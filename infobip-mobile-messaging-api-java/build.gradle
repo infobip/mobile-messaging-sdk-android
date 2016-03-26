@@ -1,8 +1,6 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
-    id "nebula.provided-base" version "2.2.2"
-    id "nebula.optional-base" version "2.2.2"
     id 'idea'
 }
 
@@ -29,6 +27,15 @@ shadowJar {
 
 artifacts {
     shadowJar
+}
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+    test { compileClasspath += configurations.provided }
 }
 
 idea {
