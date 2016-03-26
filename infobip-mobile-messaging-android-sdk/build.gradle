@@ -10,8 +10,15 @@ buildscript {
     }
 }
 
+plugins {
+    id "nebula.provided-base" version "2.2.2"
+    id "nebula.optional-base" version "2.2.2"
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'nebula.provided-base'
+apply plugin: 'nebula.optional-base'
 apply plugin: 'idea'
 
 group 'org.infobip.mobile.messaging'
@@ -43,16 +50,6 @@ android {
         sourceCompatibility=JavaVersion.VERSION_1_7
         targetCompatibility=JavaVersion.VERSION_1_7
     }
-}
-
-configurations {
-    provided
-    compile.extendsFrom provided
-}
-
-sourceSets {
-    main { compileClasspath += configurations.provided }
-    androidTest { compileClasspath += configurations.provided }
 }
 
 dependencies {

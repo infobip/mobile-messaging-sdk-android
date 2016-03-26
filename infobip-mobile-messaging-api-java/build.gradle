@@ -1,7 +1,9 @@
 plugins {
-    id 'idea'
     id 'java'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id "nebula.provided-base" version "2.2.2"
+    id "nebula.optional-base" version "2.2.2"
+    id 'idea'
 }
 
 group 'org.infobip.mobile.messaging.api'
@@ -9,8 +11,10 @@ version '1.0.0-SNAPSHOT'
 
 
 jar {
-    enabled = false
+    classifier = 'non_shaded'
 }
+
+jar.dependsOn(shadowJar)
 
 shadowJar {
     classifier = ''
@@ -25,20 +29,18 @@ artifacts {
     shadowJar
 }
 
-build.dependsOn(shadowJar)
-
-configurations {
-    provided
-}
-
-sourceSets {
-    main { compileClasspath += configurations.provided }
-    test { compileClasspath += configurations.provided }
-}
-
 idea {
     module {
-        scopes.PROVIDED.plus += [configurations.provided]
+        try {
+            scopes.PROVIDED.plus += [project.configurations.provided]
+
+            //scopes.PROVIDED.plus += project.configurations.provided.compile
+            //scopes.PROVIDED.plus += project.configurations.provided.runtime
+            //scopes.COMPILE.minus += project.configurations.provided.compile
+            //scopes.RUNTIME.minus += project.configurations.provided.runtime
+        } catch(NullPointerException e) {
+            println ":${project.name} ${e}"
+        }
     }
 }
 
