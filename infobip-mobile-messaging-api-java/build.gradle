@@ -56,9 +56,9 @@ idea {
 
 def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
 println ":${project.name} ${repo}"
-println ":${project.name} ${artifactory.publish.contextUrl}"
-println ":${project.name} ${artifactory.publish.username}"
-println ":${project.name} ${artifactory.publish.password}"
+println ":${project.name} ${getProperty('artifactory.publish.contextUrl')}"
+println ":${project.name} ${getProperty('artifactory.publish.username')}"
+println ":${project.name} ${getProperty('artifactory.publish.password')}"
 
 artifactory {
     contextUrl = "${biuldInfo.getProperty('artifactory.publish.contextUrl')}"
