@@ -56,18 +56,17 @@ idea {
 
 def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
 println ":${project.name} ${repo}"
-println ":${project.name} ${repo}"
-println ":${project.name} ${System.getProperty('artifactory.publish.contextUrl')}"
-println ":${project.name} ${System.getProperty('artifactory.publish.username')}"
-println ":${project.name} ${System.getProperty('artifactory.publish.password')}"
+println ":${project.name} ${'artifactory.publish.contextUrl'}"
+println ":${project.name} ${'artifactory.publish.username'}"
+println ":${project.name} ${'artifactory.publish.password'}"
 
 artifactory {
-    contextUrl = "${System.getProperty('artifactory.publish.contextUrl')}"
+    contextUrl = "${biuldInfo.getProperty('artifactory.publish.contextUrl')}"
     publish {
         repository {
             repoKey = repo
-            username = "${System.getProperty('artifactory.publish.username')}"
-            password = "${System.getProperty('artifactory.publish.password')}"
+            username = "${biuldInfo.getProperty('artifactory.publish.username')}"
+            password = "${biuldInfo.getProperty('artifactory.publish.password')}"
             maven = true
 
         }
