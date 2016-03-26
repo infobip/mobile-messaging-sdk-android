@@ -61,11 +61,6 @@ def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-
 //println ":${project.name} ${getProperty('artifactory.publish.password')}"
 
 artifactory {
-    clientConfig.setIncludeEnvVars(true)
-    println ":${project.name} ${clientConfig.publisher.contextUrl}"
-    println ":${project.name} ${clientConfig.publisher.username}"
-    println ":${project.name} ${clientConfig.publisher.password}"
-
     contextUrl = "${artifactory_contextUrl}"
     publish {
         repository {
