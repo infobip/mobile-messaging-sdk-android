@@ -55,12 +55,17 @@ idea {
 }
 
 def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
-println ":${project.name} ${repo}"
-println ":${project.name} ${getProperty('artifactory.publish.contextUrl')}"
-println ":${project.name} ${getProperty('artifactory.publish.username')}"
-println ":${project.name} ${getProperty('artifactory.publish.password')}"
+//println ":${project.name} ${repo}"
+//println ":${project.name} ${getProperty('artifactory.publish.contextUrl')}"
+//println ":${project.name} ${getProperty('artifactory.publish.username')}"
+//println ":${project.name} ${getProperty('artifactory.publish.password')}"
 
 artifactory {
+    clientConfig.setIncludeEnvVars(true)
+    println ":${project.name} ${clientConfig.publisher.contextUrl}"
+    println ":${project.name} ${clientConfig.publisher.username}"
+    println ":${project.name} ${clientConfig.publisher.password}"
+
     contextUrl = "${biuldInfo.getProperty('artifactory.publish.contextUrl')}"
     publish {
         repository {
