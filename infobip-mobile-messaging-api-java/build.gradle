@@ -1,0 +1,53 @@
+plugins {
+    id 'idea'
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
+
+group 'org.infobip.mobile.messaging.api'
+version '1.0.0-SNAPSHOT'
+
+
+jar {
+    enabled = false
+}
+
+shadowJar {
+    classifier = ''
+    zip64 = true
+    relocate 'com.google.gson', 'org.infobip.mobile.messaging.api.shaded.google.gson'
+    manifest {
+        attributes("Implementation-Title": "Gradle", "Implementation-Version": version)
+    }
+}
+
+artifacts {
+    shadowJar
+}
+
+build.dependsOn(shadowJar)
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+    test { compileClasspath += configurations.provided }
+}
+
+idea {
+    module {
+        scopes.PROVIDED.plus += [configurations.provided]
+    }
+}
+
+dependencies {
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
+
+    provided group: 'org.projectlombok', name: 'lombok', version: '1.16.8'
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '2.3.0'
+    testCompile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.0'
+}

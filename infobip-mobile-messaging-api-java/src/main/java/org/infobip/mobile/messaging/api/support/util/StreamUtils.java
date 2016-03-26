@@ -1,0 +1,41 @@
+package org.infobip.mobile.messaging.api.support.util;
+
+import java.io.*;
+
+/**
+ * @author mstipanov
+ * @since 03.03.2016.
+ */
+public abstract class StreamUtils {
+    private StreamUtils() {
+    }
+
+    public static String readToString(InputStream inputStream, String charsetName, long length) throws IOException {
+        if (length < 1) {
+            return "";
+        }
+
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        int result = inputStream.read();
+        long count = 1;
+        while (result != -1) {
+            byte b = (byte) result;
+            buf.write(b);
+            if (count == length) {
+                break;
+            }
+            result = inputStream.read();
+            count++;
+        }
+        return buf.toString(charsetName);
+    }
+
+    public static long write(String s, OutputStream outputStream, String charsetName) throws IOException {
+        return write(s.getBytes(charsetName), outputStream);
+    }
+
+    private static long write(byte[] bytes, OutputStream outputStream) throws IOException {
+        outputStream.write(bytes);
+        return bytes.length;
+    }
+}

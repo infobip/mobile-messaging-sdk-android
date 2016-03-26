@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+        classpath "org.projectlombok:lombok:1.16.8"
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'idea'
+
+group 'org.infobip.mobile.messaging'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+}
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName project.version
+        testInstrumentationRunner 'org.infobip.mobile.messaging.service.CustomInstrumentationTestRunner'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    compileOptions{
+        sourceCompatibility=JavaVersion.VERSION_1_7
+        targetCompatibility=JavaVersion.VERSION_1_7
+    }
+}
+
+configurations {
+    provided
+    compile.extendsFrom provided
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+    androidTest { compileClasspath += configurations.provided }
+}
+
+dependencies {
+    compile(project(':infobip-mobile-messaging-api-java')) {
+        exclude group: 'com.google.code.gson'
+    }
+    androidTestCompile 'com.crittercism.dexmaker:dexmaker-dx:1.4'
+    androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'
+    androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
+    androidTestCompile 'org.mockito:mockito-core:1.10.19'
+
+    provided "org.projectlombok:lombok:1.16.8"
+
+    compile group: 'com.google.android.gms', name: 'play-services', version: '8.4.0'
+}
+
+idea {
+    module {
+        try {
+            scopes.PROVIDED.plus += [project.configurations.provided]
+
+            //scopes.PROVIDED.plus += project.configurations.provided.compile
+            //scopes.PROVIDED.plus += project.configurations.provided.runtime
+            //scopes.COMPILE.minus += project.configurations.provided.compile
+            //scopes.RUNTIME.minus += project.configurations.provided.runtime
+        } catch(NullPointerException e) {
+            println ":${project.name} ${e}"
+        }
+    }
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
+        dependsOn variant.javaCompile
+        from variant.javaCompile.destinationDir
+
+        manifest {
+            attributes(
+                    "Bundle-Name": 'parse-android',
+                    "Bundle-Version": project.version
+            )
+        }
+
+        exclude '**/R.class'
+        exclude '**/R\$*.class'
+        exclude '**/Manifest.class'
+        exclude '**/Manifest\$*.class'
+        exclude '**/BuildConfig.class'
+    }
+
+    artifacts {
+        archives jar
+    }
+}
