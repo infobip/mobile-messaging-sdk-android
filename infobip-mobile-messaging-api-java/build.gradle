@@ -57,12 +57,12 @@ idea {
 def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
 
 artifactory {
-    contextUrl = "${project.getProperty('artifactory.publish.contextUrl')}"
+    contextUrl = "${System.getProperty('artifactory.publish.contextUrl')}"
     publish {
         repository {
             repoKey = repo
-            username = "${project.getProperty('artifactory.publish.username')}"
-            password = "${project.getProperty('artifactory.publish.password')}"
+            username = "${System.getProperty('artifactory.publish.username')}"
+            password = "${System.getProperty('artifactory.publish.password')}"
             maven = true
 
         }
@@ -70,8 +70,8 @@ artifactory {
     resolve {
         repository {
             repoKey = 'repo'
-            username = "${project.getProperty('artifactory.publish.username')}"
-            password = "${project.getProperty('artifactory.publish.password')}"
+            username = "${System.getProperty('artifactory.publish.username')}"
+            password = "${System.getProperty('artifactory.publish.password')}"
             maven = true
         }
     }
