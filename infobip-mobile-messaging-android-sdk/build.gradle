@@ -33,6 +33,7 @@ android {
         versionCode 1
         versionName project.version
         testInstrumentationRunner 'org.infobip.mobile.messaging.service.CustomInstrumentationTestRunner'
+        setProperty("archivesBaseName", "${archivesBaseName}-$versionName")
     }
 
     lintOptions {

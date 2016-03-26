@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'maven'
     id 'idea'
 }
 
@@ -9,12 +10,6 @@ version '1.0.0-SNAPSHOT'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
-
-jar {
-    classifier = 'non_shaded'
-}
-
-jar.dependsOn(shadowJar)
 
 shadowJar {
     classifier = ''
@@ -25,8 +20,14 @@ shadowJar {
     }
 }
 
+jar {
+    classifier = 'non_shaded'
+}
+
+jar.dependsOn(shadowJar)
+
 artifacts {
-    shadowJar
+    archives shadowJar
 }
 
 configurations {
@@ -53,6 +54,71 @@ idea {
     }
 }
 
+def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+
+artifactory {
+    contextUrl = "${project.getProperty('artifactory.publish.contextUrl')}"
+    publish {
+        repository {
+            repoKey = repo
+            username = "${project.getProperty('artifactory.publish.username')}"
+            password = "${project.getProperty('artifactory.publish.password')}"
+            maven = true
+
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'repo'
+            username = "${project.getProperty('artifactory.publish.username')}"
+            password = "${project.getProperty('artifactory.publish.password')}"
+            maven = true
+        }
+    }
+}
+
+/*
+System.getenv('HOME')
+def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : ''
+def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : ''
+
+uploadArchives {
+    configuration = configurations.archives
+
+    repositories {
+        mavenDeployer {
+
+            repository(url: 'http://ci-server.infobip.local/artifactory/libs-release-local') {
+                authentication(userName: artifactoryUsername, password: artifactoryPassword)
+            }
+
+            snapshotRepository(url: 'http://ci-server.infobip.local/artifactory/libs-snapshot-local') {
+                authentication(userName: artifactoryUsername, password: artifactoryPassword)
+            }
+
+            pom.project {
+                name 'infobip-mobile-messaging-api-java'
+                description 'Infobip Mobile Messaging API for Java'
+
+                scm {
+                    developerConnection 'scm:git:ssh://git@git.infobip.local:7999/mml/infobip-mobile-messaging-android.git'
+                }
+            }
+        }
+    }
+}
+
+task checkProperties << {
+    if (!artifactoryUsername) {
+        throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties?")
+    } else if (!artifactoryPassword) {
+        throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties?")
+    }
+}
+
+uploadArchives.dependsOn(checkProperties)
+*/
+
 dependencies {
     compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
 
@@ -62,3 +128,5 @@ dependencies {
     testCompile group: 'org.assertj', name: 'assertj-core', version: '2.3.0'
     testCompile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.0'
 }
+
+

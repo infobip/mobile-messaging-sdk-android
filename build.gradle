@@ -7,10 +7,17 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
     }
 }
 
+plugins {
+    id "com.jfrog.artifactory" version "4.0.0"
+}
+
 allprojects {
+    apply plugin: "com.jfrog.artifactory"
+
     repositories {
         mavenLocal()
         jcenter()
