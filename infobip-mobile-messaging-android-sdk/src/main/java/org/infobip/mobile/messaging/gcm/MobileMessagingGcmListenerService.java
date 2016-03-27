@@ -16,8 +16,10 @@ import com.google.android.gms.gcm.GcmListenerService;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.api.support.util.StringUtils;
 import org.infobip.mobile.messaging.util.ResourceLoader;
+import org.infobip.mobile.messaging.util.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
@@ -62,6 +64,17 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
             message.copyFrom(notification);
         }
 
+        if (StringUtils.isBlank(message.getMessageId())) {
+            //TODO Remove this ASAP!
+            String metaJson = data.getString("meta");
+            if (null != metaJson) {
+                try {
+                    message.setMessageId(new JSONObject(metaJson).getString("messageId"));
+                } catch (JSONException e) {
+                    //ignore
+                }
+            }
+        }
         return message;
     }
 

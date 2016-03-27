@@ -59,14 +59,14 @@ public class RegistrationIntentService extends IntentService {
         MobileMessaging mobileMessaging = MobileMessaging.getInstance();
         String infobipRegistrationId = mobileMessaging.getInfobipRegistrationId();
 
-//        boolean saveNeeded = null == infobipRegistrationId ||
-//                null == mobileMessaging.getRegistrationId() ||
-//                !token.equals(mobileMessaging.getRegistrationId()) ||
-//                !mobileMessaging.isRegistrationIdSaved();
-//
-//        if (!saveNeeded) {
-//            return;
-//        }
+        boolean saveNeeded = null == infobipRegistrationId ||
+                null == mobileMessaging.getRegistrationId() ||
+                !token.equals(mobileMessaging.getRegistrationId()) ||
+                !mobileMessaging.isRegistrationIdSaved();
+
+        if (!saveNeeded) {
+            return;
+        }
 
         mobileMessaging.setRegistrationId(token);
         mobileMessaging.setRegistrationIdSaved(false);

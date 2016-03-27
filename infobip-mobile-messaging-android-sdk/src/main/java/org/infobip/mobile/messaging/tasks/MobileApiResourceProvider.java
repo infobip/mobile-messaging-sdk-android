@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.tasks;
 
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.api.registration.MobileApiDeliveryReport;
+import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 

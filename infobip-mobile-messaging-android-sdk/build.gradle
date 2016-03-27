@@ -48,9 +48,8 @@ sourceSets {
 }
 
 dependencies {
-    compile(project(':infobip-mobile-messaging-api-java')) {
-        exclude group: 'com.google.code.gson'
-    }
+    compile(project(':infobip-mobile-messaging-api-java'))
+
     androidTestCompile 'com.crittercism.dexmaker:dexmaker-dx:1.4'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'

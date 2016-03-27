@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.registration;
+package org.infobip.mobile.messaging.api.deliveryreports;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

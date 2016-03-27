@@ -1,8 +1,8 @@
 package it.org.infobip.mobile.messaging.api;
 
 import fi.iki.elonen.NanoHTTPD;
-import org.infobip.mobile.messaging.api.registration.DeliveryReportResponse;
-import org.infobip.mobile.messaging.api.registration.MobileApiDeliveryReport;
+import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReportResponse;
+import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.tools.DebugServer;

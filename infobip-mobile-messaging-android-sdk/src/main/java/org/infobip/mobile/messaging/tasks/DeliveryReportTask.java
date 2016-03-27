@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.api.registration.DeliveryReportResponse;
+import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReportResponse;
 
 /**
  * @author mstipanov

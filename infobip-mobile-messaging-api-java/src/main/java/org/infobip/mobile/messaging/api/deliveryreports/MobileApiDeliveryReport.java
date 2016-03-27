@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.registration;
+package org.infobip.mobile.messaging.api.deliveryreports;
 
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
 import org.infobip.mobile.messaging.api.support.http.Query;
