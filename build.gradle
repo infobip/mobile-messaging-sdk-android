@@ -52,6 +52,9 @@ subprojects {
                 password = "${artifactoryPassword}"
                 maven = true
             }
+            defaults {
+                publishConfigs('archives')
+            }
         }
         resolve {
             repository {
