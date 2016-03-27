@@ -54,34 +54,33 @@ idea {
     }
 }
 
-//def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
-//println ":${project.name} ${repo}"
-//println ":${project.name} ${getProperty('artifactory.publish.contextUrl')}"
-//println ":${project.name} ${getProperty('artifactory.publish.username')}"
-//println ":${project.name} ${getProperty('artifactory.publish.password')}"
+def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
+def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
 
-/*
+println ":${project.name} ${repo}"
+println ":${project.name} ${artifactoryUsername}"
+println ":${project.name} ${artifactoryPassword}"
+
 artifactory {
-    contextUrl = "${artifactory_contextUrl}"
+    contextUrl = "http://ci-server.infobip.local/artifactory"
     publish {
         repository {
-            repoKey = repo
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
+            repoKey = "${repo}"
+            username = "${artifactoryUsername}"
+            password = "${artifactoryPassword}"
             maven = true
-
         }
     }
     resolve {
         repository {
             repoKey = 'repo'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
+            username = "${artifactoryUsername}"
+            password = "${artifactoryPassword}"
             maven = true
         }
     }
 }
-*/
 
 /*
 System.getenv('HOME')
