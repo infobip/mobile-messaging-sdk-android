@@ -54,12 +54,13 @@ idea {
     }
 }
 
-def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+//def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
 //println ":${project.name} ${repo}"
 //println ":${project.name} ${getProperty('artifactory.publish.contextUrl')}"
 //println ":${project.name} ${getProperty('artifactory.publish.username')}"
 //println ":${project.name} ${getProperty('artifactory.publish.password')}"
 
+/*
 artifactory {
     contextUrl = "${artifactory_contextUrl}"
     publish {
@@ -80,6 +81,7 @@ artifactory {
         }
     }
 }
+*/
 
 /*
 System.getenv('HOME')
