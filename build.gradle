@@ -2,6 +2,7 @@
 
 buildscript {
     repositories {
+        mavenCentral()
         mavenLocal()
         jcenter()
     }
@@ -16,11 +17,50 @@ plugins {
 }
 
 allprojects {
-    apply plugin: "com.jfrog.artifactory"
-
     repositories {
         mavenLocal()
         jcenter()
+    }
+
+    group 'org.infobip.mobile.messaging.api'
+    version '1.0.0-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: "com.jfrog.artifactory"
+
+    def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+    def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
+    def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
+
+    task checkProperties << {
+        if (!artifactoryUsername) {
+            throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
+        } else if (!artifactoryPassword) {
+            throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
+        }
+    }
+
+    artifactoryPublish.dependsOn(checkProperties)
+
+    artifactory {
+        contextUrl = "http://ci-server.infobip.local/artifactory"
+        publish {
+            repository {
+                repoKey = "${repo}"
+                username = "${artifactoryUsername}"
+                password = "${artifactoryPassword}"
+                maven = true
+            }
+        }
+        resolve {
+            repository {
+                repoKey = 'repo'
+                username = "${artifactoryUsername}"
+                password = "${artifactoryPassword}"
+                maven = true
+            }
+        }
     }
 }
 

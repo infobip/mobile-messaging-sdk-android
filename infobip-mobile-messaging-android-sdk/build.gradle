@@ -14,15 +14,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'idea'
 
-group 'org.infobip.mobile.messaging'
-version '0.0.1-SNAPSHOT'
-
-repositories {
-    mavenCentral()
-    mavenLocal()
-    jcenter()
-}
-
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
