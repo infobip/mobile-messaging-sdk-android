@@ -1,9 +1,17 @@
+buildscript {
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+    }
+}
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '1.2.3'
     id 'maven'
     id 'idea'
 }
+
+apply plugin: 'com.jfrog.bintray'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -61,4 +69,16 @@ dependencies {
     testCompile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.0'
 }
 
-
+bintray {
+    publish = !version.endsWith('SNAPSHOT')
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = 'infobip-mobile-messaging-api-java'
+        userOrg = user
+        licenses = ['Apache-2.0']
+        vcsUrl = "http://git.infobip.local/projects/MML/repos/infobip-mobile-messaging-android/browse"
+    }
+}

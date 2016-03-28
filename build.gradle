@@ -20,8 +20,6 @@ allprojects {
         mavenLocal()
         jcenter()
     }
-
-    group 'org.infobip.mobile.messaging.api'
 }
 
 subprojects {
