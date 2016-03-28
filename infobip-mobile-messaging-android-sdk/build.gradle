@@ -102,19 +102,6 @@ android.libraryVariants.all { variant ->
     }
 }
 
-task removeSnapshots << {
-    configurations.archives.artifacts.with { archives ->
-        def snapshots = []
-        archives.each {
-            if (it.file.toString().contains("SNAPSHOT")) {
-                snapshots.add(it)
-            }
-        }
-        println "Removing SNAPSHOT artifacts: ${snapshots}"
-        removeAll(snapshots)
-    }
-}
-
 bintrayUpload.dependsOn(removeSnapshots)
 
 bintray {

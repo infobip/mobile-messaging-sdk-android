@@ -30,6 +30,10 @@ subprojects {
     def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
     def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
 
+    task removeSnapshots << {
+        delete fileTree(dir: 'build', include: '**/*SNAPSHOT*.*')
+    }
+
     task checkProperties << {
         if (!artifactoryUsername) {
             throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")

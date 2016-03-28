@@ -69,19 +69,6 @@ dependencies {
     testCompile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.0'
 }
 
-task removeSnapshots << {
-    configurations.archives.artifacts.with { archives ->
-        def snapshots = []
-        archives.each {
-            if (it.file.toString().contains("SNAPSHOT")) {
-                snapshots.add(it)
-            }
-        }
-        println "Removing SNAPSHOT artifacts: ${snapshots}"
-        removeAll(snapshots)
-    }
-}
-
 bintrayUpload.dependsOn(removeSnapshots)
 
 bintray {
