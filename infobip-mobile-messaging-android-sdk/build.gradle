@@ -105,26 +105,23 @@ android.libraryVariants.all { variant ->
 task removeSnapshots << {
     delete fileTree(dir: 'build', include: '**/*SNAPSHOT*.*')
 
-    def snapshots = project.configurations.archives.findResults {
-        if (it.file.exists()) {
+    def releases = project.configurations.archives.findResults {
+        if (!it.file.exists()) {
             return null
         }
         return it
     }.unique();
-    for (def snapshot : snapshots) {
-        project.configurations.archives.remove(snapshot)
-    }
 
-    println "Remaining archives: ${project.configurations.archives}"
+    project.configurations.releases = releases
 }
 
 bintrayUpload.dependsOn(removeSnapshots)
 
 bintray {
-    publish = !version.endsWith('SNAPSHOT')
+    publish = !version.contains('SNAPSHOT')
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    configurations = ['archives']
+    configurations = ['releases']
     pkg {
         repo = 'maven'
         name = project.name
