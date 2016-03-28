@@ -69,5 +69,5 @@ task clean(type: Delete) {
 }
 
 release {
-    buildTasks = ['build clean']
+    buildTasks = ['clean', 'build']
 }
