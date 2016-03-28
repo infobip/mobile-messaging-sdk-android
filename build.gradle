@@ -28,7 +28,7 @@ subprojects {
     apply plugin: "com.jfrog.artifactory"
 
     def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
-    def artifactoryUrl = System.getenv('ARTIFACTORY_USERNAME') ? System.getenv('ARTIFACTORY_USERNAME') : "http://ci-server.infobip.local/artifactory"
+    def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "http://ci-server.infobip.local/artifactory"
     def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
     def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
 
@@ -55,7 +55,6 @@ subprojects {
                 publishConfigs('archives')
             }
         }
-/*
         resolve {
             repository {
                 repoKey = 'repo'
@@ -64,7 +63,6 @@ subprojects {
                 maven = true
             }
         }
-*/
     }
 }
 
