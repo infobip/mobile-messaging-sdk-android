@@ -71,7 +71,7 @@ android {
     }
 
     artifacts {
-        archives file("build/outputs/apk/infobip-mobile-messaging-android-demo-full-${version.contains('SNAPSHOT')?'dev':'release'}-${version}")
+        archives file("build/outputs/apk/infobip-mobile-messaging-android-demo-full-${version.contains('SNAPSHOT')?'dev':'release'}-${version}.apk")
     }
 
     productFlavors {

@@ -44,7 +44,7 @@ public enum MobileApiResourceProvider {
         }
 
         Properties properties = System.getProperties();
-        properties.put("api.key", MobileMessaging.getInstance().getApplicationId());
+        properties.put("api.key", MobileMessaging.getInstance().getApplicationCode());
         generator = new Generator.Builder().
                 withBaseUrl(MobileMessaging.getInstance().getApiUri()).
                 withProperties(properties).

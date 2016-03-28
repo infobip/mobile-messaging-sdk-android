@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         new MobileMessaging.Builder(this)
                 .withCallbackActivity(MainActivity.class)
-                .withApplicationId(getResources().getString(R.string.infobip_api_key))
+                .withApplicationCode(getResources().getString(R.string.infobip_application_code))
                 .withGcmSenderId(getResources().getString(R.string.google_app_id))
                 .withDefaultTitle(getResources().getString(R.string.app_name))
 //                .withDefaultIcon(R.drawable.cast_ic_notification_0)

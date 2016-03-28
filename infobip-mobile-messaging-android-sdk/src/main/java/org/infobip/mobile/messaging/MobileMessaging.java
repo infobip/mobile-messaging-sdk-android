@@ -41,7 +41,7 @@ public class MobileMessaging implements Configuration {
 
     private final Context context;
     private String gcmSenderId;
-    private String applicationId;
+    private String applicationCode;
     private String apiUri = DEFAULT_API_URI;
     private Class<?> callbackActivity;
     private String defaultTitle = DEFAULT_TITLE;
@@ -84,8 +84,8 @@ public class MobileMessaging implements Configuration {
         return gcmSenderId;
     }
 
-    public String getApplicationId() {
-        return applicationId;
+    public String getApplicationCode() {
+        return applicationCode;
     }
 
     public String getApiUri() {
@@ -222,8 +222,8 @@ public class MobileMessaging implements Configuration {
             return this;
         }
 
-        public Builder withApplicationId(String applicationId) {
-            mobileMessaging.applicationId = applicationId;
+        public Builder withApplicationCode(String applicationCode) {
+            mobileMessaging.applicationCode = applicationCode;
             return this;
         }
 
@@ -267,8 +267,8 @@ public class MobileMessaging implements Configuration {
                 throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + DEFAULT_API_URI);
             }
 
-            if (null == mobileMessaging.getApplicationId()) {
-                throw new IllegalArgumentException("applicationId is mandatory!"); //TODO link to the explanation how to get one!
+            if (null == mobileMessaging.getApplicationCode()) {
+                throw new IllegalArgumentException("applicationCode is mandatory!"); //TODO link to the explanation how to get one!
             }
 
             if (null == mobileMessaging.getGcmSenderId()) {
