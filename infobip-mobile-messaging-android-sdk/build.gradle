@@ -102,6 +102,21 @@ android.libraryVariants.all { variant ->
     }
 }
 
+task removeSnapshots << {
+    configurations.archives.artifacts.with { archives ->
+        def snapshots = []
+        archives.each {
+            if (it.file.toString().contains("SNAPSHOT")) {
+                snapshots.add(it)
+            }
+        }
+        println "Removing SNAPSHOT artifacts: ${snapshots}"
+        removeAll(snapshots)
+    }
+}
+
+bintrayUpload.dependsOn(removeSnapshots)
+
 bintray {
     publish = !version.endsWith('SNAPSHOT')
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
