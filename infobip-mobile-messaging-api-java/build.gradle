@@ -69,6 +69,22 @@ dependencies {
     testCompile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.0'
 }
 
+task removeSnapshots << {
+    delete fileTree(dir: 'build', include: '**/*SNAPSHOT*.*')
+
+    def snapshots = project.configurations.archives.findResults {
+        if (it.file.exists()) {
+            return null
+        }
+        return it
+    }.unique();
+    for (def snapshot : snapshots) {
+        project.configurations.archives.remove(snapshot)
+    }
+
+    println "Remaining archives: ${project.configurations.archives}"
+}
+
 bintrayUpload.dependsOn(removeSnapshots)
 
 bintray {
