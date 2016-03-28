@@ -102,26 +102,11 @@ android.libraryVariants.all { variant ->
     }
 }
 
-task removeSnapshots << {
-    delete fileTree(dir: 'build', include: '**/*SNAPSHOT*.*')
-
-    def releases = project.configurations.archives.findResults {
-        if (!it.file.exists()) {
-            return null
-        }
-        return it
-    }.unique();
-
-    project.configurations.releases = releases
-}
-
-bintrayUpload.dependsOn(removeSnapshots)
-
 bintray {
     publish = !version.contains('SNAPSHOT')
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    configurations = ['releases']
+    configurations = ['archives']
     pkg {
         repo = 'maven'
         name = project.name

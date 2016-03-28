@@ -67,3 +67,7 @@ subprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+release {
+    buildTasks = ['build clean']
+}
