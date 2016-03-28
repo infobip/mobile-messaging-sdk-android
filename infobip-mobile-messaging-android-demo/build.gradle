@@ -25,11 +25,12 @@ def getStarDate() {
 }
 
 private Object getKeystore() {
-    def keystore = project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')
-    if (!keystore || !new File(keystore).exists()) {
-        keystore = "/tmp/mobile-messaging-demo.keystore"
-    }
-    keystore
+//    def keystore = project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')
+//    if (!keystore || !new File(keystore).exists()) {
+//        keystore = "/tmp/mobile-messaging-demo.keystore"
+//    }
+//    return keystore
+    return "/tmp/mobile-messaging-demo.keystore"
 }
 
 android {
