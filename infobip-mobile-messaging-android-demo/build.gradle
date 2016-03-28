@@ -40,13 +40,14 @@ android {
         targetCompatibility=JavaVersion.VERSION_1_7
     }
 
-    def keystoreFileName = "${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}"
-    if (!keystoreFileName || !new File(keystoreFileName).exists())
-        keystoreFileName = "/tmp/mobile-messaging-demo.keystore"
 
     signingConfigs {
         release {
-            storeFile file(keystoreFileName)
+            def keystoreFileName = "${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}"
+            if (!keystoreFileName || !new File(keystoreFileName).exists())
+                keystoreFileName = "/tmp/mobile-messaging-demo.keystore"
+
+            storeFile file("${keystoreFileName}")
             storePassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
             keyAlias "alias_name"
             keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
