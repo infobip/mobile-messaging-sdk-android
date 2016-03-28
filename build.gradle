@@ -69,5 +69,5 @@ task clean(type: Delete) {
 }
 
 release {
-    buildTasks = ['clean', 'build']
+    buildTasks = ['clean', 'build', 'bintrayUpload']
 }
