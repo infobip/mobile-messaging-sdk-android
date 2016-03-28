@@ -9,12 +9,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
+        classpath 'net.researchgate:gradle-release:2.3.4'
     }
 }
 
 plugins {
     id "com.jfrog.artifactory" version "4.0.0"
-//    id 'net.researchgate.release' version '2.3.4'
 }
 
 allprojects {
@@ -29,6 +29,7 @@ allprojects {
 
 subprojects {
     apply plugin: "com.jfrog.artifactory"
+    apply plugin: 'net.researchgate.release'
 
     def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
     def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')

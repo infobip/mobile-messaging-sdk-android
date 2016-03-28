@@ -118,6 +118,10 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
         }
         notificationBuilder.setSmallIcon(icon);
 
+        if (null!=MobileMessaging.getInstance().getVibrate()) {
+            notificationBuilder.setVibrate(MobileMessaging.getInstance().getVibrate());
+        }
+
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 

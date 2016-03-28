@@ -36,6 +36,7 @@ public class MobileMessaging implements Configuration {
     private static final String GCM_REGISTRATION_ID = "org.infobip.mobile.messaging.gcm.REGISTRATION_ID";
     private static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.infobip.REGISTRATION_ID";
     private static final String INFOBIP_UNREPORTED_MESSAGE_IDS = "org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS";
+    private static final long[] DEFAULT_VIBRATION_PATTERN = new long[]{0, 250, 200, 250, 150, 150, 75, 150, 75, 150};
 
     private static MobileMessaging instance;
 
@@ -47,6 +48,7 @@ public class MobileMessaging implements Configuration {
     private String defaultTitle = DEFAULT_TITLE;
     private boolean displayNotificationEnabled;
     private int defaultIcon = DEFAULT_ICON;
+    private long[] vibrate = DEFAULT_VIBRATION_PATTERN;
 
     private MobileMessaging(Context context) {
         this.context = context;
@@ -210,6 +212,10 @@ public class MobileMessaging implements Configuration {
         return defaultIcon;
     }
 
+    public long[] getVibrate() {
+        return vibrate;
+    }
+
     public static final class Builder {
         private final MobileMessaging mobileMessaging;
 
@@ -240,6 +246,16 @@ public class MobileMessaging implements Configuration {
 
         public Builder withDefaultTitle(String defaultTitle) {
             mobileMessaging.defaultTitle = defaultTitle;
+            return this;
+        }
+
+        public Builder withVibrate(long[] vibrate) {
+            mobileMessaging.vibrate = vibrate;
+            return this;
+        }
+
+        public Builder withoutVibrate() {
+            mobileMessaging.vibrate = null;
             return this;
         }
 
