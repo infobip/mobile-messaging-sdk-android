@@ -61,7 +61,6 @@ android {
         abortOnError false
     }
 
-/*
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             output.outputFile = new File(
@@ -70,7 +69,10 @@ android {
             )
         }
     }
-*/
+
+    artifacts {
+        archives file("build/outputs/apk/infobip-mobile-messaging-android-demo-full-${version.contains('SNAPSHOT')?'dev':'release'}-${version}")
+    }
 
     productFlavors {
         full {
