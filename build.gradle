@@ -71,7 +71,6 @@ subprojects {
     }
 
     release {
-        useAutomaticVersion = true
         failOnCommitNeeded = true
         failOnPublishNeeded = true
         failOnSnapshotDependencies = true
