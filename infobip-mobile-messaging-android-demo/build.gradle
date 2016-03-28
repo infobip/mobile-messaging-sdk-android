@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         mavenLocal()
@@ -9,11 +11,17 @@ buildscript {
     }
 }
 apply plugin: 'com.android.application'
-//apply plugin: 'com.google.gms.google-services'
 
 repositories {
     mavenLocal()
     jcenter()
+}
+
+def getStarDate() {
+    def days = new SimpleDateFormat("yyyyMMdd").format(new Date()).toInteger() - 20150630
+    def hours = new SimpleDateFormat("HH").format(new Date())
+    def minutes = new SimpleDateFormat("mm").format(new Date())
+    return ("" + days + hours + minutes).toInteger()
 }
 
 android {
@@ -24,8 +32,7 @@ android {
         applicationId "org.infobip.mobile.messaging.demo"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionName version
     }
 
     compileOptions{
@@ -33,15 +40,44 @@ android {
         targetCompatibility=JavaVersion.VERSION_1_7
     }
 
+    signingConfigs {
+        release {
+            storeFile file("${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}")
+            storePassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
+            keyAlias "alias_name"
+            keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
     lintOptions {
         abortOnError false
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFile = new File(
+                    output.outputFile.parent,
+                    output.outputFile.name.replace("release", (variant.versionName.contains("SNAPSHOT")?"dev":"release")+"-${variant.versionName}")
+            )
+        }
+    }
+
+    productFlavors {
+        full {
+            versionCode getStarDate()
+        }
+
+        less {
+            versionCode (getStarDate() - 1)
+        }
     }
 }
 
