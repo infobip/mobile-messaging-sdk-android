@@ -24,6 +24,14 @@ def getStarDate() {
     return ("" + days + hours + minutes).toInteger()
 }
 
+private Object getKeystore() {
+    def keystore = project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')
+    if (!keystore || !new File(keystore).exists()) {
+        keystore = "/tmp/mobile-messaging-demo.keystore"
+    }
+    keystore
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -43,11 +51,7 @@ android {
 
     signingConfigs {
         release {
-            def keystore = project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')
-            if(!keystore || !new File(keystore).exists()){
-                keystore = "/tmp/mobile-messaging-demo.keystore"
-            }
-            storeFile file("${keystore}")
+            storeFile file("${getKeystore()}")
             storePassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
             keyAlias "alias_name"
             keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
