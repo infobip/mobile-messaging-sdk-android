@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
             Message message = new Message(intent.getExtras());
             String body = message.getBody();
             Toast.makeText(MainActivity.this, "Message received: " + body, Toast.LENGTH_LONG).show();
-            updateCount(true);
+            updateCount();
         }
     };
 
@@ -62,8 +62,7 @@ public class MainActivity extends AppCompatActivity {
         messagesListView.setAdapter(listAdapter);
 
         registerReceiver();
-        updateCount(false);
-        MobileMessaging.getInstance().disableNotification();
+        updateCount();
     }
 
     private void fillSomeData() {
@@ -71,32 +70,28 @@ public class MainActivity extends AppCompatActivity {
         MessageStore.INSTANCE.save(Message.create("2", "Now Showing"));
         MessageStore.INSTANCE.save(Message.create("3", "Coming Soon.."));
 
-        updateCount(true);
+        updateCount();
     }
 
-    private void updateCount(boolean refreshList) {
+    private void updateCount() {
         totalReceivedTextView.setText(String.valueOf(MessageStore.INSTANCE.countAll()));
-        if (refreshList) {
-            listAdapter.notifyDataSetChanged();
-        }
+        listAdapter.notifyDataSetChanged();
     }
 
     public void onEraseInboxClick(View view) {
         MessageStore.INSTANCE.deleteAll();
-        updateCount(true);
+        updateCount();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        MobileMessaging.getInstance().disableNotification();
         registerReceiver();
-        updateCount(true);
+        updateCount();
     }
 
     @Override
     protected void onPause() {
-        MobileMessaging.getInstance().enableNotification();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
         isReceiverRegistered = false;
         super.onPause();

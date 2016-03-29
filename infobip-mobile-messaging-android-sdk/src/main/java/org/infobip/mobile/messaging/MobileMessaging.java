@@ -298,14 +298,6 @@ public class MobileMessaging implements Configuration {
         return messageStoreEnabled;
     }
 
-    public void disableNotification() {
-        this.displayNotificationEnabled = false;
-    }
-
-    public void enableNotification() {
-        this.displayNotificationEnabled = true;
-    }
-
     public static final class Builder {
         private final MobileMessaging mobileMessaging;
 
