@@ -5,27 +5,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageStore;
 import org.infobip.mobile.messaging.MobileMessaging;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isReceiverRegistered;
+    private TextView totalReceivedTextView;
+    private ExpandableListView messagesListView;
+    private ExpandableListAdapter listAdapter;
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Message message = new Message(intent.getExtras());
             String body = message.getBody();
             Toast.makeText(MainActivity.this, "Message received: " + body, Toast.LENGTH_LONG).show();
+            updateCount(true);
         }
     };
 
@@ -38,37 +43,60 @@ public class MainActivity extends AppCompatActivity {
                 .withApplicationCode(getResources().getString(R.string.infobip_application_code))
                 .withGcmSenderId(getResources().getString(R.string.google_app_id))
                 .withDefaultTitle(getResources().getString(R.string.app_name))
-                .withDefaultIcon(R.drawable.ic_stat_ic_notification)
+                .withDefaultIcon(R.mipmap.ic_launcher)
 //                .withDisplayNotification()
 //                .withoutDisplayNotification()
 //                .withApiUri("http://10.116.52.238:18080")
                 .withApiUri("https://oneapi.ioinfobip.com")
+                .withMessageStore()
+//                .withoutMessageStore()
                 .build();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "RegId: " + MobileMessaging.getInstance().getRegistrationId(), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        totalReceivedTextView = (TextView) findViewById(R.id.totalReceivedTextView);
+        messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
+        listAdapter = new ExpandableListAdapter(this);
+        messagesListView.setAdapter(listAdapter);
 
         registerReceiver();
+        updateCount(false);
+        MobileMessaging.getInstance().disableNotification();
+    }
+
+    private void fillSomeData() {
+        MessageStore.INSTANCE.save(Message.create("1", "Top 250"));
+        MessageStore.INSTANCE.save(Message.create("2", "Now Showing"));
+        MessageStore.INSTANCE.save(Message.create("3", "Coming Soon.."));
+
+        updateCount(true);
+    }
+
+    private void updateCount(boolean refreshList) {
+        totalReceivedTextView.setText(String.valueOf(MessageStore.INSTANCE.countAll()));
+        if (refreshList) {
+            listAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void onEraseInboxClick(View view) {
+        MessageStore.INSTANCE.deleteAll();
+        updateCount(true);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        MobileMessaging.getInstance().disableNotification();
         registerReceiver();
+        updateCount(true);
     }
 
     @Override
     protected void onPause() {
+        MobileMessaging.getInstance().enableNotification();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
         isReceiverRegistered = false;
         super.onPause();
@@ -99,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            fillSomeData();
             return true;
         }
 

@@ -96,6 +96,13 @@ public class Message {
         bundle.putBoolean(Data.SILENT.getKey(), silent);
     }
 
+    public static Message create(String messageId, String body) {
+        Message message = new Message(new Bundle());
+        message.setMessageId(messageId);
+        message.setBody(body);
+        return message;
+    }
+
     private enum Data {
         MESSAGE_ID("messageId"),
         TITLE("title"),

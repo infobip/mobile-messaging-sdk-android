@@ -15,6 +15,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmListenerService;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageStore;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -39,19 +40,25 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
         Message message = createMessage(from, data);
-        messageReceived.putExtras(message.getBundle());
-        LocalBroadcastManager.getInstance(this).sendBroadcast(messageReceived);
-
         sendDeliveryReport(message);
 
-        if (!message.isSilent() &&
-                StringUtils.isNotBlank(message.getBody()) &&
-                MobileMessaging.getInstance().isDisplayNotificationEnabled() &&
-                null != MobileMessaging.getInstance().getCallbackActivity()) {
+        if (!message.isSilent()) {
+            saveMessage(message);
             displayNotification(message);
         }
+
+        Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
+        messageReceived.putExtras(message.getBundle());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(messageReceived);
+    }
+
+    private void saveMessage(Message message) {
+        if (!MobileMessaging.getInstance().isMessageStoreEnabled()) {
+            return;
+        }
+
+        MessageStore.INSTANCE.save(message);
     }
 
     private Message createMessage(String from, Bundle data) {
@@ -93,7 +100,14 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
      * @param message message received.
      */
     private void displayNotification(Message message) {
-        Intent intent = new Intent(this, MobileMessaging.getInstance().getCallbackActivity());
+        MobileMessaging mobileMessaging = MobileMessaging.getInstance();
+        if (mobileMessaging.isDisplayNotificationEnabled() ||
+                StringUtils.isNotBlank(message.getBody()) ||
+                null != mobileMessaging.getCallbackActivity()) {
+            return;
+        }
+
+        Intent intent = new Intent(this, mobileMessaging.getCallbackActivity());
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         int requestCode = 0; //TODO Request code
         PendingIntent pendingIntent = PendingIntent.getActivity(this, requestCode, intent,
@@ -101,7 +115,7 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION); //TODO load message.sound from /res/raw/
 
-        String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : MobileMessaging.getInstance().getDefaultTitle();
+        String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : mobileMessaging.getDefaultTitle();
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle(title)
@@ -114,12 +128,12 @@ public class MobileMessagingGcmListenerService extends GcmListenerService {
         if (StringUtils.isNotBlank(message.getIcon())) {
             icon = ResourceLoader.loadResourceByName(this, "drawable", message.getIcon());
         } else {
-            icon = MobileMessaging.getInstance().getDefaultIcon();
+            icon = mobileMessaging.getDefaultIcon();
         }
         notificationBuilder.setSmallIcon(icon);
 
-        if (null!=MobileMessaging.getInstance().getVibrate()) {
-            notificationBuilder.setVibrate(MobileMessaging.getInstance().getVibrate());
+        if (null != mobileMessaging.getVibrate()) {
+            notificationBuilder.setVibrate(mobileMessaging.getVibrate());
         }
 
         NotificationManager notificationManager =

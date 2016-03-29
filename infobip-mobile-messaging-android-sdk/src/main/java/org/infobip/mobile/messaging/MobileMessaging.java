@@ -54,6 +54,8 @@ public class MobileMessaging implements Configuration {
     private boolean displayNotificationEnabled;
     private int defaultIcon = DEFAULT_ICON;
     private long[] vibrate = DEFAULT_VIBRATION_PATTERN;
+    private boolean messageStoreEnabled;
+    private boolean notificationEnabled = true;
 
     private MobileMessaging(Context context) {
         this.context = context;
@@ -192,6 +194,10 @@ public class MobileMessaging implements Configuration {
     }
 
     public void reportRegistration() {
+        if (StringUtils.isBlank(getRegistrationId())) {
+            return;
+        }
+
         AsyncTask task;
         if (null == getInfobipRegistrationId()) {
             task = new CreateRegistrationTask() {
@@ -288,6 +294,18 @@ public class MobileMessaging implements Configuration {
         return vibrate;
     }
 
+    public boolean isMessageStoreEnabled() {
+        return messageStoreEnabled;
+    }
+
+    public void disableNotification() {
+        this.displayNotificationEnabled = false;
+    }
+
+    public void enableNotification() {
+        this.displayNotificationEnabled = true;
+    }
+
     public static final class Builder {
         private final MobileMessaging mobileMessaging;
 
@@ -343,6 +361,16 @@ public class MobileMessaging implements Configuration {
 
         public Builder withoutDisplayNotification() {
             mobileMessaging.displayNotificationEnabled = false;
+            return this;
+        }
+
+        public Builder withMessageStore() {
+            mobileMessaging.messageStoreEnabled = true;
+            return this;
+        }
+
+        public Builder withoutMessageStore() {
+            mobileMessaging.messageStoreEnabled = false;
             return this;
         }
 

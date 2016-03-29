@@ -11,6 +11,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.io.IOException;
 
@@ -51,6 +52,10 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
+        if (StringUtils.isBlank(token)) {
+            return;
+        }
+
         MobileMessaging mobileMessaging = MobileMessaging.getInstance();
         String infobipRegistrationId = mobileMessaging.getInfobipRegistrationId();
 
