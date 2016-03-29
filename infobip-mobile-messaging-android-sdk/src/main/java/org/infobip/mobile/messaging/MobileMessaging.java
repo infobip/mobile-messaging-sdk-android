@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -11,9 +12,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.gcm.RegistrationIntentService;
+import org.infobip.mobile.messaging.tasks.CreateRegistrationTask;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
+import org.infobip.mobile.messaging.tasks.UpdateRegistrationTask;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -177,6 +182,73 @@ public class MobileMessaging implements Configuration {
         sharedPreferences.edit().putStringSet(INFOBIP_UNREPORTED_MESSAGE_IDS, unreportedMessageIdSet).apply();
     }
 
+    public void reportUnreportedRegistration() {
+        String infobipRegistrationId = getInfobipRegistrationId();
+        if (null != infobipRegistrationId && isRegistrationIdSaved()) {
+            return;
+        }
+
+        reportRegistration();
+    }
+
+    public void reportRegistration() {
+        AsyncTask task;
+        if (null == getInfobipRegistrationId()) {
+            task = new CreateRegistrationTask() {
+                @Override
+                protected void onPostExecute(RegistrationResponse registrationResponse) {
+                    if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
+                        Log.e(TAG, "MobileMessaging API didn't return any value!");
+
+                        Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                        return;
+                    }
+                    MobileMessaging.getInstance().setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
+                    MobileMessaging.getInstance().setRegistrationIdSaved(true);
+
+                    Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
+                }
+
+                @Override
+                protected void onCancelled() {
+                    MobileMessaging.getInstance().setRegistrationIdSaved(false);
+
+                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                }
+            };
+        } else {
+            task = new UpdateRegistrationTask() {
+                @Override
+                protected void onPostExecute(RegistrationResponse registrationResponse) {
+                    if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
+                        Log.e(TAG, "MobileMessaging API didn't return any value!");
+
+                        Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                        return;
+                    }
+                    MobileMessaging.getInstance().setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
+                    MobileMessaging.getInstance().setRegistrationIdSaved(true);
+
+                    Intent registrationChanged = new Intent(Event.REGISTRATION_CHANGED.getKey());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationChanged);
+                }
+
+                @Override
+                protected void onCancelled() {
+                    MobileMessaging.getInstance().setRegistrationIdSaved(false);
+
+                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                }
+            };
+        }
+        task.execute();
+    }
+
     public void reportUnreportedMessageIds() {
         if (getUnreportedMessageIds().length == 0) {
             return;
@@ -297,6 +369,7 @@ public class MobileMessaging implements Configuration {
 
             MobileMessaging.instance = mobileMessaging;
             mobileMessaging.checkPlayServices();
+            mobileMessaging.reportUnreportedRegistration();
             mobileMessaging.reportUnreportedMessageIds();
             return mobileMessaging;
         }

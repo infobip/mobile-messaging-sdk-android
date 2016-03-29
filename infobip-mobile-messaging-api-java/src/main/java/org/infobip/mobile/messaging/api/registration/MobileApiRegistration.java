@@ -15,6 +15,5 @@ public interface MobileApiRegistration {
     RegistrationResponse create(@Query(name = "registrationId") String registrationId);
 
     @HttpRequest(method = HttpMethod.PUT, value = "/mobile/{version}/registration")
-    @Query(name = "platformType", value = "${platform.type:GCM}")
     RegistrationResponse update(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId, @Query(name = "registrationId") String registrationId);
 }

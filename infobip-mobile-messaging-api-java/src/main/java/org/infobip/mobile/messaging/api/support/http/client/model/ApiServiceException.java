@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ApiServiceException extends RuntimeException {
-    private String code;
+    private String messageId;
     private String text;
 
     @Override

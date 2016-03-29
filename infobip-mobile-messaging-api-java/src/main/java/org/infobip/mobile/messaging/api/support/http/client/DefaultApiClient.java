@@ -191,7 +191,7 @@ public class DefaultApiClient implements ApiClient {
             return new Tuple<>(code, message);
         }
 
-        return new Tuple<>(apiResponse.getRequestError().getServiceException().getCode(), apiResponse.getRequestError().getServiceException().getText());
+        return new Tuple<>(apiResponse.getRequestError().getServiceException().getMessageId(), apiResponse.getRequestError().getServiceException().getText());
     }
 
     private void appendVaule(StringBuilder sb, Map.Entry<String, Collection<Object>> entry) throws UnsupportedEncodingException {
