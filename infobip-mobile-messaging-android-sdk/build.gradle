@@ -39,6 +39,15 @@ android {
     }
 }
 
+task copyLibs(type: Copy) {
+    from(configurations.compile){
+        include "infobip-mobile-messaging-api-java*"
+    }
+    into 'libs'
+}
+
+assemble.dependsOn(copyLibs)
+
 configurations {
     provided
     compile.extendsFrom provided
@@ -50,6 +59,8 @@ sourceSets {
 }
 
 dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
     compile(project(':infobip-mobile-messaging-api-java'))
 
     androidTestCompile 'com.crittercism.dexmaker:dexmaker-dx:1.4'

@@ -17,22 +17,22 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 shadowJar {
-    classifier = ''
+    classifier = 'shaded'
     zip64 = true
-    relocate 'com.google.gson', 'org.infobip.mobile.messaging.api.shaded.google.gson'
+    relocate('com.google.gson', 'org.infobip.mobile.messaging.api.shaded.google.gson')
     manifest {
         attributes("Implementation-Title": "Gradle", "Implementation-Version": version)
     }
 }
 
-jar {
-    classifier = 'non_shaded'
-}
-
 jar.dependsOn(shadowJar)
 
-artifacts {
-    archives shadowJar
+jar {
+    from{
+        zipTree(shadowJar.archivePath)
+    }{
+        include 'org/infobip/mobile/messaging/api/shaded/**'
+    }
 }
 
 configurations {
