@@ -38,11 +38,11 @@ public class MainActivity extends AppCompatActivity {
                 .withApplicationCode(getResources().getString(R.string.infobip_application_code))
                 .withGcmSenderId(getResources().getString(R.string.google_app_id))
                 .withDefaultTitle(getResources().getString(R.string.app_name))
-//                .withDefaultIcon(R.drawable.cast_ic_notification_0)
+                .withDefaultIcon(R.drawable.ic_stat_ic_notification)
 //                .withDisplayNotification()
 //                .withoutDisplayNotification()
 //                .withApiUri("http://10.116.52.238:18080")
-                .withApiUri("http://oneapi.ioinfobip.com")
+                .withApiUri("https://oneapi.ioinfobip.com")
                 .build();
 
         setContentView(R.layout.activity_main);

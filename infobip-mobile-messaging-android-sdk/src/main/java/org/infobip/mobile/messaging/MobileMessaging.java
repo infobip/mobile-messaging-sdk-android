@@ -28,7 +28,7 @@ import java.util.Set;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MobileMessaging implements Configuration {
     public static final String DEFAULT_TITLE = "Message";
-    public static final int DEFAULT_ICON = R.drawable.cast_ic_notification_0;
+    public static final int DEFAULT_ICON = R.drawable.ic_stat_ic_notification;
     public static final String DEFAULT_API_URI = "https://oneapi.infobip.com/";
     public static final String TAG = "MobileMessaging";
 
