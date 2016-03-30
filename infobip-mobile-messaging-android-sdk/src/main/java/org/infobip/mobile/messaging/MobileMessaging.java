@@ -14,11 +14,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.gcm.RegistrationIntentService;
+import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tasks.CreateRegistrationTask;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
 import org.infobip.mobile.messaging.tasks.UpdateRegistrationTask;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,40 +35,51 @@ import java.util.Set;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MobileMessaging implements Configuration {
-    public static final String DEFAULT_TITLE = "Message";
-    public static final int DEFAULT_ICON = R.drawable.ic_stat_ic_notification;
-    public static final String DEFAULT_API_URI = "https://oneapi.infobip.com/";
     public static final String TAG = "MobileMessaging";
+
+    private static final String DEFAULT_TITLE_VALUE = "Message";
+    private static final int DEFAULT_ICON_VALUE = R.drawable.ic_stat_ic_notification;
+    private static final String DEFAULT_API_URI = "https://oneapi.infobip.com/";
+    private static final long[] DEFAULT_VIBRATION_PATTERN = new long[]{0, 250, 200, 250, 150, 150, 75, 150, 75, 150};
 
     private static final String GCM_REGISTRATION_ID_SAVED = "org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_SAVED";
     private static final String GCM_REGISTRATION_ID = "org.infobip.mobile.messaging.gcm.REGISTRATION_ID";
     private static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.infobip.REGISTRATION_ID";
     private static final String INFOBIP_UNREPORTED_MESSAGE_IDS = "org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS";
-    private static final long[] DEFAULT_VIBRATION_PATTERN = new long[]{0, 250, 200, 250, 150, 150, 75, 150, 75, 150};
+    private static final String GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
+    private static final String APPLICATION_CODE = "org.infobip.mobile.messaging.infobip.APPLICATION_CODE";
+    private static final String API_URI = "org.infobip.mobile.messaging.infobip.API_URI";
+    private static final String DEFAULT_TITLE = "org.infobip.mobile.messaging.infobip.DEFAULT_TITLE";
+    private static final String DISPLAY_NOTIFICATION_ENABLED = "org.infobip.mobile.messaging.infobip.DISPLAY_NOTIFICATION_ENABLED";
+    private static final String CALLBACK_ACTIVITY = "org.infobip.mobile.messaging.infobip.CALLBACK_ACTIVITY";
+    private static final String DEFAULT_ICON = "org.infobip.mobile.messaging.infobip.DEFAULT_ICON";
+    private static final String VIBRATE = "org.infobip.mobile.messaging.infobip.VIBRATE";
+    private static final String MESSAGE_STORE_CLASS = "org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS";
 
     private static MobileMessaging instance;
 
     private final Context context;
-    private String gcmSenderId;
-    private String applicationCode;
-    private String apiUri = DEFAULT_API_URI;
-    private Class<?> callbackActivity;
-    private String defaultTitle = DEFAULT_TITLE;
-    private boolean displayNotificationEnabled;
-    private int defaultIcon = DEFAULT_ICON;
-    private long[] vibrate = DEFAULT_VIBRATION_PATTERN;
-    private boolean messageStoreEnabled;
-    private boolean notificationEnabled = true;
+    private MessageStore messageStore;
+//    private String gcmSenderId;
+//    private String applicationCode;
+//    private String apiUri = DEFAULT_API_URI;
+//    private Class<?> callbackActivity;
+//    private String defaultTitle = DEFAULT_TITLE;
+//    private boolean displayNotificationEnabled;
+//    private int defaultIcon = DEFAULT_ICON;
+//    private long[] vibrate = DEFAULT_VIBRATION_PATTERN;
+//    private boolean messageStoreEnabled;
 
     private MobileMessaging(Context context) {
         this.context = context;
     }
 
-    public static MobileMessaging getInstance() {
-        if (null == instance) {
-            throw new MobileMessagingNotInitializedException("You must initialize MobileMessaging using: MobileMessaging mobileMessaging = new MobileMessaging.Builder().build();");
+    public synchronized static MobileMessaging getInstance(Context context) {
+        if (null != instance) {
+            return instance;
         }
 
+        instance = new MobileMessaging(context);
         return instance;
     }
 
@@ -75,8 +89,7 @@ public class MobileMessaging implements Configuration {
     }
 
     public void setRegistrationId(String registrationId) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putString(GCM_REGISTRATION_ID, registrationId).apply();
+        saveString(GCM_REGISTRATION_ID, registrationId);
     }
 
     public String getInfobipRegistrationId() {
@@ -84,25 +97,167 @@ public class MobileMessaging implements Configuration {
         return sharedPreferences.getString(INFOBIP_REGISTRATION_ID, null);
     }
 
-    public void setInfobipRegistrationId(String registrationId) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putString(INFOBIP_REGISTRATION_ID, registrationId).apply();
+    private void setInfobipRegistrationId(String registrationId) {
+        saveString(INFOBIP_REGISTRATION_ID, registrationId);
     }
 
     public String getGcmSenderId() {
-        return gcmSenderId;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(GCM_SENDER_ID, null);
+    }
+
+    private void setGcmSenderId(String gcmSenderId) {
+        saveString(GCM_SENDER_ID, gcmSenderId);
     }
 
     public String getApplicationCode() {
-        return applicationCode;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(APPLICATION_CODE, null);
+    }
+
+    private void setApplicationCode(String applicationCode) {
+        saveString(APPLICATION_CODE, applicationCode);
     }
 
     public String getApiUri() {
-        return apiUri;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(API_URI, DEFAULT_API_URI);
+    }
+
+    private void setApiUri(String apiUri) {
+        saveString(API_URI, apiUri);
     }
 
     public Class<?> getCallbackActivity() {
-        return callbackActivity;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String callbackActivityClassName = sharedPreferences.getString(CALLBACK_ACTIVITY, null);
+        if (StringUtils.isBlank(callbackActivityClassName)) {
+            return null;
+        }
+        //TODO cache
+        try {
+            return Class.forName(callbackActivityClassName);
+        } catch (ClassNotFoundException e) {
+            //TODO log
+            return null;
+        }
+    }
+
+    private void setCallbackActivity(Class<?> callbackActivity) {
+        saveString(CALLBACK_ACTIVITY, null != callbackActivity.getName() ? callbackActivity.getName() : null);
+    }
+
+    public String getDefaultTitle() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(DEFAULT_TITLE, DEFAULT_TITLE_VALUE);
+    }
+
+    private void setDefaultTitle(String defaultTitle) {
+        saveString(DEFAULT_TITLE, defaultTitle);
+    }
+
+    public boolean isDisplayNotificationEnabled() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(DISPLAY_NOTIFICATION_ENABLED, true);
+    }
+
+    private void setDisplayNotificationEnabled(boolean displayNotificationEnabled) {
+        saveBoolean(DISPLAY_NOTIFICATION_ENABLED, displayNotificationEnabled);
+    }
+
+    public int getDefaultIcon() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getInt(DEFAULT_ICON, DEFAULT_ICON_VALUE);
+    }
+
+    private void setDefaultIcon(int defaultIcon) {
+        saveInt(DEFAULT_ICON, defaultIcon);
+    }
+
+    public long[] getVibrate() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String vibrate = sharedPreferences.getString(VIBRATE, null);
+        if (null == vibrate) {
+            return DEFAULT_VIBRATION_PATTERN;
+        }
+        //TODO cache
+        try {
+            JSONArray jsonArray = new JSONArray(vibrate);
+            long[] vibratePattern = new long[jsonArray.length()];
+            for (int i = 0; i < jsonArray.length(); i++) {
+                vibratePattern[i] = jsonArray.getLong(i);
+            }
+            return vibratePattern;
+        } catch (JSONException e) {
+            //TODO log
+            return DEFAULT_VIBRATION_PATTERN;
+        }
+    }
+
+    private void setVibrate(long[] vibrate) {
+        saveLongArray(VIBRATE, vibrate);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Class<? extends MessageStore> getMessageStoreClass() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String messageStoreClassName = sharedPreferences.getString(MESSAGE_STORE_CLASS, null);
+        if (StringUtils.isBlank(messageStoreClassName)) {
+            return null;
+        }
+        //TODO cache
+        try {
+            return (Class<? extends MessageStore>) Class.forName(messageStoreClassName);
+        } catch (ClassNotFoundException e) {
+            //TODO log
+            return null;
+        }
+    }
+
+    private void setMessageStoreClass(Class<? extends MessageStore> messageStoreClass) {
+        saveString(MESSAGE_STORE_CLASS, null != messageStoreClass.getName() ? messageStoreClass.getName() : null);
+    }
+
+    public boolean isRegistrationIdSaved() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(GCM_REGISTRATION_ID_SAVED, false);
+    }
+
+    public void setRegistrationIdSaved(boolean registrationIdSaved) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(GCM_REGISTRATION_ID_SAVED, registrationIdSaved).apply();
+    }
+
+    private void saveString(String key, String value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (null == value) {
+            sharedPreferences.edit().remove(key).apply();
+            return;
+        }
+        sharedPreferences.edit().putString(key, value).apply();
+    }
+
+    private void saveBoolean(String key, boolean value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(key, value).apply();
+    }
+
+    private void saveInt(String key, int value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putInt(key, value).apply();
+    }
+
+    private void saveLongArray(String key, long[] value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (null == value) {
+            sharedPreferences.edit().remove(key).apply();
+            return;
+        }
+        JSONArray jsonArray = new JSONArray();
+        for (long aValue : value) {
+            jsonArray.put(aValue);
+        }
+        sharedPreferences.edit().putString(key, jsonArray.toString()).apply();
     }
 
     /**
@@ -110,7 +265,7 @@ public class MobileMessaging implements Configuration {
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    public void checkPlayServices() {
+    private void checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
@@ -127,24 +282,6 @@ public class MobileMessaging implements Configuration {
         // Start IntentService to register this application with GCM.
         Intent intent = new Intent(context, RegistrationIntentService.class);
         context.startService(intent);
-    }
-
-    public String getDefaultTitle() {
-        return defaultTitle;
-    }
-
-    public boolean isDisplayNotificationEnabled() {
-        return displayNotificationEnabled;
-    }
-
-    public boolean isRegistrationIdSaved() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean(GCM_REGISTRATION_ID_SAVED, false);
-    }
-
-    public void setRegistrationIdSaved(boolean registrationIdSaved) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putBoolean(GCM_REGISTRATION_ID_SAVED, registrationIdSaved).apply();
     }
 
     public String[] getUnreportedMessageIds() {
@@ -200,7 +337,7 @@ public class MobileMessaging implements Configuration {
 
         AsyncTask task;
         if (null == getInfobipRegistrationId()) {
-            task = new CreateRegistrationTask() {
+            task = new CreateRegistrationTask(context) {
                 @Override
                 protected void onPostExecute(RegistrationResponse registrationResponse) {
                     if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
@@ -210,8 +347,8 @@ public class MobileMessaging implements Configuration {
                         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                         return;
                     }
-                    MobileMessaging.getInstance().setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
-                    MobileMessaging.getInstance().setRegistrationIdSaved(true);
+                    setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
+                    setRegistrationIdSaved(true);
 
                     Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
@@ -219,14 +356,14 @@ public class MobileMessaging implements Configuration {
 
                 @Override
                 protected void onCancelled() {
-                    MobileMessaging.getInstance().setRegistrationIdSaved(false);
+                    setRegistrationIdSaved(false);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                 }
             };
         } else {
-            task = new UpdateRegistrationTask() {
+            task = new UpdateRegistrationTask(context) {
                 @Override
                 protected void onPostExecute(RegistrationResponse registrationResponse) {
                     if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
@@ -236,8 +373,8 @@ public class MobileMessaging implements Configuration {
                         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                         return;
                     }
-                    MobileMessaging.getInstance().setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
-                    MobileMessaging.getInstance().setRegistrationIdSaved(true);
+                    setInfobipRegistrationId(registrationResponse.getDeviceApplicationInstanceId());
+                    setRegistrationIdSaved(true);
 
                     Intent registrationChanged = new Intent(Event.REGISTRATION_CHANGED.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationChanged);
@@ -245,7 +382,7 @@ public class MobileMessaging implements Configuration {
 
                 @Override
                 protected void onCancelled() {
-                    MobileMessaging.getInstance().setRegistrationIdSaved(false);
+                    setRegistrationIdSaved(false);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
@@ -260,7 +397,7 @@ public class MobileMessaging implements Configuration {
             return;
         }
 
-        new DeliveryReportTask() {
+        new DeliveryReportTask(context) {
             @Override
             protected void onPostExecute(DeliveryReportResult result) {
                 if (null == result) {
@@ -286,16 +423,27 @@ public class MobileMessaging implements Configuration {
         }.execute();
     }
 
-    public int getDefaultIcon() {
-        return defaultIcon;
-    }
+    public MessageStore getMessageStore() {
+        if (!isMessageStoreEnabled()) {
+            return null;
+        }
 
-    public long[] getVibrate() {
-        return vibrate;
+        if (null != messageStore) {
+            return messageStore;
+        }
+
+        Class<? extends MessageStore> messageStoreClass = null;
+        try {
+            messageStoreClass = getMessageStoreClass();
+            messageStore = messageStoreClass.newInstance();
+            return messageStore;
+        } catch (Exception e) {
+            throw new MessageStoreInstantiationException("Can't create message store of type: " + messageStoreClass, e);
+        }
     }
 
     public boolean isMessageStoreEnabled() {
-        return messageStoreEnabled;
+        return null != getMessageStoreClass();
     }
 
     public static final class Builder {
@@ -306,69 +454,68 @@ public class MobileMessaging implements Configuration {
         }
 
         public Builder withGcmSenderId(String gcmSenderId) {
-            mobileMessaging.gcmSenderId = gcmSenderId;
+            mobileMessaging.setGcmSenderId(gcmSenderId);
             return this;
         }
 
         public Builder withApplicationCode(String applicationCode) {
-            mobileMessaging.applicationCode = applicationCode;
+            mobileMessaging.setApplicationCode(applicationCode);
             return this;
         }
 
         public Builder withCallbackActivity(Class<?> callbackActivity) {
-            mobileMessaging.callbackActivity = callbackActivity;
-            mobileMessaging.displayNotificationEnabled = null != callbackActivity;
+            mobileMessaging.setCallbackActivity(callbackActivity);
             return this;
         }
 
         public Builder withApiUri(String apiUri) {
-            mobileMessaging.apiUri = apiUri;
+            mobileMessaging.setApiUri(apiUri);
             return this;
         }
 
         public Builder withDefaultTitle(String defaultTitle) {
-            mobileMessaging.defaultTitle = defaultTitle;
+            mobileMessaging.setDefaultTitle(defaultTitle);
             return this;
         }
 
         public Builder withVibrate(long[] vibrate) {
-            mobileMessaging.vibrate = vibrate;
+            mobileMessaging.setVibrate(vibrate);
             return this;
         }
 
         public Builder withoutVibrate() {
-            mobileMessaging.vibrate = null;
+            mobileMessaging.setVibrate(null);
             return this;
         }
 
         public Builder withDefaultIcon(int defaultIcon) {
-            mobileMessaging.defaultIcon = defaultIcon;
+            mobileMessaging.setDefaultIcon(defaultIcon);
             return this;
         }
 
         public Builder withDisplayNotification() {
-            mobileMessaging.displayNotificationEnabled = true;
+            mobileMessaging.setDisplayNotificationEnabled(true);
             return this;
         }
 
         public Builder withoutDisplayNotification() {
-            mobileMessaging.displayNotificationEnabled = false;
+            mobileMessaging.setDisplayNotificationEnabled(false);
             return this;
         }
 
-        public Builder withMessageStore() {
-            mobileMessaging.messageStoreEnabled = true;
+        public Builder withMessageStore(Class<? extends MessageStore> messageStoreClass) {
+            mobileMessaging.setMessageStoreClass(messageStoreClass);
             return this;
         }
 
         public Builder withoutMessageStore() {
-            mobileMessaging.messageStoreEnabled = false;
+            mobileMessaging.setMessageStoreClass(null);
             return this;
         }
 
         public MobileMessaging build() {
-            if (null == mobileMessaging.context.getResources().getDrawable(mobileMessaging.defaultIcon)) {
-                throw new IllegalArgumentException("defaultIcon doesn't exist: " + mobileMessaging.defaultIcon);
+            if (null == mobileMessaging.context.getResources().getDrawable(mobileMessaging.getDefaultIcon())) {
+                throw new IllegalArgumentException("defaultIcon doesn't exist: " + mobileMessaging.getDefaultIcon());
             }
 
             if (null == mobileMessaging.getApiUri()) {
@@ -383,7 +530,7 @@ public class MobileMessaging implements Configuration {
                 throw new IllegalArgumentException("gcmSenderId is mandatory!"); //TODO link to the explanation how to get one!
             }
 
-            if (mobileMessaging.displayNotificationEnabled && null == mobileMessaging.getCallbackActivity()) {
+            if (mobileMessaging.isDisplayNotificationEnabled() && null == mobileMessaging.getCallbackActivity()) {
                 throw new IllegalArgumentException("callbackActivity is mandatory! You should use the activity that will display received messages.");
             }
 

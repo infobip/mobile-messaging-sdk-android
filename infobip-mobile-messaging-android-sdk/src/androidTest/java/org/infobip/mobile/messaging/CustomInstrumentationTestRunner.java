@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;

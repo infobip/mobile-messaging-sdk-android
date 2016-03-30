@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.tasks;
 
+import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
@@ -18,35 +19,35 @@ public enum MobileApiResourceProvider {
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiDeliveryReport mobileApiDeliveryReport;
 
-    public MobileApiRegistration getMobileApiRegistration() {
+    public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
             return mobileApiRegistration;
         }
 
-        mobileApiRegistration = getGenerator().create(MobileApiRegistration.class);
+        mobileApiRegistration = getGenerator(context).create(MobileApiRegistration.class);
 
         return mobileApiRegistration;
     }
 
-    public MobileApiDeliveryReport getMobileApiDeliveryReport() {
+    public MobileApiDeliveryReport getMobileApiDeliveryReport(Context context) {
         if (null != mobileApiDeliveryReport) {
             return mobileApiDeliveryReport;
         }
 
-        mobileApiDeliveryReport = getGenerator().create(MobileApiDeliveryReport.class);
+        mobileApiDeliveryReport = getGenerator(context).create(MobileApiDeliveryReport.class);
 
         return mobileApiDeliveryReport;
     }
 
-    private Generator getGenerator() {
+    private Generator getGenerator(Context context) {
         if (null != generator) {
             return generator;
         }
 
         Properties properties = System.getProperties();
-        properties.put("api.key", MobileMessaging.getInstance().getApplicationCode());
+        properties.put("api.key", MobileMessaging.getInstance(context).getApplicationCode());
         generator = new Generator.Builder().
-                withBaseUrl(MobileMessaging.getInstance().getApiUri()).
+                withBaseUrl(MobileMessaging.getInstance(context).getApiUri()).
                 withProperties(properties).
                 build();
         return generator;

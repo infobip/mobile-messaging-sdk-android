@@ -8,8 +8,10 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MessageStore;
+import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.storage.MessageStore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -19,7 +21,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     public ExpandableListAdapter(Context context) {
         this.context = context;
-        this.messages = MessageStore.INSTANCE.link();
+        MessageStore messageStore = MobileMessaging.getInstance(context).getMessageStore();
+        if (null != messageStore) {
+            this.messages = messageStore.link(context);
+        } else {
+            this.messages = new ArrayList<>();
+        }
     }
 
     @Override

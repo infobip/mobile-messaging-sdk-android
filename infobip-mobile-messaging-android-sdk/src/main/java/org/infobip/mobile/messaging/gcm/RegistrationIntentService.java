@@ -1,9 +1,7 @@
 package org.infobip.mobile.messaging.gcm;
 
-import android.annotation.TargetApi;
 import android.app.IntentService;
 import android.content.Intent;
-import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import com.google.android.gms.gcm.GcmPubSub;
@@ -21,7 +19,6 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @author mstipanov
  * @since 21.03.2016.
  */
-@TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class RegistrationIntentService extends IntentService {
     private static final String[] TOPICS = {"global"};
 
@@ -33,7 +30,7 @@ public class RegistrationIntentService extends IntentService {
     public void onHandleIntent(Intent intent) {
         try {
             InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken(MobileMessaging.getInstance().getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            String token = instanceID.getToken(MobileMessaging.getInstance(this).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
             LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
             sendRegistrationToServer(token);
@@ -56,7 +53,7 @@ public class RegistrationIntentService extends IntentService {
             return;
         }
 
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance();
+        MobileMessaging mobileMessaging = MobileMessaging.getInstance(this);
         String infobipRegistrationId = mobileMessaging.getInfobipRegistrationId();
 
         boolean saveNeeded = null == infobipRegistrationId ||

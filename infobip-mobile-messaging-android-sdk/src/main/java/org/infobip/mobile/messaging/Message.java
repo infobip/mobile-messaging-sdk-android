@@ -9,23 +9,40 @@ import android.os.Bundle;
  * @since 25.03.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-public class Message {
+public class Message implements Comparable {
     private final Bundle bundle;
+
+    public Message() {
+        bundle = new Bundle();
+    }
 
     public Message(Bundle bundle) {
         this.bundle = bundle;
     }
 
-    public void copyFrom(Bundle source) {
+    public static Message create(String messageId, String body) {
+        Message message = new Message();
+        message.setMessageId(messageId);
+        message.setBody(body);
+        return message;
+    }
+
+    public static Message copyFrom(Bundle source) {
         Message sourceMessage = new Message(source);
-        setFrom(sourceMessage.getFrom());
-        setMessageId(sourceMessage.getMessageId());
-        setTitle(sourceMessage.getTitle());
-        setBody(sourceMessage.getBody());
-        setSound(sourceMessage.getSound());
-        setIcon(sourceMessage.getIcon());
-        setSilent(sourceMessage.isSilent());
-        setData(sourceMessage.getData());
+
+        Message message = new Message();
+
+        message.setFrom(sourceMessage.getFrom());
+        message.setMessageId(sourceMessage.getMessageId());
+        message.setTitle(sourceMessage.getTitle());
+        message.setBody(sourceMessage.getBody());
+        message.setSound(sourceMessage.getSound());
+        message.setIcon(sourceMessage.getIcon());
+        message.setSilent(sourceMessage.isSilent());
+        message.setData(sourceMessage.getData());
+        message.setReceivedTimestamp(sourceMessage.getReceivedTimestamp());
+
+        return message;
     }
 
     public String getMessageId() {
@@ -96,21 +113,33 @@ public class Message {
         bundle.putBoolean(Data.SILENT.getKey(), silent);
     }
 
-    public static Message create(String messageId, String body) {
-        Message message = new Message(new Bundle());
-        message.setMessageId(messageId);
-        message.setBody(body);
-        return message;
+    public long getReceivedTimestamp() {
+        return bundle.getLong(Data.RECEIVED_TIMESTAMP.getKey(), System.currentTimeMillis());
+    }
+
+    public void setReceivedTimestamp(long receivedTimestamp) {
+        bundle.putLong(Data.RECEIVED_TIMESTAMP.getKey(), receivedTimestamp);
+    }
+
+    @Override
+    public int compareTo(Object another) {
+        if (!(another instanceof Message)) {
+            return 1;
+        }
+
+        Message message = (Message) another;
+        return (int) Math.signum(message.getReceivedTimestamp() - getReceivedTimestamp());
     }
 
     private enum Data {
-        MESSAGE_ID("messageId"),
-        TITLE("title"),
-        BODY("body"),
-        SOUND("sound"),
-        ICON("icon"),
+        MESSAGE_ID("gcm.notification.messageId"),
+        TITLE("gcm.notification.title"),
+        BODY("gcm.notification.body"),
+        SOUND("gcm.notification.sound"),
+        ICON("gcm.notification.icon"),
         FROM("from"),
-        SILENT("silent"),
+        SILENT("gcm.notification.silent"),
+        RECEIVED_TIMESTAMP("received_timestamp"),
         DATA("data");
 
         private final String key;

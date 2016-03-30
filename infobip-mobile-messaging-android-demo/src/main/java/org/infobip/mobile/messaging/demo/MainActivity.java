@@ -16,8 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MessageStore;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isReceiverRegistered;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 //                .withoutDisplayNotification()
 //                .withApiUri("http://10.116.52.238:18080")
                 .withApiUri("https://oneapi.ioinfobip.com")
-                .withMessageStore()
+                .withMessageStore(SharedPreferencesMessageStore.class)
 //                .withoutMessageStore()
                 .build();
 
@@ -65,21 +65,13 @@ public class MainActivity extends AppCompatActivity {
         updateCount();
     }
 
-    private void fillSomeData() {
-        MessageStore.INSTANCE.save(Message.create("1", "Top 250"));
-        MessageStore.INSTANCE.save(Message.create("2", "Now Showing"));
-        MessageStore.INSTANCE.save(Message.create("3", "Coming Soon.."));
-
-        updateCount();
-    }
-
     private void updateCount() {
-        totalReceivedTextView.setText(String.valueOf(MessageStore.INSTANCE.countAll()));
+        totalReceivedTextView.setText(String.valueOf(MobileMessaging.getInstance(this).getMessageStore().countAll(this)));
         listAdapter.notifyDataSetChanged();
     }
 
     public void onEraseInboxClick(View view) {
-        MessageStore.INSTANCE.deleteAll();
+        MobileMessaging.getInstance(this).getMessageStore().deleteAll(this);
         updateCount();
     }
 
@@ -122,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            fillSomeData();
             return true;
         }
 
