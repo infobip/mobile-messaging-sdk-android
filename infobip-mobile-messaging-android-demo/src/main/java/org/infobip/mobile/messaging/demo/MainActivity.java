@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         registerReceiver();
         updateCount();
+        clearNotifications();
     }
 
     private void updateCount() {
@@ -80,6 +82,12 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         registerReceiver();
         updateCount();
+        clearNotifications();
+    }
+
+    private void clearNotifications() {
+        NotificationManager notifManager= (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notifManager.cancelAll();
     }
 
     @Override
