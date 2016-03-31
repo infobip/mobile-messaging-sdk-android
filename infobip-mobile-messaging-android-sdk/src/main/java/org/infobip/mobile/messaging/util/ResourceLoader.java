@@ -11,11 +11,10 @@ public abstract class ResourceLoader {
     }
 
     public static int loadResourceByName(final Context context, final String resourceGroup, final String resourceName) {
-        String className = context.getApplicationContext().getPackageName() + ".R$" + resourceGroup;
         try {
-            Class<?> aClass = Class.forName(className);
-            return (int) aClass.getDeclaredField(resourceName).get(aClass);
+            return context.getResources().getIdentifier(resourceName, resourceGroup, context.getApplicationContext().getPackageName());
         } catch (Exception e) {
+            String className = context.getApplicationContext().getPackageName() + ".R$" + resourceGroup;
             throw new MissingAndroidResourceException("Can't load resource: " + resourceName, className, resourceName, e);
         }
     }

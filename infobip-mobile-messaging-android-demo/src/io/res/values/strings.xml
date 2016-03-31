@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Mobile Messaging Demo IO</string>
+    <string name="google_app_id">492584729132</string>
+    <string name="infobip_application_code">b7ad2bedd5b87f5af6cdaca08af24aea-8ca3e122-dc1d-441d-996f-39c1e514de74</string>
+    <string name="infobip_api_uri">https://oneapi.ioinfobip.com/</string>
+</resources>

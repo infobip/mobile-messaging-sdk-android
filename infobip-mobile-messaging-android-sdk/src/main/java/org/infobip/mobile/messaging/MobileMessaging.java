@@ -19,6 +19,7 @@ import org.infobip.mobile.messaging.tasks.CreateRegistrationTask;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
 import org.infobip.mobile.messaging.tasks.UpdateRegistrationTask;
+import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,15 +61,6 @@ public class MobileMessaging implements Configuration {
 
     private final Context context;
     private MessageStore messageStore;
-//    private String gcmSenderId;
-//    private String applicationCode;
-//    private String apiUri = DEFAULT_API_URI;
-//    private Class<?> callbackActivity;
-//    private String defaultTitle = DEFAULT_TITLE;
-//    private boolean displayNotificationEnabled;
-//    private int defaultIcon = DEFAULT_ICON;
-//    private long[] vibrate = DEFAULT_VIBRATION_PATTERN;
-//    private boolean messageStoreEnabled;
 
     private MobileMessaging(Context context) {
         this.context = context;
@@ -451,6 +443,13 @@ public class MobileMessaging implements Configuration {
 
         public Builder(Context context) {
             this.mobileMessaging = new MobileMessaging(null != context ? context.getApplicationContext() : null);
+            int infobipApiUriResource = ResourceLoader.loadResourceByName(context, "string", "infobip_api_uri");
+            if (infobipApiUriResource > 0) {
+                String apiUri = context.getResources().getString(infobipApiUriResource);
+                if (StringUtils.isNotBlank(apiUri)) {
+                    mobileMessaging.setApiUri(apiUri);
+                }
+            }
         }
 
         public Builder withGcmSenderId(String gcmSenderId) {

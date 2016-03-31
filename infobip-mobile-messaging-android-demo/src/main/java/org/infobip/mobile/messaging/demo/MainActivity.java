@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 //                .withDisplayNotification()
 //                .withoutDisplayNotification()
 //                .withApiUri("http://10.116.52.238:18080")
-//                .withApiUri("https://oneapi.ioinfobip.com")
                 .withMessageStore(SharedPreferencesMessageStore.class)
 //                .withoutMessageStore()
                 .build();
