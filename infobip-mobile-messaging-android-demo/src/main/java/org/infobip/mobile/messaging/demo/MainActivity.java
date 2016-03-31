@@ -15,6 +15,9 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
+import io.fabric.sdk.android.Fabric;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -39,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Crashlytics crashlyticsKit = new Crashlytics.Builder()
+                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build())
+                .build();
+
+        // Initialize Fabric with the debug-disabled crashlytics.
+        Fabric.with(this, crashlyticsKit);
+
         new MobileMessaging.Builder(this)
                 .withCallbackActivity(MainActivity.class)
                 .withApplicationCode(getResources().getString(R.string.infobip_application_code))
@@ -48,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 //                .withDisplayNotification()
 //                .withoutDisplayNotification()
 //                .withApiUri("http://10.116.52.238:18080")
-                .withApiUri("https://oneapi.ioinfobip.com")
+//                .withApiUri("https://oneapi.ioinfobip.com")
                 .withMessageStore(SharedPreferencesMessageStore.class)
 //                .withoutMessageStore()
                 .build();
