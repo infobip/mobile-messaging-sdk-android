@@ -14,6 +14,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.gcm.RegistrationIntentService;
+import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tasks.CreateRegistrationTask;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
@@ -58,12 +60,14 @@ public class MobileMessaging implements Configuration {
     private static final String MESSAGE_STORE_CLASS = "org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS";
 
     private static MobileMessaging instance;
+    private MobileMessagingStats stats;
 
     private final Context context;
     private MessageStore messageStore;
 
     private MobileMessaging(Context context) {
         this.context = context;
+        stats = new MobileMessagingStats(context);
     }
 
     public synchronized static MobileMessaging getInstance(Context context) {
@@ -334,6 +338,7 @@ public class MobileMessaging implements Configuration {
                 protected void onPostExecute(RegistrationResponse registrationResponse) {
                     if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
                         Log.e(TAG, "MobileMessaging API didn't return any value!");
+                        getStats().reportError(MobileMessagingError.CREATE_REGISTRATION_ERROR);
 
                         Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
@@ -348,8 +353,10 @@ public class MobileMessaging implements Configuration {
 
                 @Override
                 protected void onCancelled() {
+                    Log.e(TAG, "Error creating registration!");
                     setRegistrationIdSaved(false);
 
+                    getStats().reportError(MobileMessagingError.CREATE_REGISTRATION_ERROR);
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                 }
@@ -361,6 +368,7 @@ public class MobileMessaging implements Configuration {
                     if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
                         Log.e(TAG, "MobileMessaging API didn't return any value!");
 
+                        getStats().reportError(MobileMessagingError.UPDATE_REGISTRATION_ERROR);
                         Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                         return;
@@ -374,6 +382,8 @@ public class MobileMessaging implements Configuration {
 
                 @Override
                 protected void onCancelled() {
+                    getStats().reportError(MobileMessagingError.UPDATE_REGISTRATION_ERROR);
+                    Log.e(TAG, "Error updating registration!");
                     setRegistrationIdSaved(false);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -395,6 +405,7 @@ public class MobileMessaging implements Configuration {
                 if (null == result) {
                     Log.e(TAG, "MobileMessaging API didn't return any value!");
 
+                    getStats().reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
@@ -409,6 +420,8 @@ public class MobileMessaging implements Configuration {
 
             @Override
             protected void onCancelled() {
+                getStats().reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
+                Log.e(TAG, "Error reporting delivery!");
                 Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
             }
@@ -436,6 +449,10 @@ public class MobileMessaging implements Configuration {
 
     public boolean isMessageStoreEnabled() {
         return null != getMessageStoreClass();
+    }
+
+    public MobileMessagingStats getStats() {
+        return stats;
     }
 
     public static final class Builder {

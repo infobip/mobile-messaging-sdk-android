@@ -25,6 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 
 import java.util.List;
 
@@ -121,6 +123,18 @@ public class InspectActivity extends PreferenceActivity {
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
+    }
+
+    private static void bindLongPreferenceSummaryToValue(Preference preference) {
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getLong(preference.getKey(), 0));
     }
 
     private static void bindBooleanPreferenceSummaryToValue(Preference preference) {
@@ -294,6 +308,9 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID));
             bindBooleanPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID_SAVED));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_SENDER_ID));
+            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.CREATE_REGISTRATION_ERROR)));
+            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.UPDATE_REGISTRATION_ERROR)));
+            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
         }
 
         @Override
@@ -305,9 +322,9 @@ public class InspectActivity extends PreferenceActivity {
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
             if (preference.getKey().equals(MobileMessaging.GCM_REGISTRATION_ID_SAVED)) {
-                MobileMessaging.getInstance(getContext()).reportUnreportedRegistration();
+                MobileMessaging.getInstance(preference.getContext()).reportUnreportedRegistration();
             }else{
-                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(CLIPBOARD_SERVICE);
+                ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());
                 clipboard.setPrimaryClip(clip);
             }

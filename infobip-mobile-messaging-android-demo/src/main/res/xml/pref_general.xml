@@ -47,4 +47,34 @@
             android:singleLine="true"
             android:maxLines="1"
     />
+    <Preference
+            android:key="org.infobip.mobile.messaging.stats.CREATE_REGISTRATION_ERROR"
+            android:title="@string/pref_title_create_registration_error"
+            android:defaultValue="0"
+            android:selectAllOnFocus="true"
+            android:inputType="number"
+            android:capitalize="none"
+            android:singleLine="true"
+            android:maxLines="1"
+    />
+    <Preference
+            android:key="org.infobip.mobile.messaging.stats.UPDATE_REGISTRATION_ERROR"
+            android:title="@string/pref_title_update_registration_error"
+            android:defaultValue="0"
+            android:selectAllOnFocus="true"
+            android:inputType="number"
+            android:capitalize="none"
+            android:singleLine="true"
+            android:maxLines="1"
+    />
+    <Preference
+            android:key="org.infobip.mobile.messaging.stats.DELIVERY_REPORTING_ERROR"
+            android:title="@string/pref_title_delivery_reporting_error"
+            android:defaultValue="0"
+            android:selectAllOnFocus="true"
+            android:inputType="number"
+            android:capitalize="none"
+            android:singleLine="true"
+            android:maxLines="1"
+    />
 </PreferenceScreen>
