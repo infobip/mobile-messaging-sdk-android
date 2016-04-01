@@ -26,7 +26,7 @@ public class MobileMessagingStats {
     }
 
     public synchronized void reportError(MobileMessagingError mobileMessagingError) {
-        saveLong(mobileMessagingError, getErrorCount(mobileMessagingError));
+        saveLong(mobileMessagingError, getErrorCount(mobileMessagingError) + 1);
     }
 
     public void resetErrors() {
