@@ -384,7 +384,11 @@ public class MobileMessaging implements Configuration {
                 protected void onCancelled() {
                     getStats().reportError(MobileMessagingError.UPDATE_REGISTRATION_ERROR);
                     Log.e(TAG, "Error updating registration!");
+
+                    //TODO remove this after we implement MM-128
+                    setInfobipRegistrationId(null);
                     setRegistrationIdSaved(false);
+                    reportUnreportedMessageIds();
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
@@ -396,6 +400,12 @@ public class MobileMessaging implements Configuration {
 
     public void reportUnreportedMessageIds() {
         if (getUnreportedMessageIds().length == 0) {
+            return;
+        }
+
+        if (StringUtils.isBlank(getInfobipRegistrationId())) {
+            Log.w(TAG, "Can't report delivery reports to MobileMessaging API without saving registration first!");
+            reportUnreportedRegistration();
             return;
         }
 
