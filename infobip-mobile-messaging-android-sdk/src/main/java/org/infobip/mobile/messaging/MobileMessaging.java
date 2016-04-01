@@ -38,17 +38,17 @@ import java.util.Set;
 public class MobileMessaging implements Configuration {
     public static final String TAG = "MobileMessaging";
 
+    public static final String GCM_REGISTRATION_ID_SAVED = "org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_SAVED";
+    public static final String GCM_REGISTRATION_ID = "org.infobip.mobile.messaging.gcm.REGISTRATION_ID";
+    public static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.infobip.REGISTRATION_ID";
+    public static final String GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
+    public static final String APPLICATION_CODE = "org.infobip.mobile.messaging.infobip.APPLICATION_CODE";
+
     private static final String DEFAULT_TITLE_VALUE = "Message";
     private static final int DEFAULT_ICON_VALUE = R.drawable.ic_stat_ic_notification;
     private static final String DEFAULT_API_URI = "https://oneapi.infobip.com/";
     private static final long[] DEFAULT_VIBRATION_PATTERN = new long[]{0, 250, 200, 250, 150, 150, 75, 150, 75, 150};
-
-    private static final String GCM_REGISTRATION_ID_SAVED = "org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_SAVED";
-    private static final String GCM_REGISTRATION_ID = "org.infobip.mobile.messaging.gcm.REGISTRATION_ID";
-    private static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.infobip.REGISTRATION_ID";
     private static final String INFOBIP_UNREPORTED_MESSAGE_IDS = "org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS";
-    private static final String GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
-    private static final String APPLICATION_CODE = "org.infobip.mobile.messaging.infobip.APPLICATION_CODE";
     private static final String API_URI = "org.infobip.mobile.messaging.infobip.API_URI";
     private static final String DEFAULT_TITLE = "org.infobip.mobile.messaging.infobip.DEFAULT_TITLE";
     private static final String DISPLAY_NOTIFICATION_ENABLED = "org.infobip.mobile.messaging.infobip.DISPLAY_NOTIFICATION_ENABLED";
@@ -443,6 +443,21 @@ public class MobileMessaging implements Configuration {
 
         public Builder(Context context) {
             this.mobileMessaging = new MobileMessaging(null != context ? context.getApplicationContext() : null);
+            loadDefaultTitle(context);
+            loadDefaultApiUri(context);
+        }
+
+        private void loadDefaultTitle(Context context) {
+            int appNameResource = ResourceLoader.loadResourceByName(context, "string", "app_name");
+            if (appNameResource > 0) {
+                String appName = context.getResources().getString(appNameResource);
+                if (StringUtils.isNotBlank(appName)) {
+                    mobileMessaging.setDefaultTitle(appName);
+                }
+            }
+        }
+
+        private void loadDefaultApiUri(Context context) {
             int infobipApiUriResource = ResourceLoader.loadResourceByName(context, "string", "infobip_api_uri");
             if (infobipApiUriResource > 0) {
                 String apiUri = context.getResources().getString(infobipApiUriResource);

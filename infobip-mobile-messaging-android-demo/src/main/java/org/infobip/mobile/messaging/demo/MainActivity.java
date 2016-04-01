@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
                 .withCallbackActivity(MainActivity.class)
                 .withApplicationCode(getResources().getString(R.string.infobip_application_code))
                 .withGcmSenderId(getResources().getString(R.string.google_app_id))
-                .withDefaultTitle(getResources().getString(R.string.app_name))
                 .withDefaultIcon(R.mipmap.ic_launcher)
 //                .withDisplayNotification()
 //                .withoutDisplayNotification()
@@ -130,7 +129,8 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_inspect) {
+            startActivity(new Intent(this, InspectActivity.class));
             return true;
         }
 
