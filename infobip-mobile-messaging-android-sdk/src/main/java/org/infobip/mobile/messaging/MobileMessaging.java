@@ -176,21 +176,25 @@ public class MobileMessaging implements Configuration {
     }
 
     public void setLastHttpException(Exception lastHttpException) {
-        PrintWriter writer = null;
-        try {
-            StringWriter sw = new StringWriter();
-            writer = new PrintWriter(sw);
-            lastHttpException.printStackTrace(writer);
-            saveString(LAST_HTTP_EXCEPTION, sw.toString());
-        } finally {
-            if (null != writer) {
-                try {
-                    writer.close();
-                } catch (Exception e) {
-                    //ignore
+        String s = null;
+        if (null != lastHttpException) {
+            PrintWriter writer = null;
+            try {
+                StringWriter sw = new StringWriter();
+                writer = new PrintWriter(sw);
+                lastHttpException.printStackTrace(writer);
+                s = sw.toString();
+            } finally {
+                if (null != writer) {
+                    try {
+                        writer.close();
+                    } catch (Exception e) {
+                        //ignore
+                    }
                 }
             }
         }
+        saveString(LAST_HTTP_EXCEPTION, s);
     }
 
     public long[] getVibrate() {
@@ -341,6 +345,7 @@ public class MobileMessaging implements Configuration {
     }
 
     public void reportUnreportedRegistration() {
+        checkPlayServices();
         String infobipRegistrationId = getDeviceApplicationInstanceId();
         if (null != infobipRegistrationId && isRegistrationIdSaved()) {
             return;
@@ -562,7 +567,7 @@ public class MobileMessaging implements Configuration {
             }
 
             MobileMessaging.instance = mobileMessaging;
-            mobileMessaging.checkPlayServices();
+            mobileMessaging.setLastHttpException(null);
             mobileMessaging.reportUnreportedRegistration();
             mobileMessaging.reportUnreportedMessageIds();
             return mobileMessaging;
