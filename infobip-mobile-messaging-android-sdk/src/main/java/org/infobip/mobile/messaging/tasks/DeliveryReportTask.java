@@ -22,13 +22,14 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
 
     @Override
     protected DeliveryReportResult doInBackground(Object... notUsed) {
+        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
         try {
-            MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
             String[] messageIDs = mobileMessaging.getUnreportedMessageIds();
             DeliveryReportResponse report = MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(messageIDs);
             mobileMessaging.removeUnreportedMessageIds(messageIDs);
             return new DeliveryReportResult(report, messageIDs);
         } catch (Exception e) {
+            mobileMessaging.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error reporting delivery!", e);
             cancel(true);
             return null;

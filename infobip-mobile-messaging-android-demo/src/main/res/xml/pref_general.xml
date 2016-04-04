@@ -77,4 +77,14 @@
             android:singleLine="true"
             android:maxLines="1"
     />
+    <Preference
+            android:key="org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION"
+            android:title="@string/pref_title_last_http_error"
+            android:defaultValue="No errors found"
+            android:selectAllOnFocus="true"
+            android:inputType="number"
+            android:capitalize="none"
+            android:singleLine="true"
+            android:maxLines="50"
+    />
 </PreferenceScreen>

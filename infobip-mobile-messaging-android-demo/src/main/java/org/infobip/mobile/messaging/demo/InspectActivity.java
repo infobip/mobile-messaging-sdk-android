@@ -311,6 +311,7 @@ public class InspectActivity extends PreferenceActivity {
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.CREATE_REGISTRATION_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.UPDATE_REGISTRATION_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.LAST_HTTP_EXCEPTION));
         }
 
         @Override

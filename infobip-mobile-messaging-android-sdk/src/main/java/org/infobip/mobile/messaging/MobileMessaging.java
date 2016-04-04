@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,14 +16,16 @@ import org.infobip.mobile.messaging.gcm.RegistrationIntentService;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
+import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,6 +45,7 @@ public class MobileMessaging implements Configuration {
     public static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.infobip.REGISTRATION_ID";
     public static final String GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
     public static final String APPLICATION_CODE = "org.infobip.mobile.messaging.infobip.APPLICATION_CODE";
+    public static final String LAST_HTTP_EXCEPTION = "org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION";
 
     private static final String DEFAULT_TITLE_VALUE = "Message";
     private static final int DEFAULT_ICON_VALUE = R.drawable.ic_stat_ic_notification;
@@ -59,9 +61,8 @@ public class MobileMessaging implements Configuration {
     private static final String MESSAGE_STORE_CLASS = "org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS";
 
     private static MobileMessaging instance;
-    private MobileMessagingStats stats;
-
     private final Context context;
+    private MobileMessagingStats stats;
     private MessageStore messageStore;
 
     private MobileMessaging(Context context) {
@@ -167,6 +168,29 @@ public class MobileMessaging implements Configuration {
 
     private void setDefaultIcon(int defaultIcon) {
         saveInt(DEFAULT_ICON, defaultIcon);
+    }
+
+    public String getLastHttpException() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(LAST_HTTP_EXCEPTION, null);
+    }
+
+    public void setLastHttpException(Exception lastHttpException) {
+        PrintWriter writer = null;
+        try {
+            StringWriter sw = new StringWriter();
+            writer = new PrintWriter(sw);
+            lastHttpException.printStackTrace(writer);
+            saveString(LAST_HTTP_EXCEPTION, sw.toString());
+        } finally {
+            if (null != writer) {
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+        }
     }
 
     public long[] getVibrate() {
