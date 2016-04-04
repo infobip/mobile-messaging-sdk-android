@@ -1,4 +1,4 @@
-@Version("1")
+@Version("2")
 @ApiKey("${api.key}")
 package org.infobip.mobile.messaging.api;
 

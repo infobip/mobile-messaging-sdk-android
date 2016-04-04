@@ -13,17 +13,17 @@ import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
  * @since 03.03.2016.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class CreateRegistrationTask extends AsyncTask<Object, Void, RegistrationResponse> {
+public class UpsertRegistrationTask extends AsyncTask<Object, Void, RegistrationResponse> {
     private final Context context;
 
-    public CreateRegistrationTask(Context context) {
+    public UpsertRegistrationTask(Context context) {
         this.context = context;
     }
 
     @Override
     protected RegistrationResponse doInBackground(Object... notUsed) {
         try {
-            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).create(MobileMessaging.getInstance(context).getRegistrationId());
+            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(MobileMessaging.getInstance(context).getDeviceApplicationInstanceId(), MobileMessaging.getInstance(context).getRegistrationId());
         } catch (Exception e) {
             Log.e(MobileMessaging.TAG, "Error creating registration!", e);
             cancel(true);

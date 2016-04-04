@@ -323,7 +323,9 @@ public class InspectActivity extends PreferenceActivity {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
             if (preference.getKey().equals(MobileMessaging.GCM_REGISTRATION_ID_SAVED)) {
                 MobileMessaging.getInstance(preference.getContext()).reportUnreportedRegistration();
-            }else{
+            } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
+                MobileMessaging.getInstance(preference.getContext()).reportUnreportedMessageIds();
+            } else {
                 ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());
                 clipboard.setPrimaryClip(clip);

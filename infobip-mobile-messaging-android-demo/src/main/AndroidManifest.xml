@@ -50,7 +50,7 @@
                 android:parentActivityName=".MainActivity">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
-                    android:value="org.infobip.mobile.messaging.demo.MainActivity"/>
+                    android:value=".MainActivity"/>
         </activity>
 
         <meta-data

@@ -2,12 +2,10 @@ import java.text.SimpleDateFormat
 
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
         classpath 'com.google.gms:google-services:2.1.0-alpha3'
         classpath 'io.fabric.tools:gradle:1.+'
     }
@@ -16,7 +14,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 repositories {
-    mavenLocal()
     jcenter()
     maven { url 'https://maven.fabric.io/public' }
 }

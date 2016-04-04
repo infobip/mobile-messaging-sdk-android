@@ -9,7 +9,7 @@
     <!-- General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_infobip_registration_id">Infobip registration ID</string>
+    <string name="pref_title_infobip_registration_id">Device application instance ID</string>
     <string name="pref_default_infobip_registration_id">N/A</string>
 
     <string name="pref_title_application_code">Application code</string>
