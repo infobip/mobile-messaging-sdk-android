@@ -1,5 +1,9 @@
 <resources>
+    <string name="app_name">Mobile Messaging Demo</string>
+
     <string name="erase_inbox">Erase inbox</string>
+    <string name="message_count_default">0</string>
+
     <string name="total_received">Total Received:</string>
     <string name="title_activity_inspect">Inspect</string>
 

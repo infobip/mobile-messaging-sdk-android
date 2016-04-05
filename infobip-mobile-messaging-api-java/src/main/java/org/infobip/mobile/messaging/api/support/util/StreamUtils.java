@@ -1,6 +1,9 @@
 package org.infobip.mobile.messaging.api.support.util;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author mstipanov
@@ -37,5 +40,17 @@ public abstract class StreamUtils {
     private static long write(byte[] bytes, OutputStream outputStream) throws IOException {
         outputStream.write(bytes);
         return bytes.length;
+    }
+
+    public static void closeSafely(OutputStream outputStream) {
+        if (null == outputStream) {
+            return;
+        }
+
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+            //ignore
+        }
     }
 }

@@ -14,7 +14,7 @@
     <uses-permission android:name=".permission.C2D_MESSAGE"/>
 
     <application
-            android:allowBackup="true"
+            android:allowBackup="false"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:supportsRtl="true"
@@ -28,16 +28,9 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:exported="true"
-                  android:name="org.infobip.mobile.messaging.demo.ApiExceptionReceiver">
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.infobip.API_COMMUNICATION_ERROR"/>
-            </intent-filter>
-        </receiver>
-
         <service
                 android:name="org.infobip.mobile.messaging.gcm.RegistrationIntentService"
-                android:exported="true">
+                android:exported="false">
         </service>
 
         <activity
@@ -46,6 +39,7 @@
                 android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
@@ -53,16 +47,10 @@
 
         <activity
                 android:name=".InspectActivity"
-                android:label="@string/title_activity_inspect"
-                android:parentActivityName=".MainActivity">
+                android:label="@string/title_activity_inspect">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".MainActivity"/>
         </activity>
-
-        <meta-data
-                android:name="io.fabric.ApiKey"
-                android:value="49d13685e8fd8b049bbbc76d82a2b3703eaee734"
-        />
     </application>
 </manifest>

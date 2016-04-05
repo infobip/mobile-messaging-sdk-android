@@ -99,9 +99,13 @@ public class DefaultApiClient implements ApiClient {
                 byte[] bytes = JSON_SERIALIZER.serialize(body).getBytes("UTF-8");
                 urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
                 urlConnection.setRequestProperty("Content-Type", "application/json");
-                try (OutputStream outputStream = new BufferedOutputStream(urlConnection.getOutputStream())) {
+                OutputStream outputStream = null;
+                try {
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
                     outputStream.write(bytes);
                     outputStream.flush();
+                } finally {
+                    StreamUtils.closeSafely(outputStream);
                 }
             }
 

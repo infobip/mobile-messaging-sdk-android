@@ -1,29 +1,12 @@
-import java.text.SimpleDateFormat
-
 buildscript {
     repositories {
         jcenter()
-        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.google.gms:google-services:2.1.0-alpha3'
-        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
-
-repositories {
-    jcenter()
-    maven { url 'https://maven.fabric.io/public' }
-}
-
-def getStarDate() {
-    def days = new SimpleDateFormat("yyyyMMdd").format(new Date()).toInteger() - 20150630
-    def hours = new SimpleDateFormat("HH").format(new Date())
-    def minutes = new SimpleDateFormat("mm").format(new Date())
-    return ("" + days + hours + minutes).toInteger()
-}
 
 android {
     compileSdkVersion 23
@@ -32,11 +15,13 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
+        versionCode 1
+        versionName version
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_7
-        targetCompatibility = JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 
 
@@ -51,52 +36,28 @@ android {
 
     buildTypes {
         debug {
-            // Disable fabric build ID generation for debug builds
-            ext.enableCrashlytics = false
+            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
+            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
         }
         release {
+            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
+            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            ext.betaDistributionGroupAliases="android-testers"
         }
     }
 
     lintOptions {
         abortOnError false
     }
-
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            output.outputFile = new File(
-                    output.outputFile.parent,
-                    output.outputFile.name.replace("release", (variant.versionName.contains("SNAPSHOT") ? "dev" : "release") + "-${variant.versionName}")
-            )
-        }
-    }
-
-    productFlavors {
-        prod {
-            applicationId "org.infobip.mobile.messaging.demo"
-            versionCode getStarDate()
-            versionName version
-        }
-
-        io {
-            applicationId "org.infobip.mobile.messaging.demo.io"
-            versionCode getStarDate()
-            versionName version
-        }
-    }
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile('com.crashlytics.sdk.android:crashlytics:2.+@aar') {
-        transitive = true;
-    }
-    compile(project(':infobip-mobile-messaging-api-java'))
     compile project(':infobip-mobile-messaging-android-sdk')
+    compile project(':infobip-mobile-messaging-api-java')
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'

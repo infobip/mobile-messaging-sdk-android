@@ -30,7 +30,7 @@
                 android:id="@+id/eraseInboxButton" android:layout_gravity="center_vertical|right" android:layout_row="0"
                 android:layout_column="2" android:onClick="onEraseInboxClick" android:nestedScrollingEnabled="false"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:textAppearance="?android:attr/textAppearanceLarge" android:text="0"
+                  android:textAppearance="?android:attr/textAppearanceLarge" android:text="@string/message_count_default"
                   android:id="@+id/totalReceivedTextView" android:layout_gravity="left|center_vertical" android:layout_row="0"
                   android:layout_column="1" android:layout_marginLeft="5dp"/>
     </GridLayout>

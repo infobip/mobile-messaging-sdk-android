@@ -15,9 +15,6 @@ import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
-import io.fabric.sdk.android.Fabric;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -41,13 +38,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Crashlytics crashlyticsKit = new Crashlytics.Builder()
-                .core(new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build())
-                .build();
-
-        // Initialize Fabric with the debug-disabled crashlytics.
-        Fabric.with(this, crashlyticsKit);
 
         new MobileMessaging.Builder(this)
                 .withCallbackActivity(MainActivity.class)
