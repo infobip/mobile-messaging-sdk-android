@@ -23,7 +23,7 @@ public class RegistrationIntentService extends IntentService {
     private static final String[] TOPICS = {"global"};
 
     public RegistrationIntentService() {
-        super(TAG);
+        super(TAG + "-" + RegistrationIntentService.class.getSimpleName());
     }
 
     @Override
@@ -32,6 +32,7 @@ public class RegistrationIntentService extends IntentService {
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(MobileMessaging.getInstance(this).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
+            this.sendBroadcast(registrationComplete);
             LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
             sendRegistrationToServer(token);
             subscribeTopics(token);

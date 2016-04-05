@@ -308,8 +308,7 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID));
             bindBooleanPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID_SAVED));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_SENDER_ID));
-            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.CREATE_REGISTRATION_ERROR)));
-            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.UPDATE_REGISTRATION_ERROR)));
+            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.LAST_HTTP_EXCEPTION));
         }

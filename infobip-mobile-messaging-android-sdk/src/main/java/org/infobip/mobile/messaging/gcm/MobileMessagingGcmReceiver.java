@@ -5,8 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -14,7 +12,6 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmReceiver;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -52,6 +49,7 @@ public class MobileMessagingGcmReceiver extends GcmReceiver {
 
         Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
         messageReceived.putExtras(message.getBundle());
+        context.sendBroadcast(messageReceived);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
     }
 
@@ -110,7 +108,7 @@ public class MobileMessagingGcmReceiver extends GcmReceiver {
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : mobileMessaging.getDefaultTitle();
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(true)

@@ -28,6 +28,13 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:exported="true"
+                  android:name="org.infobip.mobile.messaging.demo.ApiExceptionReceiver">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.infobip.API_COMMUNICATION_ERROR"/>
+            </intent-filter>
+        </receiver>
+
         <service
                 android:name="org.infobip.mobile.messaging.gcm.RegistrationIntentService"
                 android:exported="true">

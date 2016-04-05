@@ -19,6 +19,7 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
 import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
+import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONArray;
@@ -176,25 +177,7 @@ public class MobileMessaging implements Configuration {
     }
 
     public void setLastHttpException(Exception lastHttpException) {
-        String s = null;
-        if (null != lastHttpException) {
-            PrintWriter writer = null;
-            try {
-                StringWriter sw = new StringWriter();
-                writer = new PrintWriter(sw);
-                lastHttpException.printStackTrace(writer);
-                s = sw.toString();
-            } finally {
-                if (null != writer) {
-                    try {
-                        writer.close();
-                    } catch (Exception e) {
-                        //ignore
-                    }
-                }
-            }
-        }
-        saveString(LAST_HTTP_EXCEPTION, s);
+        saveString(LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
     }
 
     public long[] getVibrate() {
@@ -364,9 +347,10 @@ public class MobileMessaging implements Configuration {
             protected void onPostExecute(RegistrationResponse registrationResponse) {
                 if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
                     Log.e(TAG, "MobileMessaging API didn't return any value!");
-                    getStats().reportError(MobileMessagingError.CREATE_REGISTRATION_ERROR);
+                    getStats().reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
                 }
@@ -374,6 +358,7 @@ public class MobileMessaging implements Configuration {
                 setRegistrationIdSaved(true);
 
                 Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
+                context.sendBroadcast(registrationCreated);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
             }
 
@@ -382,9 +367,7 @@ public class MobileMessaging implements Configuration {
                 Log.e(TAG, "Error creating registration!");
                 setRegistrationIdSaved(false);
 
-                getStats().reportError(MobileMessagingError.CREATE_REGISTRATION_ERROR);
-                Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                getStats().reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
             }
         }.execute();
     }
@@ -408,6 +391,7 @@ public class MobileMessaging implements Configuration {
 
                     getStats().reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
                 }
@@ -416,6 +400,7 @@ public class MobileMessaging implements Configuration {
                 Bundle extras = new Bundle();
                 extras.putStringArray("messageIDs", result.getMessageIDs());
                 messageReceived.putExtras(extras);
+                context.sendBroadcast(messageReceived);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
             }
 
@@ -423,8 +408,6 @@ public class MobileMessaging implements Configuration {
             protected void onCancelled() {
                 getStats().reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
                 Log.e(TAG, "Error reporting delivery!");
-                Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
             }
         }.execute();
     }
