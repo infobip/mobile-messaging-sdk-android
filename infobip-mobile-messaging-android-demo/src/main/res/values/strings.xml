@@ -24,8 +24,7 @@
     <string name="pref_title_gcm_sender_id">GCM sender ID</string>
     <string name="pref_default_gcm_sender_id">N/A</string>
 
-    <string name="pref_title_create_registration_error">Create registration errors</string>
-    <string name="pref_title_update_registration_error">Update registration error</string>
+    <string name="pref_title_registration_sync_error">Registration sync errors</string>
     <string name="pref_title_delivery_reporting_error">Delivery reporting errors</string>
     <string name="pref_title_last_http_error">Last HTTP error</string>
     <!-- /General settings -->
