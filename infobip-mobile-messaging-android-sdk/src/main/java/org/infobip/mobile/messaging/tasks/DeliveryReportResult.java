@@ -5,16 +5,10 @@ package org.infobip.mobile.messaging.tasks;
  * @since 24.03.2016.
  */
 public class DeliveryReportResult {
-    private final DeliveryReportResponse deliveryReportResponse;
     private final String[] messageIDs;
 
-    public DeliveryReportResult(DeliveryReportResponse deliveryReportResponse, String[] messageIDs) {
-        this.deliveryReportResponse = deliveryReportResponse;
+    public DeliveryReportResult(String[] messageIDs) {
         this.messageIDs = messageIDs;
-    }
-
-    public DeliveryReportResponse getDeliveryReportResponse() {
-        return deliveryReportResponse;
     }
 
     public String[] getMessageIDs() {

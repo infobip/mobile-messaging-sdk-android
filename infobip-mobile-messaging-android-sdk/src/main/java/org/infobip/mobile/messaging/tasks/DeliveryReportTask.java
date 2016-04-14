@@ -27,9 +27,9 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
         MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
         try {
             String[] messageIDs = mobileMessaging.getUnreportedMessageIds();
-            DeliveryReportResponse report = MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(messageIDs);
+            MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(messageIDs);
             mobileMessaging.removeUnreportedMessageIds(messageIDs);
-            return new DeliveryReportResult(report, messageIDs);
+            return new DeliveryReportResult(messageIDs);
         } catch (Exception e) {
             mobileMessaging.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error reporting delivery!", e);
