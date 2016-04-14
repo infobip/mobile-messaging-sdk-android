@@ -121,7 +121,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
 
 ###Message received
 
-Library generates intents on the following events as described in [Event](src/main/java/org/infobip/mobile/messaging/Event.java):
+Library generates intents on the following events as described in [Event](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java):
 
 * __Message received__ - is triggered when message is received.
 * __Registration acquired__ - is triggered when GCM registration token is received.
