@@ -5,6 +5,8 @@ import android.os.Build;
 import android.os.Bundle;
 
 /**
+ * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
+ *
  * @author mstipanov
  * @since 25.03.2016.
  */

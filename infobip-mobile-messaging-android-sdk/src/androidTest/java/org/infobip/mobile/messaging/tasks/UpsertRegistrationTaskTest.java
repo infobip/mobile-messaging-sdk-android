@@ -3,11 +3,9 @@ package org.infobip.mobile.messaging.tasks;
 import junit.framework.TestCase;
 import org.infobip.mobile.messaging.api.support.http.client.ApiClient;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.*;
-
 /**
+ * TODO implement this test!
+ *
  * @author mstipanov
  * @since 03.03.2016.
  */
@@ -20,7 +18,6 @@ public class UpsertRegistrationTaskTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
 //        apiClient = mock(ApiClient.class);
 //        Configuration configuration = mock(Configuration.class);
 //        when(configuration.getApiUri()).thenReturn(API_URL);

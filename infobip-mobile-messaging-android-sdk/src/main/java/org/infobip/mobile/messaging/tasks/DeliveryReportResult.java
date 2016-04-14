@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.tasks;
 
-import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReportResponse;
-
 /**
  * @author mstipanov
  * @since 24.03.2016.

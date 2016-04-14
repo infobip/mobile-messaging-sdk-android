@@ -5,6 +5,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author mstipanov
  * @since 18.03.2016.
@@ -22,9 +24,10 @@ public class GeneratorTest {
     public void tearDown() throws Exception {
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void build_noBaseUrl_shouldThrow() throws Exception {
-        new Generator.Builder().build();
+    @Test
+    public void build_noBaseUrl_default() throws Exception {
+        Generator build = new Generator.Builder().build();
+        assertEquals("https://oneapi.infobip.com/", build.getBaseUrl());
     }
 
     @Test(expected = NullPointerException.class)

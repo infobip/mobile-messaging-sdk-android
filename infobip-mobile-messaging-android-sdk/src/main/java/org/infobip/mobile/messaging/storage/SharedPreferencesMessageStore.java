@@ -11,6 +11,20 @@ import org.infobip.mobile.messaging.Message;
 import java.util.*;
 
 /**
+ * Stores messages in shared preferences.
+ * <pre>
+ * {@code
+ * public class MyActivity extends AppCompatActivity {
+ *        protected void onCreate(Bundle savedInstanceState) {
+ *            super.onCreate(savedInstanceState);
+ *
+ *            new MobileMessaging.Builder(this)
+ *                .withMessageStore(SharedPreferencesMessageStore.class);
+ *                .build();
+ *        }
+ *    }}
+ * </pre>
+ *
  * @author mstipanov
  * @since 29.03.2016.
  */
@@ -45,7 +59,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
         return unreportedMessageIdSet.size();
     }
 
-    public List<Message> link(final Context context) {
+    public List<Message> bind(final Context context) {
         return new AbstractList<Message>() {
             @Override
             public Message get(int location) {

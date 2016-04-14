@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,12 +19,12 @@ import android.widget.Toast;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 public class MainActivity extends AppCompatActivity {
     private boolean isReceiverRegistered;
     private TextView totalReceivedTextView;
-    private ExpandableListView messagesListView;
     private ExpandableListAdapter listAdapter;
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
@@ -40,15 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         new MobileMessaging.Builder(this)
-                .withCallbackActivity(MainActivity.class)
-                .withApplicationCode(getResources().getString(R.string.infobip_application_code))
-                .withGcmSenderId(getResources().getString(R.string.google_app_id))
-                .withDefaultIcon(R.mipmap.ic_launcher)
-//                .withDisplayNotification()
-//                .withoutDisplayNotification()
-//                .withApiUri("http://10.116.52.238:18080")
                 .withMessageStore(SharedPreferencesMessageStore.class)
-//                .withoutMessageStore()
                 .build();
 
         setContentView(R.layout.activity_main);
@@ -56,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         totalReceivedTextView = (TextView) findViewById(R.id.totalReceivedTextView);
-        messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
+
+        ExpandableListView messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
+        assert messagesListView != null;
         listAdapter = new ExpandableListAdapter(this);
         messagesListView.setAdapter(listAdapter);
 
@@ -84,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void clearNotifications() {
-        NotificationManager notifManager= (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notifManager.cancelAll();
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
     }
 
     @Override

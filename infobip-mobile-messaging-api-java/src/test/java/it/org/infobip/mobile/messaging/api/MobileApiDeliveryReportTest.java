@@ -1,10 +1,8 @@
 package it.org.infobip.mobile.messaging.api;
 
 import fi.iki.elonen.NanoHTTPD;
-import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReportResponse;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.support.Generator;
-import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
 import org.junit.After;
 import org.junit.Before;
@@ -50,9 +48,9 @@ public class MobileApiDeliveryReportTest {
 
     @Test
     public void create_success() throws Exception {
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new DeliveryReportResponse("11")));
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        DeliveryReportResponse response = mobileApiDeliveryReport.report("1", "2", "3");
+        mobileApiDeliveryReport.report("1", "2", "3");
 
         //inspect http context
         assertThat(debugServer.getUri()).isEqualTo("/mobile/1/deliveryreports");

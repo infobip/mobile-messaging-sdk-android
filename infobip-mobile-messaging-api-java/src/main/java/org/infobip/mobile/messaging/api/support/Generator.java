@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NonNull;
 import org.infobip.mobile.messaging.api.support.http.*;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
+import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
 
 import java.io.IOException;
@@ -21,13 +22,19 @@ import java.util.jar.Manifest;
 import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.loadPackageInfo;
 
 /**
+ * Generates Mobile API proxies.
+ * <pre>{@code
+ * MobileApiRegistration mobileApiRegistration = new Generator.Builder().build().create(MobileApiRegistration.class);
+ * }</pre>
+ *
  * @author mstipanov
+ * @see Builder
  * @since 17.03.2016.
  */
 @Data
 public class Generator {
     private DefaultApiClient apiClient;
-    private String baseUrl;
+    private String baseUrl = "https://oneapi.infobip.com/";
     private ConcurrentHashMap<Class<?>, CachingInvocationHandler> proxyCacheMap = new ConcurrentHashMap<>();
     private Properties properties = System.getProperties();
     private int connectTimeout = DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
@@ -167,6 +174,16 @@ public class Generator {
         return Collections.singleton(arg);
     }
 
+    /**
+     * Builds {@link Generator}
+     *
+     * @see Generator
+     * @see Builder#withBaseUrl(String)
+     * @see Builder#withProperties(Properties)
+     * @see Builder#withConnectTimeout(int)
+     * @see Builder#withReadTimeout(int)
+     * @see Builder#withUserAgentAdditions(String...)
+     */
     public static class Builder {
         private final Generator generator;
 
@@ -174,26 +191,60 @@ public class Generator {
             generator = new Generator();
         }
 
+        /**
+         * It will set the base API URL. By default it will be <a href="https://oneapi.infobip.com/">https://oneapi.infobip.com/</a>
+         *
+         * @return {@link Builder}
+         */
         public Builder withBaseUrl(@NonNull String baseUrl) {
             generator.setBaseUrl(baseUrl);
             return this;
         }
 
+        /**
+         * It will set the base properties from which User-Agent header will be constructed.
+         * <p>
+         * Used properties:
+         * <ul>
+         * <li><i>os.name</i> - for OS name</li>
+         * <li><i>os.version</i> - for OS version</li>
+         * <li><i>os.arch</i> - for OS architecture</li>
+         * <li><i>api.key</i> - for Mobile API API-KEY. You must use application code as the API-KEY!</li>
+         * <li><i>platform.type</i> - for identifying the cloud type (GCM, ?)</li>
+         * </ul>
+         *
+         * @return {@link Builder}
+         */
         public Builder withProperties(@NonNull Properties properties) {
             generator.setProperties(properties);
             return this;
         }
 
+        /**
+         * It will set the connect timeout. Default is: 5s
+         *
+         * @return {@link Builder}
+         */
         public Builder withConnectTimeout(int connectTimeout) {
             generator.setConnectTimeout(connectTimeout);
             return this;
         }
 
+        /**
+         * It will set the read timeout. Default is: 1min
+         *
+         * @return {@link Builder}
+         */
         public Builder withReadTimeout(int readTimeout) {
             generator.setReadTimeout(readTimeout);
             return this;
         }
 
+        /**
+         * It will custom string array to append to User-Agent header.
+         *
+         * @return {@link Builder}
+         */
         public Builder withUserAgentAdditions(@NonNull String... userAgentAdditions) {
             generator.setUserAgentAdditions(userAgentAdditions);
             return this;
@@ -221,7 +272,7 @@ public class Generator {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             ProxyCache proxyCache = getProxyCache(method);
-            HttpRequest httpRequest = proxyCache.getHttpRequest();
+//            HttpRequest httpRequest = proxyCache.getHttpRequest();
             String uri = proxyCache.getUri();
 
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
@@ -260,7 +311,15 @@ public class Generator {
                 }
             }
 
-            return getApiClient().execute(httpRequest.method(), uri, apiKey, queryParams, headerMap, body, method.getReturnType());
+            return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, queryParams, headerMap, body, method.getReturnType());
+        }
+
+        private HttpMethod getHttpRequestMethod(HttpRequest[] httpRequests) {
+            HttpMethod method = HttpMethod.GET;
+            for (HttpRequest httpRequest : httpRequests) {
+                method = httpRequest.method();
+            }
+            return method;
         }
 
         private ProxyCache getProxyCache(Method method) {
@@ -286,7 +345,7 @@ public class Generator {
 
     @Data
     private class ProxyCache {
-        private final HttpRequest httpRequest;
+        private final HttpRequest[] httpRequests;
         private final String uri;
         private final HashMap<String, Collection<Object>> defaultQueryParams;
         private final HashMap<String, Collection<Object>> defaultHeaderMap;
@@ -294,7 +353,7 @@ public class Generator {
         private final String apiKey;
 
         public ProxyCache(Method method) {
-            this.httpRequest = createHttpRequest(method);
+            this.httpRequests = createHttpRequest(method);
             this.uri = createUri(method);
             this.defaultQueryParams = createDefaultQueryParams(method);
             this.defaultHeaderMap = createDefaultHeaderMap(method);
@@ -327,16 +386,23 @@ public class Generator {
             return parameters;
         }
 
-        private HttpRequest createHttpRequest(Method method) {
+        private HttpRequest[] createHttpRequest(Method method) {
+            HttpRequest httpRequestOnClass = method.getDeclaringClass().getAnnotation(HttpRequest.class);
             HttpRequest httpRequest = method.getAnnotation(HttpRequest.class);
-            if (null == httpRequest) {
-                throw new NoHttpRequestAnnotation("Method '" + method.getName() + "' must be annotated with @HttpRequest!");
+            if (null != httpRequest && null != httpRequestOnClass) {
+                return new HttpRequest[]{httpRequestOnClass, httpRequest};
             }
-            return httpRequest;
+            if (null != httpRequest) {
+                return new HttpRequest[]{httpRequest};
+            }
+            if (null != httpRequestOnClass) {
+                return new HttpRequest[]{httpRequestOnClass};
+            }
+            throw new NoHttpRequestAnnotation("Method '" + method.getName() + "' must be annotated with @HttpRequest!");
         }
 
         private String createUri(Method method) {
-            String uri = StringUtils.join("/", baseUrl, httpRequest.value());
+            String uri = StringUtils.join("/", baseUrl, getHttpRequestValue());
             Version version = getVersionAnnotation(method);
             if (null != version) {
                 uri = uri.replace("{version}", injectProperty(version.value()));
@@ -351,6 +417,14 @@ public class Generator {
                 for (Path p : paths.value()) {
                     uri = uri.replace("{" + p.name() + "}", injectProperty(p.value()));
                 }
+            }
+            return uri;
+        }
+
+        private String getHttpRequestValue() {
+            String uri = "";
+            for (HttpRequest httpRequest : httpRequests) {
+                uri = StringUtils.join("/", uri, httpRequest.value());
             }
             return uri;
         }

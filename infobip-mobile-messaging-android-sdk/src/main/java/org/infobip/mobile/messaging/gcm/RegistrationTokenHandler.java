@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.gcm;
 
-import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -17,25 +17,21 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author mstipanov
- * @since 21.03.2016.
+ * @since 14.04.2016.
  */
-public class RegistrationIntentService extends IntentService {
+class RegistrationTokenHandler {
     private static final String[] TOPICS = {"global"};
 
-    public RegistrationIntentService() {
-        super(TAG + "-" + RegistrationIntentService.class.getSimpleName());
-    }
-
-    @Override
-    public void onHandleIntent(Intent intent) {
+    void handleRegustrationTokenUpdate(Context context) {
         try {
-            InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken(MobileMessaging.getInstance(this).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            InstanceID instanceID = InstanceID.getInstance(context);
+            String token = instanceID.getToken(MobileMessaging.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
-            this.sendBroadcast(registrationComplete);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
-            sendRegistrationToServer(token);
-            subscribeTopics(token);
+            registrationComplete.putExtra("registrationId", token);
+            context.sendBroadcast(registrationComplete);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationComplete);
+            sendRegistrationToServer(context, token);
+            subscribeTopics(context, token);
         } catch (IOException e) {
             Log.e(TAG, "Failed to complete token refresh", e);
         }
@@ -49,12 +45,12 @@ public class RegistrationIntentService extends IntentService {
      *
      * @param token The new token.
      */
-    private void sendRegistrationToServer(String token) {
+    private void sendRegistrationToServer(Context context, String token) {
         if (StringUtils.isBlank(token)) {
             return;
         }
 
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(this);
+        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
         String infobipRegistrationId = mobileMessaging.getDeviceApplicationInstanceId();
 
         boolean saveNeeded = null == infobipRegistrationId ||
@@ -68,7 +64,7 @@ public class RegistrationIntentService extends IntentService {
 
         mobileMessaging.setRegistrationId(token);
         mobileMessaging.setRegistrationIdSaved(false);
-        mobileMessaging.reportRegistration();
+        mobileMessaging.reportUnreportedRegistration();
     }
 
     /**
@@ -78,8 +74,8 @@ public class RegistrationIntentService extends IntentService {
      * @throws IOException if unable to reach the GCM PubSub service
      */
     // [START subscribe_topics]
-    private void subscribeTopics(String token) throws IOException {
-        GcmPubSub pubSub = GcmPubSub.getInstance(this);
+    private void subscribeTopics(Context context, String token) throws IOException {
+        GcmPubSub pubSub = GcmPubSub.getInstance(context);
         for (String topic : TOPICS) {
             pubSub.subscribe(token, "/topics/" + topic, null);
         }

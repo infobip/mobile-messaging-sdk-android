@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 
@@ -303,14 +304,14 @@ public class InspectActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.INFOBIP_REGISTRATION_ID));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.APPLICATION_CODE));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID));
-            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_REGISTRATION_ID_SAVED));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.GCM_SENDER_ID));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.INFOBIP_REGISTRATION_ID.getKey()));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.APPLICATION_CODE.getKey()));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID.getKey()));
+            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey()));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_SENDER_ID.getKey()));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessaging.LAST_HTTP_EXCEPTION));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.LAST_HTTP_EXCEPTION.getKey()));
         }
 
         @Override
@@ -321,7 +322,7 @@ public class InspectActivity extends PreferenceActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
-            if (preference.getKey().equals(MobileMessaging.GCM_REGISTRATION_ID_SAVED)) {
+            if (preference.getKey().equals(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey())) {
                 MobileMessaging.getInstance(preference.getContext()).reportUnreportedRegistration();
             } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
                 MobileMessaging.getInstance(preference.getContext()).reportUnreportedMessageIds();

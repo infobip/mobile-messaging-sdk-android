@@ -8,18 +8,20 @@
             android:id="@+id/lblListItem"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="17dip"
+            android:textSize="17sp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+            android:paddingRight="?android:attr/expandableListPreferredChildPaddingLeft" />
 
     <TextView
             android:id="@+id/lblListItem2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textSize="17dip"
+            android:textSize="17sp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft" />
+            android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+            android:paddingRight="?android:attr/expandableListPreferredChildPaddingLeft" />
 
 </LinearLayout>

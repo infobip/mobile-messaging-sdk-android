@@ -9,7 +9,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReportResponse;
 
 /**
  * @author mstipanov

@@ -14,23 +14,23 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter {
+class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<Message> messages; // header titles
 
-    public ExpandableListAdapter(Context context) {
+    ExpandableListAdapter(Context context) {
         this.context = context;
         MessageStore messageStore = MobileMessaging.getInstance(context).getMessageStore();
         if (null != messageStore) {
-            this.messages = messageStore.link(context);
+            this.messages = messageStore.bind(context);
         } else {
             this.messages = new ArrayList<>();
         }
     }
 
     @Override
-    public Object getChild(int groupPosition, int childPosititon) {
+    public Object getChild(int groupPosition, int childPosition) {
         return this.messages.get(groupPosition).getBody();
     }
 

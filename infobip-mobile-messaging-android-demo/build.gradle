@@ -24,7 +24,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
-
     signingConfigs {
         release {
             storeFile file("${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}")
