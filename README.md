@@ -30,8 +30,8 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     ```groovy
     dependencies {
         ...
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.9.2@aar'
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.9.2'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.9.3@aar'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.9.3'
         compile 'com.google.android.gms:play-services:8.4.0'
     }
     ```

@@ -16,6 +16,8 @@ import java.util.Set;
  * @since 07.04.2016.
  */
 public abstract class PreferenceHelper {
+    private static final Object LOCK = new Object();
+
     private PreferenceHelper() {
     }
 
@@ -154,12 +156,14 @@ public abstract class PreferenceHelper {
     }
 
     public static String[] findStringArray(Context context, String key, String[] defaultValue) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> value = sharedPreferences.getStringSet(key, null);
-        if (null == value) {
-            return defaultValue;
+        synchronized (LOCK) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            Set<String> value = sharedPreferences.getStringSet(key, null);
+            if (null == value) {
+                return defaultValue;
+            }
+            return value.toArray(new String[value.size()]);
         }
-        return value.toArray(new String[value.size()]);
     }
 
     public static void appendToStringArray(Context context, MobileMessagingProperty property, String... strings) {
@@ -190,15 +194,17 @@ public abstract class PreferenceHelper {
         editSet(context, key, mutator);
     }
 
-    private static synchronized void editSet(Context context, String key, SetMutator mutator) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final Set<String> set = sharedPreferences.getStringSet(key, new HashSet<String>());
-        mutator.mutate(set);
-        if (set.isEmpty()) {
-            sharedPreferences.edit().remove(key).apply();
-            return;
+    private static void editSet(Context context, String key, SetMutator mutator) {
+        synchronized (LOCK) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            final Set<String> set = sharedPreferences.getStringSet(key, new HashSet<String>());
+            mutator.mutate(set);
+            if (set.isEmpty()) {
+                sharedPreferences.edit().remove(key).apply();
+                return;
+            }
+            sharedPreferences.edit().putStringSet(key, set).apply();
         }
-        sharedPreferences.edit().putStringSet(key, set).apply();
     }
 
     private static abstract class SetMutator {
