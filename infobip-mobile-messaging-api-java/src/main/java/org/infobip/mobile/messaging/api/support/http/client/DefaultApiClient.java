@@ -130,6 +130,10 @@ public class DefaultApiClient implements ApiClient {
                 return null;
             }
 
+            if (Void.class.equals(responseType) || void.class.equals(responseType)) {
+                return null;
+            }
+
             InputStream inputStream = urlConnection.getInputStream();
             String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
             return JSON_SERIALIZER.deserialize(s, responseType);
