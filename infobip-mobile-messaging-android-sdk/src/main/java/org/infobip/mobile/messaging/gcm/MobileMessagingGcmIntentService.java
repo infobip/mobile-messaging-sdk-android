@@ -169,6 +169,6 @@ public class MobileMessagingGcmIntentService extends IntentService {
             return;
         }
 
-        registrationTokenHandler.handleRegustrationTokenUpdate(this);
+        registrationTokenHandler.handleRegistrationTokenUpdate(this);
     }
 }

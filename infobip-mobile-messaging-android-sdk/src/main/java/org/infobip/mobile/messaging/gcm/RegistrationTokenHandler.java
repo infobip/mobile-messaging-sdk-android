@@ -22,7 +22,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 class RegistrationTokenHandler {
     private static final String[] TOPICS = {"global"};
 
-    void handleRegustrationTokenUpdate(Context context) {
+    void handleRegistrationTokenUpdate(Context context) {
         try {
             InstanceID instanceID = InstanceID.getInstance(context);
             String token = instanceID.getToken(MobileMessaging.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);

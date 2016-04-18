@@ -125,7 +125,7 @@ public class MobileMessaging {
     }
 
     private void setMessageStoreClass(Class<? extends MessageStore> messageStoreClass) {
-        String value = null != messageStoreClass.getName() ? messageStoreClass.getName() : null;
+        String value = null != messageStoreClass ? messageStoreClass.getName() : null;
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, value);
     }
 

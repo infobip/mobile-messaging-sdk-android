@@ -12,20 +12,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
 
     * You can find more info on this link http://developer.android.com/training/basics/firstapp/creating-project.html
     
-2. Add Infobip maven repo to the root build.gradle file
-
-    ```groovy
-    allprojects {
-        repositories {
-            ...
-            maven {
-                url  "http://dl.bintray.com/infobipmobile/maven"
-            }
-        }
-    }
-    ```
-
-3. Add dependencies to app/build.gradle
+2. Add dependencies to app/build.gradle
 
     ```groovy
     dependencies {
@@ -36,7 +23,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     }
     ```
 
-4. Add permissions and services to AndroidManifest.xml
+3. Add permissions and services to AndroidManifest.xml
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -77,7 +64,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     </manifest>
     ```
 
-5. Add GCM Sender ID and Infobip Application Code to values/strings.xml resource file
+4. Add GCM Sender ID and Infobip Application Code to values/strings.xml resource file
     ```groovy
     <resources>
         <string name="google_app_id">YOUR GCM SENDER</string>
@@ -86,10 +73,10 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     </resources>
     ```
     * You can generate the GCM Sender ID And Server API Key here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm
-    * You can generate the Application Code by creating the application here: https://portal.ioinfobip.com/push/applications
+    * You can generate the Application Code by creating the application here: https://portal.infobip.com/push/applications
     * You need to enter your Application Code when you create the application!
 
-6. Add code to MainActivity#onCreate
+5. Add code to MainActivity#onCreate
 
     ```java
     import android.os.Bundle;
