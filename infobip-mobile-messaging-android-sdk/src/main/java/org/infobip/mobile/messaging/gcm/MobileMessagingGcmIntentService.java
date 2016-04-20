@@ -35,7 +35,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * <pre>
  * {@code <receiver android:name=".MyMessageReceiver" android:exported="false">
  *       <intent-filter>
- *           <action android:name="org.infobip.mobile.messaging.gcm.MESSAGE_RECEIVED"/>
+ *           <action android:name="org.infobip.mobile.messaging.MESSAGE_RECEIVED"/>
  *        </intent-filter>
  *   </receiver>}
  * </pre>

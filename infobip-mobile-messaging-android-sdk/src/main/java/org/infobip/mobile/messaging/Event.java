@@ -10,7 +10,7 @@ import android.content.BroadcastReceiver;
  * <pre>
  * {@code <receiver android:name=".MyMessageReceiver" android:exported="false">
  *       <intent-filter>
- *           <action android:name="org.infobip.mobile.messaging.gcm.MESSAGE_RECEIVED"/>
+ *           <action android:name="org.infobip.mobile.messaging.MESSAGE_RECEIVED"/>
  *        </intent-filter>
  *   </receiver>}
  * </pre>
@@ -75,7 +75,7 @@ public enum Event {
      * }
      * </pre>
      */
-    REGISTRATION_ACQUIRED("org.infobip.mobile.messaging.gcm.REGISTRATION_ACQUIRED"),
+    REGISTRATION_ACQUIRED("org.infobip.mobile.messaging.REGISTRATION_ACQUIRED"),
 
     /**
      * It is triggered when GCM registration token successfully stored on the registration server.
@@ -89,7 +89,7 @@ public enum Event {
      * }
      * </pre>
      */
-    REGISTRATION_CREATED("org.infobip.mobile.messaging.gcm.REGISTRATION_CREATED"),
+    REGISTRATION_CREATED("org.infobip.mobile.messaging.REGISTRATION_CREATED"),
 
     /**
      * It is triggered when message is received.
@@ -103,7 +103,7 @@ public enum Event {
      *
      * @see Message
      */
-    MESSAGE_RECEIVED("org.infobip.mobile.messaging.gcm.MESSAGE_RECEIVED"),
+    MESSAGE_RECEIVED("org.infobip.mobile.messaging.MESSAGE_RECEIVED"),
 
     /**
      * It is triggered on every error returned by API.
@@ -115,7 +115,7 @@ public enum Event {
      * }
      * </pre>
      */
-    API_COMMUNICATION_ERROR("org.infobip.mobile.messaging.infobip.API_COMMUNICATION_ERROR"),
+    API_COMMUNICATION_ERROR("org.infobip.mobile.messaging.API_COMMUNICATION_ERROR"),
 
     /**
      * It is triggered when message delivery is reported.
@@ -127,7 +127,7 @@ public enum Event {
      * }
      * </pre>
      */
-    DELIVERY_REPORTS_SENT("org.infobip.mobile.messaging.infobip.DELIVERY_REPORTS_SENT");
+    DELIVERY_REPORTS_SENT("org.infobip.mobile.messaging.DELIVERY_REPORTS_SENT");
 
     private final String key;
 

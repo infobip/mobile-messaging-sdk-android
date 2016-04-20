@@ -17,9 +17,9 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     ```groovy
     dependencies {
         ...
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.9.5@aar'
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.9.5'
-        compile 'com.google.android.gms:play-services:8.4.0'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.9.6@aar'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.9.6'
+        compile 'com.google.android.gms:play-services-gcm:8.4.0'
     }
     ```
 
@@ -32,11 +32,9 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
      
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
-        <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-        <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-     
-        <permission android:name="<your-package-name>.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+
         <uses-permission android:name="<your-package-name>.permission.C2D_MESSAGE" />
+        <permission android:name="<your-package-name>.permission.C2D_MESSAGE" android:protectionLevel="signature" />
      
         <!-- Needed for push notifications that contain VIBRATE flag. Optional, but recommended. -->
         <uses-permission android:name="android.permission.VIBRATE" />
