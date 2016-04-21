@@ -26,5 +26,5 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 public interface MobileApiRegisterMsisdn {
 
     @HttpRequest(method = HttpMethod.POST, value = "msisdn")
-    void registerMsisdn(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId, @Query(name = "msisdn") String msisdn);
+    void registerMsisdn(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId, @Query(name = "msisdn") long msisdn);
 }

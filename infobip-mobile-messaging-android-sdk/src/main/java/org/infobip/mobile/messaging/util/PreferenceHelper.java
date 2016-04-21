@@ -43,6 +43,32 @@ public abstract class PreferenceHelper {
         sharedPreferences.edit().putString(key, value).apply();
     }
 
+    public static long findLong(Context context, MobileMessagingProperty property) {
+        Object defaultValue = property.getDefaultValue();
+        if (null == defaultValue) {
+            defaultValue = 0L;
+        }
+        return findLong(context, property.getKey(), (Long) defaultValue);
+    }
+
+    public static long findLong(Context context, String key, long defaultValue) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String string = sharedPreferences.getString(key, String.valueOf(defaultValue));
+        if (StringUtils.isBlank(string)) {
+            return 0;
+        }
+        return Long.parseLong(string);
+    }
+
+    public static void saveLong(Context context, MobileMessagingProperty property, long value) {
+        saveLong(context, property.getKey(), value);
+    }
+
+    public static void saveLong(Context context, String key, long value) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putString(key, String.valueOf(value)).apply();
+    }
+
     public static <T> Class<T> findClass(Context context, MobileMessagingProperty property) {
         return findClass(context, property.getKey(), (Class<T>) property.getDefaultValue());
     }

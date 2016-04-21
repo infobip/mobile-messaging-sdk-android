@@ -9,7 +9,6 @@ import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnResult;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnTask;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
@@ -19,7 +18,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 class MsisdnSynchronizer {
 
-    void syncronize(Context context, String deviceApplicationInstanceId, String msisdn, boolean msisdnSaved, MobileMessagingStats stats) {
+    void syncronize(Context context, String deviceApplicationInstanceId, long msisdn, boolean msisdnSaved, MobileMessagingStats stats) {
         if (null != deviceApplicationInstanceId && msisdnSaved) {
             return;
         }
@@ -27,8 +26,9 @@ class MsisdnSynchronizer {
         reportRegistration(context, msisdn, stats);
     }
 
-    private void reportRegistration(final Context context, final String msisdn, final MobileMessagingStats stats) {
-        if (StringUtils.isBlank(msisdn)) {
+    private void reportRegistration(final Context context, final long msisdn, final MobileMessagingStats stats) {
+        if (msisdn <= 0) {
+            MobileMessaging.getInstance(context).setMsisdnSaved(true);
             return;
         }
 

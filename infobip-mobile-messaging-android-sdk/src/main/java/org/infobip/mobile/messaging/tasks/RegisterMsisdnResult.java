@@ -5,13 +5,13 @@ package org.infobip.mobile.messaging.tasks;
  * @since 24.03.2016.
  */
 public class RegisterMsisdnResult {
-    private final String msisdn;
+    private final long msisdn;
 
-    public RegisterMsisdnResult(String msisdn) {
+    public RegisterMsisdnResult(long msisdn) {
         this.msisdn = msisdn;
     }
 
-    public String getMsisdn() {
+    public long getMsisdn() {
         return msisdn;
     }
 }

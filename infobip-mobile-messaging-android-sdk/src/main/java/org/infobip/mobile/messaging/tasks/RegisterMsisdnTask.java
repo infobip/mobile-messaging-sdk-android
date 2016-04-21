@@ -26,7 +26,7 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
     protected RegisterMsisdnResult doInBackground(Object... notUsed) {
         MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
         try {
-            String msisdn = mobileMessaging.getMsisdn();
+            long msisdn = mobileMessaging.getMsisdn();
             MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessaging.getDeviceApplicationInstanceId(), msisdn);
 
             return new RegisterMsisdnResult(msisdn);

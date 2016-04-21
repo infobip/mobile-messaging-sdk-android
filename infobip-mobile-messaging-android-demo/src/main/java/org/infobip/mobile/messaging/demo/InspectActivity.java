@@ -135,7 +135,7 @@ public class InspectActivity extends PreferenceActivity {
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
-                        .getLong(preference.getKey(), 0));
+                        .getLong(preference.getKey(), 0L));
     }
 
     private static void bindBooleanPreferenceSummaryToValue(Preference preference) {

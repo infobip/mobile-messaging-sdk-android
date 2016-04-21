@@ -68,16 +68,19 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         return instance;
     }
 
-    public String getMsisdn() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.MSISDN);
+    public long getMsisdn() {
+        return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN);
     }
 
-    public void setMsisdn(String msisdn) {
-        String oldMsisdn = getMsisdn();
-        if (null != oldMsisdn && oldMsisdn.equals(msisdn)) {
+    public void setMsisdn(long msisdn) {
+        if (msisdn < 0) {
+            throw new IllegalArgumentException("MSISDN can't be negative!");
+        }
+        long oldMsisdn = getMsisdn();
+        if (oldMsisdn != 0 && oldMsisdn == msisdn) {
             return;
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MSISDN, msisdn);
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN, msisdn);
     }
 
     public String getRegistrationId() {
