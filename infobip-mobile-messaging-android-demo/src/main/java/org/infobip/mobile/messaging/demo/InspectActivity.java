@@ -309,8 +309,11 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID.getKey()));
             bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey()));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_SENDER_ID.getKey()));
+            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.MSISDN.getKey()));
+            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.MSISDN_SAVED.getKey()));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
+            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.MSISDN_SYNC_ERROR)));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.LAST_HTTP_EXCEPTION.getKey()));
         }
 
@@ -322,10 +325,14 @@ public class InspectActivity extends PreferenceActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
+            MobileMessaging mobileMessaging = MobileMessaging.getInstance(preference.getContext());
             if (preference.getKey().equals(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey())) {
-                MobileMessaging.getInstance(preference.getContext()).reportUnreportedRegistration();
+                mobileMessaging.reportUnreportedRegistration();
             } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
-                MobileMessaging.getInstance(preference.getContext()).reportUnreportedMessageIds();
+                mobileMessaging.reportUnreportedMessageIds();
+            } else if (preference.getKey().equals(MobileMessagingProperty.MSISDN_SAVED.getKey())
+                    || preference.getKey().equals(MobileMessagingError.MSISDN_SYNC_ERROR)) {
+                mobileMessaging.syncMsisdn();
             } else {
                 ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());

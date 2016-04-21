@@ -127,7 +127,17 @@ public enum Event {
      * }
      * </pre>
      */
-    DELIVERY_REPORTS_SENT("org.infobip.mobile.messaging.DELIVERY_REPORTS_SENT");
+    DELIVERY_REPORTS_SENT("org.infobip.mobile.messaging.DELIVERY_REPORTS_SENT"),
+
+    /**
+     * It is triggered when MSISDN is successfully stored on the registration server.
+     * <pre>
+     * {@code
+     * String msisdn = intent.getStringExtra("msisdn");
+     * }
+     * </pre>
+     */
+    MSISDN_SYNCED("org.infobip.mobile.messaging.MSISDN_SYNCED");
 
     private final String key;
 

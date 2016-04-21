@@ -23,7 +23,7 @@
     <string name="pref_default_gcm_registration_id">N/A</string>
 
     <string name="pref_title_gcm_registration_id_saved">GCM registration ID saved</string>
-    <string name="pref_description_gcm_registration_id_saved">GCM registration ID are saved on Infobip server</string>
+    <string name="pref_description_gcm_registration_id_saved">GCM registration ID is saved on Infobip server</string>
 
     <string name="pref_title_gcm_sender_id">GCM sender ID</string>
     <string name="pref_default_gcm_sender_id">N/A</string>
@@ -31,6 +31,12 @@
     <string name="pref_title_registration_sync_error">Registration sync errors</string>
     <string name="pref_title_delivery_reporting_error">Delivery reporting errors</string>
     <string name="pref_title_last_http_error">Last HTTP error</string>
+
+    <string name="pref_title_msisdn">MSISDN</string>
+    <string name="pref_default_msisdn">N/A</string>
+    <string name="pref_description_msisdn_saved">MSISDN is saved on Infobip server</string>
+    <string name="pref_title_msisdn_saved">MSISDN saved</string>
+    <string name="pref_title_msisdn_sync_error">MSISDN sync errors</string>
     <!-- /General settings -->
 
     <!-- Settings for Notifications -->

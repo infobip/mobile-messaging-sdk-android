@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -39,13 +40,14 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @since 29.02.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class MobileMessaging {
+public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = "MobileMessaging";
 
     private static MobileMessaging instance;
     private final Context context;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
+    private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
     private final MobileMessagingStats stats;
     private MessageStore messageStore;
@@ -54,6 +56,7 @@ public class MobileMessaging {
     private MobileMessaging(Context context) {
         this.context = context;
         stats = new MobileMessagingStats(context);
+        PreferenceHelper.registerOnSharedPreferenceChangeListener(context, this);
     }
 
     public synchronized static MobileMessaging getInstance(Context context) {
@@ -63,6 +66,18 @@ public class MobileMessaging {
 
         instance = new MobileMessaging(context);
         return instance;
+    }
+
+    public String getMsisdn() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.MSISDN);
+    }
+
+    public void setMsisdn(String msisdn) {
+        String oldMsisdn = getMsisdn();
+        if (null != oldMsisdn && oldMsisdn.equals(msisdn)) {
+            return;
+        }
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MSISDN, msisdn);
     }
 
     public String getRegistrationId() {
@@ -171,12 +186,24 @@ public class MobileMessaging {
         registrationSynchronizer.setRegistrationIdSaved(context, registrationIdSaved);
     }
 
+    public boolean isMsisdnSaved() {
+        return msisdnSynchronizer.isMsisdnSaved(context);
+    }
+
+    public void setMsisdnSaved(boolean msisdnSaved) {
+        msisdnSynchronizer.setMsisdnSaved(context, msisdnSaved);
+    }
+
     public void reportUnreportedRegistration() {
         registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getStats());
     }
 
     public void reportUnreportedMessageIds() {
         deliveryReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedMessageIds(), getStats());
+    }
+
+    public void syncMsisdn() {
+        msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getMsisdn(), isMsisdnSaved(), getStats());
     }
 
     public MessageStore getMessageStore() {
@@ -204,6 +231,15 @@ public class MobileMessaging {
 
     private MobileMessagingStats getStats() {
         return stats;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (!MobileMessagingProperty.MSISDN.getKey().equals(key)) {
+            return;
+        }
+        setMsisdnSaved(false);
+        syncMsisdn();
     }
 
     /**
@@ -427,6 +463,7 @@ public class MobileMessaging {
             mobileMessaging.playServicesSupport.checkPlayServices(context);
             mobileMessaging.reportUnreportedRegistration();
             mobileMessaging.reportUnreportedMessageIds();
+            mobileMessaging.syncMsisdn();
 
             return mobileMessaging;
         }

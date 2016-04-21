@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.tasks;
 import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
+import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 
@@ -18,6 +19,7 @@ public enum MobileApiResourceProvider {
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiDeliveryReport mobileApiDeliveryReport;
+    private MobileApiRegisterMsisdn mobileApiRegisterMsisdn;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -37,6 +39,16 @@ public enum MobileApiResourceProvider {
         mobileApiDeliveryReport = getGenerator(context).create(MobileApiDeliveryReport.class);
 
         return mobileApiDeliveryReport;
+    }
+
+    public MobileApiRegisterMsisdn getMobileApiRegisterMsisdn(Context context) {
+        if (null != mobileApiRegisterMsisdn) {
+            return mobileApiRegisterMsisdn;
+        }
+
+        mobileApiRegisterMsisdn = getGenerator(context).create(MobileApiRegisterMsisdn.class);
+
+        return mobileApiRegisterMsisdn;
     }
 
     private Generator getGenerator(Context context) {

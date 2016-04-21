@@ -207,6 +207,10 @@ public abstract class PreferenceHelper {
         }
     }
 
+    public static void registerOnSharedPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
+    }
+
     private static abstract class SetMutator {
         abstract void mutate(Set<String> set);
     }

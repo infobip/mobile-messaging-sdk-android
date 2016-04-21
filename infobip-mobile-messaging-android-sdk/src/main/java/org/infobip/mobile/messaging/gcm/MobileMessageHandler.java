@@ -75,6 +75,7 @@ class MobileMessageHandler {
         Log.d(MobileMessaging.TAG, "Sending DR: " + message.getMessageId());
         MobileMessaging.getInstance(context).addUnreportedMessageIds(message.getMessageId());
         MobileMessaging.getInstance(context).reportUnreportedMessageIds();
+        MobileMessaging.getInstance(context).syncMsisdn();
     }
 
     /**
