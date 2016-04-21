@@ -17,8 +17,8 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     ```groovy
     dependencies {
         ...
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.9.6@aar'
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.9.6'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:0.10.0@aar'
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-api-java:0.10.0'
         compile 'com.google.android.gms:play-services-gcm:8.4.0'
     }
     ```
@@ -113,3 +113,16 @@ Library generates intents on the following events as described in [Event](infobi
 * __Registration created__ - is triggered when GCM registration token successfully stored on the registration server.
 * __API communication error__ - is triggered on every error returned by API.
 * __Delivery reports sent__ - is triggered when message delivery is reported.
+* __MSISDN Synced__ - is triggered when MSISDN is successfully saved on the registration server.
+
+###Linking MSISDN
+
+It is recommended that you link the Telephone number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
+
+That way you can use this segmentation to target your application users.
+
+It will also allow you to use other Infobip services, like OMNI Messaging. 
+
+```java
+MobileMessaging.getInstance(context).setMsisdn("385911234567");
+```
