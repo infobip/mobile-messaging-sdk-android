@@ -21,6 +21,9 @@ public enum MobileMessagingProperty {
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),
     MSISDN("org.infobip.mobile.messaging.infobip.MSISDN"),
     MSISDN_SAVED("org.infobip.mobile.messaging.infobip.MSISDN_SAVED"),
+    MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
+    MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
+    MOBILE_NETWORK_CODE("org.infobip.mobile.messaging.infobip.MNC", ""),
 
     DISPLAY_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.DISPLAY_NOTIFICATION_ENABLED", true),
     CALLBACK_ACTIVITY("org.infobip.mobile.messaging.notification.CALLBACK_ACTIVITY"),

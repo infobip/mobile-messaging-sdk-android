@@ -10,7 +10,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
-import org.infobip.mobile.messaging.util.MobileNetworkInformation;
+import org.infobip.mobile.messaging.telephony.MobileNetworkInfo;
 
 /**
  * @author mstipanov
@@ -30,10 +30,9 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, Registration
         try {
             String deviceApplicationInstanceId = mobileMessaging.getDeviceApplicationInstanceId();
             String registrationId = mobileMessaging.getRegistrationId();
-            String mobileCarrierName = MobileNetworkInformation.getMobileCarrierName(context);
-            String mobileCountryCode = MobileNetworkInformation.getMobileCoutryCode(context);
-            String mobileNetworkCode = MobileNetworkInformation.getMobileNetworkCode(context);
-            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId, registrationId, mobileCarrierName, mobileCountryCode, mobileNetworkCode);
+            MobileNetworkInfo mobileNetworkInfo = MobileNetworkInfo.fromProperties(context);
+            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId,
+                    registrationId, mobileNetworkInfo.getCarrierName(), mobileNetworkInfo.getMCC(), mobileNetworkInfo.getMNC());
         } catch (Exception e) {
             mobileMessaging.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error creating registration!", e);

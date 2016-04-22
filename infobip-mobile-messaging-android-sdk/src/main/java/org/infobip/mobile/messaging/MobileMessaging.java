@@ -4,9 +4,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -49,6 +51,7 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
+    private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private MessageStore messageStore;
     private NotificationSettings notificationSettings;
@@ -56,6 +59,7 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
     private MobileMessaging(Context context) {
         this.context = context;
         stats = new MobileMessagingStats(context);
+        mobileNetworkStateListener = new MobileNetworkStateListener(context);
         PreferenceHelper.registerOnSharedPreferenceChangeListener(context, this);
     }
 
