@@ -7,17 +7,13 @@ import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.loadPackageInfo;
 
@@ -46,32 +42,27 @@ public class Generator {
             return apiClient;
         }
 
-        String osName = System.getProperty("os.name");
-        String osVersion = System.getProperty("os.version");
-        String osBuildTag = System.getProperty("os.arch");
-//        String libraryVersion = getLibraryVersion();
-        String libraryVersion = "1.0.0"; //TODO fix getLibraryVersion()
-        apiClient = new DefaultApiClient(connectTimeout, readTimeout, osName, osVersion, osBuildTag, libraryVersion, userAgentAdditions);
-        return apiClient;
-    }
-
-    private String getLibraryVersion() {
-        try {
-            Class theClass = getClass();
-            String classPath = theClass.getResource(theClass.getSimpleName() + ".class").toString();
-            int exclamationIndex = classPath.lastIndexOf("!");
-            if (exclamationIndex < 0) {
-                return null;
-            }
-            String libPath = classPath.substring(0, exclamationIndex);
-            String filePath = libPath + "!/META-INF/MANIFEST.MF";
-            Manifest manifest = new Manifest(new URL(filePath).openStream());
-            Attributes attr = manifest.getMainAttributes();
-            return attr.getValue("Implementation-Version");
-        } catch (IOException e) {
-            //ignore
-            return null;
+        String osName = properties.getProperty("os.name");
+        String osVersion = properties.getProperty("os.version");
+        String osBuildTag = properties.getProperty("os.arch");
+        String libraryVersion = properties.getProperty("library.version");
+        List<String> internalUserAgentAdditions = new ArrayList<>();
+        String deviceModel = properties.getProperty("device.model");
+        if (StringUtils.isNotBlank(deviceModel)) {
+            internalUserAgentAdditions.add(deviceModel);
         }
+        String deviceVendor = properties.getProperty("device.vendor");
+        if (StringUtils.isNotBlank(deviceVendor)) {
+            internalUserAgentAdditions.add(deviceVendor);
+        }
+        String appVersion = properties.getProperty("app.version");
+        if (StringUtils.isNotBlank(appVersion)) {
+            internalUserAgentAdditions.add(appVersion);
+        }
+        Collections.addAll(internalUserAgentAdditions, userAgentAdditions);
+        String[] userAgentAdditionsCombined = internalUserAgentAdditions.toArray(new String[internalUserAgentAdditions.size()]);
+        apiClient = new DefaultApiClient(connectTimeout, readTimeout, osName, osVersion, osBuildTag, libraryVersion, userAgentAdditionsCombined);
+        return apiClient;
     }
 
     @SuppressWarnings("unchecked")
@@ -210,7 +201,11 @@ public class Generator {
          * <li><i>os.version</i> - for OS version</li>
          * <li><i>os.arch</i> - for OS architecture</li>
          * <li><i>api.key</i> - for Mobile API API-KEY. You must use application code as the API-KEY!</li>
+         * <li><i>library.version</i> - for Mobile Messaging library version</li>
          * <li><i>platform.type</i> - for identifying the cloud type (GCM, ?)</li>
+         * <li><i>device.vendor</i> - for host device vendor</li>
+         * <li><i>device.model</i> - for host device model</li>
+         * <li><i>app.version</i> - for hosting app version</li>
          * </ul>
          *
          * @return {@link Builder}

@@ -174,11 +174,10 @@ public class DefaultApiClient implements ApiClient {
         if (StringUtils.isNotBlank(osBuildTag)) {
             sb.append(osBuildTag);
         }
-        sb.append(";");
         if (null != userAgentAdditions) {
             for (String userAgentAddition : userAgentAdditions) {
-                sb.append(userAgentAddition);
                 sb.append(";");
+                sb.append(userAgentAddition);
             }
         }
         sb.append(")");
