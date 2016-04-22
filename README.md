@@ -118,10 +118,7 @@ Library generates intents on the following events as described in [Event](infobi
 ###Linking MSISDN
 
 It is recommended that you link the Telephone number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
-
-That way you can use this segmentation to target your application users.
-
-It will also allow you to use other Infobip services, like OMNI Messaging. 
+It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
 
 ```java
 MobileMessaging.getInstance(context).setMsisdn("385911234567");

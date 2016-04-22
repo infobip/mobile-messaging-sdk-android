@@ -1,14 +1,16 @@
 package org.infobip.mobile.messaging.util;
 
+import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 
 import java.lang.reflect.Field;
 
 /**
  * Created by sslavin on 21/04/16.
  */
-public class SystemInformationUtils {
-    private SystemInformationUtils() {
+public class SystemInformation {
+    private SystemInformation() {
     }
 
     private static String systemName = null;
@@ -51,5 +53,9 @@ public class SystemInformationUtils {
             androidABI = Build.SUPPORTED_ABIS[0];
         }
         return androidABI;
+    }
+
+    public static String getAndroidID(Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 }

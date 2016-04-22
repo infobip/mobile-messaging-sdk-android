@@ -8,8 +8,8 @@ import org.infobip.mobile.messaging.BuildConfig;
 /**
  * Created by sslavin on 21/04/16.
  */
-public class SoftwareInformationUtils {
-    private SoftwareInformationUtils() {
+public class SoftwareInformation {
+    private SoftwareInformation() {
     }
 
     private static String appVersion = null;

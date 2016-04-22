@@ -8,8 +8,8 @@ import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
-import org.infobip.mobile.messaging.util.SoftwareInformationUtils;
-import org.infobip.mobile.messaging.util.SystemInformationUtils;
+import org.infobip.mobile.messaging.util.SoftwareInformation;
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.Properties;
 
@@ -62,12 +62,12 @@ public enum MobileApiResourceProvider {
 
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
-        properties.put("os.name", SystemInformationUtils.getAndroidSystemName());
+        properties.put("os.name", SystemInformation.getAndroidSystemName());
         properties.put("os.version", Build.VERSION.RELEASE);
-        properties.put("os.arch", SystemInformationUtils.getAndroidSystemABI());
+        properties.put("os.arch", SystemInformation.getAndroidSystemABI());
         properties.put("api.key", MobileMessaging.getInstance(context).getApplicationCode());
-        properties.put("library.version", SoftwareInformationUtils.getLibraryVersion());
-        properties.put("app.version", SoftwareInformationUtils.getAppVersion(context));
+        properties.put("library.version", SoftwareInformation.getLibraryVersion());
+        properties.put("app.version", SoftwareInformation.getAppVersion(context));
         properties.put("platform.type", "GCM");
         properties.put("device.model", Build.MODEL);
         properties.put("device.vendor", Build.MANUFACTURER);
