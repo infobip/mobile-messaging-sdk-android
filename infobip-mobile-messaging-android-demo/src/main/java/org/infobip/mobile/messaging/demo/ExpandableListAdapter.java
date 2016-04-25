@@ -18,9 +18,15 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<Message> messages; // header titles
+    private OnMessageExpandedListener onMessageExpandedListener;
 
-    ExpandableListAdapter(Context context) {
+    public interface OnMessageExpandedListener {
+        void onMessageExpanded(Message message);
+    }
+
+    ExpandableListAdapter(Context context, OnMessageExpandedListener onMessageExpandedListener) {
         this.context = context;
+        this.onMessageExpandedListener = onMessageExpandedListener;
         MessageStore messageStore = MobileMessaging.getInstance(context).getMessageStore();
         if (null != messageStore) {
             this.messages = messageStore.bind(context);
@@ -95,6 +101,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         lblListHeader.setText(headerTitle);
 
         return convertView;
+    }
+
+    @Override
+    public void onGroupExpanded(int groupPosition) {
+        onMessageExpandedListener.onMessageExpanded(this.messages.get(groupPosition));
     }
 
     @Override

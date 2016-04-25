@@ -7,6 +7,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
+import org.infobip.mobile.messaging.api.seenstatus.MobileApiSeenStatusReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
@@ -24,6 +25,7 @@ public enum MobileApiResourceProvider {
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiDeliveryReport mobileApiDeliveryReport;
     private MobileApiRegisterMsisdn mobileApiRegisterMsisdn;
+    private MobileApiSeenStatusReport mobileApiSeenStatusReport;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -53,6 +55,16 @@ public enum MobileApiResourceProvider {
         mobileApiRegisterMsisdn = getGenerator(context).create(MobileApiRegisterMsisdn.class);
 
         return mobileApiRegisterMsisdn;
+    }
+
+    public MobileApiSeenStatusReport getMobileApiSeenStatusReport(Context context) {
+        if (null != mobileApiSeenStatusReport) {
+            return mobileApiSeenStatusReport;
+        }
+
+        mobileApiSeenStatusReport = getGenerator(context).create(MobileApiSeenStatusReport.class);
+
+        return mobileApiSeenStatusReport;
     }
 
     private Generator getGenerator(Context context) {

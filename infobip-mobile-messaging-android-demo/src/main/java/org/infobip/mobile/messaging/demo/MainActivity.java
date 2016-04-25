@@ -35,6 +35,14 @@ public class MainActivity extends AppCompatActivity {
             updateCount();
         }
     };
+    private ExpandableListAdapter.OnMessageExpandedListener onMessageExpandedListener = new ExpandableListAdapter.OnMessageExpandedListener() {
+        @Override
+        public void onMessageExpanded(Message message) {
+            MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
+            mobileMessaging.addUnreportedSeenMessageIds(message.getMessageId());
+            mobileMessaging.reportUnreportedSeenMessageIds();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
         ExpandableListView messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
         assert messagesListView != null;
-        listAdapter = new ExpandableListAdapter(this);
+        listAdapter = new ExpandableListAdapter(this, onMessageExpandedListener);
         messagesListView.setAdapter(listAdapter);
 
         registerReceiver();

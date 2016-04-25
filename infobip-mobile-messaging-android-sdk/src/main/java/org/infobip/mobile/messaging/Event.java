@@ -130,6 +130,18 @@ public enum Event {
     DELIVERY_REPORTS_SENT("org.infobip.mobile.messaging.DELIVERY_REPORTS_SENT"),
 
     /**
+     * It is triggered when message seen is reported.
+     * <p>
+     * Contains the list of all reported message IDs.
+     * <pre>
+     * {@code
+     * String[] messageIDs = intent.getStringArrayExtra("messageIDs");
+     * }
+     * </pre>
+     */
+    SEEN_REPORTS_SENT("org.infobip.mobile.messaging.SEEN_REPORTS_SENT"),
+
+    /**
      * It is triggered when MSISDN is successfully stored on the registration server.
      * <pre>
      * {@code

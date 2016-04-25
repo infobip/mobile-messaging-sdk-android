@@ -49,6 +49,7 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
     private final Context context;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
+    private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
     private final MobileNetworkStateListener mobileNetworkStateListener;
@@ -164,6 +165,18 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
+    public String[] getUnreportedSeenMessageIds() {
+        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+    }
+
+    public void addUnreportedSeenMessageIds(final String... messageIDs) {
+        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
+    }
+
+    public void removeUnreportedSeenMessageIds(final String... messageIDs) {
+        PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
+    }
+
     public NotificationSettings getNotificationSettings() {
         if (!isDisplayNotificationEnabled()) {
             return null;
@@ -207,6 +220,10 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
 
     public void reportUnreportedMessageIds() {
         deliveryReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedMessageIds(), getStats());
+    }
+
+    public void reportUnreportedSeenMessageIds() {
+        seenStatusReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedSeenMessageIds(), getStats());
     }
 
     public void syncMsisdn() {
