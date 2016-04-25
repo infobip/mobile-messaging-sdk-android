@@ -20,6 +20,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onMessageExpanded(Message message) {
             MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
+            if (mobileMessaging.isMessageStoreEnabled()) {
+                message.setSeenTimestamp(System.currentTimeMillis());
+                mobileMessaging.getMessageStore().save(MainActivity.this, message);
+            }
             mobileMessaging.addUnreportedSeenMessageIds(message.getMessageId());
             mobileMessaging.reportUnreportedSeenMessageIds();
         }

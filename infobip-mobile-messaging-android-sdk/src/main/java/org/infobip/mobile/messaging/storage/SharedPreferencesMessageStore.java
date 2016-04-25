@@ -30,19 +30,26 @@ import java.util.*;
  */
 public class SharedPreferencesMessageStore implements MessageStore {
 
-    private static final String INFOBIP_UNREPORTED_MESSAGE_IDS = "org.infobip.mobile.messaging.store.DATA";
+    private static final String INFOBIP_MESSAGE_DATA_SET = "org.infobip.mobile.messaging.store.DATA";
 
     public void save(Context context, Message message) {
-        addUnreportedMessageIds(context, message);
+        addMessage(context, message);
     }
 
     public List<Message> findAll(Context context) {
+        return findAllMatching(context, new String[0]);
+    }
+
+    public List<Message> findAllMatching(Context context, String... messageIDs) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> unreportedMessageIdSet = sharedPreferences.getStringSet(INFOBIP_UNREPORTED_MESSAGE_IDS, new LinkedHashSet<String>());
+        Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
+        List<String> listMessageIDs = Arrays.asList(messageIDs);
         ArrayList<Message> messages = new ArrayList<>();
-        for (String s : unreportedMessageIdSet) {
+        for (String s : messageSet) {
             Message message = new Message(deserialize(s));
-            messages.add(message);
+            if (listMessageIDs.isEmpty() || listMessageIDs.contains(message.getMessageId())) {
+                messages.add(message);
+            }
         }
         Collections.sort(messages);
         return messages;
@@ -50,12 +57,12 @@ public class SharedPreferencesMessageStore implements MessageStore {
 
     public void deleteAll(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().remove(INFOBIP_UNREPORTED_MESSAGE_IDS).apply();
+        sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
     }
 
     public long countAll(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> unreportedMessageIdSet = sharedPreferences.getStringSet(INFOBIP_UNREPORTED_MESSAGE_IDS, new LinkedHashSet<String>());
+        Set<String> unreportedMessageIdSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
         return unreportedMessageIdSet.size();
     }
 
@@ -73,25 +80,32 @@ public class SharedPreferencesMessageStore implements MessageStore {
         };
     }
 
-    private void addUnreportedMessageIds(Context context, final Message message) {
-        SetMutator mutator = new SetMutator() {
+    private void addMessage(Context context, final Message message) {
+        SetMutator addMessageMutator = new SetMutator() {
             @Override
             void mutate(Set<String> set) {
+                for (String serializedBundle : set) {
+                    Message messageInSet = new Message(deserialize(serializedBundle));
+                    if (messageInSet.getMessageId().equals(message.getMessageId())) {
+                        set.remove(serializedBundle);
+                        break;
+                    }
+                }
                 set.add(serialize(message.getBundle()));
             }
         };
-        editUnreportedMessageIds(context, mutator);
+        editMessages(context, addMessageMutator);
     }
 
-    private synchronized void editUnreportedMessageIds(Context context, SetMutator mutator) {
+    private synchronized void editMessages(Context context, SetMutator mutator) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final Set<String> unreportedMessageIdSet = sharedPreferences.getStringSet(INFOBIP_UNREPORTED_MESSAGE_IDS, new LinkedHashSet<String>());
-        mutator.mutate(unreportedMessageIdSet);
-        if (unreportedMessageIdSet.isEmpty()) {
-            sharedPreferences.edit().remove(INFOBIP_UNREPORTED_MESSAGE_IDS).apply();
+        final Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
+        mutator.mutate(messageSet);
+        if (messageSet.isEmpty()) {
+            sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
             return;
         }
-        sharedPreferences.edit().putStringSet(INFOBIP_UNREPORTED_MESSAGE_IDS, unreportedMessageIdSet).apply();
+        sharedPreferences.edit().putStringSet(INFOBIP_MESSAGE_DATA_SET, messageSet).apply();
     }
 
 

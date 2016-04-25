@@ -9,7 +9,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+
+import java.util.List;
 
 /**
  * @author sslavin
@@ -27,8 +30,14 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
     protected SeenStatusReportResult doInBackground(Object... notUsed) {
         MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
         try {
-            String[] messageIDs = mobileMessaging.getUnreportedSeenMessageIds();
-            SeenMessages seenMessages = SeenMessages.withMessageIds(messageIDs);
+            String messageIDs[] = mobileMessaging.getUnreportedSeenMessageIds();
+            SeenMessages seenMessages;
+            if (mobileMessaging.isMessageStoreEnabled()) {
+                List<Message> messages = mobileMessaging.getMessageStore().findAllMatching(context, messageIDs);
+                seenMessages = SeenMessages.fromMessages(messages);
+            } else {
+                seenMessages = SeenMessages.fromMessageIds(messageIDs);
+            }
             MobileApiResourceProvider.INSTANCE.getMobileApiSeenStatusReport(context).report(seenMessages.toJson());
             mobileMessaging.removeUnreportedSeenMessageIds(messageIDs);
             return new SeenStatusReportResult(messageIDs);
@@ -37,10 +46,10 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
             Log.e(MobileMessaging.TAG, "Error reporting seen status!", e);
             cancel(true);
 
-            Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            registrationSaveError.putExtra("exception", e);
-            context.sendBroadcast(registrationSaveError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+            Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+            seenStatusReportError.putExtra("exception", e);
+            context.sendBroadcast(seenStatusReportError);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
 
             return null;
         }

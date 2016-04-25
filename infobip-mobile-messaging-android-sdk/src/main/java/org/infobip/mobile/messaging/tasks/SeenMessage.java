@@ -13,6 +13,10 @@ public class SeenMessage {
         this(messageId, "", (double) System.currentTimeMillis());
     }
 
+    public SeenMessage(String messageId, long seenDate) {
+        this(messageId, "", (double) seenDate);
+    }
+
     public SeenMessage(String messageId, String supplementaryId, Double seenDate) {
         this.messageId = messageId;
         this.supplementaryId = supplementaryId;
