@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.tasks;
 
-import java.util.Date;
-
 /**
  * @auhtor sslavin
  * @since 25.04.2016.
@@ -12,7 +10,7 @@ public class SeenMessage {
     private final Double seenDate;
 
     public SeenMessage(String messageId) {
-        this(messageId, "", (double) (new Date()).getTime());
+        this(messageId, "", (double) System.currentTimeMillis());
     }
 
     public SeenMessage(String messageId, String supplementaryId, Double seenDate) {

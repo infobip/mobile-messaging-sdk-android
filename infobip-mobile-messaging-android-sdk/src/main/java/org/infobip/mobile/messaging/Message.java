@@ -43,7 +43,6 @@ public class Message implements Comparable {
         message.setSilent(sourceMessage.isSilent());
         message.setData(sourceMessage.getData());
         message.setReceivedTimestamp(sourceMessage.getReceivedTimestamp());
-        message.setSeenTimestamp(sourceMessage.getSeenTimestamp());
 
         return message;
     }
@@ -124,14 +123,6 @@ public class Message implements Comparable {
         bundle.putLong(Data.RECEIVED_TIMESTAMP.getKey(), receivedTimestamp);
     }
 
-    public long getSeenTimestamp() {
-        return bundle.getLong(Data.SEEN_TIMESTAMP.getKey(), 0);
-    }
-
-    public void setSeenTimestamp(long seenTimestamp) {
-        bundle.putLong(Data.SEEN_TIMESTAMP.getKey(), seenTimestamp);
-    }
-
     @Override
     public int compareTo(Object another) {
         if (!(another instanceof Message)) {
@@ -151,7 +142,6 @@ public class Message implements Comparable {
         FROM("from"),
         SILENT("gcm.notification.silent"),
         RECEIVED_TIMESTAMP("received_timestamp"),
-        SEEN_TIMESTAMP("seen_timestamp"),
         DATA("data");
 
         private final String key;
