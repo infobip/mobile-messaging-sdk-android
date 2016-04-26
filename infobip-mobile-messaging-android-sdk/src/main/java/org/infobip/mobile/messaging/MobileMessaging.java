@@ -226,6 +226,17 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         seenStatusReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedSeenMessageIds(), getStats());
     }
 
+    public void setMessageSeen(String messageId) {
+        if (isMessageStoreEnabled()) {
+            for (Message message : messageStore.findAllMatching(context, messageId)) {
+                message.setSeenTimestamp(System.currentTimeMillis());
+                messageStore.save(context, message);
+            }
+        }
+        addUnreportedSeenMessageIds(messageId);
+        reportUnreportedSeenMessageIds();
+    }
+
     public void syncMsisdn() {
         msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getMsisdn(), isMsisdnSaved(), getStats());
     }

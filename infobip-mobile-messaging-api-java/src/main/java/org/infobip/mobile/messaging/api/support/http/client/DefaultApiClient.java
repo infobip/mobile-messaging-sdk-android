@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.api.support.http.client;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
+import org.infobip.mobile.messaging.api.support.ApiInvalidParameterException;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
@@ -117,7 +118,10 @@ public class DefaultApiClient implements ApiClient {
                     String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
                     apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
                 }
-                if (responseCode >= 500) {
+                if (responseCode == 400) {
+                    Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-4", "Unknown API invalid parameter error");
+                    throw new ApiInvalidParameterException(tuple.getLeft(), tuple.getRight());
+                } else if (responseCode >= 500) {
                     Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
                     throw new ApiBackendException(tuple.getLeft(), tuple.getRight());
                 }

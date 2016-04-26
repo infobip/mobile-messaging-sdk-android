@@ -118,6 +118,26 @@ public enum Event {
     API_COMMUNICATION_ERROR("org.infobip.mobile.messaging.API_COMMUNICATION_ERROR"),
 
     /**
+     * It is triggered if error happens during validation of parameters.
+     * <p>
+     * Contains information about which parameter was not verified and information about exception.
+     * <p>
+     * Following parameters can now trigger validation error:
+     * <ul>
+     * <li>{@link MobileMessaging#setMsisdn(long) msisdn} - use <a href="http://developer.android.com/reference/android/content/Intent.html#getLongExtra(java.lang.String, long)">intent.getLongExtra("parameterValue")</a> to get msisdn that caused the error</li>
+     * </ul>
+     * <pre>
+     * {@code
+     * String parameterName = intent.getStringExtra("parameterName"); // "msisdn"
+     * long msisdn = intent.getLongExtra("parameterValue", 0);
+     * Throwable exception = (Throwable) intent.getSerializableExtra("exception");
+     * }
+     * </pre>
+     * @see MobileMessaging#setMsisdn(long)
+     */
+    API_PARAMETER_VALIDATION_ERROR("org.infobip.mobile.messaging.API_PARAMETER_VALIDATION_ERROR"),
+
+    /**
      * It is triggered when message delivery is reported.
      * <p>
      * Contains the list of all reported message IDs.

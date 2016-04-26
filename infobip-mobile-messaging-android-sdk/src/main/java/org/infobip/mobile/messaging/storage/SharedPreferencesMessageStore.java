@@ -84,7 +84,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
         SetMutator addMessageMutator = new SetMutator() {
             @Override
             void mutate(Set<String> set) {
-                for (String serializedBundle : set) {
+                for (String serializedBundle : new HashSet<>(set)) {
                     Message messageInSet = new Message(deserialize(serializedBundle));
                     if (messageInSet.getMessageId().equals(message.getMessageId())) {
                         set.remove(serializedBundle);

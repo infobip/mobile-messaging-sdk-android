@@ -40,12 +40,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onMessageExpanded(Message message) {
             MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
-            if (mobileMessaging.isMessageStoreEnabled()) {
-                message.setSeenTimestamp(System.currentTimeMillis());
-                mobileMessaging.getMessageStore().save(MainActivity.this, message);
-            }
-            mobileMessaging.addUnreportedSeenMessageIds(message.getMessageId());
-            mobileMessaging.reportUnreportedSeenMessageIds();
+            mobileMessaging.setMessageSeen(message.getMessageId());
         }
     };
 
