@@ -31,6 +31,7 @@ import java.util.*;
 public class SharedPreferencesMessageStore implements MessageStore {
 
     private static final String INFOBIP_MESSAGE_DATA_SET = "org.infobip.mobile.messaging.store.DATA";
+    private static final Object LOCK = new Object();
 
     public void save(Context context, Message message) {
         addMessage(context, message);
@@ -41,18 +42,20 @@ public class SharedPreferencesMessageStore implements MessageStore {
     }
 
     public List<Message> findAllMatching(Context context, String... messageIDs) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
-        List<String> listMessageIDs = Arrays.asList(messageIDs);
-        ArrayList<Message> messages = new ArrayList<>();
-        for (String s : messageSet) {
-            Message message = new Message(deserialize(s));
-            if (listMessageIDs.isEmpty() || listMessageIDs.contains(message.getMessageId())) {
-                messages.add(message);
+        synchronized (LOCK) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
+            List<String> listMessageIDs = Arrays.asList(messageIDs);
+            ArrayList<Message> messages = new ArrayList<>();
+            for (String s : messageSet) {
+                Message message = new Message(deserialize(s));
+                if (listMessageIDs.isEmpty() || listMessageIDs.contains(message.getMessageId())) {
+                    messages.add(message);
+                }
             }
+            Collections.sort(messages);
+            return messages;
         }
-        Collections.sort(messages);
-        return messages;
     }
 
     public void deleteAll(Context context) {
@@ -98,14 +101,16 @@ public class SharedPreferencesMessageStore implements MessageStore {
     }
 
     private synchronized void editMessages(Context context, SetMutator mutator) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        final Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
-        mutator.mutate(messageSet);
-        if (messageSet.isEmpty()) {
-            sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
-            return;
+        synchronized (LOCK) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            final Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
+            mutator.mutate(messageSet);
+            if (messageSet.isEmpty()) {
+                sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
+                return;
+            }
+            sharedPreferences.edit().putStringSet(INFOBIP_MESSAGE_DATA_SET, messageSet).apply();
         }
-        sharedPreferences.edit().putStringSet(INFOBIP_MESSAGE_DATA_SET, messageSet).apply();
     }
 
 
