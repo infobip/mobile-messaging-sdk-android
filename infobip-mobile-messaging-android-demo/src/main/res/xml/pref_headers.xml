@@ -3,13 +3,18 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-            android:fragment="org.infobip.mobile.messaging.demo.InspectActivity$GeneralPreferenceFragment"
-            android:title="@string/pref_header_general"
-            android:icon="@drawable/ic_info_black_24dp"/>
+        android:fragment="org.infobip.mobile.messaging.demo.InspectActivity$PersonalSettingsPreferenceFragment"
+        android:title="@string/pref_header_personal"
+        android:icon="@drawable/ic_settings_black_24dp"/>
 
     <header
             android:fragment="org.infobip.mobile.messaging.demo.InspectActivity$NotificationPreferenceFragment"
             android:title="@string/pref_header_notifications"
             android:icon="@drawable/ic_notifications_black_24dp"/>
+
+    <header
+        android:fragment="org.infobip.mobile.messaging.demo.InspectActivity$InformationPreferenceFragment"
+        android:title="@string/pref_header_information"
+        android:icon="@drawable/ic_info_black_24dp"/>
 
 </preference-headers>

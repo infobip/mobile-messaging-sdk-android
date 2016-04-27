@@ -47,21 +47,6 @@
             android:singleLine="true"
             android:maxLines="1"
     />
-    <EditTextPreference
-            android:key="org.infobip.mobile.messaging.infobip.MSISDN"
-            android:title="@string/pref_title_msisdn"
-            android:selectAllOnFocus="true"
-            android:inputType="number"
-            android:capitalize="none"
-            android:singleLine="true"
-            android:maxLines="1"
-    />
-    <SwitchPreference
-            android:key="org.infobip.mobile.messaging.infobip.MSISDN_SAVED"
-            android:title="@string/pref_title_msisdn_saved"
-            android:summary="@string/pref_description_msisdn_saved"
-            android:defaultValue="false"/>
-
     <Preference
             android:key="org.infobip.mobile.messaging.stats.REGISTRATION_SYNC_ERROR"
             android:title="@string/pref_title_registration_sync_error"

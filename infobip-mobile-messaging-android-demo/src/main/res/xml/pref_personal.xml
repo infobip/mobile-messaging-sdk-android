@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="org.infobip.mobile.messaging.demo.MSISDN"
+        android:title="@string/pref_title_msisdn"
+        android:selectAllOnFocus="true"
+        android:inputType="number"
+        android:capitalize="none"
+        android:singleLine="true"
+        android:maxLines="1"
+        />
+</PreferenceScreen>

@@ -6,6 +6,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -95,6 +96,20 @@ public class InspectActivity extends PreferenceActivity {
         }
     };
     private AppCompatDelegate mDelegate;
+
+    private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals(ApplicationPreferences.MSISDN)) {
+                long msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
+                if (0 != msisdn) {
+                    MobileMessaging mobileMessaging = MobileMessaging.getInstance(InspectActivity.this);
+                    mobileMessaging.setMsisdn(msisdn);
+                }
+            }
+        }
+    };
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -215,6 +230,8 @@ public class InspectActivity extends PreferenceActivity {
 
     @Override
     protected void onDestroy() {
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+
         super.onDestroy();
         getDelegate().onDestroy();
     }
@@ -236,6 +253,8 @@ public class InspectActivity extends PreferenceActivity {
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
         setupActionBar();
+
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     /**
@@ -284,8 +303,9 @@ public class InspectActivity extends PreferenceActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
-                || NotificationPreferenceFragment.class.getName().equals(fragmentName);
+                || InformationPreferenceFragment.class.getName().equals(fragmentName)
+                || NotificationPreferenceFragment.class.getName().equals(fragmentName)
+                || PersonalSettingsPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -293,11 +313,11 @@ public class InspectActivity extends PreferenceActivity {
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
+    public static class InformationPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
+            addPreferencesFromResource(R.xml.pref_information);
             setHasOptionsMenu(true);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
@@ -309,17 +329,10 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID.getKey()));
             bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey()));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_SENDER_ID.getKey()));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.MSISDN.getKey()));
-            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.MSISDN_SAVED.getKey()));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.MSISDN_SYNC_ERROR)));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.LAST_HTTP_EXCEPTION.getKey()));
-        }
-
-        @Override
-        public void onSaveInstanceState(Bundle outState) {
-            super.onSaveInstanceState(outState);
         }
 
         @Override
@@ -330,9 +343,6 @@ public class InspectActivity extends PreferenceActivity {
                 mobileMessaging.reportUnreportedRegistration();
             } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
                 mobileMessaging.reportUnreportedMessageIds();
-            } else if (preference.getKey().equals(MobileMessagingProperty.MSISDN_SAVED.getKey())
-                    || preference.getKey().equals(MobileMessagingError.MSISDN_SYNC_ERROR)) {
-                mobileMessaging.syncMsisdn();
             } else {
                 ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());
@@ -366,6 +376,32 @@ public class InspectActivity extends PreferenceActivity {
             setHasOptionsMenu(true);
 
             bindStringPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == android.R.id.home) {
+                startActivity(new Intent(getActivity(), InspectActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * This fragment shows personal preferences only. It is used when the
+     * activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class PersonalSettingsPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_personal);
+            setHasOptionsMenu(true);
+
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.MSISDN));
         }
 
         @Override
