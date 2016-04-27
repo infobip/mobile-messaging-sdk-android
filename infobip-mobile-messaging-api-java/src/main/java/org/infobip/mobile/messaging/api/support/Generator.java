@@ -41,27 +41,8 @@ public class Generator {
         if (null != apiClient) {
             return apiClient;
         }
-
-        String osName = properties.getProperty("os.name");
-        String osVersion = properties.getProperty("os.version");
-        String osBuildTag = properties.getProperty("os.arch");
         String libraryVersion = properties.getProperty("library.version");
-        List<String> internalUserAgentAdditions = new ArrayList<>();
-        String deviceModel = properties.getProperty("device.model");
-        if (StringUtils.isNotBlank(deviceModel)) {
-            internalUserAgentAdditions.add(deviceModel);
-        }
-        String deviceVendor = properties.getProperty("device.vendor");
-        if (StringUtils.isNotBlank(deviceVendor)) {
-            internalUserAgentAdditions.add(deviceVendor);
-        }
-        String appVersion = properties.getProperty("app.version");
-        if (StringUtils.isNotBlank(appVersion)) {
-            internalUserAgentAdditions.add(appVersion);
-        }
-        Collections.addAll(internalUserAgentAdditions, userAgentAdditions);
-        String[] userAgentAdditionsCombined = internalUserAgentAdditions.toArray(new String[internalUserAgentAdditions.size()]);
-        apiClient = new DefaultApiClient(connectTimeout, readTimeout, osName, osVersion, osBuildTag, libraryVersion, userAgentAdditionsCombined);
+        apiClient = new DefaultApiClient(connectTimeout, readTimeout, libraryVersion, userAgentAdditions);
         return apiClient;
     }
 
@@ -197,15 +178,8 @@ public class Generator {
          * <p>
          * Used properties:
          * <ul>
-         * <li><i>os.name</i> - for OS name</li>
-         * <li><i>os.version</i> - for OS version</li>
-         * <li><i>os.arch</i> - for OS architecture</li>
          * <li><i>api.key</i> - for Mobile API API-KEY. You must use application code as the API-KEY!</li>
          * <li><i>library.version</i> - for Mobile Messaging library version</li>
-         * <li><i>platform.type</i> - for identifying the cloud type (GCM, ?)</li>
-         * <li><i>device.vendor</i> - for host device vendor</li>
-         * <li><i>device.model</i> - for host device model</li>
-         * <li><i>app.version</i> - for hosting app version</li>
          * </ul>
          *
          * @return {@link Builder}

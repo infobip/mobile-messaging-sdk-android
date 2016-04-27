@@ -22,10 +22,7 @@ public class MobileNetworkInformation {
     public static String getMobileCoutryCode(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            String networkOperator = telephonyManager.getNetworkOperator();
-            if (StringUtils.isNotBlank(networkOperator)) {
-                return networkOperator.substring(0, 3);
-            }
+            return extractMCC(telephonyManager.getNetworkOperator());
         }
         return "unknown";
     }
@@ -33,10 +30,45 @@ public class MobileNetworkInformation {
     public static String getMobileNetworkCode(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            String networkOperator = telephonyManager.getNetworkOperator();
-            if (StringUtils.isNotBlank(networkOperator)) {
-                return networkOperator.substring(3);
-            }
+            return extractMNC(telephonyManager.getNetworkOperator());
+        }
+        return "unknown";
+    }
+
+    public static String getSIMCarrierName(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            return telephonyManager.getSimOperatorName();
+        }
+        return "unknown";
+    }
+
+    public static String getSIMCoutryCode(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            return extractMCC(telephonyManager.getSimOperator());
+        }
+        return "unknown";
+    }
+
+    public static String getSIMNetworkCode(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (telephonyManager != null) {
+            return extractMNC(telephonyManager.getSimOperator());
+        }
+        return "unknown";
+    }
+
+    private static String extractMCC(String operator) {
+        if (StringUtils.isNotBlank(operator)) {
+            return operator.substring(0, 3);
+        }
+        return "unknown";
+    }
+
+    private static String extractMNC(String operator) {
+        if (StringUtils.isNotBlank(operator)) {
+            return operator.substring(3);
         }
         return "unknown";
     }

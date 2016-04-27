@@ -33,9 +33,6 @@ public class DefaultApiClient implements ApiClient {
 
     private final int connectTimeout;
     private final int readTimeout;
-    private final String osName;
-    private final String osVersion;
-    private final String osBuildTag;
     private final String libraryVersion;
     private final String[] userAgentAdditions;
     private String userAgent;
@@ -44,12 +41,9 @@ public class DefaultApiClient implements ApiClient {
         this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, null, null, null, null);
     }
 
-    public DefaultApiClient(int connectTimeout, int readTimeout, String osName, String osVersion, String osBuildTag, String libraryVersion, String... userAgentAdditions) {
+    public DefaultApiClient(int connectTimeout, int readTimeout, String libraryVersion, String... userAgentAdditions) {
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
-        this.osName = osName;
-        this.osVersion = osVersion;
-        this.osBuildTag = osBuildTag;
         this.libraryVersion = libraryVersion;
         this.userAgentAdditions = userAgentAdditions;
     }
@@ -167,22 +161,8 @@ public class DefaultApiClient implements ApiClient {
             sb.append("/").append(libraryVersion);
         }
         sb.append("(");
-        if (StringUtils.isNotBlank(osName)) {
-            sb.append(osName);
-        }
-        sb.append(";");
-        if (StringUtils.isNotBlank(osVersion)) {
-            sb.append(osVersion);
-        }
-        sb.append(";");
-        if (StringUtils.isNotBlank(osBuildTag)) {
-            sb.append(osBuildTag);
-        }
         if (null != userAgentAdditions) {
-            for (String userAgentAddition : userAgentAdditions) {
-                sb.append(";");
-                sb.append(userAgentAddition);
-            }
+            sb.append(StringUtils.join(";", userAgentAdditions));
         }
         sb.append(")");
         userAgent = sb.toString();

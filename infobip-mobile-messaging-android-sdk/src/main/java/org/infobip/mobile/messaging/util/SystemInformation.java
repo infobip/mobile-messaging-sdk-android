@@ -55,7 +55,7 @@ public class SystemInformation {
         return androidABI;
     }
 
-    public static String getAndroidID(Context context) {
-        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    public static String getAndroidSystemVersion() {
+        return Build.VERSION.RELEASE;
     }
 }

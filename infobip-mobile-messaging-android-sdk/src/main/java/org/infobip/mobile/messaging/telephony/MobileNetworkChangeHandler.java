@@ -21,6 +21,7 @@ public class MobileNetworkChangeHandler {
         if (!oldInfo.isEqual(newInfo)) {
             newInfo.save();
             MobileMessaging.getInstance(context).reportUnreportedRegistration();
+            // TODO: update user-agent
         }
     }
 }

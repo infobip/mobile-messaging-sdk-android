@@ -9,6 +9,9 @@ import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.seenstatus.MobileApiSeenStatusReport;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.telephony.MobileNetworkInfo;
+import org.infobip.mobile.messaging.util.DeviceInformation;
+import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
@@ -74,18 +77,29 @@ public enum MobileApiResourceProvider {
 
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
-        properties.put("os.name", SystemInformation.getAndroidSystemName());
-        properties.put("os.version", Build.VERSION.RELEASE);
-        properties.put("os.arch", SystemInformation.getAndroidSystemABI());
         properties.put("api.key", MobileMessaging.getInstance(context).getApplicationCode());
         properties.put("library.version", SoftwareInformation.getLibraryVersion());
-        properties.put("app.version", SoftwareInformation.getAppVersion(context));
-        properties.put("platform.type", "GCM");
-        properties.put("device.model", Build.MODEL);
-        properties.put("device.vendor", Build.MANUFACTURER);
+
+        String userAgentAdditions[] = {
+                SystemInformation.getAndroidSystemName(),
+                SystemInformation.getAndroidSystemVersion(),
+                SystemInformation.getAndroidSystemABI(),
+                DeviceInformation.getDeviceModel(),
+                DeviceInformation.getDeviceManufacturer(),
+                SoftwareInformation.getAppName(context),
+                SoftwareInformation.getAppVersion(context),
+                MobileNetworkInformation.getMobileCarrierName(context),
+                MobileNetworkInformation.getMobileNetworkCode(context),
+                MobileNetworkInformation.getMobileCoutryCode(context),
+                MobileNetworkInformation.getSIMCarrierName(context),
+                MobileNetworkInformation.getSIMNetworkCode(context),
+                MobileNetworkInformation.getSIMCoutryCode(context)
+            };
+
         generator = new Generator.Builder().
                 withBaseUrl(MobileMessaging.getInstance(context).getApiUri()).
                 withProperties(properties).
+                withUserAgentAdditions(userAgentAdditions).
                 build();
         return generator;
     }
