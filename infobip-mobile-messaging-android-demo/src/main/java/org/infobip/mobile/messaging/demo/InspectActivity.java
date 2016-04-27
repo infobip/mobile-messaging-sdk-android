@@ -25,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
@@ -102,11 +104,7 @@ public class InspectActivity extends PreferenceActivity {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(ApplicationPreferences.MSISDN)) {
-                long msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
-                if (0 != msisdn) {
-                    MobileMessaging mobileMessaging = MobileMessaging.getInstance(InspectActivity.this);
-                    mobileMessaging.setMsisdn(msisdn);
-                }
+                OnMSISDNPreferenceChanged(sharedPreferences);
             }
         }
     };
@@ -245,6 +243,20 @@ public class InspectActivity extends PreferenceActivity {
             mDelegate = AppCompatDelegate.create(this, null);
         }
         return mDelegate;
+    }
+
+    private void OnMSISDNPreferenceChanged(SharedPreferences sharedPreferences) {
+        try {
+            long msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
+            if (0 != msisdn) {
+                MobileMessaging mobileMessaging = MobileMessaging.getInstance(InspectActivity.this);
+                mobileMessaging.setMsisdn(msisdn);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.toast_message_msisdn_invalid, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

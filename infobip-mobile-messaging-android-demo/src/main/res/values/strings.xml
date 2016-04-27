@@ -51,4 +51,7 @@
 
     <string name="pref_title_msisdn">MSISDN</string>
     <string name="pref_description_msisdn_saved">MSISDN is saved on Infobip server</string>
+
+    <!-- Toast messages -->
+    <string name="toast_message_msisdn_invalid">MSISDN is invalid</string>
 </resources>
