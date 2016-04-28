@@ -2,10 +2,11 @@ package org.infobip.mobile.messaging.telephony;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.tasks.MobileApiResourceProvider;
 
 /**
- * Created by sslavin on 22/04/16.
+ * @author sslavin
+ * @since 22.04.2016.
  */
 public class MobileNetworkChangeHandler {
 
@@ -20,8 +21,7 @@ public class MobileNetworkChangeHandler {
         MobileNetworkInfo oldInfo = MobileNetworkInfo.fromProperties(context);
         if (!oldInfo.isEqual(newInfo)) {
             newInfo.save();
-            MobileMessaging.getInstance(context).reportUnreportedRegistration();
-            // TODO: update user-agent
+            MobileApiResourceProvider.INSTANCE.resetMobileApi();
         }
     }
 }

@@ -30,9 +30,7 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, Registration
         try {
             String deviceApplicationInstanceId = mobileMessaging.getDeviceApplicationInstanceId();
             String registrationId = mobileMessaging.getRegistrationId();
-            MobileNetworkInfo mobileNetworkInfo = MobileNetworkInfo.fromProperties(context);
-            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId,
-                    registrationId, mobileNetworkInfo.getCarrierName(), mobileNetworkInfo.getMCC(), mobileNetworkInfo.getMNC());
+            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId, registrationId);
         } catch (Exception e) {
             mobileMessaging.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error creating registration!", e);

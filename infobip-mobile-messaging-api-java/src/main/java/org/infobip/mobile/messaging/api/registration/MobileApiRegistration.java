@@ -30,16 +30,10 @@ public interface MobileApiRegistration {
      *
      * @param deviceApplicationInstanceId null if it doesn't exist
      * @param registrationId              new registration token
-     * @param mobileCarrierName           mobile carrier name
-     * @param mobileCountryCode           mobile country code
-     * @param mobileNetworkCode           mobile network code
      * @return {@link RegistrationResponse}
      */
     @HttpRequest(method = HttpMethod.POST, value = "registration")
     @Query(name = "platformType", value = "${platform.type:GCM}")
     RegistrationResponse upsert(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
-                                @Query(name = "registrationId") String registrationId,
-                                @Query(name = "mobileCarrierName") String mobileCarrierName,
-                                @Query(name = "mobileCountryCode") String mobileCountryCode,
-                                @Query(name = "mobileNetworkCode") String mobileNetworkCode);
+                                @Query(name = "registrationId") String registrationId);
 }

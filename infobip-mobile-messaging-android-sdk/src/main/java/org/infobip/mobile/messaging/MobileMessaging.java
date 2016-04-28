@@ -39,6 +39,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @see Builder#withApplicationCode(String)
  * @see Builder#withDisplayNotification(NotificationSettings)
  * @see Builder#withoutMessageStore()
+ * @see Builder#withoutCarrierInfo()
+ * @see Builder#withoutSystemInfo() 
  * @since 29.02.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -268,6 +270,14 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         return stats;
     }
 
+    protected void setReportCarrierInfo(boolean reportCarrierInfo) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO, reportCarrierInfo);
+    }
+
+    protected void setReportSystemInfo(boolean reportSystemInfo) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (!MobileMessagingProperty.MSISDN.getKey().equals(key)) {
@@ -300,6 +310,8 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
         private String apiUri = (String) MobileMessagingProperty.API_URI.getDefaultValue();
         private NotificationSettings notificationSettings = null;
+        private boolean reportCarrierInfo = true;
+        private boolean reportSystemInfo = true;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -479,6 +491,36 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         }
 
         /**
+         * It will not send mobile network carrier info to the server.
+         * <pre>
+         * {@code new MobileMessaging.Builder(context)
+         *       .withoutCarrierInfo()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutCarrierInfo() {
+            this.reportCarrierInfo = false;
+            return this;
+        }
+
+        /**
+         * It will not send system information to the server.
+         * <pre>
+         * {@code new MobileMessaging.Builder(context)
+         *       .withoutSystemInfo()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutSystemInfo() {
+            this.reportSystemInfo = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -492,6 +534,8 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
             mobileMessaging.setApplicationCode(applicationCode);
             mobileMessaging.setMessageStoreClass(messageStoreClass);
             mobileMessaging.setNotificationSettings(notificationSettings);
+            mobileMessaging.setReportCarrierInfo(reportCarrierInfo);
+            mobileMessaging.setReportSystemInfo(reportSystemInfo);
 
             MobileMessaging.instance = mobileMessaging;
 
