@@ -3,10 +3,7 @@ package it.org.infobip.mobile.messaging.api;
 import fi.iki.elonen.NanoHTTPD;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
-import org.infobip.mobile.messaging.api.support.ApiBackendException;
-import org.infobip.mobile.messaging.api.support.ApiException;
-import org.infobip.mobile.messaging.api.support.ApiIOException;
-import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.support.*;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
@@ -63,7 +60,7 @@ public class MobileApiRegistrationTest {
         assertEquals("/mobile/2/registration", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        assertEquals(5, debugServer.getQueryParametersCount());
+        assertEquals(2, debugServer.getQueryParametersCount());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertNull(debugServer.getBody());
 
@@ -83,7 +80,7 @@ public class MobileApiRegistrationTest {
         mobileApiRegistration.upsert(null, "123");
     }
 
-    @Test(expected = ApiException.class)
+    @Test(expected = ApiInvalidParameterException.class)
     public void create_onResponseError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some error!")));
 
