@@ -24,6 +24,9 @@ public abstract class StringUtils {
         StringBuilder sb = new StringBuilder();
         boolean endingWithSeparator = true;
         for (String uri : uris) {
+            if (null == uri) {
+                uri = "";
+            }
             if (!endingWithSeparator && !uri.startsWith(separator)) {
                 sb.append(separator);
                 endingWithSeparator = true;
