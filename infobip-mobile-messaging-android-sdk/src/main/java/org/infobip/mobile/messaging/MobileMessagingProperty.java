@@ -10,7 +10,7 @@ import android.content.Intent;
  */
 public enum MobileMessagingProperty {
 
-    GCM_REGISTRATION_ID_SAVED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_SAVED", false),
+    GCM_REGISTRATION_ID_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
     GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID"),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID"),
     GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID"),
@@ -21,7 +21,7 @@ public enum MobileMessagingProperty {
     API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://oneapi.infobip.com/"),
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),
     MSISDN("org.infobip.mobile.messaging.infobip.MSISDN"),
-    MSISDN_SAVED("org.infobip.mobile.messaging.infobip.MSISDN_SAVED"),
+    MSISDN_REPORTED("org.infobip.mobile.messaging.infobip.MSISDN_REPORTED"),
     MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
     MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
     MOBILE_NETWORK_CODE("org.infobip.mobile.messaging.infobip.MNC", ""),

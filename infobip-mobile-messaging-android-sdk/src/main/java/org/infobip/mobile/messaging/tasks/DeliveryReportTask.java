@@ -9,6 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 
 /**
  * @author mstipanov
@@ -24,14 +25,14 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
 
     @Override
     protected DeliveryReportResult doInBackground(Object... notUsed) {
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         try {
-            String[] messageIDs = mobileMessaging.getUnreportedMessageIds();
+            String[] messageIDs = mobileMessagingCore.getUnreportedMessageIds();
             MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(messageIDs);
-            mobileMessaging.removeUnreportedMessageIds(messageIDs);
+            mobileMessagingCore.removeUnreportedMessageIds(messageIDs);
             return new DeliveryReportResult(messageIDs);
         } catch (Exception e) {
-            mobileMessaging.setLastHttpException(e);
+            mobileMessagingCore.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error reporting delivery!", e);
             cancel(true);
 

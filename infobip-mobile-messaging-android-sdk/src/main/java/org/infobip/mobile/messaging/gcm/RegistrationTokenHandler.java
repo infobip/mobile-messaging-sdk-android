@@ -8,7 +8,7 @@ import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ class RegistrationTokenHandler {
     void handleRegistrationTokenUpdate(Context context) {
         try {
             InstanceID instanceID = InstanceID.getInstance(context);
-            String token = instanceID.getToken(MobileMessaging.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            String token = instanceID.getToken(MobileMessagingCore.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
             registrationComplete.putExtra("registrationId", token);
             context.sendBroadcast(registrationComplete);
@@ -50,21 +50,20 @@ class RegistrationTokenHandler {
             return;
         }
 
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
-        String infobipRegistrationId = mobileMessaging.getDeviceApplicationInstanceId();
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        String infobipRegistrationId = mobileMessagingCore.getDeviceApplicationInstanceId();
 
         boolean saveNeeded = null == infobipRegistrationId ||
-                null == mobileMessaging.getRegistrationId() ||
-                !token.equals(mobileMessaging.getRegistrationId()) ||
-                !mobileMessaging.isRegistrationIdSaved();
+                null == mobileMessagingCore.getRegistrationId() ||
+                !token.equals(mobileMessagingCore.getRegistrationId()) ||
+                !mobileMessagingCore.isRegistrationIdReported();
 
         if (!saveNeeded) {
             return;
         }
 
-        mobileMessaging.setRegistrationId(token);
-        mobileMessaging.setRegistrationIdSaved(false);
-        mobileMessaging.reportUnreportedRegistration();
+        mobileMessagingCore.setRegistrationId(token);
+        mobileMessagingCore.sync();
     }
 
     /**

@@ -10,6 +10,7 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.ApiInvalidParameterException;
 
 /**
@@ -26,14 +27,14 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
 
     @Override
     protected RegisterMsisdnResult doInBackground(Object... notUsed) {
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
-        long msisdn = mobileMessaging.getMsisdn();
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        long msisdn = mobileMessagingCore.getMsisdn();
         try {
-            MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessaging.getDeviceApplicationInstanceId(), msisdn);
+            MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessagingCore.getDeviceApplicationInstanceId(), msisdn);
 
             return new RegisterMsisdnResult(msisdn);
         } catch (ApiInvalidParameterException ae) {
-            mobileMessaging.setLastHttpException(ae);
+            mobileMessagingCore.setLastHttpException(ae);
             Log.e(MobileMessaging.TAG, "Error syncing MSISDN due to invalid parameter error!", ae);
             cancel(true);
 
@@ -47,7 +48,7 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
             return null;
 
         } catch (Exception e) {
-            mobileMessaging.setLastHttpException(e);
+            mobileMessagingCore.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error syncing MSISDN!", e);
             cancel(true);
 

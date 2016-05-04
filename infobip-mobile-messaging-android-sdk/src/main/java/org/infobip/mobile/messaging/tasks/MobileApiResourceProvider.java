@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.tasks;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
@@ -108,11 +108,11 @@ public enum MobileApiResourceProvider {
 
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
-        properties.put("api.key", MobileMessaging.getInstance(context).getApplicationCode());
+        properties.put("api.key", MobileMessagingCore.getInstance(context).getApplicationCode());
         properties.put("library.version", SoftwareInformation.getLibraryVersion());
 
         generator = new Generator.Builder().
-                withBaseUrl(MobileMessaging.getInstance(context).getApiUri()).
+                withBaseUrl(MobileMessagingCore.getInstance(context).getApiUri()).
                 withProperties(properties).
                 withUserAgentAdditions(getUserAgentAdditions(context)).
                 build();

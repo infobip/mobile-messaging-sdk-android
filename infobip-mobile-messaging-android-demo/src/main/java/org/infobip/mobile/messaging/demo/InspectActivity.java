@@ -339,7 +339,7 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.INFOBIP_REGISTRATION_ID.getKey()));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.APPLICATION_CODE.getKey()));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID.getKey()));
-            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey()));
+            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED.getKey()));
             bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_SENDER_ID.getKey()));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
             bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
@@ -351,10 +351,10 @@ public class InspectActivity extends PreferenceActivity {
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
             MobileMessaging mobileMessaging = MobileMessaging.getInstance(preference.getContext());
-            if (preference.getKey().equals(MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED.getKey())) {
-                mobileMessaging.reportUnreportedRegistration();
+            if (preference.getKey().equals(MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED.getKey())) {
+                mobileMessaging.sync();
             } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
-                mobileMessaging.reportUnreportedMessageIds();
+                mobileMessaging.sync();
             } else {
                 ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());

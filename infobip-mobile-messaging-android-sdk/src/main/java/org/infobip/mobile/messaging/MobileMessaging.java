@@ -2,15 +2,10 @@ package org.infobip.mobile.messaging;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
-import org.infobip.mobile.messaging.util.ExceptionUtils;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -44,26 +39,15 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @since 29.02.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MobileMessaging {
     public static final String TAG = "MobileMessaging";
 
     private static MobileMessaging instance;
     private final Context context;
-    private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
-    private final DeliveryReporter deliveryReporter = new DeliveryReporter();
-    private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
-    private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
-    private final MobileNetworkStateListener mobileNetworkStateListener;
-    private final MobileMessagingStats stats;
-    private MessageStore messageStore;
-    private NotificationSettings notificationSettings;
 
     private MobileMessaging(Context context) {
         this.context = context;
-        stats = new MobileMessagingStats(context);
-        mobileNetworkStateListener = new MobileNetworkStateListener(context);
-        PreferenceHelper.registerOnSharedPreferenceChangeListener(context, this);
     }
 
     public synchronized static MobileMessaging getInstance(Context context) {
@@ -75,216 +59,28 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
         return instance;
     }
 
-    public long getMsisdn() {
-        return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN);
+    public void setMessagesDelivered(final String... messageIds) {
+        MobileMessagingCore.getInstance(context).setMessagesDelivered(messageIds);
     }
 
     public void setMsisdn(long msisdn) {
-        if (msisdn < 0) {
-            throw new IllegalArgumentException("MSISDN can't be negative!");
-        }
-        long oldMsisdn = getMsisdn();
-        if (oldMsisdn != 0 && oldMsisdn == msisdn) {
-            return;
-        }
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN, msisdn);
+        MobileMessagingCore.getInstance(context).setMsisdn(msisdn);
     }
 
-    public String getRegistrationId() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+    public long getMsisdn() {
+        return MobileMessagingCore.getInstance(context).getMsisdn();
     }
 
-    public void setRegistrationId(String registrationId) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, registrationId);
-    }
-
-    public String getDeviceApplicationInstanceId() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
-    }
-
-    public String getGcmSenderId() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
-    }
-
-    private void setGcmSenderId(String gcmSenderId) {
-        if (StringUtils.isBlank(gcmSenderId)) {
-            throw new IllegalArgumentException("gcmSenderId is mandatory! Get one here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm");
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_SENDER_ID, gcmSenderId);
-    }
-
-    public String getApplicationCode() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
-    }
-
-    private void setApplicationCode(String applicationCode) {
-        if (StringUtils.isBlank(applicationCode)) {
-            throw new IllegalArgumentException("applicationCode is mandatory! Get one here: https://portal.infobip.com/push/applications");
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, applicationCode);
-    }
-
-    public String getApiUri() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
-    }
-
-    private void setApiUri(String apiUri) {
-        if (StringUtils.isBlank(apiUri)) {
-            throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
-    }
-
-    @SuppressWarnings("unused")
-    public String getLastHttpException() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION);
-    }
-
-    public void setLastHttpException(Exception lastHttpException) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
-    }
-
-    @SuppressWarnings({"unchecked", "WeakerAccess"})
-    public Class<? extends MessageStore> getMessageStoreClass() {
-        return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
-    }
-
-    private void setMessageStoreClass(Class<? extends MessageStore> messageStoreClass) {
-        String value = null != messageStoreClass ? messageStoreClass.getName() : null;
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, value);
-    }
-
-    public String[] getUnreportedMessageIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
-
-    }
-
-    public void addUnreportedMessageIds(final String... messageIDs) {
-        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
-    }
-
-    public void removeUnreportedMessageIds(final String... messageIDs) {
-        PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
-    }
-
-    public String[] getUnreportedSeenMessageIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
-    }
-
-    public void addUnreportedSeenMessageIds(final String... messageIDs) {
-        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
-    }
-
-    public void removeUnreportedSeenMessageIds(final String... messageIDs) {
-        PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
-    }
-
-    public NotificationSettings getNotificationSettings() {
-        if (!isDisplayNotificationEnabled()) {
-            return null;
-        }
-        if (null != notificationSettings)
-            return notificationSettings;
-
-        notificationSettings = new NotificationSettings(context);
-        return notificationSettings;
-    }
-
-    private void setNotificationSettings(NotificationSettings notificationSettings) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, null != notificationSettings);
-        this.notificationSettings = notificationSettings;
-    }
-
-    private boolean isDisplayNotificationEnabled() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
-    }
-    //endregion
-
-    public boolean isRegistrationIdSaved() {
-        return registrationSynchronizer.isRegistrationIdSaved(context);
-    }
-
-    public void setRegistrationIdSaved(boolean registrationIdSaved) {
-        registrationSynchronizer.setRegistrationIdSaved(context, registrationIdSaved);
-    }
-
-    public boolean isMsisdnSaved() {
-        return msisdnSynchronizer.isMsisdnSaved(context);
-    }
-
-    public void setMsisdnSaved(boolean msisdnSaved) {
-        msisdnSynchronizer.setMsisdnSaved(context, msisdnSaved);
-    }
-
-    public void reportUnreportedRegistration() {
-        registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getStats());
-    }
-
-    public void reportUnreportedMessageIds() {
-        deliveryReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedMessageIds(), getStats());
-    }
-
-    public void reportUnreportedSeenMessageIds() {
-        seenStatusReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdSaved(), getUnreportedSeenMessageIds(), getStats());
-    }
-
-    public void setMessageSeen(String messageId) {
-        if (isMessageStoreEnabled()) {
-            for (Message message : messageStore.findAllMatching(context, messageId)) {
-                message.setSeenTimestamp(System.currentTimeMillis());
-                messageStore.save(context, message);
-            }
-        }
-        addUnreportedSeenMessageIds(messageId);
-        reportUnreportedSeenMessageIds();
-    }
-
-    public void syncMsisdn() {
-        msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getMsisdn(), isMsisdnSaved(), getStats());
+    public void setMessagesSeen(final String... messageIds) {
+        MobileMessagingCore.getInstance(context).setMessagesSeen(messageIds);
     }
 
     public MessageStore getMessageStore() {
-        if (!isMessageStoreEnabled()) {
-            return null;
-        }
-
-        if (null != messageStore) {
-            return messageStore;
-        }
-
-        Class<? extends MessageStore> messageStoreClass = null;
-        try {
-            messageStoreClass = getMessageStoreClass();
-            messageStore = messageStoreClass.newInstance();
-            return messageStore;
-        } catch (Exception e) {
-            throw new MessageStoreInstantiationException("Can't create message store of type: " + messageStoreClass, e);
-        }
+        return MobileMessagingCore.getInstance(context).getMessageStore();
     }
 
-    public boolean isMessageStoreEnabled() {
-        return null != getMessageStoreClass();
-    }
-
-    private MobileMessagingStats getStats() {
-        return stats;
-    }
-
-    protected void setReportCarrierInfo(boolean reportCarrierInfo) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO, reportCarrierInfo);
-    }
-
-    protected void setReportSystemInfo(boolean reportSystemInfo) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (!MobileMessagingProperty.MSISDN.getKey().equals(key)) {
-            return;
-        }
-        setMsisdnSaved(false);
-        syncMsisdn();
+    public void sync() {
+        MobileMessagingCore.getInstance(context).sync();
     }
 
     /**
@@ -320,7 +116,7 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
             if (null == context) {
                 throw new IllegalArgumentException("context is mandatory!");
             }
-            this.context = context;
+            this.context = context.getApplicationContext();
 
             loadDefaultApiUri(context);
             loadGcmSenderId(context);
@@ -527,22 +323,20 @@ public class MobileMessaging implements SharedPreferences.OnSharedPreferenceChan
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
-            MobileMessaging mobileMessaging = new MobileMessaging(context.getApplicationContext());
+            MobileMessagingCore.setApiUri(context, apiUri);
+            MobileMessagingCore.setGcmSenderId(context, gcmSenderId);
+            MobileMessagingCore.setApplicationCode(context, applicationCode);
+            MobileMessagingCore.setMessageStoreClass(context, messageStoreClass);
+            MobileMessagingCore.setReportCarrierInfo(context, reportCarrierInfo);
+            MobileMessagingCore.setReportSystemInfo(context, reportSystemInfo);
 
-            mobileMessaging.setApiUri(apiUri);
-            mobileMessaging.setGcmSenderId(gcmSenderId);
-            mobileMessaging.setApplicationCode(applicationCode);
-            mobileMessaging.setMessageStoreClass(messageStoreClass);
-            mobileMessaging.setNotificationSettings(notificationSettings);
-            mobileMessaging.setReportCarrierInfo(reportCarrierInfo);
-            mobileMessaging.setReportSystemInfo(reportSystemInfo);
-
+            MobileMessaging mobileMessaging = new MobileMessaging(context);
             MobileMessaging.instance = mobileMessaging;
-
             mobileMessaging.playServicesSupport.checkPlayServices(context);
-            mobileMessaging.reportUnreportedRegistration();
-            mobileMessaging.reportUnreportedMessageIds();
-            mobileMessaging.syncMsisdn();
+
+            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+            mobileMessagingCore.setNotificationSettings(notificationSettings);
+            mobileMessagingCore.sync();
 
             return mobileMessaging;
         }

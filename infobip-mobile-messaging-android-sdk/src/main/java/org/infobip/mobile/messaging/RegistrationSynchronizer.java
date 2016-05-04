@@ -45,7 +45,7 @@ class RegistrationSynchronizer {
                     return;
                 }
                 setDeviceApplicationInstanceId(context, registrationResponse.getDeviceApplicationInstanceId());
-                setRegistrationIdSaved(context, true);
+                setRegistrationIdReported(context, true);
 
                 Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
                 registrationCreated.putExtra("registrationId", registrationId);
@@ -57,7 +57,7 @@ class RegistrationSynchronizer {
             @Override
             protected void onCancelled() {
                 Log.e(TAG, "Error creating registration!");
-                setRegistrationIdSaved(context, false);
+                setRegistrationIdReported(context, false);
 
                 stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
             }
@@ -68,11 +68,11 @@ class RegistrationSynchronizer {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
     }
 
-    void setRegistrationIdSaved(Context context, boolean registrationIdSaved) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED, registrationIdSaved);
+    void setRegistrationIdReported(Context context, boolean registrationIdSaved) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, registrationIdSaved);
     }
 
-    boolean isRegistrationIdSaved(Context context) {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_SAVED);
+    boolean isRegistrationIdReported(Context context) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED);
     }
 }

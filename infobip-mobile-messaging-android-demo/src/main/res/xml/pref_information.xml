@@ -32,9 +32,9 @@
     />
 
     <SwitchPreference
-            android:key="org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_SAVED"
-            android:title="@string/pref_title_gcm_registration_id_saved"
-            android:summary="@string/pref_description_gcm_registration_id_saved"
+            android:key="org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED"
+            android:title="@string/pref_title_gcm_registration_id_reported"
+            android:summary="@string/pref_description_gcm_registration_id_reported"
             android:defaultValue="false"/>
 
     <Preference

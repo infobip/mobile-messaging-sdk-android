@@ -11,6 +11,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 
 import java.util.List;
 
@@ -28,21 +29,21 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
 
     @Override
     protected SeenStatusReportResult doInBackground(Object... notUsed) {
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         try {
-            String messageIDs[] = mobileMessaging.getUnreportedSeenMessageIds();
+            String messageIDs[] = mobileMessagingCore.getUnreportedSeenMessageIds();
             SeenMessages seenMessages;
-            if (mobileMessaging.isMessageStoreEnabled()) {
-                List<Message> messages = mobileMessaging.getMessageStore().findAllMatching(context, messageIDs);
+            if (mobileMessagingCore.isMessageStoreEnabled()) {
+                List<Message> messages = mobileMessagingCore.getMessageStore().findAllMatching(context, messageIDs);
                 seenMessages = SeenMessages.fromMessages(messages);
             } else {
                 seenMessages = SeenMessages.fromMessageIds(messageIDs);
             }
             MobileApiResourceProvider.INSTANCE.getMobileApiSeenStatusReport(context).report(seenMessages.toJson());
-            mobileMessaging.removeUnreportedSeenMessageIds(messageIDs);
+            mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
             return new SeenStatusReportResult(messageIDs);
         } catch (Exception e) {
-            mobileMessaging.setLastHttpException(e);
+            mobileMessagingCore.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error reporting seen status!", e);
             cancel(true);
 

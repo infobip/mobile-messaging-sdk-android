@@ -9,14 +9,9 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.*;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author mstipanov
@@ -47,14 +42,14 @@ class MobileMessageHandler {
     }
 
     private void saveMessage(Context context, Message message) {
-        if (!MobileMessaging.getInstance(context).isMessageStoreEnabled()) {
+        if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
             Log.d(MobileMessaging.TAG, "Skipping save message: " + message.getMessageId());
             return;
         }
 
         Log.d(MobileMessaging.TAG, "Saving message: " + message.getMessageId());
         try {
-            MobileMessaging.getInstance(context).getMessageStore().save(context, message);
+            MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
         } catch (Exception e) {
             Log.e(MobileMessaging.TAG, "Error saving message: " + message.getMessageId(), e);
         }
@@ -69,13 +64,11 @@ class MobileMessageHandler {
 
     private void sendDeliveryReport(Context context, Message message) {
         if (StringUtils.isBlank(message.getMessageId())) {
-            Log.e(TAG, "No ID received for message: " + message);
+            Log.e(MobileMessaging.TAG, "No ID received for message: " + message);
             return;
         }
         Log.d(MobileMessaging.TAG, "Sending DR: " + message.getMessageId());
-        MobileMessaging.getInstance(context).addUnreportedMessageIds(message.getMessageId());
-        MobileMessaging.getInstance(context).reportUnreportedMessageIds();
-        MobileMessaging.getInstance(context).syncMsisdn();
+        MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
     }
 
     /**
@@ -84,8 +77,7 @@ class MobileMessageHandler {
      * @param message message received.
      */
     private void displayNotification(Context context, Message message) {
-        MobileMessaging mobileMessaging = MobileMessaging.getInstance(context);
-        NotificationSettings notificationSettings = mobileMessaging.getNotificationSettings();
+        NotificationSettings notificationSettings = MobileMessagingCore.getInstance(context).getNotificationSettings();
         if (null == notificationSettings) {
             return;
         }

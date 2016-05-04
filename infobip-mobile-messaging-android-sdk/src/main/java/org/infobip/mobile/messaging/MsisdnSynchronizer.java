@@ -23,12 +23,12 @@ class MsisdnSynchronizer {
             return;
         }
 
-        reportRegistration(context, msisdn, stats);
+        reportMSISDN(context, msisdn, stats);
     }
 
-    private void reportRegistration(final Context context, final long msisdn, final MobileMessagingStats stats) {
+    private void reportMSISDN(final Context context, final long msisdn, final MobileMessagingStats stats) {
         if (msisdn <= 0) {
-            MobileMessaging.getInstance(context).setMsisdnSaved(true);
+            MobileMessagingCore.getInstance(context).setMsisdnReported(true);
             return;
         }
 
@@ -44,7 +44,7 @@ class MsisdnSynchronizer {
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
                 }
-                setMsisdnSaved(context, true);
+                setMsisdnReported(context, true);
 
                 Intent registrationCreated = new Intent(Event.MSISDN_SYNCED.getKey());
                 registrationCreated.putExtra("msisdn", msisdn);
@@ -54,19 +54,19 @@ class MsisdnSynchronizer {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error syncing MSISDN registration!");
-                setMsisdnSaved(context, false);
+                Log.e(TAG, "Error reporting MSISDN!");
+                setMsisdnReported(context, false);
 
-                stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
+                stats.reportError(MobileMessagingError.MSISDN_SYNC_ERROR);
             }
         }.execute();
     }
 
-    void setMsisdnSaved(Context context, boolean msisdnSaved) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MSISDN_SAVED, msisdnSaved);
+    void setMsisdnReported(Context context, boolean msisdnReported) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MSISDN_REPORTED, msisdnReported);
     }
 
-    boolean isMsisdnSaved(Context context) {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MSISDN_SAVED);
+    boolean isMsisdnReported(Context context) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MSISDN_REPORTED);
     }
 }

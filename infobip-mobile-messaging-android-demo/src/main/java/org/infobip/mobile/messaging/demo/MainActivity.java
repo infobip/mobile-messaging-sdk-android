@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onMessageExpanded(Message message) {
             MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
-            mobileMessaging.setMessageSeen(message.getMessageId());
+            mobileMessaging.setMessagesSeen(message.getMessageId());
         }
     };
 
