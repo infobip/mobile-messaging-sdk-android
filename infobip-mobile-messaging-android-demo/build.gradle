@@ -1,0 +1,64 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:2.1.0-alpha3'
+    }
+}
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 23
+        versionCode 1
+        versionName version
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}")
+            storePassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
+            keyAlias "alias_name"
+            keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
+        }
+    }
+
+    buildTypes {
+        debug {
+            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
+            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
+        }
+        release {
+            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
+            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile project(':infobip-mobile-messaging-android-sdk')
+    compile project(':infobip-mobile-messaging-api-java')
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'com.android.support:support-v4:23.2.1'
+}

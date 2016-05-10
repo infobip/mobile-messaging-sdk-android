@@ -1,0 +1,1 @@
+include ':infobip-mobile-messaging-api-java', ':infobip-mobile-messaging-android-sdk', ':infobip-mobile-messaging-android-demo'

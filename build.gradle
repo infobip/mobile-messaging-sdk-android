@@ -1,0 +1,70 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0"
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.2.1'
+    id "com.jfrog.artifactory" version "4.0.0"
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+subprojects {
+    apply plugin: "com.jfrog.artifactory"
+
+    def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+    def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "http://ci-server.infobip.local/artifactory"
+    def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
+    def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
+
+    task checkProperties << {
+        if (!artifactoryUsername) {
+            throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
+        } else if (!artifactoryPassword) {
+            throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
+        }
+    }
+
+    artifactoryPublish.dependsOn(checkProperties)
+
+    artifactory {
+        contextUrl = artifactoryUrl
+        publish {
+            repository {
+                repoKey = "${repo}"
+                username = "${artifactoryUsername}"
+                password = "${artifactoryPassword}"
+                maven = true
+            }
+            defaults {
+                publishConfigs('archives')
+            }
+        }
+        resolve {
+            repository {
+                repoKey = 'repo'
+                username = "${artifactoryUsername}"
+                password = "${artifactoryPassword}"
+                maven = true
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+release {
+    buildTasks = ['clean', 'build', 'bintrayUpload']
+}
