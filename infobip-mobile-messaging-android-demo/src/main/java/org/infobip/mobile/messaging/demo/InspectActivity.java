@@ -2,10 +2,12 @@ package org.infobip.mobile.messaging.demo;
 
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
@@ -17,6 +19,7 @@ import android.preference.*;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -27,10 +30,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.List;
 
@@ -105,6 +110,36 @@ public class InspectActivity extends PreferenceActivity {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(ApplicationPreferences.MSISDN)) {
                 OnMSISDNPreferenceChanged(sharedPreferences);
+            }
+        }
+    };
+    private boolean receiversRegistered = false;
+    private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String parameterName = intent.getStringExtra("parameterName");
+            if (parameterName.equals("msisdn")) {
+                long msisdn = intent.getLongExtra("parameterValue", 0);
+                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_invalid) + ": " + msisdn,
+                        Toast.LENGTH_LONG).show();
+
+                PreferenceManager.getDefaultSharedPreferences(InspectActivity.this)
+                        .edit()
+                        .putString(ApplicationPreferences.MSISDN, "")
+                        .commit();
+            }
+        }
+    };
+    private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long msisdn = intent.getLongExtra("msisdn", 0);
+            if (msisdn == 0) {
+                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_cannot_save),
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_set) + ": " + msisdn,
+                        Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -228,7 +263,8 @@ public class InspectActivity extends PreferenceActivity {
 
     @Override
     protected void onDestroy() {
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+        unregisterReceiver();
+        unregisterPreferenceChangeListener();
 
         super.onDestroy();
         getDelegate().onDestroy();
@@ -243,6 +279,34 @@ public class InspectActivity extends PreferenceActivity {
             mDelegate = AppCompatDelegate.create(this, null);
         }
         return mDelegate;
+    }
+
+    private void registerReceiver() {
+        if (!receiversRegistered) {
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+            localBroadcastManager.registerReceiver(validationErrorReceiver,
+                    new IntentFilter(Event.API_PARAMETER_VALIDATION_ERROR.getKey()));
+            localBroadcastManager.registerReceiver(msisdnRecevier,
+                    new IntentFilter(Event.MSISDN_SYNCED.getKey()));
+            receiversRegistered = true;
+        }
+    }
+
+    private void unregisterReceiver() {
+        if (receiversRegistered) {
+            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+            localBroadcastManager.unregisterReceiver(validationErrorReceiver);
+            localBroadcastManager.unregisterReceiver(msisdnRecevier);
+            receiversRegistered = false;
+        }
+    }
+
+    private void registerPreferenceChangeListener() {
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+    }
+
+    private void unregisterPreferenceChangeListener() {
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     private void OnMSISDNPreferenceChanged(SharedPreferences sharedPreferences) {
@@ -266,7 +330,8 @@ public class InspectActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
 
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+        registerPreferenceChangeListener();
+        registerReceiver();
     }
 
     /**

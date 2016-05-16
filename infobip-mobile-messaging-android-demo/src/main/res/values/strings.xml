@@ -54,4 +54,6 @@
 
     <!-- Toast messages -->
     <string name="toast_message_msisdn_invalid">MSISDN is invalid</string>
+    <string name="toast_message_msisdn_cannot_save">Cannot save MSISDN</string>
+    <string name="toast_message_msisdn_set">MSISDN is set</string>
 </resources>
