@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.seenstatus.SeenMessages;
 
 import java.util.List;
 
@@ -35,11 +36,11 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
             SeenMessages seenMessages;
             if (mobileMessagingCore.isMessageStoreEnabled()) {
                 List<Message> messages = mobileMessagingCore.getMessageStore().findAllMatching(context, messageIDs);
-                seenMessages = SeenMessages.fromMessages(messages);
+                seenMessages = SeenMessagesReport.fromMessages(messages);
             } else {
-                seenMessages = SeenMessages.fromMessageIds(messageIDs);
+                seenMessages = SeenMessagesReport.fromMessageIds(messageIDs);
             }
-            MobileApiResourceProvider.INSTANCE.getMobileApiSeenStatusReport(context).report(seenMessages.toJson());
+            MobileApiResourceProvider.INSTANCE.getMobileApiSeenStatusReport(context).report(seenMessages);
             mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
             return new SeenStatusReportResult(messageIDs);
         } catch (Exception e) {

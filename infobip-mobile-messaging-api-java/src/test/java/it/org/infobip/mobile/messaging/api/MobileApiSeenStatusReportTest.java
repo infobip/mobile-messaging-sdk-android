@@ -1,5 +1,6 @@
 package it.org.infobip.mobile.messaging.api;
 
+import org.infobip.mobile.messaging.api.seenstatus.SeenMessages;
 import org.infobip.mobile.messaging.api.seenstatus.MobileApiSeenStatusReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
@@ -51,13 +52,15 @@ public class MobileApiSeenStatusReportTest {
     public void create_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiSeenStatusReport.report("my_report");
+        SeenMessages messages = new SeenMessages(new SeenMessages.Message("1", 2));
+
+        mobileApiSeenStatusReport.report(messages);
 
         //inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/seenMessages");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/messages/seen");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
-        assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);
-        assertThat(debugServer.getBody()).isEqualTo("\"my_report\"");
+        assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
+        assertThat(debugServer.getBody()).isEqualTo("{\"messages\":[{\"messageId\":\"1\",\"seenDate\":2.0}]}");
     }
 }
