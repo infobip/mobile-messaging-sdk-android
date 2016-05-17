@@ -11,7 +11,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.support.ApiInvalidParameterException;
+import org.infobip.mobile.messaging.api.support.ApiException;
 
 /**
  * @author mstipanov
@@ -31,33 +31,41 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
         long msisdn = mobileMessagingCore.getMsisdn();
         try {
             MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessagingCore.getDeviceApplicationInstanceId(), msisdn);
-
             return new RegisterMsisdnResult(msisdn);
-        } catch (ApiInvalidParameterException ae) {
-            mobileMessagingCore.setLastHttpException(ae);
-            Log.e(MobileMessaging.TAG, "Error syncing MSISDN due to invalid parameter error!", ae);
-            cancel(true);
-
-            Intent registrationError = new Intent(Event.API_PARAMETER_VALIDATION_ERROR.getKey());
-            registrationError.putExtra("parameterName", "msisdn");
-            registrationError.putExtra("parameterValue", msisdn);
-            registrationError.putExtra("exception", ae);
-            context.sendBroadcast(registrationError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
-
+        } catch (ApiException ae) {
+            if (ae.getCode().equals("5")) {
+                onMsisdnValidationError(ae, msisdn);
+            } else {
+                onApiCommunitationError(ae);
+            }
             return null;
-
         } catch (Exception e) {
-            mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error syncing MSISDN!", e);
-            cancel(true);
-
-            Intent registrationError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            registrationError.putExtra("exception", e);
-            context.sendBroadcast(registrationError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
-
+            onApiCommunitationError(e);
             return null;
         }
+    }
+
+    private void onMsisdnValidationError(Exception e, long msisdn) {
+        MobileMessagingCore.getInstance(context).setLastHttpException(e);
+        Log.e(MobileMessaging.TAG, "Error syncing MSISDN - did not pass validation!", e);
+        cancel(true);
+
+        Intent registrationError = new Intent(Event.API_PARAMETER_VALIDATION_ERROR.getKey());
+        registrationError.putExtra("parameterName", "msisdn");
+        registrationError.putExtra("parameterValue", msisdn);
+        registrationError.putExtra("exception", e);
+        context.sendBroadcast(registrationError);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
+    }
+
+    private void onApiCommunitationError(Exception e) {
+        MobileMessagingCore.getInstance(context).setLastHttpException(e);
+        Log.e(MobileMessaging.TAG, "Error syncing MSISDN!", e);
+        cancel(true);
+
+        Intent registrationError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+        registrationError.putExtra("exception", e);
+        context.sendBroadcast(registrationError);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
     }
 }

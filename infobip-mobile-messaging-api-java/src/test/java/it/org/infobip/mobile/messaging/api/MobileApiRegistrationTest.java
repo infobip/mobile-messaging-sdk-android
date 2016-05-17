@@ -80,7 +80,7 @@ public class MobileApiRegistrationTest {
         mobileApiRegistration.upsert(null, "123");
     }
 
-    @Test(expected = ApiInvalidParameterException.class)
+    @Test(expected = ApiException.class)
     public void create_onResponseError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some error!")));
 
