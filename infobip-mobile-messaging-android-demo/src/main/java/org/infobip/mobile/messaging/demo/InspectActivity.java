@@ -120,8 +120,8 @@ public class InspectActivity extends PreferenceActivity {
             String parameterName = intent.getStringExtra("parameterName");
             if (parameterName.equals("msisdn")) {
                 long msisdn = intent.getLongExtra("parameterValue", 0);
-                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_invalid) + ": " + msisdn,
-                        Toast.LENGTH_LONG).show();
+                Throwable throwable = (Throwable)intent.getSerializableExtra("exception");
+                showToast(throwable.getMessage());
 
                 PreferenceManager.getDefaultSharedPreferences(InspectActivity.this)
                         .edit()
@@ -135,11 +135,9 @@ public class InspectActivity extends PreferenceActivity {
         public void onReceive(Context context, Intent intent) {
             long msisdn = intent.getLongExtra("msisdn", 0);
             if (msisdn == 0) {
-                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_cannot_save),
-                        Toast.LENGTH_LONG).show();
+                showToast(R.string.toast_message_msisdn_cannot_save);
             } else {
-                Toast.makeText(InspectActivity.this, getString(R.string.toast_message_msisdn_set) + ": " + msisdn,
-                        Toast.LENGTH_LONG).show();
+                showToast(getString(R.string.toast_message_msisdn_set) + ": " + msisdn);
             }
         }
     };
@@ -262,6 +260,17 @@ public class InspectActivity extends PreferenceActivity {
     }
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        getDelegate().installViewFactory();
+        getDelegate().onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
+        setupActionBar();
+
+        registerPreferenceChangeListener();
+        registerReceiver();
+    }
+
+    @Override
     protected void onDestroy() {
         unregisterReceiver();
         unregisterPreferenceChangeListener();
@@ -319,19 +328,16 @@ public class InspectActivity extends PreferenceActivity {
                 throw new IllegalArgumentException();
             }
         } catch (Exception e) {
-            Toast.makeText(this, R.string.toast_message_msisdn_invalid, Toast.LENGTH_SHORT).show();
+            showToast(R.string.toast_message_msisdn_invalid);
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        getDelegate().installViewFactory();
-        getDelegate().onCreate(savedInstanceState);
-        super.onCreate(savedInstanceState);
-        setupActionBar();
+    private void showToast(String text) {
+        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+    }
 
-        registerPreferenceChangeListener();
-        registerReceiver();
+    private void showToast(int resId) {
+        showToast(getString(resId));
     }
 
     /**
