@@ -58,6 +58,9 @@ public class MobileMessagingCore {
         registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats());
         deliveryReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getUnreportedMessageIds(), getStats());
         seenStatusReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getUnreportedSeenMessageIds(), getStats());
+    }
+
+    public void syncMsisdn() {
         msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getMsisdn(), isMsisdnReported(), getStats());
     }
 

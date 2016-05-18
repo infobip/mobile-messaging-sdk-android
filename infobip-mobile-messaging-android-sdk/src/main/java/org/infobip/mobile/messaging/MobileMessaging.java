@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
- * <p>
+ * <p/>
  * It should is used in the Application entry point.
  * <pre>
  * {@code
@@ -35,7 +35,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @see Builder#withDisplayNotification(NotificationSettings)
  * @see Builder#withoutMessageStore()
  * @see Builder#withoutCarrierInfo()
- * @see Builder#withoutSystemInfo() 
+ * @see Builder#withoutSystemInfo()
  * @since 29.02.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -63,12 +63,12 @@ public class MobileMessaging {
         MobileMessagingCore.getInstance(context).setMessagesDelivered(messageIds);
     }
 
-    public void setMsisdn(long msisdn) {
-        MobileMessagingCore.getInstance(context).setMsisdn(msisdn);
-    }
-
     public long getMsisdn() {
         return MobileMessagingCore.getInstance(context).getMsisdn();
+    }
+
+    public void setMsisdn(long msisdn) {
+        MobileMessagingCore.getInstance(context).setMsisdn(msisdn);
     }
 
     public void setMessagesSeen(final String... messageIds) {
@@ -203,9 +203,9 @@ public class MobileMessaging {
          *       .build();
          * }
          * </pre>
-         * <p>
+         * <p/>
          * The default us set to <a href="https://oneapi.infobip.com">https://oneapi.infobip.com</a>.
-         * <p>
+         * <p/>
          * It fill fail if set to null or empty string.
          *
          * @param apiUri API endpoint
@@ -246,7 +246,7 @@ public class MobileMessaging {
          *       .build();
          * }
          * </pre>
-         * <p>
+         * <p/>
          *
          * @return {@link Builder}
          */
@@ -336,7 +336,6 @@ public class MobileMessaging {
 
             MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
-            mobileMessagingCore.sync();
 
             return mobileMessaging;
         }

@@ -52,6 +52,8 @@ class RegistrationSynchronizer {
                 registrationCreated.putExtra("deviceApplicationInstanceId", registrationResponse.getDeviceApplicationInstanceId());
                 context.sendBroadcast(registrationCreated);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
+
+                MobileMessagingCore.getInstance(context).syncMsisdn();
             }
 
             @Override
