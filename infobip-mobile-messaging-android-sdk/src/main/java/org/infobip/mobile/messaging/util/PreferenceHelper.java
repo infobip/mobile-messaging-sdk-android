@@ -37,7 +37,7 @@ public abstract class PreferenceHelper {
     public static void saveString(Context context, String key, String value) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (null == value) {
-            sharedPreferences.edit().remove(key).apply();
+            remove(context, key);
             return;
         }
         sharedPreferences.edit().putString(key, value).apply();
@@ -167,7 +167,7 @@ public abstract class PreferenceHelper {
     public static void saveLongArray(Context context, String key, long[] value) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         if (null == value) {
-            sharedPreferences.edit().remove(key).apply();
+            remove(context, key);
             return;
         }
         JSONArray jsonArray = new JSONArray();
@@ -226,17 +226,35 @@ public abstract class PreferenceHelper {
             final Set<String> set = sharedPreferences.getStringSet(key, new HashSet<String>());
             mutator.mutate(set);
             if (set.isEmpty()) {
-                sharedPreferences.edit().remove(key).apply();
+                remove(context, key);
                 return;
             }
             sharedPreferences.edit().putStringSet(key, set).apply();
         }
     }
 
+    public static void remove(Context context, MobileMessagingProperty property) {
+        remove(context, property.getKey());
+    }
+
+    public static void remove(Context context, String key) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .remove(key)
+                .apply();
+    }
+
+    public static boolean contains(Context context, MobileMessagingProperty property) {
+        return contains(context, property.getKey());
+    }
+
+    public static boolean contains(Context context, String key) {
+        return PreferenceManager.getDefaultSharedPreferences(context).contains(key);
+    }
+
     public static void registerOnSharedPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
     }
-
     private static abstract class SetMutator {
         abstract void mutate(Set<String> set);
     }

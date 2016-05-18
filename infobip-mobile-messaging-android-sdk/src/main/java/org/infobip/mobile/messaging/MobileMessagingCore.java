@@ -30,11 +30,10 @@ public class MobileMessagingCore {
     private OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (!MobileMessagingProperty.MSISDN.getKey().equals(key)) {
-                return;
+            if (MobileMessagingProperty.MSISDN_TO_REPORT.getKey().equals(key) &&
+                PreferenceHelper.contains(context, MobileMessagingProperty.MSISDN_TO_REPORT)) {
+                syncMsisdn();
             }
-            setMsisdnReported(false);
-            sync();
         }
     };
 
@@ -61,11 +60,15 @@ public class MobileMessagingCore {
     }
 
     public void syncMsisdn() {
-        msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getMsisdn(), isMsisdnReported(), getStats());
+        msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getUnreportedMsisdn(), isMsisdnReported(), getStats());
     }
 
     public long getMsisdn() {
         return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN);
+    }
+
+    public long getUnreportedMsisdn() {
+        return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN_TO_REPORT);
     }
 
     protected void setMsisdn(long msisdn) {
@@ -74,9 +77,22 @@ public class MobileMessagingCore {
         }
         long oldMsisdn = getMsisdn();
         if (oldMsisdn != 0 && oldMsisdn == msisdn) {
+            setMsisdnReported(false);
             return;
         }
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN, msisdn);
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN_TO_REPORT, msisdn);
+    }
+
+    protected boolean isMsisdnReported() {
+        return !PreferenceHelper.contains(context, MobileMessagingProperty.MSISDN_TO_REPORT);
+    }
+
+    public void setMsisdnReported(boolean success) {
+        long reportedMsisdn = PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN_TO_REPORT);
+        if (success && reportedMsisdn > 0) {
+            PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN, reportedMsisdn);
+        }
+        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
     }
 
     public String getRegistrationId() {
@@ -169,14 +185,6 @@ public class MobileMessagingCore {
     public void setRegistrationId(String registrationId) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, registrationId);
         setRegistrationIdReported(false);
-    }
-
-    protected boolean isMsisdnReported() {
-        return msisdnSynchronizer.isMsisdnReported(context);
-    }
-
-    protected void setMsisdnReported(boolean msisdnSaved) {
-        msisdnSynchronizer.setMsisdnReported(context, msisdnSaved);
     }
 
     protected static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {

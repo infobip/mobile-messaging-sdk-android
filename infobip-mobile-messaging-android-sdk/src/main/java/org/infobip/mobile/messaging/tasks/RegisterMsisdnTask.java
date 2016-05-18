@@ -28,7 +28,7 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
     @Override
     protected RegisterMsisdnResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        long msisdn = mobileMessagingCore.getMsisdn();
+        long msisdn = mobileMessagingCore.getUnreportedMsisdn();
         try {
             MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessagingCore.getDeviceApplicationInstanceId(), msisdn);
             return new RegisterMsisdnResult(msisdn);
@@ -49,6 +49,8 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
         MobileMessagingCore.getInstance(context).setLastHttpException(e);
         Log.e(MobileMessaging.TAG, "Error syncing MSISDN - did not pass validation!", e);
         cancel(true);
+
+        MobileMessagingCore.getInstance(context).setMsisdnReported(false);
 
         Intent registrationError = new Intent(Event.API_PARAMETER_VALIDATION_ERROR.getKey());
         registrationError.putExtra("parameterName", "msisdn");

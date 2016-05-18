@@ -21,7 +21,7 @@ public enum MobileMessagingProperty {
     API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://oneapi.infobip.com/"),
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),
     MSISDN("org.infobip.mobile.messaging.infobip.MSISDN"),
-    MSISDN_REPORTED("org.infobip.mobile.messaging.infobip.MSISDN_REPORTED"),
+    MSISDN_TO_REPORT("org.infobip.mobile.messaging.infobip.MSISDN_TO_REPORT"),
     MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
     MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
     MOBILE_NETWORK_CODE("org.infobip.mobile.messaging.infobip.MNC", ""),
