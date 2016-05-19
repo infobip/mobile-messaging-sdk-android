@@ -2,13 +2,10 @@ package org.infobip.mobile.messaging.demo;
 
 
 import android.annotation.TargetApi;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -19,7 +16,6 @@ import android.preference.*;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -28,14 +24,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.List;
 
@@ -103,44 +96,6 @@ public class InspectActivity extends PreferenceActivity {
         }
     };
     private AppCompatDelegate mDelegate;
-
-    private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (key.equals(ApplicationPreferences.MSISDN)) {
-                OnMSISDNPreferenceChanged(sharedPreferences);
-            }
-        }
-    };
-    private boolean receiversRegistered = false;
-    private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String parameterName = intent.getStringExtra("parameterName");
-            if (parameterName.equals("msisdn")) {
-                long msisdn = intent.getLongExtra("parameterValue", 0);
-                Throwable throwable = (Throwable)intent.getSerializableExtra("exception");
-                showToast(throwable.getMessage());
-
-                PreferenceManager.getDefaultSharedPreferences(InspectActivity.this)
-                        .edit()
-                        .putString(ApplicationPreferences.MSISDN, "")
-                        .commit();
-            }
-        }
-    };
-    private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            long msisdn = intent.getLongExtra("msisdn", 0);
-            if (msisdn == 0) {
-                showToast(R.string.toast_message_msisdn_cannot_save);
-            } else {
-                showToast(getString(R.string.toast_message_msisdn_set) + ": " + msisdn);
-            }
-        }
-    };
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -265,16 +220,10 @@ public class InspectActivity extends PreferenceActivity {
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
         setupActionBar();
-
-        registerPreferenceChangeListener();
-        registerReceiver();
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver();
-        unregisterPreferenceChangeListener();
-
         super.onDestroy();
         getDelegate().onDestroy();
     }
@@ -288,56 +237,6 @@ public class InspectActivity extends PreferenceActivity {
             mDelegate = AppCompatDelegate.create(this, null);
         }
         return mDelegate;
-    }
-
-    private void registerReceiver() {
-        if (!receiversRegistered) {
-            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.registerReceiver(validationErrorReceiver,
-                    new IntentFilter(Event.API_PARAMETER_VALIDATION_ERROR.getKey()));
-            localBroadcastManager.registerReceiver(msisdnRecevier,
-                    new IntentFilter(Event.MSISDN_SYNCED.getKey()));
-            receiversRegistered = true;
-        }
-    }
-
-    private void unregisterReceiver() {
-        if (receiversRegistered) {
-            LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.unregisterReceiver(validationErrorReceiver);
-            localBroadcastManager.unregisterReceiver(msisdnRecevier);
-            receiversRegistered = false;
-        }
-    }
-
-    private void registerPreferenceChangeListener() {
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
-    }
-
-    private void unregisterPreferenceChangeListener() {
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
-    }
-
-    private void OnMSISDNPreferenceChanged(SharedPreferences sharedPreferences) {
-        try {
-            long msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
-            if (0 != msisdn) {
-                MobileMessaging mobileMessaging = MobileMessaging.getInstance(InspectActivity.this);
-                mobileMessaging.setMsisdn(msisdn);
-            } else {
-                throw new IllegalArgumentException();
-            }
-        } catch (Exception e) {
-            showToast(R.string.toast_message_msisdn_invalid);
-        }
-    }
-
-    private void showToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-    }
-
-    private void showToast(int resId) {
-        showToast(getString(resId));
     }
 
     /**

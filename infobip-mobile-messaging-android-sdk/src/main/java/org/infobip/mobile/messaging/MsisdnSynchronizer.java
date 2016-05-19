@@ -18,8 +18,8 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 class MsisdnSynchronizer {
 
-    void syncronize(Context context, String deviceApplicationInstanceId, long msisdn, boolean msisdnSaved, MobileMessagingStats stats) {
-        if (null != deviceApplicationInstanceId && msisdnSaved) {
+    void syncronize(Context context, String deviceApplicationInstanceId, long msisdn, boolean msisdnReported, MobileMessagingStats stats) {
+        if (null != deviceApplicationInstanceId && msisdnReported) {
             return;
         }
 
@@ -28,7 +28,7 @@ class MsisdnSynchronizer {
 
     private void reportMSISDN(final Context context, final long msisdn, final MobileMessagingStats stats) {
         if (msisdn <= 0) {
-            MobileMessagingCore.getInstance(context).setMsisdnReported(true);
+            MobileMessagingCore.getInstance(context).setMsisdnReported(false);
             return;
         }
 
@@ -39,34 +39,24 @@ class MsisdnSynchronizer {
                     Log.e(TAG, "MobileMessaging API didn't return any value!");
                     stats.reportError(MobileMessagingError.MSISDN_SYNC_ERROR);
 
-                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    context.sendBroadcast(registrationSaveError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                    Intent msisdnReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    context.sendBroadcast(msisdnReportError);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(msisdnReportError);
                     return;
                 }
-                setMsisdnReported(context, true);
+                MobileMessagingCore.getInstance(context).setMsisdnReported(true);
 
-                Intent registrationCreated = new Intent(Event.MSISDN_SYNCED.getKey());
-                registrationCreated.putExtra("msisdn", msisdn);
-                context.sendBroadcast(registrationCreated);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
+                Intent msisdnSynced = new Intent(Event.MSISDN_SYNCED.getKey());
+                msisdnSynced.putExtra("msisdn", msisdn);
+                context.sendBroadcast(msisdnSynced);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(msisdnSynced);
             }
 
             @Override
             protected void onCancelled() {
                 Log.e(TAG, "Error reporting MSISDN!");
-                setMsisdnReported(context, false);
-
                 stats.reportError(MobileMessagingError.MSISDN_SYNC_ERROR);
             }
         }.execute();
-    }
-
-    void setMsisdnReported(Context context, boolean msisdnReported) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MSISDN_REPORTED, msisdnReported);
-    }
-
-    boolean isMsisdnReported(Context context) {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MSISDN_REPORTED);
     }
 }
