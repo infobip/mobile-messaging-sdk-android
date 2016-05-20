@@ -23,10 +23,13 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.*;
+
 public class MainActivity extends AppCompatActivity {
     private TextView totalReceivedTextView;
     private ExpandableListAdapter listAdapter;
     private boolean receiversRegistered = false;
+
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -39,10 +42,10 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String parameterName = intent.getStringExtra("parameterName");
-            if (parameterName.equals("msisdn")) {
-                Throwable throwable = (Throwable)intent.getSerializableExtra("exception");
-                long msisdn = intent.getLongExtra("parameterValue", 0);
+            String parameterName = intent.getStringExtra(EXTRA_PARAMETER_NAME);
+            if (parameterName.equals(EXTRA_PARAMETER_MSISDN)) {
+                Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_PARAMETER_EXCEPTION);
+                long msisdn = intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
                 showToast(throwable.getMessage() + " for " + msisdn);
 
                 unregisterPreferenceChangeListener();
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long msisdn = intent.getLongExtra("msisdn", 0);
+            long msisdn = intent.getLongExtra(EXTRA_PARAMETER_MSISDN, 0);
             if (msisdn == 0) {
                 showToast(R.string.toast_message_msisdn_cannot_save);
             } else {

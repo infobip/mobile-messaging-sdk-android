@@ -111,7 +111,7 @@ public enum Event {
      * Contains the exception information.
      * <pre>
      * {@code
-     * Throwable exception = (Throwable) intent.getSerializableExtra("exception");
+     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_PARAMETER_EXCEPTION});
      * }
      * </pre>
      */
@@ -124,13 +124,13 @@ public enum Event {
      * <p>
      * Following parameters can now trigger validation error:
      * <ul>
-     * <li>{@link MobileMessaging#setMsisdn(long) msisdn} - use <a href="http://developer.android.com/reference/android/content/Intent.html#getLongExtra(java.lang.String, long)">intent.getLongExtra("parameterValue")</a> to get msisdn that caused the error</li>
+     * <li>{@link MobileMessaging#setMsisdn(long) msisdn} - use <a href="http://developer.android.com/reference/android/content/Intent.html#getLongExtra(java.lang.String, long)">intent.getLongExtra({@link BroadcastParameter#EXTRA_PARAMETER_VALUE})</a> to get msisdn that caused the error</li>
      * </ul>
      * <pre>
      * {@code
-     * String parameterName = intent.getStringExtra("parameterName"); // "msisdn"
-     * long msisdn = intent.getLongExtra("parameterValue", 0);
-     * Throwable exception = (Throwable) intent.getSerializableExtra("exception");
+     * String parameterName = intent.getStringExtra({@link BroadcastParameter#EXTRA_PARAMETER_NAME});
+     * long msisdn = intent.getLongExtra({@link BroadcastParameter#EXTRA_PARAMETER_MSISDN}, 0);
+     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_PARAMETER_EXCEPTION});
      * }
      * </pre>
      * @see MobileMessaging#setMsisdn(long)
@@ -165,7 +165,7 @@ public enum Event {
      * It is triggered when MSISDN is successfully stored on the registration server.
      * <pre>
      * {@code
-     * String msisdn = intent.getStringExtra("msisdn");
+     * String msisdn = intent.getStringExtra({@link BroadcastParameter#EXTRA_PARAMETER_MSISDN});
      * }
      * </pre>
      */

@@ -13,6 +13,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.ApiException;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.*;
+
 /**
  * @author mstipanov
  * @since 03.03.2016.
@@ -36,11 +38,11 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
             if (ae.getCode().equals("5")) {
                 onMsisdnValidationError(ae, msisdn);
             } else {
-                onApiCommunitationError(ae);
+                onApiCommunicationError(ae);
             }
             return null;
         } catch (Exception e) {
-            onApiCommunitationError(e);
+            onApiCommunicationError(e);
             return null;
         }
     }
@@ -53,20 +55,20 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
         MobileMessagingCore.getInstance(context).setMsisdnReported(false);
 
         Intent registrationError = new Intent(Event.API_PARAMETER_VALIDATION_ERROR.getKey());
-        registrationError.putExtra("parameterName", "msisdn");
-        registrationError.putExtra("parameterValue", msisdn);
-        registrationError.putExtra("exception", e);
+        registrationError.putExtra(EXTRA_PARAMETER_NAME, EXTRA_PARAMETER_MSISDN);
+        registrationError.putExtra(EXTRA_PARAMETER_VALUE, msisdn);
+        registrationError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
         context.sendBroadcast(registrationError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
     }
 
-    private void onApiCommunitationError(Exception e) {
+    private void onApiCommunicationError(Exception e) {
         MobileMessagingCore.getInstance(context).setLastHttpException(e);
         Log.e(MobileMessaging.TAG, "Error syncing MSISDN!", e);
         cancel(true);
 
         Intent registrationError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-        registrationError.putExtra("exception", e);
+        registrationError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
         context.sendBroadcast(registrationError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
     }

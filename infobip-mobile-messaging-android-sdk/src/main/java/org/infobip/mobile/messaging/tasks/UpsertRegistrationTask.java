@@ -12,6 +12,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_EXCEPTION;
+
 /**
  * @author mstipanov
  * @since 03.03.2016.
@@ -37,7 +39,7 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, Registration
             cancel(true);
 
             Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            registrationSaveError.putExtra("exception", e);
+            registrationSaveError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
             context.sendBroadcast(registrationSaveError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
 
