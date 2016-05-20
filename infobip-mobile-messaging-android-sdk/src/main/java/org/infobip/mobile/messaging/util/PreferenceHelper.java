@@ -223,7 +223,7 @@ public abstract class PreferenceHelper {
     private static void editSet(Context context, String key, SetMutator mutator) {
         synchronized (LOCK) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            final Set<String> set = sharedPreferences.getStringSet(key, new HashSet<String>());
+            final Set<String> set = new HashSet<>(sharedPreferences.getStringSet(key, new HashSet<String>()));
             mutator.mutate(set);
             if (set.isEmpty()) {
                 remove(context, key);

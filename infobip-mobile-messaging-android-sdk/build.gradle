@@ -23,7 +23,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName project.version
-        testInstrumentationRunner 'org.infobip.mobile.messaging.service.CustomInstrumentationTestRunner'
+        testInstrumentationRunner 'org.infobip.mobile.messaging.CustomInstrumentationTestRunner'
     }
 
     lintOptions {
