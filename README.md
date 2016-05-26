@@ -71,6 +71,14 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
                     android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
                     android:exported="true">
             </service>
+            <service
+                    android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
+                    android:exported="false">
+                    <intent-filter>
+                        <action android:name="com.google.android.gms.iid.InstanceID"/>
+                        <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+                    </intent-filter>
+            </service>
             ...
         </application>
     </manifest>
