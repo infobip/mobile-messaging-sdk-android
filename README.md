@@ -1,18 +1,32 @@
-#Mobile Messaging SDK for Android
+# Mobile Messaging SDK for Android
 
-Mobile Messaging SDK easily enables push notification channel in your mobile application.
-It gives your application access to the features of [Infobip IP Messaging Platform](https://portal.infobip.com/push/).
+[![Download](https://api.bintray.com/packages/infobip/maven/infobip-mobile-messaging-android-sdk/images/download.svg)](https://bintray.com/infobip/maven/infobip-mobile-messaging-android-sdk/_latestVersion)
+[![License](https://img.shields.io/github/license/infobip/mobile-messaging-sdk-android.svg?label=License)](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE)
 
-##Supported versions
-We support Android 4.0 "Ice Cream Sandwich" and later!
+Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of [Infobip IP Messaging Platform](https://portal.infobip.com/push/). 
+The document describes library integration steps.
 
-##Quick start guide
+## Requirements
 
-1. Create new application in Android Studio
+- Android Studio
+- API Level: 14 (Android 4.0 - Ice Cream Sandwich)
 
+## Quick start guide
+
+This guide is designed to get you up and running with Mobile Messaging SDK integrated into your Android application.
+
+1. Prepare your [GCM credentials](guides/GCM.md) to get GCM Sender ID and Server API Key.
+2. Prepare your Infobip account (https://portal.infobip.com/push/) to get your Application Code:
+    1. [Create new application](https://dev.infobip.com/v1/docs/push-introduction-create-app) on Infobip Push portal.
+    2. Navigate to your Application where you will get the Application Code.
+    3. Mark the "Available on Android" checkbox.
+    4. Insert previously obtained GCM Server Key.
+
+    <center><img src="guides/images/GCMAppSetup.png" alt="CUP Settings"/></center>
+3. Create new application in Android Studio
     * You can find more info on this link http://developer.android.com/training/basics/firstapp/creating-project.html
     
-2. Add dependencies to app/build.gradle
+4. Add dependencies to app/build.gradle
 
     ```groovy
     dependencies {
@@ -23,7 +37,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     }
     ```
 
-3. Add permissions and services to AndroidManifest.xml
+5. Add permissions and services to AndroidManifest.xml
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -62,7 +76,7 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     </manifest>
     ```
 
-4. Add GCM Sender ID and Infobip Application Code to values/strings.xml resource file
+6. Add GCM Sender ID, obtained in step 1, and Infobip Application Code, obtained in step 2, to values/strings.xml resource file
     ```groovy
     <resources>
         <string name="google_app_id">YOUR GCM SENDER</string>
@@ -70,11 +84,8 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
         ...
     </resources>
     ```
-    * You can generate the GCM Sender ID And Server API Key here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm
-    * You can generate the Application Code by creating the application here: https://portal.infobip.com/push/applications
-    * You need to enter your Application Code when you create the application!
 
-5. Add code to MainActivity#onCreate
+7. Add code to MainActivity#onCreate
 
     ```java
     import android.os.Bundle;
@@ -96,9 +107,9 @@ We support Android 4.0 "Ice Cream Sandwich" and later!
     }
     ```
     
-##Mobile Messaging APIs
+## Mobile Messaging APIs
 
-###Events
+### Events
 
 Library generates intents on the following events as described in [Event](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java):
 
@@ -110,7 +121,7 @@ Library generates intents on the following events as described in [Event](infobi
 * __Delivery reports sent__ - is triggered when message delivery is reported.
 * __MSISDN Synced__ - is triggered when MSISDN is successfully saved on the registration server.
 
-###Linking MSISDN
+### Linking MSISDN
 
 It is recommended that you link the Telephone number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
 It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
