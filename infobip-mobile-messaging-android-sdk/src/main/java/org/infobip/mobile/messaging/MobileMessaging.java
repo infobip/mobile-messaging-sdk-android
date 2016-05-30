@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 
-import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -44,7 +43,6 @@ public class MobileMessaging {
 
     private static MobileMessaging instance;
     private final Context context;
-    private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
 
     private MobileMessaging(Context context) {
         this.context = context;
@@ -325,17 +323,17 @@ public class MobileMessaging {
         public MobileMessaging build() {
             MobileMessagingCore.setApiUri(context, apiUri);
             MobileMessagingCore.setGcmSenderId(context, gcmSenderId);
-            MobileMessagingCore.setApplicationCode(context, applicationCode);
             MobileMessagingCore.setMessageStoreClass(context, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(context, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(context, reportSystemInfo);
 
             MobileMessaging mobileMessaging = new MobileMessaging(context);
             MobileMessaging.instance = mobileMessaging;
-            mobileMessaging.playServicesSupport.checkPlayServices(context);
 
-            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-            mobileMessagingCore.setNotificationSettings(notificationSettings);
+            new MobileMessagingCore.Builder(context)
+                    .withDisplayNotification(notificationSettings)
+                    .withApplicationCode(applicationCode)
+                    .build();
 
             return mobileMessaging;
         }

@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
+import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -24,6 +26,7 @@ public class MobileMessagingCore {
     private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
+    private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
@@ -154,7 +157,7 @@ public class MobileMessagingCore {
         return notificationSettings;
     }
 
-    protected void setNotificationSettings(NotificationSettings notificationSettings) {
+    private void setNotificationSettings(NotificationSettings notificationSettings) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, null != notificationSettings);
         this.notificationSettings = notificationSettings;
     }
@@ -233,14 +236,14 @@ public class MobileMessagingCore {
         return PreferenceHelper.findString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION);
     }
 
-    protected static void setApplicationCode(Context context, String applicationCode) {
+    private void setApplicationCode(String applicationCode) {
         if (StringUtils.isBlank(applicationCode)) {
             throw new IllegalArgumentException("applicationCode is mandatory! Get one here: https://portal.infobip.com/push/applications");
         }
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, applicationCode);
     }
 
-    public String getApplicationCode() {
+    public static String getApplicationCode(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
@@ -261,5 +264,99 @@ public class MobileMessagingCore {
 
     protected static void setReportSystemInfo(Context context, boolean reportSystemInfo) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
+    }
+
+    private static void cleanupSettings(Context context) {
+        PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
+        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+    }
+
+    /**
+     * The {@link MobileMessagingCore} builder class.
+     *
+     * @author sslavin
+     * @see MobileMessagingCore
+     * @see NotificationSettings.Builder
+     * @see NotificationSettings
+     * @since 30.05.2016.
+     */
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    public static final class Builder {
+
+        private NotificationSettings notificationSettings = null;
+        private String applicationCode = null;
+        private final Context context;
+
+        public Builder(Context context) {
+            if (null == context) {
+                throw new IllegalArgumentException("context is mandatory!");
+            }
+            this.context = context.getApplicationContext();
+        }
+
+        private void validateWithParam(Object o) {
+            if (null != o) {
+                return;
+            }
+            throw new IllegalArgumentException("Can't use 'with' method with null argument!");
+        }
+
+        /**
+         * It will set the notification configuration which will be used to display the notification automatically.
+         * <pre>
+         * {@code new MobileMessagingCore.Builder(context)
+         *       .withDisplayNotification(
+         *           new NotificationSettings.Builder(this)
+         *               .withDisplayNotification()
+         *               .withCallbackActivity(MyActivity.class)
+         *               .build()
+         *       )
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withDisplayNotification(NotificationSettings notificationSettings) {
+            this.notificationSettings = notificationSettings;
+            return this;
+        }
+
+        /**
+         * When you want to use the Application code that is not stored to <i>infobip_application_code</i> string resource
+         * By default it will use <i>infobip_application_code</i> string resource
+         *
+         * @param applicationCode if you don't have one, you should get one <a href="https://portal.infobip.com/push/applications">here</a>
+         * @return {@link Builder}
+         */
+        public Builder withApplicationCode(String applicationCode) {
+            validateWithParam(applicationCode);
+            this.applicationCode = applicationCode;
+            return this;
+        }
+
+        /**
+         * Builds the <i>MobileMessagingCore</i> configuration. Registration token sync is started by default.
+         * Any messages received in the past will be reported as delivered!
+         *
+         * @return {@link MobileMessagingCore}
+         */
+        public MobileMessagingCore build() {
+            if (!MobileMessagingCore.getApplicationCode(context).equals(applicationCode)) {
+                MobileMessagingCore.cleanupSettings(context);
+            }
+            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
+            mobileMessagingCore.setNotificationSettings(notificationSettings);
+            mobileMessagingCore.setApplicationCode(applicationCode);
+            MobileMessagingCore.instance = mobileMessagingCore;
+            mobileMessagingCore.playServicesSupport.checkPlayServices(context);
+            return mobileMessagingCore;
+        }
     }
 }
