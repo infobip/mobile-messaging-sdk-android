@@ -348,7 +348,7 @@ public class MobileMessagingCore {
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build() {
-            if (!MobileMessagingCore.getApplicationCode(context).equals(applicationCode)) {
+            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
                 MobileMessagingCore.cleanupSettings(context);
             }
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
