@@ -1,16 +1,17 @@
 package org.infobip.mobile.messaging;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
+import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -266,7 +267,15 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
     }
 
-    private static void cleanupSettings(Context context) {
+    private static void cleanup(Context context) {
+        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
+        String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+
+        Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
+        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
+        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_TOKEN, gcmToken);
+        context.startService(intent);
+
         PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
@@ -349,7 +358,7 @@ public class MobileMessagingCore {
          */
         public MobileMessagingCore build() {
             if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
-                MobileMessagingCore.cleanupSettings(context);
+                MobileMessagingCore.cleanup(context);
             }
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
             mobileMessagingCore.setNotificationSettings(notificationSettings);

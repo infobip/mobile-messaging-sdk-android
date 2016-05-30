@@ -155,6 +155,11 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @since 21.03.2016.
  */
 public class MobileMessagingGcmIntentService extends IntentService {
+    public static final String ACTION_GCM_MESSAGE_RECEIVE = "com.google.android.c2dm.intent.RECEIVE";
+    public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
+    public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
+    public static final String EXTRA_GCM_TOKEN = "org.infobip.mobile.messaging.gcm.GCM_TOKEN";
+
     private MobileMessageHandler mobileMessageHandler = new MobileMessageHandler();
     private RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
 
@@ -164,9 +169,12 @@ public class MobileMessagingGcmIntentService extends IntentService {
 
     @Override
     public void onHandleIntent(Intent intent) {
-        if ("com.google.android.c2dm.intent.RECEIVE".equals(intent.getAction())) {
+        if (ACTION_GCM_MESSAGE_RECEIVE.equals(intent.getAction())) {
             mobileMessageHandler.handleNotification(this, intent);
             return;
+        } else if (ACTION_TOKEN_CLEANUP.equals(intent.getAction())) {
+            registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+            return ;
         }
 
         registrationTokenHandler.handleRegistrationTokenUpdate(this);

@@ -72,11 +72,26 @@ class RegistrationTokenHandler {
      * @param token GCM token
      * @throws IOException if unable to reach the GCM PubSub service
      */
-    // [START subscribe_topics]
     private void subscribeTopics(Context context, String token) throws IOException {
         GcmPubSub pubSub = GcmPubSub.getInstance(context);
         for (String topic : TOPICS) {
             pubSub.subscribe(token, "/topics/" + topic, null);
+        }
+    }
+
+    /**
+     * Cleanup GCM token accosicated with a specific GCM sender ID.
+     *
+     * @param gcmSenderID GCM sender ID
+     * @param gcmToken GCM token to delete
+     * @throws IOException if unable to reach the GCM PubSub service
+     */
+    void handleRegistrationTokenCleanup(Context context, String gcmSenderID, String gcmToken) {
+        try {
+            InstanceID instanceID = InstanceID.getInstance(context);
+            instanceID.deleteToken(gcmSenderID, gcmToken);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to complete GCM token cleanup", e);
         }
     }
 }
