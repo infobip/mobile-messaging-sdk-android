@@ -18,14 +18,4 @@ public class SeenMessagesReport extends SeenMessages {
         }
         return new SeenMessages(messages.toArray(new Message[messages.size()]));
     }
-
-    public static org.infobip.mobile.messaging.api.seenstatus.SeenMessages fromMessages(List<org.infobip.mobile.messaging.Message> messages) {
-        List<Message> seenMessages = new ArrayList<>();
-        for (int i = 0; i < messages.size(); i++) {
-            seenMessages.add( new Message(
-                    messages.get(i).getMessageId(),
-                    messages.get(i).getSeenTimestamp()));
-        }
-        return new SeenMessages(seenMessages.toArray(new Message[seenMessages.size()]));
-    }
 }

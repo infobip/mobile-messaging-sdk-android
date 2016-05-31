@@ -38,15 +38,6 @@ public interface MessageStore {
     List<Message> findAll(Context context);
 
     /**
-     * Finds all stored messages that match specified ids
-     *
-     * @param context current context
-     * @param messageIDs ids of messages to find
-     * @return all stored messages
-     */
-    List<Message> findAllMatching(Context context, String... messageIDs);
-
-    /**
      * Counts all stored messages
      *
      * @param context current context

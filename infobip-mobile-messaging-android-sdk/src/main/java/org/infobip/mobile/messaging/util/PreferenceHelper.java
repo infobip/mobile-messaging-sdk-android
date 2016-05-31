@@ -182,13 +182,22 @@ public abstract class PreferenceHelper {
     }
 
     public static String[] findStringArray(Context context, String key, String[] defaultValue) {
+        return find(context, key, defaultValue, new SetConverter<String[]>() {
+            @Override
+            protected String[] convert(Set<String> set) {
+                return set.toArray(new String[set.size()]);
+            }
+        });
+    }
+
+    public static <T> T find(Context context, String key, T defaultValue, SetConverter<T> converter) {
         synchronized (LOCK) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             Set<String> value = sharedPreferences.getStringSet(key, null);
             if (null == value) {
                 return defaultValue;
             }
-            return value.toArray(new String[value.size()]);
+            return converter.convert(value);
         }
     }
 
@@ -199,7 +208,7 @@ public abstract class PreferenceHelper {
     public static void appendToStringArray(Context context, String key, final String... strings) {
         SetMutator mutator = new SetMutator() {
             @Override
-            void mutate(Set<String> set) {
+            protected void mutate(Set<String> set) {
                 set.addAll(Arrays.asList(strings));
             }
         };
@@ -213,14 +222,14 @@ public abstract class PreferenceHelper {
     public static void deleteFromStringArray(Context context, String key, final String... strings) {
         SetMutator mutator = new SetMutator() {
             @Override
-            void mutate(Set<String> set) {
+            protected void mutate(Set<String> set) {
                 set.removeAll(Arrays.asList(strings));
             }
         };
         editSet(context, key, mutator);
     }
 
-    private static void editSet(Context context, String key, SetMutator mutator) {
+    public static void editSet(Context context, String key, SetMutator mutator) {
         synchronized (LOCK) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
             final Set<String> set = new HashSet<>(sharedPreferences.getStringSet(key, new HashSet<String>()));
@@ -255,7 +264,12 @@ public abstract class PreferenceHelper {
     public static void registerOnSharedPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
     }
-    private static abstract class SetMutator {
-        abstract void mutate(Set<String> set);
+
+    public static abstract class SetMutator {
+        abstract protected void mutate(Set<String> set);
+    }
+
+    public static abstract class SetConverter<T> {
+        abstract protected T convert(Set<String> set);
     }
 }

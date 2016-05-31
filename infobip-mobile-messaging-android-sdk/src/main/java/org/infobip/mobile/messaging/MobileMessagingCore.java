@@ -137,12 +137,6 @@ public class MobileMessagingCore {
     }
 
     protected void setMessagesSeen(String... messageIds) {
-        if (isMessageStoreEnabled()) {
-            for (Message message : messageStore.findAllMatching(context, messageIds)) {
-                message.setSeenTimestamp(System.currentTimeMillis());
-                messageStore.save(context, message);
-            }
-        }
         addUnreportedSeenMessageIds(messageIds);
         sync();
     }

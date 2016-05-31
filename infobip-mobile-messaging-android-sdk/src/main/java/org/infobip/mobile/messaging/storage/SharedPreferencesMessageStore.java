@@ -1,12 +1,11 @@
 package org.infobip.mobile.messaging.storage;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.preference.PreferenceManager;
 import android.util.Base64;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.*;
 
@@ -31,42 +30,30 @@ import java.util.*;
 public class SharedPreferencesMessageStore implements MessageStore {
 
     private static final String INFOBIP_MESSAGE_DATA_SET = "org.infobip.mobile.messaging.store.DATA";
-    private static final Object LOCK = new Object();
 
     public void save(Context context, Message message) {
         addMessage(context, message);
     }
 
     public List<Message> findAll(Context context) {
-        return findAllMatching(context, new String[0]);
-    }
-
-    public List<Message> findAllMatching(Context context, String... messageIDs) {
-        synchronized (LOCK) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
-            List<String> listMessageIDs = Arrays.asList(messageIDs);
-            ArrayList<Message> messages = new ArrayList<>();
-            for (String s : messageSet) {
-                Message message = new Message(deserialize(s));
-                if (listMessageIDs.isEmpty() || listMessageIDs.contains(message.getMessageId())) {
-                    messages.add(message);
+        return PreferenceHelper.find(context, INFOBIP_MESSAGE_DATA_SET, new ArrayList<Message>(), new PreferenceHelper.SetConverter<List<Message>>() {
+            @Override
+            protected List<Message> convert(Set<String> set) {
+                List<Message> messages = new ArrayList<Message>();
+                for (String bundle : set) {
+                    messages.add(new Message(deserialize(bundle)));
                 }
+                return messages;
             }
-            Collections.sort(messages);
-            return messages;
-        }
+        });
     }
 
     public void deleteAll(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
+        PreferenceHelper.remove(context, INFOBIP_MESSAGE_DATA_SET);
     }
 
     public long countAll(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> unreportedMessageIdSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
-        return unreportedMessageIdSet.size();
+        return findAll(context).size();
     }
 
     public List<Message> bind(final Context context) {
@@ -84,9 +71,9 @@ public class SharedPreferencesMessageStore implements MessageStore {
     }
 
     private void addMessage(Context context, final Message message) {
-        SetMutator addMessageMutator = new SetMutator() {
+        PreferenceHelper.editSet(context, INFOBIP_MESSAGE_DATA_SET, new PreferenceHelper.SetMutator() {
             @Override
-            void mutate(Set<String> set) {
+            protected void mutate(Set<String> set) {
                 for (String serializedBundle : new HashSet<>(set)) {
                     Message messageInSet = new Message(deserialize(serializedBundle));
                     if (messageInSet.getMessageId().equals(message.getMessageId())) {
@@ -96,23 +83,8 @@ public class SharedPreferencesMessageStore implements MessageStore {
                 }
                 set.add(serialize(message.getBundle()));
             }
-        };
-        editMessages(context, addMessageMutator);
+        });
     }
-
-    private synchronized void editMessages(Context context, SetMutator mutator) {
-        synchronized (LOCK) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            final Set<String> messageSet = sharedPreferences.getStringSet(INFOBIP_MESSAGE_DATA_SET, new LinkedHashSet<String>());
-            mutator.mutate(messageSet);
-            if (messageSet.isEmpty()) {
-                sharedPreferences.edit().remove(INFOBIP_MESSAGE_DATA_SET).apply();
-                return;
-            }
-            sharedPreferences.edit().putStringSet(INFOBIP_MESSAGE_DATA_SET, messageSet).apply();
-        }
-    }
-
 
     private String serialize(Bundle in) {
         Parcel parcel = Parcel.obtain();
@@ -138,9 +110,5 @@ public class SharedPreferencesMessageStore implements MessageStore {
         } finally {
             parcel.recycle();
         }
-    }
-
-    private abstract class SetMutator {
-        abstract void mutate(Set<String> set);
     }
 }

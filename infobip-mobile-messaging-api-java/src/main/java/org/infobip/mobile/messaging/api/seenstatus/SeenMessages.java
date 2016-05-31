@@ -27,28 +27,8 @@ public class SeenMessages {
          * @param messageId - id of a message to report.
          */
         public Message(String messageId) {
-            this(messageId, System.currentTimeMillis());
-        }
-
-        /**
-         * Constructs message with the supplied Id and timestamp in long format.
-         *
-         * @param messageId - id of a message.
-         * @param seenDate - tmestamp in long.
-         */
-        public Message(String messageId, long seenDate) {
-            this(messageId, (double) seenDate);
-        }
-
-        /**
-         * Constructs message with the supplied id and timestamp in Double format.
-         *
-         * @param messageId - id of a message.
-         * @param seenDate - timestamp in Double.
-         */
-        public Message(String messageId, Double seenDate) {
             this.messageId = messageId;
-            this.seenDate = seenDate;
+            this.seenDate = (double) System.currentTimeMillis();
         }
     }
 
