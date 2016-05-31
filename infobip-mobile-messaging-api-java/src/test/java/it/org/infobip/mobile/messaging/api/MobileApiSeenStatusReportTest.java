@@ -52,7 +52,7 @@ public class MobileApiSeenStatusReportTest {
     public void create_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        SeenMessages messages = new SeenMessages(new SeenMessages.Message("1", 2));
+        SeenMessages messages = new SeenMessages(new SeenMessages.Message("1"));
 
         mobileApiSeenStatusReport.report(messages);
 
@@ -61,6 +61,5 @@ public class MobileApiSeenStatusReportTest {
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
-        assertThat(debugServer.getBody()).isEqualTo("{\"messages\":[{\"messageId\":\"1\",\"seenDate\":2.0}]}");
     }
 }
