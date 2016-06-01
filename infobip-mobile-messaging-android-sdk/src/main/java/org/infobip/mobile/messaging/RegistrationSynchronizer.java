@@ -48,8 +48,8 @@ class RegistrationSynchronizer {
                 setRegistrationIdReported(context, true);
 
                 Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
-                registrationCreated.putExtra("registrationId", registrationId);
-                registrationCreated.putExtra("deviceApplicationInstanceId", registrationResponse.getDeviceApplicationInstanceId());
+                registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, registrationId);
+                registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, registrationResponse.getDeviceApplicationInstanceId());
                 context.sendBroadcast(registrationCreated);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
 

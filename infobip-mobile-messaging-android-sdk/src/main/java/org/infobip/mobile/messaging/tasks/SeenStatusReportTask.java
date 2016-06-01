@@ -9,14 +9,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.seenstatus.SeenMessages;
 
-import java.util.List;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_EXCEPTION;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
 /**
  * @author sslavin
@@ -45,7 +42,7 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
             cancel(true);
 
             Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            seenStatusReportError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
+            seenStatusReportError.putExtra(EXTRA_EXCEPTION, e);
             context.sendBroadcast(seenStatusReportError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
 

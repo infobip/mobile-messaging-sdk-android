@@ -127,30 +127,6 @@ public class InspectActivity extends PreferenceActivity {
                         .getString(preference.getKey(), ""));
     }
 
-    private static void bindLongPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getLong(preference.getKey(), 0L));
-    }
-
-    private static void bindBooleanPreferenceSummaryToValue(Preference preference) {
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getBoolean(preference.getKey(), false));
-    }
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -306,31 +282,22 @@ public class InspectActivity extends PreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.INFOBIP_REGISTRATION_ID.getKey()));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.APPLICATION_CODE.getKey()));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID.getKey()));
-            bindBooleanPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED.getKey()));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.GCM_SENDER_ID.getKey()));
-            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.REGISTRATION_SYNC_ERROR)));
-            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.DELIVERY_REPORTING_ERROR)));
-            bindLongPreferenceSummaryToValue(findPreference(MobileMessagingStats.getKey(MobileMessagingError.MSISDN_SYNC_ERROR)));
-            bindStringPreferenceSummaryToValue(findPreference(MobileMessagingProperty.LAST_HTTP_EXCEPTION.getKey()));
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.GCM_TOKEN));
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.INFOBIP_REGISTRATION_ID));
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.LAST_API_COMMUNICATION_ERROR));
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.LAST_API_PARAMETER_VALIDATION_ERROR));
+
+            // Set summary for read-only preferences
+            findPreference(ApplicationPreferences.APP_CODE).setSummary(R.string.infobip_application_code);
+            findPreference(ApplicationPreferences.GCM_SENDER_ID).setSummary(R.string.google_app_id);
         }
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             boolean b = super.onPreferenceTreeClick(preferenceScreen, preference);
-            MobileMessaging mobileMessaging = MobileMessaging.getInstance(preference.getContext());
-            if (preference.getKey().equals(MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED.getKey())) {
-                mobileMessaging.sync();
-            } else if (preference.getKey().equals(MobileMessagingError.DELIVERY_REPORTING_ERROR)) {
-                mobileMessaging.sync();
-            } else {
-                ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());
-                clipboard.setPrimaryClip(clip);
-            }
-
+            ClipboardManager clipboard = (ClipboardManager) preference.getContext().getSystemService(CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(preference.getTitle(), preference.getSummary());
+            clipboard.setPrimaryClip(clip);
             return b;
         }
 

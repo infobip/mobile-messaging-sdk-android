@@ -7,6 +7,8 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
+
+import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -27,7 +29,7 @@ class RegistrationTokenHandler {
             InstanceID instanceID = InstanceID.getInstance(context);
             String token = instanceID.getToken(MobileMessagingCore.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
-            registrationComplete.putExtra("registrationId", token);
+            registrationComplete.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, token);
             context.sendBroadcast(registrationComplete);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationComplete);
             sendRegistrationToServer(context, token);

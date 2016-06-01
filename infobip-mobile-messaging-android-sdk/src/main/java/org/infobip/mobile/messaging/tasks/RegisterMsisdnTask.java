@@ -55,9 +55,9 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
         MobileMessagingCore.getInstance(context).setMsisdnReported(false);
 
         Intent registrationError = new Intent(Event.API_PARAMETER_VALIDATION_ERROR.getKey());
-        registrationError.putExtra(EXTRA_PARAMETER_NAME, EXTRA_PARAMETER_MSISDN);
+        registrationError.putExtra(EXTRA_PARAMETER_NAME, EXTRA_MSISDN);
         registrationError.putExtra(EXTRA_PARAMETER_VALUE, msisdn);
-        registrationError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
+        registrationError.putExtra(EXTRA_EXCEPTION, e);
         context.sendBroadcast(registrationError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
     }
@@ -68,7 +68,7 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
         cancel(true);
 
         Intent registrationError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-        registrationError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
+        registrationError.putExtra(EXTRA_EXCEPTION, e);
         context.sendBroadcast(registrationError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationError);
     }

@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ExpandableListAdapter listAdapter;
     private boolean receiversRegistered = false;
 
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Message message = new Message(intent.getExtras());
@@ -42,9 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String parameterName = intent.getStringExtra(EXTRA_PARAMETER_NAME);
-            if (parameterName.equals(EXTRA_PARAMETER_MSISDN)) {
-                Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_PARAMETER_EXCEPTION);
+            if (EXTRA_MSISDN.equals(intent.getStringExtra(EXTRA_PARAMETER_NAME))) {
+                Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_EXCEPTION);
                 long msisdn = intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
                 showToast(throwable.getMessage() + " for " + msisdn);
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long msisdn = intent.getLongExtra(EXTRA_PARAMETER_MSISDN, 0);
+            long msisdn = intent.getLongExtra(EXTRA_MSISDN, 0);
             if (msisdn == 0) {
                 showToast(R.string.toast_message_msisdn_cannot_save);
             } else {

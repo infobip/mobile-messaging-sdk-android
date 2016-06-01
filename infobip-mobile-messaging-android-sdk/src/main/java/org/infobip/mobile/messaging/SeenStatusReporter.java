@@ -45,7 +45,7 @@ public class SeenStatusReporter {
 
                 Intent seenReportsSent = new Intent(Event.SEEN_REPORTS_SENT.getKey());
                 Bundle extras = new Bundle();
-                extras.putStringArray("messageIDs", result.getMessageIDs());
+                extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, result.getMessageIDs());
                 seenReportsSent.putExtras(extras);
                 context.sendBroadcast(seenReportsSent);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(seenReportsSent);

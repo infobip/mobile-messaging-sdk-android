@@ -8,9 +8,8 @@ import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnResult;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnTask;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_MSISDN;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MSISDN;
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
@@ -48,7 +47,7 @@ class MsisdnSynchronizer {
                 MobileMessagingCore.getInstance(context).setMsisdnReported(true);
 
                 Intent msisdnSynced = new Intent(Event.MSISDN_SYNCED.getKey());
-                msisdnSynced.putExtra(EXTRA_PARAMETER_MSISDN, msisdn);
+                msisdnSynced.putExtra(EXTRA_MSISDN, msisdn);
                 context.sendBroadcast(msisdnSynced);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(msisdnSynced);
             }

@@ -44,7 +44,7 @@ class DeliveryReporter {
 
                 Intent messageReceived = new Intent(Event.DELIVERY_REPORTS_SENT.getKey());
                 Bundle extras = new Bundle();
-                extras.putStringArray("messageIDs", result.getMessageIDs());
+                extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, result.getMessageIDs());
                 messageReceived.putExtras(extras);
                 context.sendBroadcast(messageReceived);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);

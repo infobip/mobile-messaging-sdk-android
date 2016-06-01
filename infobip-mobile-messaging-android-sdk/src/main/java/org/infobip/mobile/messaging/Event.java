@@ -71,7 +71,7 @@ public enum Event {
      * Contains the GCM registration token.
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra("registrationId");
+     * String gcmRegistrationToken = intent.getStringExtra({@link BroadcastParameter#EXTRA_GCM_TOKEN});
      * }
      * </pre>
      */
@@ -80,12 +80,12 @@ public enum Event {
     /**
      * It is triggered when GCM registration token successfully stored on the registration server.
      * <p>
-     * Contains the GCM registration token and the device application instance ID
+     * Contains the GCM registration token and Infobip device application instance ID
      * (which identifies every application instance).
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra("registrationId");
-     *        String deviceApplicationInstanceId = intent.getStringExtra("deviceApplicationInstanceId");
+     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_GCM_TOKEN});
+     * String deviceApplicationInstanceId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
      * }
      * </pre>
      */
@@ -111,7 +111,7 @@ public enum Event {
      * Contains the exception information.
      * <pre>
      * {@code
-     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_PARAMETER_EXCEPTION});
+     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_EXCEPTION });
      * }
      * </pre>
      */
@@ -129,8 +129,8 @@ public enum Event {
      * <pre>
      * {@code
      * String parameterName = intent.getStringExtra({@link BroadcastParameter#EXTRA_PARAMETER_NAME});
-     * long msisdn = intent.getLongExtra({@link BroadcastParameter#EXTRA_PARAMETER_MSISDN}, 0);
-     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_PARAMETER_EXCEPTION});
+     * long msisdn = intent.getLongExtra({@link BroadcastParameter#EXTRA_MSISDN}, 0);
+     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_EXCEPTION});
      * }
      * </pre>
      * @see MobileMessaging#setMsisdn(long)
@@ -143,7 +143,7 @@ public enum Event {
      * Contains the list of all reported message IDs.
      * <pre>
      * {@code
-     * String[] messageIDs = intent.getStringArrayExtra("messageIDs");
+     * String[] messageIDs = intent.getStringArrayExtra({@link BroadcastParameter#EXTRA_MESSAGE_IDS});
      * }
      * </pre>
      */
@@ -155,7 +155,7 @@ public enum Event {
      * Contains the list of all reported message IDs.
      * <pre>
      * {@code
-     * String[] messageIDs = intent.getStringArrayExtra("messageIDs");
+     * String[] messageIDs = intent.getStringArrayExtra({@link BroadcastParameter#EXTRA_MESSAGE_IDS});
      * }
      * </pre>
      */
@@ -165,7 +165,7 @@ public enum Event {
      * It is triggered when MSISDN is successfully stored on the registration server.
      * <pre>
      * {@code
-     * String msisdn = intent.getStringExtra({@link BroadcastParameter#EXTRA_PARAMETER_MSISDN});
+     * String msisdn = intent.getStringExtra({@link BroadcastParameter#EXTRA_MSISDN });
      * }
      * </pre>
      */

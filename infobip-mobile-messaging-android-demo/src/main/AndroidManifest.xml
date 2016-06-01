@@ -38,6 +38,16 @@
                 </intent-filter>
         </service>
 
+        <receiver
+            android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_ACQUIRED"/>
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED"/>
+                <action android:name="org.infobip.mobile.messaging.API_COMMUNICATION_ERROR"/>
+                <action android:name="org.infobip.mobile.messaging.API_PARAMETER_VALIDATION_ERROR"/>
+            </intent-filter>
+        </receiver>
+
         <activity
                 android:name=".MainActivity"
                 android:label="@string/app_name"

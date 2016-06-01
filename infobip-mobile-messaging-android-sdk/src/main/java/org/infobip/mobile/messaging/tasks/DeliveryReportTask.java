@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_EXCEPTION;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
 /**
  * @author mstipanov
@@ -39,7 +39,7 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
             cancel(true);
 
             Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            registrationSaveError.putExtra(EXTRA_PARAMETER_EXCEPTION, e);
+            registrationSaveError.putExtra(EXTRA_EXCEPTION, e);
             context.sendBroadcast(registrationSaveError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
 

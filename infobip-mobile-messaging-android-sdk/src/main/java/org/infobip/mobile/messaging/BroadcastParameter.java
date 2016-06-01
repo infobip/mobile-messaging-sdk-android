@@ -6,10 +6,13 @@ package org.infobip.mobile.messaging;
  */
 public final class BroadcastParameter {
 
-    public static final String EXTRA_PARAMETER_NAME = "org.infobip.mobile.messaging.parameterName";
-    public static final String EXTRA_PARAMETER_VALUE = "org.infobip.mobile.messaging.parameterValue";
-    public static final String EXTRA_PARAMETER_EXCEPTION = "org.infobip.mobile.messaging.parameterException";
-    public static final String EXTRA_PARAMETER_MSISDN = "org.infobip.mobile.messaging.msisdn";
+    public static final String EXTRA_PARAMETER_NAME = "org.infobip.mobile.messaging.parameter.name";
+    public static final String EXTRA_PARAMETER_VALUE = "org.infobip.mobile.messaging.parameter.value";
+    public static final String EXTRA_EXCEPTION = "org.infobip.mobile.messaging.exception";
+    public static final String EXTRA_MSISDN = "org.infobip.mobile.messaging.msisdn";
+    public static final String EXTRA_GCM_TOKEN = "org.infobip.mobile.messaging.gcm.token";
+    public static final String EXTRA_INFOBIP_ID = "org.infobip.mobile.messaging.infobip.token";
+    public static final String EXTRA_MESSAGE_IDS = "org.infobip.mobile.messaging.message.ids";
 
     private BroadcastParameter() {
     }
