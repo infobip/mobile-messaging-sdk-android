@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 
+import java.util.Set;
+
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
  *
@@ -13,6 +15,7 @@ import android.os.Bundle;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Message implements Comparable {
     private final Bundle bundle;
+    private Bundle customData;
 
     public Message() {
         bundle = new Bundle();
@@ -130,6 +133,20 @@ public class Message implements Comparable {
 
     public void setSeenTimestamp(long receivedTimestamp) {
         bundle.putLong(Data.SEEN_TIMESTAMP.getKey(), receivedTimestamp);
+    }
+
+    public Bundle getCustomData() {
+        if (null != this.customData) {
+            return customData;
+        }
+
+        Bundle customDataBundle = (Bundle) getData().clone();
+        for (Data key : Data.values()) {
+            customDataBundle.remove(key.getKey());
+        }
+
+        customData = customDataBundle;
+        return customData;
     }
 
     @Override

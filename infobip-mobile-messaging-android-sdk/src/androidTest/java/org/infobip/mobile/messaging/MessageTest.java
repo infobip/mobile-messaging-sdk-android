@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * @author mstipanov
@@ -74,5 +75,50 @@ public class MessageTest extends TestCase {
 //        data.putBundle("notification", notification);
 
         assertEquals("1234", message.getMessageId());
+    }
+
+    public void test_customData() throws Exception {
+        Message message = new Message(new Bundle());
+
+        Bundle dataBundle = new Bundle();
+        dataBundle.putString("mykey", "mickey");
+        dataBundle.putString("mykey2", "mickey2");
+        dataBundle.putString("mykey3", "mickey3");
+        dataBundle.putString("mykey4", "mickey4");
+        dataBundle.putString("mykey5", "mickey5");
+
+        message.setData(dataBundle);
+
+
+        Bundle customData = message.getCustomData();
+
+        assertTrue(equalBundles(customData, dataBundle));
+
+    }
+
+    public boolean equalBundles(Bundle one, Bundle two) {
+        if(one.size() != two.size())
+            return false;
+
+        Set<String> setOne = one.keySet();
+        Object valueOne;
+        Object valueTwo;
+
+        for(String key : setOne) {
+            valueOne = one.get(key);
+            valueTwo = two.get(key);
+            if(valueOne instanceof Bundle && valueTwo instanceof Bundle &&
+                    !equalBundles((Bundle) valueOne, (Bundle) valueTwo)) {
+                return false;
+            }
+            else if(valueOne == null) {
+                if(valueTwo != null || !two.containsKey(key))
+                    return false;
+            }
+            else if(!valueOne.equals(valueTwo))
+                return false;
+        }
+
+        return true;
     }
 }
