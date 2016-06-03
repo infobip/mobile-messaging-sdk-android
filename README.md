@@ -22,7 +22,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     3. Mark the "Available on Android" checkbox.
     4. Insert previously obtained GCM Server Key.
 
-    <center><img src="guides/images/GCMAppSetup.png" alt="CUP Settings"/></center>
+    <center><img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/GCMAppSetup.png" alt="CUP Settings"/></center>
 3. Create new application in Android Studio
     * You can find more info on this link http://developer.android.com/training/basics/firstapp/creating-project.html
     
