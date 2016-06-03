@@ -34,14 +34,18 @@ android {
     }
 
     buildTypes {
-        debug {
-            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
-            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
+        all {
+            def googleAppId = project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')
+            if (googleAppId) {
+                resValue "string", "google_app_id", googleAppId
+            }
+
+            def infobipApplicationCode = project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')
+            if (infobipApplicationCode) {
+                resValue "string", "infobip_application_code", infobipApplicationCode
+            }
         }
         release {
-            resValue "string", "google_app_id", "${project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')}"
-            resValue "string", "infobip_application_code", "${project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')}"
-
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
