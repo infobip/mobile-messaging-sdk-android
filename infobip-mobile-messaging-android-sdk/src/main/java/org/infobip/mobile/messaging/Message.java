@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 
-import java.util.Set;
-
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
  *
@@ -145,6 +143,10 @@ public class Message implements Comparable {
             customDataBundle.remove(key.getKey());
         }
 
+        for (GcmData gcmKey : GcmData.values()) {
+            customDataBundle.remove(gcmKey.getKey());
+        }
+
         customData = customDataBundle;
         return customData;
     }
@@ -174,6 +176,22 @@ public class Message implements Comparable {
         private final String key;
 
         Data(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+    }
+
+    private enum GcmData {
+        GCM_NOTIFICATION_E("gcm.notification.e"),
+        ANDROID_SUPPORT_CONTENT_WAKELOCKID("android.support.content.wakelockid"),
+        COLLAPSE_KEY("collapse_key");
+
+        private final String key;
+
+        GcmData(String key) {
             this.key = key;
         }
 

@@ -2,7 +2,9 @@ package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 import android.os.Parcel;
+
 import junit.framework.TestCase;
+
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.HashMap;
@@ -57,7 +59,7 @@ public class MessageTest extends TestCase {
         Bundle.CREATOR.createFromParcel(parcel);
 
         Message message = new Message(bundle);
-//        message.setMessageId("1234");
+        message.setMessageId("1234");
 //        message.setSound("some sound");
 //        message.setBody("lala");
 //        message.setTitle("title");
@@ -93,29 +95,54 @@ public class MessageTest extends TestCase {
         Bundle customData = message.getCustomData();
 
         assertTrue(equalBundles(customData, dataBundle));
+    }
 
+    public void test_customDataWithGcmKeys() throws Exception {
+        Message message = new Message(new Bundle());
+
+        Bundle dataBundle = new Bundle();
+        dataBundle.putString("mykey1", "mickey1");
+        dataBundle.putString("mykey2", "mickey2");
+        dataBundle.putString("mykey3", "mickey3");
+        dataBundle.putString("mykey4", "mickey4");
+        dataBundle.putString("gcm.notification.e", "1");
+        dataBundle.putString("gcm.notification.messageId", "L+auqUQFlo1yqk2TEakxua/4rc6DmGgm7cM6G0GRQjU=");
+        dataBundle.putString("gcm.notification.sound", "default");
+        dataBundle.putString("gcm.notification.title", "notification title sender");
+        dataBundle.putString("gcm.notification.body", "push text");
+        dataBundle.putString("android.support.content.wakelockid", "11");
+        dataBundle.putString("collapse_key", "org.infobip.mobile.messaging.showcase.dev");
+
+        message.setData(dataBundle);
+
+
+        Bundle customData = message.getCustomData();
+
+        assertFalse(equalBundles(customData, dataBundle));
+        assertTrue(dataBundle.keySet().size() == 11);
+        assertTrue(customData.keySet().size() == 4);
+        assertFalse(customData.containsKey("android.support.content.wakelockid"));
+        assertTrue(customData.containsKey("mykey4"));
     }
 
     public boolean equalBundles(Bundle one, Bundle two) {
-        if(one.size() != two.size())
+        if (one.size() != two.size())
             return false;
 
         Set<String> setOne = one.keySet();
         Object valueOne;
         Object valueTwo;
 
-        for(String key : setOne) {
+        for (String key : setOne) {
             valueOne = one.get(key);
             valueTwo = two.get(key);
-            if(valueOne instanceof Bundle && valueTwo instanceof Bundle &&
+            if (valueOne instanceof Bundle && valueTwo instanceof Bundle &&
                     !equalBundles((Bundle) valueOne, (Bundle) valueTwo)) {
                 return false;
-            }
-            else if(valueOne == null) {
-                if(valueTwo != null || !two.containsKey(key))
+            } else if (valueOne == null) {
+                if (valueTwo != null || !two.containsKey(key))
                     return false;
-            }
-            else if(!valueOne.equals(valueTwo))
+            } else if (!valueOne.equals(valueTwo))
                 return false;
         }
 
