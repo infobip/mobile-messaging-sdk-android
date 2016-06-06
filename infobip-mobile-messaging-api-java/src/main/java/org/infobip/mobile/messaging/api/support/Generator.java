@@ -84,6 +84,34 @@ public class Generator {
         return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), ApiKey.class);
     }
 
+    private User getUserAnnotation(Method method) {
+        User user = method.getAnnotation(User.class);
+        if (null != user) {
+            return user;
+        }
+
+        user = method.getDeclaringClass().getAnnotation(User.class);
+        if (null != user) {
+            return user;
+        }
+
+        return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), User.class);
+    }
+
+    private Password getPasswordAnnotation(Method method) {
+        Password password = method.getAnnotation(Password.class);
+        if (null != password) {
+            return password;
+        }
+
+        password = method.getDeclaringClass().getAnnotation(Password.class);
+        if (null != password) {
+            return password;
+        }
+
+        return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), Password.class);
+    }
+
     private <T extends Annotation> T getPackageAnnotation(String pkg, Class<T> annotationClass) {
         Package p = Package.getPackage(pkg);
         if (null == p) {
@@ -247,6 +275,8 @@ public class Generator {
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
             Map<String, Collection<Object>> headerMap = new HashMap<>(proxyCache.getDefaultHeaderMap());
             String apiKey = proxyCache.getApiKey();
+            String user = proxyCache.getUser();
+            String password = proxyCache.getPassword();
 
             Parameter[] parameters = proxyCache.getParameters();
             Object body = null;
@@ -280,7 +310,7 @@ public class Generator {
                 }
             }
 
-            return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, queryParams, headerMap, body, method.getReturnType());
+            return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, user, password, queryParams, headerMap, body, method.getReturnType());
         }
 
         private HttpMethod getHttpRequestMethod(HttpRequest[] httpRequests) {
@@ -320,6 +350,8 @@ public class Generator {
         private final HashMap<String, Collection<Object>> defaultHeaderMap;
         private final Parameter[] parameters;
         private final String apiKey;
+        private final String user;
+        private final String password;
 
         public ProxyCache(Method method) {
             this.httpRequests = createHttpRequest(method);
@@ -328,6 +360,8 @@ public class Generator {
             this.defaultHeaderMap = createDefaultHeaderMap(method);
             this.parameters = createParameters(method);
             this.apiKey = findApiKey(method);
+            this.user = findUser(method);
+            this.password = findPassword(method);
         }
 
         private String findApiKey(Method method) {
@@ -336,6 +370,22 @@ public class Generator {
                 return null;
             }
             return injectProperty(apiKeyAnotation.value());
+        }
+
+        private String findUser(Method method) {
+            User userAnnotation = getUserAnnotation(method);
+            if (null == userAnnotation) {
+                return null;
+            }
+            return injectProperty(userAnnotation.value());
+        }
+
+        private String findPassword(Method method) {
+            Password passwordAnnotation = getPasswordAnnotation(method);
+            if (null == passwordAnnotation) {
+                return null;
+            }
+            return injectProperty(passwordAnnotation.value());
         }
 
         private Parameter[] createParameters(Method method) {

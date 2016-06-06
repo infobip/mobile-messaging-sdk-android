@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.api.support.http.client;
 
+import org.apache.commons.codec.binary.Base64;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -48,7 +49,7 @@ public class DefaultApiClient implements ApiClient {
     }
 
     @Override
-    public <B, R> R execute(HttpMethod method, String uri, String apiKey, Map<String, Collection<Object>> queryParams, Map<String, Collection<Object>> headers, B body, Class<R> responseType) {
+    public <B, R> R execute(HttpMethod method, String uri, String apiKey, String user, String password, Map<String, Collection<Object>> queryParams, Map<String, Collection<Object>> headers, B body, Class<R> responseType) {
         HttpURLConnection urlConnection = null;
         try {
             StringBuilder sb = new StringBuilder();
@@ -82,6 +83,9 @@ public class DefaultApiClient implements ApiClient {
             }
             if (StringUtils.isNotBlank(apiKey)) {
                 urlConnection.setRequestProperty("Authorization", "App " + apiKey);
+            } else if (StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password)) {
+                String basicApiKey = Base64.encodeBase64String((user + ":" + password).getBytes());
+                urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
             }
             urlConnection.setRequestProperty("Accept", "application/json");
             String userAgent = urlConnection.getRequestProperty("User-Agent");
