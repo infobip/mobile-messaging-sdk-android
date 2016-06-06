@@ -55,4 +55,7 @@
     <string name="toast_message_msisdn_invalid">MSISDN is invalid</string>
     <string name="toast_message_msisdn_cannot_save">Cannot save MSISDN</string>
     <string name="toast_message_msisdn_set">MSISDN is set</string>
+
+    <string name="google_app_id">YOUR GCM SENDER</string>
+    <string name="infobip_application_code">YOUR APPLICATION CODE</string>
 </resources>
