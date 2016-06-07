@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import org.apache.commons.codec.binary.Base64;
 import org.infobip.mobile.messaging.api.support.ApiException;
+import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiError;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiServiceException;
@@ -44,14 +45,14 @@ public class DefaultApiClientTest {
                 DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse(
                         new ApiError(new ApiServiceException("1", "Invalid Application ID")))));
 
-        apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, ApiResponse.class);
+        apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, ApiResponse.class);
     }
 
     @Test
     public void execute_withQueryParams_noHeaders_noBody_receivesOK() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new SomeApiResponse(11)));
 
-        SomeApiResponse result = apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), "12345", null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, SomeApiResponse.class);
+        SomeApiResponse result = apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), "12345", null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, SomeApiResponse.class);
 
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
@@ -69,14 +70,14 @@ public class DefaultApiClientTest {
                 DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse(
                         new ApiError(new ApiServiceException("1", "Invalid Application ID")))));
 
-        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, new SomeApiRequest("Test"), ApiResponse.class);
+        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, new SomeApiRequest("Test"), ApiResponse.class);
     }
 
     @Test
     public void execute_withQueryParams_noHeaders_withBody_receivesOK() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new SomeApiResponse(11)));
 
-        SomeApiResponse result = apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, new SomeApiRequest("Test"), SomeApiResponse.class);
+        SomeApiResponse result = apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, new SomeApiRequest("Test"), SomeApiResponse.class);
 
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
@@ -94,14 +95,14 @@ public class DefaultApiClientTest {
                 DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse(
                         new ApiError(new ApiServiceException("1", "Invalid Application ID")))));
 
-        apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), null, ApiResponse.class);
+        apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), null, ApiResponse.class);
     }
 
     @Test
     public void execute_withQueryParams_withHeaders_noBody_receivesOK() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new SomeApiResponse(11)));
 
-        SomeApiResponse result = apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), null, SomeApiResponse.class);
+        SomeApiResponse result = apiClient.execute(HttpMethod.GET, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), null, SomeApiResponse.class);
 
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
@@ -120,14 +121,14 @@ public class DefaultApiClientTest {
                 DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse(
                         new ApiError(new ApiServiceException("1", "Invalid Application ID")))));
 
-        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), new SomeApiRequest("Test"), ApiResponse.class);
+        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), new SomeApiRequest("Test"), ApiResponse.class);
     }
 
     @Test
     public void execute_withQueryParams_withHeaders_withBody_receivesOK() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new SomeApiResponse(11)));
 
-        SomeApiResponse result = apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), new SomeApiRequest("Test"), SomeApiResponse.class);
+        SomeApiResponse result = apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), MapUtils.map("X-Test-1", "test1", "X-Test-2", "test2"), new SomeApiRequest("Test"), SomeApiResponse.class);
 
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
@@ -147,9 +148,10 @@ public class DefaultApiClientTest {
 
         String user = "user";
         String password = "password";
+        Tuple<String, String> credentials = new Tuple<>(user, password);
         String base64Auth = Base64.encodeBase64String((user + ":" + password).getBytes());
 
-        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, user, password, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, null);
+        apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, credentials, MapUtils.map("applicationId", "xyz", "currentRegistrationId", "1234"), null, null, null);
         Assert.assertEquals(debugServer.getHeader("Authorization"), "Basic " + base64Auth);
     }
 
