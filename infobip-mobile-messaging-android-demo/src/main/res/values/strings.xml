@@ -5,7 +5,7 @@
     <string name="message_count_default">0</string>
 
     <string name="total_received">Total Received:</string>
-    <string name="title_activity_inspect">Inspect</string>§
+    <string name="title_activity_inspect">Inspect</string>
 
     <!-- Strings related to Inspect -->
     <string name="action_inspect">Inspect</string>
