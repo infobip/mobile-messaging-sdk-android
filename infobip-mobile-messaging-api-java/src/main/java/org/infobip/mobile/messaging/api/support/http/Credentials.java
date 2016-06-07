@@ -8,11 +8,12 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Sets username.
+ * Sets credentials for basic authorization.
  */
 @Documented
 @Target({METHOD, TYPE, PACKAGE})
 @Retention(RUNTIME)
-public @interface User {
-    String value() default "";
+public @interface Credentials {
+    String user() default "";
+    String password() default "";
 }

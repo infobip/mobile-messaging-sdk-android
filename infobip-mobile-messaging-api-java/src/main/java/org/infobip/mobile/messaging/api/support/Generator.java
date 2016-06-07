@@ -84,32 +84,18 @@ public class Generator {
         return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), ApiKey.class);
     }
 
-    private User getUserAnnotation(Method method) {
-        User user = method.getAnnotation(User.class);
-        if (null != user) {
-            return user;
+    private Credentials getCredentialsAnnotation(Method method) {
+        Credentials credentials = method.getAnnotation(Credentials.class);
+        if (null != credentials) {
+            return credentials;
         }
 
-        user = method.getDeclaringClass().getAnnotation(User.class);
-        if (null != user) {
-            return user;
+        credentials = method.getDeclaringClass().getAnnotation(Credentials.class);
+        if (null != credentials) {
+            return credentials;
         }
 
-        return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), User.class);
-    }
-
-    private Password getPasswordAnnotation(Method method) {
-        Password password = method.getAnnotation(Password.class);
-        if (null != password) {
-            return password;
-        }
-
-        password = method.getDeclaringClass().getAnnotation(Password.class);
-        if (null != password) {
-            return password;
-        }
-
-        return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), Password.class);
+        return getPackageAnnotation(method.getDeclaringClass().getPackage().getName(), Credentials.class);
     }
 
     private <T extends Annotation> T getPackageAnnotation(String pkg, Class<T> annotationClass) {
@@ -275,8 +261,7 @@ public class Generator {
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
             Map<String, Collection<Object>> headerMap = new HashMap<>(proxyCache.getDefaultHeaderMap());
             String apiKey = proxyCache.getApiKey();
-            String user = proxyCache.getUser();
-            String password = proxyCache.getPassword();
+            Tuple<String, String> credentials = proxyCache.getCredentials();
 
             Parameter[] parameters = proxyCache.getParameters();
             Object body = null;
@@ -310,7 +295,7 @@ public class Generator {
                 }
             }
 
-            return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, user, password, queryParams, headerMap, body, method.getReturnType());
+            return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, credentials, queryParams, headerMap, body, method.getReturnType());
         }
 
         private HttpMethod getHttpRequestMethod(HttpRequest[] httpRequests) {
@@ -350,8 +335,7 @@ public class Generator {
         private final HashMap<String, Collection<Object>> defaultHeaderMap;
         private final Parameter[] parameters;
         private final String apiKey;
-        private final String user;
-        private final String password;
+        private final Tuple<String, String> credentials;
 
         public ProxyCache(Method method) {
             this.httpRequests = createHttpRequest(method);
@@ -360,8 +344,7 @@ public class Generator {
             this.defaultHeaderMap = createDefaultHeaderMap(method);
             this.parameters = createParameters(method);
             this.apiKey = findApiKey(method);
-            this.user = findUser(method);
-            this.password = findPassword(method);
+            this.credentials = findCredentials(method);
         }
 
         private String findApiKey(Method method) {
@@ -372,20 +355,12 @@ public class Generator {
             return injectProperty(apiKeyAnotation.value());
         }
 
-        private String findUser(Method method) {
-            User userAnnotation = getUserAnnotation(method);
-            if (null == userAnnotation) {
+        private Tuple<String, String> findCredentials(Method method) {
+            Credentials credentialsAnnotation = getCredentialsAnnotation(method);
+            if (null == credentialsAnnotation) {
                 return null;
             }
-            return injectProperty(userAnnotation.value());
-        }
-
-        private String findPassword(Method method) {
-            Password passwordAnnotation = getPasswordAnnotation(method);
-            if (null == passwordAnnotation) {
-                return null;
-            }
-            return injectProperty(passwordAnnotation.value());
+            return new Tuple<>(injectProperty(credentialsAnnotation.user()), injectProperty(credentialsAnnotation.password()));
         }
 
         private Parameter[] createParameters(Method method) {

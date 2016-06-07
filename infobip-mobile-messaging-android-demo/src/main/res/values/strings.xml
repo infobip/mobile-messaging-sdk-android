@@ -5,7 +5,7 @@
     <string name="message_count_default">0</string>
 
     <string name="total_received">Total Received:</string>
-    <string name="title_activity_inspect">Inspect</string>
+    <string name="title_activity_inspect">Inspect</string>§
 
     <!-- Strings related to Inspect -->
     <string name="action_inspect">Inspect</string>
@@ -56,6 +56,8 @@
     <string name="toast_message_msisdn_cannot_save">Cannot save MSISDN</string>
     <string name="toast_message_msisdn_set">MSISDN is set</string>
 
+    <!--Application credentials>
     <string name="google_app_id">YOUR GCM SENDER</string>
     <string name="infobip_application_code">YOUR APPLICATION CODE</string>
+    </Application credentials-->
 </resources>
