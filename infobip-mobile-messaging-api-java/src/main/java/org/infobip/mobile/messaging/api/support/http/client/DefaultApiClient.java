@@ -84,7 +84,7 @@ public class DefaultApiClient implements ApiClient {
             if (StringUtils.isNotBlank(apiKey)) {
                 urlConnection.setRequestProperty("Authorization", "App " + apiKey);
             } else if (credentials != null && StringUtils.isNotBlank(credentials.getLeft()) && StringUtils.isNotBlank(credentials.getRight())) {
-                String basicApiKey = Base64.encodeBase64String((credentials.getLeft() + ":" + credentials.getRight()).getBytes());
+                String basicApiKey = new String(Base64.encodeBase64((credentials.getLeft() + ":" + credentials.getRight()).getBytes()));
                 urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
             }
             urlConnection.setRequestProperty("Accept", "application/json");
