@@ -27,6 +27,12 @@ import java.util.List;
  */
 public interface MessageStore {
 
+    /**
+     * Binds message list to the message store
+     *
+     * @param context current context
+     * @return immutable list of all stored messages
+     */
     List<Message> bind(final Context context);
 
     /**

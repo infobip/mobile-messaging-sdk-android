@@ -180,7 +180,7 @@ public class NotificationSettings {
         }
 
         /**
-         * Defines component to be used as a callback activity. It is triggered when thr user clicks on the notification.
+         * Defines component to be used as a callback activity. It is triggered when user clicks on the notification.
          * <pre>
          * {@code
          * new Builder(this)
