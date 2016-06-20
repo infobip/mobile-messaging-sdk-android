@@ -44,6 +44,11 @@ android {
             if (infobipApplicationCode) {
                 resValue "string", "infobip_application_code", infobipApplicationCode
             }
+
+            def infobipApiUri = project.hasProperty('infobip_api_uri') ? project['infobip_api_uri'] : System.getenv('INFOBIP_API_URI')
+            if (infobipApiUri) {
+                resValue "string", "infobip_api_uri", infobipApiUri
+            }
         }
         release {
             minifyEnabled false

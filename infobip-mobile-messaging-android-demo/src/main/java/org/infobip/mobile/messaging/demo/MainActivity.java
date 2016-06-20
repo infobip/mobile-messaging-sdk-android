@@ -21,6 +21,7 @@ import android.widget.Toast;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.*;
@@ -87,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
 
         new MobileMessaging.Builder(this)
                 .withMessageStore(SharedPreferencesMessageStore.class)
+                .withDisplayNotification(new NotificationSettings.Builder(this)
+                        .withDefaultIcon(R.drawable.ic_notification)
+                        .build())
                 .build();
 
         setContentView(R.layout.activity_main);
