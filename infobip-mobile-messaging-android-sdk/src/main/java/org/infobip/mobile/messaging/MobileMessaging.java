@@ -77,10 +77,6 @@ public class MobileMessaging {
         return MobileMessagingCore.getInstance(context).getMessageStore();
     }
 
-    public void sync() {
-        MobileMessagingCore.getInstance(context).sync();
-    }
-
     /**
      * The {@link MobileMessaging} builder class.
      *
