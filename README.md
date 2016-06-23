@@ -108,7 +108,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
             
             ...
      
-            new MobileMessaging.Builder(this).build();
+            new MobileMessaging.Builder(getApplication()).build();
         }
          
         ...
