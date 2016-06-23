@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.annotation.TargetApi;
+import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
@@ -95,7 +96,7 @@ public class MobileMessaging {
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
-        private final Context context;
+        private final Application application;
         private String gcmSenderId = (String) MobileMessagingProperty.GCM_SENDER_ID.getDefaultValue();
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
         private String apiUri = (String) MobileMessagingProperty.API_URI.getDefaultValue();
@@ -106,16 +107,16 @@ public class MobileMessaging {
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
 
-        public Builder(Context context) {
-            if (null == context) {
-                throw new IllegalArgumentException("context is mandatory!");
+        public Builder(Application application) {
+            if (null == application) {
+                throw new IllegalArgumentException("application object is mandatory!");
             }
-            this.context = context.getApplicationContext();
+            this.application = application;
 
-            loadDefaultApiUri(context);
-            loadGcmSenderId(context);
-            loadApplicationCode(context);
-            loadNotificationSettings(context);
+            loadDefaultApiUri(application);
+            loadGcmSenderId(application);
+            loadApplicationCode(application);
+            loadNotificationSettings(application);
         }
 
         private void loadNotificationSettings(Context context) {
@@ -192,7 +193,7 @@ public class MobileMessaging {
         /**
          * It will configure the system to use a custom API endpoint.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withApiUri("http://127.0.0.1")
          *       .build();
          * }
@@ -214,7 +215,7 @@ public class MobileMessaging {
         /**
          * It will set the notification configuration which will be used to display the notification automatically.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withDisplayNotification(
          *           new NotificationSettings.Builder(this)
          *               .withDisplayNotification()
@@ -235,7 +236,7 @@ public class MobileMessaging {
         /**
          * It will configure the system not to display the notification automatically.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withoutDisplayNotification()
          *       .build();
          * }
@@ -252,7 +253,7 @@ public class MobileMessaging {
         /**
          * It will set the <i>MessageStore</i> class which will be used to store the messages upon arrival.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withMessageStore(MyMessageStore.class)
          *       .build();}
          * </pre>
@@ -268,7 +269,7 @@ public class MobileMessaging {
         /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withoutMessageStore()
          *       .build();}
          * </pre>
@@ -283,7 +284,7 @@ public class MobileMessaging {
         /**
          * It will not send mobile network carrier info to the server.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withoutCarrierInfo()
          *       .build();}
          * </pre>
@@ -298,7 +299,7 @@ public class MobileMessaging {
         /**
          * It will not send system information to the server.
          * <pre>
-         * {@code new MobileMessaging.Builder(context)
+         * {@code new MobileMessaging.Builder(application)
          *       .withoutSystemInfo()
          *       .build();}
          * </pre>
@@ -317,16 +318,16 @@ public class MobileMessaging {
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
-            MobileMessagingCore.setApiUri(context, apiUri);
-            MobileMessagingCore.setGcmSenderId(context, gcmSenderId);
-            MobileMessagingCore.setMessageStoreClass(context, messageStoreClass);
-            MobileMessagingCore.setReportCarrierInfo(context, reportCarrierInfo);
-            MobileMessagingCore.setReportSystemInfo(context, reportSystemInfo);
+            MobileMessagingCore.setApiUri(application, apiUri);
+            MobileMessagingCore.setGcmSenderId(application, gcmSenderId);
+            MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
+            MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
+            MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
 
-            MobileMessaging mobileMessaging = new MobileMessaging(context);
+            MobileMessaging mobileMessaging = new MobileMessaging(application);
             MobileMessaging.instance = mobileMessaging;
 
-            new MobileMessagingCore.Builder(context)
+            new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
                     .build();

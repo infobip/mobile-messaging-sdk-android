@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import org.infobip.mobile.messaging.*;
+import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -88,6 +89,10 @@ class MobileMessageHandler {
         }
 
         if (StringUtils.isBlank(message.getBody())) {
+            return;
+        }
+
+        if (ActivityLifecycleMonitor.isForeground() && notificationSettings.isForegroundNotificationDisabled()) {
             return;
         }
 

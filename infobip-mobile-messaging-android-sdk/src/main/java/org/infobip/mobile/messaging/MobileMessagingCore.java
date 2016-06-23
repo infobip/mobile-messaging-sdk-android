@@ -1,10 +1,12 @@
 package org.infobip.mobile.messaging;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
+import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -28,6 +30,7 @@ public class MobileMessagingCore {
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
+    private ActivityLifecycleMonitor activityLifecycleMonitor;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
@@ -45,6 +48,8 @@ public class MobileMessagingCore {
         this.context = context;
         this.stats = new MobileMessagingStats(context);
         this.mobileNetworkStateListener = new MobileNetworkStateListener(context);
+        this.activityLifecycleMonitor = null;
+
         PreferenceHelper.registerOnSharedPreferenceChangeListener(context, onSharedPreferenceChangeListener);
     }
 
@@ -295,13 +300,13 @@ public class MobileMessagingCore {
 
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
-        private final Context context;
+        private final Application application;
 
-        public Builder(Context context) {
-            if (null == context) {
-                throw new IllegalArgumentException("context is mandatory!");
+        public Builder(Application application) {
+            if (null == application) {
+                throw new IllegalArgumentException("application is mandatory!");
             }
-            this.context = context.getApplicationContext();
+            this.application = application;
         }
 
         private void validateWithParam(Object o) {
@@ -314,7 +319,7 @@ public class MobileMessagingCore {
         /**
          * It will set the notification configuration which will be used to display the notification automatically.
          * <pre>
-         * {@code new MobileMessagingCore.Builder(context)
+         * {@code new MobileMessagingCore.Builder(application)
          *       .withDisplayNotification(
          *           new NotificationSettings.Builder(this)
          *               .withDisplayNotification()
@@ -351,14 +356,15 @@ public class MobileMessagingCore {
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build() {
-            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
-                MobileMessagingCore.cleanup(context);
+            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application))) {
+                MobileMessagingCore.cleanup(application);
             }
-            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
+            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             MobileMessagingCore.instance = mobileMessagingCore;
-            mobileMessagingCore.playServicesSupport.checkPlayServices(context);
+            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application);
+            mobileMessagingCore.playServicesSupport.checkPlayServices(application);
             return mobileMessagingCore;
         }
     }

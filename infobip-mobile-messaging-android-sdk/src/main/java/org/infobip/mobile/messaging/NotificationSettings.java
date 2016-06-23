@@ -28,6 +28,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @since 07.04.2016.
  */
 public class NotificationSettings {
+
     private final Context context;
 
     NotificationSettings(Context context) {
@@ -104,6 +105,18 @@ public class NotificationSettings {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL, notificationAutoCancel);
     }
 
+    public boolean isForegroundNotificationEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED);
+    }
+
+    public boolean isForegroundNotificationDisabled() {
+        return !isForegroundNotificationEnabled();
+    }
+
+    private void setForegroundNotificationEnabled(boolean foregroundNotificationEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED, foregroundNotificationEnabled);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -130,6 +143,7 @@ public class NotificationSettings {
         private int pendingIntentFlags = (int) MobileMessagingProperty.PENDING_INTENT_FLAGS.getDefaultValue();
         private int notificationDefaults = (int) MobileMessagingProperty.NOTIFICATION_DEFAULTS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
+        private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
 
         public Builder(Context context) {
             if (null == context) {
@@ -303,6 +317,18 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to disable notifications when your app is in foreground.
+         * <p>
+         * By default foreground notifications are enabled
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutForegroundNotification() {
+            this.foregroundNotificationEnabled = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>NotificationSettings</i> configuration.
          *
          * @return {@link NotificationSettings}
@@ -317,6 +343,7 @@ public class NotificationSettings {
             notificationSettings.setPendingIntentFlags(pendingIntentFlags);
             notificationSettings.setNotificationDefaults(notificationDefaults);
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
+            notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
 
             return notificationSettings;
         }
