@@ -35,7 +35,7 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
             MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessagingCore.getDeviceApplicationInstanceId(), msisdn);
             return new RegisterMsisdnResult(msisdn);
         } catch (ApiException ae) {
-            if (ae.getCode().equals("5")) {
+            if ("5".equals(ae.getCode())) {
                 onMsisdnValidationError(ae, msisdn);
             } else {
                 onApiCommunicationError(ae);
