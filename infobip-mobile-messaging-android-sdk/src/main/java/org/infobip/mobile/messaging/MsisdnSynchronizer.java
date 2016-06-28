@@ -9,6 +9,8 @@ import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnResult;
 import org.infobip.mobile.messaging.tasks.RegisterMsisdnTask;
 
+import java.util.concurrent.Executor;
+
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MSISDN;
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
@@ -18,15 +20,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 class MsisdnSynchronizer {
 
-    void syncronize(Context context, String deviceApplicationInstanceId, long msisdn, boolean msisdnReported, MobileMessagingStats stats) {
-        if (null != deviceApplicationInstanceId && msisdnReported) {
-            return;
-        }
-
-        reportMSISDN(context, msisdn, stats);
-    }
-
-    private void reportMSISDN(final Context context, final long msisdn, final MobileMessagingStats stats) {
+    void syncronize(final Context context, final long msisdn, boolean msisdnReported, final MobileMessagingStats stats, Executor executor) {
         if (msisdn <= 0) {
             MobileMessagingCore.getInstance(context).setMsisdnReported(false);
             return;
@@ -57,6 +51,6 @@ class MsisdnSynchronizer {
                 Log.e(TAG, "Error reporting MSISDN!");
                 stats.reportError(MobileMessagingError.MSISDN_SYNC_ERROR);
             }
-        }.execute();
+        }.executeOnExecutor(executor);
     }
 }

@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.seenstatus.SeenMessages;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
@@ -30,6 +31,12 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
     @Override
     protected SeenStatusReportResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+            Log.e(MobileMessaging.TAG, "Can't send seen reports to MobileMessaging API without valid registration!");
+            return null;
+        }
+
         try {
             String messageIDs[] = mobileMessagingCore.getUnreportedSeenMessageIds();
             SeenMessages seenMessages = SeenMessagesReport.fromMessageIds(messageIDs);

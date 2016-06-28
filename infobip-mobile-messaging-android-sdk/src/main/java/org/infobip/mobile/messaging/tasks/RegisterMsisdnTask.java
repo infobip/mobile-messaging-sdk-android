@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.ApiException;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.*;
 
@@ -30,6 +31,12 @@ public class RegisterMsisdnTask extends AsyncTask<Object, Void, RegisterMsisdnRe
     @Override
     protected RegisterMsisdnResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+            Log.e(MobileMessaging.TAG, "Can't report msisdn to MobileMessaging API without valid registration!");
+            return null;
+        }
+
         long msisdn = mobileMessagingCore.getUnreportedMsisdn();
         try {
             MobileApiResourceProvider.INSTANCE.getMobileApiRegisterMsisdn(context).registerMsisdn(mobileMessagingCore.getDeviceApplicationInstanceId(), msisdn);

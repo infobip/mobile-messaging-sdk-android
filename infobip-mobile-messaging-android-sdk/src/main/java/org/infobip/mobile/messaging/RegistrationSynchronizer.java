@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.concurrent.Executor;
+
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
@@ -19,15 +21,15 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 class RegistrationSynchronizer {
 
-    void syncronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats) {
+    void syncronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
         if (null != deviceApplicationInstanceId && registrationIdSaved) {
             return;
         }
 
-        reportRegistration(context, registrationId, stats);
+        reportRegistration(context, registrationId, stats, executor);
     }
 
-    private void reportRegistration(final Context context, final String registrationId, final MobileMessagingStats stats) {
+    private void reportRegistration(final Context context, final String registrationId, final MobileMessagingStats stats, Executor executor) {
         if (StringUtils.isBlank(registrationId)) {
             return;
         }
@@ -52,8 +54,6 @@ class RegistrationSynchronizer {
                 registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, registrationResponse.getDeviceApplicationInstanceId());
                 context.sendBroadcast(registrationCreated);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
-
-                MobileMessagingCore.getInstance(context).syncMsisdn();
             }
 
             @Override
@@ -63,7 +63,7 @@ class RegistrationSynchronizer {
 
                 stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
             }
-        }.execute();
+        }.executeOnExecutor(executor);
     }
 
     private void setDeviceApplicationInstanceId(Context context, String registrationId) {

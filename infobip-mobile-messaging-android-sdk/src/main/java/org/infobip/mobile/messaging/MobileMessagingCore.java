@@ -16,6 +16,9 @@ import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 /**
  * @author sslavin
  * @since 28.04.2016.
@@ -30,6 +33,7 @@ public class MobileMessagingCore {
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
+    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
@@ -39,7 +43,7 @@ public class MobileMessagingCore {
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (MobileMessagingProperty.MSISDN_TO_REPORT.getKey().equals(key) &&
                 PreferenceHelper.contains(context, MobileMessagingProperty.MSISDN_TO_REPORT)) {
-                syncMsisdn();
+                sync();
             }
         }
     };
@@ -63,13 +67,10 @@ public class MobileMessagingCore {
     }
 
     public void sync() {
-        registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats());
-        deliveryReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getUnreportedMessageIds(), getStats());
-        seenStatusReporter.report(context, registrationSynchronizer, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getUnreportedSeenMessageIds(), getStats());
-    }
-
-    public void syncMsisdn() {
-        msisdnSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getUnreportedMsisdn(), isMsisdnReported(), getStats());
+        registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
+        deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
+        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
+        msisdnSynchronizer.syncronize(context, getUnreportedMsisdn(), isMsisdnReported(), getStats(), taskExecutor);
     }
 
     public long getMsisdn() {

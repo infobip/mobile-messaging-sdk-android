@@ -12,6 +12,8 @@ import org.infobip.mobile.messaging.tasks.SeenStatusReportResult;
 import org.infobip.mobile.messaging.tasks.SeenStatusReportTask;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.concurrent.Executor;
+
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
@@ -19,14 +21,8 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @since 25.04.2016.
  */
 public class SeenStatusReporter {
-    void report(final Context context, RegistrationSynchronizer registrationSynchronizer, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, String[] unreportedSeenMessageIds, final MobileMessagingStats stats) {
+    void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, Executor executor) {
         if (unreportedSeenMessageIds.length == 0) {
-            return;
-        }
-
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.w(TAG, "Can't report seen reports to MobileMessaging API without saving registration first!");
-            registrationSynchronizer.syncronize(context, deviceApplicationInstanceId, registrationId, registrationIdSaved, stats);
             return;
         }
 
@@ -56,6 +52,6 @@ public class SeenStatusReporter {
                 stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
                 Log.e(TAG, "Error reporting seen status!");
             }
-        }.execute();
+        }.executeOnExecutor(executor);
     }
 }

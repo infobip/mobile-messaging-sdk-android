@@ -60,11 +60,10 @@ class RegistrationTokenHandler {
                 !token.equals(mobileMessagingCore.getRegistrationId()) ||
                 !mobileMessagingCore.isRegistrationIdReported();
 
-        if (!saveNeeded) {
-            return;
+        if (saveNeeded) {
+            mobileMessagingCore.setRegistrationId(token);
         }
 
-        mobileMessagingCore.setRegistrationId(token);
         mobileMessagingCore.sync();
     }
 

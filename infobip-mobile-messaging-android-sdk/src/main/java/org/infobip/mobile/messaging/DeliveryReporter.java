@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.concurrent.Executor;
+
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
@@ -18,14 +20,8 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @since 07.04.2016.
  */
 class DeliveryReporter {
-    void report(final Context context, RegistrationSynchronizer registrationSynchronizer, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, String[] unreportedMessageIds, final MobileMessagingStats stats) {
+    void report(final Context context, String[] unreportedMessageIds, final MobileMessagingStats stats, Executor executor) {
         if (unreportedMessageIds.length == 0) {
-            return;
-        }
-
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.w(TAG, "Can't report delivery reports to MobileMessaging API without saving registration first!");
-            registrationSynchronizer.syncronize(context, deviceApplicationInstanceId, registrationId, registrationIdSaved, stats);
             return;
         }
 
@@ -55,6 +51,6 @@ class DeliveryReporter {
                 stats.reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
                 Log.e(TAG, "Error reporting delivery!");
             }
-        }.execute();
+        }.executeOnExecutor(executor);
     }
 }
