@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.app;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Service;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -13,13 +14,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     private static boolean foreground = false;
 
     public ActivityLifecycleMonitor(Context context) {
-        Application application = null;
-        if (context instanceof Activity) {
-            application = ((Activity) context).getApplication();
-        } else if (context.getApplicationContext() instanceof Application) {
-            application = (Application) context.getApplicationContext();
-        }
-
+        Application application = getApplication(context);
         if (application != null) {
             application.registerActivityLifecycleCallbacks(this);
         }
@@ -31,6 +26,17 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     private static synchronized void setForeground(boolean foreground) {
         ActivityLifecycleMonitor.foreground = foreground;
+    }
+
+    private static Application getApplication(Context context) {
+        if (context instanceof Activity) {
+            return ((Activity) context).getApplication();
+        } else if (context instanceof Service) {
+            return ((Service) context).getApplication();
+        } else if (context.getApplicationContext() instanceof Application) {
+            return (Application) context.getApplicationContext();
+        }
+        return null;
     }
 
     @Override
