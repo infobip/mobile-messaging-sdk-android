@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -301,13 +300,13 @@ public class MobileMessagingCore {
 
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
-        private final Application application;
+        private final Context context;
 
-        public Builder(Application application) {
-            if (null == application) {
-                throw new IllegalArgumentException("application is mandatory!");
+        public Builder(Context context) {
+            if (null == context) {
+                throw new IllegalArgumentException("context is mandatory!");
             }
-            this.application = application;
+            this.context = context;
         }
 
         private void validateWithParam(Object o) {
@@ -320,7 +319,7 @@ public class MobileMessagingCore {
         /**
          * It will set the notification configuration which will be used to display the notification automatically.
          * <pre>
-         * {@code new MobileMessagingCore.Builder(application)
+         * {@code new MobileMessagingCore.Builder(context)
          *       .withDisplayNotification(
          *           new NotificationSettings.Builder(this)
          *               .withDisplayNotification()
@@ -357,15 +356,15 @@ public class MobileMessagingCore {
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build() {
-            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application))) {
-                MobileMessagingCore.cleanup(application);
+            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
+                MobileMessagingCore.cleanup(context);
             }
-            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
+            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             MobileMessagingCore.instance = mobileMessagingCore;
-            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application);
-            mobileMessagingCore.playServicesSupport.checkPlayServices(application);
+            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(context);
+            mobileMessagingCore.playServicesSupport.checkPlayServices(context);
             return mobileMessagingCore;
         }
     }

@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        new MobileMessaging.Builder(getApplication())
+        new MobileMessaging.Builder(this)
                 .withMessageStore(SharedPreferencesMessageStore.class)
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withDefaultIcon(R.drawable.ic_notification)
