@@ -29,10 +29,10 @@ class MobileMessageHandler {
         Log.d(MobileMessaging.TAG, "Message received from: " + from);
         Message message = createMessage(from, data);
         sendDeliveryReport(context, message);
+        saveMessage(context, message);
 
         Log.d(MobileMessaging.TAG, "Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
-            saveMessage(context, message);
             displayNotification(context, message);
         }
 

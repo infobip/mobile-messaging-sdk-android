@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 
+import org.infobip.mobile.messaging.util.InternalMessageUtils;
+
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
  *
@@ -23,28 +25,22 @@ public class Message implements Comparable {
         this.bundle = bundle;
     }
 
-    public static Message create(String messageId, String body) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setBody(body);
-        return message;
-    }
-
     public static Message copyFrom(Bundle source) {
         Message sourceMessage = new Message(source);
 
         Message message = new Message();
 
+        message.setSilent(sourceMessage.isSilent());
         message.setFrom(sourceMessage.getFrom());
         message.setMessageId(sourceMessage.getMessageId());
         message.setTitle(sourceMessage.getTitle());
         message.setBody(sourceMessage.getBody());
         message.setSound(sourceMessage.getSound());
         message.setIcon(sourceMessage.getIcon());
-        message.setSilent(sourceMessage.isSilent());
         message.setData(sourceMessage.getData());
         message.setReceivedTimestamp(sourceMessage.getReceivedTimestamp());
         message.setSeenTimestamp(sourceMessage.getSeenTimestamp());
+        message.setInternalData(sourceMessage.getInternalData());
 
         return message;
     }
@@ -66,11 +62,18 @@ public class Message implements Comparable {
     }
 
     public String getSound() {
+        if (isSilent()) {
+            return InternalMessageUtils.getSilentSound(this);
+        }
         return bundle.getString(Data.SOUND.getKey(), null);
     }
 
     public void setSound(String sound) {
-        bundle.putString(Data.SOUND.getKey(), sound);
+        if (isSilent()) {
+            InternalMessageUtils.setSilentSound(this, sound);
+        } else {
+            bundle.putString(Data.SOUND.getKey(), sound);
+        }
     }
 
     public String getIcon() {
@@ -82,19 +85,33 @@ public class Message implements Comparable {
     }
 
     public String getBody() {
+        if (isSilent()) {
+            return InternalMessageUtils.getSilentBody(this);
+        }
         return bundle.getString(Data.BODY.getKey(), null);
     }
 
     public void setBody(String body) {
-        bundle.putString(Data.BODY.getKey(), body);
+        if (isSilent()) {
+            InternalMessageUtils.setSilentBody(this, body);
+        } else {
+            bundle.putString(Data.BODY.getKey(), body);
+        }
     }
 
     public String getTitle() {
+        if (isSilent()) {
+            return InternalMessageUtils.getSilentTitle(this);
+        }
         return bundle.getString(Data.TITLE.getKey(), null);
     }
 
     public void setTitle(String title) {
-        bundle.putString(Data.TITLE.getKey(), title);
+        if (isSilent()) {
+            InternalMessageUtils.setSilentTitle(this, title);
+        } else {
+            bundle.putString(Data.TITLE.getKey(), title);
+        }
     }
 
     public Bundle getData() {
@@ -110,11 +127,11 @@ public class Message implements Comparable {
     }
 
     public boolean isSilent() {
-        return bundle.getBoolean(Data.SILENT.getKey(), false);
+        return "true".equals(bundle.getString(Data.SILENT.getKey()));
     }
 
     public void setSilent(boolean silent) {
-        bundle.putBoolean(Data.SILENT.getKey(), silent);
+        bundle.putString(Data.SILENT.getKey(), silent ? "true" : "false");
     }
 
     public long getReceivedTimestamp() {
@@ -151,6 +168,14 @@ public class Message implements Comparable {
         return customData;
     }
 
+    protected String getInternalData() {
+        return bundle.getString(Data.INTERNAL_DATA.getKey());
+    }
+
+    protected void setInternalData(String data) {
+        bundle.putString(Data.INTERNAL_DATA.getKey(), data);
+    }
+
     @Override
     public int compareTo(Object another) {
         if (!(another instanceof Message)) {
@@ -161,7 +186,7 @@ public class Message implements Comparable {
         return (int) Math.signum(message.getReceivedTimestamp() - getReceivedTimestamp());
     }
 
-    private enum Data {
+    protected enum Data {
         MESSAGE_ID("gcm.notification.messageId"),
         TITLE("gcm.notification.title"),
         BODY("gcm.notification.body"),
@@ -171,7 +196,8 @@ public class Message implements Comparable {
         SILENT("gcm.notification.silent"),
         RECEIVED_TIMESTAMP("received_timestamp"),
         SEEN_TIMESTAMP("seen_timestamp"),
-        DATA("data");
+        DATA("data"),
+        INTERNAL_DATA("internalData");
 
         private final String key;
 
