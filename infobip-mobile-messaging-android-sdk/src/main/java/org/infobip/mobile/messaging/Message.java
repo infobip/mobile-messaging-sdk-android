@@ -15,7 +15,6 @@ import org.infobip.mobile.messaging.util.InternalMessageUtils;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Message implements Comparable {
     private final Bundle bundle;
-    private Bundle customData;
 
     public Message() {
         bundle = new Bundle();
@@ -41,6 +40,7 @@ public class Message implements Comparable {
         message.setReceivedTimestamp(sourceMessage.getReceivedTimestamp());
         message.setSeenTimestamp(sourceMessage.getSeenTimestamp());
         message.setInternalData(sourceMessage.getInternalData());
+        message.setCustomPayload(sourceMessage.getCustomPayload());
 
         return message;
     }
@@ -150,22 +150,12 @@ public class Message implements Comparable {
         bundle.putLong(Data.SEEN_TIMESTAMP.getKey(), receivedTimestamp);
     }
 
-    public Bundle getCustomData() {
-        if (null != this.customData) {
-            return customData;
-        }
+    public String getCustomPayload() {
+        return bundle.getString(Data.CUSTOM_PAYLOAD.getKey());
+    }
 
-        Bundle customDataBundle = (Bundle) getData().clone();
-        for (Data key : Data.values()) {
-            customDataBundle.remove(key.getKey());
-        }
-
-        for (GcmData gcmKey : GcmData.values()) {
-            customDataBundle.remove(gcmKey.getKey());
-        }
-
-        customData = customDataBundle;
-        return customData;
+    private void setCustomPayload(String customPayload) {
+        bundle.putString(Data.CUSTOM_PAYLOAD.getKey(), customPayload);
     }
 
     protected String getInternalData() {
@@ -197,27 +187,12 @@ public class Message implements Comparable {
         RECEIVED_TIMESTAMP("received_timestamp"),
         SEEN_TIMESTAMP("seen_timestamp"),
         DATA("data"),
-        INTERNAL_DATA("internalData");
+        INTERNAL_DATA("internalData"),
+        CUSTOM_PAYLOAD("customPayload");
 
         private final String key;
 
         Data(String key) {
-            this.key = key;
-        }
-
-        public String getKey() {
-            return key;
-        }
-    }
-
-    private enum GcmData {
-        GCM_NOTIFICATION_E("gcm.notification.e"),
-        ANDROID_SUPPORT_CONTENT_WAKELOCKID("android.support.content.wakelockid"),
-        COLLAPSE_KEY("collapse_key");
-
-        private final String key;
-
-        GcmData(String key) {
             this.key = key;
         }
 
