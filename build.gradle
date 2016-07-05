@@ -69,7 +69,7 @@ task updateVersionInReadme << {
     def readmeFile = new File('README.md')
     def text = readmeFile.text
     readmeFile.withWriter { w ->
-        w << text.replaceFirst('infobip-mobile-messaging-android-sdk:\\d+\\.\\d+\\.\\S+@aar', "infobip-mobile-messaging-android-sdk:$version")
+        w << text.replaceFirst('infobip-mobile-messaging-android-sdk:\\d+\\.\\d+\\.\\S+@aar', "infobip-mobile-messaging-android-sdk:$version@aar")
     }
 }
 
