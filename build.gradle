@@ -65,6 +65,14 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+task updateVersionInReadme << {
+    def readmeFile = new File('README.md')
+    def text = readmeFile.text
+    readmeFile.withWriter { w ->
+        w << text.replaceFirst('infobip-mobile-messaging-android-sdk:\\d+\\.\\d+\\.\\S+@aar', "infobip-mobile-messaging-android-sdk:$version")
+    }
+}
+
 release {
-    buildTasks = ['clean', 'build', 'bintrayUpload']
+    buildTasks = ['clean', 'build', 'updateVersionInReadme', 'bintrayUpload']
 }
