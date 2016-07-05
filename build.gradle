@@ -73,6 +73,8 @@ task updateVersionInReadme << {
     }
 }
 
+afterReleaseBuild.dependsOn updateVersionInReadme
+
 release {
-    buildTasks = ['clean', 'build', 'updateVersionInReadme', 'bintrayUpload']
+    buildTasks = ['clean', 'build', 'bintrayUpload']
 }
