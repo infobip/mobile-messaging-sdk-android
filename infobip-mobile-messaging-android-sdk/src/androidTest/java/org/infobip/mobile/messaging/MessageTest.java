@@ -6,6 +6,8 @@ import junit.framework.TestCase;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
 import org.infobip.mobile.messaging.api.shaded.google.gson.JsonParser;
+import org.json.JSONObject;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.Set;
 
@@ -79,45 +81,43 @@ public class MessageTest extends TestCase {
     }
 
     public void test_customData() throws Exception {
-        Message message = new Message(new Bundle());
+        String customPayload =
+        "{" +
+            "\"key1\":\"value1\"," +
+            "\"key2\":\"value2\"," +
+            "\"key3\":\"value3\"" +
+        "}";
 
-        Bundle dataBundle = new Bundle();
-        dataBundle.putString("mykey", "mickey");
-        dataBundle.putString("mykey2", "mickey2");
-        dataBundle.putString("mykey3", "mickey3");
-        dataBundle.putString("mykey4", "mickey4");
-        dataBundle.putString("mykey5", "mickey5");
+        Bundle bundle = new Bundle();
+        bundle.putString("customPayload", customPayload);
 
-        message.setData(dataBundle);
+        Message message = Message.copyFrom(bundle);
 
-        assertTrue(equalBundles(message.getCustomData(), dataBundle));
+        JSONAssert.assertEquals(customPayload, message.getCustomPayload(), true);
     }
 
     public void test_customDataWithGcmKeys() throws Exception {
-        Message message = new Message(new Bundle());
 
-        Bundle dataBundle = new Bundle();
-        dataBundle.putString("mykey1", "mickey1");
-        dataBundle.putString("mykey2", "mickey2");
-        dataBundle.putString("mykey3", "mickey3");
-        dataBundle.putString("mykey4", "mickey4");
-        dataBundle.putString("gcm.notification.e", "1");
-        dataBundle.putString("gcm.notification.messageId", "L+auqUQFlo1yqk2TEakxua/4rc6DmGgm7cM6G0GRQjU=");
-        dataBundle.putString("gcm.notification.sound", "default");
-        dataBundle.putString("gcm.notification.title", "notification title sender");
-        dataBundle.putString("gcm.notification.body", "push text");
-        dataBundle.putString("android.support.content.wakelockid", "11");
-        dataBundle.putString("collapse_key", "org.infobip.mobile.messaging.showcase.dev");
+        String customPayload =
+        "{" +
+            "\"key1\":\"value1\"," +
+            "\"key2\":\"value2\"," +
+            "\"key3\":\"value3\"" +
+        "}";
 
-        message.setData(dataBundle);
+        Bundle bundle = new Bundle();
+        bundle.putString("customPayload", customPayload);
+        bundle.putString("gcm.notification.e", "1");
+        bundle.putString("gcm.notification.messageId", "L+auqUQFlo1yqk2TEakxua/4rc6DmGgm7cM6G0GRQjU=");
+        bundle.putString("gcm.notification.sound", "default");
+        bundle.putString("gcm.notification.title", "notification title sender");
+        bundle.putString("gcm.notification.body", "push text");
+        bundle.putString("android.support.content.wakelockid", "11");
+        bundle.putString("collapse_key", "org.infobip.mobile.messaging.showcase.dev");
 
-        Bundle customData = message.getCustomData();
+        Message message = Message.copyFrom(bundle);
 
-        assertFalse(equalBundles(customData, dataBundle));
-        assertTrue(dataBundle.keySet().size() == 11);
-        assertTrue(customData.keySet().size() == 4);
-        assertFalse(customData.containsKey("android.support.content.wakelockid"));
-        assertTrue(customData.containsKey("mykey4"));
+        JSONAssert.assertEquals(customPayload, message.getCustomPayload(), true);
     }
 
     public void test_silentMessage_fromJson_withSilentData() throws Exception {
@@ -233,12 +233,24 @@ public class MessageTest extends TestCase {
         assertNotNull(message.getInternalData());
         assertNotNull(bundle.getString("internalData"));
 
-        JsonParser parser = new JsonParser();
-        JsonObject silentData = parser.parse(bundle.getString("internalData")).getAsJsonObject().getAsJsonObject("silent");
-
-        assertEquals("silentTitle", silentData.get("title").getAsString());
-        assertEquals("silentBody", silentData.get("body").getAsString());
-        assertEquals("silentSound", silentData.get("sound").getAsString());
+        JSONAssert.assertEquals(
+            "{" +
+                "\"silent\":" +
+                "{" +
+                    "\"title\":\"silentTitle\"," +
+                    "\"body\":\"silentBody\"," +
+                    "\"sound\":\"silentSound\"" +
+                "}" +
+            "}", message.getInternalData(), true);
+        JSONAssert.assertEquals(
+            "{" +
+                "\"silent\":" +
+                "{" +
+                    "\"title\":\"silentTitle\"," +
+                    "\"body\":\"silentBody\"," +
+                    "\"sound\":\"silentSound\"" +
+                "}" +
+            "}", bundle.getString("internalData"), true);
     }
 
     public void test_normalMessage_withSilentData_toJson() throws Exception {
@@ -254,29 +266,5 @@ public class MessageTest extends TestCase {
         assertEquals("normalTitle", bundle.getString("gcm.notification.title"));
         assertEquals("normalBody", bundle.getString("gcm.notification.body"));
         assertEquals("normalSound", bundle.getString("gcm.notification.sound"));
-    }
-
-    private boolean equalBundles(Bundle one, Bundle two) {
-        if (one.size() != two.size())
-            return false;
-
-        Set<String> setOne = one.keySet();
-        Object valueOne;
-        Object valueTwo;
-
-        for (String key : setOne) {
-            valueOne = one.get(key);
-            valueTwo = two.get(key);
-            if (valueOne instanceof Bundle && valueTwo instanceof Bundle &&
-                    !equalBundles((Bundle) valueOne, (Bundle) valueTwo)) {
-                return false;
-            } else if (valueOne == null) {
-                if (valueTwo != null || !two.containsKey(key))
-                    return false;
-            } else if (!valueOne.equals(valueTwo))
-                return false;
-        }
-
-        return true;
     }
 }

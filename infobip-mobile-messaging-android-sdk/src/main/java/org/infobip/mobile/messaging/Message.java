@@ -5,6 +5,8 @@ import android.os.Build;
 import android.os.Bundle;
 
 import org.infobip.mobile.messaging.util.InternalMessageUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
@@ -150,12 +152,16 @@ public class Message implements Comparable {
         bundle.putLong(Data.SEEN_TIMESTAMP.getKey(), receivedTimestamp);
     }
 
-    public String getCustomPayload() {
-        return bundle.getString(Data.CUSTOM_PAYLOAD.getKey());
+    public JSONObject getCustomPayload() {
+        return getJSON(Data.CUSTOM_PAYLOAD.getKey());
     }
 
-    private void setCustomPayload(String customPayload) {
-        bundle.putString(Data.CUSTOM_PAYLOAD.getKey(), customPayload);
+    private void setCustomPayload(JSONObject customPayload) {
+        if (customPayload == null) {
+            return;
+        }
+
+        bundle.putString(Data.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
     }
 
     protected String getInternalData() {
@@ -164,6 +170,20 @@ public class Message implements Comparable {
 
     protected void setInternalData(String data) {
         bundle.putString(Data.INTERNAL_DATA.getKey(), data);
+    }
+
+    private JSONObject getJSON(String key) {
+        String string = bundle.getString(key);
+        if (string == null) {
+            return null;
+        }
+
+        try {
+            return new JSONObject(string);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

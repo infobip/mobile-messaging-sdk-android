@@ -3,9 +3,8 @@ package org.infobip.mobile.messaging.util;
 import android.os.Bundle;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonElement;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonParser;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author sslavin
@@ -38,48 +37,55 @@ public class InternalMessageUtils extends Message {
     }
 
     private static String getSilentDataField(Message message, String silentKey) {
-        Bundle bundle = message.getBundle();
-        String internalDataString = bundle.getString(Data.INTERNAL_DATA.getKey());
+        String internalDataString = message.getBundle().getString(Data.INTERNAL_DATA.getKey());
         if (internalDataString == null) {
             return null;
         }
 
-        JsonParser jsonParser = new JsonParser();
-        JsonObject internalData = jsonParser.parse(internalDataString).getAsJsonObject();
-        if (internalData == null) {
+        JSONObject internalData;
+        try {
+            internalData = new JSONObject(internalDataString);
+        } catch (JSONException e) {
+            e.printStackTrace();
             return null;
         }
 
-        JsonObject silentData = internalData.getAsJsonObject(InternalData.SILENT_DATA.getKey());
+        JSONObject silentData = internalData.optJSONObject(InternalData.SILENT_DATA.getKey());
         if (silentData == null) {
             return null;
         }
 
-        JsonElement element = silentData.get(silentKey);
-        if (element == null) {
-            return null;
-        }
-
-        return element.getAsString();
+        return silentData.optString(silentKey);
     }
 
     private static void setSilentDataField(Message message, String silentKey, String value) {
         Bundle bundle = message.getBundle();
-        String internalDataString = bundle.getString(Data.INTERNAL_DATA.getKey());
-        JsonParser jsonParser = new JsonParser();
-        JsonObject internalData = internalDataString == null ? new JsonObject() : jsonParser.parse(internalDataString).getAsJsonObject();;
+        String internalDataString = message.getBundle().getString(Data.INTERNAL_DATA.getKey());
+        JSONObject internalData = null;
+        if (internalDataString != null) {
+            try {
+                internalData = new JSONObject(internalDataString);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (internalData == null) {
-            internalData = new JsonObject();
-
+            internalData = new JSONObject();
         }
 
-        JsonObject silentData = internalData.getAsJsonObject(InternalData.SILENT_DATA.getKey());
+        JSONObject silentData = internalData.optJSONObject(InternalData.SILENT_DATA.getKey());
         if (silentData == null) {
-            silentData = new JsonObject();
+            silentData = new JSONObject();
         }
 
-        silentData.addProperty(silentKey, value);
-        internalData.add(InternalData.SILENT_DATA.getKey(), silentData);
+        try {
+            silentData.put(silentKey, value);
+            internalData.put(InternalData.SILENT_DATA.getKey(), silentData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
         bundle.putString(Data.INTERNAL_DATA.getKey(), internalData.toString());
     }
 
