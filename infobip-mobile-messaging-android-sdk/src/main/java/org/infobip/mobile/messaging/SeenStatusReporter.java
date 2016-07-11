@@ -10,7 +10,6 @@ import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.SeenStatusReportResult;
 import org.infobip.mobile.messaging.tasks.SeenStatusReportTask;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
@@ -21,37 +20,49 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @since 25.04.2016.
  */
 public class SeenStatusReporter {
-    void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, Executor executor) {
+
+    private static BatchReporter batchReporter = null;
+
+    void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
         if (unreportedSeenMessageIds.length == 0) {
             return;
         }
 
-        new SeenStatusReportTask(context) {
+        if (batchReporter == null) {
+            batchReporter = new BatchReporter(context);
+        }
+
+        batchReporter.put(new Runnable() {
             @Override
-            protected void onPostExecute(SeenStatusReportResult result) {
-                if (null == result) {
-                    Log.e(TAG, "MobileMessaging API didn't return any value!");
+            public void run() {
+                new SeenStatusReportTask(context) {
+                    @Override
+                    protected void onPostExecute(SeenStatusReportResult result) {
+                        if (null == result) {
+                            Log.e(TAG, "MobileMessaging API didn't return any value!");
 
-                    stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
-                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    context.sendBroadcast(registrationSaveError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
-                    return;
-                }
+                            stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
+                            Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                            context.sendBroadcast(registrationSaveError);
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                            return;
+                        }
 
-                Intent seenReportsSent = new Intent(Event.SEEN_REPORTS_SENT.getKey());
-                Bundle extras = new Bundle();
-                extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, result.getMessageIDs());
-                seenReportsSent.putExtras(extras);
-                context.sendBroadcast(seenReportsSent);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(seenReportsSent);
+                        Intent seenReportsSent = new Intent(Event.SEEN_REPORTS_SENT.getKey());
+                        Bundle extras = new Bundle();
+                        extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, result.getMessageIDs());
+                        seenReportsSent.putExtras(extras);
+                        context.sendBroadcast(seenReportsSent);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(seenReportsSent);
+                    }
+
+                    @Override
+                    protected void onCancelled() {
+                        stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
+                        Log.e(TAG, "Error reporting seen status!");
+                    }
+                }.executeOnExecutor(executor);
             }
-
-            @Override
-            protected void onCancelled() {
-                stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
-                Log.e(TAG, "Error reporting seen status!");
-            }
-        }.executeOnExecutor(executor);
+        });
     }
 }
