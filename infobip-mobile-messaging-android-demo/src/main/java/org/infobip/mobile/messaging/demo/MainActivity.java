@@ -21,39 +21,18 @@ import android.widget.Toast;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.*;
+import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
-    private TextView totalReceivedTextView;
-    private ExpandableListAdapter listAdapter;
-    private boolean receiversRegistered = false;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MSISDN;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_NAME;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_VALUE;
 
-    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Message message = new Message(intent.getExtras());
-            String body = message.getBody();
-            Toast.makeText(MainActivity.this, "Message received: " + body, Toast.LENGTH_LONG).show();
-            updateCount();
-        }
-    };
-    private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (EXTRA_MSISDN.equals(intent.getStringExtra(EXTRA_PARAMETER_NAME))) {
-                Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_EXCEPTION);
-                long msisdn = intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
-                showToast(throwable.getMessage() + " for " + msisdn);
-
-                unregisterPreferenceChangeListener();
-                readMsisdnFromMobileMessaging();
-                registerPreferenceChangeListener();
-            }
-        }
-    };
+public class MainActivity extends AppCompatActivity implements MobileMessaging.OnReplyClickListener {
     private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -65,13 +44,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private ExpandableListAdapter.OnMessageExpandedListener onMessageExpandedListener = new ExpandableListAdapter.OnMessageExpandedListener() {
-        @Override
-        public void onMessageExpanded(Message message) {
-            MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
-            mobileMessaging.setMessagesSeen(message.getMessageId());
-        }
-    };
     private final SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
 
         @Override
@@ -81,15 +53,52 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (EXTRA_MSISDN.equals(intent.getStringExtra(EXTRA_PARAMETER_NAME))) {
+                Throwable throwable = (Throwable) intent.getSerializableExtra(EXTRA_EXCEPTION);
+                long msisdn = intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
+                showToast(throwable.getMessage() + " for " + msisdn);
+
+                unregisterPreferenceChangeListener();
+                readMsisdnFromMobileMessaging();
+                registerPreferenceChangeListener();
+            }
+        }
+    };
+    private TextView totalReceivedTextView;
+    private ExpandableListAdapter listAdapter;
+    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Message message = new Message(intent.getExtras());
+            String body = message.getBody();
+            Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), getString(R.string.toast_message_received), body), Toast.LENGTH_LONG).show();
+            updateCount();
+        }
+    };
+    private boolean receiversRegistered = false;
+    private ExpandableListAdapter.OnMessageExpandedListener onMessageExpandedListener = new ExpandableListAdapter.OnMessageExpandedListener() {
+        @Override
+        public void onMessageExpanded(Message message) {
+            MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
+            mobileMessaging.setMessagesSeen(message.getMessageId());
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         new MobileMessaging.Builder(this)
+                .withOnReplyClickListener(this)
                 .withMessageStore(SharedPreferencesMessageStore.class)
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withDefaultIcon(R.drawable.ic_notification)
+                        .withMarkSeenActionTitle(getString(R.string.action_mark_seen))
+                        .withReplyActionTitle(getString(R.string.action_reply))
+                        .withCouponUrlActionTitle(getString(R.string.action_coupon))
                         .withoutForegroundNotification()
                         .build())
                 .build();
@@ -230,5 +239,16 @@ public class MainActivity extends AppCompatActivity {
                 .edit()
                 .putString(ApplicationPreferences.MSISDN, "" + MobileMessaging.getInstance(this).getMsisdn())
                 .apply();
+    }
+
+    @Override
+    public void onReplyClicked(Intent intent) {
+        Intent replyIntent = new Intent(this, ReplyActivity.class);
+        String messageExtra = MobileMessagingProperty.EXTRA_MESSAGE.getKey();
+        Bundle bundle = intent.getBundleExtra(messageExtra);
+        if (bundle != null) {
+            replyIntent.putExtra(messageExtra, bundle);
+            startActivity(replyIntent);
+        }
     }
 }

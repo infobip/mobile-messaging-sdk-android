@@ -4,10 +4,15 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Base64;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Stores messages in shared preferences.

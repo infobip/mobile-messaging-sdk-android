@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -43,6 +44,7 @@ public class MobileMessaging {
 
     private static MobileMessaging instance;
     private final Context context;
+    private OnReplyClickListener replyClickListener;
 
     private MobileMessaging(Context context) {
         this.context = context;
@@ -77,6 +79,10 @@ public class MobileMessaging {
         return MobileMessagingCore.getInstance(context).getMessageStore();
     }
 
+    public interface OnReplyClickListener {
+        void onReplyClicked(Intent intent);
+    }
+
     /**
      * The {@link MobileMessaging} builder class.
      *
@@ -105,6 +111,7 @@ public class MobileMessaging {
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
+        private OnReplyClickListener replyActionClickListener;
 
         public Builder(Context context) {
             if (null == context) {
@@ -310,6 +317,11 @@ public class MobileMessaging {
             return this;
         }
 
+        public Builder withOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
+            this.replyActionClickListener = replyActionClickListener;
+            return this;
+        }
+
         /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
@@ -325,11 +337,12 @@ public class MobileMessaging {
 
             MobileMessaging mobileMessaging = new MobileMessaging(context);
             MobileMessaging.instance = mobileMessaging;
-
             new MobileMessagingCore.Builder(context)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
+                    .withOnReplyClickListener(replyActionClickListener)
                     .build();
+
 
             return mobileMessaging;
         }
