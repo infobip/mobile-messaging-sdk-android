@@ -4,14 +4,9 @@ import android.os.Bundle;
 
 import junit.framework.TestCase;
 
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonParser;
-import org.json.JSONObject;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import java.util.Set;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author mstipanov
@@ -266,5 +261,51 @@ public class MessageTest extends TestCase {
         assertEquals("normalTitle", bundle.getString("gcm.notification.title"));
         assertEquals("normalBody", bundle.getString("gcm.notification.body"));
         assertEquals("normalSound", bundle.getString("gcm.notification.sound"));
+    }
+
+    public void test_normalMessage_seenTimestamp() throws Exception {
+        long seenTimestamp = System.currentTimeMillis();
+        Message message = new Message(new Bundle());
+
+        message.setTitle("normalTitle");
+        message.setBody("normalBody");
+        message.setSound("normalSound");
+        message.setSeenTimestamp(seenTimestamp);
+
+        Bundle bundle = message.getBundle();
+
+        assertNull(message.getInternalData());
+        assertNull(bundle.getString("internalData"));
+        assertEquals("normalTitle", bundle.getString("gcm.notification.title"));
+        assertEquals("normalBody", bundle.getString("gcm.notification.body"));
+        assertEquals("normalSound", bundle.getString("gcm.notification.sound"));
+
+        assertEquals(message.getSeenTimestamp(), seenTimestamp);
+        assertEquals(seenTimestamp, bundle.getLong("seen_timestamp"));
+    }
+
+    public void test_silentMessage_seenTimestamp() throws Exception {
+        final long seenTimestamp = System.currentTimeMillis();
+        Message message = new Message(new Bundle());
+
+        message.setSilent(true);
+        message.setTitle("silentTitle");
+        message.setBody("silentBody");
+        message.setSound("silentSound");
+        message.setSeenTimestamp(seenTimestamp);
+
+        Bundle bundle = message.getBundle();
+
+        JSONAssert.assertEquals(
+                "{" +
+                        "\"silent\":" +
+                        "{" +
+                        "\"title\":\"silentTitle\"," +
+                        "\"body\":\"silentBody\"," +
+                        "\"sound\":\"silentSound\"" +
+                        "}" +
+                        "}", message.getInternalData(), true);
+        assertEquals(message.getSeenTimestamp(), seenTimestamp);
+        assertEquals(seenTimestamp, bundle.getLong("seen_timestamp"));
     }
 }
