@@ -39,9 +39,15 @@ public enum MobileMessagingProperty {
     PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", PendingIntent.FLAG_CANCEL_CURRENT),
     NOTIFICATION_DEFAULTS("org.infobip.mobile.messaging.notification.NOTIFICATION_DEFAULTS", Notification.DEFAULT_ALL),
     NOTIFICATION_AUTO_CANCEL("org.infobip.mobile.messaging.notification.NOTIFICATION_AUTO_CANCEL", true),
+
+    BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 3000L),
     FOREGROUND_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.FOREGROUND_NOTIFICATION_ENABLED", true),
 
-    BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 3000L);
+    EXTRA_MESSAGE("org.infobip.mobile.messaging.infobip.EXTRA_MESSAGE"),
+
+    NOTIFICATION_MARK_SEEN_TITLE("org.infobip.mobile.messaging.notification.NOTIFICATION_MARK_SEEN_TITLE"),
+    NOTIFICATION_REPLY_TITLE("org.infobip.mobile.messaging.notification.NOTIFICATION_REPLY_TITLE"),
+    NOTIFICATION_OPEN_URL_TITLE("org.infobip.mobile.messaging.notification.NOTIFICATION_OPEN_URL_TITLE");
 
     private final String key;
     private final Object defaultValue;

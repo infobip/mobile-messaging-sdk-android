@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -109,12 +110,24 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED);
     }
 
+    private void setForegroundNotificationEnabled(boolean foregroundNotificationEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED, foregroundNotificationEnabled);
+    }
+
     public boolean isForegroundNotificationDisabled() {
         return !isForegroundNotificationEnabled();
     }
 
-    private void setForegroundNotificationEnabled(boolean foregroundNotificationEnabled) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED, foregroundNotificationEnabled);
+    public String getMarkSeenActionTitle() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_MARK_SEEN_TITLE.getKey(), "Mark as seen");
+    }
+
+    public String getReplyActionTitle() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_REPLY_TITLE.getKey(), "Reply");
+    }
+
+    public String getOpenUrlActionTitle() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_OPEN_URL_TITLE.getKey(), "Get coupon");
     }
 
     /**
@@ -202,7 +215,7 @@ public class NotificationSettings {
          *                .build();
          * }
          * </pre>
-         * <p>
+         * <p/>
          * By default it will use the default activity for the application package.
          *
          * @param callbackActivity The component class that is to be used for the intent when notification is clicked.
@@ -216,7 +229,7 @@ public class NotificationSettings {
 
         /**
          * When you want to use some notification title instead of the app name <i>R.string.app_name</i>
-         * <p>
+         * <p/>
          * By default it will use <i>R.string.app_name</i>
          *
          * @param defaultTitle will be displayed in the notification title, if the notification doesn't override it.
@@ -230,7 +243,7 @@ public class NotificationSettings {
 
         /**
          * When you want to use some notification icon instead of the app icon <i>R.mipmap.ic_launcher</i>
-         * <p>
+         * <p/>
          * By default it will use <i>R.mipmap.ic_launcher</i>
          *
          * @param defaultIcon will be displayed in the notification area, if the notification doesn't override it.
@@ -243,7 +256,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification intent flags. It is delegated to {@link Intent#addFlags(int)}
-         * <p>
+         * <p/>
          * By default it will use <i>Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP</i>
          *
          * @param intentFlags to be delegated to {@link Intent#addFlags(int)}.
@@ -258,7 +271,7 @@ public class NotificationSettings {
         /**
          * When you want to set notification pending intent flags. It is delegated to
          * {@link PendingIntent#getActivity(android.content.Context, int, android.content.Intent, int)}
-         * <p>
+         * <p/>
          * By default it will use {@link PendingIntent#FLAG_CANCEL_CURRENT}
          *
          * @param pendingIntentFlags to be delegated to {@link PendingIntent#getActivity(android.content.Context, int, android.content.Intent, int)}.
@@ -274,7 +287,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification defaults. It is delegated to {@link NotificationCompat.Builder#setDefaults(int)}
-         * <p>
+         * <p/>
          * By default it will use {@link Notification#DEFAULT_ALL}
          *
          * @param notificationDefaults to be delegated to {@link NotificationCompat.Builder#setDefaults(int)}.
@@ -290,7 +303,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification auto-cancel to <i>true</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
-         * <p>
+         * <p/>
          * By default it will be set to <i>true</i>
          *
          * @return {@link Builder}
@@ -304,7 +317,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification auto-cancel to <i>false</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
-         * <p>
+         * <p/>
          * By default it will be set to <i>true</i>
          *
          * @return {@link Builder}
@@ -318,13 +331,49 @@ public class NotificationSettings {
 
         /**
          * When you want to disable notifications when your app is in foreground.
-         * <p>
+         * <p/>
          * By default foreground notifications are enabled
          *
          * @return {@link Builder}
          */
         public Builder withoutForegroundNotification() {
             this.foregroundNotificationEnabled = false;
+            return this;
+        }
+
+        /**
+         * Enables you to put localized string as title for mark as seen actionable notification.
+         * <p/>
+         * By default foreground notifications are enabled
+         *
+         * @return {@link Builder}
+         */
+        public Builder withMarkSeenActionTitle(String title) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_MARK_SEEN_TITLE, title);
+            return this;
+        }
+
+        /**
+         * Enables you to put localized string as title for actionable notification that handles reply action.
+         * <p/>
+         * By default foreground notifications are enabled
+         *
+         * @return {@link Builder}
+         */
+        public Builder withReplyActionTitle(String title) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_REPLY_TITLE, title);
+            return this;
+        }
+
+        /**
+         * Enables you to put localized string as title for actionable notification that opens received web url in browser.
+         * <p/>
+         * By default foreground notifications are enabled
+         *
+         * @return {@link Builder}
+         */
+        public Builder withCouponUrlActionTitle(String title) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_OPEN_URL_TITLE, title);
             return this;
         }
 

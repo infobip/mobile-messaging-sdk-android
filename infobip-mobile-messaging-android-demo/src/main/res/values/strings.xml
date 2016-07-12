@@ -55,6 +55,16 @@
     <string name="toast_message_msisdn_invalid">MSISDN is invalid</string>
     <string name="toast_message_msisdn_cannot_save">Cannot save MSISDN</string>
     <string name="toast_message_msisdn_set">MSISDN is set</string>
+    <string name="toast_message_received">"Message received: %s"</string>
+
+    <!-- Strings related to Reply -->
+    <string name="reply_close_label">Close</string>
+    <string name="reply_sender_placeholder">Sender</string>
+
+    <!--Strings related to notification actions-->
+    <string name="action_mark_seen">Mark as read</string>
+    <string name="action_reply">Reply</string>
+    <string name="action_coupon">Checkout great offer</string>
 
     <!--Application credentials>
     <string name="google_app_id">YOUR GCM SENDER</string>

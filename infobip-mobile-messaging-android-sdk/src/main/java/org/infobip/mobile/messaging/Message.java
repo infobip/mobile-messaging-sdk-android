@@ -43,6 +43,7 @@ public class Message implements Comparable {
         message.setSeenTimestamp(sourceMessage.getSeenTimestamp());
         message.setInternalData(sourceMessage.getInternalData());
         message.setCustomPayload(sourceMessage.getCustomPayload());
+        message.setCategory(sourceMessage.getCategory());
 
         return message;
     }
@@ -164,12 +165,20 @@ public class Message implements Comparable {
         bundle.putString(Data.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
     }
 
-    protected String getInternalData() {
+    public String getInternalData() {
         return bundle.getString(Data.INTERNAL_DATA.getKey());
     }
 
     protected void setInternalData(String data) {
         bundle.putString(Data.INTERNAL_DATA.getKey(), data);
+    }
+
+    public String getCategory() {
+        return bundle.getString(Data.CATEGORY.getKey());
+    }
+
+    public void setCategory(String category) {
+        bundle.putString(Data.CATEGORY.getKey(), category);
     }
 
     private JSONObject getJSON(String key) {
@@ -202,8 +211,9 @@ public class Message implements Comparable {
         BODY("gcm.notification.body"),
         SOUND("gcm.notification.sound"),
         ICON("gcm.notification.icon"),
-        FROM("from"),
         SILENT("gcm.notification.silent"),
+        CATEGORY("gcm.notification.category"),
+        FROM("from"),
         RECEIVED_TIMESTAMP("received_timestamp"),
         SEEN_TIMESTAMP("seen_timestamp"),
         DATA("data"),
