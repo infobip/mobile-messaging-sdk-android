@@ -46,6 +46,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
      
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
         <uses-permission android:name="<your-package-name>.permission.C2D_MESSAGE" />
         <permission android:name="<your-package-name>.permission.C2D_MESSAGE" android:protectionLevel="signature" />
@@ -79,6 +80,9 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
                         <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
                     </intent-filter>
             </service>
+
+            <!--Service that triggers when geofence area is entered-->
+            <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
             ...
         </application>
     </manifest>

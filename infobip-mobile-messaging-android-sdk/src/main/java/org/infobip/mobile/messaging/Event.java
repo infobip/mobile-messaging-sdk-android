@@ -169,7 +169,19 @@ public enum Event {
      * }
      * </pre>
      */
-    MSISDN_SYNCED("org.infobip.mobile.messaging.MSISDN_SYNCED");
+    MSISDN_SYNCED("org.infobip.mobile.messaging.MSISDN_SYNCED"),
+
+    /**
+     * It is triggered when monitored geofence area is entered.
+     * <p>
+     * Contains the {@link Geo} object which contains the list of all triggered geofence areas.
+     * <pre>
+     * {@code
+     * Geo geo = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * }
+     * </pre>
+     */
+    GEOFENCE_AREA_ENTERED("org.infobip.mobile.messaging.GEOFENCE_AREA_ENTERED");
 
     private final String key;
 

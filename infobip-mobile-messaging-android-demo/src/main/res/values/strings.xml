@@ -66,8 +66,4 @@
     <string name="action_reply">Reply</string>
     <string name="action_coupon">Checkout great offer</string>
 
-    <!--Application credentials>
-    <string name="google_app_id">YOUR GCM SENDER</string>
-    <string name="infobip_application_code">YOUR APPLICATION CODE</string>
-    </Application credentials-->
 </resources>

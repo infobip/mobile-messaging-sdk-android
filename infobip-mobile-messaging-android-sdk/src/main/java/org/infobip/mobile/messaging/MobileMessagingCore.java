@@ -1,14 +1,18 @@
 package org.infobip.mobile.messaging;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 
 import org.infobip.mobile.messaging.MobileMessaging.OnReplyClickListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -25,7 +29,6 @@ import java.util.concurrent.Executors;
  */
 public class MobileMessagingCore {
     private static MobileMessagingCore instance;
-
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
@@ -38,6 +41,9 @@ public class MobileMessagingCore {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
+    private OnReplyClickListener replyClickListener;
+    private Geofencing geofencing;
+
     private OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -48,13 +54,13 @@ public class MobileMessagingCore {
         }
     };
 
-    private OnReplyClickListener replyClickListener;
 
     protected MobileMessagingCore(Context context) {
         this.context = context;
         this.stats = new MobileMessagingStats(context);
         this.mobileNetworkStateListener = new MobileNetworkStateListener(context);
         this.activityLifecycleMonitor = null;
+        this.geofencing = Geofencing.getInstance(context);
 
         PreferenceHelper.registerOnSharedPreferenceChangeListener(context, onSharedPreferenceChangeListener);
     }
@@ -66,57 +72,6 @@ public class MobileMessagingCore {
 
         instance = new MobileMessagingCore(context);
         return instance;
-    }
-
-    protected static void setGcmSenderId(Context context, String gcmSenderId) {
-        if (StringUtils.isBlank(gcmSenderId)) {
-            throw new IllegalArgumentException("gcmSenderId is mandatory! Get one here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm");
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_SENDER_ID, gcmSenderId);
-    }
-
-    protected static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
-        String value = null != messageStoreClass ? messageStoreClass.getName() : null;
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, value);
-    }
-
-    public static String getApplicationCode(Context context) {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
-    }
-
-    protected static void setApiUri(Context context, String apiUri) {
-        if (StringUtils.isBlank(apiUri)) {
-            throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
-    }
-
-    protected static void setReportCarrierInfo(Context context, boolean reportCarrierInfo) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO, reportCarrierInfo);
-    }
-
-    protected static void setReportSystemInfo(Context context, boolean reportSystemInfo) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
-    }
-
-    private static void cleanup(Context context) {
-        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
-        String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
-
-        Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
-        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
-        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_TOKEN, gcmToken);
-        context.startService(intent);
-
-        PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
-
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
-
-        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
-        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
     }
 
     public void sync() {
@@ -225,6 +180,13 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
+    protected static void setGcmSenderId(Context context, String gcmSenderId) {
+        if (StringUtils.isBlank(gcmSenderId)) {
+            throw new IllegalArgumentException("gcmSenderId is mandatory! Get one here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm");
+        }
+        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_SENDER_ID, gcmSenderId);
+    }
+
     public String getGcmSenderId() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
     }
@@ -237,9 +199,9 @@ public class MobileMessagingCore {
         registrationSynchronizer.setRegistrationIdReported(context, registrationIdReported);
     }
 
-    @SuppressWarnings({"unchecked", "WeakerAccess"})
-    protected Class<? extends MessageStore> getMessageStoreClass() {
-        return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
+    protected static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
+        String value = null != messageStoreClass ? messageStoreClass.getName() : null;
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, value);
     }
 
     public MessageStore getMessageStore() {
@@ -261,6 +223,11 @@ public class MobileMessagingCore {
         }
     }
 
+    @SuppressWarnings({"unchecked", "WeakerAccess"})
+    protected Class<? extends MessageStore> getMessageStoreClass() {
+        return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
+    }
+
     public boolean isMessageStoreEnabled() {
         return null != getMessageStoreClass();
     }
@@ -269,13 +236,13 @@ public class MobileMessagingCore {
         return stats;
     }
 
+    public void setLastHttpException(Exception lastHttpException) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
+    }
+
     @SuppressWarnings("unused")
     public String getLastHttpException() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION);
-    }
-
-    public void setLastHttpException(Exception lastHttpException) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
     }
 
     private void setApplicationCode(String applicationCode) {
@@ -285,8 +252,47 @@ public class MobileMessagingCore {
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, applicationCode);
     }
 
+    public static String getApplicationCode(Context context) {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
+    }
+
+    protected static void setApiUri(Context context, String apiUri) {
+        if (StringUtils.isBlank(apiUri)) {
+            throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
+        }
+        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
+    }
+
     public String getApiUri() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
+    }
+
+    protected static void setReportCarrierInfo(Context context, boolean reportCarrierInfo) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO, reportCarrierInfo);
+    }
+
+    protected static void setReportSystemInfo(Context context, boolean reportSystemInfo) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
+    }
+
+    private static void cleanup(Context context) {
+        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
+        String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+
+        Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
+        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
+        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_TOKEN, gcmToken);
+        context.startService(intent);
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
+        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
     }
 
     public OnReplyClickListener getOnReplyClickListener() {
@@ -295,6 +301,31 @@ public class MobileMessagingCore {
 
     public void setOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
         this.replyClickListener = replyActionClickListener;
+    }
+
+    static void setGeofencingActivated(Context context, boolean activated) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, activated);
+    }
+
+    public static boolean isGeofencingActivated(Context context) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
+    }
+
+    void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (geofencing == null) return;
+        geofencing.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public void activateGeofencing() {
+        if (geofencing == null) return;
+        setGeofencingActivated(context, true);
+        geofencing.activate();
+    }
+
+    public void deactivateGeofencing() {
+        if (geofencing == null) return;
+        setGeofencingActivated(context, false);
+        geofencing.deactivate();
     }
 
     /**
@@ -313,6 +344,7 @@ public class MobileMessagingCore {
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
         private OnReplyClickListener replyActionClickListener;
+        private Geofencing geofencing;
 
         public Builder(Context context) {
             if (null == context) {
@@ -361,9 +393,26 @@ public class MobileMessagingCore {
             return this;
         }
 
+        /**
+         * It will activate monitoring geo areas and notify when area is entered.
+         *
+         * @param geofencing - handles monitored geo areas
+         * @return {@link Builder}
+         */
+        public Builder withGeofencing(Geofencing geofencing) {
+            this.geofencing = geofencing;
+            return this;
+        }
+
         public Builder withOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
             this.replyActionClickListener = replyActionClickListener;
             return this;
+        }
+
+        private void activateGeofencing() {
+            if (geofencing != null) {
+                geofencing.activate();
+            }
         }
 
         /**
@@ -376,6 +425,7 @@ public class MobileMessagingCore {
             if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
                 MobileMessagingCore.cleanup(context);
             }
+
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
@@ -383,6 +433,7 @@ public class MobileMessagingCore {
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(context);
             mobileMessagingCore.playServicesSupport.checkPlayServices(context);
             mobileMessagingCore.setOnReplyClickListener(replyActionClickListener);
+            activateGeofencing();
             return mobileMessagingCore;
         }
     }

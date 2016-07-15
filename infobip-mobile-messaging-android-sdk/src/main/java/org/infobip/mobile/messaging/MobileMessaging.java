@@ -40,6 +40,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MobileMessaging {
+
     public static final String TAG = "MobileMessaging";
 
     private static MobileMessaging instance;
@@ -79,9 +80,29 @@ public class MobileMessaging {
         return MobileMessagingCore.getInstance(context).getMessageStore();
     }
 
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        MobileMessagingCore.getInstance(context).onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     public interface OnReplyClickListener {
         void onReplyClicked(Intent intent);
     }
+
+    /**
+     * It will start tracking geofence areas.
+     *
+     */
+    public void activateGeofencing() {
+        MobileMessagingCore.getInstance(context).activateGeofencing();
+    }
+
+    /**
+     * It will stop tracking geofence areas.
+     */
+    public void deactivateGeofencing() {
+        MobileMessagingCore.getInstance(context).deactivateGeofencing();
+    }
+
 
     /**
      * The {@link MobileMessaging} builder class.
@@ -101,6 +122,7 @@ public class MobileMessaging {
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
+        private Geofencing geofencing;
         private final Context context;
         private String gcmSenderId = (String) MobileMessagingProperty.GCM_SENDER_ID.getDefaultValue();
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
@@ -118,6 +140,7 @@ public class MobileMessaging {
                 throw new IllegalArgumentException("context object is mandatory!");
             }
             this.context = context;
+            this.geofencing = Geofencing.getInstance(context);
 
             loadDefaultApiUri(context);
             loadGcmSenderId(context);
@@ -273,6 +296,21 @@ public class MobileMessaging {
         }
 
         /**
+         * It will disable tracking geofence areas.
+         * <pre>
+         * {@code new MobileMessaging.Builder(context)
+         *       .withoutGeofencing()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutGeofencing() {
+            geofencing = null;
+            return this;
+        }
+
+        /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
          * {@code new MobileMessaging.Builder(context)
@@ -337,12 +375,13 @@ public class MobileMessaging {
 
             MobileMessaging mobileMessaging = new MobileMessaging(context);
             MobileMessaging.instance = mobileMessaging;
+
             new MobileMessagingCore.Builder(context)
+                    .withOnReplyClickListener(replyActionClickListener)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
-                    .withOnReplyClickListener(replyActionClickListener)
+                    .withGeofencing(geofencing)
                     .build();
-
 
             return mobileMessaging;
         }

@@ -17,6 +17,7 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName version
+        applicationId "org.infobip.mobile.messaging.demo"
     }
 
     compileOptions {

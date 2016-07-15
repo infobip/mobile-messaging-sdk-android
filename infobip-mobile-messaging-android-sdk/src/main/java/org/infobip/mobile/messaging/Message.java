@@ -3,6 +3,12 @@ package org.infobip.mobile.messaging;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
+
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.infobip.mobile.messaging.util.InternalMessageUtils;
 import org.json.JSONException;
@@ -17,6 +23,7 @@ import org.json.JSONObject;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
 public class Message implements Comparable {
     private final Bundle bundle;
+    private Gson gson = new Gson();
 
     public Message() {
         bundle = new Bundle();
@@ -54,6 +61,15 @@ public class Message implements Comparable {
 
     public void setMessageId(String messageId) {
         bundle.putString(Data.MESSAGE_ID.getKey(), messageId);
+    }
+
+    public List<Geo.Area> getGeoAreasList() {
+        if (TextUtils.isEmpty(getInternalData())) {
+            return new ArrayList<>(0);
+        }
+
+        Geo geo = gson.fromJson(getInternalData(), Geo.class);
+        return geo.getAreasList();
     }
 
     public String getFrom() {

@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <uses-permission android:name=".permission.C2D_MESSAGE"/>
     <permission android:name=".permission.C2D_MESSAGE" android:protectionLevel="signature"/>
@@ -40,6 +41,9 @@
                     <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
                 </intent-filter>
         </service>
+
+        <!--Service that triggers when geofence area is entered-->
+        <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
 
         <receiver
             android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver">
