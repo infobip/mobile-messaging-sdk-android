@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import com.google.android.gms.location.Geofence;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -15,14 +16,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class Geo implements Parcelable {
 
-    @SerializedName("geo")
-    private List<Area> areasList;
+    @SerializedName("triggeringLatitude")
+    private Double triggeringLatitude;
 
-    public Geo(List<Area> areasList) {
+    @SerializedName("triggeringLongitude")
+    private Double triggeringLongitude;
+
+    @SerializedName("geo")
+    private List<Area> areasList = new ArrayList<>();
+
+    public Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
+        this.triggeringLatitude = triggeringLatitude;
+        this.triggeringLongitude = triggeringLongitude;
         this.areasList = areasList;
     }
 
     protected Geo(Parcel in) {
+        triggeringLatitude = in.readDouble();
+        triggeringLongitude = in.readDouble();
         in.readTypedList(areasList, Area.CREATOR);
     }
 
@@ -38,6 +49,14 @@ public class Geo implements Parcelable {
         }
     };
 
+    public Double getTriggeringLatitude() {
+        return triggeringLatitude;
+    }
+
+    public Double getTriggeringLongitude() {
+        return triggeringLongitude;
+    }
+
     public List<Area> getAreasList() {
         return areasList;
     }
@@ -49,6 +68,8 @@ public class Geo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeDouble(triggeringLatitude);
+        parcel.writeDouble(triggeringLongitude);
         parcel.writeTypedList(areasList);
     }
 

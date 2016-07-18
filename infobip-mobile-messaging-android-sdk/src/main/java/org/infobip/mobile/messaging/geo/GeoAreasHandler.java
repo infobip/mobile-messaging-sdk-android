@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -46,21 +47,43 @@ class GeoAreasHandler {
         }
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+        List<Geo.Area> areasList = getAreasList(context, triggeringGeofences);
+
+        LogGeofenceTransition(geofenceTransition);
+        LogGeofences(areasList);
 
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-            List<Geo.Area> areasList = getAreasList(context, triggeringGeofences);
             displayNotifications(context, areasList);
 
-            if (!areasList.isEmpty()) {
-                Geo geo = new Geo(areasList);
-                Intent geofenceAreaEntered = new Intent(Event.GEOFENCE_AREA_ENTERED.getKey());
-                intent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceAreaEntered);
-            }
+            Location triggeringLocation = geofencingEvent.getTriggeringLocation();
+            Geo geo = new Geo(triggeringLocation.getLatitude(), triggeringLocation.getLongitude(), areasList);
+            Intent geofenceAreaEntered = new Intent(Event.GEOFENCE_AREA_ENTERED.getKey());
+            geofenceAreaEntered.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceAreaEntered);
+            context.sendBroadcast(geofenceAreaEntered);
+        }
+    }
 
-        } else {
-            Log.e(TAG, "Geofence transition - invalid type");
+    private void LogGeofenceTransition(int t) {
+        switch (t) {
+            case Geofence.GEOFENCE_TRANSITION_ENTER:
+                Log.i(TAG, "GEOFENCE_TRANSITION_ENTER");
+                break;
+            case Geofence.GEOFENCE_TRANSITION_DWELL:
+                Log.i(TAG, "GEOFENCE_TRANSITION_DWELL");
+                break;
+            case Geofence.GEOFENCE_TRANSITION_EXIT:
+                Log.i(TAG, "GEOFENCE_TRANSITION_EXIT");
+                break;
+            default:
+                Log.i(TAG, "Transition type is invalid: " + t);
+        }
+    }
+
+    private void LogGeofences(List<Geo.Area> areas) {
+        for (Geo.Area a : areas) {
+            Log.i(TAG, "GEOFENCE (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
         }
     }
 

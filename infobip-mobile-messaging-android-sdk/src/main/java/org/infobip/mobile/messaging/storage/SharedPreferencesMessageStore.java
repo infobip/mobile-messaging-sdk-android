@@ -91,7 +91,9 @@ public class SharedPreferencesMessageStore implements MessageStore {
             }
         });
 
-        MobileMessagingCore.getInstance(context).activateGeofencing();
+        if (MobileMessagingCore.isGeofencingActivated(context)) {
+            MobileMessagingCore.getInstance(context).activateGeofencing();
+        }
     }
 
     private String serialize(Bundle in) {

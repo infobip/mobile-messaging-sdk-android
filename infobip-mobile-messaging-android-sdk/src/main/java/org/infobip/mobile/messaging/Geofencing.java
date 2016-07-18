@@ -98,58 +98,63 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     private void activateGeofences() {
-        if (!geofences.isEmpty()) {
-            if (googleApiClient.isConnected() && context instanceof Activity) {
-                Activity activity = (Activity) context;
-
-                if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-                    String[] permissions = {ACCESS_FINE_LOCATION};
-                    ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
-
-                } else {
-                    LocationServices.GeofencingApi.addGeofences(googleApiClient, geofencingRequest(), geofencePendingIntent())
-                            .setResultCallback(new ResultCallback<Status>() {
-                                @Override
-                                public void onResult(@NonNull Status status) {
-                                    MobileMessagingCore.setGeofencingActivated(context, status.isSuccess());
-                                    logGeofenceStatus(status);
-                                }
-                            });
-                }
-
-            } else {
-                googleApiClient.connect();
-            }
-
-        } else {
-            Log.d(TAG, "Skip adding geofences. No geofence areas added, list of areas is empty.");
-            deactivate();
+        if (!googleApiClient.isConnected()) {
+            googleApiClient.connect();
+            return;
         }
+
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
+        }
+
+        Activity activity = (Activity) context;
+        if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
+            String[] permissions = {ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+
+        if (geofences.isEmpty()) {
+            Log.d(TAG, "Skip adding geofences. No geofence areas added.");
+            return;
+        }
+
+        LocationServices.GeofencingApi.addGeofences(googleApiClient, geofencingRequest(), geofencePendingIntent())
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        MobileMessagingCore.setGeofencingActivated(context, status.isSuccess());
+                        logGeofenceStatus(status, true);
+                        }
+                    });
     }
 
+
     void deactivate() {
-        checkRequiredService(context, GeofenceTransitionsIntentService.class);
-        if (googleApiClient.isConnected() && context instanceof Activity) {
-            Activity activity = (Activity) context;
-
-            if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-                String[] permissions = {ACCESS_FINE_LOCATION};
-                ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
-
-            } else {
-                LocationServices.GeofencingApi.removeGeofences(googleApiClient, geofencePendingIntent())
-                        .setResultCallback(new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-                                MobileMessagingCore.setGeofencingActivated(context, !status.isSuccess());
-                                logGeofenceStatus(status);
-                            }
-                        });
-            }
-
-        } else {
+        if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
+            return;
         }
+
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
+        }
+
+        Activity activity = (Activity) context;
+        if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
+            String[] permissions = {ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+
+        LocationServices.GeofencingApi.removeGeofences(googleApiClient, geofencePendingIntent())
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        MobileMessagingCore.setGeofencingActivated(context, !status.isSuccess());
+                        logGeofenceStatus(status, false);
+                    }
+                });
     }
 
     /**
@@ -168,12 +173,13 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
     }
 
-    private void logGeofenceStatus(@NonNull Status status) {
+
+    private void logGeofenceStatus(@NonNull Status status, boolean activated) {
         if (status.isSuccess()) {
-            Log.d(TAG, "Geofencing monitoring updated successfully");
+            Log.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
 
         } else {
-            Log.e(TAG, "Geofencing monitoring update failed", new Throwable(status.getStatusMessage()));
+            Log.e(TAG, "Geofencing monitoring " +  (activated ? "" : "de-") + "activation failed", new Throwable(status.getStatusMessage()));
         }
     }
 
