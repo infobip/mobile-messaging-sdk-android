@@ -17,7 +17,7 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.Geo;
+import org.infobip.mobile.messaging.GeofenceAreas;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -48,7 +48,7 @@ class GeoAreasHandler {
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-        List<Geo.Area> areasList = getAreasList(context, triggeringGeofences);
+        List<GeofenceAreas.Area> areasList = getAreasList(context, triggeringGeofences);
 
         LogGeofenceTransition(geofenceTransition);
         LogGeofences(areasList);
@@ -57,9 +57,9 @@ class GeoAreasHandler {
             displayNotifications(context, areasList);
 
             Location triggeringLocation = geofencingEvent.getTriggeringLocation();
-            Geo geo = new Geo(triggeringLocation.getLatitude(), triggeringLocation.getLongitude(), areasList);
+            GeofenceAreas geofenceAreas = new GeofenceAreas(triggeringLocation.getLatitude(), triggeringLocation.getLongitude(), areasList);
             Intent geofenceAreaEntered = new Intent(Event.GEOFENCE_AREA_ENTERED.getKey());
-            geofenceAreaEntered.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
+            geofenceAreaEntered.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geofenceAreas);
             LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceAreaEntered);
             context.sendBroadcast(geofenceAreaEntered);
         }
@@ -81,8 +81,8 @@ class GeoAreasHandler {
         }
     }
 
-    private void LogGeofences(List<Geo.Area> areas) {
-        for (Geo.Area a : areas) {
+    private void LogGeofences(List<GeofenceAreas.Area> areas) {
+        for (GeofenceAreas.Area a : areas) {
             Log.i(TAG, "GEOFENCE (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
         }
     }
@@ -100,21 +100,21 @@ class GeoAreasHandler {
         }
     }
 
-    private void displayNotifications(Context context, List<Geo.Area> triggeredGeoAreasList) {
+    private void displayNotifications(Context context, List<GeofenceAreas.Area> triggeredGeoAreasList) {
         if (triggeredGeoAreasList == null || triggeredGeoAreasList.isEmpty()) return;
 
-        for (Geo.Area area : triggeredGeoAreasList) {
+        for (GeofenceAreas.Area area : triggeredGeoAreasList) {
             displayNotificationForArea(context, area);
         }
     }
 
-    private List<Geo.Area> getAreasList(Context context, List<Geofence> triggeringGeofences) {
+    private List<GeofenceAreas.Area> getAreasList(Context context, List<Geofence> triggeringGeofences) {
         List<Message> messages = MobileMessaging.getInstance(context).getMessageStore().bind(context);
-        List<Geo.Area> areasList = new ArrayList<>(triggeringGeofences.size());
+        List<GeofenceAreas.Area> areasList = new ArrayList<>(triggeringGeofences.size());
 
         for (Message message : messages) {
-            List<Geo.Area> geoAreasList = message.getGeoAreasList();
-            for (Geo.Area area : geoAreasList) {
+            List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
+            for (GeofenceAreas.Area area : geoAreasList) {
                 for (Geofence geofence : triggeringGeofences) {
                     if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
                         areasList.add(area);
@@ -127,7 +127,7 @@ class GeoAreasHandler {
     }
 
     @SuppressWarnings("ResourceType")
-    private void displayNotificationForArea(Context context, Geo.Area area) {
+    private void displayNotificationForArea(Context context, GeofenceAreas.Area area) {
         if (area == null) return;
         NotificationSettings notificationSettings = MobileMessagingCore.getInstance(context).getNotificationSettings();
 

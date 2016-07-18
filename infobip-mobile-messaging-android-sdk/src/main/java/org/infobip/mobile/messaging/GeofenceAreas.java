@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @author pandric
  * @since 14.06.2016.
  */
-public class Geo implements Parcelable {
+public class GeofenceAreas implements Parcelable {
 
     @SerializedName("triggeringLatitude")
     private Double triggeringLatitude;
@@ -25,27 +25,27 @@ public class Geo implements Parcelable {
     @SerializedName("geo")
     private List<Area> areasList = new ArrayList<>();
 
-    public Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
+    public GeofenceAreas(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.areasList = areasList;
     }
 
-    protected Geo(Parcel in) {
+    protected GeofenceAreas(Parcel in) {
         triggeringLatitude = in.readDouble();
         triggeringLongitude = in.readDouble();
         in.readTypedList(areasList, Area.CREATOR);
     }
 
-    public static final Creator<Geo> CREATOR = new Creator<Geo>() {
+    public static final Creator<GeofenceAreas> CREATOR = new Creator<GeofenceAreas>() {
         @Override
-        public Geo createFromParcel(Parcel in) {
-            return new Geo(in);
+        public GeofenceAreas createFromParcel(Parcel in) {
+            return new GeofenceAreas(in);
         }
 
         @Override
-        public Geo[] newArray(int size) {
-            return new Geo[size];
+        public GeofenceAreas[] newArray(int size) {
+            return new GeofenceAreas[size];
         }
     };
 

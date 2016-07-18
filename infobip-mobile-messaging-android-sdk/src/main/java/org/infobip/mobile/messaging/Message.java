@@ -63,13 +63,13 @@ public class Message implements Comparable {
         bundle.putString(Data.MESSAGE_ID.getKey(), messageId);
     }
 
-    public List<Geo.Area> getGeoAreasList() {
+    public List<GeofenceAreas.Area> getGeofenceAreasList() {
         if (TextUtils.isEmpty(getInternalData())) {
             return new ArrayList<>(0);
         }
 
-        Geo geo = gson.fromJson(getInternalData(), Geo.class);
-        return geo.getAreasList();
+        GeofenceAreas geofenceAreas = gson.fromJson(getInternalData(), GeofenceAreas.class);
+        return geofenceAreas.getAreasList();
     }
 
     public String getFrom() {

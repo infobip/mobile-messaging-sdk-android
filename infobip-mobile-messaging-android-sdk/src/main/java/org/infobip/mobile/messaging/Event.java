@@ -174,10 +174,10 @@ public enum Event {
     /**
      * It is triggered when monitored geofence area is entered.
      * <p>
-     * Contains the {@link Geo} object which contains the list of all triggered geofence areas.
+     * Contains the {@link GeofenceAreas} object which contains the list of all triggered geofence areas.
      * <pre>
      * {@code
-     * Geo geo = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * GeofenceAreas geo = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
      * }
      * </pre>
      */

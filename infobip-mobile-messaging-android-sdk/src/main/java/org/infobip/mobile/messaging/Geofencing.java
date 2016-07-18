@@ -86,10 +86,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if (!messages.isEmpty()) {
             this.geofences.clear();
             for (Message message : messages) {
-                List<Geo.Area> geoAreasList = message.getGeoAreasList();
+                List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
 
                 if (geoAreasList != null && !geoAreasList.isEmpty()) {
-                    for (Geo.Area area : geoAreasList) {
+                    for (GeofenceAreas.Area area : geoAreasList) {
                         this.geofences.add(area.toGeofence());
                     }
                 }
@@ -206,10 +206,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
         if (!messages.isEmpty()) {
             for (Message message : messages) {
-                List<Geo.Area> geoAreasList = message.getGeoAreasList();
+                List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
 
                 if (geoAreasList != null && !geoAreasList.isEmpty()) {
-                    for (Geo.Area area : geoAreasList) {
+                    for (GeofenceAreas.Area area : geoAreasList) {
                         geofences.add(area.toGeofence());
                     }
                 }

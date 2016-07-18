@@ -69,6 +69,5 @@ dependencies {
     compile project(':infobip-mobile-messaging-api-java')
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
-    compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.android.support:support-v4:23.2.1'
 }
