@@ -10,6 +10,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReport;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -37,7 +38,7 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
 
         try {
             String[] messageIDs = mobileMessagingCore.getUnreportedMessageIds();
-            MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(messageIDs);
+            MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(new DeliveryReport(messageIDs));
             mobileMessagingCore.removeUnreportedMessageIds(messageIDs);
             return new DeliveryReportResult(messageIDs);
         } catch (Exception e) {
