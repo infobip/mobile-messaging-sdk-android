@@ -185,7 +185,7 @@ public class Message implements Comparable {
         return bundle.getString(Data.INTERNAL_DATA.getKey());
     }
 
-    protected void setInternalData(String data) {
+    public void setInternalData(String data) {
         bundle.putString(Data.INTERNAL_DATA.getKey(), data);
     }
 
