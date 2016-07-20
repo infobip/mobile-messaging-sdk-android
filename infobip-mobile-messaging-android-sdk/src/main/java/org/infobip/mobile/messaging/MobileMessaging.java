@@ -64,14 +64,6 @@ public class MobileMessaging {
         MobileMessagingCore.getInstance(context).setMessagesDelivered(messageIds);
     }
 
-    public long getMsisdn() {
-        return MobileMessagingCore.getInstance(context).getMsisdn();
-    }
-
-    public void setMsisdn(long msisdn) {
-        MobileMessagingCore.getInstance(context).setMsisdn(msisdn);
-    }
-
     public void setMessagesSeen(final String... messageIds) {
         MobileMessagingCore.getInstance(context).setMessagesSeen(messageIds);
     }
@@ -82,6 +74,14 @@ public class MobileMessaging {
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         MobileMessagingCore.getInstance(context).onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public void setUserData(String externalUserId, UserData userData) {
+        MobileMessagingCore.getInstance(context).setUserData(externalUserId, userData);
+    }
+
+    public UserData getUserData() {
+        return MobileMessagingCore.getInstance(context).getUserData();
     }
 
     public interface OnReplyClickListener {

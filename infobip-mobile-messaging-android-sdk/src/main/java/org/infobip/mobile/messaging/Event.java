@@ -118,26 +118,6 @@ public enum Event {
     API_COMMUNICATION_ERROR("org.infobip.mobile.messaging.API_COMMUNICATION_ERROR"),
 
     /**
-     * It is triggered if error happens during validation of parameters.
-     * <p>
-     * Contains information about which parameter was not verified and information about exception.
-     * <p>
-     * Following parameters can now trigger validation error:
-     * <ul>
-     * <li>{@link MobileMessaging#setMsisdn(long) msisdn} - use <a href="http://developer.android.com/reference/android/content/Intent.html#getLongExtra(java.lang.String, long)">intent.getLongExtra({@link BroadcastParameter#EXTRA_PARAMETER_VALUE})</a> to get msisdn that caused the error</li>
-     * </ul>
-     * <pre>
-     * {@code
-     * String parameterName = intent.getStringExtra({@link BroadcastParameter#EXTRA_PARAMETER_NAME});
-     * long msisdn = intent.getLongExtra({@link BroadcastParameter#EXTRA_MSISDN}, 0);
-     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_EXCEPTION});
-     * }
-     * </pre>
-     * @see MobileMessaging#setMsisdn(long)
-     */
-    API_PARAMETER_VALIDATION_ERROR("org.infobip.mobile.messaging.API_PARAMETER_VALIDATION_ERROR"),
-
-    /**
      * It is triggered when message delivery is reported.
      * <p>
      * Contains the list of all reported message IDs.
@@ -162,16 +142,6 @@ public enum Event {
     SEEN_REPORTS_SENT("org.infobip.mobile.messaging.SEEN_REPORTS_SENT"),
 
     /**
-     * It is triggered when MSISDN is successfully stored on the registration server.
-     * <pre>
-     * {@code
-     * String msisdn = intent.getStringExtra({@link BroadcastParameter#EXTRA_MSISDN });
-     * }
-     * </pre>
-     */
-    MSISDN_SYNCED("org.infobip.mobile.messaging.MSISDN_SYNCED"),
-
-    /**
      * It is triggered when monitored geofence area is entered.
      * <p>
      * Contains the {@link GeofenceAreas} object which contains the list of all triggered geofence areas.
@@ -181,7 +151,17 @@ public enum Event {
      * }
      * </pre>
      */
-    GEOFENCE_AREA_ENTERED("org.infobip.mobile.messaging.GEOFENCE_AREA_ENTERED");
+    GEOFENCE_AREA_ENTERED("org.infobip.mobile.messaging.GEOFENCE_AREA_ENTERED"),
+
+    /**
+     * It is triggered when user data is successfully reported to the server.
+     * <pre>
+     * {@code
+     * GeofenceAreas geofenceAreas = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * }
+     * </pre>
+     */
+    USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED");
 
     private final String key;
 

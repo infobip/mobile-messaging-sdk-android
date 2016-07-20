@@ -31,7 +31,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     ```groovy
     dependencies {
         ...
-        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.2.0@aar' {
+        compile 'org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.2.3@aar' {
             transitive = true;
         }
     }
@@ -139,5 +139,7 @@ It is recommended that you link the Telephone number (in [MSISDN](https://en.wik
 It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
 
 ```java
-MobileMessaging.getInstance(context).setMsisdn(385911234567);
+UserData userData = new UserData();
+userData.setMsisdn("385911234567");
+MobileMessaging.getInstance(context).setUserData("myUserId", userData);
 ```

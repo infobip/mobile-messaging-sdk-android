@@ -2,8 +2,8 @@ package org.infobip.mobile.messaging.api.deliveryreports;
 
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.ApiKey;
+import org.infobip.mobile.messaging.api.support.http.Body;
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
-import org.infobip.mobile.messaging.api.support.http.Query;
 import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
@@ -20,11 +20,11 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * @see Generator.Builder
  * @since 17.03.2016.
  */
-@Version("1")
+@Version("2")
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}")
 public interface MobileApiDeliveryReport {
 
     @HttpRequest(method = HttpMethod.POST, value = "deliveryreports")
-    void report(@Query(name = "messageIDs") String... messageIDs);
+    void report(@Body() DeliveryReport deliveryReport);
 }

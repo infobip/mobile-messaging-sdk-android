@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
+        android:key="org.infobip.mobile.messaging.demo.USER_ID"
+        android:title="@string/pref_title_user_id"
+        android:selectAllOnFocus="true"
+        android:inputType="text"
+        android:capitalize="none"
+        android:singleLine="true"
+        android:maxLines="1"
+        />
+
+    <EditTextPreference
         android:key="org.infobip.mobile.messaging.demo.MSISDN"
         android:title="@string/pref_title_msisdn"
         android:selectAllOnFocus="true"

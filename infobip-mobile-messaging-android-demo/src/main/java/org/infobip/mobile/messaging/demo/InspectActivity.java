@@ -285,7 +285,6 @@ public class InspectActivity extends PreferenceActivity {
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.GCM_TOKEN));
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.INFOBIP_REGISTRATION_ID));
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.LAST_API_COMMUNICATION_ERROR));
-            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.LAST_API_PARAMETER_VALIDATION_ERROR));
 
             // Set summary for read-only preferences
             findPreference(ApplicationPreferences.APP_CODE).setSummary(R.string.infobip_application_code);
@@ -350,6 +349,7 @@ public class InspectActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_personal);
             setHasOptionsMenu(true);
 
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.USER_ID));
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.MSISDN));
         }
 

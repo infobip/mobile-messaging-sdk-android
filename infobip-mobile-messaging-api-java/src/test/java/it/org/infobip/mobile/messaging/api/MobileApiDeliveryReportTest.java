@@ -1,6 +1,6 @@
 package it.org.infobip.mobile.messaging.api;
 
-import fi.iki.elonen.NanoHTTPD;
+import org.infobip.mobile.messaging.api.deliveryreports.DeliveryReport;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
+
+import fi.iki.elonen.NanoHTTPD;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,13 +52,13 @@ public class MobileApiDeliveryReportTest {
     public void create_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiDeliveryReport.report("1", "2", "3");
+        mobileApiDeliveryReport.report(new DeliveryReport("1", "2", "3"));
 
         //inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/deliveryreports");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/2/deliveryreports");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
-        assertThat(debugServer.getQueryParametersCount()).isEqualTo(1); //TODO It should ne 3! Use a better server that knows how to accept arrays!
-        assertThat(debugServer.getBody()).isNull();
+        assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
+        assertThat(debugServer.getBody()).contains("messageIDs");
     }
 }

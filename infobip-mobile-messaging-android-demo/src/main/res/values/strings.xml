@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mobile Messaging Demo</string>
+    <string name="app_name">Mobile Messaging Example</string>
 
     <string name="erase_inbox">Erase inbox</string>
     <string name="message_count_default">0</string>
@@ -50,11 +50,13 @@
 
     <string name="pref_title_msisdn">MSISDN</string>
     <string name="pref_description_msisdn_reported">MSISDN is reported to Infobip server</string>
+    <string name="pref_title_user_id">User ID (external)</string>
 
     <!-- Toast messages -->
-    <string name="toast_message_msisdn_invalid">MSISDN is invalid</string>
-    <string name="toast_message_msisdn_cannot_save">Cannot save MSISDN</string>
-    <string name="toast_message_msisdn_set">MSISDN is set</string>
+    <string name="toast_message_userdata_invalid">User data is invalid</string>
+    <string name="toast_missing_user_id">Please provide external user ID</string>
+    <string name="toast_message_userdata_cannot_save">Cannot save user data</string>
+    <string name="toast_message_userdata_set">User data is set</string>
     <string name="toast_message_received">"Message received: %s"</string>
 
     <!-- Strings related to Reply -->
@@ -65,5 +67,7 @@
     <string name="action_mark_seen">Mark as read</string>
     <string name="action_reply">Reply</string>
     <string name="action_coupon">Checkout great offer</string>
+
+    <string name="error_api_comm_unknown">Unknown API communication error</string>
 
 </resources>

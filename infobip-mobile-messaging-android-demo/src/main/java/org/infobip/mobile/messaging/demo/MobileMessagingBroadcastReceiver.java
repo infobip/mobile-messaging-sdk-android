@@ -22,8 +22,6 @@ public class MobileMessagingBroadcastReceiver extends BroadcastReceiver {
             onRegistrationCreated(context, intent);
         } else if (intent.getAction().equals(Event.API_COMMUNICATION_ERROR.getKey())) {
             onApiCommunicationError(context, intent);
-        } else if (intent.getAction().equals(Event.API_PARAMETER_VALIDATION_ERROR.getKey())) {
-            onApiParameterValidationError(context, intent);
         }
     }
 
@@ -47,24 +45,10 @@ public class MobileMessagingBroadcastReceiver extends BroadcastReceiver {
 
     void onApiCommunicationError(Context context, Intent intent) {
         Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_EXCEPTION);
-        String errorDescription = throwable.getMessage() + "\n";
+        String errorDescription = throwable != null ? throwable.getMessage() : context.getString(R.string.error_api_comm_unknown) + "\n";
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putString(ApplicationPreferences.LAST_API_COMMUNICATION_ERROR, errorDescription)
-                .apply();
-    }
-
-    void onApiParameterValidationError(Context context, Intent intent) {
-        Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_EXCEPTION);
-        String parameterName = intent.getStringExtra(EXTRA_PARAMETER_NAME);
-        String errorDescription = throwable.getMessage() + "\n";
-        errorDescription += parameterName + "\n";
-        if (EXTRA_MSISDN.equals(parameterName)) {
-            errorDescription += "" + intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
-        }
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit()
-                .putString(ApplicationPreferences.LAST_API_PARAMETER_VALIDATION_ERROR, errorDescription)
                 .apply();
     }
 }

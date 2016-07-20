@@ -5,10 +5,10 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
-import org.infobip.mobile.messaging.api.msisdn.MobileApiRegisterMsisdn;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.seenstatus.MobileApiSeenStatusReport;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.userdata.MobileApiUserDataSync;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -30,8 +30,8 @@ public enum MobileApiResourceProvider {
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiDeliveryReport mobileApiDeliveryReport;
-    private MobileApiRegisterMsisdn mobileApiRegisterMsisdn;
     private MobileApiSeenStatusReport mobileApiSeenStatusReport;
+    private MobileApiUserDataSync mobileApiUserDataSync;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -53,16 +53,6 @@ public enum MobileApiResourceProvider {
         return mobileApiDeliveryReport;
     }
 
-    public MobileApiRegisterMsisdn getMobileApiRegisterMsisdn(Context context) {
-        if (null != mobileApiRegisterMsisdn) {
-            return mobileApiRegisterMsisdn;
-        }
-
-        mobileApiRegisterMsisdn = getGenerator(context).create(MobileApiRegisterMsisdn.class);
-
-        return mobileApiRegisterMsisdn;
-    }
-
     public MobileApiSeenStatusReport getMobileApiSeenStatusReport(Context context) {
         if (null != mobileApiSeenStatusReport) {
             return mobileApiSeenStatusReport;
@@ -71,6 +61,16 @@ public enum MobileApiResourceProvider {
         mobileApiSeenStatusReport = getGenerator(context).create(MobileApiSeenStatusReport.class);
 
         return mobileApiSeenStatusReport;
+    }
+
+    public MobileApiUserDataSync getMobileApiUserDataSync(Context context) {
+        if (null != mobileApiUserDataSync) {
+            return mobileApiUserDataSync;
+        }
+
+        mobileApiUserDataSync = getGenerator(context).create(MobileApiUserDataSync.class);
+
+        return mobileApiUserDataSync;
     }
 
     String[] getUserAgentAdditions(Context context) {
@@ -124,6 +124,6 @@ public enum MobileApiResourceProvider {
         mobileApiRegistration = null;
         mobileApiSeenStatusReport = null;
         mobileApiDeliveryReport = null;
-        mobileApiRegisterMsisdn = null;
+        mobileApiUserDataSync = null;
     }
 }
