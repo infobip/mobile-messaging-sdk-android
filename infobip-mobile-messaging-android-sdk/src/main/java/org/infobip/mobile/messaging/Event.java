@@ -157,7 +157,7 @@ public enum Event {
      * It is triggered when user data is successfully reported to the server.
      * <pre>
      * {@code
-     * GeofenceAreas geofenceAreas = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * UserData userData = new UserData(intent.getStringExtra(BroadcastParameter.EXTRA_USER_DATA));
      * }
      * </pre>
      */
