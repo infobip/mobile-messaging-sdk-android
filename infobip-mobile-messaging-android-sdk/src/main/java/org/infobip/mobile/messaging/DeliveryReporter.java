@@ -9,7 +9,6 @@ import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
 import org.infobip.mobile.messaging.tasks.DeliveryReportTask;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
@@ -28,11 +27,12 @@ class DeliveryReporter {
         new DeliveryReportTask(context) {
             @Override
             protected void onPostExecute(DeliveryReportResult result) {
-                if (null == result) {
-                    Log.e(TAG, "MobileMessaging API didn't return any value!");
+                if (result.hasError()) {
+                    Log.e(TAG, "MobileMessaging API returned error!");
 
                     stats.reportError(MobileMessagingError.DELIVERY_REPORTING_ERROR);
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
                     context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;

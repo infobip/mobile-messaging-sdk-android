@@ -40,6 +40,7 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
             String[] messageIDs = mobileMessagingCore.getUnreportedMessageIds();
             MobileApiResourceProvider.INSTANCE.getMobileApiDeliveryReport(context).report(new DeliveryReport(messageIDs));
             mobileMessagingCore.removeUnreportedMessageIds(messageIDs);
+
             return new DeliveryReportResult(messageIDs);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
@@ -51,7 +52,7 @@ public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportRe
             context.sendBroadcast(registrationSaveError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
 
-            return null;
+            return new DeliveryReportResult(e);
         }
     }
 }

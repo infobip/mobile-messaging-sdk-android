@@ -13,6 +13,7 @@ public enum MobileMessagingProperty {
     GCM_REGISTRATION_ID_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
     GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID"),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID"),
+    EXTERNAL_USER_ID("org.infobip.mobile.messaging.infobip.EXTERNAL_USER_ID"),
     GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID"),
     APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE"),
     LAST_HTTP_EXCEPTION("org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION"),
@@ -20,8 +21,6 @@ public enum MobileMessagingProperty {
     INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS", new String[0]),
     API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://oneapi.infobip.com/"),
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),
-    MSISDN("org.infobip.mobile.messaging.infobip.MSISDN"),
-    MSISDN_TO_REPORT("org.infobip.mobile.messaging.infobip.MSISDN_TO_REPORT"),
     MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
     MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
     MOBILE_NETWORK_CODE("org.infobip.mobile.messaging.infobip.MNC", ""),
@@ -30,6 +29,8 @@ public enum MobileMessagingProperty {
     SIM_NETWORK_CODE("org.infobip.mobile.messaging.infobip.SIM_MNC", ""),
     REPORT_CARRIER_INFO("org.infobip.mobile.messaging.infobip.REPORT_CARRIER_INFO", true),
     REPORT_SYSTEM_INFO("org.infobip.mobile.messaging.infobip.REPORT_SYSTEM_INFO", true),
+    UNREPORTED_USER_DATA("org.ninfobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
+    USER_DATA("org.ninfobip.mobile.messaging.infobip.USER_DATA"),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.infobip.GEOFENCING_ACTIVATED", true),
 

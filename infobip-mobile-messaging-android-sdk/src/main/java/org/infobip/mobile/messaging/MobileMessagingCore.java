@@ -1,18 +1,15 @@
 package org.infobip.mobile.messaging;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageManager;
 
 import org.infobip.mobile.messaging.MobileMessaging.OnReplyClickListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -32,7 +29,7 @@ public class MobileMessagingCore {
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
-    private final MsisdnSynchronizer msisdnSynchronizer = new MsisdnSynchronizer();
+    private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
@@ -47,8 +44,8 @@ public class MobileMessagingCore {
     private OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (MobileMessagingProperty.MSISDN_TO_REPORT.getKey().equals(key) &&
-                    PreferenceHelper.contains(context, MobileMessagingProperty.MSISDN_TO_REPORT)) {
+            if (MobileMessagingProperty.UNREPORTED_USER_DATA.getKey().equals(key) &&
+                    PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
                 sync();
             }
         }
@@ -78,39 +75,7 @@ public class MobileMessagingCore {
         registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
         deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
-        msisdnSynchronizer.syncronize(context, getUnreportedMsisdn(), isMsisdnReported(), getStats(), taskExecutor);
-    }
-
-    public long getMsisdn() {
-        return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN);
-    }
-
-    protected void setMsisdn(long msisdn) {
-        if (msisdn < 0) {
-            throw new IllegalArgumentException("MSISDN can't be negative!");
-        }
-        long oldMsisdn = getMsisdn();
-        if (oldMsisdn != 0 && oldMsisdn == msisdn) {
-            setMsisdnReported(false);
-            return;
-        }
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN_TO_REPORT, msisdn);
-    }
-
-    public long getUnreportedMsisdn() {
-        return PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN_TO_REPORT);
-    }
-
-    protected boolean isMsisdnReported() {
-        return !PreferenceHelper.contains(context, MobileMessagingProperty.MSISDN_TO_REPORT);
-    }
-
-    public void setMsisdnReported(boolean success) {
-        long reportedMsisdn = PreferenceHelper.findLong(context, MobileMessagingProperty.MSISDN_TO_REPORT);
-        if (success && reportedMsisdn > 0) {
-            PreferenceHelper.saveLong(context, MobileMessagingProperty.MSISDN, reportedMsisdn);
-        }
-        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
+        userDataSynchronizer.sync(context, getStats(), taskExecutor);
     }
 
     public String getRegistrationId() {
@@ -124,6 +89,14 @@ public class MobileMessagingCore {
 
     public String getDeviceApplicationInstanceId() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+    }
+
+    public String getExternalUserId() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.EXTERNAL_USER_ID);
+    }
+
+    protected void setExternalUserId(String externalUserId) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.EXTERNAL_USER_ID, externalUserId);
     }
 
     public String[] getUnreportedMessageIds() {
@@ -289,8 +262,8 @@ public class MobileMessagingCore {
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
 
-        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN_TO_REPORT);
-        PreferenceHelper.remove(context, MobileMessagingProperty.MSISDN);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+        PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
     }
@@ -326,6 +299,42 @@ public class MobileMessagingCore {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
         geofencing.deactivate();
+    }
+
+    protected void setUserData(String externalUserId, UserData userData) {
+        UserData existingData = getUnreportedUserData();
+        if (existingData == null) {
+            existingData = getUserData();
+        }
+
+        setExternalUserId(externalUserId);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, UserData.merge(existingData, userData).toString());
+    }
+
+    protected UserData getUserData() {
+        if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
+            return new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
+        }
+        return null;
+    }
+
+    public UserData getUnreportedUserData() {
+        if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
+            return new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
+        }
+        return null;
+    }
+
+    public void setUserDataReported(boolean success) {
+        if (!PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
+            return;
+        }
+
+        String reported = PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+        if (success && StringUtils.isNotBlank(reported)) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, reported);
+        }
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
     /**

@@ -34,7 +34,7 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
             Log.e(MobileMessaging.TAG, "Can't send seen reports to MobileMessaging API without valid registration!");
-            return null;
+            return new SeenStatusReportResult(new Exception("No valid registration"));
         }
 
         try {
@@ -53,7 +53,7 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
             context.sendBroadcast(seenStatusReportError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
 
-            return null;
+            return new SeenStatusReportResult(e);
         }
     }
 }

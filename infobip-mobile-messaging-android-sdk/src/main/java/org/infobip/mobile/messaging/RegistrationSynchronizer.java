@@ -4,9 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
+
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.tasks.UpsertRegistrationResult;
 import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -36,22 +37,24 @@ class RegistrationSynchronizer {
 
         new UpsertRegistrationTask(context) {
             @Override
-            protected void onPostExecute(RegistrationResponse registrationResponse) {
-                if (null == registrationResponse || StringUtils.isBlank(registrationResponse.getDeviceApplicationInstanceId())) {
-                    Log.e(TAG, "MobileMessaging API didn't return any value!");
+            protected void onPostExecute(UpsertRegistrationResult result) {
+                if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
+                    Log.e(TAG, "MobileMessaging API returned error!");
                     stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
                     context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
                 }
-                setDeviceApplicationInstanceId(context, registrationResponse.getDeviceApplicationInstanceId());
+
+                setDeviceApplicationInstanceId(context, result.getDeviceInstanceId());
                 setRegistrationIdReported(context, true);
 
                 Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
                 registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, registrationId);
-                registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, registrationResponse.getDeviceApplicationInstanceId());
+                registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, result.getDeviceInstanceId());
                 context.sendBroadcast(registrationCreated);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
             }

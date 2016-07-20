@@ -38,13 +38,14 @@ public class SeenStatusReporter {
                 new SeenStatusReportTask(context) {
                     @Override
                     protected void onPostExecute(SeenStatusReportResult result) {
-                        if (null == result) {
-                            Log.e(TAG, "MobileMessaging API didn't return any value!");
+                        if (result.hasError()) {
+                            Log.e(TAG, "MobileMessaging API returned error!");
 
                             stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
-                            Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                            context.sendBroadcast(registrationSaveError);
-                            LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
+                            Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+                            seenStatusReportError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
+                            context.sendBroadcast(seenStatusReportError);
+                            LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
                             return;
                         }
 

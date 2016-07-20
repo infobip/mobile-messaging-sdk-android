@@ -19,7 +19,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @since 03.03.2016.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class UpsertRegistrationTask extends AsyncTask<Object, Void, RegistrationResponse> {
+public class UpsertRegistrationTask extends AsyncTask<Object, Void, UpsertRegistrationResult> {
     private final Context context;
 
     public UpsertRegistrationTask(Context context) {
@@ -27,12 +27,13 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, Registration
     }
 
     @Override
-    protected RegistrationResponse doInBackground(Object... notUsed) {
+    protected UpsertRegistrationResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         try {
             String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
             String registrationId = mobileMessagingCore.getRegistrationId();
-            return MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId, registrationId);
+            RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId, registrationId);
+            return new UpsertRegistrationResult(registrationResponse.getDeviceApplicationInstanceId());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error creating registration!", e);
@@ -43,7 +44,7 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, Registration
             context.sendBroadcast(registrationSaveError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
 
-            return null;
+            return new UpsertRegistrationResult(e);
         }
     }
 }

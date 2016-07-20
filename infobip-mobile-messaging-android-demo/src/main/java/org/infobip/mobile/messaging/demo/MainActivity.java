@@ -23,24 +23,23 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.Locale;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MSISDN;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_NAME;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_PARAMETER_VALUE;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 
 public class MainActivity extends AppCompatActivity implements MobileMessaging.OnReplyClickListener {
-    private final BroadcastReceiver msisdnRecevier = new BroadcastReceiver() {
+    private final BroadcastReceiver userDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            long msisdn = intent.getLongExtra(EXTRA_MSISDN, 0);
-            if (msisdn == 0) {
-                showToast(R.string.toast_message_msisdn_cannot_save);
+            if (!intent.hasExtra(EXTRA_USER_DATA)) {
+                showToast(R.string.toast_message_userdata_cannot_save);
             } else {
-                showToast(getString(R.string.toast_message_msisdn_set) + ": " + msisdn);
+                UserData userData = new UserData(intent.getStringExtra(EXTRA_USER_DATA));
+                showToast(getString(R.string.toast_message_userdata_set) + ": " + userData.toString());
             }
         }
     };
@@ -53,18 +52,20 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
             }
         }
     };
-    private final BroadcastReceiver validationErrorReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver errorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (EXTRA_MSISDN.equals(intent.getStringExtra(EXTRA_PARAMETER_NAME))) {
-                Throwable throwable = (Throwable) intent.getSerializableExtra(EXTRA_EXCEPTION);
-                long msisdn = intent.getLongExtra(EXTRA_PARAMETER_VALUE, 0);
-                showToast(throwable.getMessage() + " for " + msisdn);
-
-                unregisterPreferenceChangeListener();
-                readMsisdnFromMobileMessaging();
-                registerPreferenceChangeListener();
+            String message = getString(R.string.error_api_comm_unknown);
+            Throwable exception = (Throwable) intent.getSerializableExtra(EXTRA_EXCEPTION);
+            if (exception != null) {
+                message = exception.getMessage();
             }
+
+            showToast(message);
+
+            unregisterPreferenceChangeListener();
+            readMsisdnFromMobileMessaging();
+            registerPreferenceChangeListener();
         }
     };
     private TextView totalReceivedTextView;
@@ -196,28 +197,40 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
     }
 
     private void onMSISDNPreferenceChanged(SharedPreferences sharedPreferences) {
+
+        String userId = sharedPreferences.getString(ApplicationPreferences.USER_ID, null);
+        if (userId == null) {
+            showToast(R.string.toast_missing_user_id);
+            return;
+        }
+
+        Long msisdn = null;
         try {
             if (sharedPreferences.contains(ApplicationPreferences.MSISDN)) {
-                long msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
-                if (msisdn > 0) {
-                    MobileMessaging mobileMessaging = MobileMessaging.getInstance(MainActivity.this);
-                    mobileMessaging.setMsisdn(msisdn);
-                } else {
+                msisdn = Long.parseLong(sharedPreferences.getString(ApplicationPreferences.MSISDN, "0"));
+                if (msisdn <= 0) {
                     throw new IllegalArgumentException();
                 }
             }
         } catch (Exception e) {
-            showToast(R.string.toast_message_msisdn_invalid);
+            showToast(R.string.toast_message_userdata_invalid);
+            return;
+        }
+
+        if (msisdn != null) {
+            UserData userData = new UserData();
+            userData.setMsisdn(msisdn.toString());
+            MobileMessaging.getInstance(this).setUserData(userId, userData);
         }
     }
 
     private void registerReceivers() {
         if (!receiversRegistered) {
             LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.registerReceiver(validationErrorReceiver,
-                    new IntentFilter(Event.API_PARAMETER_VALIDATION_ERROR.getKey()));
-            localBroadcastManager.registerReceiver(msisdnRecevier,
-                    new IntentFilter(Event.MSISDN_SYNCED.getKey()));
+            localBroadcastManager.registerReceiver(errorReceiver,
+                    new IntentFilter(Event.API_COMMUNICATION_ERROR.getKey()));
+            localBroadcastManager.registerReceiver(userDataReceiver,
+                    new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
             localBroadcastManager.registerReceiver(messageReceiver,
                     new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
             receiversRegistered = true;
@@ -227,17 +240,22 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
     private void unregisterReceivers() {
         if (receiversRegistered) {
             LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
-            localBroadcastManager.unregisterReceiver(validationErrorReceiver);
-            localBroadcastManager.unregisterReceiver(msisdnRecevier);
+            localBroadcastManager.unregisterReceiver(errorReceiver);
+            localBroadcastManager.unregisterReceiver(userDataReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
             receiversRegistered = false;
         }
     }
 
     private void readMsisdnFromMobileMessaging() {
+        UserData userData = MobileMessaging.getInstance(this).getUserData();
+        if (userData == null) {
+            return;
+        }
+
         PreferenceManager.getDefaultSharedPreferences(MainActivity.this)
                 .edit()
-                .putString(ApplicationPreferences.MSISDN, "" + MobileMessaging.getInstance(this).getMsisdn())
+                .putString(ApplicationPreferences.MSISDN, "" + userData.getMsisdn())
                 .apply();
     }
 
