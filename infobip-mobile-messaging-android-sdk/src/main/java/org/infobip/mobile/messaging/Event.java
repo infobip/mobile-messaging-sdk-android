@@ -177,7 +177,7 @@ public enum Event {
      * Contains the {@link GeofenceAreas} object which contains the list of all triggered geofence areas.
      * <pre>
      * {@code
-     * GeofenceAreas geo = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * GeofenceAreas geofenceAreas = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
      * }
      * </pre>
      */

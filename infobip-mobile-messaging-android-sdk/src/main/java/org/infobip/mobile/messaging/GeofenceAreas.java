@@ -87,7 +87,7 @@ public class GeofenceAreas implements Parcelable {
         @SerializedName("longitude")
         private Double longitude;
 
-        @SerializedName("radius")
+        @SerializedName("radiusInMeters")
         private Integer radius;
 
         @SerializedName("expiry")
@@ -124,7 +124,7 @@ public class GeofenceAreas implements Parcelable {
         };
 
         public Long getExpiry() {
-            return expiry == 0L ? TimeUnit.HOURS.toMillis(12L) : expiry;
+            return expiry == 0L ? TimeUnit.HOURS.toMillis(24L) : expiry;
         }
 
         public String getId() {
