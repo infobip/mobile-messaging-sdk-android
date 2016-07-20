@@ -131,7 +131,7 @@ Library generates intents on the following events as described in [Event](infobi
 * __API communication error__ - is triggered on every error returned by API.
 * __API validation error__ - is triggerred when there is an error during validation of input parameters (e.g.: invalid MSISDN).
 * __Delivery reports sent__ - is triggered when message delivery is reported.
-* __MSISDN Synced__ - is triggered when MSISDN is successfully saved on the registration server.
+* __User data synced__ - is triggered when user data is successfully saved on the registration server.
 
 ### Linking MSISDN
 
