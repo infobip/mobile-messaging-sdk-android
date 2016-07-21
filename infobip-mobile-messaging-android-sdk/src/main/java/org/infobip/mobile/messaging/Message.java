@@ -4,15 +4,16 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.infobip.mobile.messaging.util.InternalMessageUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
@@ -68,8 +69,14 @@ public class Message implements Comparable {
             return new ArrayList<>(0);
         }
 
-        GeofenceAreas geofenceAreas = gson.fromJson(getInternalData(), GeofenceAreas.class);
-        return geofenceAreas.getAreasList();
+        try {
+            GeofenceAreas geofenceAreas = gson.fromJson(getInternalData(), GeofenceAreas.class);
+            return geofenceAreas.getAreasList();
+
+        } catch (Exception e) {
+            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            return new ArrayList<>(0);
+        }
     }
 
     public String getFrom() {
