@@ -25,6 +25,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.Locale;
 
@@ -40,6 +41,15 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
             } else {
                 UserData userData = new UserData(intent.getStringExtra(EXTRA_USER_DATA));
                 showToast(getString(R.string.toast_message_userdata_set) + ": " + userData.toString());
+
+                if (StringUtils.isBlank(userData.getMsisdn())) {
+                    return;
+                }
+
+                PreferenceManager.getDefaultSharedPreferences(context)
+                        .edit()
+                        .putString(ApplicationPreferences.MSISDN, userData.getMsisdn())
+                        .apply();
             }
         }
     };
@@ -49,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(ApplicationPreferences.MSISDN)) {
                 onMSISDNPreferenceChanged(sharedPreferences);
+            } else if (key.equals(ApplicationPreferences.USER_ID)) {
+                onUserIdChanged(sharedPreferences);
             }
         }
     };
@@ -222,6 +234,18 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
             userData.setMsisdn(msisdn.toString());
             MobileMessaging.getInstance(this).setUserData(userId, userData);
         }
+    }
+
+    private void onUserIdChanged(SharedPreferences sharedPreferences) {
+
+        sharedPreferences.edit().remove(ApplicationPreferences.MSISDN).apply();
+
+        String userId = sharedPreferences.getString(ApplicationPreferences.USER_ID, "");
+        if (userId.isEmpty()) {
+            return;
+        }
+
+        MobileMessaging.getInstance(this).setUserData(userId, null);
     }
 
     private void registerReceivers() {

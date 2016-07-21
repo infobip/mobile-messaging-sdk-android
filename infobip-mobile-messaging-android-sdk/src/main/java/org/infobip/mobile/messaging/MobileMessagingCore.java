@@ -302,13 +302,21 @@ public class MobileMessagingCore {
     }
 
     protected void setUserData(String externalUserId, UserData userData) {
+        String existingUserId = getExternalUserId();
+        setExternalUserId(externalUserId);
+
         UserData existingData = getUnreportedUserData();
         if (existingData == null) {
             existingData = getUserData();
         }
 
-        setExternalUserId(externalUserId);
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, UserData.merge(existingData, userData).toString());
+        if (!externalUserId.equals(existingUserId)) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
+            existingData = null;
+        }
+
+        UserData merged = UserData.merge(existingData, userData);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, merged.toString());
     }
 
     protected UserData getUserData() {
@@ -325,14 +333,13 @@ public class MobileMessagingCore {
         return null;
     }
 
-    public void setUserDataReported(boolean success) {
-        if (!PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
-            return;
-        }
+    public void setUserDataReportedWithError() {
+        setUserDataReported(null);
+    }
 
-        String reported = PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
-        if (success && StringUtils.isNotBlank(reported)) {
-            PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, reported);
+    public void setUserDataReported(UserData userData) {
+        if (userData != null) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }

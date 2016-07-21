@@ -32,20 +32,24 @@ public class UserData {
     }
 
     public static UserData merge(UserData old, UserData latest) {
-        if (old == null) {
-            return latest;
-        }
-        if (latest == null) {
-            return old;
+        UserData merged = new UserData();
+        merged.add(old);
+        merged.add(latest);
+        return merged;
+    }
+
+    private void add(UserData data) {
+        if (data == null) {
+            return;
         }
 
-        UserData merged = new UserData();
-        for (PredefinedField field : PredefinedField.values()) {
-            merged.mergeField(field, old, latest);
+        if (data.predefinedUserData != null) {
+            this.predefinedUserData.putAll(data.predefinedUserData);
         }
-        merged.customUserData.putAll(old.customUserData);
-        merged.customUserData.putAll(latest.customUserData);
-        return merged;
+
+        if (data.customUserData != null) {
+            this.customUserData.putAll(data.customUserData);
+        }
     }
 
     @Override
@@ -119,19 +123,15 @@ public class UserData {
     }
 
     private <T> T getField(PredefinedField field) {
+        if (predefinedUserData == null) {
+            return null;
+        }
+
         Object object = predefinedUserData.get(field.getKey());
         try {
             return (T) object;
         } catch (ClassCastException e) {
             return null;
-        }
-    }
-
-    private void mergeField(PredefinedField field, UserData oldData, UserData newData) {
-        if (newData.predefinedUserData.containsKey(field.getKey())) {
-            this.predefinedUserData.put(field.getKey(), newData.predefinedUserData.get(field.getKey()));
-        } else if (oldData.predefinedUserData.containsKey(field.getKey())){
-            this.predefinedUserData.put(field.getKey(), oldData.predefinedUserData.get(field.getKey()));
         }
     }
 

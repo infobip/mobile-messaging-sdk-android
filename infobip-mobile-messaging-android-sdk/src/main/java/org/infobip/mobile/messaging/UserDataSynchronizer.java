@@ -34,7 +34,7 @@ public class UserDataSynchronizer {
                     stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
 
                     if (syncUserDataResult.hasInvalidParameterError()) {
-                        MobileMessagingCore.getInstance(context).setUserDataReported(false);
+                        MobileMessagingCore.getInstance(context).setUserDataReportedWithError();
                     }
 
                     Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -43,9 +43,10 @@ public class UserDataSynchronizer {
                     LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
                     return;
                 }
-                MobileMessagingCore.getInstance(context).setUserDataReported(true);
 
                 UserData userData = new UserData(syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
+                MobileMessagingCore.getInstance(context).setUserDataReported(userData);
+
                 Intent userDataReported = new Intent(Event.USER_DATA_REPORTED.getKey());
                 userDataReported.putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
                 context.sendBroadcast(userDataReported);

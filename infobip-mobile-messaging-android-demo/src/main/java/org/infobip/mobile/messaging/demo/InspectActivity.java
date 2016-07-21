@@ -6,13 +6,21 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.*;
+import android.preference.EditTextPreference;
+import android.preference.ListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
+import android.preference.RingtonePreference;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
@@ -24,11 +32,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
-import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 
 import java.util.List;
 
@@ -342,15 +345,23 @@ public class InspectActivity extends PreferenceActivity {
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class PersonalSettingsPreferenceFragment extends PreferenceFragment {
+    public static class PersonalSettingsPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_personal);
             setHasOptionsMenu(true);
 
+            PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
+
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.USER_ID));
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.MSISDN));
+        }
+
+        @Override
+        public void onDestroy() {
+            PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
+            super.onDestroy();
         }
 
         @Override
@@ -361,6 +372,14 @@ public class InspectActivity extends PreferenceActivity {
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            Preference preference = findPreference(key);
+            if (ApplicationPreferences.MSISDN.equals(key)) {
+                sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, sharedPreferences.getString(key, ""));
+            }
         }
     }
 }
