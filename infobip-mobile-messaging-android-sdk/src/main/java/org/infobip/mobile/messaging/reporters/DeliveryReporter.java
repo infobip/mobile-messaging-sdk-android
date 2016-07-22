@@ -1,10 +1,13 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.DeliveryReportResult;
@@ -18,8 +21,8 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @author mstipanov
  * @since 07.04.2016.
  */
-class DeliveryReporter {
-    void report(final Context context, String[] unreportedMessageIds, final MobileMessagingStats stats, Executor executor) {
+public class DeliveryReporter {
+    public void report(final Context context, String[] unreportedMessageIds, final MobileMessagingStats stats, Executor executor) {
         if (unreportedMessageIds.length == 0) {
             return;
         }

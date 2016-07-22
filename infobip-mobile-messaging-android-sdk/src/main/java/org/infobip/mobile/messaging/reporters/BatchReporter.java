@@ -1,7 +1,8 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Timer;

@@ -84,6 +84,10 @@ public class MobileMessaging {
         return MobileMessagingCore.getInstance(context).getUserData();
     }
 
+    public void sendMessages(MoMessage... messages) {
+        MobileMessagingCore.getInstance(context).sendMessages(messages);
+    }
+
     public interface OnReplyClickListener {
         void onReplyClicked(Intent intent);
     }

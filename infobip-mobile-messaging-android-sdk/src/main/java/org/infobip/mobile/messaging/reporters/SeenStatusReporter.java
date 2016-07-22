@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.SeenStatusReportResult;
@@ -23,7 +25,7 @@ public class SeenStatusReporter {
 
     private static BatchReporter batchReporter = null;
 
-    void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
+    public void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
         if (unreportedSeenMessageIds.length == 0) {
             return;
         }

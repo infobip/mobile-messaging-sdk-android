@@ -5,8 +5,8 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
-import org.infobip.mobile.messaging.api.seenstatus.MobileApiSeenStatusReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.userdata.MobileApiUserDataSync;
 import org.infobip.mobile.messaging.util.DeviceInformation;
@@ -30,7 +30,7 @@ public enum MobileApiResourceProvider {
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiDeliveryReport mobileApiDeliveryReport;
-    private MobileApiSeenStatusReport mobileApiSeenStatusReport;
+    private MobileApiMessages mobileApiMessages;
     private MobileApiUserDataSync mobileApiUserDataSync;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
@@ -53,14 +53,14 @@ public enum MobileApiResourceProvider {
         return mobileApiDeliveryReport;
     }
 
-    public MobileApiSeenStatusReport getMobileApiSeenStatusReport(Context context) {
-        if (null != mobileApiSeenStatusReport) {
-            return mobileApiSeenStatusReport;
+    public MobileApiMessages getMobileApiMessages(Context context) {
+        if (null != mobileApiMessages) {
+            return mobileApiMessages;
         }
 
-        mobileApiSeenStatusReport = getGenerator(context).create(MobileApiSeenStatusReport.class);
+        mobileApiMessages = getGenerator(context).create(MobileApiMessages.class);
 
-        return mobileApiSeenStatusReport;
+        return mobileApiMessages;
     }
 
     public MobileApiUserDataSync getMobileApiUserDataSync(Context context) {
@@ -122,7 +122,7 @@ public enum MobileApiResourceProvider {
     public void resetMobileApi() {
         generator = null;
         mobileApiRegistration = null;
-        mobileApiSeenStatusReport = null;
+        mobileApiMessages = null;
         mobileApiDeliveryReport = null;
         mobileApiUserDataSync = null;
     }

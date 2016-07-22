@@ -8,6 +8,7 @@ public class DeliveryReportResult extends UnsuccessfulResult {
     private final String[] messageIDs;
 
     public DeliveryReportResult(String[] messageIDs) {
+        super(null);
         this.messageIDs = messageIDs;
 
     }

@@ -11,7 +11,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.seenstatus.SeenMessages;
+import org.infobip.mobile.messaging.api.messages.SeenMessages;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -40,7 +40,7 @@ public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusRepo
         try {
             String messageIDs[] = mobileMessagingCore.getUnreportedSeenMessageIds();
             SeenMessages seenMessages = SeenMessagesReport.fromMessageIds(messageIDs);
-            MobileApiResourceProvider.INSTANCE.getMobileApiSeenStatusReport(context).report(seenMessages);
+            MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).reportSeen(seenMessages);
             mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
             return new SeenStatusReportResult(messageIDs);
         } catch (Exception e) {

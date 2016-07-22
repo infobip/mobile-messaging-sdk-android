@@ -10,10 +10,6 @@ import org.infobip.mobile.messaging.api.support.ApiException;
 public class UnsuccessfulResult {
     private final Throwable exception;
 
-    public UnsuccessfulResult() {
-        exception = null;
-    }
-
     public UnsuccessfulResult(Throwable exception) {
         this.exception = exception;
     }

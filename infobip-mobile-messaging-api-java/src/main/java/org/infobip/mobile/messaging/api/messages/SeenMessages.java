@@ -1,14 +1,21 @@
-package org.infobip.mobile.messaging.api.seenstatus;
+package org.infobip.mobile.messaging.api.messages;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  *
  * Seen messages report body encapsulation.
  *
  * @author sslavin
- * @see MobileApiSeenStatusReport
- * @see MobileApiSeenStatusReport#report(SeenMessages)
+ * @see MobileApiMessages
+ * @see MobileApiMessages#reportSeen(SeenMessages)
  * @since 25.04.2016.
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SeenMessages {
 
     public static class Message {
@@ -30,15 +37,6 @@ public class SeenMessages {
             this.messageId = messageId;
             this.seenDate = (double) System.currentTimeMillis();
         }
-    }
-
-    /**
-     * Default constructor
-     * @param messages - one or more messages to report
-     */
-
-    public SeenMessages(Message... messages) {
-        this.messages = messages;
     }
 
     /**

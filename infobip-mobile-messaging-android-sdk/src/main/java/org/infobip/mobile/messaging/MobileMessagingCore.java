@@ -10,6 +10,11 @@ import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.reporters.DeliveryReporter;
+import org.infobip.mobile.messaging.reporters.MessageReporter;
+import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
+import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
+import org.infobip.mobile.messaging.reporters.UserDataSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -30,6 +35,7 @@ public class MobileMessagingCore {
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
+    private final MessageReporter messageReporter = new MessageReporter();
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
@@ -342,6 +348,10 @@ public class MobileMessagingCore {
             PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+    }
+
+    public void sendMessages(MoMessage... messages) {
+        messageReporter.send(context, getStats(), taskExecutor, messages);
     }
 
     /**

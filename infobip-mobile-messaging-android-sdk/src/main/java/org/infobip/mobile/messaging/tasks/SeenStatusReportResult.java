@@ -8,6 +8,7 @@ public class SeenStatusReportResult extends UnsuccessfulResult {
     private final String messageIDs[];
 
     public SeenStatusReportResult(String[] messageIDs) {
+        super(null);
         this.messageIDs = messageIDs;
     }
 

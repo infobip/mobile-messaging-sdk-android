@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.test.InstrumentationTestCase;
 
+import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;

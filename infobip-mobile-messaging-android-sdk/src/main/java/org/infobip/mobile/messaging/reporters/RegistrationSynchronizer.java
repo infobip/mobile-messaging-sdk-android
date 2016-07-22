@@ -1,10 +1,13 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.UpsertRegistrationResult;
@@ -20,9 +23,9 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @author mstipanov
  * @since 07.04.2016.
  */
-class RegistrationSynchronizer {
+public class RegistrationSynchronizer {
 
-    void syncronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
+    public void syncronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
         if (null != deviceApplicationInstanceId && registrationIdSaved) {
             return;
         }
@@ -73,11 +76,11 @@ class RegistrationSynchronizer {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
     }
 
-    void setRegistrationIdReported(Context context, boolean registrationIdSaved) {
+    public void setRegistrationIdReported(Context context, boolean registrationIdSaved) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, registrationIdSaved);
     }
 
-    boolean isRegistrationIdReported(Context context) {
+    public boolean isRegistrationIdReported(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED);
     }
 }

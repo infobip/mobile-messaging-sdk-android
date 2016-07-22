@@ -11,6 +11,7 @@ public class SyncUserDataResult extends UnsuccessfulResult {
     private final Map<String, Object> custom;
 
     public SyncUserDataResult(Map<String, Object> predefined, Map<String, Object> custom) {
+        super(null);
         this.predefined = predefined;
         this.custom = custom;
     }

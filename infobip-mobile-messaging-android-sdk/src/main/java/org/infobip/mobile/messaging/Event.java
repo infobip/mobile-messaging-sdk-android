@@ -106,6 +106,20 @@ public enum Event {
     MESSAGE_RECEIVED("org.infobip.mobile.messaging.MESSAGE_RECEIVED"),
 
     /**
+     * It is triggered when messages are sent.
+     * <p>
+     * Contains messages that were sent and status information for each message.
+     * <pre>
+     * {@code
+     * MoMessage messages[] = MoMessage.createFrom(intent.getStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES));
+     * }
+     * </pre>
+     *
+     * @see Message
+     */
+    MESSAGES_SENT("org.infobip.mobile.messaging.MESSAGES_SENT"),
+
+    /**
      * It is triggered on every error returned by API.
      * <p>
      * Contains the exception information.

@@ -1,9 +1,10 @@
-package org.infobip.mobile.messaging.api.seenstatus;
+package org.infobip.mobile.messaging.api.messages;
 
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.ApiKey;
 import org.infobip.mobile.messaging.api.support.http.Body;
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
+import org.infobip.mobile.messaging.api.support.http.Query;
 import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
@@ -12,7 +13,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * <p>
  * Usage:
  * <pre>{@code
- * MobileApiSeenStatusReport mobileApiSeenStatusReport = new Generator.Builder().build().create(MobileApiSeenStatusReport.class);
+ * MobileApiMessages mobileApiSeenStatusReport = new Generator.Builder().build().create(MobileApiMessages.class);
  * }</pre>
  *
  * @author sslavin
@@ -23,7 +24,11 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 @Version("1")
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}/messages")
-public interface MobileApiSeenStatusReport {
+public interface MobileApiMessages {
     @HttpRequest(method = HttpMethod.POST, value = "seen")
-    void report(@Body() SeenMessages seenReport);
+    void reportSeen(@Body() SeenMessages seenReport);
+
+    @HttpRequest(method = HttpMethod.POST, value = "mo")
+    @Query(name = "platformType", value = "${platform.type:GCM}")
+    MoMessagesResponse sendMO(@Body() MoMessagesBody moMessagesBody);
 }

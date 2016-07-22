@@ -8,6 +8,7 @@ public class UpsertRegistrationResult extends UnsuccessfulResult {
     private final String deviceInstanceId;
 
     public UpsertRegistrationResult(String deviceInstanceId) {
+        super(null);
         this.deviceInstanceId = deviceInstanceId;
     }
 

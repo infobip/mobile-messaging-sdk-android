@@ -1,10 +1,14 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.SyncUserDataResult;
@@ -20,7 +24,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class UserDataSynchronizer {
 
-    void sync(final Context context, final MobileMessagingStats stats, Executor executor) {
+    public void sync(final Context context, final MobileMessagingStats stats, Executor executor) {
 
         if (MobileMessagingCore.getInstance(context).getUnreportedUserData() == null) {
             return;
