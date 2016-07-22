@@ -64,7 +64,8 @@ public class SendMOMessageTest extends InstrumentationTestCase {
             "\"messages\":" +
             "[" +
                 "{" +
-                    "\"status\" :       \"1\"," +
+                    "\"status\" :       \"Message not sent\"," +
+                    "\"statusCode\" :   1," +
                     "\"messageId\" :    \"myMessageId\"," +
                     "\"destination\" :  \"myDestination\"," +
                     "\"text\" :         \"myText\"," +
@@ -76,7 +77,8 @@ public class SendMOMessageTest extends InstrumentationTestCase {
                     "}" +
                 "}," +
                 "{" +
-                    "\"status\" :       \"0\"," +
+                    "\"status\" :       \"Message sent\"," +
+                    "\"statusCode\" :   0," +
                     "\"messageId\" :    \"myMessageId2\"," +
                     "\"destination\" :  \"myDestination2\"," +
                     "\"text\" :         \"myText2\"," +
@@ -106,6 +108,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         MoMessage messages[] = MoMessage.createFrom(captor.getValue().getStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES));
         assertEquals("myMessageId", messages[0].getMessageId());
         assertEquals(MoMessage.Status.ERROR, messages[0].getStatus());
+        assertEquals("Message not sent", messages[0].getStatusMessage());
         assertEquals("myDestination", messages[0].getDestination());
         assertEquals("myText", messages[0].getText());
         assertEquals("string", messages[0].getCustomPayload().get("myStringKey"));
@@ -113,6 +116,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         assertEquals(true, messages[0].getCustomPayload().get("myBooleanKey"));
         assertEquals("myMessageId2", messages[1].getMessageId());
         assertEquals(MoMessage.Status.SUCCESS, messages[1].getStatus());
+        assertEquals("Message sent", messages[1].getStatusMessage());
         assertEquals("myDestination2", messages[1].getDestination());
         assertEquals("myText2", messages[1].getText());
         assertEquals("string2", messages[1].getCustomPayload().get("myStringKey"));

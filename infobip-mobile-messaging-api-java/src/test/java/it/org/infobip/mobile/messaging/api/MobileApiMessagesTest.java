@@ -84,6 +84,7 @@ public class MobileApiMessagesTest {
             "[" +
                 "{" +
                     "\"status\" :       \"myStatusId\"," +
+                    "\"statusCode\" :   0," +
                     "\"messageId\" :    \"myMessageId\"," +
                     "\"destination\" :  \"myDestination\"," +
                     "\"text\" :         \"myText\"," +
@@ -96,6 +97,7 @@ public class MobileApiMessagesTest {
                 "}," +
                 "{" +
                     "\"status\" :       \"myStatusId2\"," +
+                    "\"statusCode\" :   1," +
                     "\"messageId\" :    \"myMessageId2\"," +
                     "\"destination\" :  \"myDestination2\"," +
                     "\"text\" :         \"myText2\"," +
@@ -146,6 +148,7 @@ public class MobileApiMessagesTest {
         assertEquals(2, moMessagesResponse.getMessages().length);
         assertEquals("myMessageId", moMessagesResponse.getMessages()[0].getMessageId());
         assertEquals("myStatusId", moMessagesResponse.getMessages()[0].getStatus());
+        assertEquals(0, moMessagesResponse.getMessages()[0].getStatusCode());
         assertEquals("myDestination", moMessagesResponse.getMessages()[0].getDestination());
         assertEquals("myText", moMessagesResponse.getMessages()[0].getText());
         assertEquals("string", moMessagesResponse.getMessages()[0].getCustomPayload().get("myStringKey"));
@@ -153,6 +156,7 @@ public class MobileApiMessagesTest {
         assertEquals(true, moMessagesResponse.getMessages()[0].getCustomPayload().get("myBooleanKey"));
         assertEquals("myMessageId2", moMessagesResponse.getMessages()[1].getMessageId());
         assertEquals("myStatusId2", moMessagesResponse.getMessages()[1].getStatus());
+        assertEquals(1, moMessagesResponse.getMessages()[1].getStatusCode());
         assertEquals("myDestination2", moMessagesResponse.getMessages()[1].getDestination());
         assertEquals("myText2", moMessagesResponse.getMessages()[1].getText());
         assertEquals("string2", moMessagesResponse.getMessages()[1].getCustomPayload().get("myStringKey"));

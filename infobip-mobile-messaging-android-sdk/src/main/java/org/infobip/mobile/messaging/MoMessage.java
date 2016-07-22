@@ -18,6 +18,7 @@ public class MoMessage {
 
     protected String messageId;
     protected Status status;
+    protected String statusMessage;
 
     public MoMessage(String destination, String text, Map<String, Object> customPayload) {
         this.destination = destination;
@@ -25,6 +26,7 @@ public class MoMessage {
         this.customPayload = customPayload;
         this.messageId = "";
         this.status = Status.UNKNOWN;
+        this.statusMessage = "";
     }
 
     private MoMessage(String message) {
@@ -35,6 +37,7 @@ public class MoMessage {
         this.customPayload = moMessage.customPayload;
         this.messageId = moMessage.messageId;
         this.status = moMessage.status;
+        this.statusMessage = moMessage.statusMessage;
     }
 
     public static MoMessage[] createFrom(List<String> messages) {
@@ -76,6 +79,10 @@ public class MoMessage {
 
     public Status getStatus() {
         return status;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
     public enum Status {

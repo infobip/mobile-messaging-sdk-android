@@ -29,20 +29,17 @@ public class MessageReporter {
 
     class MoDeliveredMessage extends MoMessage {
 
-        private final static String STATUS_ID_SENT = "0";
-        private final static String STATUS_ID_ERROR = "1";
+        private final static int STATUS_ID_SENT = 0;
+        private final static int STATUS_ID_ERROR = 1;
 
-        public MoDeliveredMessage(String destination, String text, Map<String, Object> customPayload, String messageId, String statusId) {
+        public MoDeliveredMessage(String destination, String text, Map<String, Object> customPayload, String messageId, int statusId, String statusMessage) {
             super(destination, text, customPayload);
             this.messageId = messageId;
             this.status = getStatusFromStatusId(statusId);
+            this.statusMessage = statusMessage;
         }
 
-        Status getStatusFromStatusId(String statusId) {
-            if (statusId == null) {
-                return Status.UNKNOWN;
-            }
-
+        Status getStatusFromStatusId(int statusId) {
             switch (statusId) {
                 case STATUS_ID_SENT:
                     return Status.SUCCESS;
@@ -78,6 +75,7 @@ public class MessageReporter {
                             delivery.getText(),
                             delivery.getCustomPayload(),
                             delivery.getMessageId(),
+                            delivery.getStatusCode(),
                             delivery.getStatus());
 
                     moMessages.add(jsonSerializer.serialize(message));

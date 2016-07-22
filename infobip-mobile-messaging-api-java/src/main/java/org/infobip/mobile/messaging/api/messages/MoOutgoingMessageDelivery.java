@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MoOutgoingMessageDelivery extends MoOutgoingMessage {
+    int statusCode;
     String status;
     String messageId;
 }
