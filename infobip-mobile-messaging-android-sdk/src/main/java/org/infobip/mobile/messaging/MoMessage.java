@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,12 @@ public class MoMessage {
         this.messageId = "";
         this.status = Status.UNKNOWN;
         this.statusMessage = "";
+    }
+
+    public MoMessage() {
+        this.destination = null;
+        this.text = null;
+        this.customPayload = new HashMap<>();
     }
 
     private MoMessage(String message) {
