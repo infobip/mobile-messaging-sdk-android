@@ -56,7 +56,7 @@ public interface MessageStore {
      *
      * @param context current context
      */
-    void save(Context context, Message message);
+    void save(Context context, Message... messages);
 
     /**
      * Deletes all stored messages

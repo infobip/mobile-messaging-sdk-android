@@ -16,6 +16,7 @@ import org.infobip.mobile.messaging.tasks.SendMessageResult;
 import org.infobip.mobile.messaging.tasks.SendMessageTask;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -51,7 +52,7 @@ public class MessageReporter {
         }
     }
 
-    public void send(final Context context, final MobileMessagingStats stats, Executor executor, MoMessage... messages) {
+    public void send(final Context context, final MobileMessagingStats stats, Executor executor, final MoMessage... messages) {
         new SendMessageTask(context) {
             @Override
             protected void onPostExecute(SendMessageResult sendMessageResult) {
@@ -63,6 +64,9 @@ public class MessageReporter {
                     sendMessageError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, sendMessageResult.getError());
                     context.sendBroadcast(sendMessageError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessageError);
+
+                    reportFailedMessages(context, sendMessageResult.getError().getMessage(), messages);
+
                     return;
                 }
 
@@ -89,9 +93,32 @@ public class MessageReporter {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error reporting user data!");
+                Log.e(TAG, "Error sending messages!");
                 stats.reportError(MobileMessagingError.MESSAGE_SEND_ERROR);
+                reportFailedMessages(context, "Network error", messages);
             }
         }.executeOnExecutor(executor, messages);
+    }
+
+    private void reportFailedMessages(final Context context, String errorMessage, final MoMessage... messages) {
+
+        ArrayList<String> moMessages = new ArrayList<>();
+        JsonSerializer jsonSerializer = new JsonSerializer();
+        for (MoMessage message : messages) {
+            MoDeliveredMessage moMessage = new MoDeliveredMessage(
+                    message.getDestination(),
+                    message.getText(),
+                    message.getCustomPayload(),
+                    message.getMessageId(),
+                    MoDeliveredMessage.STATUS_ID_ERROR,
+                    errorMessage
+            );
+            moMessages.add(jsonSerializer.serialize(moMessage));
+        }
+
+        Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
+        messagesSent.putStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES, moMessages);
+        context.sendBroadcast(messagesSent);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
     }
 }

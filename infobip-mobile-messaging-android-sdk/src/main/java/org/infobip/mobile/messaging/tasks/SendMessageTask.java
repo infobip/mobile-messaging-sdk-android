@@ -55,13 +55,13 @@ public class SendMessageTask extends AsyncTask<MoMessage, Void, SendMessageResul
             return new SendMessageResult(moMessagesResponse.getMessages());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error sending seen messages!", e);
+            Log.e(MobileMessaging.TAG, "Error sending MO messages!", e);
             cancel(true);
 
-            Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            seenStatusReportError.putExtra(EXTRA_EXCEPTION, e);
-            context.sendBroadcast(seenStatusReportError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
+            Intent sendMessagesError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+            sendMessagesError.putExtra(EXTRA_EXCEPTION, e);
+            context.sendBroadcast(sendMessagesError);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessagesError);
 
             return new SendMessageResult(e);
         }

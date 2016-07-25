@@ -180,7 +180,7 @@ public class Message implements Comparable {
         return getJSON(Data.CUSTOM_PAYLOAD.getKey());
     }
 
-    private void setCustomPayload(JSONObject customPayload) {
+    public void setCustomPayload(JSONObject customPayload) {
         if (customPayload == null) {
             return;
         }

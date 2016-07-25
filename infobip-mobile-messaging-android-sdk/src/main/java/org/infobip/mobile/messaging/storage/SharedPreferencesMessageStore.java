@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.storage;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Base64;
@@ -30,6 +31,9 @@ import java.util.Set;
  *    }}
  * </pre>
  *
+ * Overwrite SharedPreferencesMessageStore#getStoreTag(String)
+ * to provide alternate key to store data shared preferences.
+ *
  * @author mstipanov
  * @since 29.03.2016.
  */
@@ -37,12 +41,12 @@ public class SharedPreferencesMessageStore implements MessageStore {
 
     private static final String INFOBIP_MESSAGE_DATA_SET = "org.infobip.mobile.messaging.store.DATA";
 
-    public void save(Context context, Message message) {
-        addMessage(context, message);
+    public void save(Context context, Message... messages) {
+        addMessages(context, messages);
     }
 
     public List<Message> findAll(Context context) {
-        return PreferenceHelper.find(context, INFOBIP_MESSAGE_DATA_SET, new ArrayList<Message>(), new PreferenceHelper.SetConverter<List<Message>>() {
+        return PreferenceHelper.find(context, getStoreTag(), new ArrayList<Message>(), new PreferenceHelper.SetConverter<List<Message>>() {
             @Override
             protected List<Message> convert(Set<String> set) {
                 List<Message> messages = new ArrayList<Message>();
@@ -55,7 +59,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
     }
 
     public void deleteAll(Context context) {
-        PreferenceHelper.remove(context, INFOBIP_MESSAGE_DATA_SET);
+        PreferenceHelper.remove(context, getStoreTag());
     }
 
     public long countAll(Context context) {
@@ -76,22 +80,25 @@ public class SharedPreferencesMessageStore implements MessageStore {
         };
     }
 
-    private void addMessage(Context context, final Message message) {
-        PreferenceHelper.editSet(context, INFOBIP_MESSAGE_DATA_SET, new PreferenceHelper.SetMutator() {
+    private void addMessages(final Context context, final Message... messages) {
+        PreferenceHelper.editSet(context, getStoreTag(), new PreferenceHelper.SetMutator() {
             @Override
             protected void mutate(Set<String> set) {
-                for (String serializedBundle : new HashSet<>(set)) {
-                    Message messageInSet = new Message(deserialize(serializedBundle));
-                    if (messageInSet.getMessageId().equals(message.getMessageId())) {
-                        set.remove(serializedBundle);
-                        break;
+                for (Message message : messages) {
+                    for (String serializedBundle : new HashSet<>(set)) {
+                        Message messageInSet = new Message(deserialize(serializedBundle));
+                        if (messageInSet.getMessageId().equals(message.getMessageId())) {
+                            set.remove(serializedBundle);
+                            break;
+                        }
                     }
+
+                    set.add(serialize(message.getBundle()));
                 }
-                set.add(serialize(message.getBundle()));
             }
         });
 
-        if (MobileMessagingCore.isGeofencingActivated(context)) {
+        if (!MobileMessagingCore.isGeofencingActivated(context)) {
             MobileMessagingCore.getInstance(context).activateGeofencing();
         }
     }
@@ -120,5 +127,9 @@ public class SharedPreferencesMessageStore implements MessageStore {
         } finally {
             parcel.recycle();
         }
+    }
+
+    protected String getStoreTag() {
+        return INFOBIP_MESSAGE_DATA_SET;
     }
 }
