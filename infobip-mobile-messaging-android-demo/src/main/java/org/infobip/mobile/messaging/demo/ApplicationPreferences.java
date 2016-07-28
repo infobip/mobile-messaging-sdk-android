@@ -5,7 +5,6 @@ package org.infobip.mobile.messaging.demo;
  * @since 27/04/16.
  */
 public class ApplicationPreferences {
-    public static final String USER_ID = "org.infobip.mobile.messaging.demo.USER_ID";
     public static final String MSISDN = "org.infobip.mobile.messaging.demo.MSISDN";
     public static final String FIRST_NAME = "org.infobip.mobile.messaging.demo.FIRST_NAME";
     public static final String LAST_NAME = "org.infobip.mobile.messaging.demo.LAST_NAME";

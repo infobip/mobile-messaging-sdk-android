@@ -15,4 +15,10 @@ public abstract class StringUtils {
     public static boolean isBlank(String s) {
         return null == s || s.trim().isEmpty();
     }
+
+    public static boolean isEqual(String s1, String s2) {
+        return s1 == null && s2 == null || s1 != null && s1.equals(s2);
+
+    }
+
 }

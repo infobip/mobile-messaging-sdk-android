@@ -59,8 +59,6 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals(ApplicationPreferences.MSISDN)) {
                 onMSISDNPreferenceChanged(sharedPreferences);
-            } else if (key.equals(ApplicationPreferences.USER_ID)) {
-                onUserIdChanged(sharedPreferences);
             }
         }
     };
@@ -210,12 +208,6 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
 
     private void onMSISDNPreferenceChanged(SharedPreferences sharedPreferences) {
 
-        String userId = sharedPreferences.getString(ApplicationPreferences.USER_ID, null);
-        if (userId == null) {
-            showToast(R.string.toast_missing_user_id);
-            return;
-        }
-
         Long msisdn = null;
         try {
             if (sharedPreferences.contains(ApplicationPreferences.MSISDN)) {
@@ -232,20 +224,8 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         if (msisdn != null) {
             UserData userData = new UserData();
             userData.setMsisdn(msisdn.toString());
-            MobileMessaging.getInstance(this).setUserData(userId, userData);
+            MobileMessaging.getInstance(this).setUserData(userData);
         }
-    }
-
-    private void onUserIdChanged(SharedPreferences sharedPreferences) {
-
-        sharedPreferences.edit().remove(ApplicationPreferences.MSISDN).apply();
-
-        String userId = sharedPreferences.getString(ApplicationPreferences.USER_ID, "");
-        if (userId.isEmpty()) {
-            return;
-        }
-
-        MobileMessaging.getInstance(this).setUserData(userId, null);
     }
 
     private void registerReceivers() {

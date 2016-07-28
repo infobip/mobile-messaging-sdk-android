@@ -37,16 +37,11 @@ public class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> 
             Log.e(MobileMessaging.TAG, "Can't sync user data without valid registration!");
             return new SyncUserDataResult(new Exception("Syncing user data: no valid registration"));
         }
-        String externalUserId = mobileMessagingCore.getExternalUserId();
-        if (StringUtils.isBlank(externalUserId)) {
-            Log.e(MobileMessaging.TAG, "Can't sync user data without valid external user Id!");
-            return new SyncUserDataResult(new Exception("Syncing user data: no valid external user id"));
-        }
 
         UserData userData = mobileMessagingCore.getUnreportedUserData();
         try {
             UserDataReport request = new UserDataReport(userData.getPredefinedUserData(), userData.getCustomUserData());
-            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiUserDataSync(context).sync(deviceApplicationInstanceId, externalUserId, request);
+            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiUserDataSync(context).sync(deviceApplicationInstanceId, userData.getExternalUserId(), request);
             return new SyncUserDataResult(response.getPredefinedUserData(), response.getCustomUserData());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

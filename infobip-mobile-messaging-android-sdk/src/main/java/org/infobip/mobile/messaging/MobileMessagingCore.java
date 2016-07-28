@@ -97,14 +97,6 @@ public class MobileMessagingCore {
         return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
     }
 
-    public String getExternalUserId() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.EXTERNAL_USER_ID);
-    }
-
-    protected void setExternalUserId(String externalUserId) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.EXTERNAL_USER_ID, externalUserId);
-    }
-
     public String[] getUnreportedMessageIds() {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
@@ -307,16 +299,17 @@ public class MobileMessagingCore {
         geofencing.deactivate();
     }
 
-    protected void setUserData(String externalUserId, UserData userData) {
-        String existingUserId = getExternalUserId();
-        setExternalUserId(externalUserId);
+    protected void setUserData(UserData userData) {
 
         UserData existingData = getUnreportedUserData();
         if (existingData == null) {
             existingData = getUserData();
         }
 
-        if (!externalUserId.equals(existingUserId)) {
+        String userId = userData != null ? userData.getExternalUserId() : null;
+        String existingUserId = existingData != null ? existingData.getExternalUserId() : null;
+
+        if (!StringUtils.isEqual(userId, existingUserId)) {
             PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
             existingData = null;
         }

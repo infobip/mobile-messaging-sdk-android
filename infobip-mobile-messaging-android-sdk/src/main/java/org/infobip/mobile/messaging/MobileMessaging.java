@@ -76,8 +76,8 @@ public class MobileMessaging {
         MobileMessagingCore.getInstance(context).onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void setUserData(String externalUserId, UserData userData) {
-        MobileMessagingCore.getInstance(context).setUserData(externalUserId, userData);
+    public void setUserData(UserData userData) {
+        MobileMessagingCore.getInstance(context).setUserData(userData);
     }
 
     public UserData getUserData() {

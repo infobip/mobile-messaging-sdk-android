@@ -354,7 +354,6 @@ public class InspectActivity extends PreferenceActivity {
 
             PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
 
-            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.USER_ID));
             bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.MSISDN));
         }
 

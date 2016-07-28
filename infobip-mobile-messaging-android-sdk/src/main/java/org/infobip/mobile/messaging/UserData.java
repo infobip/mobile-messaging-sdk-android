@@ -11,10 +11,12 @@ import java.util.Map;
  * @since 15/07/16.
  */
 public class UserData {
+    private String externalUserId;
     private Map<String, Object> predefinedUserData;
     private Map<String, Object> customUserData;
 
     public UserData() {
+        this.externalUserId = null;
         this.predefinedUserData = new HashMap<>();
         this.customUserData = new HashMap<>();
     }
@@ -22,6 +24,7 @@ public class UserData {
     public UserData(String userData) {
         Gson gson = new Gson();
         UserData data = gson.fromJson(userData, UserData.class);
+        this.externalUserId = data.externalUserId;
         this.predefinedUserData = data.predefinedUserData;
         this.customUserData = data.customUserData;
     }
@@ -50,6 +53,8 @@ public class UserData {
         if (data.customUserData != null) {
             this.customUserData.putAll(data.customUserData);
         }
+
+        this.externalUserId = data.externalUserId;
     }
 
     @Override
@@ -120,6 +125,14 @@ public class UserData {
 
     public void setEmail(String email) {
         setField(PredefinedField.EMAIL, email);
+    }
+
+    public void setExternalUserId(String externalUserId) {
+        this.externalUserId = externalUserId;
+    }
+
+    public String getExternalUserId() {
+        return externalUserId;
     }
 
     private <T> T getField(PredefinedField field) {
