@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * User data is used to provide user details to the server.
+ * </p>
+ * User data supports set of predefined fields ({@link PredefinedField}) and custom fields.
+ * In order to delete any field, set it to null and report it to server.
  * @author sslavin
  * @since 15/07/16.
  */

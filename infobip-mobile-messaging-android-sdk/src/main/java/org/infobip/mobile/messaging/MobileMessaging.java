@@ -47,10 +47,24 @@ public class MobileMessaging {
     private final Context context;
     private OnReplyClickListener replyClickListener;
 
+    /**
+     * Default constructor. Use MobileMessaging.Builder to construct MobileMessaging.
+     *
+     * @param context android context object.
+     *
+     * @see MobileMessaging.Builder
+     */
     private MobileMessaging(Context context) {
         this.context = context;
     }
 
+    /**
+     * Gets an instance of MobileMessaging after it is initialized via {@link MobileMessaging.Builder}.
+     * @param context android context object.
+     * @return instance of MobileMessaging.
+     *
+     * @see MobileMessaging.Builder
+     */
     public synchronized static MobileMessaging getInstance(Context context) {
         if (null != instance) {
             return instance;
@@ -60,48 +74,120 @@ public class MobileMessaging {
         return instance;
     }
 
+    /**
+     * Reports delivery of messages to Mobile Messaging servers.
+     * </p>
+     * This method has to be used only if you handle GCM message notifications
+     * without Mobile Messaging library. In all other cases the library will
+     * send delivery report automatically whenever GCM push is delivered to device.
+     * @param messageIds ids of messages to report delivery for
+     *
+     * @see Event#DELIVERY_REPORTS_SENT
+     */
     public void setMessagesDelivered(final String... messageIds) {
         MobileMessagingCore.getInstance(context).setMessagesDelivered(messageIds);
     }
 
+    /**
+     * Reports seen status of messages to Mobile Messaging servers.
+     * </p>
+     * This method shall be user to report seen status when user actually sees message content.
+     * @param messageIds message ids to report seen status for
+     *
+     * @see Event#SEEN_REPORTS_SENT
+     */
     public void setMessagesSeen(final String... messageIds) {
         MobileMessagingCore.getInstance(context).setMessagesSeen(messageIds);
     }
 
+    /**
+     * Returns instance of message store that is used within the library or null if message store is not set.
+     * @return instance of message store.
+     *
+     * @see MessageStore
+     */
     public MessageStore getMessageStore() {
         return MobileMessagingCore.getInstance(context).getMessageStore();
     }
 
+    /**
+     * Reports permission request result to the library whenever permission is requested in activity.
+     * </p>
+     * This method shall be user to inform the library if location permissions are granted or not for {@link Geofencing}.
+     * @param requestCode request code passed in <a href=https://developer.android.com/reference/android/support/v4/app/ActivityCompat.html#requestPermissions(android.app.Activity, java.lang.String[], int)>requestPermissions</a>
+     * @param permissions requested permissions
+     * @param grantResults grant results
+     */
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         MobileMessagingCore.getInstance(context).onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void setUserData(UserData userData) {
-        MobileMessagingCore.getInstance(context).setUserData(userData);
+    /**
+     * Does a synchronization of user data with server.
+     * </p>
+     * This method will synchronize new data with server and will also trigger {@link Event#USER_DATA_REPORTED}
+     * with all the data currently available on a server for this user.
+     * @param userData user data object with desired changes
+     *
+     * @see Event#USER_DATA_REPORTED
+     */
+    public void syncUserData(UserData userData) {
+        MobileMessagingCore.getInstance(context).syncUserData(userData);
     }
 
+    /**
+     * Does a synchronization of user data with server.
+     * </p>
+     * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     *
+     * @see Event#USER_DATA_REPORTED
+     */
+    public void syncUserData() {
+        MobileMessagingCore.getInstance(context).syncUserData(null);
+    }
+
+    /**
+     * Reads user data that is currently stored in the library.
+     * </p>
+     * This method does not trigger {@link Event#USER_DATA_REPORTED}.
+     * @return last synchronized UserData object
+     */
     public UserData getUserData() {
         return MobileMessagingCore.getInstance(context).getUserData();
     }
 
+    /**
+     * Send mobile originated messages.
+     * </p>
+     * Destination for each message is set inside {@link Message}.
+     * @param messages messages to send
+     */
     public void sendMessages(MoMessage... messages) {
         MobileMessagingCore.getInstance(context).sendMessages(messages);
     }
 
+    /**
+     * This interface is used to handle an action of reply button click in actionable notification.
+     */
     public interface OnReplyClickListener {
+        /**
+         * It is triggered when reply button is clicked.
+         * @param intent intent containing message
+         */
         void onReplyClicked(Intent intent);
     }
 
     /**
-     * It will start tracking geofence areas.
-     *
+     * Starts tracking geofence areas.
+     * @see Geofencing
      */
     public void activateGeofencing() {
         MobileMessagingCore.getInstance(context).activateGeofencing();
     }
 
     /**
-     * It will stop tracking geofence areas.
+     * Stops tracking geofence areas.
+     * @see Geofencing
      */
     public void deactivateGeofencing() {
         MobileMessagingCore.getInstance(context).deactivateGeofencing();
@@ -359,6 +445,16 @@ public class MobileMessaging {
             return this;
         }
 
+        /**
+         * Sets reply click listener for actionable notification.
+         * <pre>
+         * {@code new MobileMessaging.Builder(context)
+         *       .withOnReplyClickListener(replyActionClickListener)
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
         public Builder withOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
             this.replyActionClickListener = replyActionClickListener;
             return this;

@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         if (msisdn != null) {
             UserData userData = new UserData();
             userData.setMsisdn(msisdn.toString());
-            MobileMessaging.getInstance(this).setUserData(userData);
+            MobileMessaging.getInstance(this).syncUserData(userData);
         }
     }
 

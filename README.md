@@ -141,5 +141,5 @@ It will give an additional opportunity to target your application users and orch
 ```java
 UserData userData = new UserData();
 userData.setMsisdn("385911234567");
-MobileMessaging.getInstance(context).setUserData(userData);
+MobileMessaging.getInstance(context).syncUserData(userData);
 ```

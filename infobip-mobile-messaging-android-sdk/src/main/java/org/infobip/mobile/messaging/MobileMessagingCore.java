@@ -299,23 +299,28 @@ public class MobileMessagingCore {
         geofencing.deactivate();
     }
 
-    protected void setUserData(UserData userData) {
+    protected void syncUserData(UserData userData) {
 
-        UserData existingData = getUnreportedUserData();
-        if (existingData == null) {
-            existingData = getUserData();
+        UserData userDataToReport = new UserData();
+        if (userData != null) {
+            UserData existingData = getUnreportedUserData();
+            if (existingData == null) {
+                existingData = getUserData();
+            }
+
+            String userId = userData.getExternalUserId();
+            String existingUserId = existingData != null ? existingData.getExternalUserId() : null;
+
+            if (!StringUtils.isEqual(userId, existingUserId)) {
+                PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
+                existingData = null;
+            }
+
+            userDataToReport = UserData.merge(existingData, userData);
         }
 
-        String userId = userData != null ? userData.getExternalUserId() : null;
-        String existingUserId = existingData != null ? existingData.getExternalUserId() : null;
-
-        if (!StringUtils.isEqual(userId, existingUserId)) {
-            PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
-            existingData = null;
-        }
-
-        UserData merged = UserData.merge(existingData, userData);
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, merged.toString());
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
     }
 
     protected UserData getUserData() {
