@@ -304,10 +304,6 @@ public class MobileMessagingCore {
         UserData userDataToReport = new UserData();
         if (userData != null) {
             UserData existingData = getUnreportedUserData();
-            if (existingData == null) {
-                existingData = getUserData();
-            }
-
             String userId = userData.getExternalUserId();
             String existingUserId = existingData != null ? existingData.getExternalUserId() : null;
 
