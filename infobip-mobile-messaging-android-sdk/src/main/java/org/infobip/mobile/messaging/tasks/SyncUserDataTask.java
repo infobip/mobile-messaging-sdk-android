@@ -39,6 +39,10 @@ public class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> 
         }
 
         UserData userData = mobileMessagingCore.getUnreportedUserData();
+        if (userData == null) {
+            userData = new UserData();
+        }
+
         try {
             UserDataReport request = new UserDataReport(userData.getPredefinedUserData(), userData.getCustomUserData());
             UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiUserDataSync(context).sync(deviceApplicationInstanceId, userData.getExternalUserId(), request);
