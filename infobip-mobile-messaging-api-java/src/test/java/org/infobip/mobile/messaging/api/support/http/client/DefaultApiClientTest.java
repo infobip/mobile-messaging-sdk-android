@@ -57,7 +57,7 @@ public class DefaultApiClientTest {
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
         Assert.assertEquals(NanoHTTPD.Method.GET, debugServer.getRequestMethod());
-        Assert.assertEquals("/", debugServer.getUri());
+        Assert.assertEquals("", debugServer.getUri());
         Assert.assertEquals("xyz", debugServer.getQueryParameter("applicationId"));
         Assert.assertEquals("1234", debugServer.getQueryParameter("currentRegistrationId"));
         Assert.assertNull(debugServer.getQueryParameter("oldRegistrationId"));
@@ -82,7 +82,7 @@ public class DefaultApiClientTest {
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
         Assert.assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        Assert.assertEquals("/", debugServer.getUri());
+        Assert.assertEquals("", debugServer.getUri());
         Assert.assertEquals("xyz", debugServer.getQueryParameter("applicationId"));
         Assert.assertEquals("1234", debugServer.getQueryParameter("currentRegistrationId"));
         Assert.assertNull(debugServer.getQueryParameter("oldRegistrationId"));
@@ -107,7 +107,7 @@ public class DefaultApiClientTest {
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
         Assert.assertEquals(NanoHTTPD.Method.GET, debugServer.getRequestMethod());
-        Assert.assertEquals("/", debugServer.getUri());
+        Assert.assertEquals("", debugServer.getUri());
         Assert.assertEquals("xyz", debugServer.getQueryParameter("applicationId"));
         Assert.assertEquals("1234", debugServer.getQueryParameter("currentRegistrationId"));
         Assert.assertNull(debugServer.getQueryParameter("oldRegistrationId"));
@@ -133,7 +133,7 @@ public class DefaultApiClientTest {
         Assert.assertEquals(11, result.getInternalRegistrationId());
         Assert.assertEquals(1, debugServer.getRequestCount());
         Assert.assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        Assert.assertEquals("/", debugServer.getUri());
+        Assert.assertEquals("", debugServer.getUri());
         Assert.assertEquals("xyz", debugServer.getQueryParameter("applicationId"));
         Assert.assertEquals("1234", debugServer.getQueryParameter("currentRegistrationId"));
         Assert.assertNull(debugServer.getQueryParameter("oldRegistrationId"));

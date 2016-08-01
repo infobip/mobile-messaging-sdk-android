@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.api.support.http.serialization;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author mstipanov
@@ -8,7 +9,7 @@ import com.google.gson.Gson;
  */
 public class JsonSerializer {
 
-    private Gson gson = new Gson();
+    private Gson gson = new GsonBuilder().serializeNulls().create();
 
     public <T> T deserialize(String s, Class<T> type) {
         return gson.fromJson(s, type);
