@@ -13,8 +13,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoOutgoingMessageDelivery extends MoOutgoingMessage {
+public class MoMessageDelivery extends MoMessage {
     int statusCode;
     String status;
-    String messageId;
 }

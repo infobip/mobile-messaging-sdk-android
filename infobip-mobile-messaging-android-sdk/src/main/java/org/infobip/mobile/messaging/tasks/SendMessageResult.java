@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.tasks;
 
-import org.infobip.mobile.messaging.api.messages.MoOutgoingMessageDelivery;
+import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 
 /**
  * @author sslavin
@@ -8,22 +8,22 @@ import org.infobip.mobile.messaging.api.messages.MoOutgoingMessageDelivery;
  */
 public class SendMessageResult extends UnsuccessfulResult {
 
-    MoOutgoingMessageDelivery messages[];
+    MoMessageDelivery messages[];
 
     public SendMessageResult(Throwable exception) {
         super(exception);
     }
 
-    public SendMessageResult(MoOutgoingMessageDelivery messages[]) {
+    public SendMessageResult(MoMessageDelivery messages[]) {
         super(null);
         this.messages = messages;
     }
 
-    public MoOutgoingMessageDelivery[] getMessageDeliveries() {
+    public MoMessageDelivery[] getMessageDeliveries() {
         return messages;
     }
 
-    public void setMessages(MoOutgoingMessageDelivery[] messages) {
+    public void setMessages(MoMessageDelivery[] messages) {
         this.messages = messages;
     }
 }

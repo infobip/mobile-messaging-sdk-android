@@ -1,6 +1,6 @@
 package it.org.infobip.mobile.messaging.api;
 
-import org.infobip.mobile.messaging.api.messages.MoOutgoingMessage;
+import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
@@ -113,15 +113,15 @@ public class MobileApiMessagesTest {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
 
-        MoOutgoingMessage moOutgoingMessages[] =
+        MoMessage moMessages[] =
         {
-            new MoOutgoingMessage("myDestination", "myText", new HashMap<String, Object>()
+            new MoMessage("myMessageId", "myDestination", "myText", new HashMap<String, Object>()
                 {{
                     put("myStringKey", "string1");
                     put("myNubmberKey", 1);
                     put("myBooleanKey", true);
                 }}),
-            new MoOutgoingMessage("myDestination2", "myText2", new HashMap<String, Object>()
+            new MoMessage("myMessageId2", "myDestination2", "myText2", new HashMap<String, Object>()
                 {{
                     put("myStringKey", "string2");
                     put("myNubmberKey", 2);
@@ -131,7 +131,7 @@ public class MobileApiMessagesTest {
 
         MoMessagesBody requestBody = new MoMessagesBody();
         requestBody.setFrom("fromTest");
-        requestBody.setMessages(moOutgoingMessages);
+        requestBody.setMessages(moMessages);
 
         MoMessagesResponse moMessagesResponse = mobileApiMessages.sendMO(requestBody);
 

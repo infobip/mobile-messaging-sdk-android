@@ -7,10 +7,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MoMessage;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.messages.MoOutgoingMessage;
+import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -24,7 +23,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @author sslavin
  * @since 21/07/16.
  */
-public class SendMessageTask extends AsyncTask<MoMessage, Void, SendMessageResult>{
+public class SendMessageTask extends AsyncTask<org.infobip.mobile.messaging.MoMessage, Void, SendMessageResult>{
 
     private final Context context;
 
@@ -33,7 +32,7 @@ public class SendMessageTask extends AsyncTask<MoMessage, Void, SendMessageResul
     }
 
     @Override
-    protected SendMessageResult doInBackground(MoMessage... messages) {
+    protected SendMessageResult doInBackground(org.infobip.mobile.messaging.MoMessage... messages) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
 
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
@@ -46,11 +45,11 @@ public class SendMessageTask extends AsyncTask<MoMessage, Void, SendMessageResul
             MoMessagesBody moMessagesBody = new MoMessagesBody();
             moMessagesBody.setFrom(deviceApplicationInstanceId);
 
-            List<MoOutgoingMessage> moOutgoingMessages = new ArrayList<>();
-            for (MoMessage message : messages) {
-                moOutgoingMessages.add(new MoOutgoingMessage(message.getDestination(), message.getText(), message.getCustomPayload()));
+            List<MoMessage> moMessages = new ArrayList<>();
+            for (org.infobip.mobile.messaging.MoMessage message : messages) {
+                moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getText(), message.getCustomPayload()));
             }
-            moMessagesBody.setMessages(moOutgoingMessages.toArray(new MoOutgoingMessage[moOutgoingMessages.size()]));
+            moMessagesBody.setMessages(moMessages.toArray(new MoMessage[moMessages.size()]));
             MoMessagesResponse moMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sendMO(moMessagesBody);
             return new SendMessageResult(moMessagesResponse.getMessages());
         } catch (Exception e) {

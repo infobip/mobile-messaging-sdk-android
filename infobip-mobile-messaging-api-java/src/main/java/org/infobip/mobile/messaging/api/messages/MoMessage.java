@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoOutgoingMessage {
+public class MoMessage {
+    String messageId;
     String destination;
     String text;
     Map<String, Object> customPayload;

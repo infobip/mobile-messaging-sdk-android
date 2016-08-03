@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author sslavin
@@ -22,15 +23,16 @@ public class MoMessage {
     protected String statusMessage;
 
     public MoMessage(String destination, String text, Map<String, Object> customPayload) {
+        this.messageId = UUID.randomUUID().toString();;
         this.destination = destination;
         this.text = text;
         this.customPayload = customPayload;
-        this.messageId = "";
         this.status = Status.UNKNOWN;
         this.statusMessage = "";
     }
 
     public MoMessage() {
+        this.messageId = UUID.randomUUID().toString();;
         this.destination = null;
         this.text = null;
         this.customPayload = new HashMap<>();

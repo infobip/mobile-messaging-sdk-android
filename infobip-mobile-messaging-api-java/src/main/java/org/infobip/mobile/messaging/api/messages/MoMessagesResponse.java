@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MoMessagesResponse {
-    MoOutgoingMessageDelivery messages[];
+    MoMessageDelivery messages[];
 }

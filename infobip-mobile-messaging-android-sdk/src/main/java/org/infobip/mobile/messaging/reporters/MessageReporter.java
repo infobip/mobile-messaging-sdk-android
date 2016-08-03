@@ -8,7 +8,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MoMessage;
-import org.infobip.mobile.messaging.api.messages.MoOutgoingMessageDelivery;
+import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -16,7 +16,6 @@ import org.infobip.mobile.messaging.tasks.SendMessageResult;
 import org.infobip.mobile.messaging.tasks.SendMessageTask;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -72,7 +71,7 @@ public class MessageReporter {
 
                 ArrayList<String> moMessages = new ArrayList<>();
                 JsonSerializer jsonSerializer = new JsonSerializer();
-                for (MoOutgoingMessageDelivery delivery : sendMessageResult.getMessageDeliveries()) {
+                for (MoMessageDelivery delivery : sendMessageResult.getMessageDeliveries()) {
 
                     MoDeliveredMessage message = new MoDeliveredMessage(
                             delivery.getDestination(),
