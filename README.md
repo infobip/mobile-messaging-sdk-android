@@ -20,7 +20,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     1. [Create new application](https://dev.infobip.com/v1/docs/push-introduction-create-app) on Infobip Push portal.
     2. Navigate to your Application where you will get the Application Code.
     3. Mark the "Available on Android" checkbox.
-    4. Insert previously obtained GCM Server Key.
+    4. Insert previously obtained GCM Server Key (Server API Key).
 
     <center><img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/GCMAppSetup.png" alt="CUP Settings"/></center>
 3. Create new application in Android Studio
@@ -37,29 +37,34 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     }
     ```
 
-5. Add permissions and services to AndroidManifest.xml
+5. Add permissions and Mobile Messaging components to AndroidManifest.xml
 
     ```xml
-    <?xml version="1.0" encoding="utf-8"?>
-    <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-              package="<your-package-name>">
+    <manifest>
+    
+        <!-- Existing manifest entries -->
      
+        <!-- Mobile Messaging permissions -->
+        
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
-        <uses-permission android:name="<your-package-name>.permission.C2D_MESSAGE" />
-        <permission android:name="<your-package-name>.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+        <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
+        <permission android:name="${applicationId}.permission.C2D_MESSAGE" android:protectionLevel="signature" />
      
         <!-- Needed for push notifications that contain VIBRATE flag. Optional, but recommended. -->
         <uses-permission android:name="android.permission.VIBRATE" />
-        <application
-                android:allowBackup="true"
-                android:icon="@mipmap/ic_launcher"
-                android:label="@string/app_name"
-                android:supportsRtl="true"
-                android:theme="@style/AppTheme">
+        
+        <!-- /Mobile Messaging permissions -->
+        
+      
+        <application>
+        
+            <!-- Existing application entries -->
      
+            <!-- Mobile Messaging components -->
+            
             <receiver
                     android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver"
                     android:exported="true"
@@ -68,10 +73,12 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
                     <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 </intent-filter>
             </receiver>
+            
             <service
                     android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
                     android:exported="true">
             </service>
+            
             <service
                     android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
                     android:exported="false">
@@ -83,7 +90,10 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 
             <!--Service that triggers when geofence area is entered-->
             <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
-            ...
+            
+            <!-- /Mobile Messaging components -->
+            
+            
         </application>
     </manifest>
     ```
@@ -112,7 +122,9 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
             
             ...
      
-            new MobileMessaging.Builder(this).build();
+            new MobileMessaging.Builder(this)
+                            .withMessageStore(SharedPreferencesMessageStore.class)
+                            .build();
         }
          
         ...
@@ -126,7 +138,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 Library generates intents on the following events as described in [Event](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java):
 
 * __Message received__ - is triggered when message is received.
-* __Messages sent__ = is triggered when messages are sent.
+* __Messages sent__ - is triggered when messages are sent.
 * __Registration acquired__ - is triggered when GCM registration token is received.
 * __Registration created__ - is triggered when GCM registration token successfully stored on the registration server.
 * __API communication error__ - is triggered on every error returned by API.
