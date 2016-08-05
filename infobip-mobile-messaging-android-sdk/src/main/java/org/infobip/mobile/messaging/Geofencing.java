@@ -45,6 +45,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private PendingIntent geofencePendingIntent;
 
     private Geofencing(Context context) {
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
+        }
+
         Geofencing.context = context;
         geofences = getGeofences(context);
         googleApiClient = new GoogleApiClient.Builder(context)
@@ -103,10 +107,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             return;
         }
 
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
-        }
-
         Activity activity = (Activity) context;
         if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
             String[] permissions = {ACCESS_FINE_LOCATION};
@@ -134,10 +134,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
             return;
-        }
-
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
         }
 
         Activity activity = (Activity) context;

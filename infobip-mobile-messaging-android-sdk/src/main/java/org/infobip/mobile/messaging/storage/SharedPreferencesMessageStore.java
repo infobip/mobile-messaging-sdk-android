@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.storage;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Base64;
@@ -98,9 +97,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
             }
         });
 
-        if (!MobileMessagingCore.isGeofencingActivated(context)) {
-            MobileMessagingCore.getInstance(context).activateGeofencing();
-        }
+        MobileMessagingCore.getInstance(context).activateGeofencing();
     }
 
     private String serialize(Bundle in) {
