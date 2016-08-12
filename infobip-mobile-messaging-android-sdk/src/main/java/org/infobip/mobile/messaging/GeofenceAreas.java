@@ -170,5 +170,18 @@ public class GeofenceAreas implements Parcelable {
             parcel.writeInt(radius);
             parcel.writeLong(expiry);
         }
+
+        /**
+         * geofence is valid if it contains all the required parameters
+         *
+         * @return
+         */
+        public boolean isValid() {
+            return getId() != null &&
+                    getExpiry() != null &&
+                    getLatitude() != null &&
+                    getLongitude() != null &&
+                    getRadius() != null;
+        }
     }
 }

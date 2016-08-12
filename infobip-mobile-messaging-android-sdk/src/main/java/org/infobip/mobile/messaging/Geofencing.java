@@ -45,10 +45,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private PendingIntent geofencePendingIntent;
 
     private Geofencing(Context context) {
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
-        }
-
         Geofencing.context = context;
         geofences = getGeofences(context);
         googleApiClient = new GoogleApiClient.Builder(context)
@@ -94,7 +90,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
                 if (geoAreasList != null && !geoAreasList.isEmpty()) {
                     for (GeofenceAreas.Area area : geoAreasList) {
-                        this.geofences.add(area.toGeofence());
+                        if (area.isValid()) {
+                            this.geofences.add(area.toGeofence());
+                        }
                     }
                 }
             }
@@ -105,6 +103,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
             return;
+        }
+
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
         }
 
         Activity activity = (Activity) context;
@@ -125,8 +127,8 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                     public void onResult(@NonNull Status status) {
                         MobileMessagingCore.setGeofencingActivated(context, status.isSuccess());
                         logGeofenceStatus(status, true);
-                        }
-                    });
+                    }
+                });
     }
 
 
@@ -134,6 +136,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
             return;
+        }
+
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
         }
 
         Activity activity = (Activity) context;
@@ -175,7 +181,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             Log.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
 
         } else {
-            Log.e(TAG, "Geofencing monitoring " +  (activated ? "" : "de-") + "activation failed", new Throwable(status.getStatusMessage()));
+            Log.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed", new Throwable(status.getStatusMessage()));
         }
     }
 
@@ -206,7 +212,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
                 if (geoAreasList != null && !geoAreasList.isEmpty()) {
                     for (GeofenceAreas.Area area : geoAreasList) {
-                        geofences.add(area.toGeofence());
+                        if (area.isValid()) {
+                            geofences.add(area.toGeofence());
+                        }
                     }
                 }
             }
