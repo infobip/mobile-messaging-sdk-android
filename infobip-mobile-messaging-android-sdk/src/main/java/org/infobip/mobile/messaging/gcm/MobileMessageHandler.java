@@ -20,6 +20,8 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -33,6 +35,7 @@ class MobileMessageHandler {
     public static final int COUPON_NOTIFICATION_ID = 2;
     public static final int DEFAULT_NOTIFICATION_ID = 0;
     private NotificationSettings notificationSettings;
+    private SharedPreferencesMessageStore messageStore;
 
     void handleNotification(Context context, Intent intent) {
         String from = intent.getStringExtra("from");
@@ -150,6 +153,13 @@ class MobileMessageHandler {
     private void saveMessage(Context context, Message message) {
         if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
             Log.d(MobileMessaging.TAG, "Skipping save message: " + message.getMessageId());
+
+            if (!message.getGeofenceAreasList().isEmpty()) {
+                // if message store is not enabled, we need to use it internally (by creating new instance of SharedPreferencesMessageStore.class),
+                // to save only those Messages which contains GeofenceAreas, otherwise they would never be triggered.
+                messageStore().save(context, message);
+                Log.d(MobileMessaging.TAG, "Only save message that contains geofence areas: " + message.getMessageId());
+            }
             return;
         }
 
@@ -159,6 +169,13 @@ class MobileMessageHandler {
         } catch (Exception e) {
             Log.e(MobileMessaging.TAG, "Error saving message: " + message.getMessageId(), e);
         }
+    }
+
+    private MessageStore messageStore() {
+        if (messageStore == null) {
+            messageStore = new SharedPreferencesMessageStore();
+        }
+        return messageStore;
     }
 
     private Message createMessage(String from, Bundle data) {

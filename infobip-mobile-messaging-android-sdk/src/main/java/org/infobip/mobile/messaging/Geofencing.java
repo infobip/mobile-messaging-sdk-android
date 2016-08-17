@@ -20,7 +20,9 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.infobip.mobile.messaging.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
+import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.ArrayList;
@@ -43,10 +45,12 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private GoogleApiClient googleApiClient;
     private List<Geofence> geofences;
     private PendingIntent geofencePendingIntent;
+    private MessageStore messageStore;
 
     private Geofencing(Context context) {
         Geofencing.context = context;
-        geofences = getGeofences(context);
+        geofences = new ArrayList<>();
+        messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -82,13 +86,14 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     void addGeofenceAreasToPlayServices() {
-        List<Message> messages = MobileMessagingCore.getInstance(context).getMessageStore().bind(context);
+        List<Message> messages = messageStore().bind(context);
         if (!messages.isEmpty()) {
             this.geofences.clear();
+
             for (Message message : messages) {
                 List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
 
-                if (geoAreasList != null && !geoAreasList.isEmpty()) {
+                if (!geoAreasList.isEmpty()) {
                     for (GeofenceAreas.Area area : geoAreasList) {
                         if (area.isValid()) {
                             this.geofences.add(area.toGeofence());
@@ -99,6 +104,13 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
     }
 
+    private MessageStore messageStore() {
+        if (messageStore == null) {
+            messageStore = new SharedPreferencesMessageStore();
+        }
+        return messageStore;
+    }
+
     private void activateGeofences() {
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
@@ -106,7 +118,8 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
 
         if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
+            Log.e(TAG, "You shall provide instance of Activity as context for geofencing!");
+            return;
         }
 
         Activity activity = (Activity) context;
@@ -117,7 +130,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
 
         if (geofences.isEmpty()) {
-            Log.d(TAG, "Skip adding geofences. No geofence areas added.");
+            Log.d(TAG, "Skip adding geofences. No geofence areas to add.");
             return;
         }
 
@@ -171,10 +184,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         try {
             context.getPackageManager().getServiceInfo(componentName, PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException localNameNotFoundException) {
-            throw new ConfigurationException(String.format(ConfigurationException.Reason.MISSING_REQUIRED_SERVICE.message(), serviceName));
+            throw new ConfigurationException(String.format(Reason.MISSING_REQUIRED_SERVICE.message(), serviceName));
         }
     }
-
 
     private void logGeofenceStatus(@NonNull Status status, boolean activated) {
         if (status.isSuccess()) {
@@ -199,28 +211,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
 
         return geofencePendingIntent;
-    }
-
-    private List<Geofence> getGeofences(Context context) {
-        SharedPreferencesMessageStore messageStore = new SharedPreferencesMessageStore();
-        List<Message> messages = messageStore.bind(context);
-        List<Geofence> geofences = new ArrayList<>(messages.size());
-
-        if (!messages.isEmpty()) {
-            for (Message message : messages) {
-                List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
-
-                if (geoAreasList != null && !geoAreasList.isEmpty()) {
-                    for (GeofenceAreas.Area area : geoAreasList) {
-                        if (area.isValid()) {
-                            geofences.add(area.toGeofence());
-                        }
-                    }
-                }
-            }
-        }
-
-        return geofences;
     }
 
     @Override

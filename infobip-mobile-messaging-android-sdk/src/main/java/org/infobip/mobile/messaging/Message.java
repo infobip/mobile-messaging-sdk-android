@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -64,6 +65,7 @@ public class Message implements Comparable {
         bundle.putString(Data.MESSAGE_ID.getKey(), messageId);
     }
 
+    @NonNull
     public List<GeofenceAreas.Area> getGeofenceAreasList() {
         if (TextUtils.isEmpty(getInternalData())) {
             return new ArrayList<>(0);
