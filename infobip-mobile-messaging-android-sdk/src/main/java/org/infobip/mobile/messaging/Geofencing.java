@@ -50,7 +50,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private Geofencing(Context context) {
         Geofencing.context = context;
         geofences = new ArrayList<>();
-        messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
+        messageStore = new SharedPreferencesMessageStore();
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -86,7 +86,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     void addGeofenceAreasToPlayServices() {
-        List<Message> messages = messageStore().bind(context);
+        List<Message> messages = messageStore.bind(context);
         if (!messages.isEmpty()) {
             this.geofences.clear();
 
@@ -104,13 +104,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
     }
 
-    private MessageStore messageStore() {
-        if (messageStore == null) {
-            messageStore = new SharedPreferencesMessageStore();
-        }
-        return messageStore;
-    }
-
+    @SuppressWarnings("MissingPermission")
     private void activateGeofences() {
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
