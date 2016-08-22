@@ -62,7 +62,7 @@ public class MobileApiMessagesTest {
         {{
             setMessages(new ArrayList<Message>()
             {{
-                add(new Message("myMessageId"));
+                add(new Message("myMessageId", System.currentTimeMillis()));
             }}.toArray(new Message[1]));
         }};
 

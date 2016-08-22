@@ -114,10 +114,12 @@ class GeoAreasHandler {
 
         for (Message message : messages) {
             List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
-            for (GeofenceAreas.Area area : geoAreasList) {
-                for (Geofence geofence : triggeringGeofences) {
-                    if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
-                        areasList.add(area);
+            if (geoAreasList != null) {
+                for (GeofenceAreas.Area area : geoAreasList) {
+                    for (Geofence geofence : triggeringGeofences) {
+                        if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
+                            areasList.add(area);
+                        }
                     }
                 }
             }

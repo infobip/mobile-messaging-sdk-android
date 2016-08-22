@@ -65,7 +65,6 @@ public class Message implements Comparable {
         bundle.putString(Data.MESSAGE_ID.getKey(), messageId);
     }
 
-    @NonNull
     public List<GeofenceAreas.Area> getGeofenceAreasList() {
         if (TextUtils.isEmpty(getInternalData())) {
             return new ArrayList<>(0);

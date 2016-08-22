@@ -22,6 +22,7 @@ import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -114,7 +115,22 @@ public class MobileMessagingCore {
     }
 
     protected void addUnreportedSeenMessageIds(final String... messageIDs) {
-        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
+        String[] seenMessages = concatSeenTimestampToMessageIDs(messageIDs);
+        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, seenMessages);
+    }
+
+    private String[] concatSeenTimestampToMessageIDs(String[] messageIDs) {
+        String[] seenMessages = new String[messageIDs.length];
+
+        if (messageIDs.length > 0) {
+            for (int i = 0; i < messageIDs.length; i++) {
+                String messageId = messageIDs[i];
+                String seenTimestamp = String.valueOf(System.currentTimeMillis());
+                seenMessages[i] = String.format(Locale.getDefault(), "%s, %s", messageId, seenTimestamp);
+            }
+        }
+
+        return seenMessages;
     }
 
     public void removeUnreportedSeenMessageIds(final String... messageIDs) {

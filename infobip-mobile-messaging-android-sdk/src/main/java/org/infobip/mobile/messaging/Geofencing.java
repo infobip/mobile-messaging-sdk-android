@@ -93,7 +93,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             for (Message message : messages) {
                 List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
 
-                if (!geoAreasList.isEmpty()) {
+                if (geoAreasList != null && !geoAreasList.isEmpty()) {
                     for (GeofenceAreas.Area area : geoAreasList) {
                         if (area.isValid()) {
                             this.geofences.add(area.toGeofence());

@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- *
  * Seen messages report body encapsulation.
  *
  * @author sslavin
@@ -24,18 +23,19 @@ public class SeenMessages {
          */
         private final String messageId;
         /**
-         * Seen timestamp (since 1970 in UTC).
+         * Delta timestamp (now - seenTimestamp) - delta between timestamp in seconds between now (time when seen status is sent to the backend)
+         * and seenTimestamp (when seen timestamp was actually recorded).
          */
-        private final Double seenDate;
+        private long timestampDelta;
 
         /**
          * Constructs message using only the message Id, timestamp is set to current time.
          *
          * @param messageId - id of a message to report.
          */
-        public Message(String messageId) {
+        public Message(String messageId, long timestampDelta) {
             this.messageId = messageId;
-            this.seenDate = (double) System.currentTimeMillis();
+            this.timestampDelta = timestampDelta;
         }
     }
 
