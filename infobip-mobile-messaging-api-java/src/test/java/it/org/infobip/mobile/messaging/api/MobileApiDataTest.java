@@ -1,27 +1,33 @@
 package it.org.infobip.mobile.messaging.api;
 
+import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.data.SystemDataReport;
+import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
-import org.infobip.mobile.messaging.api.userdata.MobileApiUserDataSync;
-import org.infobip.mobile.messaging.api.userdata.UserDataReport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Properties;
 
 import fi.iki.elonen.NanoHTTPD;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 /**
  * @author sslavin
- * @since 15/07/16.
+ * @since 25/08/16.
  */
-public class MobileApiUserDataReportSyncTest {
+public class MobileApiDataTest {
+
     private DebugServer debugServer;
-    private MobileApiUserDataSync mobileApiUserDataSync;
+    private MobileApiData mobileApiData;
+
 
     @Before
     public void setUp() throws Exception {
@@ -35,7 +41,7 @@ public class MobileApiUserDataReportSyncTest {
                 .withProperties(properties)
                 .build();
 
-        mobileApiUserDataSync = generator.create(MobileApiUserDataSync.class);
+        mobileApiData = generator.create(MobileApiData.class);
     }
 
     @After
@@ -50,7 +56,7 @@ public class MobileApiUserDataReportSyncTest {
     }
 
     @Test
-    public void create_success_examineResponse() throws Exception {
+    public void create_userData_success_examineResponse() throws Exception {
         String jsonResponse =
         "{" +
                 "\"predefinedUserData\":" +
@@ -72,10 +78,10 @@ public class MobileApiUserDataReportSyncTest {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
 
-        UserDataReport response = mobileApiUserDataSync.sync("myDeviceInstanceId", "myExternalUserId", null);
+        UserDataReport response = mobileApiData.reportUserData("myDeviceInstanceId", "myExternalUserId", null);
 
         //inspect http context
-        assertEquals("/mobile/1/userdata", debugServer.getUri());
+        assertEquals("/mobile/1/data/user", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(2, debugServer.getQueryParametersCount());
@@ -96,5 +102,48 @@ public class MobileApiUserDataReportSyncTest {
         assertEquals("String", response.getCustomUserData().get("SomeString"));
         assertEquals(true, response.getCustomUserData().get("SomeBoolean"));
         assertEquals(1.0, response.getCustomUserData().get("SomeDouble"));
+    }
+
+    @Test
+    public void create_systemData_success_examineRequest() throws Exception {
+
+        // prepare request data
+        SystemDataReport systemDataReport = new SystemDataReport();
+        systemDataReport.setSdkVersion("1.2.3.TEST");
+        systemDataReport.setOsName("TestOSName");
+        systemDataReport.setOsVersion("0.1.2.TEST");
+        systemDataReport.setDeviceManufacturer("INFOBIP");
+        systemDataReport.setDeviceModel("TEST");
+        systemDataReport.setApplicationName("MobileApiDataTest_System");
+        systemDataReport.setApplicationVersion("3.4.5.TEST");
+        systemDataReport.setGeofencing(false);
+
+        // prepare server
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        // send request
+        mobileApiData.reportSystemData("myDeviceInstanceId", systemDataReport);
+
+        //inspect http context
+        assertEquals("/mobile/1/data/system", debugServer.getUri());
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals(1, debugServer.getQueryParametersCount());
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertNotNull(debugServer.getBody());
+
+        //inspect parameters
+        assertEquals("myDeviceInstanceId", debugServer.getQueryParameter("deviceApplicationInstanceId"));
+
+        //inspect request
+        HashMap<String, Object> request = new JsonSerializer().deserialize(debugServer.getBody(), HashMap.class);
+        assertEquals("1.2.3.TEST", request.get("sdkVersion"));
+        assertEquals("TestOSName", request.get("osName"));
+        assertEquals("0.1.2.TEST", request.get("osVersion"));
+        assertEquals("INFOBIP", request.get("deviceManufacturer"));
+        assertEquals("TEST", request.get("deviceModel"));
+        assertEquals("MobileApiDataTest_System", request.get("applicationName"));
+        assertEquals("3.4.5.TEST", request.get("applicationVersion"));
+        assertEquals(false, request.get("geofencing"));
     }
 }

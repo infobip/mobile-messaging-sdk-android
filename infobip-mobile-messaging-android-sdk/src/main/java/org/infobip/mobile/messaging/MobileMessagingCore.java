@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
 
 import org.infobip.mobile.messaging.MobileMessaging.OnReplyClickListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -14,13 +15,17 @@ import org.infobip.mobile.messaging.reporters.DeliveryReporter;
 import org.infobip.mobile.messaging.reporters.MessageReporter;
 import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
+import org.infobip.mobile.messaging.reporters.SystemDataReporter;
 import org.infobip.mobile.messaging.reporters.UserDataSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
+import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -37,6 +42,7 @@ public class MobileMessagingCore {
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MessageReporter messageReporter = new MessageReporter();
+    private final SystemDataReporter systemDataReporter = new SystemDataReporter();
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
     private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
@@ -83,6 +89,7 @@ public class MobileMessagingCore {
         deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor);
+        systemDataReporter.report(context, getStats(), taskExecutor);
     }
 
     public String getRegistrationId() {
@@ -280,6 +287,8 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
+        PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
     }
 
     public OnReplyClickListener getOnReplyClickListener() {
@@ -363,6 +372,45 @@ public class MobileMessagingCore {
     public void sendMessages(MoMessage... messages) {
         messageReporter.send(context, getStats(), taskExecutor, messages);
     }
+
+    public void readSystemData() {
+
+        boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
+
+        SystemData data = new SystemData(SoftwareInformation.getLibraryVersion(),
+                reportEnabled ? SystemInformation.getAndroidSystemName() : "",
+                reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
+                reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
+                reportEnabled ? DeviceInformation.getDeviceModel() : "",
+                reportEnabled ? SoftwareInformation.getAppName(context) : "",
+                reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
+                isGeofencingActivated(context));
+
+        Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        if (hash == data.hashCode()) {
+            return;
+        }
+
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
+    }
+
+    public SystemData getUnreportedSystemData() {
+        if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA)) {
+            return new SystemData(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA));
+        }
+        return null;
+    }
+
+    public void setSystemDataReported() {
+        SystemData systemData = getUnreportedSystemData();
+        if (systemData == null) {
+            return;
+        }
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
+        PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
+    }
+
 
     /**
      * The {@link MobileMessagingCore} builder class.
@@ -469,7 +517,8 @@ public class MobileMessagingCore {
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(context);
             mobileMessagingCore.playServicesSupport.checkPlayServices(context);
             mobileMessagingCore.setOnReplyClickListener(replyActionClickListener);
-            activateGeofencing();
+            mobileMessagingCore.readSystemData();
+            mobileMessagingCore.activateGeofencing();
             return mobileMessagingCore;
         }
     }

@@ -12,7 +12,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.api.userdata.UserDataReport;
+import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -45,7 +45,7 @@ public class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> 
 
         try {
             UserDataReport request = new UserDataReport(userData.getPredefinedUserData(), userData.getCustomUserData());
-            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiUserDataSync(context).sync(deviceApplicationInstanceId, userData.getExternalUserId(), request);
+            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(deviceApplicationInstanceId, userData.getExternalUserId(), request);
             return new SyncUserDataResult(response.getPredefinedUserData(), response.getCustomUserData());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
