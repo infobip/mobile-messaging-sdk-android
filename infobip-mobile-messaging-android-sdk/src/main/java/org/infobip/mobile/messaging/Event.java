@@ -175,7 +175,17 @@ public enum Event {
      * }
      * </pre>
      */
-    USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED");
+    USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED"),
+
+    /**
+     * It is triggered when system data is successfully reported to the server.
+     * <pre>
+     * {@code
+     * String systemData = intent.getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA);
+     * }
+     * </pre>
+     */
+    SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED");
 
     private final String key;
 

@@ -12,6 +12,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_MESSAGE_IDS = "org.infobip.mobile.messaging.message.ids";
     public static final String EXTRA_GEOFENCE_AREAS = "org.infobip.mobile.messaging.message.geofenceAreas";
     public static final String EXTRA_USER_DATA = "org.infobip.mobile.messaging.userdata";
+    public static final String EXTRA_SYSTEM_DATA = "org.infobip.mobile.messaging.systemdata";
     public static final String EXTRA_MO_MESSAGES = "org.infobip.mobile.messaging.mo.messages";
 
     private BroadcastParameter() {

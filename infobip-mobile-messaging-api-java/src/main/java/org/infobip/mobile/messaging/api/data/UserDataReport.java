@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.userdata;
+package org.infobip.mobile.messaging.api.data;
 
 import java.util.Map;
 
