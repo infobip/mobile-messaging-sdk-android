@@ -136,13 +136,13 @@ public class MobileMessaging {
     }
 
     /**
-     * Does a synchronization of user data with server.
+     * Does a fetch of user data from the server.
      * </p>
      * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
      *
      * @see Event#USER_DATA_REPORTED
      */
-    public void syncUserData() {
+    public void fetchUserData() {
         MobileMessagingCore.getInstance(context).syncUserData(null);
     }
 
