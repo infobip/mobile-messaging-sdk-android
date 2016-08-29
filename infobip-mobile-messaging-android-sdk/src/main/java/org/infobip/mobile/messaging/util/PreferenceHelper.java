@@ -17,8 +17,18 @@ import java.util.Set;
  */
 public abstract class PreferenceHelper {
     private static final Object LOCK = new Object();
+    private static Cryptor cryptor = null;
 
     private PreferenceHelper() {
+    }
+
+    private static Cryptor getCryptor(Context context) {
+        if (cryptor != null) {
+            return cryptor;
+        }
+
+        cryptor = new Cryptor(DeviceInformation.getDeviceID(context));
+        return cryptor;
     }
 
     public static String findString(Context context, MobileMessagingProperty property) {
@@ -35,9 +45,9 @@ public abstract class PreferenceHelper {
             return sharedPreferences.getString(key, defaultValue);
         }
 
-        String encryptedKey = EncryptUtil.encrypt(context, key);
+        String encryptedKey = getCryptor(context).encrypt(key);
         String encryptedValue = sharedPreferences.getString(encryptedKey, defaultValue);
-        return EncryptUtil.decrypt(context, encryptedValue);
+        return getCryptor(context).decrypt(encryptedValue);
     }
 
     public static void saveString(Context context, MobileMessagingProperty property, String value) {
@@ -50,8 +60,8 @@ public abstract class PreferenceHelper {
             return;
         }
 
-        String encryptedKey = EncryptUtil.encrypt(context, key);
-        String encryptedValue = EncryptUtil.encrypt(context, value);
+        String encryptedKey = getCryptor(context).encrypt(key);
+        String encryptedValue = getCryptor(context).encrypt(value);
         saveString(context, encryptedKey, encryptedValue);
     }
 
