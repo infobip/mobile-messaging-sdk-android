@@ -11,11 +11,11 @@ import android.content.Intent;
 public enum MobileMessagingProperty {
 
     GCM_REGISTRATION_ID_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
-    GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID"),
-    INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID"),
+    GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),
+    INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID", null, true),
     EXTERNAL_USER_ID("org.infobip.mobile.messaging.infobip.EXTERNAL_USER_ID"),
-    GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID"),
-    APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE"),
+    GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
+    APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE", null, true),
     LAST_HTTP_EXCEPTION("org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION"),
     INFOBIP_UNREPORTED_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS", new String[0]),
     INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS", new String[0]),
@@ -56,14 +56,20 @@ public enum MobileMessagingProperty {
 
     private final String key;
     private final Object defaultValue;
+    private final boolean encrypted;
 
     MobileMessagingProperty(String key) {
-        this(key, null);
+        this(key, null, false);
     }
 
     MobileMessagingProperty(String key, Object defaultValue) {
+        this(key, defaultValue, false);
+    }
+
+    MobileMessagingProperty(String key, Object defaultValue, boolean encrypted) {
         this.key = key;
         this.defaultValue = defaultValue;
+        this.encrypted = encrypted;
     }
 
     public String getKey() {
@@ -72,5 +78,9 @@ public enum MobileMessagingProperty {
 
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
     }
 }
