@@ -22,16 +22,37 @@ public abstract class PreferenceHelper {
     }
 
     public static String findString(Context context, MobileMessagingProperty property) {
-        return findString(context, property.getKey(), (String) property.getDefaultValue());
+        return findString(context, property.getKey(), (String) property.getDefaultValue(), property.isEncrypted());
     }
 
     public static String findString(Context context, String key, String defaultValue) {
+        return findString(context, key, defaultValue, false);
+    }
+
+    public static String findString(Context context, String key, String defaultValue, boolean encrypted) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getString(key, defaultValue);
+        if (!encrypted) {
+            return sharedPreferences.getString(key, defaultValue);
+        }
+
+        String encryptedKey = EncryptUtil.encrypt(context, key);
+        String encryptedValue = sharedPreferences.getString(encryptedKey, defaultValue);
+        return EncryptUtil.decrypt(context, encryptedValue);
     }
 
     public static void saveString(Context context, MobileMessagingProperty property, String value) {
-        saveString(context, property.getKey(), value);
+        saveString(context, property.getKey(), value, property.isEncrypted());
+    }
+
+    public static void saveString(Context context, String key, String value, boolean encrypted) {
+        if (!encrypted) {
+            saveString(context, key, value);
+            return;
+        }
+
+        String encryptedKey = EncryptUtil.encrypt(context, key);
+        String encryptedValue = EncryptUtil.encrypt(context, value);
+        saveString(context, encryptedKey, encryptedValue);
     }
 
     public static void saveString(Context context, String key, String value) {
