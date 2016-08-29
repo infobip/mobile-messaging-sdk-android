@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.Base64;
 
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,42 +15,44 @@ import javax.crypto.spec.SecretKeySpec;
  * @author sslavin
  * @since 29/08/16.
  */
-public class EncryptUtil {
+public class Cryptor {
 
     private static String AES_ALGO = "AES/ECB/PKCS5Padding";
-    private static Key key = null;
+    private Key key = null;
 
-    static Key getKey(String algorithm, Context context) {
-        if (key != null && key.getAlgorithm().equals(algorithm)) {
-            return key;
+    public Cryptor(String userPassword) {
+        byte keyBytes[] = userPassword.getBytes();
+        MessageDigest sha = null;
+        try {
+            sha = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
-
-        byte keyBytes[] = DeviceInformation.getDeviceID(context).getBytes();
-        key = new SecretKeySpec(keyBytes, algorithm);
-        return key;
+        keyBytes = sha.digest(keyBytes);
+        keyBytes = Arrays.copyOf(keyBytes, 16);
+        key = new SecretKeySpec(keyBytes, AES_ALGO);
     }
 
-    public static String encrypt(Context context, String data) {
+    public String encrypt(String data) {
         if (data == null) {
             return null;
         }
 
-        byte encoded[] = encodeAES128(context, data.getBytes());
+        byte encoded[] = encodeAES128(data.getBytes());
         return Base64.encodeToString(encoded, Base64.DEFAULT);
     }
 
-    public static String decrypt(Context context, String encryptedBase64Data) {
+    public String decrypt(String encryptedBase64Data) {
         if (encryptedBase64Data == null) {
             return null;
         }
 
         byte encrypted[] = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
-        byte decrypted[] = decodeAES128(context, encrypted);
+        byte decrypted[] = decodeAES128(encrypted);
         return new String(decrypted);
     }
 
-    static byte[] encodeAES128(Context context, byte data[]) {
-        Key key = getKey(AES_ALGO, context);
+    byte[] encodeAES128(byte data[]) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -58,8 +63,7 @@ public class EncryptUtil {
         }
     }
 
-    static byte[] decodeAES128(Context context, byte data[]) {
-        Key key = getKey(AES_ALGO, context);
+    byte[] decodeAES128(byte data[]) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.DECRYPT_MODE, key);

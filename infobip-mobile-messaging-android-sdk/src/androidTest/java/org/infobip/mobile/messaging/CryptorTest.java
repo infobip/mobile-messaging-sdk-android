@@ -4,13 +4,13 @@ import android.content.Context;
 import android.test.InstrumentationTestCase;
 import android.util.Base64;
 
-import org.infobip.mobile.messaging.util.EncryptUtil;
+import org.infobip.mobile.messaging.util.Cryptor;
 
 /**
  * @author sslavin
  * @since 29/08/16.
  */
-public class EncryptUtilTest extends InstrumentationTestCase {
+public class CryptorTest extends InstrumentationTestCase {
 
     Context context = null;
 
@@ -28,8 +28,9 @@ public class EncryptUtilTest extends InstrumentationTestCase {
     public void test_encryptDecrypt() throws Exception {
 
         String data = "thisIsMyTestData";
-        String encrypted = EncryptUtil.encrypt(context, data);
-        String decrypted = EncryptUtil.decrypt(context, encrypted);
+        String key = "thisIsMySuperSecretKey";
+        String encrypted = new Cryptor(key).encrypt(data);
+        String decrypted = new Cryptor(key).decrypt(encrypted);
 
         assertFalse(data.equals(encrypted));
         assertFalse(data.equals(new String(Base64.decode(encrypted, Base64.DEFAULT))));
