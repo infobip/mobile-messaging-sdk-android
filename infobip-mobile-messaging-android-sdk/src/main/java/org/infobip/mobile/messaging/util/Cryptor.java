@@ -39,7 +39,7 @@ public class Cryptor {
         }
 
         byte encoded[] = encodeAES128(data.getBytes());
-        return Base64.encodeToString(encoded, Base64.DEFAULT);
+        return Base64.encodeToString(encoded, Base64.NO_WRAP);
     }
 
     public String decrypt(String encryptedBase64Data) {
