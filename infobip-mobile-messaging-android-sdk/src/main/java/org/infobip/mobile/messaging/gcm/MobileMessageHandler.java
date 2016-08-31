@@ -154,7 +154,7 @@ class MobileMessageHandler {
         if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
             Log.d(MobileMessaging.TAG, "Skipping save message: " + message.getMessageId());
 
-            if (!message.getGeofenceAreasList().isEmpty()) {
+            if (message.getGeofenceAreasList() != null && !message.getGeofenceAreasList().isEmpty()) {
                 // if message store is not enabled, we need to use it internally (by creating new instance of SharedPreferencesMessageStore.class),
                 // to save only those Messages which contains GeofenceAreas, otherwise they would never be triggered.
                 messageStore().save(context, message);
