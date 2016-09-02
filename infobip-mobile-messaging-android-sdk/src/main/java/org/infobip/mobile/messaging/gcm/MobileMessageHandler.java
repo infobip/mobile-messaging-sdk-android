@@ -43,8 +43,13 @@ class MobileMessageHandler {
 
         data.putLong("received_timestamp", System.currentTimeMillis());
 
-        Log.d(MobileMessaging.TAG, "Message received from: " + from);
         Message message = createMessage(from, data);
+        if (StringUtils.isBlank(message.getMessageId())) {
+            Log.w(MobileMessaging.TAG, "Ignoring message without messageId");
+            return;
+        }
+
+        Log.d(MobileMessaging.TAG, "Message received from: " + from);
 
         sendDeliveryReport(context, message);
         saveMessage(context, message);
