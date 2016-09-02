@@ -36,6 +36,14 @@ public class InternalMessageUtils extends Message {
         setSilentDataField(message, InternalData.SOUND.getKey(), sound);
     }
 
+    public static String getSilentCategory(Message message) {
+        return getSilentDataField(message, InternalData.CATEGORY.getKey());
+    }
+
+    public static void setSilentCategory(Message message, String category) {
+        setSilentDataField(message, InternalData.CATEGORY.getKey(), category);
+    }
+
     private static String getSilentDataField(Message message, String silentKey) {
         String internalDataString = message.getBundle().getString(Data.INTERNAL_DATA.getKey());
         if (internalDataString == null) {
@@ -93,7 +101,8 @@ public class InternalMessageUtils extends Message {
         SILENT_DATA("silent"),
         TITLE("title"),
         BODY("body"),
-        SOUND("sound");
+        SOUND("sound"),
+        CATEGORY("category");
 
         private final String key;
 

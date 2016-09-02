@@ -123,7 +123,8 @@ public class MessageTest extends TestCase {
             "{" +
                 "\"title\":\"silentTitle\"," +
                 "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"" +
+                "\"sound\":\"silentSound\"," +
+                "\"category\":\"silentCategory\"" +
             "}" +
         "}";
 
@@ -140,6 +141,7 @@ public class MessageTest extends TestCase {
         assertEquals("silentTitle", message.getTitle());
         assertEquals("silentBody", message.getBody());
         assertEquals("silentSound", message.getSound());
+        assertEquals("silentCategory", message.getCategory());
     }
 
     public void test_silentMessage_fromJson_withoutSilentData() throws Exception {
@@ -169,7 +171,8 @@ public class MessageTest extends TestCase {
             "{" +
                 "\"title\":\"silentTitle\"," +
                 "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"" +
+                "\"sound\":\"silentSound\"," +
+                "\"category\":\"silentCategory\"" +
             "}" +
         "}";
 
@@ -181,6 +184,7 @@ public class MessageTest extends TestCase {
         bundle.putString("gcm.notification.title", "notSilentTitle");
         bundle.putString("gcm.notification.body", "notSilentBody");
         bundle.putString("gcm.notification.sound", "notSilentSound");
+        bundle.putString("gcm.notification.category", "notSilentCategory");
         bundle.putString("internalData", internalData);
 
         Message message = Message.copyFrom(bundle);
@@ -188,6 +192,7 @@ public class MessageTest extends TestCase {
         assertEquals("notSilentTitle", message.getTitle());
         assertEquals("notSilentBody", message.getBody());
         assertEquals("notSilentSound", message.getSound());
+        assertEquals("notSilentCategory", message.getCategory());
     }
 
     public void test_normalMessage_fromJson_withoutNormalData() throws Exception {
@@ -198,7 +203,8 @@ public class MessageTest extends TestCase {
             "{" +
                 "\"title\":\"silentTitle\"," +
                 "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"" +
+                "\"sound\":\"silentSound\"," +
+                "\"category\":\"silentCategory\"" +
             "}" +
         "}";
 
@@ -214,6 +220,7 @@ public class MessageTest extends TestCase {
         assertNotEquals("silentTitle", message.getTitle());
         assertNotEquals("silentBody", message.getBody());
         assertNotEquals("silentSound", message.getSound());
+        assertNotEquals("silentCategory", message.getCategory());
     }
 
     public void test_silentMessage_withSilentData_toJson() throws Exception {
@@ -222,6 +229,7 @@ public class MessageTest extends TestCase {
         message.setTitle("silentTitle");
         message.setBody("silentBody");
         message.setSound("silentSound");
+        message.setCategory("silentCategory");
 
         Bundle bundle = message.getBundle();
 
@@ -234,7 +242,8 @@ public class MessageTest extends TestCase {
                 "{" +
                     "\"title\":\"silentTitle\"," +
                     "\"body\":\"silentBody\"," +
-                    "\"sound\":\"silentSound\"" +
+                    "\"sound\":\"silentSound\"," +
+                    "\"category\":\"silentCategory\"" +
                 "}" +
             "}", message.getInternalData(), true);
         JSONAssert.assertEquals(
@@ -243,7 +252,8 @@ public class MessageTest extends TestCase {
                 "{" +
                     "\"title\":\"silentTitle\"," +
                     "\"body\":\"silentBody\"," +
-                    "\"sound\":\"silentSound\"" +
+                    "\"sound\":\"silentSound\"," +
+                    "\"category\":\"silentCategory\"" +
                 "}" +
             "}", bundle.getString("internalData"), true);
     }
@@ -253,6 +263,7 @@ public class MessageTest extends TestCase {
         message.setTitle("normalTitle");
         message.setBody("normalBody");
         message.setSound("normalSound");
+        message.setCategory("normalCategory");
 
         Bundle bundle = message.getBundle();
 
@@ -261,6 +272,7 @@ public class MessageTest extends TestCase {
         assertEquals("normalTitle", bundle.getString("gcm.notification.title"));
         assertEquals("normalBody", bundle.getString("gcm.notification.body"));
         assertEquals("normalSound", bundle.getString("gcm.notification.sound"));
+        assertEquals("normalCategory", bundle.getString("gcm.notification.category"));
     }
 
     public void test_normalMessage_seenTimestamp() throws Exception {
@@ -270,6 +282,7 @@ public class MessageTest extends TestCase {
         message.setTitle("normalTitle");
         message.setBody("normalBody");
         message.setSound("normalSound");
+        message.setCategory("normalCategory");
         message.setSeenTimestamp(seenTimestamp);
 
         Bundle bundle = message.getBundle();
@@ -279,6 +292,7 @@ public class MessageTest extends TestCase {
         assertEquals("normalTitle", bundle.getString("gcm.notification.title"));
         assertEquals("normalBody", bundle.getString("gcm.notification.body"));
         assertEquals("normalSound", bundle.getString("gcm.notification.sound"));
+        assertEquals("normalCategory", bundle.getString("gcm.notification.category"));
 
         assertEquals(message.getSeenTimestamp(), seenTimestamp);
         assertEquals(seenTimestamp, bundle.getLong("seen_timestamp"));
@@ -292,19 +306,21 @@ public class MessageTest extends TestCase {
         message.setTitle("silentTitle");
         message.setBody("silentBody");
         message.setSound("silentSound");
+        message.setCategory("silentCategory");
         message.setSeenTimestamp(seenTimestamp);
 
         Bundle bundle = message.getBundle();
 
         JSONAssert.assertEquals(
-                "{" +
-                        "\"silent\":" +
-                        "{" +
-                        "\"title\":\"silentTitle\"," +
-                        "\"body\":\"silentBody\"," +
-                        "\"sound\":\"silentSound\"" +
-                        "}" +
-                        "}", message.getInternalData(), true);
+        "{" +
+            "\"silent\":" +
+            "{" +
+                "\"title\":\"silentTitle\"," +
+                "\"body\":\"silentBody\"," +
+                "\"sound\":\"silentSound\"," +
+                "\"category\":\"silentCategory\"" +
+            "}" +
+        "}", message.getInternalData(), true);
         assertEquals(message.getSeenTimestamp(), seenTimestamp);
         assertEquals(seenTimestamp, bundle.getLong("seen_timestamp"));
     }

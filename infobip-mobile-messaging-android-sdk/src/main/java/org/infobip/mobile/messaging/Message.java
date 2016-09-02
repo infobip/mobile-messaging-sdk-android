@@ -198,11 +198,18 @@ public class Message implements Comparable {
     }
 
     public String getCategory() {
+        if (isSilent()) {
+            return InternalMessageUtils.getSilentCategory(this);
+        }
         return bundle.getString(Data.CATEGORY.getKey());
     }
 
     public void setCategory(String category) {
-        bundle.putString(Data.CATEGORY.getKey(), category);
+        if (isSilent()) {
+            InternalMessageUtils.setSilentCategory(this, category);
+        } else {
+            bundle.putString(Data.CATEGORY.getKey(), category);
+        }
     }
 
     private JSONObject getJSON(String key) {
