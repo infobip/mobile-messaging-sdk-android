@@ -110,11 +110,9 @@ public class MobileApiDataTest {
         // prepare request data
         SystemDataReport systemDataReport = new SystemDataReport();
         systemDataReport.setSdkVersion("1.2.3.TEST");
-        systemDataReport.setOsName("TestOSName");
         systemDataReport.setOsVersion("0.1.2.TEST");
         systemDataReport.setDeviceManufacturer("INFOBIP");
         systemDataReport.setDeviceModel("TEST");
-        systemDataReport.setApplicationName("MobileApiDataTest_System");
         systemDataReport.setApplicationVersion("3.4.5.TEST");
         systemDataReport.setGeofencing(false);
 
@@ -138,11 +136,9 @@ public class MobileApiDataTest {
         //inspect request
         HashMap<String, Object> request = new JsonSerializer().deserialize(debugServer.getBody(), HashMap.class);
         assertEquals("1.2.3.TEST", request.get("sdkVersion"));
-        assertEquals("TestOSName", request.get("osName"));
         assertEquals("0.1.2.TEST", request.get("osVersion"));
         assertEquals("INFOBIP", request.get("deviceManufacturer"));
         assertEquals("TEST", request.get("deviceModel"));
-        assertEquals("MobileApiDataTest_System", request.get("applicationName"));
         assertEquals("3.4.5.TEST", request.get("applicationVersion"));
         assertEquals(false, request.get("geofencing"));
     }
