@@ -81,12 +81,10 @@ public class SystemDataReportTest extends InstrumentationTestCase {
         assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
 
         SystemData data = new JsonSerializer().deserialize(captor.getValue().getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
-        assertFalse(data.getApplicationName().isEmpty());
         // application version is null in test
         //assertFalse(data.getApplicationVersion().isEmpty());
         assertFalse(data.getDeviceManufacturer().isEmpty());
         assertFalse(data.getDeviceModel().isEmpty());
-        assertFalse(data.getOsName().isEmpty());
         assertFalse(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
         assertNotNull(data.getGeofencing());
@@ -105,12 +103,10 @@ public class SystemDataReportTest extends InstrumentationTestCase {
         assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
 
         SystemData data = new JsonSerializer().deserialize(captor.getValue().getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
-        assertTrue(data.getApplicationName().isEmpty());
         // application version is null in test
         //assertTrue(data.getApplicationVersion().isEmpty());
         assertTrue(data.getDeviceManufacturer().isEmpty());
         assertTrue(data.getDeviceModel().isEmpty());
-        assertTrue(data.getOsName().isEmpty());
         assertTrue(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
         assertNotNull(data.getGeofencing());

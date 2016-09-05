@@ -13,11 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SystemDataReport {
     String sdkVersion;
-    String osName;
     String osVersion;
     String deviceManufacturer;
     String deviceModel;
-    String applicationName;
     String applicationVersion;
     Boolean geofencing;
 }

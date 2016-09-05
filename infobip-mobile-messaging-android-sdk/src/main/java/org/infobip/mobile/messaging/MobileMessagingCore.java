@@ -378,11 +378,9 @@ public class MobileMessagingCore {
         boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
 
         SystemData data = new SystemData(SoftwareInformation.getLibraryVersion(),
-                reportEnabled ? SystemInformation.getAndroidSystemName() : "",
                 reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
                 reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
-                reportEnabled ? SoftwareInformation.getAppName(context) : "",
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
                 isGeofencingActivated(context));
 

@@ -33,9 +33,8 @@ public class SystemDataReporter {
         }
 
         SystemDataReport report = new SystemDataReport(data.getSdkVersion(),
-                data.getOsName(), data.getOsVersion(), data.getDeviceManufacturer(),
-                data.getDeviceModel(), data.getApplicationName(), data.getApplicationVersion(),
-                data.getGeofencing());
+                data.getOsVersion(), data.getDeviceManufacturer(), data.getDeviceModel(),
+                data.getApplicationVersion(), data.getGeofencing());
 
         new SystemDataReportTask(context) {
             @Override

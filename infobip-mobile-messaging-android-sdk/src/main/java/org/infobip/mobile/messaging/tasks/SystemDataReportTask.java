@@ -45,11 +45,9 @@ public class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, Syst
         try {
             MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(deviceApplicationInstanceId, report);
             SystemData data = new SystemData(report.getSdkVersion(),
-                    report.getOsName(),
                     report.getOsVersion(),
                     report.getDeviceManufacturer(),
                     report.getDeviceModel(),
-                    report.getApplicationName(),
                     report.getApplicationVersion(),
                     report.getGeofencing());
             return new SystemDataReportResult(data);
