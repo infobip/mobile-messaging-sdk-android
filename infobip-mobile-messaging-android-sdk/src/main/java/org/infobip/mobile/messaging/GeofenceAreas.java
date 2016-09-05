@@ -6,9 +6,11 @@ import android.os.Parcelable;
 import com.google.android.gms.location.Geofence;
 import com.google.gson.annotations.SerializedName;
 
+import org.infobip.mobile.messaging.util.DateTimeUtil;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author pandric
@@ -90,16 +92,16 @@ public class GeofenceAreas implements Parcelable {
         @SerializedName("radiusInMeters")
         private Integer radius;
 
-        @SerializedName("expiry")
-        private Long expiry;
+        @SerializedName("expiryTime")
+        private String expiryTime;
 
-        public Area(String id, String title, Double latitude, Double longitude, Integer radius, Long expiry) {
+        public Area(String id, String title, Double latitude, Double longitude, Integer radius, String expiryTime) {
             this.id = id;
             this.title = title;
             this.latitude = latitude;
             this.longitude = longitude;
             this.radius = radius;
-            this.expiry = expiry;
+            this.expiryTime = expiryTime;
         }
 
         protected Area(Parcel in) {
@@ -108,7 +110,7 @@ public class GeofenceAreas implements Parcelable {
             latitude = in.readDouble();
             longitude = in.readDouble();
             radius = in.readInt();
-            expiry = in.readLong();
+            expiryTime = in.readString();
         }
 
         public static final Creator<Area> CREATOR = new Creator<Area>() {
@@ -123,8 +125,12 @@ public class GeofenceAreas implements Parcelable {
             }
         };
 
-        public Long getExpiry() {
-            return expiry == 0L ? TimeUnit.HOURS.toMillis(24L) : expiry;
+        public String getExpiryTime() {
+            return expiryTime;
+        }
+
+        public Date getExpiryDate() {
+            return DateTimeUtil.ISO8601DateFromString(expiryTime);
         }
 
         public String getId() {
@@ -148,11 +154,20 @@ public class GeofenceAreas implements Parcelable {
         }
 
         public Geofence toGeofence() {
+            Long expirationDurationMillis = 0L;
+            Date expiryDate = getExpiryDate();
+            if (expiryDate != null) {
+                expirationDurationMillis = expiryDate.getTime() - System.currentTimeMillis();
+            }
+            if (expirationDurationMillis <= 0) {
+                expirationDurationMillis = Geofence.NEVER_EXPIRE;
+            }
+
             return new Geofence.Builder()
                     .setCircularRegion(getLatitude(), getLongitude(), getRadius())
-                    .setExpirationDuration(getExpiry())
                     .setRequestId(getId())
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                    .setExpirationDuration(expirationDurationMillis)
                     .build();
         }
 
@@ -168,7 +183,7 @@ public class GeofenceAreas implements Parcelable {
             parcel.writeDouble(latitude);
             parcel.writeDouble(longitude);
             parcel.writeInt(radius);
-            parcel.writeLong(expiry);
+            parcel.writeString(expiryTime);
         }
 
         /**
@@ -178,7 +193,7 @@ public class GeofenceAreas implements Parcelable {
          */
         public boolean isValid() {
             return getId() != null &&
-                    getExpiry() != null &&
+                    getExpiryTime() != null &&
                     getLatitude() != null &&
                     getLongitude() != null &&
                     getRadius() != null;
