@@ -7,15 +7,18 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
@@ -23,7 +26,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @author sslavin
  * @since 21/07/16.
  */
-public class SendMessageTask extends AsyncTask<org.infobip.mobile.messaging.MoMessage, Void, SendMessageResult>{
+public class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>{
 
     private final Context context;
 
@@ -32,7 +35,7 @@ public class SendMessageTask extends AsyncTask<org.infobip.mobile.messaging.MoMe
     }
 
     @Override
-    protected SendMessageResult doInBackground(org.infobip.mobile.messaging.MoMessage... messages) {
+    protected SendMessageResult doInBackground(Message... messages) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
 
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
@@ -46,8 +49,10 @@ public class SendMessageTask extends AsyncTask<org.infobip.mobile.messaging.MoMe
             moMessagesBody.setFrom(deviceApplicationInstanceId);
 
             List<MoMessage> moMessages = new ArrayList<>();
-            for (org.infobip.mobile.messaging.MoMessage message : messages) {
-                moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getText(), message.getCustomPayload()));
+            for (Message message : messages) {
+                String customPayloadString = message.getCustomPayload() != null ? message.getCustomPayload().toString() : null;
+                Map<String, Object> customPayloadMap = new JsonSerializer().deserialize(customPayloadString, Map.class);
+                moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getBody(), customPayloadMap));
             }
             moMessagesBody.setMessages(moMessages.toArray(new MoMessage[moMessages.size()]));
             MoMessagesResponse moMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sendMO(moMessagesBody);

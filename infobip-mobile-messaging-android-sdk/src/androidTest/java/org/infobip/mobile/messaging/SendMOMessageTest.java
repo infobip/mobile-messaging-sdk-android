@@ -4,12 +4,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.tools.DebugServer;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -94,33 +98,33 @@ public class SendMOMessageTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
 
-        MoMessage moMessages[] =
-        {
-            new MoMessage("dest", "test", null),
-            new MoMessage("dest", "test", null)
-        };
-
-        mobileMessaging.sendMessages(moMessages);
+        Message messagesToSend[] = {new Message(), new Message()};
+        mobileMessaging.sendMessages(messagesToSend);
 
         Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_MO_MESSAGES));
+        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_MESSAGES));
 
-        MoMessage messages[] = MoMessage.createFrom(captor.getValue().getStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES));
-        assertEquals("myMessageId", messages[0].getMessageId());
-        assertEquals(MoMessage.Status.ERROR, messages[0].getStatus());
-        assertEquals("Message not sent", messages[0].getStatusMessage());
-        assertEquals("myDestination", messages[0].getDestination());
-        assertEquals("myText", messages[0].getText());
-        assertEquals("string", messages[0].getCustomPayload().get("myStringKey"));
-        assertEquals(1.0, messages[0].getCustomPayload().get("myNumberKey"));
-        assertEquals(true, messages[0].getCustomPayload().get("myBooleanKey"));
-        assertEquals("myMessageId2", messages[1].getMessageId());
-        assertEquals(MoMessage.Status.SUCCESS, messages[1].getStatus());
-        assertEquals("Message sent", messages[1].getStatusMessage());
-        assertEquals("myDestination2", messages[1].getDestination());
-        assertEquals("myText2", messages[1].getText());
-        assertEquals("string2", messages[1].getCustomPayload().get("myStringKey"));
-        assertEquals(2.0, messages[1].getCustomPayload().get("myNumberKey"));
-        assertEquals(false, messages[1].getCustomPayload().get("myBooleanKey"));
+        ArrayList<Bundle> bundles = captor.getValue().getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES);
+        List<Message> messages = new ArrayList<>();
+        for (Bundle bundle : bundles) {
+            messages.add(Message.createFrom(bundle));
+        }
+
+        assertEquals("myMessageId", messages.get(0).getMessageId());
+        assertEquals(Message.Status.ERROR, messages.get(0).getStatus());
+        assertEquals("Message not sent", messages.get(0).getStatusMessage());
+        assertEquals("myDestination", messages.get(0).getDestination());
+        assertEquals("myText", messages.get(0).getBody());
+        assertEquals("string", messages.get(0).getCustomPayload().opt("myStringKey"));
+        assertEquals(1, messages.get(0).getCustomPayload().opt("myNumberKey"));
+        assertEquals(true, messages.get(0).getCustomPayload().opt("myBooleanKey"));
+        assertEquals("myMessageId2", messages.get(1).getMessageId());
+        assertEquals(Message.Status.SUCCESS, messages.get(1).getStatus());
+        assertEquals("Message sent", messages.get(1).getStatusMessage());
+        assertEquals("myDestination2", messages.get(1).getDestination());
+        assertEquals("myText2", messages.get(1).getBody());
+        assertEquals("string2", messages.get(1).getCustomPayload().opt("myStringKey"));
+        assertEquals(2, messages.get(1).getCustomPayload().opt("myNumberKey"));
+        assertEquals(false, messages.get(1).getCustomPayload().opt("myBooleanKey"));
     }
 }

@@ -24,7 +24,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
         Bundle bundle = intent.getBundleExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey());
         if (bundle == null) return;
 
-        Message message = new Message(bundle);
+        Message message = Message.createFrom(bundle);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         String action = intent.getAction();

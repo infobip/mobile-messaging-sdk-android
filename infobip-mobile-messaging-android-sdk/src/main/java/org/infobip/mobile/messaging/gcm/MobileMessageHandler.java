@@ -10,8 +10,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
 import org.infobip.mobile.messaging.Actionable;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -129,9 +127,7 @@ class MobileMessageHandler {
         NotificationCompat.Builder builder = notificationCompatBuilder(context, message);
         if (builder == null) return;
 
-        Gson gson = new Gson();
-        Actionable actionable = gson.fromJson(message.getInternalData(), Actionable.class);
-
+        Actionable actionable = message.getActionable();
         if (actionable != null && actionable.getInteractive() != null) {
             Actionable.Interactive interactive = actionable.getInteractive();
 
@@ -184,9 +180,8 @@ class MobileMessageHandler {
     }
 
     private Message createMessage(String from, Bundle data) {
-        Message message = Message.copyFrom(data);
+        Message message = Message.createFrom(data);
         message.setFrom(from);
-        message.setData(data);
         return message;
     }
 

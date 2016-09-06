@@ -50,7 +50,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
             protected List<Message> convert(Set<String> set) {
                 List<Message> messages = new ArrayList<Message>();
                 for (String bundle : set) {
-                    messages.add(new Message(deserialize(bundle)));
+                    messages.add(Message.createFrom(deserialize(bundle)));
                 }
                 return messages;
             }
@@ -85,7 +85,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
             protected void mutate(Set<String> set) {
                 for (Message message : messages) {
                     for (String serializedBundle : new HashSet<>(set)) {
-                        Message messageInSet = new Message(deserialize(serializedBundle));
+                        Message messageInSet = Message.createFrom(deserialize(serializedBundle));
                         if (messageInSet.getMessageId().equals(message.getMessageId())) {
                             set.remove(serializedBundle);
                             break;

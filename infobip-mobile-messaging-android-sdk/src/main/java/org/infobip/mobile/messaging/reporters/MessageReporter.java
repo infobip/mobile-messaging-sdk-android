@@ -2,21 +2,23 @@ package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MoMessage;
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tasks.SendMessageResult;
 import org.infobip.mobile.messaging.tasks.SendMessageTask;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
@@ -27,31 +29,59 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class MessageReporter {
 
-    class MoDeliveredMessage extends MoMessage {
+    static class MessageDelivery extends Message {
 
-        private final static int STATUS_ID_SENT = 0;
-        private final static int STATUS_ID_ERROR = 1;
+        public static Message fromJson(String json) {
+            JSONObject object;
+            try {
+                object = new JSONObject(json);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return new Message();
+            }
 
-        public MoDeliveredMessage(String destination, String text, Map<String, Object> customPayload, String messageId, int statusId, String statusMessage) {
-            super(destination, text, customPayload);
-            this.messageId = messageId;
-            this.status = getStatusFromStatusId(statusId);
-            this.statusMessage = statusMessage;
+            Bundle bundle = new Bundle();
+            bundle.putString(BundleField.DESTINATION.getKey(), object.optString(JsonField.DESTINATION.getKey()));
+            bundle.putString(BundleField.MESSAGE_ID.getKey(), object.optString(JsonField.MESSAGE_ID.getKey()));
+            bundle.putString(BundleField.BODY.getKey(), object.optString(JsonField.TEXT.getKey()));
+            if (object.has(JsonField.CUSTOM_PAYLOAD.getKey())) {
+                bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), object.optJSONObject(JsonField.CUSTOM_PAYLOAD.getKey()).toString());
+            }
+            if (object.has(JsonField.STATUS_CODE.getKey())) {
+                int statusId = object.optInt(JsonField.STATUS_CODE.getKey(), Status.UNKNOWN.ordinal());
+                for (Status status : Status.values()) {
+                    if (status.ordinal() == statusId) {
+                        bundle.putString(BundleField.STATUS.getKey(), status.getKey());
+                        break;
+                    }
+                }
+            }
+            bundle.putString(BundleField.STATUS_MESSAGE.getKey(), object.optString(JsonField.STATUS.getKey()));
+
+            return Message.createFrom(bundle);
         }
 
-        Status getStatusFromStatusId(int statusId) {
-            switch (statusId) {
-                case STATUS_ID_SENT:
-                    return Status.SUCCESS;
-                case STATUS_ID_ERROR:
-                    return Status.ERROR;
-                default:
-                    return Status.UNKNOWN;
+        enum JsonField {
+            MESSAGE_ID("messageId"),
+            DESTINATION("destination"),
+            TEXT("text"),
+            CUSTOM_PAYLOAD("customPayload"),
+            STATUS_CODE("statusCode"),
+            STATUS("status");
+
+            private final String key;
+
+            JsonField(String key) {
+                this.key = key;
+            }
+
+            public String getKey() {
+                return key;
             }
         }
     }
 
-    public void send(final Context context, final MobileMessagingStats stats, Executor executor, final MoMessage... messages) {
+    public void send(final Context context, final MobileMessagingStats stats, Executor executor, final Message... messages) {
         new SendMessageTask(context) {
             @Override
             protected void onPostExecute(SendMessageResult sendMessageResult) {
@@ -69,23 +99,15 @@ public class MessageReporter {
                     return;
                 }
 
-                ArrayList<String> moMessages = new ArrayList<>();
-                JsonSerializer jsonSerializer = new JsonSerializer();
+                ArrayList<Bundle> messageBundles = new ArrayList<>();
+                JsonSerializer serializer = new JsonSerializer();
                 for (MoMessageDelivery delivery : sendMessageResult.getMessageDeliveries()) {
-
-                    MoDeliveredMessage message = new MoDeliveredMessage(
-                            delivery.getDestination(),
-                            delivery.getText(),
-                            delivery.getCustomPayload(),
-                            delivery.getMessageId(),
-                            delivery.getStatusCode(),
-                            delivery.getStatus());
-
-                    moMessages.add(jsonSerializer.serialize(message));
+                    Message message = MessageDelivery.fromJson(serializer.serialize(delivery));
+                    messageBundles.add(message.getBundle());
                 }
 
                 Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
-                messagesSent.putStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES, moMessages);
+                messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, messageBundles);
                 context.sendBroadcast(messagesSent);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
             }
@@ -99,24 +121,15 @@ public class MessageReporter {
         }.executeOnExecutor(executor, messages);
     }
 
-    private void reportFailedMessages(final Context context, String errorMessage, final MoMessage... messages) {
+    private void reportFailedMessages(final Context context, String errorMessage, final Message... messages) {
 
-        ArrayList<String> moMessages = new ArrayList<>();
-        JsonSerializer jsonSerializer = new JsonSerializer();
-        for (MoMessage message : messages) {
-            MoDeliveredMessage moMessage = new MoDeliveredMessage(
-                    message.getDestination(),
-                    message.getText(),
-                    message.getCustomPayload(),
-                    message.getMessageId(),
-                    MoDeliveredMessage.STATUS_ID_ERROR,
-                    errorMessage
-            );
-            moMessages.add(jsonSerializer.serialize(moMessage));
+        ArrayList<Bundle> messageBundles = new ArrayList<>();
+        for (Message message : messages) {
+            messageBundles.add(message.getBundle());
         }
 
         Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
-        messagesSent.putStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES, moMessages);
+        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, messageBundles);
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
     }

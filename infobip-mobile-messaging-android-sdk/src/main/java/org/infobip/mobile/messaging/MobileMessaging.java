@@ -162,7 +162,7 @@ public class MobileMessaging {
      * Destination for each message is set inside {@link Message}.
      * @param messages messages to send
      */
-    public void sendMessages(MoMessage... messages) {
+    public void sendMessages(Message... messages) {
         MobileMessagingCore.getInstance(context).sendMessages(messages);
     }
 

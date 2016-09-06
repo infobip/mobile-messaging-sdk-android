@@ -1,219 +1,188 @@
 package org.infobip.mobile.messaging;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
-import org.infobip.mobile.messaging.util.InternalMessageUtils;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
  *
- * @author mstipanov
- * @since 25.03.2016.
+ * @author sslavin
+ * @since 05/09/16.
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-public class Message implements Comparable {
-    private final Bundle bundle;
-    private Gson gson = new Gson();
+public class Message implements Comparable<Message> {
+    Bundle bundle;
+    String messageId;
+    String title;
+    String body;
+    String sound;
+    String icon;
+    boolean silent;
+    String category;
+    String from;
+    Long receivedTimestamp;
+    Long seenTimestamp;
+    JSONObject internalData;
+    JSONObject customPayload;
+    String destination;
+    Status status;
+    String statusMessage;
+
+    public static Message createFrom(Bundle bundle) {
+        return new Message(bundle);
+    }
+
+    public static List<Message> createFrom(ArrayList<Bundle> bundles) {
+        List<Message> messages = new ArrayList<>();
+        for (Bundle bundle : bundles) {
+            messages.add(Message.createFrom(bundle));
+        }
+        return messages;
+    }
 
     public Message() {
-        bundle = new Bundle();
+        this.messageId = UUID.randomUUID().toString();
+        this.status = Status.UNKNOWN;
+        this.receivedTimestamp = System.currentTimeMillis();
+        this.bundle = new Bundle();
+        this.bundle.putString(BundleField.MESSAGE_ID.getKey(), this.messageId);
+        this.bundle.putString(BundleField.STATUS.getKey(), this.status.getKey());
+        this.bundle.putLong(BundleField.RECEIVED_TIMESTAMP.getKey(), this.receivedTimestamp);
     }
 
-    public Message(Bundle bundle) {
+    private Message(Bundle bundle) {
+
         this.bundle = bundle;
-    }
-
-    public static Message copyFrom(Bundle source) {
-        Message sourceMessage = new Message(source);
-
-        Message message = new Message();
-
-        message.setSilent(sourceMessage.isSilent());
-        message.setFrom(sourceMessage.getFrom());
-        message.setMessageId(sourceMessage.getMessageId());
-        message.setTitle(sourceMessage.getTitle());
-        message.setBody(sourceMessage.getBody());
-        message.setSound(sourceMessage.getSound());
-        message.setIcon(sourceMessage.getIcon());
-        message.setData(sourceMessage.getData());
-        message.setReceivedTimestamp(sourceMessage.getReceivedTimestamp());
-        message.setSeenTimestamp(sourceMessage.getSeenTimestamp());
-        message.setInternalData(sourceMessage.getInternalData());
-        message.setCustomPayload(sourceMessage.getCustomPayload());
-        message.setCategory(sourceMessage.getCategory());
-
-        return message;
-    }
-
-    public String getMessageId() {
-        return bundle.getString(Data.MESSAGE_ID.getKey(), null);
-    }
-
-    public void setMessageId(String messageId) {
-        bundle.putString(Data.MESSAGE_ID.getKey(), messageId);
-    }
-
-    public List<GeofenceAreas.Area> getGeofenceAreasList() {
-        if (TextUtils.isEmpty(getInternalData())) {
-            return new ArrayList<>(0);
-        }
-
+        this.silent = "true".equals(bundle.getString(BundleField.SILENT.getKey()));
+        this.messageId = bundle.getString(BundleField.MESSAGE_ID.getKey());
+        this.icon = bundle.getString(BundleField.ICON.getKey());
+        this.from = bundle.getString(BundleField.FROM.getKey());
+        this.receivedTimestamp = bundle.getLong(BundleField.RECEIVED_TIMESTAMP.getKey());
+        this.seenTimestamp = bundle.getLong(BundleField.SEEN_TIMESTAMP.getKey());
+        this.internalData = getJSON(bundle, BundleField.INTERNAL_DATA.getKey());
+        this.customPayload = getJSON(bundle, BundleField.CUSTOM_PAYLOAD.getKey());
+        this.destination = bundle.getString(BundleField.DESTINATION.getKey());
         try {
-            GeofenceAreas geofenceAreas = gson.fromJson(getInternalData(), GeofenceAreas.class);
-            return geofenceAreas.getAreasList();
-
-        } catch (Exception e) {
-            Log.e(MobileMessaging.TAG, e.getMessage(), e);
-            return new ArrayList<>(0);
+            this.status = Status.valueOf(bundle.getString(BundleField.STATUS.getKey()));
+        } catch (Exception ignored) {
+            this.status = Status.UNKNOWN;
         }
-    }
+        this.statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
 
-    public String getFrom() {
-        return bundle.getString(Data.FROM.getKey(), null);
-    }
-
-    public void setFrom(String from) {
-        bundle.putString(Data.FROM.getKey(), from);
-    }
-
-    public String getSound() {
-        if (isSilent()) {
-            return InternalMessageUtils.getSilentSound(this);
-        }
-        return bundle.getString(Data.SOUND.getKey(), null);
-    }
-
-    public void setSound(String sound) {
-        if (isSilent()) {
-            InternalMessageUtils.setSilentSound(this, sound);
+        if (this.silent) {
+            this.title = getSilentField(bundle, InternalDataField.TITLE.getKey());
+            this.body = getSilentField(bundle, InternalDataField.BODY.getKey());
+            this.sound = getSilentField(bundle, InternalDataField.SOUND.getKey());
+            this.category = getSilentField(bundle, InternalDataField.CATEGORY.getKey());
         } else {
-            bundle.putString(Data.SOUND.getKey(), sound);
+            this.title = bundle.getString(BundleField.TITLE.getKey());
+            this.body = bundle.getString(BundleField.BODY.getKey());
+            this.sound = bundle.getString(BundleField.SOUND.getKey());
+            this.category = bundle.getString(BundleField.CATEGORY.getKey());
         }
-    }
-
-    public String getIcon() {
-        return bundle.getString(Data.ICON.getKey(), null);
-    }
-
-    public void setIcon(String icon) {
-        bundle.putString(Data.ICON.getKey(), icon);
-    }
-
-    public String getBody() {
-        if (isSilent()) {
-            return InternalMessageUtils.getSilentBody(this);
-        }
-        return bundle.getString(Data.BODY.getKey(), null);
-    }
-
-    public void setBody(String body) {
-        if (isSilent()) {
-            InternalMessageUtils.setSilentBody(this, body);
-        } else {
-            bundle.putString(Data.BODY.getKey(), body);
-        }
-    }
-
-    public String getTitle() {
-        if (isSilent()) {
-            return InternalMessageUtils.getSilentTitle(this);
-        }
-        return bundle.getString(Data.TITLE.getKey(), null);
-    }
-
-    public void setTitle(String title) {
-        if (isSilent()) {
-            InternalMessageUtils.setSilentTitle(this, title);
-        } else {
-            bundle.putString(Data.TITLE.getKey(), title);
-        }
-    }
-
-    public Bundle getData() {
-        return bundle.getBundle(Data.DATA.getKey());
-    }
-
-    public void setData(Bundle data) {
-        bundle.putBundle(Data.DATA.getKey(), data);
     }
 
     public Bundle getBundle() {
         return bundle;
     }
 
+    @Override
+    public int compareTo(@NonNull Message another) {
+        return (int) Math.signum(another.getReceivedTimestamp() - getReceivedTimestamp());
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public String getSound() {
+        return sound;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
     public boolean isSilent() {
-        return "true".equals(bundle.getString(Data.SILENT.getKey()));
-    }
-
-    public void setSilent(boolean silent) {
-        bundle.putString(Data.SILENT.getKey(), silent ? "true" : "false");
-    }
-
-    public long getReceivedTimestamp() {
-        return bundle.getLong(Data.RECEIVED_TIMESTAMP.getKey(), System.currentTimeMillis());
-    }
-
-    public void setReceivedTimestamp(long receivedTimestamp) {
-        bundle.putLong(Data.RECEIVED_TIMESTAMP.getKey(), receivedTimestamp);
-    }
-
-    public long getSeenTimestamp() {
-        return bundle.getLong(Data.SEEN_TIMESTAMP.getKey(), 0);
-    }
-
-    public void setSeenTimestamp(long receivedTimestamp) {
-        bundle.putLong(Data.SEEN_TIMESTAMP.getKey(), receivedTimestamp);
-    }
-
-    public JSONObject getCustomPayload() {
-        return getJSON(Data.CUSTOM_PAYLOAD.getKey());
-    }
-
-    public void setCustomPayload(JSONObject customPayload) {
-        if (customPayload == null) {
-            return;
-        }
-
-        bundle.putString(Data.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
-    }
-
-    public String getInternalData() {
-        return bundle.getString(Data.INTERNAL_DATA.getKey());
-    }
-
-    public void setInternalData(String data) {
-        bundle.putString(Data.INTERNAL_DATA.getKey(), data);
+        return silent;
     }
 
     public String getCategory() {
-        if (isSilent()) {
-            return InternalMessageUtils.getSilentCategory(this);
-        }
-        return bundle.getString(Data.CATEGORY.getKey());
+        return category;
     }
 
-    public void setCategory(String category) {
-        if (isSilent()) {
-            InternalMessageUtils.setSilentCategory(this, category);
-        } else {
-            bundle.putString(Data.CATEGORY.getKey(), category);
+    public String getFrom() {
+        return from;
+    }
+
+    public Long getReceivedTimestamp() {
+        return receivedTimestamp;
+    }
+
+    public Long getSeenTimestamp() {
+        return seenTimestamp;
+    }
+
+    public JSONObject getInternalData() {
+        return internalData;
+    }
+
+    public JSONObject getCustomPayload() {
+        return customPayload;
+    }
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public List<GeofenceAreas.Area> getGeofenceAreasList() {
+        if (getInternalData() == null) {
+            return new ArrayList<>(0);
+        }
+
+        try {
+            GeofenceAreas geofenceAreas = new JsonSerializer().deserialize(getInternalData().toString(), GeofenceAreas.class);
+            return geofenceAreas.getAreasList();
+        } catch (Exception e) {
+            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            return new ArrayList<>(0);
         }
     }
 
-    private JSONObject getJSON(String key) {
-        String string = bundle.getString(key);
+    public Actionable getActionable() {
+        if (getInternalData() == null) {
+            return null;
+        }
+
+        return new JsonSerializer().deserialize(getInternalData().toString(), Actionable.class);
+    }
+
+    private static JSONObject getJSON(Bundle from, String key) {
+        String string = from.getString(key);
         if (string == null) {
             return null;
         }
@@ -226,17 +195,60 @@ public class Message implements Comparable {
         }
     }
 
-    @Override
-    public int compareTo(Object another) {
-        if (!(another instanceof Message)) {
-            return 1;
+    private static String getSilentField(Bundle from, String key) {
+        JSONObject internalData = getJSON(from, BundleField.INTERNAL_DATA.getKey());
+        if (internalData == null) {
+            return null;
         }
 
-        Message message = (Message) another;
-        return (int) Math.signum(message.getReceivedTimestamp() - getReceivedTimestamp());
+        JSONObject silentData = internalData.optJSONObject(InternalDataField.SILENT_DATA.getKey());
+        if (silentData == null) {
+            return null;
+        }
+
+        return silentData.optString(key);
     }
 
-    protected enum Data {
+    public void setFrom(String from) {
+        this.from = from;
+        this.bundle.putString(BundleField.FROM.getKey(), from);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+        this.bundle.putString(BundleField.BODY.getKey(), body);
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+        this.bundle.putString(BundleField.DESTINATION.getKey(), destination);
+    }
+
+    public void setCustomPayload(JSONObject customPayload) {
+        this.customPayload = customPayload;
+        if (customPayload != null) {
+            this.bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
+        }
+    }
+
+    public void setSeenTimestamp(long seenTimestamp) {
+        this.seenTimestamp = seenTimestamp;
+        this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), seenTimestamp);
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        this.bundle.putString(BundleField.TITLE.getKey(), title);
+    }
+
+    public void setInternalData(JSONObject internalData) {
+        this.internalData = internalData;
+        if (internalData != null) {
+            this.bundle.putString(BundleField.INTERNAL_DATA.getKey(), internalData.toString());
+        }
+    }
+
+    protected enum BundleField {
         MESSAGE_ID("gcm.notification.messageId"),
         TITLE("gcm.notification.title"),
         BODY("gcm.notification.body"),
@@ -247,13 +259,49 @@ public class Message implements Comparable {
         FROM("from"),
         RECEIVED_TIMESTAMP("received_timestamp"),
         SEEN_TIMESTAMP("seen_timestamp"),
-        DATA("data"),
         INTERNAL_DATA("internalData"),
-        CUSTOM_PAYLOAD("customPayload");
+        CUSTOM_PAYLOAD("customPayload"),
+        STATUS("status"),
+        STATUS_MESSAGE("status_message"),
+        DESTINATION("destination");
 
         private final String key;
 
-        Data(String key) {
+        BundleField(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+    }
+
+    protected enum InternalDataField {
+        SILENT_DATA("silent"),
+        TITLE("title"),
+        BODY("body"),
+        SOUND("sound"),
+        CATEGORY("category");
+
+        private final String key;
+
+        InternalDataField(String key) {
+            this.key = key;
+        }
+
+        public String getKey() {
+            return key;
+        }
+    }
+
+    public enum Status {
+        SUCCESS("SUCCESS"),
+        ERROR("ERROR"),
+        UNKNOWN("UNKNOWN");
+
+        private final String key;
+
+        Status(String key) {
             this.key = key;
         }
 

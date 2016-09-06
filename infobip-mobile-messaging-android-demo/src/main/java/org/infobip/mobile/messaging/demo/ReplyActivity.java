@@ -28,7 +28,7 @@ public class ReplyActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getBundleExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey());
         if (bundle != null) {
-            Message message = new Message(bundle);
+            Message message = Message.createFrom(bundle);
             tvBody.setText(message.getBody());
         }
 

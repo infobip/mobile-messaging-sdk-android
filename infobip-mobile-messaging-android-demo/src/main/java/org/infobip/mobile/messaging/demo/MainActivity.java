@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
     private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Message message = new Message(intent.getExtras());
+            Message message = Message.createFrom(intent.getExtras());
             String body = message.getBody();
             Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), getString(R.string.toast_message_received), body), Toast.LENGTH_LONG).show();
             updateCount();
