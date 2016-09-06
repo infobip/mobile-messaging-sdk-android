@@ -185,7 +185,18 @@ public enum Event {
      * }
      * </pre>
      */
-    SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED");
+    SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED"),
+
+    /**
+     * It is triggered when Google Play Services are not available.
+     * <pre>
+     * {@code
+     * String playServicesErrorMessage = intent.getStringExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_MESSAGE);
+     * int playServicesErrorCode = intent.getIntExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_CODE);
+     * }
+     * </pre>
+     */
+    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR");
 
     private final String key;
 

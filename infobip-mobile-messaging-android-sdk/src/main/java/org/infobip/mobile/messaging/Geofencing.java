@@ -21,6 +21,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 import org.infobip.mobile.messaging.ConfigurationException.Reason;
+import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -79,7 +80,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     void activate() {
         checkRequiredService(context, GeofenceTransitionsIntentService.class);
-        if (MobileMessagingCore.isGeofencingActivated(context)) {
+        if (PlayServicesSupport.isPlayServicesAvailable() && MobileMessagingCore.isGeofencingActivated(context)) {
             addGeofenceAreasToPlayServices();
             activateGeofences();
         }
@@ -220,6 +221,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, connectionResult.getErrorMessage(), new Throwable(connectionResult.getErrorMessage()));
+        Log.e(TAG, connectionResult.getErrorMessage(), new ConfigurationException(Reason.CHECK_LOCATION_SETTINGS));
     }
 }

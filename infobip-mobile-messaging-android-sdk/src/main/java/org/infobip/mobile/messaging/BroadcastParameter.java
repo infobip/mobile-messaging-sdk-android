@@ -14,6 +14,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_USER_DATA = "org.infobip.mobile.messaging.userdata";
     public static final String EXTRA_SYSTEM_DATA = "org.infobip.mobile.messaging.systemdata";
     public static final String EXTRA_MO_MESSAGES = "org.infobip.mobile.messaging.mo.messages";
+    public static final String EXTRA_PLAY_SERVICES_ERROR_CODE = "org.infobip.mobile.messaging.playServices";
 
     private BroadcastParameter() {
     }

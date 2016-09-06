@@ -70,4 +70,8 @@
 
     <string name="error_api_comm_unknown">Unknown API communication error</string>
 
+    <string name="gps_dialog_title">Google Play Services</string>
+    <string name="gps_dialog_message">This device is not supported by Google Play Services. Mobile Messaging Example won't run without Google Play Services.</string>
+    <string name="gps_dialog_dismiss">Dismiss</string>
+
 </resources>

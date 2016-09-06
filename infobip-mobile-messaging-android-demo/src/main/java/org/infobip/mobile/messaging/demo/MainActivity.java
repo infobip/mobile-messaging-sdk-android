@@ -1,14 +1,17 @@
 package org.infobip.mobile.messaging.demo;
 
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,12 +21,16 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GoogleApiAvailability;
+
+import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -33,6 +40,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 
 public class MainActivity extends AppCompatActivity implements MobileMessaging.OnReplyClickListener {
+
     private final BroadcastReceiver userDataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -97,6 +105,37 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
             mobileMessaging.setMessagesSeen(message.getMessageId());
         }
     };
+
+    private final BroadcastReceiver playServicesErrorReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int errorCode = intent.getIntExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_CODE, 0);
+            if (errorCode == PlayServicesSupport.DEVICE_NOT_SUPPORTED) {
+                showDeviceNotSupportedDialog();
+                return;
+            }
+
+            Dialog errorDialog = GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this, errorCode, 0);
+            if (errorDialog != null) {
+                errorDialog.show();
+            }
+        }
+    };
+
+    private void showDeviceNotSupportedDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle(R.string.gps_dialog_title)
+                .setMessage(R.string.gps_dialog_message)
+                .setCancelable(false)
+                .setNeutralButton(R.string.gps_dialog_dismiss, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MainActivity.this.finish();
+                    }
+                })
+                .create()
+                .show();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,6 +276,8 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
                     new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
             localBroadcastManager.registerReceiver(messageReceiver,
                     new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
+            localBroadcastManager.registerReceiver(playServicesErrorReceiver,
+                    new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
             receiversRegistered = true;
         }
     }
@@ -247,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
             localBroadcastManager.unregisterReceiver(errorReceiver);
             localBroadcastManager.unregisterReceiver(userDataReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
+            localBroadcastManager.unregisterReceiver(playServicesErrorReceiver);
             receiversRegistered = false;
         }
     }

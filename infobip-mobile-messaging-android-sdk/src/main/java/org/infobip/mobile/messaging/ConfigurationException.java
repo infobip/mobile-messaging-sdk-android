@@ -19,7 +19,9 @@ public class ConfigurationException extends RuntimeException {
     }
 
     enum Reason {
-        MISSING_REQUIRED_SERVICE("Missing required service in AndroidManifest.xml, add: %s");
+        MISSING_REQUIRED_SERVICE("Missing required service in AndroidManifest.xml, add: %s"),
+
+        CHECK_LOCATION_SETTINGS("Check your location settings.");
 
         private String message;
 
