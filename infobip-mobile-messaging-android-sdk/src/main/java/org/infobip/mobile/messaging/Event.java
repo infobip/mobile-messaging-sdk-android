@@ -191,7 +191,6 @@ public enum Event {
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code
-     * String playServicesErrorMessage = intent.getStringExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_MESSAGE);
      * int playServicesErrorCode = intent.getIntExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_CODE);
      * }
      * </pre>

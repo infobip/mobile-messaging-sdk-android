@@ -9,6 +9,7 @@ public class Actionable {
     public static final String CHAT = "chatMessage";
     public static final String COUPON = "chatCoupon";
     public static final String EXTRA_COUPON_URL = "couponUrl";
+    public static final String KEY_TEXT_REPLY = "key_text_reply";
 
     @SerializedName("interactive")
     private Interactive interactive;

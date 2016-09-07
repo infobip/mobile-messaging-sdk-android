@@ -15,12 +15,12 @@ apply plugin: 'idea'
 apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName project.version
         testInstrumentationRunner 'org.infobip.mobile.messaging.CustomInstrumentationTestRunner'

@@ -48,7 +48,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             case NotificationAction.ACTION_COUPON_URL:
                 String stringUrl = intent.getStringExtra(Actionable.EXTRA_COUPON_URL);
                 Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(stringUrl));
+                i.setData(Uri.parse(stringUrl == null ? "" : stringUrl));
                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(i);
                 notificationId = MobileMessageHandler.COUPON_NOTIFICATION_ID;

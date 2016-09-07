@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.RemoteInput;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import org.infobip.mobile.messaging.Actionable;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -310,9 +312,15 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         Intent replyIntent = new Intent(this, ReplyActivity.class);
         String messageExtra = MobileMessagingProperty.EXTRA_MESSAGE.getKey();
         Bundle bundle = intent.getBundleExtra(messageExtra);
-        if (bundle != null) {
+        if (bundle != null && android.os.Build.VERSION.SDK_INT < 24) {
             replyIntent.putExtra(messageExtra, bundle);
             startActivity(replyIntent);
+        } else {
+            Bundle resultsFromIntent = RemoteInput.getResultsFromIntent(intent);
+            if (resultsFromIntent != null) {
+                CharSequence replyText = resultsFromIntent.getCharSequence(Actionable.KEY_TEXT_REPLY);
+                // TODO send message to server
+            }
         }
     }
 }
