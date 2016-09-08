@@ -173,14 +173,6 @@ public class Message implements Comparable<Message> {
         }
     }
 
-    public Actionable getActionable() {
-        if (getInternalData() == null) {
-            return null;
-        }
-
-        return new JsonSerializer().deserialize(getInternalData().toString(), Actionable.class);
-    }
-
     private static JSONObject getJSON(Bundle from, String key) {
         String string = from.getString(key);
         if (string == null) {

@@ -7,18 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.RemoteInput;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.Actionable;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonParseException;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -31,11 +28,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 class MobileMessageHandler {
 
-    public static final int CHAT_NOTIFICATION_ID = 1;
-    public static final int COUPON_NOTIFICATION_ID = 2;
     public static final int DEFAULT_NOTIFICATION_ID = 0;
 
-    private NotificationSettings notificationSettings;
     private SharedPreferencesMessageStore messageStore;
 
     void handleNotification(Context context, Intent intent) {
@@ -57,17 +51,7 @@ class MobileMessageHandler {
 
         Log.d(MobileMessaging.TAG, "Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
-            String category = message.getCategory();
-
-            if (Actionable.CHAT.equalsIgnoreCase(category)) {
-                displayChatNotification(context, message);
-
-            } else if (Actionable.COUPON.equalsIgnoreCase(category)) {
-                displayCouponNotification(context, message);
-
-            } else {
-                displayNotification(context, message);
-            }
+            displayNotification(context, message);
         }
 
         Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
@@ -88,79 +72,6 @@ class MobileMessageHandler {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         Notification notification = builder.build();
         notificationManager.notify(DEFAULT_NOTIFICATION_ID, notification);
-    }
-
-    /**
-     * Create and show a notification containing the received GCM message and two actions - one to mark message as seen
-     * and one to reply to the received message without opening your application.
-     *
-     * @param message message received.
-     */
-    private void displayChatNotification(Context context, Message message) {
-        NotificationCompat.Builder builder = notificationCompatBuilder(context, message);
-        if (builder == null) return;
-
-        Intent markSeenIntent = new Intent(context, NotificationActionReceiver.class);
-        markSeenIntent.setAction(NotificationAction.ACTION_MARK_SEEN);
-        markSeenIntent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), message.getBundle());
-        PendingIntent pendingIntentMarkSeen = PendingIntent.getBroadcast(context, 0, markSeenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Action markSeenAction = new NotificationCompat.Action(0, notificationSettings.getMarkSeenActionTitle(), pendingIntentMarkSeen);
-
-        Intent replyIntent = new Intent(context, NotificationActionReceiver.class);
-        replyIntent.setAction(NotificationAction.ACTION_REPLY);
-        replyIntent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), message.getBundle());
-        PendingIntent pendingIntentReply = PendingIntent.getBroadcast(context, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        String replyLabel = notificationSettings.getReplyActionTitle();
-        RemoteInput remoteInput = new RemoteInput.Builder(Actionable.KEY_TEXT_REPLY)
-                .setLabel(replyLabel)
-                .build();
-
-        NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(0, replyLabel, pendingIntentReply)
-                .addRemoteInput(remoteInput)
-                .build();
-
-        builder.addAction(markSeenAction);
-        builder.addAction(replyAction);
-        builder.setShowWhen(true);
-        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = builder.build();
-        notificationManager.notify(CHAT_NOTIFICATION_ID, notification);
-    }
-
-    /**
-     * Create and show a notification containing the received GCM message and action that opens received web link in browser.
-     *
-     * @param message message received.
-     */
-    private void displayCouponNotification(Context context, Message message) {
-        NotificationCompat.Builder builder = notificationCompatBuilder(context, message);
-        if (builder == null) return;
-
-        Actionable actionable = message.getActionable();
-        if (actionable != null && actionable.getInteractive() != null) {
-            Actionable.Interactive interactive = actionable.getInteractive();
-
-            String couponUrl = interactive.getButtonActions().getCouponUrl();
-            Intent openUrlIntent = new Intent(context, NotificationActionReceiver.class);
-            openUrlIntent.setAction(NotificationAction.ACTION_COUPON_URL);
-            openUrlIntent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), message.getBundle());
-            openUrlIntent.putExtra(Actionable.EXTRA_COUPON_URL, couponUrl);
-            PendingIntent pendingIntentOpenUrl = PendingIntent.getBroadcast(context, 0, openUrlIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            NotificationCompat.Action openUrlAction = new NotificationCompat.Action(0, notificationSettings.getOpenUrlActionTitle(), pendingIntentOpenUrl);
-            builder.addAction(openUrlAction);
-            builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            Notification notification = builder.build();
-            notificationManager.notify(COUPON_NOTIFICATION_ID, notification);
-
-        } else {
-            Log.e(MobileMessaging.TAG, "Unable to parse internalData.interactive object", new JsonParseException("Interactive json object may be malformed"));
-        }
     }
 
     private void saveMessage(Context context, Message message) {
@@ -207,7 +118,7 @@ class MobileMessageHandler {
     }
 
     private NotificationCompat.Builder notificationCompatBuilder(Context context, Message message) {
-        notificationSettings = notificationSettings(context, message);
+        NotificationSettings notificationSettings = notificationSettings(context, message);
         if (notificationSettings == null) return null;
 
         Intent intent = new Intent(context, notificationSettings.getCallbackActivity());
@@ -222,7 +133,6 @@ class MobileMessageHandler {
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(pendingIntent)
-                .setGroupSummary(true)
                 .setWhen(message.getReceivedTimestamp());
 
         int icon;

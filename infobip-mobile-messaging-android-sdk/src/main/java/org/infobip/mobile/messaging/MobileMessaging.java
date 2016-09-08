@@ -45,7 +45,6 @@ public class MobileMessaging {
 
     private static MobileMessaging instance;
     private final Context context;
-    private OnReplyClickListener replyClickListener;
 
     /**
      * Default constructor. Use MobileMessaging.Builder to construct MobileMessaging.
@@ -167,17 +166,6 @@ public class MobileMessaging {
     }
 
     /**
-     * This interface is used to handle an action of reply button click in actionable notification.
-     */
-    public interface OnReplyClickListener {
-        /**
-         * It is triggered when reply button is clicked.
-         * @param intent intent containing message
-         */
-        void onReplyClicked(Intent intent);
-    }
-
-    /**
      * Starts tracking geofence areas.
      * @see Geofencing
      */
@@ -223,7 +211,6 @@ public class MobileMessaging {
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
-        private OnReplyClickListener replyActionClickListener;
 
         public Builder(Context context) {
             if (null == context) {
@@ -446,21 +433,6 @@ public class MobileMessaging {
         }
 
         /**
-         * Sets reply click listener for actionable notification.
-         * <pre>
-         * {@code new MobileMessaging.Builder(context)
-         *       .withOnReplyClickListener(replyActionClickListener)
-         *       .build();}
-         * </pre>
-         *
-         * @return {@link Builder}
-         */
-        public Builder withOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
-            this.replyActionClickListener = replyActionClickListener;
-            return this;
-        }
-
-        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -477,7 +449,6 @@ public class MobileMessaging {
             MobileMessaging.instance = mobileMessaging;
 
             new MobileMessagingCore.Builder(context)
-                    .withOnReplyClickListener(replyActionClickListener)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
                     .withGeofencing(geofencing)

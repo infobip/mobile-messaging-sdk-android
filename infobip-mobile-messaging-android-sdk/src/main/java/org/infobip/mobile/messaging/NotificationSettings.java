@@ -118,18 +118,6 @@ public class NotificationSettings {
         return !isForegroundNotificationEnabled();
     }
 
-    public String getMarkSeenActionTitle() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_MARK_SEEN_TITLE.getKey(), "Mark as seen");
-    }
-
-    public String getReplyActionTitle() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_REPLY_TITLE.getKey(), "Reply");
-    }
-
-    public String getOpenUrlActionTitle() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_OPEN_URL_TITLE.getKey(), "Get coupon");
-    }
-
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -338,42 +326,6 @@ public class NotificationSettings {
          */
         public Builder withoutForegroundNotification() {
             this.foregroundNotificationEnabled = false;
-            return this;
-        }
-
-        /**
-         * Enables you to put localized string as title for mark as seen actionable notification.
-         * <p/>
-         * By default foreground notifications are enabled
-         *
-         * @return {@link Builder}
-         */
-        public Builder withMarkSeenActionTitle(String title) {
-            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_MARK_SEEN_TITLE, title);
-            return this;
-        }
-
-        /**
-         * Enables you to put localized string as title for actionable notification that handles reply action.
-         * <p/>
-         * By default foreground notifications are enabled
-         *
-         * @return {@link Builder}
-         */
-        public Builder withReplyActionTitle(String title) {
-            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_REPLY_TITLE, title);
-            return this;
-        }
-
-        /**
-         * Enables you to put localized string as title for actionable notification that opens received web url in browser.
-         * <p/>
-         * By default foreground notifications are enabled
-         *
-         * @return {@link Builder}
-         */
-        public Builder withCouponUrlActionTitle(String title) {
-            PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_OPEN_URL_TITLE, title);
             return this;
         }
 
