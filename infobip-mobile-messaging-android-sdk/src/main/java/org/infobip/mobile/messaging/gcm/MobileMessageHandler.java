@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -32,7 +33,7 @@ class MobileMessageHandler {
 
     private SharedPreferencesMessageStore messageStore;
 
-    void handleNotification(Context context, Intent intent) {
+    void handleMessage(Context context, Intent intent) {
         String from = intent.getStringExtra("from");
         Bundle data = intent.getExtras();
 
@@ -128,12 +129,39 @@ class MobileMessageHandler {
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
-                .setDefaults(notificationSettings.getNotificationDefaults())
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(pendingIntent)
                 .setWhen(message.getReceivedTimestamp());
+
+        setNotificationDefaults(context, notificationBuilder, message);
+        setNotificationSound(context, notificationBuilder, message);
+        setNotificationIcon(context, notificationBuilder, message);
+
+        return notificationBuilder;
+    }
+
+    private void setNotificationDefaults(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
+        NotificationSettings notificationSettings = notificationSettings(context, message);
+        if (notificationSettings == null) return;
+
+        int notificationDefaults = notificationSettings.getNotificationDefaults();
+
+        if (!message.isDefaultSound()) {
+            notificationDefaults &= ~Notification.DEFAULT_SOUND;
+        }
+
+        if (!message.isVibrate()) {
+            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+        }
+
+        notificationBuilder.setDefaults(notificationDefaults);
+    }
+
+    private void setNotificationIcon(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
+        NotificationSettings notificationSettings = notificationSettings(context, message);
+        if (notificationSettings == null) return;
 
         int icon;
         if (StringUtils.isNotBlank(message.getIcon())) {
@@ -142,8 +170,18 @@ class MobileMessageHandler {
             icon = notificationSettings.getDefaultIcon();
         }
         notificationBuilder.setSmallIcon(icon);
+    }
 
-        return notificationBuilder;
+    private void setNotificationSound(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
+        String sound = message.getSound();
+        if (!message.isDefaultSound() && StringUtils.isNotBlank(sound)) {
+            Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
+            if (uri != null) {
+                notificationBuilder.setSound(uri);
+            } else {
+                Log.w(MobileMessaging.TAG, "Cannot find notification sound: " + sound);
+            }
+        }
     }
 
     private NotificationSettings notificationSettings(Context context, Message message) {

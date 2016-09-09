@@ -50,6 +50,11 @@ public class SystemDataReporter {
                     return;
                 }
 
+                if (result.isPostponed()) {
+                    Log.w(TAG, "System data report is saved and will be sent at a later time");
+                    return;
+                }
+
                 MobileMessagingCore.getInstance(context).setSystemDataReported();
 
                 Intent dataReported = new Intent(Event.SYSTEM_DATA_REPORTED.getKey());

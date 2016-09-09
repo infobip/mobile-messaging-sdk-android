@@ -29,12 +29,6 @@ public class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, Syst
 
     @Override
     protected SystemDataReportResult doInBackground(SystemDataReport... params) {
-        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.e(MobileMessaging.TAG, "Can't report system data without valid registration!");
-            return new SystemDataReportResult(new Exception("Syncing system data: no valid registration"));
-        }
 
         if (params.length < 1) {
             Log.e(MobileMessaging.TAG, "System data is empty, cannot report!");
@@ -42,14 +36,22 @@ public class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, Syst
         }
 
         SystemDataReport report = params[0];
+        SystemData data = new SystemData(report.getSdkVersion(),
+                report.getOsVersion(),
+                report.getDeviceManufacturer(),
+                report.getDeviceModel(),
+                report.getApplicationVersion(),
+                report.getGeofencing());
+
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+            Log.w(MobileMessaging.TAG, "Can't report system data without valid registration");
+            return new SystemDataReportResult(data, true);
+        }
+
         try {
             MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(deviceApplicationInstanceId, report);
-            SystemData data = new SystemData(report.getSdkVersion(),
-                    report.getOsVersion(),
-                    report.getDeviceManufacturer(),
-                    report.getDeviceModel(),
-                    report.getApplicationVersion(),
-                    report.getGeofencing());
             return new SystemDataReportResult(data);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
