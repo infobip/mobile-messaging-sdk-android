@@ -7,6 +7,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.messages.v3.MobileApiSyncMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.util.DeviceInformation;
@@ -33,6 +34,7 @@ public enum MobileApiResourceProvider {
     private MobileApiMessages mobileApiMessages;
 
     private MobileApiData mobileApiData;
+    private MobileApiSyncMessages mobileApiSyncMessages;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -64,6 +66,16 @@ public enum MobileApiResourceProvider {
         return mobileApiMessages;
     }
 
+    public MobileApiSyncMessages getMobileApiSyncMessages(Context context) {
+        if (mobileApiSyncMessages != null) {
+            return mobileApiSyncMessages;
+        }
+
+        mobileApiSyncMessages = getGenerator(context).create(MobileApiSyncMessages.class);
+
+        return mobileApiSyncMessages;
+    }
+
     public MobileApiData getMobileApiData(Context context) {
         if (null != mobileApiData) {
             return mobileApiData;
@@ -85,7 +97,7 @@ public enum MobileApiResourceProvider {
             userAgentAdditions.add(SoftwareInformation.getAppName(context));
             userAgentAdditions.add(SoftwareInformation.getAppVersion(context));
         } else {
-            String emptySystemInfo[] = {"","","","","","",""};
+            String emptySystemInfo[] = {"", "", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptySystemInfo));
         }
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO)) {

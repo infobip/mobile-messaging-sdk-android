@@ -248,6 +248,21 @@ public class Message implements Comparable<Message> {
         }
     }
 
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+        this.bundle.putString(BundleField.MESSAGE_ID.getKey(), messageId);
+    }
+
+    public void setSound(String sound) {
+        this.sound = sound;
+        this.bundle.putString(BundleField.SOUND.getKey(), sound);
+    }
+
+    public void setSilent(String silent) {
+        this.silent = "true".equalsIgnoreCase(silent);
+        this.bundle.putString(BundleField.SILENT.getKey(), silent);
+    }
+
     protected enum BundleField {
         MESSAGE_ID("gcm.notification.messageId"),
         TITLE("gcm.notification.title"),

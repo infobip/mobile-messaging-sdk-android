@@ -3,13 +3,18 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
+
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author mstipanov
@@ -17,7 +22,9 @@ import java.util.Set;
  */
 public abstract class PreferenceHelper {
     private static final Object LOCK = new Object();
+    private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static Cryptor cryptor = null;
+    private static final String PREFS_MESSAGE_IDS = "PREFS_MESSAGE_IDS";
 
     private PreferenceHelper() {
     }
@@ -294,6 +301,60 @@ public abstract class PreferenceHelper {
 
     public static void registerOnSharedPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
+    }
+
+
+    /**
+     * This method will return max 100 latest messageIDs.
+     *
+     * @param context
+     * @return
+     */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static String[] findMessageIDs(Context context) {
+        Map<String, String> stringMap;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_MESSAGE_IDS, Context.MODE_PRIVATE);
+        stringMap = (Map<String, String>) sharedPreferences.getAll();
+        if (stringMap == null) return null;
+
+        String[] messageIDs = new String[stringMap.size() < MESSAGE_ID_PARAMETER_LIMIT ? stringMap.size() : MESSAGE_ID_PARAMETER_LIMIT];
+
+        Set<Map.Entry<String, String>> entrySet = stringMap.entrySet();
+
+        Iterator<Map.Entry<String, String>> iterator = entrySet.iterator();
+        for (int i = 0; i < entrySet.size(); i++) {
+            if (iterator.hasNext()) {
+                Map.Entry entry = iterator.next();
+
+                String time = (String) entry.getKey();
+                long timestamp = Long.valueOf(time);
+
+                long expiryTime = TimeUnit.DAYS.toMillis(7);
+                long timeInterval = System.currentTimeMillis() - timestamp;
+
+                if (timeInterval > expiryTime || i >= MESSAGE_ID_PARAMETER_LIMIT) {
+                    sharedPreferences.edit().remove((String) entry.getValue()).apply();
+                } else {
+                    messageIDs[i] = (String) entry.getValue();
+                }
+            }
+        }
+
+        return messageIDs;
+    }
+
+    public static void appendToStringMap(Context context, String... messageIDs) {
+        synchronized (LOCK) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_MESSAGE_IDS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+
+            for (String messageId : messageIDs) {
+                String currentTimeString = String.valueOf(System.currentTimeMillis());
+                editor.putString(currentTimeString, messageId);
+                editor.apply();
+            }
+        }
     }
 
     public static abstract class SetMutator {

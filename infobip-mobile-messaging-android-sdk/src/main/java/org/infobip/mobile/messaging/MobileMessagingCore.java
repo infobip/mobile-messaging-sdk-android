@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.MobileMessaging.OnReplyClickListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -11,6 +12,7 @@ import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.reporters.DeliveryReporter;
 import org.infobip.mobile.messaging.reporters.MessageReporter;
+import org.infobip.mobile.messaging.reporters.MessagesSynchronizer;
 import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
 import org.infobip.mobile.messaging.reporters.SystemDataReporter;
@@ -34,8 +36,10 @@ import java.util.concurrent.Executors;
  * @since 28.04.2016.
  */
 public class MobileMessagingCore {
+
     private static MobileMessagingCore instance;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
+    private final MessagesSynchronizer messagesSynchronizer = new MessagesSynchronizer();
     private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
@@ -83,8 +87,9 @@ public class MobileMessagingCore {
     }
 
     public void sync() {
-        registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
-        deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
+        registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
+        messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
+//        deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
@@ -107,7 +112,13 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
 
-    protected void addUnreportedMessageIds(final String... messageIDs) {
+    @Nullable
+    public String[] getMessageIds() {
+        return PreferenceHelper.findMessageIDs(context);
+    }
+
+    protected void addUnreportedMessageIds(String... messageIDs) {
+        PreferenceHelper.appendToStringMap(context, messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
