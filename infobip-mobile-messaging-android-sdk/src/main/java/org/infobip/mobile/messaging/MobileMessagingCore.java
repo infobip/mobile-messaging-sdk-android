@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.support.annotation.Nullable;
 
-import org.infobip.mobile.messaging.MobileMessaging.OnReplyClickListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
@@ -53,7 +52,6 @@ public class MobileMessagingCore {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
-    private OnReplyClickListener replyClickListener;
     private Geofencing geofencing;
 
     private OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
@@ -300,14 +298,6 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
     }
 
-    public OnReplyClickListener getOnReplyClickListener() {
-        return this.replyClickListener;
-    }
-
-    public void setOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
-        this.replyClickListener = replyActionClickListener;
-    }
-
     static void setGeofencingActivated(Context context, boolean activated) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, activated);
     }
@@ -434,7 +424,6 @@ public class MobileMessagingCore {
         private final Context context;
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
-        private OnReplyClickListener replyActionClickListener;
         private Geofencing geofencing;
 
         public Builder(Context context) {
@@ -495,11 +484,6 @@ public class MobileMessagingCore {
             return this;
         }
 
-        public Builder withOnReplyClickListener(OnReplyClickListener replyActionClickListener) {
-            this.replyActionClickListener = replyActionClickListener;
-            return this;
-        }
-
         private void activateGeofencing() {
             if (geofencing != null) {
                 geofencing.activate();
@@ -523,7 +507,6 @@ public class MobileMessagingCore {
             MobileMessagingCore.instance = mobileMessagingCore;
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(context);
             mobileMessagingCore.playServicesSupport.checkPlayServices(context);
-            mobileMessagingCore.setOnReplyClickListener(replyActionClickListener);
             mobileMessagingCore.readSystemData();
             mobileMessagingCore.activateGeofencing();
             return mobileMessagingCore;

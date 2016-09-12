@@ -16,9 +16,6 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
 
-        <!--Actionable notifications-->
-        <receiver android:name="org.infobip.mobile.messaging.gcm.NotificationActionReceiver" />
-
         <receiver
                 android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver"
                 android:exported="true"
@@ -74,10 +71,6 @@
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".MainActivity"/>
         </activity>
-
-        <activity
-            android:name=".ReplyActivity"
-            android:theme="@style/Theme.Transparent"/>
 
     </application>
 </manifest>

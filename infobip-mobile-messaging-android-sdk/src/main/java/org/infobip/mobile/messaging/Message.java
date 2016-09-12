@@ -19,11 +19,13 @@ import java.util.UUID;
  * @since 05/09/16.
  */
 public class Message implements Comparable<Message> {
+
     Bundle bundle;
     String messageId;
     String title;
     String body;
     String sound;
+    boolean vibrate;
     String icon;
     boolean silent;
     String category;
@@ -52,6 +54,7 @@ public class Message implements Comparable<Message> {
         this.messageId = UUID.randomUUID().toString();
         this.status = Status.UNKNOWN;
         this.receivedTimestamp = System.currentTimeMillis();
+        this.vibrate = true;
         this.bundle = new Bundle();
         this.bundle.putString(BundleField.MESSAGE_ID.getKey(), this.messageId);
         this.bundle.putString(BundleField.STATUS.getKey(), this.status.getKey());
@@ -78,15 +81,18 @@ public class Message implements Comparable<Message> {
         this.statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
 
         if (this.silent) {
-            this.title = getSilentField(bundle, InternalDataField.TITLE.getKey());
-            this.body = getSilentField(bundle, InternalDataField.BODY.getKey());
-            this.sound = getSilentField(bundle, InternalDataField.SOUND.getKey());
-            this.category = getSilentField(bundle, InternalDataField.CATEGORY.getKey());
+            this.title = getSilentField(InternalDataField.TITLE.getKey());
+            this.body = getSilentField(InternalDataField.BODY.getKey());
+            this.sound = getSilentField(InternalDataField.SOUND.getKey());
+            this.category = getSilentField(InternalDataField.CATEGORY.getKey());
+            this.vibrate = getSilentField(InternalDataField.VIBRATE.getKey(), true);
         } else {
             this.title = bundle.getString(BundleField.TITLE.getKey());
             this.body = bundle.getString(BundleField.BODY.getKey());
-            this.sound = bundle.getString(BundleField.SOUND.getKey());
+            this.sound = bundle.getString(BundleField.SOUND2.getKey(),
+                    bundle.getString(BundleField.SOUND.getKey()));
             this.category = bundle.getString(BundleField.CATEGORY.getKey());
+            this.vibrate = "true".equals(bundle.getString(BundleField.VIBRATE.getKey(), "true"));
         }
     }
 
@@ -113,6 +119,10 @@ public class Message implements Comparable<Message> {
 
     public String getSound() {
         return sound;
+    }
+
+    public boolean isDefaultSound() {
+        return "default".equals(sound);
     }
 
     public String getIcon() {
@@ -159,6 +169,10 @@ public class Message implements Comparable<Message> {
         return statusMessage;
     }
 
+    public boolean isVibrate() {
+        return vibrate;
+    }
+
     public List<GeofenceAreas.Area> getGeofenceAreasList() {
         if (getInternalData() == null) {
             return new ArrayList<>(0);
@@ -171,14 +185,6 @@ public class Message implements Comparable<Message> {
             Log.e(MobileMessaging.TAG, e.getMessage(), e);
             return new ArrayList<>(0);
         }
-    }
-
-    public Actionable getActionable() {
-        if (getInternalData() == null) {
-            return null;
-        }
-
-        return new JsonSerializer().deserialize(getInternalData().toString(), Actionable.class);
     }
 
     private static JSONObject getJSON(Bundle from, String key) {
@@ -195,18 +201,32 @@ public class Message implements Comparable<Message> {
         }
     }
 
-    private static String getSilentField(Bundle from, String key) {
-        JSONObject internalData = getJSON(from, BundleField.INTERNAL_DATA.getKey());
+    private <T> T getSilentField(String key) {
+        return getSilentField(key, null);
+    }
+
+    private <T> T getSilentField(String key, T defaultValue) {
+        JSONObject internalData = getJSON(bundle, BundleField.INTERNAL_DATA.getKey());
         if (internalData == null) {
-            return null;
+            return defaultValue;
         }
 
         JSONObject silentData = internalData.optJSONObject(InternalDataField.SILENT_DATA.getKey());
         if (silentData == null) {
-            return null;
+            return defaultValue;
         }
 
-        return silentData.optString(key);
+        Object o = silentData.opt(key);
+        if (o == null) {
+            return defaultValue;
+        }
+
+        try {
+            return (T) o;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return defaultValue;
+        }
     }
 
     public void setFrom(String from) {
@@ -268,6 +288,8 @@ public class Message implements Comparable<Message> {
         TITLE("gcm.notification.title"),
         BODY("gcm.notification.body"),
         SOUND("gcm.notification.sound"),
+        SOUND2("gcm.notification.sound2"),
+        VIBRATE("gcm.notification.vibrate"),
         ICON("gcm.notification.icon"),
         SILENT("gcm.notification.silent"),
         CATEGORY("gcm.notification.category"),
@@ -296,6 +318,7 @@ public class Message implements Comparable<Message> {
         TITLE("title"),
         BODY("body"),
         SOUND("sound"),
+        VIBRATE("vibrate"),
         CATEGORY("category");
 
         private final String key;

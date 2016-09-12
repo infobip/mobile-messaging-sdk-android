@@ -10,7 +10,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.RemoteInput;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,12 +23,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 
-import org.infobip.mobile.messaging.Actionable;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
@@ -41,7 +38,7 @@ import java.util.Locale;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 
-public class MainActivity extends AppCompatActivity implements MobileMessaging.OnReplyClickListener {
+public class MainActivity extends AppCompatActivity {
 
     private final BroadcastReceiver userDataReceiver = new BroadcastReceiver() {
         @Override
@@ -144,13 +141,9 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
         super.onCreate(savedInstanceState);
 
         new MobileMessaging.Builder(this)
-                .withOnReplyClickListener(this)
                 .withMessageStore(SharedPreferencesMessageStore.class)
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withDefaultIcon(R.drawable.ic_notification)
-                        .withMarkSeenActionTitle(getString(R.string.action_mark_seen))
-                        .withReplyActionTitle(getString(R.string.action_reply))
-                        .withCouponUrlActionTitle(getString(R.string.action_coupon))
                         .withoutForegroundNotification()
                         .build())
                 .build();
@@ -305,22 +298,5 @@ public class MainActivity extends AppCompatActivity implements MobileMessaging.O
                 .edit()
                 .putString(ApplicationPreferences.MSISDN, "" + userData.getMsisdn())
                 .apply();
-    }
-
-    @Override
-    public void onReplyClicked(Intent intent) {
-        Intent replyIntent = new Intent(this, ReplyActivity.class);
-        String messageExtra = MobileMessagingProperty.EXTRA_MESSAGE.getKey();
-        Bundle bundle = intent.getBundleExtra(messageExtra);
-        if (bundle != null && android.os.Build.VERSION.SDK_INT < 24) {
-            replyIntent.putExtra(messageExtra, bundle);
-            startActivity(replyIntent);
-        } else {
-            Bundle resultsFromIntent = RemoteInput.getResultsFromIntent(intent);
-            if (resultsFromIntent != null) {
-                CharSequence replyText = resultsFromIntent.getCharSequence(Actionable.KEY_TEXT_REPLY);
-                // TODO send message to server
-            }
-        }
     }
 }

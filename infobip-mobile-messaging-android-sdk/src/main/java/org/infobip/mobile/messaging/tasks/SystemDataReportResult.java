@@ -9,10 +9,18 @@ import org.infobip.mobile.messaging.SystemData;
 public class SystemDataReportResult extends UnsuccessfulResult {
 
     SystemData data = null;
+    boolean postponed = false;
 
     public SystemDataReportResult(SystemData data) {
         super(null);
         this.data = data;
+        this.postponed = false;
+    }
+
+    public SystemDataReportResult(SystemData data, boolean postponed) {
+        super(null);
+        this.data = data;
+        this.postponed = postponed;
     }
 
     public SystemDataReportResult(Throwable exception) {
@@ -21,5 +29,9 @@ public class SystemDataReportResult extends UnsuccessfulResult {
 
     public SystemData getData() {
         return data;
+    }
+
+    public boolean isPostponed() {
+        return postponed;
     }
 }
