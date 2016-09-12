@@ -65,7 +65,6 @@ public class Message implements Comparable<Message> {
 
         this.bundle = bundle;
         this.silent = "true".equals(bundle.getString(BundleField.SILENT.getKey()));
-        this.vibrate = "true".equals(bundle.getString(BundleField.VIBRATE.getKey(), "true"));
         this.messageId = bundle.getString(BundleField.MESSAGE_ID.getKey());
         this.icon = bundle.getString(BundleField.ICON.getKey());
         this.from = bundle.getString(BundleField.FROM.getKey());
@@ -86,12 +85,14 @@ public class Message implements Comparable<Message> {
             this.body = getSilentField(InternalDataField.BODY.getKey());
             this.sound = getSilentField(InternalDataField.SOUND.getKey());
             this.category = getSilentField(InternalDataField.CATEGORY.getKey());
+            this.vibrate = getSilentField(InternalDataField.VIBRATE.getKey(), true);
         } else {
             this.title = bundle.getString(BundleField.TITLE.getKey());
             this.body = bundle.getString(BundleField.BODY.getKey());
             this.sound = bundle.getString(BundleField.SOUND2.getKey(),
                     bundle.getString(BundleField.SOUND.getKey()));
             this.category = bundle.getString(BundleField.CATEGORY.getKey());
+            this.vibrate = "true".equals(bundle.getString(BundleField.VIBRATE.getKey(), "true"));
         }
     }
 
