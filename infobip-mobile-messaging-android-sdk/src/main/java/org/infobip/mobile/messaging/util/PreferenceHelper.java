@@ -334,7 +334,7 @@ public abstract class PreferenceHelper {
                 long timeInterval = System.currentTimeMillis() - timeMessageReceived;
 
                 if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
-                    sharedPreferences.edit().remove((String) entry.getValue()).apply();
+                    sharedPreferences.edit().remove((String) entry.getKey()).apply();
                 } else {
                     messageIDs[i] = (String) entry.getValue();
                 }
