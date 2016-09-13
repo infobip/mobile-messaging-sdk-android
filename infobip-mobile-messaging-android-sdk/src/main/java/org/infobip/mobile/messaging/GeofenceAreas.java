@@ -95,6 +95,9 @@ public class GeofenceAreas implements Parcelable {
         @SerializedName("expiryTime")
         private String expiryTime;
 
+        @SerializedName("startTime")
+        private String startTime;
+
         public Area(String id, String title, Double latitude, Double longitude, Integer radius, String expiryTime) {
             this.id = id;
             this.title = title;
@@ -125,12 +128,12 @@ public class GeofenceAreas implements Parcelable {
             }
         };
 
-        public String getExpiryTime() {
-            return expiryTime;
-        }
-
         public Date getExpiryDate() {
             return DateTimeUtil.ISO8601DateFromString(expiryTime);
+        }
+
+        public Date getStartDate() {
+            return DateTimeUtil.ISO8601DateFromString(startTime);
         }
 
         public String getId() {
@@ -187,16 +190,25 @@ public class GeofenceAreas implements Parcelable {
         }
 
         /**
-         * geofence is valid if it contains all the required parameters
+         * geofence is valid and it can be monitored
          *
          * @return
          */
-        public boolean isValid() {
+        public boolean isEligibleForMonitoring() {
+            Date now = new Date();
             return getId() != null &&
-                    getExpiryTime() != null &&
+                    getExpiryDate() != null &&
                     getLatitude() != null &&
                     getLongitude() != null &&
-                    getRadius() != null;
+                    getRadius() != null &&
+                    getExpiryDate() != null && getExpiryDate().after(now) &&
+                    (getStartDate() == null || getStartDate().before(now));
+        }
+
+        public boolean isExpired() {
+            Date now = new Date();
+            Date expiryDate = getExpiryDate();
+            return expiryDate != null && expiryDate.before(now);
         }
     }
 }

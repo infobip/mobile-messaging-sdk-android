@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,12 +22,14 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 import org.infobip.mobile.messaging.ConfigurationException.Reason;
+import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -49,6 +52,8 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     private MessageStore messageStore;
 
     private Geofencing(Context context) {
+        checkRequiredService(context, GeofenceTransitionsIntentService.class);
+
         Geofencing.context = context;
         geofences = new ArrayList<>();
         messageStore = new SharedPreferencesMessageStore();
@@ -78,54 +83,79 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
     }
 
-    void activate() {
-        checkRequiredService(context, GeofenceTransitionsIntentService.class);
-        if (PlayServicesSupport.isPlayServicesAvailable() && MobileMessagingCore.isGeofencingActivated(context)) {
-            addGeofenceAreasToPlayServices();
-            activateGeofences();
-        }
+    static void scheduleRefresh(Context context) {
+        scheduleRefresh(context, new Date());
     }
 
-    void addGeofenceAreasToPlayServices() {
+    public static void scheduleRefresh(Context context, Date when) {
+        Log.i(TAG, "Next refresh in: " + when);
+
+        if (when == null) {
+            return;
+        }
+
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, new Intent(context, GeofencingAlarmReceiver.class), 0));
+    }
+
+    static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
+        Date nextCheckDate = null;
+        Date now = new Date();
+        List<Geofence> geofences = new ArrayList<>();
         List<Message> messages = messageStore.bind(context);
-        if (!messages.isEmpty()) {
-            this.geofences.clear();
 
-            for (Message message : messages) {
-                List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
+        for (Message message : messages) {
+            List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
+            if (geoAreasList == null || geoAreasList.isEmpty()) {
+                continue;
+            }
 
-                if (geoAreasList != null && !geoAreasList.isEmpty()) {
-                    for (GeofenceAreas.Area area : geoAreasList) {
-                        if (area.isValid()) {
-                            this.geofences.add(area.toGeofence());
-                        }
-                    }
+            for (GeofenceAreas.Area area : geoAreasList) {
+
+                if (area.isExpired()) {
+                    continue;
+                }
+
+                if (area.isEligibleForMonitoring()) {
+                    geofences.add(area.toGeofence());
+                    continue;
+                }
+
+                Date startDate = area.getStartDate();
+                Date expiryDate = area.getExpiryDate();
+                if (nextCheckDate == null) {
+                    nextCheckDate = startDate;
+                } else if (startDate != null && startDate.before(nextCheckDate) &&
+                        expiryDate != null && expiryDate.after(now)) {
+                    nextCheckDate = startDate;
                 }
             }
         }
+        return new Tuple<>(geofences, nextCheckDate);
     }
 
     @SuppressWarnings("MissingPermission")
-    private void activateGeofences() {
+    public void activate() {
+
+        if (!PlayServicesSupport.isPlayServicesAvailable(context) ||
+                !MobileMessagingCore.isGeofencingActivated(context)) {
+            return;
+        }
+
+        if (!checkRequiredPermissions()) {
+            return;
+        }
+
+        Tuple<List<Geofence>, Date> tuple = calculateGeofencesToMonitorAndNextCheckDate(messageStore);
+        scheduleRefresh(context, tuple.getRight());
+
+        geofences = tuple.getLeft();
+        if (geofences.isEmpty()) {
+            return;
+        }
+
         if (!googleApiClient.isConnected()) {
             googleApiClient.connect();
-            return;
-        }
-
-        if (!(context instanceof Activity)) {
-            Log.e(TAG, "You shall provide instance of Activity as context for geofencing!");
-            return;
-        }
-
-        Activity activity = (Activity) context;
-        if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-            String[] permissions = {ACCESS_FINE_LOCATION};
-            ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
-            return;
-        }
-
-        if (geofences.isEmpty()) {
-            Log.d(TAG, "Skip adding geofences. No geofence areas to add.");
             return;
         }
 
@@ -137,23 +167,18 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                         logGeofenceStatus(status, true);
                     }
                 });
+
+
     }
 
-
     void deactivate() {
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
+
+        if (!checkRequiredPermissions()) {
             return;
         }
 
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("You shall provide instance of Activity as context for geofencing!");
-        }
-
-        Activity activity = (Activity) context;
-        if (ActivityCompat.checkSelfPermission(activity, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-            String[] permissions = {ACCESS_FINE_LOCATION};
-            ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
+        if (!googleApiClient.isConnected()) {
+            googleApiClient.connect();
             return;
         }
 
@@ -165,6 +190,22 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                         logGeofenceStatus(status, false);
                     }
                 });
+    }
+
+    private boolean checkRequiredPermissions() {
+        if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
+            return true;
+        }
+
+        if (!(context instanceof Activity)) {
+            Log.e(TAG, "You shall provide instance of Activity as context for geofencing!");
+            return false;
+        }
+
+        Activity activity = (Activity) context;
+        String[] permissions = {ACCESS_FINE_LOCATION};
+        ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
+        return false;
     }
 
     /**
@@ -211,7 +252,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "GoogleApiClient connected");
-        activateGeofences();
+        activate();
     }
 
     @Override

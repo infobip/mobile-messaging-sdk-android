@@ -130,6 +130,22 @@ public class InspectActivity extends PreferenceActivity {
                         .getString(preference.getKey(), ""));
     }
 
+    private static void bindBooleanPreferenceSummaryToValue(Preference preference) {
+        if (preference == null) {
+            return;
+        }
+
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getBoolean(preference.getKey(), false));
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -326,7 +342,9 @@ public class InspectActivity extends PreferenceActivity {
             addPreferencesFromResource(R.xml.pref_notification);
             setHasOptionsMenu(true);
 
-            bindStringPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            bindStringPreferenceSummaryToValue(findPreference(ApplicationPreferences.NOTIFICATION_SOUND));
+            bindBooleanPreferenceSummaryToValue(findPreference(ApplicationPreferences.NOTIFICATION_VIBRATE));
+            bindBooleanPreferenceSummaryToValue(findPreference(ApplicationPreferences.NOTIFICATIONS_ENABLED));
         }
 
         @Override

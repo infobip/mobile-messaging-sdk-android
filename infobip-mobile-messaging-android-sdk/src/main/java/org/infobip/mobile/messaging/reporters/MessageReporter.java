@@ -9,16 +9,19 @@ import android.util.Log;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tasks.SendMessageResult;
 import org.infobip.mobile.messaging.tasks.SendMessageTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
@@ -40,7 +43,7 @@ public class MessageReporter {
                 return new Message();
             }
 
-            Bundle bundle = new Bundle();
+            Bundle bundle = new Message().getBundle();
             bundle.putString(BundleField.DESTINATION.getKey(), object.optString(JsonField.DESTINATION.getKey()));
             bundle.putString(BundleField.MESSAGE_ID.getKey(), object.optString(JsonField.MESSAGE_ID.getKey()));
             bundle.putString(BundleField.BODY.getKey(), object.optString(JsonField.TEXT.getKey()));
@@ -94,7 +97,7 @@ public class MessageReporter {
                     context.sendBroadcast(sendMessageError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessageError);
 
-                    reportFailedMessages(context, sendMessageResult.getError().getMessage(), messages);
+                    reportFailedMessages(context, messages);
 
                     return;
                 }
@@ -106,6 +109,8 @@ public class MessageReporter {
                     messageBundles.add(message.getBundle());
                 }
 
+                saveMessages(context, Message.createFrom(messageBundles));
+
                 Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
                 messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, messageBundles);
                 context.sendBroadcast(messagesSent);
@@ -116,21 +121,36 @@ public class MessageReporter {
             protected void onCancelled() {
                 Log.e(TAG, "Error sending messages!");
                 stats.reportError(MobileMessagingError.MESSAGE_SEND_ERROR);
-                reportFailedMessages(context, "Network error", messages);
+                reportFailedMessages(context, messages);
             }
         }.executeOnExecutor(executor, messages);
     }
 
-    private void reportFailedMessages(final Context context, String errorMessage, final Message... messages) {
+    private void reportFailedMessages(final Context context, final Message... messages) {
 
         ArrayList<Bundle> messageBundles = new ArrayList<>();
         for (Message message : messages) {
             messageBundles.add(message.getBundle());
         }
 
+        saveMessages(context, Message.createFrom(messageBundles));
+
         Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
         messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, messageBundles);
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
+    }
+
+    private void saveMessages(Context context, List<Message> messages) {
+        if (messages == null) {
+            return;
+        }
+
+        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
+        if (messageStore == null) {
+            return;
+        }
+
+        messageStore.save(context, messages.toArray(new Message[messages.size()]));
     }
 }

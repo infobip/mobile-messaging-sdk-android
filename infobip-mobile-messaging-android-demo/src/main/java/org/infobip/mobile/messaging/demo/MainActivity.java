@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.demo;
 
 import android.app.Dialog;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -136,17 +139,60 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    int getNotificationDefaultsFromPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean vibrate = sharedPreferences.getBoolean(ApplicationPreferences.NOTIFICATION_VIBRATE, true);
+        boolean customSound = sharedPreferences.getString(ApplicationPreferences.NOTIFICATION_SOUND, null) != null;
+
+        int notificationDefaults = Notification.DEFAULT_ALL;
+        if (!vibrate) {
+            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+        }
+        if (customSound) {
+            notificationDefaults &= ~Notification.DEFAULT_SOUND;
+        }
+        return notificationDefaults;
+    }
+
+    Uri getNotificationSoundFromPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String sound = sharedPreferences.getString(ApplicationPreferences.NOTIFICATION_SOUND, null);
+        if (sound == null) {
+            return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        }
+
+        return Uri.parse(sound);
+    }
+
+    boolean getNotificationEnabledFromPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return sharedPreferences.getBoolean(ApplicationPreferences.NOTIFICATIONS_ENABLED, true);
+    }
+
+    private MobileMessaging.Builder mobileMessagingBuilder() {
+        boolean notificationsEnabled = getNotificationEnabledFromPreferences();
+        if (!notificationsEnabled) {
+            return new MobileMessaging.Builder(this)
+                    .withMessageStore(SharedPreferencesMessageStore.class)
+                    .withoutDisplayNotification();
+        }
+
+        int notificationDefaults = getNotificationDefaultsFromPreferences();
+        Uri sound = getNotificationSoundFromPreferences();
+        return new MobileMessaging.Builder(this)
+                .withMessageStore(SharedPreferencesMessageStore.class)
+                .withDisplayNotification(new NotificationSettings.Builder(this)
+                        .withDefaultIcon(R.drawable.ic_notification)
+                        .withDefaultNotificationSound(sound)
+                        .withNotificationDefaults(notificationDefaults)
+                        .build());
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        new MobileMessaging.Builder(this)
-                .withMessageStore(SharedPreferencesMessageStore.class)
-                .withDisplayNotification(new NotificationSettings.Builder(this)
-                        .withDefaultIcon(R.drawable.ic_notification)
-                        .withoutForegroundNotification()
-                        .build())
-                .build();
+        mobileMessagingBuilder().build();
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

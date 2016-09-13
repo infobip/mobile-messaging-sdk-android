@@ -31,7 +31,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     ```groovy
     dependencies {
         ...
-        compile ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.2.26@aar') {
+        compile ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.2.28@aar') {
             transitive = true;
         }
     }
@@ -48,6 +48,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
         
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
+        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
         <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
@@ -90,6 +91,14 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 
             <!--Service that triggers when geofence area is entered-->
             <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
+            
+            <receiver android:name="org.infobip.mobile.messaging.BootReceiver">
+                    <intent-filter>
+                        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                    </intent-filter>
+            </receiver>
+            
+            <receiver android:name="org.infobip.mobile.messaging.GeofencingAlarmReceiver"/>
             
             <!-- /Mobile Messaging components -->
             

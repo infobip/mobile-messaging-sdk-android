@@ -445,6 +445,9 @@ public class MobileMessagingCore {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
     }
 
+    static void handleBootCompleted(Context context) {
+        Geofencing.scheduleRefresh(context);
+    }
 
     /**
      * The {@link MobileMessagingCore} builder class.
@@ -519,12 +522,6 @@ public class MobileMessagingCore {
         public Builder withGeofencing(Geofencing geofencing) {
             this.geofencing = geofencing;
             return this;
-        }
-
-        private void activateGeofencing() {
-            if (geofencing != null) {
-                geofencing.activate();
-            }
         }
 
         /**
