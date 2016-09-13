@@ -54,11 +54,17 @@ public class Message implements Comparable<Message> {
         this.messageId = UUID.randomUUID().toString();
         this.status = Status.UNKNOWN;
         this.receivedTimestamp = System.currentTimeMillis();
+        this.seenTimestamp = System.currentTimeMillis();
         this.vibrate = true;
+        this.silent = false;
+
         this.bundle = new Bundle();
         this.bundle.putString(BundleField.MESSAGE_ID.getKey(), this.messageId);
         this.bundle.putString(BundleField.STATUS.getKey(), this.status.getKey());
         this.bundle.putLong(BundleField.RECEIVED_TIMESTAMP.getKey(), this.receivedTimestamp);
+        this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), this.seenTimestamp);
+        this.bundle.putString(BundleField.VIBRATE.getKey(), Boolean.toString(this.vibrate));
+        this.bundle.putString(BundleField.SILENT.getKey(), Boolean.toString(this.silent));
     }
 
     private Message(Bundle bundle) {
