@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.tasks;
 
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
 
 import java.util.ArrayList;
@@ -11,12 +12,10 @@ import java.util.List;
  */
 public class SeenMessagesReport extends SeenMessages {
 
-    private static final String REGULAR_EXPRESSION = ", ";
-
     public static SeenMessages fromMessageIds(String messageIds[]) {
         List<Message> messages = new ArrayList<>();
         for (String seenMessage : messageIds) {
-            String[] messageIdWithTimestamp = seenMessage.split(REGULAR_EXPRESSION);
+            String[] messageIdWithTimestamp = seenMessage.split(MobileMessagingCore.REGEX_COMMA_WITH_SPACE);
             String messageId = messageIdWithTimestamp[0];
             String seenTimestampString = messageIdWithTimestamp[1];
 

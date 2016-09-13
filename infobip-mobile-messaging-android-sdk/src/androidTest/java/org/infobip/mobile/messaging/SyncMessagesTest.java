@@ -2,8 +2,6 @@ package org.infobip.mobile.messaging;
 
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.util.PreferenceHelper;
-
 import java.util.UUID;
 
 /**
@@ -29,8 +27,9 @@ public class SyncMessagesTest extends InstrumentationTestCase {
             mockIDs[i] = UUID.randomUUID().toString();
         }
 
-        PreferenceHelper.appendToStringMap(getInstrumentation().getContext(), mockIDs);
-        String[] messageIDs = PreferenceHelper.findMessageIDs(getInstrumentation().getContext());
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(getInstrumentation().getContext());
+        mobileMessagingCore.addSyncMessagesIds(mockIDs);
+        String[] messageIDs = mobileMessagingCore.getSyncMessagesIds();
 
         assertNotNull(messageIDs);
         assertTrue(100 >= messageIDs.length);

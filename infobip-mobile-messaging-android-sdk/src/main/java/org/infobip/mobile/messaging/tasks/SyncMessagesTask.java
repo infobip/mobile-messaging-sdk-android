@@ -26,9 +26,12 @@ public class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         try {
             String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-            String[] messageIds = mobileMessagingCore.getMessageIds();
-            SyncMessagesBody pushMessagesBody = new SyncMessagesBody(messageIds);
-            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiSyncMessages(context).syncMessages(deviceApplicationInstanceId, pushMessagesBody);
+            String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
+            String[] unreportedMessageIds = mobileMessagingCore.getUnreportedMessageIds();
+
+            SyncMessagesBody syncMessagesBody = new SyncMessagesBody(messageIds, unreportedMessageIds);
+            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiSyncMessages(context).syncMessages(deviceApplicationInstanceId, syncMessagesBody);
+            mobileMessagingCore.removeUnreportedMessageIds(unreportedMessageIds);
             return new SyncMessagesResult(syncMessagesResponse);
 
         } catch (Exception e) {

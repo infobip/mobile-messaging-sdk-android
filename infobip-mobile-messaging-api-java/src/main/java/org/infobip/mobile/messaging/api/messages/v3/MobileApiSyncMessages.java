@@ -24,7 +24,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}/messages")
 public interface MobileApiSyncMessages {
-    @HttpRequest(method = HttpMethod.POST, value = "")
+    @HttpRequest(method = HttpMethod.POST)
     @Query(name = "platformType", value = "${platform.type:GCM}")
     SyncMessagesResponse syncMessages(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
                                       @Body() SyncMessagesBody pushMessagesBody);

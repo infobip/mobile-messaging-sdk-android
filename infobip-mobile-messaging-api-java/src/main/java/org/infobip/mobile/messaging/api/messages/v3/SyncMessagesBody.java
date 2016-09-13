@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SyncMessagesBody {
     String[] mIDs;
+    String[] drIDs;
 }
