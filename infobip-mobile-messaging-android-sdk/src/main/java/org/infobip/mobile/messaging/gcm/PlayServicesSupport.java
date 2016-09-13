@@ -21,7 +21,7 @@ public class PlayServicesSupport {
 
     public static final int DEVICE_NOT_SUPPORTED = -1;
 
-    private static boolean isPlayServicesAvailable;
+    private static Boolean isPlayServicesAvailable;
     private final Handler handler = new Handler();
 
     /**
@@ -67,7 +67,10 @@ public class PlayServicesSupport {
         context.startService(intent);
     }
 
-    public static boolean isPlayServicesAvailable() {
+    public static boolean isPlayServicesAvailable(Context context) {
+        if (isPlayServicesAvailable == null) {
+            new PlayServicesSupport().checkPlayServices(context);
+        }
         return isPlayServicesAvailable;
     }
 }
