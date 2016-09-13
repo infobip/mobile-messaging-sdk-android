@@ -25,6 +25,7 @@ public abstract class PreferenceHelper {
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static Cryptor cryptor = null;
     private static final String PREFS_MESSAGE_IDS = "PREFS_MESSAGE_IDS";
+    private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
 
     private PreferenceHelper() {
     }
@@ -327,13 +328,12 @@ public abstract class PreferenceHelper {
             if (iterator.hasNext()) {
                 Map.Entry entry = iterator.next();
 
-                String time = (String) entry.getKey();
-                long timestamp = Long.valueOf(time);
+                String strTimeMessageReceived = (String) entry.getKey();
+                long timeMessageReceived = Long.valueOf(strTimeMessageReceived);
 
-                long expiryTime = TimeUnit.DAYS.toMillis(7);
-                long timeInterval = System.currentTimeMillis() - timestamp;
+                long timeInterval = System.currentTimeMillis() - timeMessageReceived;
 
-                if (timeInterval > expiryTime || i >= MESSAGE_ID_PARAMETER_LIMIT) {
+                if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
                     sharedPreferences.edit().remove((String) entry.getValue()).apply();
                 } else {
                     messageIDs[i] = (String) entry.getValue();
