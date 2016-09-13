@@ -154,6 +154,8 @@ class MobileMessageHandler {
 
         if (!message.isVibrate()) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+        } else if (message.hasVibrateSetting() && (notificationDefaults & Notification.DEFAULT_VIBRATE) == 0) {
+            notificationDefaults |= Notification.DEFAULT_VIBRATE;
         }
 
         notificationBuilder.setDefaults(notificationDefaults);
@@ -173,14 +175,23 @@ class MobileMessageHandler {
     }
 
     private void setNotificationSound(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
+        Uri soundUri = null;
         String sound = message.getSound();
         if (!message.isDefaultSound() && StringUtils.isNotBlank(sound)) {
-            Uri uri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
-            if (uri != null) {
-                notificationBuilder.setSound(uri);
-            } else {
-                Log.w(MobileMessaging.TAG, "Cannot find notification sound: " + sound);
+            soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
+            if (soundUri == null) {
+                Log.w(MobileMessaging.TAG, "Cannot load notification sound from message: " + sound);
             }
+        }
+
+        if (soundUri == null) {
+            NotificationSettings notificationSettings = notificationSettings(context, message);
+            String stringUri = notificationSettings != null ? notificationSettings.getDefaultNotificationSound() : null;
+            soundUri = stringUri != null ? Uri.parse(stringUri) : null;
+        }
+
+        if (soundUri != null) {
+            notificationBuilder.setSound(soundUri);
         }
     }
 

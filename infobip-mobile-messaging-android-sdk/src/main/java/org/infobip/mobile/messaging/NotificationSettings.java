@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -118,6 +119,14 @@ public class NotificationSettings {
         return !isForegroundNotificationEnabled();
     }
 
+    private void setDefaultNotificationSound(String sound) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND, sound);
+    }
+
+    public String getDefaultNotificationSound() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -145,6 +154,7 @@ public class NotificationSettings {
         private int notificationDefaults = (int) MobileMessagingProperty.NOTIFICATION_DEFAULTS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
+        private String defaultNotificationSound = (String) MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND.getDefaultValue();
 
         public Builder(Context context) {
             if (null == context) {
@@ -330,6 +340,20 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to change default sound for a notification.
+         * <p/>
+         * By default the library will use whatever is set as default sound in the system
+         *
+         * @param uri Uri that identifies desired notification sound
+         * @return {@link Builder}
+         */
+        public Builder withDefaultNotificationSound(Uri uri) {
+            validateWithParam(uri);
+            this.defaultNotificationSound = uri.toString();
+            return this;
+        }
+
+        /**
          * Builds the <i>NotificationSettings</i> configuration.
          *
          * @return {@link NotificationSettings}
@@ -345,6 +369,7 @@ public class NotificationSettings {
             notificationSettings.setNotificationDefaults(notificationDefaults);
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
+            notificationSettings.setDefaultNotificationSound(defaultNotificationSound);
 
             return notificationSettings;
         }
