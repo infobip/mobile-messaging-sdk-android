@@ -32,7 +32,7 @@ public class MessagesSynchronizer {
             protected void onPostExecute(SyncMessagesResult syncMessagesResult) {
                 if (syncMessagesResult.hasError()) {
                     Log.e(TAG, "MobileMessaging API returned error!");
-                    stats.reportError(MobileMessagingError.MESSAGES_SYNC_ERROR);
+                    stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
                     return;
                 }
 
@@ -42,7 +42,7 @@ public class MessagesSynchronizer {
             @Override
             protected void onCancelled() {
                 Log.e(TAG, "Error syncing messages!");
-                stats.reportError(MobileMessagingError.MESSAGES_SYNC_ERROR);
+                stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
             }
         }.executeOnExecutor(executor);
     }

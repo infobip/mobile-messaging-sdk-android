@@ -19,6 +19,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @author mstipanov
  * @since 03.03.2016.
  */
+@Deprecated
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class DeliveryReportTask extends AsyncTask<Object, Void, DeliveryReportResult> {
     private final Context context;

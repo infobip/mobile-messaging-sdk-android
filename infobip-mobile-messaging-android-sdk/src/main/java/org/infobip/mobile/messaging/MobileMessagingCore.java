@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.reporters.DeliveryReporter;
 import org.infobip.mobile.messaging.reporters.MessageReporter;
 import org.infobip.mobile.messaging.reporters.MessagesSynchronizer;
 import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
@@ -39,7 +38,6 @@ public class MobileMessagingCore {
     private static MobileMessagingCore instance;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final MessagesSynchronizer messagesSynchronizer = new MessagesSynchronizer();
-    private final DeliveryReporter deliveryReporter = new DeliveryReporter();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MessageReporter messageReporter = new MessageReporter();
@@ -87,9 +85,8 @@ public class MobileMessagingCore {
     public void sync() {
         registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
         messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
-//        deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
-        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor);
+        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
     }
 

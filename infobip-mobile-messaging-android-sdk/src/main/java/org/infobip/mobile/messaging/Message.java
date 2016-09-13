@@ -239,48 +239,14 @@ public class Message implements Comparable<Message> {
         this.bundle.putString(BundleField.BODY.getKey(), body);
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
-        this.bundle.putString(BundleField.DESTINATION.getKey(), destination);
-    }
-
-    public void setCustomPayload(JSONObject customPayload) {
-        this.customPayload = customPayload;
-        if (customPayload != null) {
-            this.bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
-        }
-    }
-
-    public void setSeenTimestamp(long seenTimestamp) {
-        this.seenTimestamp = seenTimestamp;
-        this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), seenTimestamp);
-    }
-
     public void setTitle(String title) {
         this.title = title;
         this.bundle.putString(BundleField.TITLE.getKey(), title);
     }
 
-    public void setInternalData(JSONObject internalData) {
-        this.internalData = internalData;
-        if (internalData != null) {
-            this.bundle.putString(BundleField.INTERNAL_DATA.getKey(), internalData.toString());
-        }
-    }
-
     public void setMessageId(String messageId) {
         this.messageId = messageId;
         this.bundle.putString(BundleField.MESSAGE_ID.getKey(), messageId);
-    }
-
-    public void setSound(String sound) {
-        this.sound = sound;
-        this.bundle.putString(BundleField.SOUND.getKey(), sound);
-    }
-
-    public void setSilent(String silent) {
-        this.silent = "true".equalsIgnoreCase(silent);
-        this.bundle.putString(BundleField.SILENT.getKey(), silent);
     }
 
     protected enum BundleField {

@@ -21,6 +21,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @author mstipanov
  * @since 07.04.2016.
  */
+@Deprecated
 public class DeliveryReporter {
     public void report(final Context context, String[] unreportedMessageIds, final MobileMessagingStats stats, Executor executor) {
         if (unreportedMessageIds.length == 0) {

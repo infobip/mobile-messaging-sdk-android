@@ -20,6 +20,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * @see Generator.Builder
  * @since 17.03.2016.
  */
+@Deprecated
 @Version("2")
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}")
