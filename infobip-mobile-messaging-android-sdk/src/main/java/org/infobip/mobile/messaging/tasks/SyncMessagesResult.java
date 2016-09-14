@@ -3,8 +3,8 @@ package org.infobip.mobile.messaging.tasks;
 import android.os.Bundle;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.messages.MessageResponse;
-import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.messages.v3.MessageResponse;
+import org.infobip.mobile.messaging.api.messages.v3.SyncMessagesResponse;
 
 import java.util.ArrayList;
 import java.util.List;
