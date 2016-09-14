@@ -197,12 +197,11 @@ public class GeofenceAreas implements Parcelable {
         public boolean isEligibleForMonitoring() {
             Date now = new Date();
             return getId() != null &&
-                    getExpiryDate() != null &&
                     getLatitude() != null &&
                     getLongitude() != null &&
                     getRadius() != null &&
-                    getExpiryDate() != null && getExpiryDate().after(now) &&
-                    (getStartDate() == null || getStartDate().before(now));
+                    (getStartDate() == null || getStartDate().before(now)) &&
+                    !isExpired();
         }
 
         public boolean isExpired() {
