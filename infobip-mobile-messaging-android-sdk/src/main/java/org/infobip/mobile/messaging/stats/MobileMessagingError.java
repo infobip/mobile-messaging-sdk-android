@@ -6,6 +6,7 @@ package org.infobip.mobile.messaging.stats;
  */
 public enum MobileMessagingError {
     REGISTRATION_SYNC_ERROR,
+    SYNC_MESSAGES_ERROR,
     DELIVERY_REPORTING_ERROR,
     SEEN_REPORTING_ERROR,
     USER_DATA_SYNC_ERROR,

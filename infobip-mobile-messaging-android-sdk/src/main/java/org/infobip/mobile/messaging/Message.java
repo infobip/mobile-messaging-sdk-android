@@ -261,6 +261,13 @@ public class Message implements Comparable<Message> {
         }
     }
 
+    public void setInternalData(JSONObject internalData) {
+        this.internalData = internalData;
+        if (internalData != null) {
+            this.bundle.putString(BundleField.INTERNAL_DATA.getKey(), internalData.toString());
+        }
+    }
+
     public void setSeenTimestamp(long seenTimestamp) {
         this.seenTimestamp = seenTimestamp;
         this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), seenTimestamp);
@@ -269,13 +276,6 @@ public class Message implements Comparable<Message> {
     public void setTitle(String title) {
         this.title = title;
         this.bundle.putString(BundleField.TITLE.getKey(), title);
-    }
-
-    public void setInternalData(JSONObject internalData) {
-        this.internalData = internalData;
-        if (internalData != null) {
-            this.bundle.putString(BundleField.INTERNAL_DATA.getKey(), internalData.toString());
-        }
     }
 
     protected enum BundleField {

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.messages;
+package org.infobip.mobile.messaging.api.messages.v3;
 
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.ApiKey;
@@ -9,26 +9,23 @@ import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
 /**
- * Seen status reporting API.
- * <p/>
+ * Synchronizing messages with API.
+ * <p>
  * Usage:
  * <pre>{@code
  * MobileApiMessages mobileApiSeenStatusReport = new Generator.Builder().build().create(MobileApiMessages.class);
  * }</pre>
  *
- * @author sslavin
+ * @author pandric on 09/09/16.
  * @see Generator
  * @see Generator.Builder
- * @since 25.03.2016.
  */
-@Version("1")
+@Version("3")
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}/messages")
-public interface MobileApiMessages {
-    @HttpRequest(method = HttpMethod.POST, value = "seen")
-    void reportSeen(@Body() SeenMessages seenReport);
-
-    @HttpRequest(method = HttpMethod.POST, value = "mo")
+public interface MobileApiSyncMessages {
+    @HttpRequest(method = HttpMethod.POST)
     @Query(name = "platformType", value = "${platform.type:GCM}")
-    MoMessagesResponse sendMO(@Body() MoMessagesBody moMessagesBody);
+    SyncMessagesResponse syncMessages(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
+                                      @Body() SyncMessagesBody pushMessagesBody);
 }
