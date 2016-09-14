@@ -6,7 +6,6 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
-import org.infobip.mobile.messaging.api.messages.v3.MobileApiSyncMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.util.DeviceInformation;
@@ -32,7 +31,6 @@ public enum MobileApiResourceProvider {
     private MobileApiMessages mobileApiMessages;
 
     private MobileApiData mobileApiData;
-    private MobileApiSyncMessages mobileApiSyncMessages;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -52,16 +50,6 @@ public enum MobileApiResourceProvider {
         mobileApiMessages = getGenerator(context).create(MobileApiMessages.class);
 
         return mobileApiMessages;
-    }
-
-    public MobileApiSyncMessages getMobileApiSyncMessages(Context context) {
-        if (mobileApiSyncMessages != null) {
-            return mobileApiSyncMessages;
-        }
-
-        mobileApiSyncMessages = getGenerator(context).create(MobileApiSyncMessages.class);
-
-        return mobileApiSyncMessages;
     }
 
     public MobileApiData getMobileApiData(Context context) {

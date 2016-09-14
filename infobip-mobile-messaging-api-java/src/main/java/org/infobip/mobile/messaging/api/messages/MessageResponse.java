@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.messages.v3;
+package org.infobip.mobile.messaging.api.messages;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

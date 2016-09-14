@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.api.messages.v3;
+package org.infobip.mobile.messaging.api.messages;
 
 import java.util.List;
 
