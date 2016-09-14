@@ -33,7 +33,8 @@ public class UserData {
         this.customUserData = data.customUserData;
     }
 
-    public UserData(Map<String, Object> predefinedUserData, Map<String, Object> customUserData) {
+    public UserData(String externalUserId, Map<String, Object> predefinedUserData, Map<String, Object> customUserData) {
+        this.externalUserId = externalUserId;
         this.predefinedUserData = predefinedUserData;
         this.customUserData = customUserData;
     }

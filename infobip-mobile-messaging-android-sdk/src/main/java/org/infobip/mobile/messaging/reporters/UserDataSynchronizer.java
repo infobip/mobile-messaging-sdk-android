@@ -26,7 +26,8 @@ public class UserDataSynchronizer {
 
     public void sync(final Context context, final MobileMessagingStats stats, Executor executor) {
 
-        if (MobileMessagingCore.getInstance(context).getUnreportedUserData() == null) {
+        final UserData userDataToReport = MobileMessagingCore.getInstance(context).getUnreportedUserData();
+        if (userDataToReport == null) {
             return;
         }
 
@@ -48,7 +49,7 @@ public class UserDataSynchronizer {
                     return;
                 }
 
-                UserData userData = new UserData(syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
+                UserData userData = new UserData(userDataToReport.getExternalUserId(), syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
                 MobileMessagingCore.getInstance(context).setUserDataReported(userData);
 
                 Intent userDataReported = new Intent(Event.USER_DATA_REPORTED.getKey());

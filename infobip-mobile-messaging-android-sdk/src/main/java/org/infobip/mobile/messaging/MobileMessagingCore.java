@@ -326,6 +326,12 @@ public class MobileMessagingCore {
             }
 
             userDataToReport = UserData.merge(existingData, userData);
+        } else {
+            UserData existingUserData = getUserData();
+            String externalUserId = existingUserData != null ? existingUserData.getExternalUserId() : null;
+            if (externalUserId != null) {
+                userDataToReport.setExternalUserId(externalUserId);
+            }
         }
 
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
