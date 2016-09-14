@@ -25,7 +25,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class RegistrationSynchronizer {
 
-    public void syncronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
+    public void synchronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
         if (null != deviceApplicationInstanceId && registrationIdSaved) {
             return;
         }

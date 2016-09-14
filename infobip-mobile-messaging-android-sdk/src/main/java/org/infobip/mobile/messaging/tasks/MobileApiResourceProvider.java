@@ -5,8 +5,8 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.data.MobileApiData;
-import org.infobip.mobile.messaging.api.deliveryreports.MobileApiDeliveryReport;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.messages.v3.MobileApiSyncMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.util.DeviceInformation;
@@ -29,10 +29,10 @@ public enum MobileApiResourceProvider {
 
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
-    private MobileApiDeliveryReport mobileApiDeliveryReport;
     private MobileApiMessages mobileApiMessages;
 
     private MobileApiData mobileApiData;
+    private MobileApiSyncMessages mobileApiSyncMessages;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -44,16 +44,6 @@ public enum MobileApiResourceProvider {
         return mobileApiRegistration;
     }
 
-    public MobileApiDeliveryReport getMobileApiDeliveryReport(Context context) {
-        if (null != mobileApiDeliveryReport) {
-            return mobileApiDeliveryReport;
-        }
-
-        mobileApiDeliveryReport = getGenerator(context).create(MobileApiDeliveryReport.class);
-
-        return mobileApiDeliveryReport;
-    }
-
     public MobileApiMessages getMobileApiMessages(Context context) {
         if (null != mobileApiMessages) {
             return mobileApiMessages;
@@ -62,6 +52,16 @@ public enum MobileApiResourceProvider {
         mobileApiMessages = getGenerator(context).create(MobileApiMessages.class);
 
         return mobileApiMessages;
+    }
+
+    public MobileApiSyncMessages getMobileApiSyncMessages(Context context) {
+        if (mobileApiSyncMessages != null) {
+            return mobileApiSyncMessages;
+        }
+
+        mobileApiSyncMessages = getGenerator(context).create(MobileApiSyncMessages.class);
+
+        return mobileApiSyncMessages;
     }
 
     public MobileApiData getMobileApiData(Context context) {
@@ -85,7 +85,7 @@ public enum MobileApiResourceProvider {
             userAgentAdditions.add(SoftwareInformation.getAppName(context));
             userAgentAdditions.add(SoftwareInformation.getAppVersion(context));
         } else {
-            String emptySystemInfo[] = {"","","","","","",""};
+            String emptySystemInfo[] = {"", "", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptySystemInfo));
         }
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO)) {
@@ -124,7 +124,6 @@ public enum MobileApiResourceProvider {
         generator = null;
         mobileApiRegistration = null;
         mobileApiMessages = null;
-        mobileApiDeliveryReport = null;
         mobileApiData = null;
     }
 }

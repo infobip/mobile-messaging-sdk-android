@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.json.JSONArray;
 import org.json.JSONException;

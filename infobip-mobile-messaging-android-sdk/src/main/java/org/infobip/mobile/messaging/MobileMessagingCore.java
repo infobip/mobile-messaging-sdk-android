@@ -8,8 +8,8 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.reporters.DeliveryReporter;
 import org.infobip.mobile.messaging.reporters.MessageReporter;
+import org.infobip.mobile.messaging.reporters.MessagesSynchronizer;
 import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
 import org.infobip.mobile.messaging.reporters.SystemDataReporter;
@@ -24,18 +24,26 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author sslavin
  * @since 28.04.2016.
  */
 public class MobileMessagingCore {
+
+    private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
+    private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    public static final String REGEX_COMMA_WITH_SPACE = ", ";
+
     private static MobileMessagingCore instance;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
-    private final DeliveryReporter deliveryReporter = new DeliveryReporter();
+    private final MessagesSynchronizer messagesSynchronizer = new MessagesSynchronizer();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MessageReporter messageReporter = new MessageReporter();
@@ -81,10 +89,10 @@ public class MobileMessagingCore {
     }
 
     public void sync() {
-        registrationSynchronizer.syncronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
-        deliveryReporter.report(context, getUnreportedMessageIds(), getStats(), taskExecutor);
-        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
+        registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
+        messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor);
+        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
     }
 
@@ -105,8 +113,47 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
 
-    protected void addUnreportedMessageIds(final String... messageIDs) {
+    protected void addUnreportedMessageIds(String... messageIDs) {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
+    }
+
+    protected void addSyncMessagesIds(String... messageIDs) {
+        String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
+        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
+    }
+
+    public String[] getSyncMessagesIds() {
+        String[] messageIds = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
+        ArrayList<String> messageIdsArrayList = new ArrayList<>(Arrays.asList(messageIds));
+        String[] messageIdsToSync = new String[messageIdsArrayList.size() <= MESSAGE_ID_PARAMETER_LIMIT ? messageIdsArrayList.size() : MESSAGE_ID_PARAMETER_LIMIT];
+
+        boolean shouldUpdateMessageIds = false;
+
+        for (int i = 0; i < messageIdsArrayList.size(); i++) {
+            String syncMessage = messageIdsArrayList.get(i);
+            String[] messageIdWithTimestamp = syncMessage.split(REGEX_COMMA_WITH_SPACE);
+
+            String strTimeMessageReceived = messageIdWithTimestamp[1];
+
+            long timeMessageReceived = Long.valueOf(strTimeMessageReceived);
+            long timeInterval = System.currentTimeMillis() - timeMessageReceived;
+
+            if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
+                messageIdsArrayList.remove(i);
+                shouldUpdateMessageIds = true;
+            } else {
+                messageIdsToSync[i] = messageIdWithTimestamp[0];
+            }
+        }
+
+        if (shouldUpdateMessageIds) {
+            String[] messageIdsToUpdate = new String[messageIdsArrayList.size()];
+            messageIdsToUpdate = messageIdsArrayList.toArray(messageIdsToUpdate);
+            PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
+            PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, messageIdsToUpdate);
+        }
+
+        return messageIdsToSync;
     }
 
     public void removeUnreportedMessageIds(final String... messageIDs) {
@@ -118,22 +165,22 @@ public class MobileMessagingCore {
     }
 
     protected void addUnreportedSeenMessageIds(final String... messageIDs) {
-        String[] seenMessages = concatSeenTimestampToMessageIDs(messageIDs);
+        String[] seenMessages = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, seenMessages);
     }
 
-    private String[] concatSeenTimestampToMessageIDs(String[] messageIDs) {
-        String[] seenMessages = new String[messageIDs.length];
+    private String[] concatTimestampToMessageId(String[] messageIDs) {
+        String[] syncMessages = new String[messageIDs.length];
 
         if (messageIDs.length > 0) {
             for (int i = 0; i < messageIDs.length; i++) {
                 String messageId = messageIDs[i];
                 String seenTimestamp = String.valueOf(System.currentTimeMillis());
-                seenMessages[i] = String.format(Locale.getDefault(), "%s, %s", messageId, seenTimestamp);
+                syncMessages[i] = String.format(Locale.getDefault(), "%s%s%s", messageId, REGEX_COMMA_WITH_SPACE, seenTimestamp);
             }
         }
 
-        return seenMessages;
+        return syncMessages;
     }
 
     public void removeUnreportedSeenMessageIds(final String... messageIDs) {
@@ -142,6 +189,7 @@ public class MobileMessagingCore {
 
     public void setMessagesDelivered(String... messageIds) {
         addUnreportedMessageIds(messageIds);
+        addSyncMessagesIds(messageIds);
         sync();
     }
 
