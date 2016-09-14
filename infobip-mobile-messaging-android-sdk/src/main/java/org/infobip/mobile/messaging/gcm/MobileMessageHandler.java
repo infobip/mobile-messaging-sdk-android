@@ -27,13 +27,13 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @author mstipanov
  * @since 14.04.2016.
  */
-class MobileMessageHandler {
+public class MobileMessageHandler {
 
     public static final int DEFAULT_NOTIFICATION_ID = 0;
 
     private SharedPreferencesMessageStore messageStore;
 
-    void handleMessage(Context context, Intent intent) {
+    public void handleMessage(Context context, Intent intent) {
         String from = intent.getStringExtra("from");
         Bundle data = intent.getExtras();
 

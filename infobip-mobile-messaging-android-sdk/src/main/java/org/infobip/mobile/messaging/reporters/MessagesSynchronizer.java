@@ -2,15 +2,12 @@ package org.infobip.mobile.messaging.reporters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tasks.SyncMessagesResult;
 import org.infobip.mobile.messaging.tasks.SyncMessagesTask;
 
@@ -39,7 +36,17 @@ public class MessagesSynchronizer {
                     return;
                 }
 
-                saveMessagesAndSendReceivedEvent(syncMessagesResult, context);
+                MobileMessageHandler messageHandler = new MobileMessageHandler();
+                List<Message> messages = syncMessagesResult.getMessages();
+                if (messages == null) {
+                    return;
+                }
+
+                for (Message message : messages) {
+                    Intent intent = new Intent();
+                    intent.putExtras(message.getBundle());
+                    messageHandler.handleMessage(context, intent);
+                }
             }
 
             @Override
@@ -48,24 +55,5 @@ public class MessagesSynchronizer {
                 stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
             }
         }.executeOnExecutor(executor);
-    }
-
-    private void saveMessagesAndSendReceivedEvent(SyncMessagesResult syncMessagesResult, Context context) {
-        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-
-        MessageStore messageStore = mobileMessagingCore.getMessageStore();
-        List<Message> messages = syncMessagesResult.getMessages();
-        if (messages == null || messages.isEmpty() || messageStore == null) {
-            return;
-        }
-
-        for (Message message : messages) {
-            messageStore.save(context, message);
-
-            Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
-            messageReceived.putExtras(message.getBundle());
-            context.sendBroadcast(messageReceived);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
-        }
     }
 }

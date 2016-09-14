@@ -36,22 +36,29 @@ public class SyncMessagesResult extends UnsuccessfulResult {
                 continue;
             }
 
-            Bundle bundle = new Bundle();
-            bundle.putString("gcm.notification.messageId", messageResponse.getMessageId());
-            bundle.putString("gcm.notification.title", messageResponse.getTitle());
-            bundle.putString("gcm.notification.body", messageResponse.getBody());
-            bundle.putString("gcm.notification.sound", messageResponse.getSound());
-            bundle.putString("gcm.notification.vibrate", messageResponse.getVibrate());
-            bundle.putString("gcm.notification.silent", messageResponse.getSilent());
-            bundle.putString("customPayload", messageResponse.getCustomPayload());
-            bundle.putString("internalData", messageResponse.getInternalData());
-
-            Message message = Message.createFrom(bundle);
+            Message message = SyncMessageDelivery.toMessage(messageResponse);
             this.messages.add(message);
         }
     }
 
     public List<Message> getMessages() {
         return messages;
+    }
+
+    static class SyncMessageDelivery extends Message {
+
+        static Message toMessage(MessageResponse messageResponse) {
+            Bundle bundle = new Bundle();
+            bundle.putString(BundleField.MESSAGE_ID.getKey(), messageResponse.getMessageId());
+            bundle.putString(BundleField.TITLE.getKey(), messageResponse.getTitle());
+            bundle.putString(BundleField.BODY.getKey(), messageResponse.getBody());
+            bundle.putString(BundleField.SOUND.getKey(), messageResponse.getSound());
+            bundle.putString(BundleField.VIBRATE.getKey(), messageResponse.getVibrate());
+            bundle.putString(BundleField.SILENT.getKey(), messageResponse.getSilent());
+            bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), messageResponse.getCustomPayload());
+            bundle.putString(BundleField.INTERNAL_DATA.getKey(), messageResponse.getInternalData());
+
+            return Message.createFrom(bundle);
+        }
     }
 }
