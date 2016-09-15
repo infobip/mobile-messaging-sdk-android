@@ -11,7 +11,5 @@ public class ApplicationPreferences {
     public static final String GCM_TOKEN = "org.infobip.mobile.messaging.demo.GCM_TOKEN";
     public static final String INFOBIP_REGISTRATION_ID = "org.infobip.mobile.messaging.demo.INFOBIP_REGISTRATION_ID";
     public static final String LAST_API_COMMUNICATION_ERROR = "org.infobip.mobile.messaging.demo.LAST_API_COMMUNICATION_ERROR";
-    public static final String NOTIFICATION_SOUND = "org.infobip.mobile.messaging.demo.NOTIFICATION_SOUND";
-    public static final String NOTIFICATION_VIBRATE = "org.infobip.mobile.messaging.demo.NOTIFICATION_VIBRATE";
     public static final String NOTIFICATIONS_ENABLED = "org.infobip.mobile.messaging.demo.NOTIFICATION_ENABLED";
 }

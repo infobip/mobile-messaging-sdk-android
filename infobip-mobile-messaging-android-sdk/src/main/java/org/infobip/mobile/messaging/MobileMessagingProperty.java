@@ -13,7 +13,6 @@ public enum MobileMessagingProperty {
     GCM_REGISTRATION_ID_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
     GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID", null, true),
-    EXTERNAL_USER_ID("org.infobip.mobile.messaging.infobip.EXTERNAL_USER_ID"),
     GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
     APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE", null, true),
     LAST_HTTP_EXCEPTION("org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION"),
@@ -41,10 +40,8 @@ public enum MobileMessagingProperty {
     CALLBACK_ACTIVITY("org.infobip.mobile.messaging.notification.CALLBACK_ACTIVITY"),
     DEFAULT_ICON("org.infobip.mobile.messaging.notification.DEFAULT_ICON", 0),
     DEFAULT_TITLE("org.infobip.mobile.messaging.notification.DEFAULT_TITLE", "Message"),
-    DEFAULT_NOTIFICATION_SOUND("org.infobip.mobile.messaging.notification.DEFAULT_NOTIFICATION_SOUND"),
     INTENT_FLAGS("org.infobip.mobile.messaging.notification.INTENT_FLAGS", Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
     PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", PendingIntent.FLAG_CANCEL_CURRENT),
-    NOTIFICATION_DEFAULTS("org.infobip.mobile.messaging.notification.NOTIFICATION_DEFAULTS", Notification.DEFAULT_ALL),
     NOTIFICATION_AUTO_CANCEL("org.infobip.mobile.messaging.notification.NOTIFICATION_AUTO_CANCEL", true),
     FOREGROUND_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.FOREGROUND_NOTIFICATION_ENABLED", true),
 

@@ -139,31 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    int getNotificationDefaultsFromPreferences() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean vibrate = sharedPreferences.getBoolean(ApplicationPreferences.NOTIFICATION_VIBRATE, true);
-        boolean customSound = sharedPreferences.getString(ApplicationPreferences.NOTIFICATION_SOUND, null) != null;
-
-        int notificationDefaults = Notification.DEFAULT_ALL;
-        if (!vibrate) {
-            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
-        }
-        if (customSound) {
-            notificationDefaults &= ~Notification.DEFAULT_SOUND;
-        }
-        return notificationDefaults;
-    }
-
-    Uri getNotificationSoundFromPreferences() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String sound = sharedPreferences.getString(ApplicationPreferences.NOTIFICATION_SOUND, null);
-        if (sound == null) {
-            return RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        }
-
-        return Uri.parse(sound);
-    }
-
     boolean getNotificationEnabledFromPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         return sharedPreferences.getBoolean(ApplicationPreferences.NOTIFICATIONS_ENABLED, true);
@@ -177,14 +152,10 @@ public class MainActivity extends AppCompatActivity {
                     .withoutDisplayNotification();
         }
 
-        int notificationDefaults = getNotificationDefaultsFromPreferences();
-        Uri sound = getNotificationSoundFromPreferences();
         return new MobileMessaging.Builder(this)
                 .withMessageStore(SharedPreferencesMessageStore.class)
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withDefaultIcon(R.drawable.ic_notification)
-                        .withDefaultNotificationSound(sound)
-                        .withNotificationDefaults(notificationDefaults)
                         .build());
     }
 

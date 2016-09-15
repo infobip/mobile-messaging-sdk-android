@@ -23,7 +23,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @see Builder#withCallbackActivity(Class)
  * @see Builder#withDefaultIcon(int)
  * @see Builder#withIntentFlags(int)
- * @see Builder#withNotificationDefaults(int)
  * @see Builder#withPendingIntentFlags(int)
  * @see Builder#withNotificationAutoCancel()
  * @see Builder#withoutNotificationAutoCancel()
@@ -91,14 +90,6 @@ public class NotificationSettings {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.PENDING_INTENT_FLAGS, pendingIntentFlags);
     }
 
-    public int getNotificationDefaults() {
-        return PreferenceHelper.findInt(context, MobileMessagingProperty.NOTIFICATION_DEFAULTS);
-    }
-
-    private void setNotificationDefaults(int notificationDefaults) {
-        PreferenceHelper.saveInt(context, MobileMessagingProperty.NOTIFICATION_DEFAULTS, notificationDefaults);
-    }
-
     public boolean isNotificationAutoCancel() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL);
     }
@@ -119,14 +110,6 @@ public class NotificationSettings {
         return !isForegroundNotificationEnabled();
     }
 
-    private void setDefaultNotificationSound(String sound) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND, sound);
-    }
-
-    public String getDefaultNotificationSound() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND);
-    }
-
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -138,7 +121,6 @@ public class NotificationSettings {
      * @see Builder#withCallbackActivity(Class)
      * @see Builder#withDefaultIcon(int)
      * @see Builder#withIntentFlags(int)
-     * @see Builder#withNotificationDefaults(int)
      * @see Builder#withPendingIntentFlags(int)
      * @see Builder#withNotificationAutoCancel()
      * @see Builder#withoutNotificationAutoCancel()
@@ -151,10 +133,8 @@ public class NotificationSettings {
         private Class<?> callbackActivity = (Class<?>) MobileMessagingProperty.CALLBACK_ACTIVITY.getDefaultValue();
         private int intentFlags = (int) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue();
         private int pendingIntentFlags = (int) MobileMessagingProperty.PENDING_INTENT_FLAGS.getDefaultValue();
-        private int notificationDefaults = (int) MobileMessagingProperty.NOTIFICATION_DEFAULTS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
-        private String defaultNotificationSound = (String) MobileMessagingProperty.DEFAULT_NOTIFICATION_SOUND.getDefaultValue();
 
         public Builder(Context context) {
             if (null == context) {
@@ -284,22 +264,6 @@ public class NotificationSettings {
         }
 
         /**
-         * When you want to set notification defaults. It is delegated to {@link NotificationCompat.Builder#setDefaults(int)}
-         * <p/>
-         * By default it will use {@link Notification#DEFAULT_ALL}
-         *
-         * @param notificationDefaults to be delegated to {@link NotificationCompat.Builder#setDefaults(int)}.
-         * @return {@link Builder}
-         * @see NotificationCompat.Builder
-         * @see NotificationCompat.Builder#setDefaults(int)
-         * @see Notification#DEFAULT_ALL
-         */
-        public Builder withNotificationDefaults(int notificationDefaults) {
-            this.notificationDefaults = notificationDefaults;
-            return this;
-        }
-
-        /**
          * When you want to set notification auto-cancel to <i>true</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
          * <p/>
          * By default it will be set to <i>true</i>
@@ -340,20 +304,6 @@ public class NotificationSettings {
         }
 
         /**
-         * When you want to change default sound for a notification.
-         * <p/>
-         * By default the library will use whatever is set as default sound in the system
-         *
-         * @param uri Uri that identifies desired notification sound
-         * @return {@link Builder}
-         */
-        public Builder withDefaultNotificationSound(Uri uri) {
-            validateWithParam(uri);
-            this.defaultNotificationSound = uri.toString();
-            return this;
-        }
-
-        /**
          * Builds the <i>NotificationSettings</i> configuration.
          *
          * @return {@link NotificationSettings}
@@ -366,10 +316,8 @@ public class NotificationSettings {
             notificationSettings.setCallbackActivity(callbackActivity);
             notificationSettings.setIntentFlags(intentFlags);
             notificationSettings.setPendingIntentFlags(pendingIntentFlags);
-            notificationSettings.setNotificationDefaults(notificationDefaults);
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
-            notificationSettings.setDefaultNotificationSound(defaultNotificationSound);
 
             return notificationSettings;
         }

@@ -147,7 +147,6 @@ class GeoAreasHandler {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder.setColor(Color.RED)
-                .setDefaults(notificationSettings.getNotificationDefaults())
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setContentTitle(String.format(Locale.getDefault(), "%s", area.getTitle()))

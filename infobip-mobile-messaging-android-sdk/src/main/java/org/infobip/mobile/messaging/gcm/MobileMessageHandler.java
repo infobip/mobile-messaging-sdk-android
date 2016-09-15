@@ -135,30 +135,10 @@ public class MobileMessageHandler {
                 .setContentIntent(pendingIntent)
                 .setWhen(message.getReceivedTimestamp());
 
-        setNotificationDefaults(context, notificationBuilder, message);
-        setNotificationSound(context, notificationBuilder, message);
+        setNotificationSoundAndVibrate(context, notificationBuilder, message);
         setNotificationIcon(context, notificationBuilder, message);
 
         return notificationBuilder;
-    }
-
-    private void setNotificationDefaults(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
-        NotificationSettings notificationSettings = notificationSettings(context, message);
-        if (notificationSettings == null) return;
-
-        int notificationDefaults = notificationSettings.getNotificationDefaults();
-
-        if (!message.isDefaultSound()) {
-            notificationDefaults &= ~Notification.DEFAULT_SOUND;
-        }
-
-        if (!message.isVibrate()) {
-            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
-        } else if (message.hasVibrateSetting() && (notificationDefaults & Notification.DEFAULT_VIBRATE) == 0) {
-            notificationDefaults |= Notification.DEFAULT_VIBRATE;
-        }
-
-        notificationBuilder.setDefaults(notificationDefaults);
     }
 
     private void setNotificationIcon(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
@@ -174,25 +154,28 @@ public class MobileMessageHandler {
         notificationBuilder.setSmallIcon(icon);
     }
 
-    private void setNotificationSound(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
-        Uri soundUri = null;
+    private void setNotificationSoundAndVibrate(Context context, NotificationCompat.Builder notificationBuilder, Message message) {
+        int notificationDefaults = Notification.DEFAULT_ALL;
+        if (!message.isVibrate()) {
+            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+        }
+        if (!message.isDefaultSound()) {
+            notificationDefaults &= ~Notification.DEFAULT_SOUND;
+        }
+        notificationBuilder.setDefaults(notificationDefaults);
+
         String sound = message.getSound();
-        if (!message.isDefaultSound() && StringUtils.isNotBlank(sound)) {
-            soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
-            if (soundUri == null) {
-                Log.w(MobileMessaging.TAG, "Cannot load notification sound from message: " + sound);
-            }
+        if (message.isDefaultSound() || StringUtils.isBlank(sound)) {
+            return;
         }
 
+        Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
         if (soundUri == null) {
-            NotificationSettings notificationSettings = notificationSettings(context, message);
-            String stringUri = notificationSettings != null ? notificationSettings.getDefaultNotificationSound() : null;
-            soundUri = stringUri != null ? Uri.parse(stringUri) : null;
+            Log.e(MobileMessaging.TAG, "Cannot create uri for sound:" + sound + " messageId:" + message.getMessageId());
+            return;
         }
 
-        if (soundUri != null) {
-            notificationBuilder.setSound(soundUri);
-        }
+        notificationBuilder.setSound(soundUri);
     }
 
     private NotificationSettings notificationSettings(Context context, Message message) {

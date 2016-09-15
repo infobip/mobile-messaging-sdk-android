@@ -179,10 +179,6 @@ public class Message implements Comparable<Message> {
         return vibrate;
     }
 
-    public boolean hasVibrateSetting() {
-        return bundle.containsKey(BundleField.VIBRATE.getKey());
-    }
-
     public List<GeofenceAreas.Area> getGeofenceAreasList() {
         if (getInternalData() == null) {
             return new ArrayList<>(0);
