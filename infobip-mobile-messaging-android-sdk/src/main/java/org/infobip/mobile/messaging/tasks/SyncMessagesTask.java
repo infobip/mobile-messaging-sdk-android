@@ -6,8 +6,8 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.messages.v3.SyncMessagesBody;
-import org.infobip.mobile.messaging.api.messages.v3.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 
 /**
  * @author pandric
@@ -30,7 +30,7 @@ public class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult
             String[] unreportedMessageIds = mobileMessagingCore.getUnreportedMessageIds();
 
             SyncMessagesBody syncMessagesBody = new SyncMessagesBody(messageIds, unreportedMessageIds);
-            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiSyncMessages(context).syncMessages(deviceApplicationInstanceId, syncMessagesBody);
+            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(deviceApplicationInstanceId, syncMessagesBody);
             mobileMessagingCore.removeUnreportedMessageIds(unreportedMessageIds);
             return new SyncMessagesResult(syncMessagesResponse);
 
