@@ -12,6 +12,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         GeoAreasHandler geoAreasHandler = new GeoAreasHandler();
-        geoAreasHandler.handleNotification(this, intent);
+        geoAreasHandler.handleTransition(this, intent);
     }
 }

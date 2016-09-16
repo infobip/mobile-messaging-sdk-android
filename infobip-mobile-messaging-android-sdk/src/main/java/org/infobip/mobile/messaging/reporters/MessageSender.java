@@ -30,7 +30,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  * @author sslavin
  * @since 21/07/16.
  */
-public class MessageReporter {
+public class MessageSender {
 
     static class MessageDelivery extends Message {
 

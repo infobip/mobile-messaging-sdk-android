@@ -8,7 +8,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.reporters.MessageReporter;
+import org.infobip.mobile.messaging.reporters.MessageSender;
 import org.infobip.mobile.messaging.reporters.MessagesSynchronizer;
 import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
@@ -46,7 +46,7 @@ public class MobileMessagingCore {
     private final MessagesSynchronizer messagesSynchronizer = new MessagesSynchronizer();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
-    private final MessageReporter messageReporter = new MessageReporter();
+    private final MessageSender messageSender = new MessageSender();
     private final SystemDataReporter systemDataReporter = new SystemDataReporter();
     private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
@@ -412,7 +412,7 @@ public class MobileMessagingCore {
     }
 
     public void sendMessages(Message... messages) {
-        messageReporter.send(context, getStats(), taskExecutor, messages);
+        messageSender.send(context, getStats(), taskExecutor, messages);
     }
 
     public void readSystemData() {
