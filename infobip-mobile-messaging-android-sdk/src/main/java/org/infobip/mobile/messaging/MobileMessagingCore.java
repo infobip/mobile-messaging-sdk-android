@@ -113,11 +113,11 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
 
-    protected void addUnreportedMessageIds(String... messageIDs) {
+    private void addUnreportedMessageIds(String... messageIDs) {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
-    protected void addSyncMessagesIds(String... messageIDs) {
+    void addSyncMessagesIds(String... messageIDs) {
         String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
     }
@@ -164,7 +164,7 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
     }
 
-    protected void addUnreportedSeenMessageIds(final String... messageIDs) {
+    private void addUnreportedSeenMessageIds(final String... messageIDs) {
         String[] seenMessages = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, seenMessages);
     }
@@ -193,7 +193,7 @@ public class MobileMessagingCore {
         sync();
     }
 
-    public void setMessagesSeen(String... messageIds) {
+    void setMessagesSeen(String... messageIds) {
         addUnreportedSeenMessageIds(messageIds);
         sync();
     }
@@ -218,7 +218,7 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
-    protected static void setGcmSenderId(Context context, String gcmSenderId) {
+    static void setGcmSenderId(Context context, String gcmSenderId) {
         if (StringUtils.isBlank(gcmSenderId)) {
             throw new IllegalArgumentException("gcmSenderId is mandatory! Get one here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm");
         }
@@ -237,7 +237,7 @@ public class MobileMessagingCore {
         registrationSynchronizer.setRegistrationIdReported(context, registrationIdReported);
     }
 
-    protected static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
+    static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
         String value = null != messageStoreClass ? messageStoreClass.getName() : null;
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, value);
     }
@@ -294,7 +294,7 @@ public class MobileMessagingCore {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
-    protected static void setApiUri(Context context, String apiUri) {
+    static void setApiUri(Context context, String apiUri) {
         if (StringUtils.isBlank(apiUri)) {
             throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
         }
@@ -305,11 +305,11 @@ public class MobileMessagingCore {
         return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
     }
 
-    protected static void setReportCarrierInfo(Context context, boolean reportCarrierInfo) {
+    static void setReportCarrierInfo(Context context, boolean reportCarrierInfo) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO, reportCarrierInfo);
     }
 
-    protected static void setReportSystemInfo(Context context, boolean reportSystemInfo) {
+    static void setReportSystemInfo(Context context, boolean reportSystemInfo) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
     }
 
@@ -339,7 +339,7 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, activated);
     }
 
-    public static boolean isGeofencingActivated(Context context) {
+    static boolean isGeofencingActivated(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
@@ -354,13 +354,13 @@ public class MobileMessagingCore {
         geofencing.activate();
     }
 
-    public void deactivateGeofencing() {
+    void deactivateGeofencing() {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
         geofencing.deactivate();
     }
 
-    protected void syncUserData(UserData userData) {
+    void syncUserData(UserData userData) {
 
         UserData userDataToReport = new UserData();
         if (userData != null) {
@@ -386,7 +386,7 @@ public class MobileMessagingCore {
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
     }
 
-    protected UserData getUserData() {
+    UserData getUserData() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
             return new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
         }
@@ -411,11 +411,14 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
-    public void sendMessages(Message... messages) {
+    void sendMessages(Message... messages) {
+        if (isMessageStoreEnabled()) {
+            getMessageStore().save(context, messages);
+        }
         messageSender.send(context, getStats(), taskExecutor, messages);
     }
 
-    public void readSystemData() {
+    void readSystemData() {
 
         boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
 

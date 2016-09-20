@@ -6,8 +6,12 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.util.ArrayList;
 
 /**
  * @author pandric
@@ -24,8 +28,13 @@ public class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult
     @Override
     protected SyncMessagesResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+            Log.w(MobileMessaging.TAG, "Registration is not available yet");
+            return new SyncMessagesResult(new SyncMessagesResponse(new ArrayList<MessageResponse>()));
+        }
+
         try {
-            String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
             String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
             String[] unreportedMessageIds = mobileMessagingCore.getUnreportedMessageIds();
 
