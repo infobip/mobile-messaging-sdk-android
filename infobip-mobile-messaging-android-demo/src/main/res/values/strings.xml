@@ -74,4 +74,6 @@
     <string name="gps_dialog_message">This device is not supported by Google Play Services. Mobile Messaging Example won\'t run without Google Play Services.</string>
     <string name="gps_dialog_dismiss">Dismiss</string>
 
+    <string name="saved_to_clipboard">Text saved to clipboard</string>
+
 </resources>

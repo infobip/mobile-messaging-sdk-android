@@ -158,10 +158,11 @@ public enum Event {
     /**
      * It is triggered when monitored geofence area is entered.
      * <p>
-     * Contains the {@link GeofenceAreas} object which contains the list of all triggered geofence areas.
+     * Contains the {@link GeofenceAreas} object which contains the list of all triggered geofence areas and {@link Message}.
      * <pre>
      * {@code
      * GeofenceAreas geofenceAreas = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+     * Message message = Message.createFrom(intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE));
      * }
      * </pre>
      */

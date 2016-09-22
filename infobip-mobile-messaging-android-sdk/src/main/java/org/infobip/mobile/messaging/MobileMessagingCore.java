@@ -26,7 +26,6 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +38,6 @@ public class MobileMessagingCore {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
-    public static final String REGEX_COMMA_WITH_SPACE = ", ";
 
     private static MobileMessagingCore instance;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
@@ -131,7 +129,7 @@ public class MobileMessagingCore {
 
         for (int i = 0; i < messageIdsArrayList.size(); i++) {
             String syncMessage = messageIdsArrayList.get(i);
-            String[] messageIdWithTimestamp = syncMessage.split(REGEX_COMMA_WITH_SPACE);
+            String[] messageIdWithTimestamp = syncMessage.split(StringUtils.COMMA_WITH_SPACE);
 
             String strTimeMessageReceived = messageIdWithTimestamp[1];
 
@@ -176,7 +174,7 @@ public class MobileMessagingCore {
             for (int i = 0; i < messageIDs.length; i++) {
                 String messageId = messageIDs[i];
                 String seenTimestamp = String.valueOf(System.currentTimeMillis());
-                syncMessages[i] = String.format(Locale.getDefault(), "%s%s%s", messageId, REGEX_COMMA_WITH_SPACE, seenTimestamp);
+                syncMessages[i] = StringUtils.concat(messageId, seenTimestamp, StringUtils.COMMA_WITH_SPACE);
             }
         }
 

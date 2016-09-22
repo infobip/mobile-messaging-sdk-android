@@ -98,6 +98,9 @@ public class GeofenceAreas implements Parcelable {
         @SerializedName("startTime")
         private String startTime;
 
+        @SerializedName("event")
+        private List<GeoEvent> events;
+
         public Area(String id, String title, Double latitude, Double longitude, Integer radius, String expiryTime) {
             this.id = id;
             this.title = title;
@@ -156,7 +159,11 @@ public class GeofenceAreas implements Parcelable {
             return radius;
         }
 
-        public Geofence toGeofence() {
+        public List<GeoEvent> getEvents() {
+            return events;
+        }
+
+        Geofence toGeofence() {
             Long expirationDurationMillis = 0L;
             Date expiryDate = getExpiryDate();
             if (expiryDate != null) {
@@ -208,6 +215,38 @@ public class GeofenceAreas implements Parcelable {
             Date now = new Date();
             Date expiryDate = getExpiryDate();
             return expiryDate != null && expiryDate.before(now);
+        }
+
+        public static class GeoEvent {
+
+            public static final int UNLIMITED_RECURRING = 0;
+
+            @SerializedName("type")
+            private String type;
+
+            @SerializedName("limit")
+            private Integer limit;
+
+            @SerializedName("timeoutInMinutes")
+            private Long timeoutInMinutes;
+
+            public GeoEvent(String type, Integer limit, Long timeoutInMinutes) {
+                this.type = type;
+                this.limit = limit;
+                this.timeoutInMinutes = timeoutInMinutes;
+            }
+
+            public int getLimit() {
+                return limit;
+            }
+
+            public long getTimeoutInMinutes() {
+                return timeoutInMinutes;
+            }
+
+            public String getType() {
+                return type;
+            }
         }
     }
 }

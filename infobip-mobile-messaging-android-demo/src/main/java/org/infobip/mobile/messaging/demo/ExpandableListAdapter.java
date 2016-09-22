@@ -1,15 +1,18 @@
 package org.infobip.mobile.messaging.demo;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +52,6 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        final String childText = (String) getChild(groupPosition, childPosition);
-
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -60,7 +61,16 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtListChild = (TextView) convertView
                 .findViewById(R.id.lblListItem);
 
-        txtListChild.setText(childText);
+        txtListChild.setText(getFullMessageText(groupPosition));
+        txtListChild.setBackgroundColor(Color.LTGRAY);
+        txtListChild.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Utils.saveToClipboard(context, ((TextView) v).getText().toString());
+                return true;
+            }
+        });
+
         return convertView;
     }
 
@@ -116,5 +126,43 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
+    }
+
+    private String getFullMessageText(int groupPosition) {
+        Message m = messages.get(groupPosition);
+        if (m == null) {
+            return null;
+        }
+
+        String text = "messageId: " + m.getMessageId();
+        text += "\ntitle: " + m.getTitle();
+        text += "\nbody: " + m.getBody();
+        text += "\nsound: " + m.getSound();
+        text += "\nvibrate: " + m.isVibrate();
+        text += "\nicon: " + m.getIcon();
+        text += "\nsilent: " + m.isSilent();
+        text += "\ncategory: " + m.getCategory();
+        text += "\nfrom: " + m.getFrom();
+        text += "\nreceivedTimestamp: " + m.getReceivedTimestamp();
+        text += "\nseenTimestamp: " + m.getSeenTimestamp();
+        if (m.getInternalData() != null) {
+            try {
+                text += "\ninternalData: " + m.getInternalData().toString(1);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        if (m.getCustomPayload() != null) {
+            try {
+                text += "\ncustomPayload: " + m.getCustomPayload().toString(1);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        text += "\ndestination: " + m.getDestination();
+        text += "\nstatus: " + m.getStatus();
+        text += "\nstatusMessage: " + m.getStatusMessage();
+
+        return text;
     }
 }

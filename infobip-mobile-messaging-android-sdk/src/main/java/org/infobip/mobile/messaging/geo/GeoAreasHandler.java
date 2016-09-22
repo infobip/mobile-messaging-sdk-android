@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
@@ -13,17 +14,20 @@ import com.google.android.gms.location.GeofencingEvent;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.GeofenceAreas;
+import org.infobip.mobile.messaging.GeofenceAreas.Area;
+import org.infobip.mobile.messaging.GeofenceAreas.Area.GeoEvent;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author pandric
@@ -31,107 +35,180 @@ import java.util.Random;
  */
 class GeoAreasHandler {
 
-    protected static final String TAG = "GeofenceTransitions";
+    private static final String TAG = "GeofenceTransitions";
+    private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
+    private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
+    private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent("entry", 1, 0L);
 
-    MessageStore messageStore = new SharedPreferencesMessageStore();
+    private final MessageStore messageStore = new SharedPreferencesMessageStore();
+    private final Random random = new Random();
+    private final Context context;
 
-    void handleTransition(Context context, Intent intent) {
+    private static SparseArray<String> transitionNames = new SparseArray<String>()
+    {{
+        put(Geofence.GEOFENCE_TRANSITION_ENTER, "GEOFENCE_TRANSITION_ENTER");
+        put(Geofence.GEOFENCE_TRANSITION_EXIT, "GEOFENCE_TRANSITION_EXIT");
+        put(Geofence.GEOFENCE_TRANSITION_DWELL, "GEOFENCE_TRANSITION_DWELL");
+    }};
+
+    private static SparseArray<String> geofencingErrors = new SparseArray<String>()
+    {{
+        put(GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE, "Geofence not available");
+        put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES, "Too many geofences");
+        put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
+    }};
+
+    private static SparseArray<Event> transitionEvents = new SparseArray<Event>()
+    {{
+        put(Geofence.GEOFENCE_TRANSITION_ENTER, Event.GEOFENCE_AREA_ENTERED);
+    }};
+
+    GeoAreasHandler(Context context) {
+        this.context = context;
+    }
+
+    void handleTransition(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent == null) return;
 
         if (geofencingEvent.hasError()) {
-            String errorMessage = getErrorString(geofencingEvent.getErrorCode());
-            Log.e(TAG, errorMessage);
+            Log.e(TAG, "ERROR:" + geofencingErrors.get(geofencingEvent.getErrorCode()));
+            return;
+        }
+
+        Map<Message, List<Area>> messagesAndAreas = findMessagesAndAreasForTriggeringGeofences(
+                context, geofencingEvent.getTriggeringGeofences());
+        if (messagesAndAreas == null || messagesAndAreas.isEmpty()) {
             return;
         }
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
-        Tuple<List<Message>, List<GeofenceAreas.Area>> messagesAndAreas =
-                getMessagesAndAreasForTriggeringGeofences(context, geofencingEvent.getTriggeringGeofences());
+        for (Message message : messagesAndAreas.keySet()) {
 
-        LogGeofenceTransition(geofenceTransition);
-        LogGeofences(messagesAndAreas.getRight());
+            List<Area> geofenceAreasList = messagesAndAreas.get(message);
+            logGeofences(geofenceAreasList, geofenceTransition);
 
-        if (geofenceTransition != Geofence.GEOFENCE_TRANSITION_ENTER) {
+            for (final Area area : geofenceAreasList) {
+
+                if (!shouldNotifyAboutTransition(message, area, geofenceTransition)) {
+                    continue;
+                }
+
+                Location triggeringLocation = geofencingEvent.getTriggeringLocation();
+                GeofenceAreas geofenceAreas = new GeofenceAreas(
+                        triggeringLocation.getLatitude(),
+                        triggeringLocation.getLongitude(),
+                        new ArrayList<Area>(){{add(area);}});
+
+                notifyAboutTransition(context, geofenceAreas, geofenceTransition, message);
+
+                setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
+                setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
+                        getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition) + 1);
+            }
+        }
+    }
+
+    private boolean shouldNotifyAboutTransition(Message message, Area area, int geofenceTransition) {
+        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition);
+        long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition);
+        GeoEvent settings = getNotificationSettingsForTransition(area, geofenceTransition);
+
+        return settings != null &&
+                (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEvent.UNLIMITED_RECURRING) &&
+                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
+                geoEventMatchesTransition(settings, geofenceTransition) &&
+                !area.isExpired();
+    }
+
+    private GeoEvent getNotificationSettingsForTransition(Area area, int geofenceTransition) {
+        if (area.getEvents() == null || area.getEvents().isEmpty()) {
+            return DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER;
+        }
+
+        for (GeoEvent e : area.getEvents()) {
+            if (!geoEventMatchesTransition(e, geofenceTransition)) {
+                continue;
+            }
+            return e;
+        }
+        return null;
+    }
+
+    private String areaNotificationNumKey(String messageId, String areaId, int geofenceTransition) {
+        return AREA_NOTIFIED_PREF_PREFIX + messageId + "-" + areaId + "-" + geofenceTransition;
+    }
+
+    private String areaNotificationTimeKey(String messageId, String areaId, int geofenceTransition) {
+        return AREA_LAST_TIME_PREF_PREFIX + messageId + "-" + areaId + "-" + geofenceTransition;
+    }
+
+    private boolean geoEventMatchesTransition(GeoEvent event, int geofenceTransition) {
+        return event.getType().equals(DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER.getType()) && geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER;
+    }
+
+    private int getNumberOfDisplayedNotificationsForArea(String messageId, String areaId, int geofenceTransition) {
+        return PreferenceHelper.findInt(context, areaNotificationNumKey(messageId, areaId, geofenceTransition), 0);
+    }
+
+    private void setNumberOfDisplayedNotificationsForArea(String messageId, String areaId, int geofenceTransition, int n) {
+        PreferenceHelper.saveInt(context, areaNotificationNumKey(messageId, areaId, geofenceTransition), n);
+    }
+
+    private long getLastNotificationTimeForArea(String messageId, String areaId, int geofenceTransition) {
+        return PreferenceHelper.findLong(context, areaNotificationTimeKey(messageId, areaId, geofenceTransition), 0);
+    }
+
+    private void setLastNotificationTimeForArea(String messageId, String areaId, int geofenceTransition, long timeMs) {
+        PreferenceHelper.saveLong(context, areaNotificationTimeKey(messageId, areaId, geofenceTransition), timeMs);
+    }
+
+    private void notifyAboutTransition(Context context, GeofenceAreas geofenceAreas, int geofenceTransition, Message message) {
+        NotificationHandler.displayNotification(context, message, random.nextInt());
+        sendGeoEventBroadcast(context, geofenceTransition, geofenceAreas, message);
+    }
+
+    private void sendGeoEventBroadcast(Context context, int geofenceTransition, GeofenceAreas geofenceAreas, Message message) {
+        Event event = transitionEvents.get(geofenceTransition);
+        if (event == null) {
             return;
         }
 
-        Random random = new Random();
-        for (Message message : messagesAndAreas.getLeft()) {
-            NotificationHandler.displayNotification(context, message, random.nextInt());
-        }
-
-        Location triggeringLocation = geofencingEvent.getTriggeringLocation();
-        GeofenceAreas geofenceAreas = new GeofenceAreas(triggeringLocation.getLatitude(),
-                triggeringLocation.getLongitude(), messagesAndAreas.getRight());
-
-        Intent geofenceIntent = new Intent(Event.GEOFENCE_AREA_ENTERED.getKey());
+        Intent geofenceIntent = new Intent(event.getKey());
         geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geofenceAreas);
+        geofenceIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, message.getBundle());
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
         context.sendBroadcast(geofenceIntent);
     }
 
-    private void LogGeofenceTransition(int t) {
-        switch (t) {
-            case Geofence.GEOFENCE_TRANSITION_ENTER:
-                Log.i(TAG, "GEOFENCE_TRANSITION_ENTER");
-                break;
-            case Geofence.GEOFENCE_TRANSITION_DWELL:
-                Log.i(TAG, "GEOFENCE_TRANSITION_DWELL");
-                break;
-            case Geofence.GEOFENCE_TRANSITION_EXIT:
-                Log.i(TAG, "GEOFENCE_TRANSITION_EXIT");
-                break;
-            default:
-                Log.i(TAG, "Transition type is invalid: " + t);
+    private void logGeofences(List<Area> areas, int transition) {
+        for (Area a : areas) {
+            Log.i(TAG, transitionNames.get(transition) + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
         }
     }
 
-    private void LogGeofences(List<GeofenceAreas.Area> areas) {
-        for (GeofenceAreas.Area a : areas) {
-            Log.i(TAG, "GEOFENCE (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
-        }
-    }
-
-    private String getErrorString(int errorCode) {
-        switch (errorCode) {
-            case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
-                return "Geofence not available";
-            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return "Too many geofences";
-            case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return "Too many pending intents";
-            default:
-                return "Unknown geofence error";
-        }
-    }
-
-    private Tuple<List<Message>, List<GeofenceAreas.Area>> getMessagesAndAreasForTriggeringGeofences(Context context, List<Geofence> geofences) {
-        List<Message> messages = new ArrayList<>();
-        Map<String, GeofenceAreas.Area> areas = new HashMap<>();
-
+    private Map<Message, List<Area>> findMessagesAndAreasForTriggeringGeofences(Context context, List<Geofence> geofences) {
+        Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
-            List<GeofenceAreas.Area> geoAreas = message.getGeofenceAreasList();
+            List<Area> geoAreas = message.getGeofenceAreasList();
             if (geoAreas == null || geoAreas.isEmpty()) {
                 continue;
             }
 
-            boolean isMessageTriggered = false;
-            for (GeofenceAreas.Area area : geoAreas) {
+            List<Area> areas = new ArrayList<>();
+            for (Area area : geoAreas) {
                 for (Geofence geofence : geofences) {
                     if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
-                        isMessageTriggered = true;
-                        areas.put(area.getId(), area);
+                        areas.add(area);
                     }
                 }
             }
 
-            if (isMessageTriggered) {
-                messages.add(message);
+            if (!areas.isEmpty()) {
+                messagesAndAreas.put(message, areas);
             }
         }
 
-        List<GeofenceAreas.Area> areaList = new ArrayList<>(areas.values());
-        return new Tuple<>(messages, areaList);
+        return messagesAndAreas;
     }
 }

@@ -30,7 +30,9 @@ import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -42,7 +44,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE = 100;
-    private static String TAG = MobileMessaging.TAG + "/Geofencing";
+    private static String TAG = "Geofencing";
 
     private static Context context;
     private static Geofencing instance;
@@ -101,7 +103,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
         Date nextCheckDate = null;
         Date now = new Date();
-        List<Geofence> geofences = new ArrayList<>();
+        Map<String, Geofence> geofences = new HashMap<>();
         List<Message> messages = messageStore.bind(context);
 
         for (Message message : messages) {
@@ -117,7 +119,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 }
 
                 if (area.isEligibleForMonitoring()) {
-                    geofences.add(area.toGeofence());
+                    geofences.put(area.getId(), area.toGeofence());
                     continue;
                 }
 
@@ -131,7 +133,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 }
             }
         }
-        return new Tuple<>(geofences, nextCheckDate);
+
+        List<Geofence> geofenceList = new ArrayList<>(geofences.values());
+        return new Tuple<>(geofenceList, nextCheckDate);
     }
 
     @SuppressWarnings("MissingPermission")
