@@ -39,6 +39,10 @@ public class Message implements Comparable<Message> {
     String statusMessage;
 
     public static Message createFrom(Bundle bundle) {
+        if (bundle == null) {
+            return null;
+        }
+        
         return new Message(bundle);
     }
 
