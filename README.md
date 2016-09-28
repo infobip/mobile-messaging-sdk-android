@@ -15,7 +15,7 @@ The document describes library integration steps.
 
 This guide is designed to get you up and running with Mobile Messaging SDK integrated into your Android application.
 
-1. Prepare your [GCM credentials](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Google-Cloud-Messaging-guide) to get GCM Sender ID and Server API Key.
+1. Prepare your [Cloud Messaging credentials](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging) to get Sender ID and Server API Key.
 2. Prepare your Infobip account (https://portal.infobip.com/push/) to get your Application Code:
     1. [Create new application](https://dev.infobip.com/v1/docs/push-introduction-create-app) on Infobip Push portal.
     2. Navigate to your Application where you will get the Application Code.
