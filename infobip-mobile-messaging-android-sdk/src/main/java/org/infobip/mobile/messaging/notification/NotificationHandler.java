@@ -1,12 +1,15 @@
 package org.infobip.mobile.messaging.notification;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
@@ -100,6 +103,9 @@ public class NotificationHandler {
         int notificationDefaults = Notification.DEFAULT_ALL;
         if (!message.isVibrate()) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+        } else if (message.isVibrate() && ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_DENIED) {
+            notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
+            Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
         }
         if (!message.isDefaultSound()) {
             notificationDefaults &= ~Notification.DEFAULT_SOUND;
