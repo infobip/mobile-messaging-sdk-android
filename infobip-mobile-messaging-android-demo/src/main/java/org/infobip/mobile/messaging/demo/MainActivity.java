@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.demo;
 
+import android.Manifest;
 import android.app.Dialog;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,10 +9,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.media.RingtoneManager;
-import android.net.Uri;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -42,6 +43,8 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private final BroadcastReceiver userDataReceiver = new BroadcastReceiver() {
         @Override
@@ -144,42 +147,70 @@ public class MainActivity extends AppCompatActivity {
         return sharedPreferences.getBoolean(ApplicationPreferences.NOTIFICATIONS_ENABLED, true);
     }
 
-    private MobileMessaging.Builder mobileMessagingBuilder() {
-        boolean notificationsEnabled = getNotificationEnabledFromPreferences();
-        if (!notificationsEnabled) {
-            return new MobileMessaging.Builder(this)
-                    .withMessageStore(SharedPreferencesMessageStore.class)
-                    .withoutDisplayNotification();
+    private MobileMessaging initializeMobileMessaging() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            String permissions[] = {Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            return null;
         }
 
-        return new MobileMessaging.Builder(this)
-                .withMessageStore(SharedPreferencesMessageStore.class)
-                .withDisplayNotification(new NotificationSettings.Builder(this)
-                        .withDefaultIcon(R.drawable.ic_notification)
-                        .build());
+        MobileMessaging mobileMessaging;
+        boolean notificationsEnabled = getNotificationEnabledFromPreferences();
+        if (!notificationsEnabled) {
+            mobileMessaging = new MobileMessaging.Builder(getApplication())
+                    .withMessageStore(SharedPreferencesMessageStore.class)
+                    .withoutDisplayNotification()
+                    .withGeofencing()
+                    .build();
+        } else {
+            mobileMessaging = new MobileMessaging.Builder(getApplication())
+                    .withMessageStore(SharedPreferencesMessageStore.class)
+                    .withGeofencing()
+                    .withDisplayNotification(new NotificationSettings.Builder(this)
+                            .withDefaultIcon(R.drawable.ic_notification)
+                            .build())
+                    .build();
+        }
+
+        readMsisdnFromMobileMessaging();
+        updateCount();
+
+        return mobileMessaging;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            return;
+        }
+
+        initializeMobileMessaging();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mobileMessagingBuilder().build();
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         totalReceivedTextView = (TextView) findViewById(R.id.totalReceivedTextView);
-
         ExpandableListView messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
         assert messagesListView != null;
         listAdapter = new ExpandableListAdapter(this, onMessageExpandedListener);
         messagesListView.setAdapter(listAdapter);
 
-        readMsisdnFromMobileMessaging();
+        initializeMobileMessaging();
+
         registerReceivers();
         registerPreferenceChangeListener();
-        updateCount();
         clearNotifications();
     }
 
@@ -192,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCount() {
+        if (MobileMessaging.getInstance(this).getMessageStore() == null) {
+            return;
+        }
+
         totalReceivedTextView.setText(String.valueOf(MobileMessaging.getInstance(this).getMessageStore().countAll(this)));
         listAdapter.notifyDataSetChanged();
     }

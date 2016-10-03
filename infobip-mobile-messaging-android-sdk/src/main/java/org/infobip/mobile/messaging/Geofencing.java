@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import android.app.Activity;
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -34,16 +34,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
 /**
  * @author pandric
  * @since 03.06.2016.
  */
 public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final int ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE = 100;
     private static String TAG = "Geofencing";
 
     private static Context context;
@@ -73,16 +69,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
         instance = new Geofencing(context);
         return instance;
-    }
-
-    void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PERMISSION_GRANTED) {
-                if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED) {
-                    activate();
-                }
-            }
-        }
     }
 
     static void scheduleRefresh(Context context) {
@@ -197,19 +183,12 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     private boolean checkRequiredPermissions() {
-        if (ActivityCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
-            return true;
-        }
-
-        if (!(context instanceof Activity)) {
-            Log.e(TAG, "You shall provide instance of Activity as context for geofencing!");
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(MobileMessaging.TAG, "Unable to initialize geofencing. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.ACCESS_FINE_LOCATION);
             return false;
         }
 
-        Activity activity = (Activity) context;
-        String[] permissions = {ACCESS_FINE_LOCATION};
-        ActivityCompat.requestPermissions(activity, permissions, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE);
-        return false;
+        return true;
     }
 
     /**

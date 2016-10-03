@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,11 +47,11 @@ public class MobileMessagingCore {
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MessageSender messageSender = new MessageSender();
     private final SystemDataReporter systemDataReporter = new SystemDataReporter();
-    private final MobileNetworkStateListener mobileNetworkStateListener;
     private final MobileMessagingStats stats;
-    private final PlayServicesSupport playServicesSupport = new PlayServicesSupport();
     private final Executor taskExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
+    private MobileNetworkStateListener mobileNetworkStateListener;
+    private PlayServicesSupport playServicesSupport;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
@@ -66,24 +67,30 @@ public class MobileMessagingCore {
         }
     };
 
-
     protected MobileMessagingCore(Context context) {
         this.context = context;
         this.stats = new MobileMessagingStats(context);
-        this.mobileNetworkStateListener = new MobileNetworkStateListener(context);
-        this.activityLifecycleMonitor = null;
-        this.geofencing = Geofencing.getInstance(context);
 
         PreferenceHelper.registerOnSharedPreferenceChangeListener(context, onSharedPreferenceChangeListener);
     }
 
+    /**
+     * Gets an instance of MobileMessagingCore after it is initialized via {@link MobileMessagingCore.Builder}.
+     * </p>
+     * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
+     * Only the Builder can set static instance, because there it is initialized from Application object.
+     * It is needed in order to not hold possible references to Activity(Context) and to avoid memory leaks.
+     * @param context android context object.
+     * @return instance of MobileMessagingCore.
+     *
+     * @see MobileMessagingCore.Builder
+     */
     public static MobileMessagingCore getInstance(Context context) {
         if (null != instance) {
             return instance;
         }
 
-        instance = new MobileMessagingCore(context);
-        return instance;
+        return new MobileMessagingCore(context);
     }
 
     public void sync() {
@@ -341,11 +348,6 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
-    void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (geofencing == null) return;
-        geofencing.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
     public void activateGeofencing() {
         if (geofencing == null) return;
         setGeofencingActivated(context, true);
@@ -468,16 +470,16 @@ public class MobileMessagingCore {
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
 
-        private final Context context;
+        private final Application application;
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
         private Geofencing geofencing;
 
-        public Builder(Context context) {
-            if (null == context) {
-                throw new IllegalArgumentException("context is mandatory!");
+        public Builder(Application application) {
+            if (null == application) {
+                throw new IllegalArgumentException("application is mandatory!");
             }
-            this.context = context;
+            this.application = application;
         }
 
         private void validateWithParam(Object o) {
@@ -538,16 +540,19 @@ public class MobileMessagingCore {
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build() {
-            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(context))) {
-                MobileMessagingCore.cleanup(context);
+            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application.getApplicationContext()))) {
+                MobileMessagingCore.cleanup(application);
             }
 
-            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(context);
+            MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
+            MobileMessagingCore.instance = mobileMessagingCore;
+            mobileMessagingCore.geofencing = geofencing;
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
-            MobileMessagingCore.instance = mobileMessagingCore;
-            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(context);
-            mobileMessagingCore.playServicesSupport.checkPlayServices(context);
+            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
+            mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
+            mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
+            mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
             mobileMessagingCore.readSystemData();
             mobileMessagingCore.activateGeofencing();
             return mobileMessagingCore;

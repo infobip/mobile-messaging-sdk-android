@@ -48,8 +48,6 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
         
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.WAKE_LOCK" />
-        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
         <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
         <permission android:name="${applicationId}.permission.C2D_MESSAGE" android:protectionLevel="signature" />
@@ -88,17 +86,6 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
                         <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
                     </intent-filter>
             </service>
-
-            <!--Service that triggers when geofence area is entered-->
-            <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
-            
-            <receiver android:name="org.infobip.mobile.messaging.BootReceiver">
-                    <intent-filter>
-                        <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                    </intent-filter>
-            </receiver>
-            
-            <receiver android:name="org.infobip.mobile.messaging.GeofencingAlarmReceiver"/>
             
             <!-- /Mobile Messaging components -->
             
@@ -131,7 +118,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
             
             ...
      
-            new MobileMessaging.Builder(this)
+            new MobileMessaging.Builder(getApplication())
                             .withMessageStore(SharedPreferencesMessageStore.class)
                             .build();
         }
@@ -155,7 +142,6 @@ Library generates intents on the following events as described in [Event](infobi
 * __API communication error__ - is triggered on every error returned by API.
 * __API validation error__ - is triggerred when there is an error during validation of input parameters (e.g.: invalid MSISDN).
 * __Delivery reports sent__ - is triggered when message delivery is reported.
-* __Geofence area entered__ - is triggered when device enters a geofence sent from server.
 * __User data synced__ - is triggered when user data is successfully saved on the registration server.
 
 ### Linking MSISDN

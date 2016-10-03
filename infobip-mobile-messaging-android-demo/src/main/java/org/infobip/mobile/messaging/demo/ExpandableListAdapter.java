@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -23,19 +24,32 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private List<Message> messages; // header titles
     private OnMessageExpandedListener onMessageExpandedListener;
 
-    public interface OnMessageExpandedListener {
+    interface OnMessageExpandedListener {
         void onMessageExpanded(Message message);
     }
 
     ExpandableListAdapter(Context context, OnMessageExpandedListener onMessageExpandedListener) {
         this.context = context;
         this.onMessageExpandedListener = onMessageExpandedListener;
+
+        refreshDataSet();
+    }
+
+    private void refreshDataSet() {
         MessageStore messageStore = MobileMessaging.getInstance(context).getMessageStore();
-        if (null != messageStore) {
-            this.messages = messageStore.bind(context);
-        } else {
+        if (null == messageStore) {
             this.messages = new ArrayList<>();
+            return;
         }
+
+        this.messages = messageStore.findAll(context);
+        Collections.sort(messages);
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        refreshDataSet();
     }
 
     @Override
