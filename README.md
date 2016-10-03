@@ -127,7 +127,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     }
     ```
 	> ### Notice
-	> MobileMessaging library has geofencing service enabled by default. In order to opt-out the service, follow [this guide](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API#add-code-to-mainactivityoncreate).
+	> MobileMessaging library has geofencing service disabled by default. In order to opt-in the service, follow [this guide](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API).
 
 ## Mobile Messaging APIs
 
