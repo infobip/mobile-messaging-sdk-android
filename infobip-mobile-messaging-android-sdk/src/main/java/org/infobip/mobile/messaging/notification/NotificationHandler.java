@@ -36,9 +36,15 @@ public class NotificationHandler {
         NotificationCompat.Builder builder = notificationCompatBuilder(context, message);
         if (builder == null) return;
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification notification = builder.build();
-        notificationManager.notify(notificationId, notification);
+        //issue: http://stackoverflow.com/questions/13602190/java-lang-securityexception-requires-vibrate-permission-on-jelly-bean-4-2
+        try {
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            Notification notification = builder.build();
+            notificationManager.notify(notificationId, notification);
+        } catch (SecurityException se) {
+            se.printStackTrace();
+            Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+        }
     }
 
     private static NotificationCompat.Builder notificationCompatBuilder(Context context, Message message) {
