@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,6 +47,8 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 public class MainActivity extends AppCompatActivity {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+
+    private static final String TAG = "MainActivity";
 
     private final BroadcastReceiver userDataReceiver = new BroadcastReceiver() {
         @Override
@@ -320,7 +323,17 @@ public class MainActivity extends AppCompatActivity {
         if (msisdn != null) {
             UserData userData = new UserData();
             userData.setMsisdn(msisdn.toString());
-            MobileMessaging.getInstance(this).syncUserData(userData);
+            MobileMessaging.getInstance(this).syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+                @Override
+                public void onResult(UserData result) {
+                    Log.v(TAG, "User data sync complete: " + result);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.e(TAG, "User data sync error: " + e);
+                }
+            });
         }
     }
 

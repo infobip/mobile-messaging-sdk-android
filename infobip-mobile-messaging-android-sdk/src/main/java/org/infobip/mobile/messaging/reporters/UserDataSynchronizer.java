@@ -7,6 +7,7 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
@@ -24,7 +25,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class UserDataSynchronizer {
 
-    public void sync(final Context context, final MobileMessagingStats stats, Executor executor) {
+    public void sync(final Context context, final MobileMessagingStats stats, Executor executor, final MobileMessaging.ResultListener<UserData> listener) {
 
         final UserData userDataToReport = MobileMessagingCore.getInstance(context).getUnreportedUserData();
         if (userDataToReport == null) {
@@ -39,13 +40,24 @@ public class UserDataSynchronizer {
                     stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
 
                     if (syncUserDataResult.hasInvalidParameterError()) {
+
                         MobileMessagingCore.getInstance(context).setUserDataReportedWithError();
+                        if (listener != null) {
+                            listener.onError(syncUserDataResult.getError());
+                        }
+                    } else {
+
+                        Log.v(TAG, "User data synchronization will be postponed to a later time due to communication error");
+                        if (listener != null) {
+                            listener.onResult(UserData.merge(MobileMessagingCore.getInstance(context).getUserData(), userDataToReport));
+                        }
                     }
 
                     Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     userDataSyncError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, syncUserDataResult.getError());
                     context.sendBroadcast(userDataSyncError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
+
                     return;
                 }
 
@@ -56,12 +68,21 @@ public class UserDataSynchronizer {
                 userDataReported.putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
                 context.sendBroadcast(userDataReported);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(userDataReported);
+
+                if (listener != null) {
+                    listener.onResult(userData);
+                }
             }
 
             @Override
             protected void onCancelled() {
                 Log.e(TAG, "Error reporting user data!");
                 stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
+
+                Log.v(TAG, "User data synchronization will be postponed to a later time due to communication error");
+                if (listener != null) {
+                    listener.onResult(MobileMessagingCore.getInstance(context).getUserData());
+                }
             }
         }.executeOnExecutor(executor);
     }

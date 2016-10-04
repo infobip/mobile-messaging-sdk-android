@@ -124,7 +124,22 @@ public class MobileMessaging {
      * @see Event#USER_DATA_REPORTED
      */
     public void syncUserData(UserData userData) {
-        MobileMessagingCore.getInstance(context).syncUserData(userData);
+        MobileMessagingCore.getInstance(context).syncUserData(userData, null);
+    }
+
+    /**
+     * Does a synchronization of user data with server.
+     * </p>
+     * This method will synchronize new data with server. The result of synchronization will be provided via listener.
+     * It will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     * @param userData user data object with desired changes
+     * @param listener listener to report the result on
+     *
+     * @see ResultListener
+     * @see Event#USER_DATA_REPORTED
+     */
+    public void syncUserData(UserData userData, ResultListener<UserData> listener) {
+        MobileMessagingCore.getInstance(context).syncUserData(userData, listener);
     }
 
     /**
@@ -135,7 +150,20 @@ public class MobileMessaging {
      * @see Event#USER_DATA_REPORTED
      */
     public void fetchUserData() {
-        MobileMessagingCore.getInstance(context).syncUserData(null);
+        MobileMessagingCore.getInstance(context).syncUserData(null, null);
+    }
+
+    /**
+     * Does a fetch of user data from the server.
+     * </p>
+     * The result of fetch operation will be provided via listener.
+     * This method will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     *
+     * @see ResultListener
+     * @see Event#USER_DATA_REPORTED
+     */
+    public void fetchUserData(ResultListener<UserData> listener) {
+        MobileMessagingCore.getInstance(context).syncUserData(null, listener);
     }
 
     /**
@@ -155,7 +183,23 @@ public class MobileMessaging {
      * @param messages messages to send
      */
     public void sendMessages(Message... messages) {
-        MobileMessagingCore.getInstance(context).sendMessages(messages);
+        MobileMessagingCore.getInstance(context).sendMessages(null, messages);
+    }
+
+    /**
+     * Send mobile originated messages.
+     * </p>
+     * Destination for each message is set inside {@link Message}.
+     * The result of fetch operation will be provided via listener.
+     * {@link ResultListener#onResult(Object)} will be called both in case of success and error,
+     * separate status for each message can be retrieved via {@link Message#getStatus()} and {@link Message#getStatusMessage()}.
+     * @param listener listener to invoke when the operation is complete
+     * @param messages messages to send
+     *
+     * @see ResultListener
+     */
+    public void sendMessages(ResultListener<Message[]> listener, Message... messages) {
+        MobileMessagingCore.getInstance(context).sendMessages(listener, messages);
     }
 
     /**
@@ -173,6 +217,28 @@ public class MobileMessaging {
      */
     public void deactivateGeofencing() {
         MobileMessagingCore.getInstance(context).deactivateGeofencing();
+    }
+
+    /**
+     * Default result listener interface for asynchronous operations.
+     * @param <T> type of successful result
+     */
+    public static abstract class ResultListener <T> {
+        /**
+         * This method is invoked on listener in two cases:
+         * <ol>
+         *     <li>communication with server ended successfully;</li>
+         *     <li>it is not possible to communicate with server now, but the data is saved inside library and will be sent as soon as possible.</li>
+         * </ol>
+         * @param result the result of operation
+         */
+        public abstract void onResult(T result);
+
+        /**
+         * This method is invoked on listener in case of error.
+         * @param e object that contains error description
+         */
+        public void onError(Throwable e) {}
     }
 
 

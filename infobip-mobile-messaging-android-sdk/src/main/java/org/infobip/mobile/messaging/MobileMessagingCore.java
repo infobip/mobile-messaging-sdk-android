@@ -3,8 +3,6 @@ package org.infobip.mobile.messaging;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
@@ -57,21 +55,9 @@ public class MobileMessagingCore {
     private Context context;
     private Geofencing geofencing;
 
-    private OnSharedPreferenceChangeListener onSharedPreferenceChangeListener = new OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            if (MobileMessagingProperty.UNREPORTED_USER_DATA.getKey().equals(key) &&
-                    PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
-                sync();
-            }
-        }
-    };
-
     protected MobileMessagingCore(Context context) {
         this.context = context;
         this.stats = new MobileMessagingStats(context);
-
-        PreferenceHelper.registerOnSharedPreferenceChangeListener(context, onSharedPreferenceChangeListener);
     }
 
     /**
@@ -96,7 +82,7 @@ public class MobileMessagingCore {
     public void sync() {
         registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
         messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
-        userDataSynchronizer.sync(context, getStats(), taskExecutor);
+        userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
     }
@@ -360,7 +346,7 @@ public class MobileMessagingCore {
         geofencing.deactivate();
     }
 
-    void syncUserData(UserData userData) {
+    void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
 
         UserData userDataToReport = new UserData();
         if (userData != null) {
@@ -384,13 +370,17 @@ public class MobileMessagingCore {
 
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
+
+        userDataSynchronizer.sync(context, getStats(), taskExecutor, listener);
     }
 
-    UserData getUserData() {
+    public UserData getUserData() {
+        UserData existing = null;
         if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
-            return new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
+            existing = new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
         }
-        return null;
+
+        return UserData.merge(existing, getUnreportedUserData());
     }
 
     public UserData getUnreportedUserData() {
@@ -411,11 +401,11 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
-    void sendMessages(Message... messages) {
+    void sendMessages(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
         if (isMessageStoreEnabled()) {
             getMessageStore().save(context, messages);
         }
-        messageSender.send(context, getStats(), taskExecutor, messages);
+        messageSender.send(context, getStats(), taskExecutor, listener, messages);
     }
 
     void readSystemData() {

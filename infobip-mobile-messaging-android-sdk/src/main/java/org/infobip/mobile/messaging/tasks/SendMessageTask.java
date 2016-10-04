@@ -1,12 +1,9 @@
 package org.infobip.mobile.messaging.tasks;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -19,8 +16,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
 /**
  * @author sslavin
@@ -60,12 +55,6 @@ public class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
             Log.e(MobileMessaging.TAG, "Error sending MO messages!", e);
-            cancel(true);
-
-            Intent sendMessagesError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            sendMessagesError.putExtra(EXTRA_EXCEPTION, e);
-            context.sendBroadcast(sendMessagesError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessagesError);
 
             return new SendMessageResult(e);
         }

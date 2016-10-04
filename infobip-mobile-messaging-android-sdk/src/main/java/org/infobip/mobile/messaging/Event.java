@@ -111,7 +111,7 @@ public enum Event {
      * Contains messages that were sent and status information for each message.
      * <pre>
      * {@code
-     * MoMessage messages[] = MoMessage.createFrom(intent.getStringArrayListExtra(BroadcastParameter.EXTRA_MO_MESSAGES));
+     * Message messages[] = Message.createFrom(intent.getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES));
      * }
      * </pre>
      *
