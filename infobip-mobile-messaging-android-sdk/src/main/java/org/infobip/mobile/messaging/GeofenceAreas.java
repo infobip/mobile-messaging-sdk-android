@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -37,6 +38,10 @@ public class GeofenceAreas implements Parcelable {
         triggeringLatitude = in.readDouble();
         triggeringLongitude = in.readDouble();
         in.readTypedList(areasList, Area.CREATOR);
+    }
+
+    public static GeofenceAreas createFrom(Bundle bundle) {
+        return bundle.getParcelable(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
     }
 
     public static final Creator<GeofenceAreas> CREATOR = new Creator<GeofenceAreas>() {

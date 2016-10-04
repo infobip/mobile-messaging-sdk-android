@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 

@@ -176,7 +176,7 @@ class GeoAreasHandler {
 
         Intent geofenceIntent = new Intent(event.getKey());
         geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geofenceAreas);
-        geofenceIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, message.getBundle());
+        geofenceIntent.putExtras(message.getBundle());
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
         context.sendBroadcast(geofenceIntent);
     }

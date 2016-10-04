@@ -29,6 +29,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.GeofenceAreas;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             if (!intent.hasExtra(EXTRA_USER_DATA)) {
                 showToast(R.string.toast_message_userdata_cannot_save);
             } else {
-                UserData userData = new UserData(intent.getStringExtra(EXTRA_USER_DATA));
+                UserData userData = UserData.createFrom(intent.getExtras());
                 showToast(getString(R.string.toast_message_userdata_set) + ": " + userData.toString());
 
                 if (StringUtils.isBlank(userData.getMsisdn())) {
@@ -124,6 +125,15 @@ public class MainActivity extends AppCompatActivity {
             if (errorDialog != null) {
                 errorDialog.show();
             }
+        }
+    };
+    private BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            GeofenceAreas geofenceAreas = GeofenceAreas.createFrom(intent.getExtras());
+            Message message = Message.createFrom(intent.getExtras());
+            showToast(String.format(Locale.getDefault(), "Message: %s \n triggered for area: %f, %f",
+                    message.getBody(), geofenceAreas.getTriggeringLatitude(), geofenceAreas.getTriggeringLongitude()));
         }
     };
 
@@ -325,6 +335,8 @@ public class MainActivity extends AppCompatActivity {
                     new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
             localBroadcastManager.registerReceiver(playServicesErrorReceiver,
                     new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
+            localBroadcastManager.registerReceiver(geofenceAreaEnteredReceiver,
+                    new IntentFilter(Event.GEOFENCE_AREA_ENTERED.getKey()));
             receiversRegistered = true;
         }
     }

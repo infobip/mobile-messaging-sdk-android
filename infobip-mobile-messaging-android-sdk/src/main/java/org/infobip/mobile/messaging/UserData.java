@@ -1,16 +1,21 @@
 package org.infobip.mobile.messaging;
 
+import android.os.Bundle;
+
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
+
 /**
  * User data is used to provide user details to the server.
  * </p>
  * User data supports set of predefined fields ({@link PredefinedField}) and custom fields.
  * In order to delete any field, set it to null and report it to server.
+ *
  * @author sslavin
  * @since 15/07/16.
  */
@@ -44,6 +49,10 @@ public class UserData {
         merged.add(old);
         merged.add(latest);
         return merged;
+    }
+
+    public static UserData createFrom(Bundle bundle) {
+        return new UserData(bundle.getString(EXTRA_USER_DATA));
     }
 
     private void add(UserData data) {
