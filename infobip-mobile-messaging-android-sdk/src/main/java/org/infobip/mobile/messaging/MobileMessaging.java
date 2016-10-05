@@ -208,7 +208,7 @@ public class MobileMessaging {
      */
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void activateGeofencing() {
-        MobileMessagingCore.getInstance(context).activateGeofencing();
+        MobileMessagingCore.getInstance(context).activateGeofencing(Geofencing.getInstance(context));
     }
 
     /**

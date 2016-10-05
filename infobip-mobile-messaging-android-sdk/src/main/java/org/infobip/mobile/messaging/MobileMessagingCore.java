@@ -66,9 +66,9 @@ public class MobileMessagingCore {
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      * Only the Builder can set static instance, because there it is initialized from Application object.
      * It is needed in order to not hold possible references to Activity(Context) and to avoid memory leaks.
+     *
      * @param context android context object.
      * @return instance of MobileMessagingCore.
-     *
      * @see MobileMessagingCore.Builder
      */
     public static MobileMessagingCore getInstance(Context context) {
@@ -334,7 +334,8 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
-    public void activateGeofencing() {
+    void activateGeofencing(Geofencing geofencing) {
+        this.geofencing = geofencing;
         if (geofencing == null) return;
         setGeofencingActivated(context, true);
         geofencing.activate();
@@ -344,6 +345,7 @@ public class MobileMessagingCore {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
         geofencing.deactivate();
+        this.geofencing = null;
     }
 
     void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
@@ -536,7 +538,6 @@ public class MobileMessagingCore {
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             MobileMessagingCore.instance = mobileMessagingCore;
-            mobileMessagingCore.geofencing = geofencing;
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
@@ -544,7 +545,7 @@ public class MobileMessagingCore {
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
             mobileMessagingCore.readSystemData();
-            mobileMessagingCore.activateGeofencing();
+            mobileMessagingCore.activateGeofencing(geofencing);
             return mobileMessagingCore;
         }
     }
