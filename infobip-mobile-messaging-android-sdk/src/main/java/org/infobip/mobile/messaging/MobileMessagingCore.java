@@ -334,6 +334,10 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
+    public void activateGeofencing() {
+        activateGeofencing(geofencing);
+    }
+
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
         if (geofencing == null) return;
