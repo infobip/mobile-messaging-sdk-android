@@ -2,11 +2,14 @@ package org.infobip.mobile.messaging.util;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
 import java.security.Key;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -17,7 +20,7 @@ public class EncryptUtil {
     private static String AES_ALGO = "AES/ECB/PKCS5Padding";
     private static Key key = null;
 
-    static Key getKey(String algorithm, Context context) {
+    private static Key getKey(String algorithm, Context context) {
         if (key != null && key.getAlgorithm().equals(algorithm)) {
             return key;
         }
@@ -46,26 +49,26 @@ public class EncryptUtil {
         return new String(decrypted);
     }
 
-    static byte[] encodeAES128(Context context, byte data[]) {
+    private static byte[] encodeAES128(Context context, byte data[]) {
         Key key = getKey(AES_ALGO, context);
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }
 
-    static byte[] decodeAES128(Context context, byte data[]) {
+    private static byte[] decodeAES128(Context context, byte data[]) {
         Key key = getKey(AES_ALGO, context);
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }

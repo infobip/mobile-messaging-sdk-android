@@ -1,7 +1,11 @@
 package org.infobip.mobile.messaging.util;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -30,7 +34,7 @@ public class DateTimeUtil {
         try {
             return new SimpleDateFormat(DATE_FORMAT).parse(date);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
         }
         return null;
     }

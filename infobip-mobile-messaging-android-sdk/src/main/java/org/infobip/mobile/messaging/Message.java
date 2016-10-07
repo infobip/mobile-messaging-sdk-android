@@ -20,6 +20,8 @@ import java.util.UUID;
  */
 public class Message implements Comparable<Message> {
 
+    private static final String TAG = "Message";
+
     Bundle bundle;
     String messageId;
     String title;
@@ -206,7 +208,8 @@ public class Message implements Comparable<Message> {
         try {
             return new JSONObject(string);
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.w(TAG, "Cannot parse (" + key + "): " + e.getMessage());
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }
@@ -234,7 +237,7 @@ public class Message implements Comparable<Message> {
         try {
             return (T) o;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
             return defaultValue;
         }
     }

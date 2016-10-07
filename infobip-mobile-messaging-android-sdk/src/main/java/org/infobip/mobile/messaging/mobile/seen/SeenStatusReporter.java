@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.reporters;
+package org.infobip.mobile.messaging.mobile.seen;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,10 +8,9 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tasks.SeenStatusReportResult;
-import org.infobip.mobile.messaging.tasks.SeenStatusReportTask;
 
 import java.util.concurrent.Executor;
 

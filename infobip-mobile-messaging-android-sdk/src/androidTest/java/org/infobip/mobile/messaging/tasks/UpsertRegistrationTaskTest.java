@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.tasks;
 
 import junit.framework.TestCase;
 import org.infobip.mobile.messaging.api.support.http.client.ApiClient;
+import org.infobip.mobile.messaging.mobile.registration.UpsertRegistrationTask;
 
 /**
  * TODO implement this test!

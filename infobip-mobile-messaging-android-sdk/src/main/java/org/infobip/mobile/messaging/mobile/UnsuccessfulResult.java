@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile;
 
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiException;

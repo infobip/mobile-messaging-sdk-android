@@ -1,10 +1,11 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.messages;
 
 import android.os.Bundle;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +14,15 @@ import java.util.List;
  * @author pandric
  * @since 09/09/16.
  */
-public class SyncMessagesResult extends UnsuccessfulResult {
+class SyncMessagesResult extends UnsuccessfulResult {
 
     private List<Message> messages;
 
-    public SyncMessagesResult(Throwable exception) {
+    SyncMessagesResult(Throwable exception) {
         super(exception);
     }
 
-    public SyncMessagesResult(SyncMessagesResponse syncMessagesResponse) {
+    SyncMessagesResult(SyncMessagesResponse syncMessagesResponse) {
         super(null);
         List<MessageResponse> payloads = syncMessagesResponse.getPayloads();
         mapResponseToMessage(payloads);
@@ -45,7 +46,7 @@ public class SyncMessagesResult extends UnsuccessfulResult {
         return messages;
     }
 
-    static class SyncMessageDelivery extends Message {
+    private static class SyncMessageDelivery extends Message {
 
         static Message toMessage(MessageResponse messageResponse) {
             Bundle bundle = new Bundle();

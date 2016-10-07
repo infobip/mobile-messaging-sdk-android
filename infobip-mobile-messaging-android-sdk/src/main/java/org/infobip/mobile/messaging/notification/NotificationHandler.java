@@ -42,8 +42,8 @@ public class NotificationHandler {
             Notification notification = builder.build();
             notificationManager.notify(notificationId, notification);
         } catch (SecurityException se) {
-            se.printStackTrace();
             Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+            Log.d(MobileMessaging.TAG, Log.getStackTraceString(se));
         }
     }
 

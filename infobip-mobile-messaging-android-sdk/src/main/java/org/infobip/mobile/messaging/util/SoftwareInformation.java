@@ -3,8 +3,11 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import org.infobip.mobile.messaging.BuildConfig;
+
+import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -24,7 +27,7 @@ public class SoftwareInformation {
         try {
             appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
         }
         return appVersion;
     }
@@ -39,12 +42,16 @@ public class SoftwareInformation {
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
             appName = packageManager.getApplicationLabel(applicationInfo).toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
         }
         return appName;
     }
 
     public static String getLibraryVersion() {
         return BuildConfig.VERSION_NAME;
+    }
+
+    public static boolean isDebuggableApplicationBuild(Context context) {
+        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 }

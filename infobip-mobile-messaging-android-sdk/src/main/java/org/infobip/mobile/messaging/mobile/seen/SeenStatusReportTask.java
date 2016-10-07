@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.seen;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -21,10 +22,10 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @since 25.04.2016.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResult> {
+class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResult> {
     private final Context context;
 
-    public SeenStatusReportTask(Context context) {
+    SeenStatusReportTask(Context context) {
         this.context = context;
     }
 

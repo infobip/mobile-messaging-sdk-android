@@ -2,17 +2,17 @@ package org.infobip.mobile.messaging.telephony;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.tasks.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 
 /**
  * @author sslavin
  * @since 22.04.2016.
  */
-public class MobileNetworkChangeHandler {
+class MobileNetworkChangeHandler {
 
     private Context context;
 
-    public MobileNetworkChangeHandler(Context context) {
+    MobileNetworkChangeHandler(Context context) {
         this.context = context;
     }
 

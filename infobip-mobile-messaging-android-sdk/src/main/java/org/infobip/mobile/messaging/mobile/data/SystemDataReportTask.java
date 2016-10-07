@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.data;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -19,11 +20,11 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @author sslavin
  * @since 25/08/16.
  */
-public class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataReportResult> {
+class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataReportResult> {
 
     private final Context context;
 
-    public SystemDataReportTask(Context context) {
+    SystemDataReportTask(Context context) {
         this.context = context;
     }
 

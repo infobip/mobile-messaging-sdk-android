@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.seen;
 
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -10,9 +10,9 @@ import java.util.List;
  * @author sslavin
  * @since 25/04/16.
  */
-public class SeenMessagesReport extends SeenMessages {
+class SeenMessagesReport extends SeenMessages {
 
-    public static SeenMessages fromMessageIds(String messageIds[]) {
+    static SeenMessages fromMessageIds(String messageIds[]) {
         List<Message> messages = new ArrayList<>();
         for (String seenMessage : messageIds) {
             String[] messageIdWithTimestamp = seenMessage.split(StringUtils.COMMA_WITH_SPACE);

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.reporters;
+package org.infobip.mobile.messaging.mobile;
 
 import android.content.Context;
 

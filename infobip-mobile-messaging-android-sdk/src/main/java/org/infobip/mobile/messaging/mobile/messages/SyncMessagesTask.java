@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -9,6 +9,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -17,11 +18,11 @@ import java.util.ArrayList;
  * @author pandric
  * @since 09/09/16.
  */
-public class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
+class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
 
     private final Context context;
 
-    public SyncMessagesTask(Context context) {
+    SyncMessagesTask(Context context) {
         this.context = context;
     }
 

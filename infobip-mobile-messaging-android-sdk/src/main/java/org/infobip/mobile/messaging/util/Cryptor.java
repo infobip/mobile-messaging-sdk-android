@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.util;
 
-import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
 import java.security.Key;
 import java.security.MessageDigest;
@@ -10,6 +10,8 @@ import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -26,7 +28,8 @@ public class Cryptor {
         try {
             sha = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
+            return;
         }
         keyBytes = sha.digest(keyBytes);
         keyBytes = Arrays.copyOf(keyBytes, 16);
@@ -52,24 +55,24 @@ public class Cryptor {
         return new String(decrypted);
     }
 
-    byte[] encodeAES128(byte data[]) {
+    private byte[] encodeAES128(byte data[]) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }
 
-    byte[] decodeAES128(byte data[]) {
+    private byte[] decodeAES128(byte data[]) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }

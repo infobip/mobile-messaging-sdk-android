@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -21,11 +22,11 @@ import java.util.Map;
  * @author sslavin
  * @since 21/07/16.
  */
-public class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>{
+class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>{
 
     private final Context context;
 
-    public SendMessageTask(Context context) {
+    SendMessageTask(Context context) {
         this.context = context;
     }
 

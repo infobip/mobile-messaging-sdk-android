@@ -12,7 +12,7 @@ public class DeviceInformation {
     private DeviceInformation() {
     }
 
-    public static String getDeviceID(Context context) {
+    static String getDeviceID(Context context) {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.reporters;
+package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +8,6 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tasks.SyncMessagesResult;
-import org.infobip.mobile.messaging.tasks.SyncMessagesTask;
 
 import java.util.List;
 import java.util.concurrent.Executor;

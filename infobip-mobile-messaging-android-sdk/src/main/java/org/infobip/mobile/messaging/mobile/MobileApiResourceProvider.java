@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile;
 
 import android.content.Context;
 
@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -30,6 +31,7 @@ public enum MobileApiResourceProvider {
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiMessages mobileApiMessages;
     private MobileApiData mobileApiData;
+    private MobileApiVersion mobileApiVersion;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -59,6 +61,16 @@ public enum MobileApiResourceProvider {
         mobileApiData = getGenerator(context).create(MobileApiData.class);
 
         return mobileApiData;
+    }
+
+    public MobileApiVersion getMobileApiVersion(Context context) {
+        if (null != mobileApiVersion) {
+            return mobileApiVersion;
+        }
+
+        mobileApiVersion = getGenerator(context).create(MobileApiVersion.class);
+
+        return mobileApiVersion;
     }
 
     String[] getUserAgentAdditions(Context context) {
@@ -112,5 +124,6 @@ public enum MobileApiResourceProvider {
         mobileApiRegistration = null;
         mobileApiMessages = null;
         mobileApiData = null;
+        mobileApiVersion = null;
     }
 }

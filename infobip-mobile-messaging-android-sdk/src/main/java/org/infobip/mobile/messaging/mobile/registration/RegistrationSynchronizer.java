@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.reporters;
+package org.infobip.mobile.messaging.mobile.registration;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,8 +10,6 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tasks.UpsertRegistrationResult;
-import org.infobip.mobile.messaging.tasks.UpsertRegistrationTask;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 

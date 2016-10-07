@@ -1,10 +1,11 @@
 package org.infobip.mobile.messaging.util;
 
-import android.content.Context;
 import android.os.Build;
-import android.provider.Settings;
+import android.util.Log;
 
 import java.lang.reflect.Field;
+
+import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -28,11 +29,11 @@ public class SystemInformation {
             try {
                 fieldValue = field.getInt(new Object());
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                Log.d(TAG, Log.getStackTraceString(e));
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                Log.d(TAG, Log.getStackTraceString(e));
             } catch (NullPointerException e) {
-                e.printStackTrace();
+                Log.d(TAG, Log.getStackTraceString(e));
             }
 
             if (fieldValue == Build.VERSION.SDK_INT) {

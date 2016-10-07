@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.data;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -22,10 +23,10 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @since 15/07/16.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
+class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
     private final Context context;
 
-    public SyncUserDataTask(Context context) {
+    SyncUserDataTask(Context context) {
         this.context = context;
     }
 

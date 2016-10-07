@@ -26,7 +26,7 @@ public class MobileNetworkInfo {
         this.context = context;
     }
 
-    public static MobileNetworkInfo fromProperties(Context context) {
+    static MobileNetworkInfo fromProperties(Context context) {
         MobileNetworkInfo mobileNetworkInfo = new MobileNetworkInfo();
         mobileNetworkInfo.carrierName = PreferenceHelper.findString(context, MobileMessagingProperty.MOBILE_CARRIER_NAME);
         mobileNetworkInfo.mcc = PreferenceHelper.findString(context, MobileMessagingProperty.MOBILE_COUNTRY_CODE);
@@ -37,7 +37,7 @@ public class MobileNetworkInfo {
         return mobileNetworkInfo;
     }
 
-    public static MobileNetworkInfo fromSystem(Context context) {
+    static MobileNetworkInfo fromSystem(Context context) {
         MobileNetworkInfo mobileNetworkInfo = new MobileNetworkInfo(context);
         mobileNetworkInfo.carrierName = MobileNetworkInformation.getMobileCarrierName(context);
         mobileNetworkInfo.mcc = MobileNetworkInformation.getMobileCoutryCode(context);
@@ -48,7 +48,7 @@ public class MobileNetworkInfo {
         return mobileNetworkInfo;
     }
 
-    public void save() {
+    void save() {
         PreferenceHelper.saveString(context, MobileMessagingProperty.MOBILE_CARRIER_NAME, carrierName);
         PreferenceHelper.saveString(context, MobileMessagingProperty.MOBILE_COUNTRY_CODE, mcc);
         PreferenceHelper.saveString(context, MobileMessagingProperty.MOBILE_NETWORK_CODE, mnc);
@@ -57,7 +57,7 @@ public class MobileNetworkInfo {
         PreferenceHelper.saveString(context, MobileMessagingProperty.SIM_NETWORK_CODE, simMnc);
     }
 
-    public boolean isEqual(MobileNetworkInfo mobileNetworkInfo) {
+    boolean isEqual(MobileNetworkInfo mobileNetworkInfo) {
         return (mobileNetworkInfo != null &&
                 this.mnc.equals(mobileNetworkInfo.mnc) &&
                 this.mcc.equals(mobileNetworkInfo.mcc) &&

@@ -60,7 +60,9 @@ public class DefaultApiClient implements ApiClient {
             urlConnection = (HttpURLConnection) new URL(uri + sb.toString()).openConnection();
             urlConnection.setRequestMethod(method.name());
             urlConnection.setUseCaches(false);
-            urlConnection.setDoOutput(true);
+            if (method != HttpMethod.GET) {
+                urlConnection.setDoOutput(true);
+            }
             urlConnection.setDoInput(true);
             urlConnection.setConnectTimeout(connectTimeout);
             urlConnection.setReadTimeout(readTimeout);

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.reporters;
+package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,8 +16,6 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.tasks.SendMessageResult;
-import org.infobip.mobile.messaging.tasks.SendMessageTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +31,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class MessageSender {
 
-    static class MessageDelivery extends Message {
+    private static class MessageDelivery extends Message {
 
         static void setStatus(Message message, Status status, String statusMessage) {
             if (message.getBundle() == null) {
@@ -49,7 +47,8 @@ public class MessageSender {
             try {
                 object = new JSONObject(json);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.w(TAG, "Cannot parse message from JSON: " + e.getMessage());
+                Log.d(TAG, Log.getStackTraceString(e));
                 return new Message();
             }
 

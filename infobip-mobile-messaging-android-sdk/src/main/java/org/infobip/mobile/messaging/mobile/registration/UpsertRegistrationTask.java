@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.tasks;
+package org.infobip.mobile.messaging.mobile.registration;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
@@ -22,7 +23,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 public class UpsertRegistrationTask extends AsyncTask<Object, Void, UpsertRegistrationResult> {
     private final Context context;
 
-    public UpsertRegistrationTask(Context context) {
+    UpsertRegistrationTask(Context context) {
         this.context = context;
     }
 

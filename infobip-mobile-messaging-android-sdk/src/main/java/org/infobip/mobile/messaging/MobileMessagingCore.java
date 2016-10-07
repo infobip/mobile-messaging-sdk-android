@@ -7,12 +7,13 @@ import android.content.Intent;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.reporters.MessageSender;
-import org.infobip.mobile.messaging.reporters.MessagesSynchronizer;
-import org.infobip.mobile.messaging.reporters.RegistrationSynchronizer;
-import org.infobip.mobile.messaging.reporters.SeenStatusReporter;
-import org.infobip.mobile.messaging.reporters.SystemDataReporter;
-import org.infobip.mobile.messaging.reporters.UserDataSynchronizer;
+import org.infobip.mobile.messaging.mobile.messages.MessageSender;
+import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
+import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
+import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
+import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
+import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
+import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -45,6 +46,7 @@ public class MobileMessagingCore {
     private final UserDataSynchronizer userDataSynchronizer = new UserDataSynchronizer();
     private final MessageSender messageSender = new MessageSender();
     private final SystemDataReporter systemDataReporter = new SystemDataReporter();
+    private final VersionChecker versionChecker = new VersionChecker();
     private final MobileMessagingStats stats;
     private final Executor taskExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
@@ -85,6 +87,7 @@ public class MobileMessagingCore {
         userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
+        versionChecker.check(context);
     }
 
     public String getRegistrationId() {
