@@ -45,7 +45,7 @@ public class DateTimeUtil {
     /**
      * This method compares ONLY times of two dates. Year, month and day are ignored in this comparison.
      *
-     * @return sum of two timestamps
+     * @return difference of two timestamps
      */
     public static int compareTimes(Date d1, Date d2) {
         int t1 = (int) (d1.getTime() % (24 * 60 * 60 * 1000L));
