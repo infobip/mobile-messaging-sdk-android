@@ -55,8 +55,8 @@ public class DateTimeUtil {
 
     public static int dayOfWeekISO8601() {
         Calendar calendar = Calendar.getInstance();
-        int calendarDayOfMonth = calendar.get(Calendar.DAY_OF_WEEK); // Calendar day numbers, 1 refer to Sunday
-        return calendarDayOfMonth == 1 ? 7 : calendarDayOfMonth - 1; // ISO 8601, 1 refers to Monday
+        int calendarDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK); // Calendar day numbers, 1 refer to Sunday
+        return calendarDayOfWeek == 1 ? 7 : calendarDayOfWeek - 1; // ISO 8601, 1 refers to Monday
     }
 
     public static boolean isCurrentTimeBetweenDates(String startTime, String endTime) throws ParseException {
