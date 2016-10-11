@@ -141,6 +141,22 @@ public class UserData {
         setField(PredefinedField.EMAIL, email);
     }
 
+    public String getMiddleName() {
+        return getField(PredefinedField.MIDDLE_NAME);
+    }
+
+    public void setMiddleName(String middleName) {
+        setField(PredefinedField.MIDDLE_NAME, middleName);
+    }
+    
+    public String getLandlineNumber() {
+        return getField(PredefinedField.LANDLINE_NUMBER);
+    }
+    
+    public void setLandlineNumber(String telephone) {
+        setField(PredefinedField.LANDLINE_NUMBER, telephone);
+    }
+
     public void setExternalUserId(String externalUserId) {
         this.externalUserId = externalUserId;
     }
@@ -170,9 +186,11 @@ public class UserData {
         MSISDN("msisdn"),
         FIRST_NAME("firstName"),
         LAST_NAME("lastName"),
+        MIDDLE_NAME("middleName"),
         GENDER("gender"),
         BIRTHDATE("birthdate"),
-        EMAIL("email");
+        EMAIL("email"),
+        LANDLINE_NUMBER("telephone");
 
         private final String key;
 
