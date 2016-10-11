@@ -2,8 +2,11 @@ package org.infobip.mobile.messaging.util;
 
 import android.util.Log;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
@@ -37,5 +40,37 @@ public class DateTimeUtil {
             Log.d(TAG, Log.getStackTraceString(e));
         }
         return null;
+    }
+
+    /**
+     * This method compares ONLY times of two dates. Year, month and day are ignored in this comparison.
+     *
+     * @return sum of two timestamps
+     */
+    public static int compareTimes(Date d1, Date d2) {
+        int t1 = (int) (d1.getTime() % (24 * 60 * 60 * 1000L));
+        int t2 = (int) (d2.getTime() % (24 * 60 * 60 * 1000L));
+        return (t1 - t2);
+    }
+
+    public static int dayOfWeekISO8601() {
+        Calendar calendar = Calendar.getInstance();
+        int calendarDayOfMonth = calendar.get(Calendar.DAY_OF_WEEK); // Calendar day numbers, 1 refer to Sunday
+        return calendarDayOfMonth == 1 ? 7 : calendarDayOfMonth - 1; // ISO 8601, 1 refers to Monday
+    }
+
+    public static boolean isCurrentTimeBetweenDates(String startTime, String endTime) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HHmm", Locale.getDefault());
+
+        Date startDate = simpleDateFormat.parse(startTime);
+        Calendar timeStart = Calendar.getInstance();
+        timeStart.setTime(startDate);
+
+        Date endDate = simpleDateFormat.parse(endTime);
+        Calendar timeEnd = Calendar.getInstance();
+        timeEnd.setTime(endDate);
+
+        Date nowDate = new Date();
+        return DateTimeUtil.compareTimes(startDate, nowDate) < 0 && DateTimeUtil.compareTimes(nowDate, endDate) < 0;
     }
 }

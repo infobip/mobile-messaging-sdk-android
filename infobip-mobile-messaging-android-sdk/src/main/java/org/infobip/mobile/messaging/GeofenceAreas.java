@@ -106,6 +106,9 @@ public class GeofenceAreas implements Parcelable {
         @SerializedName("event")
         private List<GeoEvent> events;
 
+        @SerializedName("deliveryTime")
+        private DeliveryTime deliveryTime;
+
         public Area(String id, String title, Double latitude, Double longitude, Integer radius, String expiryTime) {
             this.id = id;
             this.title = title;
@@ -135,6 +138,10 @@ public class GeofenceAreas implements Parcelable {
                 return new Area[size];
             }
         };
+
+        public DeliveryTime getDeliveryTime() {
+            return deliveryTime;
+        }
 
         public Date getExpiryDate() {
             return DateTimeUtil.ISO8601DateFromString(expiryTime);
@@ -251,6 +258,27 @@ public class GeofenceAreas implements Parcelable {
 
             public String getType() {
                 return type;
+            }
+        }
+
+        public static class DeliveryTime {
+            @SerializedName("days")
+            private String days;
+
+            @SerializedName("timeInterval")
+            private String timeInterval;
+
+            public DeliveryTime(String days, String timeInterval) {
+                this.days = days;
+                this.timeInterval = timeInterval;
+            }
+
+            public String getDays() {
+                return days;
+            }
+
+            public String getTimeInterval() {
+                return timeInterval;
             }
         }
     }

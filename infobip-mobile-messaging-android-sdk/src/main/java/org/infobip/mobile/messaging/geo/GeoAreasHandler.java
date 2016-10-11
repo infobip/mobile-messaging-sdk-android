@@ -17,17 +17,21 @@ import org.infobip.mobile.messaging.GeofenceAreas;
 import org.infobip.mobile.messaging.GeofenceAreas.Area;
 import org.infobip.mobile.messaging.GeofenceAreas.Area.GeoEvent;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * @author pandric
@@ -44,22 +48,19 @@ class GeoAreasHandler {
     private final Random random = new Random();
     private final Context context;
 
-    private static SparseArray<String> transitionNames = new SparseArray<String>()
-    {{
+    private static SparseArray<String> transitionNames = new SparseArray<String>() {{
         put(Geofence.GEOFENCE_TRANSITION_ENTER, "GEOFENCE_TRANSITION_ENTER");
         put(Geofence.GEOFENCE_TRANSITION_EXIT, "GEOFENCE_TRANSITION_EXIT");
         put(Geofence.GEOFENCE_TRANSITION_DWELL, "GEOFENCE_TRANSITION_DWELL");
     }};
 
-    private static SparseArray<String> geofencingErrors = new SparseArray<String>()
-    {{
+    private static SparseArray<String> geofencingErrors = new SparseArray<String>() {{
         put(GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE, "Geofence not available");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES, "Too many geofences");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
     }};
 
-    private static SparseArray<Event> transitionEvents = new SparseArray<Event>()
-    {{
+    private static SparseArray<Event> transitionEvents = new SparseArray<Event>() {{
         put(Geofence.GEOFENCE_TRANSITION_ENTER, Event.GEOFENCE_AREA_ENTERED);
     }};
 
@@ -98,7 +99,9 @@ class GeoAreasHandler {
                 GeofenceAreas geofenceAreas = new GeofenceAreas(
                         triggeringLocation.getLatitude(),
                         triggeringLocation.getLongitude(),
-                        new ArrayList<Area>(){{add(area);}});
+                        new ArrayList<Area>() {{
+                            add(area);
+                        }});
 
                 notifyAboutTransition(context, geofenceAreas, geofenceTransition, message);
 
@@ -114,11 +117,74 @@ class GeoAreasHandler {
         long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition);
         GeoEvent settings = getNotificationSettingsForTransition(area, geofenceTransition);
 
+        boolean isInDeliveryWindow = checkIsAreaInDeliveryWindow(area.getDeliveryTime());
+
         return settings != null &&
+                isInDeliveryWindow &&
                 (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEvent.UNLIMITED_RECURRING) &&
                 TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
                 geoEventMatchesTransition(settings, geofenceTransition) &&
                 !area.isExpired();
+    }
+
+    private boolean checkIsAreaInDeliveryWindow(Area.DeliveryTime deliveryTime) {
+        try {
+            if (deliveryTime == null) {
+                return true;
+            }
+
+            String daysPayload = deliveryTime.getDays();
+            if (!shouldDeliverToday(daysPayload)) {
+                return false;
+            }
+
+            String timeInterval = deliveryTime.getTimeInterval();
+            return checkIsDeliveryInTimeInterval(timeInterval);
+
+        } catch (ParseException e) {
+            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            return true;
+        }
+    }
+
+    private boolean shouldDeliverToday(String daysPayload) {
+        String[] days = null;
+
+        if (daysPayload == null) {
+            return false;
+        }
+
+        try {
+            days = daysPayload.split(",");
+        } catch (PatternSyntaxException e) {
+            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+        }
+
+        if (days == null) {
+            return false;
+        }
+
+        int dayOfMonthISO8601 = DateTimeUtil.dayOfWeekISO8601();
+
+        for (String day : days) {
+            if (day.equalsIgnoreCase(String.valueOf(dayOfMonthISO8601))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkIsDeliveryInTimeInterval(String timeInterval) throws ParseException {
+        if (timeInterval == null) {
+            return false;
+        }
+
+        String[] timeIntervalStartEnd = timeInterval.split("/");
+        String startTime = timeIntervalStartEnd[0];
+        String endTime = timeIntervalStartEnd[1];
+
+        return DateTimeUtil.isCurrentTimeBetweenDates(startTime, endTime);
     }
 
     private GeoEvent getNotificationSettingsForTransition(Area area, int geofenceTransition) {
