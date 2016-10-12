@@ -1,6 +1,18 @@
 buildscript {
+    ext {
+        artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
+        artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
+    }
+
     repositories {
         jcenter()
+        maven {
+            url 'https://oss.jfrog.org/artifactory/plugins-release'
+            credentials {
+                username = "${artifactoryUsername}"
+                password = "${artifactoryPassword}"
+            }
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.0'
@@ -8,9 +20,11 @@ buildscript {
     }
 }
 
+
+
 plugins {
     id 'net.researchgate.release' version '2.2.1'
-    id "com.jfrog.artifactory" version "4.0.0"
+    id "com.jfrog.artifactory" version "4.4.7"
 }
 
 allprojects {
@@ -22,15 +36,13 @@ allprojects {
 subprojects {
     apply plugin: "com.jfrog.artifactory"
 
-    def repo = version.endsWith('SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
-    def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "http://ci-server.infobip.local/artifactory"
-    def artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
-    def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
+    def repo = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
+    def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "https://oss.jfrog.org/artifactory"
 
     task checkProperties << {
-        if (!artifactoryUsername) {
+        if (!"${artifactoryUsername}") {
             throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
-        } else if (!artifactoryPassword) {
+        } else if (!"${artifactoryPassword}") {
             throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
         }
     }
@@ -52,7 +64,7 @@ subprojects {
         }
         resolve {
             repository {
-                repoKey = 'repo'
+                repoKey = 'libs-release'
                 username = "${artifactoryUsername}"
                 password = "${artifactoryPassword}"
                 maven = true
