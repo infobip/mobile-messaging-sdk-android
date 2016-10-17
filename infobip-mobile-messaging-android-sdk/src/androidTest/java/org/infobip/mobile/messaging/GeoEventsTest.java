@@ -105,17 +105,17 @@ public class GeoEventsTest extends InstrumentationTestCase {
                 "        {\n" +
                 "          \"type\": \"entry\",\n" +
                 "          \"limit\": 0,\n" +
-                "          \"timeout\": 1\n" +
+                "          \"timeoutInMinutes\": 1\n" +
                 "        },\n" +
                 "        {\n" +
                 "          \"type\": \"exit\",\n" +
                 "          \"limit\": 2,\n" +
-                "          \"timeout\": 2\n" +
+                "          \"timeoutInMinutes\": 2\n" +
                 "        },\n" +
                 "        {\n" +
                 "          \"type\": \"remain\",\n" +
                 "          \"limit\": 3,\n" +
-                "          \"timeout\": 3\n" +
+                "          \"timeoutInMinutes\": 3\n" +
                 "        }\n" +
                 "      ]\n" +
                 "    }\n" +
