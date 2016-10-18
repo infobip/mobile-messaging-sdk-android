@@ -80,7 +80,7 @@
             </intent-filter>
         </receiver>
         
-        <receiver android:name="org.infobip.mobile.messaging.GeofencingAlarmReceiver"/>
+        <receiver android:name="org.infobip.mobile.messaging.geo.GeofencingAlarmReceiver"/>
 
     </application>
 </manifest>

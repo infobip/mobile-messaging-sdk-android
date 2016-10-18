@@ -4,8 +4,10 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.GeofenceAreas.Area.GeoEvent;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.geo.Area;
+import org.infobip.mobile.messaging.geo.Geo;
+import org.infobip.mobile.messaging.geo.GeoEvent;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.List;
@@ -17,6 +19,16 @@ import java.util.concurrent.TimeUnit;
 public class GeoEventsTest extends InstrumentationTestCase {
 
     private Context context;
+
+    private class GeoTest extends Geo {
+        public GeoTest() {
+            super(null, null, null);
+        }
+
+        List<GeoEvent> getEventFilters() {
+            return getEvents();
+        }
+    }
 
     @Override
     protected void setUp() throws Exception {
@@ -31,34 +43,34 @@ public class GeoEventsTest extends InstrumentationTestCase {
         super.tearDown();
     }
 
-    private int getNumberOfDisplayedNotificationsForArea(GeofenceAreas.Area area) {
+    private int getNumberOfDisplayedNotificationsForArea(Area area) {
         return PreferenceHelper.findInt(context, "num" + area.getId(), 0);
     }
 
-    private long getLastNotificationTimeForArea(GeofenceAreas.Area area) {
+    private long getLastNotificationTimeForArea(Area area) {
         return PreferenceHelper.findLong(context, "time" + area.getId(), 0);
     }
 
-    private void setNumberOfDisplayedNotificationsForArea(GeofenceAreas.Area area, int n) {
+    private void setNumberOfDisplayedNotificationsForArea(Area area, int n) {
         PreferenceHelper.saveInt(context, "num" + area.getId(), n);
     }
 
-    private void setLastNotificationTimeForArea(GeofenceAreas.Area area, long timeMs) {
+    private void setLastNotificationTimeForArea(Area area, long timeMs) {
         PreferenceHelper.saveLong(context, "time" + area.getId(), timeMs);
     }
 
     public void test_handle_geo_events() throws InterruptedException {
-        GeofenceAreas geofenceAreas = new JsonSerializer().deserialize(internalData(), GeofenceAreas.class);
-        List<GeofenceAreas.Area> geofenceAreasList = geofenceAreas.getAreasList();
+        GeoTest geo = new JsonSerializer().deserialize(internalData(), GeoTest.class);
+        List<Area> geofenceAreasList = geo.getAreasList();
 
         int entryCnt = 0;
 
         for (int i = 0; i < 5; i++) {
 
-            for (GeofenceAreas.Area area : geofenceAreasList) {
+            List<GeoEvent> events = geo.getEventFilters();
+            for (GeoEvent event : events) {
 
-                List<GeoEvent> events = area.getEvents();
-                for (GeoEvent event : events) {
+                for (Area area : geo.getAreasList()) {
 
                     Thread.sleep(TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes() + 1)); // simulate delay between events
 
@@ -92,6 +104,22 @@ public class GeoEventsTest extends InstrumentationTestCase {
 
     private String internalData() {
         return "{\n" +
+                " \"event\": [\n" +
+                "  {\n" +
+                "    \"type\": \"entry\",\n" +
+                "    \"limit\": 0,\n" +
+                "    \"timeoutInMinutes\": 1\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"type\": \"exit\",\n" +
+                "    \"limit\": 2,\n" +
+                "    \"timeoutInMinutes\": 2\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"type\": \"remain\",\n" +
+                "    \"limit\": 3,\n" +
+                "    \"timeoutInMinutes\": 3\n" +
+                "  }],\n" +
                 "  \"geo\": [\n" +
                 "    {\n" +
                 "      \"radiusInMeters\": 1000,\n" +
@@ -100,24 +128,7 @@ public class GeoEventsTest extends InstrumentationTestCase {
                 "      \"expiry\": 1469292326099,\n" +
                 "      \"title\": \"Zagreb\",\n" +
                 "      \"favorite\": false,\n" +
-                "      \"longitude\": 15.97749,\n" +
-                "      \"event\": [\n" +
-                "        {\n" +
-                "          \"type\": \"entry\",\n" +
-                "          \"limit\": 0,\n" +
-                "          \"timeoutInMinutes\": 1\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"type\": \"exit\",\n" +
-                "          \"limit\": 2,\n" +
-                "          \"timeoutInMinutes\": 2\n" +
-                "        },\n" +
-                "        {\n" +
-                "          \"type\": \"remain\",\n" +
-                "          \"limit\": 3,\n" +
-                "          \"timeoutInMinutes\": 3\n" +
-                "        }\n" +
-                "      ]\n" +
+                "      \"longitude\": 15.97749\n" +
                 "    }\n" +
                 "  ]\n" +
                 "}";

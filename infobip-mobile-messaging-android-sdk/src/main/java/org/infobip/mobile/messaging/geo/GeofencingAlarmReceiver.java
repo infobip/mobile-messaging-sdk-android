@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresPermission;
 
+import org.infobip.mobile.messaging.geo.Geofencing;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;

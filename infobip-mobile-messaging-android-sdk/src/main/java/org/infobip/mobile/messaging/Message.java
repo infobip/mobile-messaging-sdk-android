@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.geo.Geo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -185,17 +186,16 @@ public class Message implements Comparable<Message> {
         return vibrate;
     }
 
-    public List<GeofenceAreas.Area> getGeofenceAreasList() {
+    public Geo getGeo() {
         if (getInternalData() == null) {
-            return new ArrayList<>(0);
+            return null;
         }
 
         try {
-            GeofenceAreas geofenceAreas = new JsonSerializer().deserialize(getInternalData().toString(), GeofenceAreas.class);
-            return geofenceAreas.getAreasList();
+            return new JsonSerializer().deserialize(getInternalData().toString(), Geo.class);
         } catch (Exception e) {
             Log.e(MobileMessaging.TAG, e.getMessage(), e);
-            return new ArrayList<>(0);
+            return null;
         }
     }
 

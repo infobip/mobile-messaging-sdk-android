@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import android.Manifest;
 import android.app.AlarmManager;
@@ -21,10 +21,12 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.infobip.mobile.messaging.ConfigurationException.Reason;
+import org.infobip.mobile.messaging.geo.ConfigurationException.Reason;
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
-import org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
@@ -71,7 +73,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         return instance;
     }
 
-    static void scheduleRefresh(Context context) {
+    public static void scheduleRefresh(Context context) {
         scheduleRefresh(context, new Date());
     }
 
@@ -86,37 +88,45 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, new Intent(context, GeofencingAlarmReceiver.class), 0));
     }
 
-    static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
+    private static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
         Date nextCheckDate = null;
         Date now = new Date();
         Map<String, Geofence> geofences = new HashMap<>();
+        Map<String, Date> expiryDates = new HashMap<>();
         List<Message> messages = messageStore.bind(context);
 
         for (Message message : messages) {
-            List<GeofenceAreas.Area> geoAreasList = message.getGeofenceAreasList();
-            if (geoAreasList == null || geoAreasList.isEmpty()) {
+            Geo geo = message.getGeo();
+            if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
                 continue;
             }
 
-            for (GeofenceAreas.Area area : geoAreasList) {
+            if (!geo.isEligibleForMonitoring()) {
+                continue;
+            }
 
-                if (area.isExpired()) {
+            List<Area> geoAreasList = message.getGeo().getAreasList();
+            for (Area area : geoAreasList) {
+                if (!area.isValid()) {
                     continue;
                 }
 
-                if (area.isEligibleForMonitoring()) {
-                    geofences.put(area.getId(), area.toGeofence());
+                Date expiry = expiryDates.get(area.getId());
+                if (expiry != null && expiry.after(geo.getExpiryDate())) {
                     continue;
                 }
 
-                Date startDate = area.getStartDate();
-                Date expiryDate = area.getExpiryDate();
-                if (nextCheckDate == null) {
-                    nextCheckDate = startDate;
-                } else if (startDate != null && startDate.before(nextCheckDate) &&
-                        expiryDate != null && expiryDate.after(now)) {
-                    nextCheckDate = startDate;
-                }
+                expiryDates.put(area.getId(), geo.getExpiryDate());
+                geofences.put(area.getId(), area.toGeofence(geo.getExpiryDate()));
+            }
+
+            Date startDate = geo.getStartDate();
+            Date expiryDate = geo.getExpiryDate();
+            if (nextCheckDate == null) {
+                nextCheckDate = startDate;
+            } else if (startDate != null && startDate.before(nextCheckDate) &&
+                    expiryDate != null && expiryDate.after(now)) {
+                nextCheckDate = startDate;
             }
         }
 
@@ -161,7 +171,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     }
 
-    void deactivate() {
+    public void deactivate() {
 
         if (!checkRequiredPermissions()) {
             return;

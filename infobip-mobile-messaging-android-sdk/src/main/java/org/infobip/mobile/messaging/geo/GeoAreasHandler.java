@@ -13,9 +13,6 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.GeofenceAreas;
-import org.infobip.mobile.messaging.GeofenceAreas.Area;
-import org.infobip.mobile.messaging.GeofenceAreas.Area.GeoEvent;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
@@ -96,14 +93,14 @@ class GeoAreasHandler {
                 }
 
                 Location triggeringLocation = geofencingEvent.getTriggeringLocation();
-                GeofenceAreas geofenceAreas = new GeofenceAreas(
+                Geo geoToNotify = new Geo(
                         triggeringLocation.getLatitude(),
                         triggeringLocation.getLongitude(),
                         new ArrayList<Area>() {{
                             add(area);
                         }});
 
-                notifyAboutTransition(context, geofenceAreas, geofenceTransition, message);
+                notifyAboutTransition(context, geoToNotify, geofenceTransition, message);
 
                 setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
                 setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
@@ -115,19 +112,20 @@ class GeoAreasHandler {
     private boolean shouldNotifyAboutTransition(Message message, Area area, int geofenceTransition) {
         int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition);
         long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition);
-        GeoEvent settings = getNotificationSettingsForTransition(area, geofenceTransition);
+        Geo geo = message.getGeo();
+        GeoEvent settings = getNotificationSettingsForTransition(geo.getEvents(), geofenceTransition);
 
-        boolean isInDeliveryWindow = checkIsAreaInDeliveryWindow(area.getDeliveryTime());
+        boolean isInDeliveryWindow = checkIsAreaInDeliveryWindow(geo.getDeliveryTime());
 
         return settings != null &&
                 isInDeliveryWindow &&
                 (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEvent.UNLIMITED_RECURRING) &&
                 TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
                 geoEventMatchesTransition(settings, geofenceTransition) &&
-                !area.isExpired();
+                !geo.isExpired();
     }
 
-    private boolean checkIsAreaInDeliveryWindow(Area.DeliveryTime deliveryTime) {
+    private boolean checkIsAreaInDeliveryWindow(DeliveryTime deliveryTime) {
         try {
             if (deliveryTime == null) {
                 return true;
@@ -187,12 +185,12 @@ class GeoAreasHandler {
         return DateTimeUtil.isCurrentTimeBetweenDates(startTime, endTime);
     }
 
-    private GeoEvent getNotificationSettingsForTransition(Area area, int geofenceTransition) {
-        if (area.getEvents() == null || area.getEvents().isEmpty()) {
+    private GeoEvent getNotificationSettingsForTransition(List<GeoEvent> eventFilters, int geofenceTransition) {
+        if (eventFilters == null || eventFilters.isEmpty()) {
             return DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER;
         }
 
-        for (GeoEvent e : area.getEvents()) {
+        for (GeoEvent e : eventFilters) {
             if (!geoEventMatchesTransition(e, geofenceTransition)) {
                 continue;
             }
@@ -229,19 +227,19 @@ class GeoAreasHandler {
         PreferenceHelper.saveLong(context, areaNotificationTimeKey(messageId, areaId, geofenceTransition), timeMs);
     }
 
-    private void notifyAboutTransition(Context context, GeofenceAreas geofenceAreas, int geofenceTransition, Message message) {
+    private void notifyAboutTransition(Context context, Geo geo, int geofenceTransition, Message message) {
         NotificationHandler.displayNotification(context, message, random.nextInt());
-        sendGeoEventBroadcast(context, geofenceTransition, geofenceAreas, message);
+        sendGeoEventBroadcast(context, geofenceTransition, geo, message);
     }
 
-    private void sendGeoEventBroadcast(Context context, int geofenceTransition, GeofenceAreas geofenceAreas, Message message) {
+    private void sendGeoEventBroadcast(Context context, int geofenceTransition, Geo geo, Message message) {
         Event event = transitionEvents.get(geofenceTransition);
         if (event == null) {
             return;
         }
 
         Intent geofenceIntent = new Intent(event.getKey());
-        geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geofenceAreas);
+        geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
         geofenceIntent.putExtras(message.getBundle());
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
         context.sendBroadcast(geofenceIntent);
@@ -256,22 +254,23 @@ class GeoAreasHandler {
     private Map<Message, List<Area>> findMessagesAndAreasForTriggeringGeofences(Context context, List<Geofence> geofences) {
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
-            List<Area> geoAreas = message.getGeofenceAreasList();
-            if (geoAreas == null || geoAreas.isEmpty()) {
+            Geo geo = message.getGeo();
+            if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
                 continue;
             }
 
-            List<Area> areas = new ArrayList<>();
-            for (Area area : geoAreas) {
+            List<Area> campaignAreas = geo.getAreasList();
+            List<Area> triggeredAreas = new ArrayList<>();
+            for (Area area : campaignAreas) {
                 for (Geofence geofence : geofences) {
                     if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
-                        areas.add(area);
+                        triggeredAreas.add(area);
                     }
                 }
             }
 
-            if (!areas.isEmpty()) {
-                messagesAndAreas.put(message, areas);
+            if (!triggeredAreas.isEmpty()) {
+                messagesAndAreas.put(message, triggeredAreas);
             }
         }
 

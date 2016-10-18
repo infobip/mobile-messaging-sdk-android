@@ -5,7 +5,11 @@ import android.os.Bundle;
 import junit.framework.TestCase;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
+import org.infobip.mobile.messaging.geo.Area;
+import org.infobip.mobile.messaging.geo.Geo;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertNotEquals;
 
@@ -14,6 +18,16 @@ import static org.junit.Assert.assertNotEquals;
  * @since 30.03.2016.
  */
 public class MessageTest extends TestCase {
+
+    class GeoTest extends Geo {
+        GeoTest() {
+            super(null, null, null);
+        }
+
+        Date getExpiry() {
+            return super.getExpiryDate();
+        }
+    }
 
     @Override
     protected void setUp() throws Exception {
@@ -219,39 +233,39 @@ public class MessageTest extends TestCase {
             "\"expiryTime\":\"2016-08-06T12:20:16+03:00\"" +
         "}";
 
-        GeofenceAreas.Area area = new Gson().fromJson(geofence, GeofenceAreas.Area.class);
+        GeoTest geo = new Gson().fromJson(geofence, GeoTest.class);
 
-        assertNotNull(area.getExpiryDate());
-        assertNotEquals(0L, area.getExpiryDate().getTime());
+        assertNotNull(geo.getExpiry());
+        assertNotEquals(0L, geo.getExpiry().getTime());
 
         geofence =
         "{" +
             "\"expiryTime\":\"2016-12-06T13:20:16+0300\"" +
         "}";
 
-        area = new Gson().fromJson(geofence, GeofenceAreas.Area.class);
+        geo = new Gson().fromJson(geofence, GeoTest.class);
 
-        assertNotNull(area.getExpiryDate());
-        assertNotEquals(0L, area.getExpiryDate().getTime());
+        assertNotNull(geo.getExpiry());
+        assertNotEquals(0L, geo.getExpiry().getTime());
 
         geofence =
         "{" +
             "\"expiryTime\":\"2016-08-31T14:20:16+03\"" +
         "}";
 
-        area = new Gson().fromJson(geofence, GeofenceAreas.Area.class);
+        geo = new Gson().fromJson(geofence, GeoTest.class);
 
-        assertNotNull(area.getExpiryDate());
-        assertNotEquals(0L, area.getExpiryDate().getTime());
+        assertNotNull(geo.getExpiry());
+        assertNotEquals(0L, geo.getExpiry().getTime());
 
         geofence =
         "{" +
             "\"expiryTime\":\"2016-08-31T14:20:16Z\"" +
         "}";
 
-        area = new Gson().fromJson(geofence, GeofenceAreas.Area.class);
+        geo = new Gson().fromJson(geofence, GeoTest.class);
 
-        assertNotNull(area.getExpiryDate());
-        assertNotEquals(0L, area.getExpiryDate().getTime());
+        assertNotNull(geo.getExpiry());
+        assertNotEquals(0L, geo.getExpiry().getTime());
     }
 }

@@ -30,7 +30,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.GeofenceAreas;
+import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
@@ -133,10 +133,10 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            GeofenceAreas geofenceAreas = GeofenceAreas.createFrom(intent.getExtras());
+            Geo geo = Geo.createFrom(intent.getExtras());
             Message message = Message.createFrom(intent.getExtras());
             showToast(String.format(Locale.getDefault(), "Message: %s \n triggered for area: %f, %f",
-                    message.getBody(), geofenceAreas.getTriggeringLatitude(), geofenceAreas.getTriggeringLongitude()));
+                    message.getBody(), geo.getTriggeringLatitude(), geo.getTriggeringLongitude()));
         }
     };
 

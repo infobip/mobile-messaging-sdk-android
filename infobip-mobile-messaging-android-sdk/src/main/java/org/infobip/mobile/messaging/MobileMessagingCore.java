@@ -7,6 +7,7 @@ import android.content.Intent;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.geo.Geofencing;
 import org.infobip.mobile.messaging.mobile.messages.MessageSender;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
@@ -329,11 +330,11 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
     }
 
-    static void setGeofencingActivated(Context context, boolean activated) {
+    public static void setGeofencingActivated(Context context, boolean activated) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, activated);
     }
 
-    static boolean isGeofencingActivated(Context context) {
+    public static boolean isGeofencingActivated(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
