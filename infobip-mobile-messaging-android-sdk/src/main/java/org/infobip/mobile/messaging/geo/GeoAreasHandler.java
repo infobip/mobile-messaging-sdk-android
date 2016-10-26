@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -39,7 +40,7 @@ class GeoAreasHandler {
     private static final String TAG = "GeofenceTransitions";
     private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
-    private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent("entry", 1, 0L);
+    private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent(GeoEventType.entry, 1, 0L);
 
     private final MessageStore messageStore = new SharedPreferencesMessageStore();
     private final Random random = new Random();
@@ -57,8 +58,12 @@ class GeoAreasHandler {
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
     }};
 
-    private static SparseArray<Event> transitionEvents = new SparseArray<Event>() {{
+    private static SparseArray<Event> transitionBroadcasts = new SparseArray<Event>() {{
         put(Geofence.GEOFENCE_TRANSITION_ENTER, Event.GEOFENCE_AREA_ENTERED);
+    }};
+
+    private static SparseArray<GeoEventType> transitionReportEvents = new SparseArray<GeoEventType>() {{
+        put(Geofence.GEOFENCE_TRANSITION_ENTER, GeoEventType.entry);
     }};
 
     GeoAreasHandler(Context context) {
@@ -79,6 +84,8 @@ class GeoAreasHandler {
         if (messagesAndAreas == null || messagesAndAreas.isEmpty()) {
             return;
         }
+
+        List<GeoReport> reports = new ArrayList<>();
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         for (Message message : messagesAndAreas.keySet()) {
@@ -105,7 +112,16 @@ class GeoAreasHandler {
                 setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
                 setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
                         getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition) + 1);
+
+                reports.add(new GeoReport(message.getGeo().getCampaignId(), message.getMessageId(),
+                        transitionReportEvents.get(geofenceTransition), area, System.currentTimeMillis()));
             }
+        }
+
+        if (!reports.isEmpty()) {
+            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+            mobileMessagingCore.addUnreportedGeoEvents(reports);
+            mobileMessagingCore.sync();
         }
     }
 
@@ -233,7 +249,7 @@ class GeoAreasHandler {
     }
 
     private void sendGeoEventBroadcast(Context context, int geofenceTransition, Geo geo, Message message) {
-        Event event = transitionEvents.get(geofenceTransition);
+        Event event = transitionBroadcasts.get(geofenceTransition);
         if (event == null) {
             return;
         }

@@ -32,6 +32,7 @@ public enum MobileMessagingProperty {
     USER_DATA("org.ninfobip.mobile.messaging.infobip.USER_DATA"),
     UNREPORTED_SYSTEM_DATA("org.ninfobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
     REPORTED_SYSTEM_DATA_HASH("org.ninfobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
+    UNREPORTED_GEO_EVENTS("org.ninfobip.mobile.messaging.infobip.UNREPORTED_GEO_EVENTS", new String[0]),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.infobip.GEOFENCING_ACTIVATED", true),
 

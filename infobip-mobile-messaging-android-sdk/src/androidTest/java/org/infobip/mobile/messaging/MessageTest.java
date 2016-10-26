@@ -4,8 +4,7 @@ import android.os.Bundle;
 
 import junit.framework.TestCase;
 
-import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
-import org.infobip.mobile.messaging.geo.Area;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -233,7 +232,7 @@ public class MessageTest extends TestCase {
             "\"expiryTime\":\"2016-08-06T12:20:16+03:00\"" +
         "}";
 
-        GeoTest geo = new Gson().fromJson(geofence, GeoTest.class);
+        GeoTest geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
 
         assertNotNull(geo.getExpiry());
         assertNotEquals(0L, geo.getExpiry().getTime());
@@ -243,7 +242,7 @@ public class MessageTest extends TestCase {
             "\"expiryTime\":\"2016-12-06T13:20:16+0300\"" +
         "}";
 
-        geo = new Gson().fromJson(geofence, GeoTest.class);
+        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
 
         assertNotNull(geo.getExpiry());
         assertNotEquals(0L, geo.getExpiry().getTime());
@@ -253,7 +252,7 @@ public class MessageTest extends TestCase {
             "\"expiryTime\":\"2016-08-31T14:20:16+03\"" +
         "}";
 
-        geo = new Gson().fromJson(geofence, GeoTest.class);
+        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
 
         assertNotNull(geo.getExpiry());
         assertNotEquals(0L, geo.getExpiry().getTime());
@@ -263,7 +262,7 @@ public class MessageTest extends TestCase {
             "\"expiryTime\":\"2016-08-31T14:20:16Z\"" +
         "}";
 
-        geo = new Gson().fromJson(geofence, GeoTest.class);
+        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
 
         assertNotNull(geo.getExpiry());
         assertNotEquals(0L, geo.getExpiry().getTime());

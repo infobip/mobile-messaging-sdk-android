@@ -15,7 +15,7 @@ public class GeoEvent implements Parcelable {
     public static final int UNLIMITED_RECURRING = 0;
 
     @SerializedName("type")
-    private String type;
+    private GeoEventType type;
 
     @SerializedName("limit")
     private Integer limit;
@@ -23,14 +23,14 @@ public class GeoEvent implements Parcelable {
     @SerializedName("timeoutInMinutes")
     private Long timeoutInMinutes;
 
-    public GeoEvent(String type, Integer limit, Long timeoutInMinutes) {
+    public GeoEvent(GeoEventType type, Integer limit, Long timeoutInMinutes) {
         this.type = type;
         this.limit = limit;
         this.timeoutInMinutes = timeoutInMinutes;
     }
 
     public GeoEvent(Parcel parcel) {
-        this.type = parcel.readString();
+        this.type = GeoEventType.valueOf(parcel.readString());
         this.limit = parcel.readInt();
         this.timeoutInMinutes = parcel.readLong();
     }
@@ -43,7 +43,7 @@ public class GeoEvent implements Parcelable {
         return timeoutInMinutes;
     }
 
-    public String getType() {
+    public GeoEventType getType() {
         return type;
     }
 
@@ -54,7 +54,7 @@ public class GeoEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(type);
+        parcel.writeString(type.name());
         parcel.writeInt(limit);
         parcel.writeLong(timeoutInMinutes);
     }

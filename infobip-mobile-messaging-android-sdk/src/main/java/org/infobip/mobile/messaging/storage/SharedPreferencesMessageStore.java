@@ -47,7 +47,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
     public List<Message> findAll(Context context) {
         return PreferenceHelper.find(context, getStoreTag(), new ArrayList<Message>(), new PreferenceHelper.SetConverter<List<Message>>() {
             @Override
-            protected List<Message> convert(Set<String> set) {
+            public List<Message> convert(Set<String> set) {
                 List<Message> messages = new ArrayList<Message>();
                 for (String bundle : set) {
                     messages.add(Message.createFrom(deserialize(bundle)));
@@ -82,7 +82,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
     private void addMessages(final Context context, final Message... messages) {
         PreferenceHelper.editSet(context, getStoreTag(), new PreferenceHelper.SetMutator() {
             @Override
-            protected void mutate(Set<String> set) {
+            public void mutate(Set<String> set) {
                 for (Message message : messages) {
                     for (String serializedBundle : new HashSet<>(set)) {
                         Message messageInSet = Message.createFrom(deserialize(serializedBundle));

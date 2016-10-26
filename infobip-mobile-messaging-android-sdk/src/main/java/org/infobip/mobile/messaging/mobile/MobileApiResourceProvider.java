@@ -5,6 +5,7 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
@@ -32,6 +33,7 @@ public enum MobileApiResourceProvider {
     private MobileApiMessages mobileApiMessages;
     private MobileApiData mobileApiData;
     private MobileApiVersion mobileApiVersion;
+    private MobileApiGeo mobileApiGeo;
 
     public MobileApiRegistration getMobileApiRegistration(Context context) {
         if (null != mobileApiRegistration) {
@@ -71,6 +73,16 @@ public enum MobileApiResourceProvider {
         mobileApiVersion = getGenerator(context).create(MobileApiVersion.class);
 
         return mobileApiVersion;
+    }
+
+    public MobileApiGeo getMobileApiGeo(Context context) {
+        if (null != mobileApiGeo) {
+            return mobileApiGeo;
+        }
+
+        mobileApiGeo = getGenerator(context).create(MobileApiGeo.class);
+
+        return mobileApiGeo;
     }
 
     String[] getUserAgentAdditions(Context context) {
@@ -125,5 +137,6 @@ public enum MobileApiResourceProvider {
         mobileApiMessages = null;
         mobileApiData = null;
         mobileApiVersion = null;
+        mobileApiGeo = null;
     }
 }

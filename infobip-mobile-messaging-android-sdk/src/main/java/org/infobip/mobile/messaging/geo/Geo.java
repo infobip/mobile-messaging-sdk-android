@@ -40,6 +40,9 @@ public class Geo implements Parcelable {
     @SerializedName("startTime")
     private String startTime;
 
+    @SerializedName("campaignId")
+    private String campaignId;
+
     protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
@@ -54,6 +57,7 @@ public class Geo implements Parcelable {
         in.readTypedList(this.events, GeoEvent.CREATOR);
         this.expiryTime = in.readString();
         this.startTime = in.readString();
+        this.campaignId = in.readString();
     }
 
     @Override
@@ -70,6 +74,7 @@ public class Geo implements Parcelable {
         parcel.writeTypedList(events);
         parcel.writeString(expiryTime);
         parcel.writeString(startTime);
+        parcel.writeString(campaignId);
     }
 
     public static final Creator<Geo> CREATOR = new Creator<Geo>() {
@@ -114,6 +119,10 @@ public class Geo implements Parcelable {
 
     protected Date getStartDate() {
         return DateTimeUtil.ISO8601DateFromString(startTime);
+    }
+
+    protected String getCampaignId() {
+        return campaignId;
     }
 
     /**

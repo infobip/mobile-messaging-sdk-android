@@ -216,7 +216,7 @@ public abstract class PreferenceHelper {
     public static String[] findStringArray(Context context, String key, String[] defaultValue) {
         return find(context, key, defaultValue, new SetConverter<String[]>() {
             @Override
-            protected String[] convert(Set<String> set) {
+            public String[] convert(Set<String> set) {
                 return set.toArray(new String[set.size()]);
             }
         });
@@ -240,7 +240,7 @@ public abstract class PreferenceHelper {
     public static void appendToStringArray(Context context, String key, final String... strings) {
         SetMutator mutator = new SetMutator() {
             @Override
-            protected void mutate(Set<String> set) {
+            public void mutate(Set<String> set) {
                 set.addAll(Arrays.asList(strings));
             }
         };
@@ -254,7 +254,7 @@ public abstract class PreferenceHelper {
     public static void deleteFromStringArray(Context context, String key, final String... strings) {
         SetMutator mutator = new SetMutator() {
             @Override
-            protected void mutate(Set<String> set) {
+            public void mutate(Set<String> set) {
                 set.removeAll(Arrays.asList(strings));
             }
         };
@@ -297,11 +297,21 @@ public abstract class PreferenceHelper {
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
     }
 
-    public static abstract class SetMutator {
-        abstract protected void mutate(Set<String> set);
+    public static <Result> Result runTransaction(Transaction<Result> transaction) {
+        synchronized (LOCK) {
+            return transaction.run();
+        }
     }
 
-    public static abstract class SetConverter<T> {
-        abstract protected T convert(Set<String> set);
+    public interface SetMutator {
+        void mutate(Set<String> set);
+    }
+
+    public interface SetConverter<T> {
+        T convert(Set<String> set);
+    }
+
+    public interface Transaction<Result> {
+        Result run();
     }
 }

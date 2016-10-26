@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
 /**
- * Seen status reporting API.
+ * Message-related mobile API.
  * <p/>
  * Usage:
  * <pre>{@code

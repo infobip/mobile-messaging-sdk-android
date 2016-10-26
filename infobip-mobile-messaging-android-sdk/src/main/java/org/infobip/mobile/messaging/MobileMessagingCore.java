@@ -4,16 +4,19 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.geo.Geofencing;
+import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
+import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
+import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessageSender;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
-import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
-import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -27,6 +30,7 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +52,7 @@ public class MobileMessagingCore {
     private final MessageSender messageSender = new MessageSender();
     private final SystemDataReporter systemDataReporter = new SystemDataReporter();
     private final VersionChecker versionChecker = new VersionChecker();
+    private final GeoReporter geoReporter = new GeoReporter();
     private final MobileMessagingStats stats;
     private final Executor taskExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
@@ -89,6 +94,7 @@ public class MobileMessagingCore {
         seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
         versionChecker.check(context);
+        geoReporter.report(context, getStats());
     }
 
     public String getRegistrationId() {
@@ -112,7 +118,7 @@ public class MobileMessagingCore {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
-    void addSyncMessagesIds(String... messageIDs) {
+    public void addSyncMessagesIds(String... messageIDs) {
         String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
     }
@@ -418,7 +424,7 @@ public class MobileMessagingCore {
         messageSender.send(context, getStats(), taskExecutor, listener, messages);
     }
 
-    void readSystemData() {
+    public void readSystemData() {
 
         boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
 
@@ -452,6 +458,35 @@ public class MobileMessagingCore {
 
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
         PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
+    }
+
+    public ArrayList<GeoReport> removeUnreportedGeoEvents(final Context context) {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<ArrayList<GeoReport>>() {
+            @Override
+            public ArrayList<GeoReport> run() {
+                JsonSerializer deserializer = new JsonSerializer();
+                String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
+                ArrayList<GeoReport> reports = new ArrayList<>();
+                for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
+                    reports.add(deserializer.deserialize(unreportedGeoEventJson, GeoReport.class));
+                }
+                PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
+                return reports;
+            }
+        });
+    }
+
+    public void addUnreportedGeoEvents(final List<GeoReport> reports) {
+        PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
+            @Override
+            public Void run() {
+                JsonSerializer serializer = new JsonSerializer();
+                for (GeoReport report : reports) {
+                    PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS, serializer.serialize(report));
+                }
+                return null;
+            }
+        });
     }
 
     static void handleBootCompleted(Context context) {

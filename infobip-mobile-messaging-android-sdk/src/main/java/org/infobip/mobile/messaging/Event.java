@@ -163,18 +163,28 @@ public enum Event {
      * Contains the {@link Geo} object which contains the list of all triggered geofence areas and {@link Message}.
      * <pre>
      * {@code
-     * Geo geofenceAreas = intent.getParcelableExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
-     * Message message = Message.createFrom(intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE));
+     * Geo geo = Geo.createFrom(intent.getExtras());
+     * Message message = Message.createFrom(intent.getExtras());
      * }
      * </pre>
      */
     GEOFENCE_AREA_ENTERED("org.infobip.mobile.messaging.GEOFENCE_AREA_ENTERED"),
 
     /**
+     * It is triggered when geofence events are reported to the server.
+     * <pre>
+     * {@code
+     * List<GeoReport> geoReports = GeoReport.createFrom(intent.getExtras());
+     * }
+     * </pre>
+     */
+    GEOFENCE_EVENTS_REPORTED("org.infobip.mobile.messaging.GEOFENCE_EVENTS_REPORTED"),
+
+    /**
      * It is triggered when user data is successfully reported to the server.
      * <pre>
      * {@code
-     * UserData userData = new UserData(intent.getStringExtra(BroadcastParameter.EXTRA_USER_DATA));
+     * UserData userData = UserData.createFrom(intent.getExtras());
      * }
      * </pre>
      */
