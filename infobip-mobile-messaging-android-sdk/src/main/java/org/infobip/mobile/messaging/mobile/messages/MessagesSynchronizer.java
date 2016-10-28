@@ -29,7 +29,7 @@ public class MessagesSynchronizer {
             @Override
             protected void onPostExecute(SyncMessagesResult syncMessagesResult) {
                 if (syncMessagesResult.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error!");
+                    Log.e(TAG, "MobileMessaging API returned error (synchronizing messages)!");
                     stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
                     return;
                 }

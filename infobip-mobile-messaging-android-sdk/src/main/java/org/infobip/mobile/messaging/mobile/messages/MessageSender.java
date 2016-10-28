@@ -98,7 +98,7 @@ public class MessageSender {
             @Override
             protected void onPostExecute(SendMessageResult sendMessageResult) {
                 if (sendMessageResult.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error!");
+                    Log.e(TAG, "MobileMessaging API returned error (sending message)!");
                     stats.reportError(MobileMessagingError.MESSAGE_SEND_ERROR);
 
                     Intent sendMessageError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

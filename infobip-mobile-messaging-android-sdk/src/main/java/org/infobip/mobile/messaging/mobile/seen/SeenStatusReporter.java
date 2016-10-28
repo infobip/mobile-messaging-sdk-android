@@ -40,7 +40,7 @@ public class SeenStatusReporter {
                     @Override
                     protected void onPostExecute(SeenStatusReportResult result) {
                         if (result.hasError()) {
-                            Log.e(TAG, "MobileMessaging API returned error!");
+                            Log.e(TAG, "MobileMessaging API returned error (seen messages)!");
 
                             stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
                             Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

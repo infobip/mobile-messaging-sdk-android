@@ -40,7 +40,7 @@ public class RegistrationSynchronizer {
             @Override
             protected void onPostExecute(UpsertRegistrationResult result) {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
-                    Log.e(TAG, "MobileMessaging API returned error!");
+                    Log.e(TAG, "MobileMessaging API returned error (registration)!");
                     stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

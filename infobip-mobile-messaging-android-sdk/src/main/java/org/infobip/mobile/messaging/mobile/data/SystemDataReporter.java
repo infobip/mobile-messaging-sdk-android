@@ -38,7 +38,7 @@ public class SystemDataReporter {
             @Override
             protected void onPostExecute(SystemDataReportResult result) {
                 if (result.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error!");
+                    Log.e(TAG, "MobileMessaging API returned error (system data)!");
                     stats.reportError(MobileMessagingError.SYSTEM_DATA_REPORT_ERROR);
 
                     Intent intent = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

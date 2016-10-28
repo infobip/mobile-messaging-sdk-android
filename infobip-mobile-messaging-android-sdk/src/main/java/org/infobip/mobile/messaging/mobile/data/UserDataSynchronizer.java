@@ -34,7 +34,7 @@ public class UserDataSynchronizer {
             @Override
             protected void onPostExecute(SyncUserDataResult syncUserDataResult) {
                 if (syncUserDataResult.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error!");
+                    Log.e(TAG, "MobileMessaging API returned error (user data)!");
                     stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
 
                     if (syncUserDataResult.hasInvalidParameterError()) {
