@@ -99,7 +99,7 @@ public enum Event {
      * Contains the received message information.
      * <pre>
      * {@code
-     * Message message = new Message(intent.getExtras());
+     * Message message = Message.createFrom(intent.getExtras());
      * }
      * </pre>
      *
