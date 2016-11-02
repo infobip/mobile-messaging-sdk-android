@@ -57,7 +57,7 @@ public class MobileApiGeoTest {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         EventReport eventReport[] = {
-                new EventReport(EventType.enter, "myAreaId1", "campaignId1", "messageId1", 1L),
+                new EventReport(EventType.entry, "myAreaId1", "campaignId1", "messageId1", 1L),
                 new EventReport(EventType.exit, "myAreaId2", "campaignId2", "messageId2", 2L),
                 new EventReport(EventType.dwell, "myAreaId3", "campaignId3", "messageId3", 3L)
         };
@@ -74,7 +74,7 @@ public class MobileApiGeoTest {
                 "{" +
                     "\"reports\": [" +
                         "{" +
-                            "\"event\":\"enter\"," +
+                            "\"event\":\"entry\"," +
                             "\"geoAreaId\":\"myAreaId1\"," +
                             "\"campaignId\":\"campaignId1\"," +
                             "\"messageId\":\"messageId1\"," +

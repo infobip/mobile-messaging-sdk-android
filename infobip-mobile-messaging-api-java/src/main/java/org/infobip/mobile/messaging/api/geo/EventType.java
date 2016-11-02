@@ -6,7 +6,7 @@ package org.infobip.mobile.messaging.api.geo;
  */
 
 public enum EventType {
-    enter,
+    entry,
     exit,
     dwell
 }
