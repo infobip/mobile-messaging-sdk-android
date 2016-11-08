@@ -76,9 +76,9 @@ public class GeoReportsTest extends InstrumentationTestCase {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         List<GeoReport> reports = new ArrayList<>();
-        reports.add(new GeoReport("campaignId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L));
-        reports.add(new GeoReport("campaignId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
-        reports.add(new GeoReport("campaignId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
+        reports.add(new GeoReport("campaignId1", "messageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L));
+        reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
+        reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
 
         MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
         geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
@@ -93,6 +93,7 @@ public class GeoReportsTest extends InstrumentationTestCase {
         GeoReport geoReport1 = broadcastedReports.get(0);
         assertEquals(geoReport1.getEvent(), GeoEventType.entry);
         assertEquals(geoReport1.getCampaignId(), "campaignId1");
+        assertEquals(geoReport1.getMessageId(), "messageId1");
         assertEquals(geoReport1.getTimestampOccured(), (Long) 1001L);
         assertEquals(geoReport1.getArea().getId(), "areaId1");
         assertEquals(geoReport1.getArea().getTitle(), "Area1");
@@ -103,6 +104,7 @@ public class GeoReportsTest extends InstrumentationTestCase {
         GeoReport geoReport2 = broadcastedReports.get(1);
         assertEquals(geoReport2.getEvent(), GeoEventType.exit);
         assertEquals(geoReport2.getCampaignId(), "campaignId2");
+        assertEquals(geoReport2.getMessageId(), "messageId2");
         assertEquals(geoReport2.getTimestampOccured(), (Long) 1002L);
         assertEquals(geoReport2.getArea().getId(), "areaId2");
         assertEquals(geoReport2.getArea().getTitle(), "Area2");
@@ -113,6 +115,7 @@ public class GeoReportsTest extends InstrumentationTestCase {
         GeoReport geoReport3 = broadcastedReports.get(2);
         assertEquals(geoReport3.getEvent(), GeoEventType.dwell);
         assertEquals(geoReport3.getCampaignId(), "campaignId3");
+        assertEquals(geoReport3.getMessageId(), "messageId3");
         assertEquals(geoReport3.getTimestampOccured(), (Long) 1003L);
         assertEquals(geoReport3.getArea().getId(), "areaId3");
         assertEquals(geoReport3.getArea().getTitle(), "Area3");
@@ -129,27 +132,30 @@ public class GeoReportsTest extends InstrumentationTestCase {
         assertEquals(body.getReports().length, 3);
         JSONAssert.assertEquals(debugServer.getBody(),
                 "{" +
-                    "\"reports\": [" +
+                        "\"reports\": [" +
                         "{" +
-                            "\"event\":\"entry\"," +
-                            "\"geoAreaId\":\"areaId1\"," +
-                            "\"campaignId\":\"campaignId1\"," +
-                            "\"timestampDelta\":" + body.getReports()[0].getTimestampDelta() +
+                        "\"event\":\"entry\"," +
+                        "\"geoAreaId\":\"areaId1\"," +
+                        "\"messageId\":\"messageId1\"," +
+                        "\"campaignId\":\"campaignId1\"," +
+                        "\"timestampDelta\":" + body.getReports()[0].getTimestampDelta() +
                         "}," +
                         "{" +
-                            "\"event\":\"exit\"," +
-                            "\"geoAreaId\":\"areaId2\"," +
-                            "\"campaignId\":\"campaignId2\"," +
-                            "\"timestampDelta\":" + body.getReports()[1].getTimestampDelta() +
+                        "\"event\":\"exit\"," +
+                        "\"geoAreaId\":\"areaId2\"," +
+                        "\"messageId\":\"messageId2\"," +
+                        "\"campaignId\":\"campaignId2\"," +
+                        "\"timestampDelta\":" + body.getReports()[1].getTimestampDelta() +
                         "}," +
                         "{" +
-                            "\"event\":\"dwell\"," +
-                            "\"geoAreaId\":\"areaId3\"," +
-                            "\"campaignId\":\"campaignId3\"," +
-                            "\"timestampDelta\":" + body.getReports()[2].getTimestampDelta() +
+                        "\"event\":\"dwell\"," +
+                        "\"geoAreaId\":\"areaId3\"," +
+                        "\"messageId\":\"messageId3\"," +
+                        "\"campaignId\":\"campaignId3\"," +
+                        "\"timestampDelta\":" + body.getReports()[2].getTimestampDelta() +
                         "}" +
-                    "]" +
-                "}"
+                        "]" +
+                        "}"
                 , true);
 
         assertNotSame(body.getReports()[0].getTimestampDelta(), body.getReports()[1].getTimestampDelta());

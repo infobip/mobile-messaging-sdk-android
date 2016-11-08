@@ -54,7 +54,6 @@ public class MobileMessaging {
      * Default constructor. Use MobileMessaging.Builder to construct MobileMessaging.
      *
      * @param context android context object.
-     *
      * @see MobileMessaging.Builder
      */
     private MobileMessaging(Context context) {
@@ -66,9 +65,9 @@ public class MobileMessaging {
      * Gets an instance of MobileMessaging after it is initialized via {@link MobileMessaging.Builder}.
      * </p>
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
+     *
      * @param context android context object.
      * @return instance of MobileMessaging.
-     *
      * @see MobileMessaging.Builder
      */
     public synchronized static MobileMessaging getInstance(Context context) {
@@ -85,8 +84,8 @@ public class MobileMessaging {
      * This method has to be used only if you handle GCM message notifications
      * without Mobile Messaging library. In all other cases the library will
      * send delivery report automatically whenever GCM push is delivered to device.
-     * @param messageIds ids of messages to report delivery for
      *
+     * @param messageIds ids of messages to report delivery for
      * @see Event#DELIVERY_REPORTS_SENT
      */
     public void setMessagesDelivered(final String... messageIds) {
@@ -97,8 +96,8 @@ public class MobileMessaging {
      * Reports seen status of messages to Mobile Messaging servers.
      * </p>
      * This method shall be user to report seen status when user actually sees message content.
-     * @param messageIds message ids to report seen status for
      *
+     * @param messageIds message ids to report seen status for
      * @see Event#SEEN_REPORTS_SENT
      */
     public void setMessagesSeen(final String... messageIds) {
@@ -107,8 +106,8 @@ public class MobileMessaging {
 
     /**
      * Returns instance of message store that is used within the library or null if message store is not set.
-     * @return instance of message store.
      *
+     * @return instance of message store.
      * @see MessageStore
      */
     public MessageStore getMessageStore() {
@@ -120,8 +119,8 @@ public class MobileMessaging {
      * </p>
      * This method will synchronize new data with server and will also trigger {@link Event#USER_DATA_REPORTED}
      * with all the data currently available on a server for this user.
-     * @param userData user data object with desired changes
      *
+     * @param userData user data object with desired changes
      * @see Event#USER_DATA_REPORTED
      */
     public void syncUserData(UserData userData) {
@@ -133,9 +132,9 @@ public class MobileMessaging {
      * </p>
      * This method will synchronize new data with server. The result of synchronization will be provided via listener.
      * It will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     *
      * @param userData user data object with desired changes
      * @param listener listener to report the result on
-     *
      * @see ResultListener
      * @see Event#USER_DATA_REPORTED
      */
@@ -171,6 +170,7 @@ public class MobileMessaging {
      * Reads user data that is currently stored in the library.
      * </p>
      * This method does not trigger {@link Event#USER_DATA_REPORTED}.
+     *
      * @return last synchronized UserData object
      */
     public UserData getUserData() {
@@ -181,6 +181,7 @@ public class MobileMessaging {
      * Send mobile originated messages.
      * </p>
      * Destination for each message is set inside {@link Message}.
+     *
      * @param messages messages to send
      */
     public void sendMessages(Message... messages) {
@@ -194,9 +195,9 @@ public class MobileMessaging {
      * The result of fetch operation will be provided via listener.
      * {@link ResultListener#onResult(Object)} will be called both in case of success and error,
      * separate status for each message can be retrieved via {@link Message#getStatus()} and {@link Message#getStatusMessage()}.
+     *
      * @param listener listener to invoke when the operation is complete
      * @param messages messages to send
-     *
      * @see ResultListener
      */
     public void sendMessages(ResultListener<Message[]> listener, Message... messages) {
@@ -205,6 +206,7 @@ public class MobileMessaging {
 
     /**
      * Starts tracking geofence areas.
+     *
      * @see Geofencing
      */
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -214,6 +216,7 @@ public class MobileMessaging {
 
     /**
      * Stops tracking geofence areas.
+     *
      * @see Geofencing
      */
     public void deactivateGeofencing() {
@@ -222,24 +225,28 @@ public class MobileMessaging {
 
     /**
      * Default result listener interface for asynchronous operations.
+     *
      * @param <T> type of successful result
      */
-    public static abstract class ResultListener <T> {
+    public static abstract class ResultListener<T> {
         /**
          * This method is invoked on listener in two cases:
          * <ol>
-         *     <li>communication with server ended successfully;</li>
-         *     <li>it is not possible to communicate with server now, but the data is saved inside library and will be sent as soon as possible.</li>
+         * <li>communication with server ended successfully;</li>
+         * <li>it is not possible to communicate with server now, but the data is saved inside library and will be sent as soon as possible.</li>
          * </ol>
+         *
          * @param result the result of operation
          */
         public abstract void onResult(T result);
 
         /**
          * This method is invoked on listener in case of error.
+         *
          * @param e object that contains error description
          */
-        public void onError(Throwable e) {}
+        public void onError(Throwable e) {
+        }
     }
 
 
@@ -365,7 +372,7 @@ public class MobileMessaging {
          * }
          * </pre>
          * <p/>
-         * The default us set to <a href="https://oneapi.infobip.com">https://oneapi.infobip.com</a>.
+         * The default is set to <a href="https://oneapi.infobip.com">https://oneapi.infobip.com</a>.
          * <p/>
          * It fill fail if set to null or empty string.
          *

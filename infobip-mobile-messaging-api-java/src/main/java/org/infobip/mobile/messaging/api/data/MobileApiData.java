@@ -31,7 +31,7 @@ public interface MobileApiData {
     void reportSystemData(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
                           @Body SystemDataReport systemDataReport);
 
-    @Version("2")
+    @Version("3")
     @HttpRequest(method = HttpMethod.POST, value = "user")
     UserDataReport reportUserData(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
                                   @Query(name = "externalUserId") String externalUserId,

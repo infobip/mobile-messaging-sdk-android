@@ -17,5 +17,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserDataReport {
     Map<String, Object> predefinedUserData;
-    Map<String, Object> customUserData;
+    Map<String, CustomUserDataValueReport> customUserData;
 }

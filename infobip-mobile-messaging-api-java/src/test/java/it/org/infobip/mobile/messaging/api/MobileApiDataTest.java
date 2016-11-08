@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -27,7 +28,6 @@ public class MobileApiDataTest {
 
     private DebugServer debugServer;
     private MobileApiData mobileApiData;
-
 
     @Before
     public void setUp() throws Exception {
@@ -57,6 +57,7 @@ public class MobileApiDataTest {
 
     @Test
     public void create_userData_success_examineResponse() throws Exception {
+        Date someDate = new Date(); // someDate.toString() == "Mon Nov 07 13:13:48 CET 2016"
         String jsonResponse =
         "{" +
                 "\"predefinedUserData\":" +
@@ -70,9 +71,21 @@ public class MobileApiDataTest {
                 "}," +
                 "\"customUserData\":" +
                 "{" +
-                    "\"SomeString\" :   \"String\"," +
-                    "\"SomeBoolean\":   true," +
-                    "\"SomeDouble\" :   1.0" +
+                    "\"SomeString\":" +
+                    "{" +
+                        "\"type\"   :   \"String\"," +
+                        "\"value\"  :   \"SomeStringValue\"" +
+                    "}," +
+                    "\"SomeDate\":" +
+                    "{" +
+                        "\"type\"   :   \"Date\"," +
+                        "\"value\"  :   " + "\"" + someDate.toString() + "\"" +
+                    "}," +
+                    "\"SomeNumber\":" +
+                    "{" +
+                        "\"type\"   :   \"Number\"," +
+                        "\"value\"  :   1.0" +
+                    "}" +
                 "}" +
         "}";
 
@@ -81,7 +94,7 @@ public class MobileApiDataTest {
         UserDataReport response = mobileApiData.reportUserData("myDeviceInstanceId", "myExternalUserId", null);
 
         //inspect http context
-        assertEquals("/mobile/2/data/user", debugServer.getUri());
+        assertEquals("/mobile/3/data/user", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(2, debugServer.getQueryParametersCount());
@@ -99,9 +112,9 @@ public class MobileApiDataTest {
         assertEquals("Gender", response.getPredefinedUserData().get("gender"));
         assertEquals("2016-12-31", response.getPredefinedUserData().get("birthdate"));
         assertEquals("user@mailbox.com", response.getPredefinedUserData().get("email"));
-        assertEquals("String", response.getCustomUserData().get("SomeString"));
-        assertEquals(true, response.getCustomUserData().get("SomeBoolean"));
-        assertEquals(1.0, response.getCustomUserData().get("SomeDouble"));
+        assertEquals("SomeStringValue", response.getCustomUserData().get("SomeString").getValue());
+        assertEquals(someDate.toString(), response.getCustomUserData().get("SomeDate").getValue());
+        assertEquals(1.0, response.getCustomUserData().get("SomeNumber").getValue());
     }
 
     @Test

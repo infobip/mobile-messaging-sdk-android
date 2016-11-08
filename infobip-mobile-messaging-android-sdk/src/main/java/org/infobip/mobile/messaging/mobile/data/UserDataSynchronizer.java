@@ -59,7 +59,7 @@ public class UserDataSynchronizer {
                     return;
                 }
 
-                UserData userData = new UserData(userDataToReport.getExternalUserId(), syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
+                UserData userData = UserDataMapper.fromUserDataReport(userDataToReport.getExternalUserId(), syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
                 MobileMessagingCore.getInstance(context).setUserDataReported(userData);
 
                 Intent userDataReported = new Intent(Event.USER_DATA_REPORTED.getKey());

@@ -35,7 +35,7 @@ public class DateTimeUtil {
 
         String date = dateString.trim().replaceAll(ISO8601_GMT_Z_MATCHER, GMT_TIME_ZONE);
         try {
-            return new SimpleDateFormat(DATE_FORMAT).parse(date);
+            return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
         } catch (Exception e) {
             Log.d(TAG, Log.getStackTraceString(e));
         }

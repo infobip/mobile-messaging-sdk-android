@@ -2,9 +2,11 @@ package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 
+import org.infobip.mobile.messaging.api.data.CustomUserDataValueReport;
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 public class UserData {
     private String externalUserId;
     private Map<String, Object> predefinedUserData;
-    private Map<String, Object> customUserData;
+    private Map<String, CustomUserDataValue> customUserData;
 
     public UserData() {
         this.externalUserId = null;
@@ -38,7 +40,7 @@ public class UserData {
         this.customUserData = data.customUserData;
     }
 
-    public UserData(String externalUserId, Map<String, Object> predefinedUserData, Map<String, Object> customUserData) {
+    protected UserData(String externalUserId, Map<String, Object> predefinedUserData, Map<String, CustomUserDataValue> customUserData) {
         this.externalUserId = externalUserId;
         this.predefinedUserData = predefinedUserData;
         this.customUserData = customUserData;
@@ -82,15 +84,23 @@ public class UserData {
     }
 
     public void setPredefinedUserData(Map<String, Object> predefinedUserData) {
-        this.predefinedUserData = customUserData;
+        this.predefinedUserData = predefinedUserData;
     }
 
-    public Map<String, Object> getCustomUserData() {
+    public void setCustomUserData(Map<String, CustomUserDataValue> customUserData) {
+        this.customUserData = customUserData;
+    }
+
+    public Map<String, CustomUserDataValue> getCustomUserData() {
         return customUserData;
     }
 
-    public void setCustomUserData(Map<String, Object> customUserData) {
-        this.customUserData = customUserData;
+    public void setCustomUserDataElement(String key, CustomUserDataValue customUserDataValue) {
+        this.customUserData.put(key, customUserDataValue);
+    }
+
+    public CustomUserDataValue getCustomUserDataValue(String key) {
+        return this.customUserData.get(key);
     }
 
     public String getMsisdn() {
@@ -148,11 +158,11 @@ public class UserData {
     public void setMiddleName(String middleName) {
         setField(PredefinedField.MIDDLE_NAME, middleName);
     }
-    
+
     public String getLandlineNumber() {
         return getField(PredefinedField.LANDLINE_NUMBER);
     }
-    
+
     public void setLandlineNumber(String telephone) {
         setField(PredefinedField.LANDLINE_NUMBER, telephone);
     }
