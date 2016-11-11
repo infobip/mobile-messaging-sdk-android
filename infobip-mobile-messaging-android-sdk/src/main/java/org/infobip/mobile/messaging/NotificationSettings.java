@@ -1,14 +1,13 @@
 package org.infobip.mobile.messaging;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
+import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -171,7 +170,7 @@ public class NotificationSettings {
         }
 
         private void loadDefaultIcon(Context context) {
-            int resource = ResourceLoader.loadResourceByName(context, "mipmap", "ic_launcher");
+            int resource = SoftwareInformation.getAppIconResourceId(context);
             if (resource > 0) {
                 this.defaultIcon = resource;
             }

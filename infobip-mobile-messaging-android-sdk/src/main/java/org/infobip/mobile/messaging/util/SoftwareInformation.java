@@ -18,6 +18,7 @@ public class SoftwareInformation {
 
     private static String appVersion = null;
     private static String appName = null;
+    private static Integer appIconResourceId = null;
 
     public static String getAppVersion(Context context) {
         if (appVersion != null) {
@@ -45,6 +46,22 @@ public class SoftwareInformation {
             Log.d(TAG, Log.getStackTraceString(e));
         }
         return appName;
+    }
+
+    public static int getAppIconResourceId(Context context) {
+        if (appIconResourceId != null) {
+            return appIconResourceId;
+        }
+
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
+            appIconResourceId = applicationInfo.icon;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return appIconResourceId != null ? appIconResourceId : 0;
     }
 
     public static String getLibraryVersion() {
