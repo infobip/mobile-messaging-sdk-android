@@ -1,9 +1,11 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
+import java.security.InvalidParameterException;
+import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -23,52 +25,69 @@ import java.util.Map;
  */
 public class CustomUserDataValue {
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
-    private static final String GMT_TIME_ZONE = "+00:00";
-    private static final String ISO8601_GMT_Z_MATCHER = "Z$";
-
-    private Object value;
-    private String type;
-
-    public CustomUserDataValue() {
+    public enum Type {
+        String,
+        Number,
+        Date
     }
 
+    private Object value;
+    private Type type;
+
     public CustomUserDataValue(String someString) {
-        set(someString);
+        this.value = someString;
+        this.type = Type.String;
     }
 
     public CustomUserDataValue(Number someNumber) {
-        set(someNumber);
+        this.value = someNumber;
+        this.type = Type.Number;
     }
 
     public CustomUserDataValue(Date someDate) {
-        set(someDate);
+        this.value = DateTimeUtil.ISO8601DateToString(someDate);
+        this.type = Type.Date;
     }
 
-    public void set(String someString) {
-        this.value = someString;
-        this.type = getTypeForValue(someString);
+    /**
+     * Parses string into CustomUserDataValue based on desired format.
+     * </p>
+     * For Date type this constructor accepts "yyyy-MM-dd" representation of date (for example 2016-12-31).
+     *
+     * @throws ParseException if stringValue cannot be parsed to {@code CustomUserDataValue}
+     * @throws InvalidParameterException if provided type is invalid
+     */
+    public CustomUserDataValue(String stringValue, Type type) throws ParseException, InvalidParameterException {
+        this.type = type;
+        switch (type) {
+            case String:
+                this.value = stringValue;
+                break;
+            case Number:
+                this.value = NumberFormat.getNumberInstance(Locale.getDefault()).parse(stringValue);
+                break;
+            case Date:
+                DateTimeUtil.DateFromYMDString(stringValue);
+                this.value = stringValue;
+                break;
+            default:
+                throw new InvalidParameterException();
+        }
     }
 
-    public void set(Number someNumber) {
-        this.value = someNumber;
-        this.type = getTypeForValue(someNumber);
-    }
-
-    public void set(Date someDate) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
-        this.value = simpleDateFormat.format(someDate);
-        this.type = getTypeForValue(someDate);
+    protected CustomUserDataValue(CustomUserDataValue that) {
+        this.value = that.value;
+        this.type = that.type;
     }
 
     /**
      * Return the value of specified {@code CustomUserDataValue} as {@link String}.
      *
      * @return {@link String}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not type of {@link String}
+     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link String} type.
      */
     public String stringValue() {
-        if (!(value instanceof String)) {
+        if (!(value instanceof String) || type != Type.String) {
             throw new ClassCastException();
         }
 
@@ -79,10 +98,10 @@ public class CustomUserDataValue {
      * Return the value of specified {@code CustomUserDataValue} as {@link Number}.
      *
      * @return {@link Number}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not type of {@link Number}
+     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Number} type.
      */
     public Number numberValue() {
-        if (!(value instanceof Number)) {
+        if (!(value instanceof Number) || type != Type.Number) {
             throw new ClassCastException();
         }
 
@@ -93,39 +112,43 @@ public class CustomUserDataValue {
      * Return the value of specified {@code CustomUserDataValue} as {@link Date}.
      *
      * @return {@link Date}
-     * @throws ISO8601DateParseException if {@code CustomUserDataValue} is not type of {@link Date}.
+     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Date} type.
      */
     public Date dateValue() {
-        String dateValue = (String) this.value;
-        String date = dateValue.trim().replaceAll(ISO8601_GMT_Z_MATCHER, GMT_TIME_ZONE);
+        if (!(value instanceof String) || type != Type.Date) {
+            throw new ClassCastException();
+        }
+
         try {
-            return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
-        } catch (ParseException e) {
-            throw new ISO8601DateParseException(ISO8601DateParseException.Reason.DATE_PARSE_EXCEPTION, e);
+            return DateTimeUtil.ISO8601DateFromString((String) value);
+        } catch (ISO8601DateParseException e) {
+            throw new ClassCastException(e.getMessage());
         }
     }
 
-    public Object getValue() {
-        return value;
-    }
-
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
-    private String getTypeForValue(Object value) {
-        if (value instanceof String) {
-            return "String";
+    protected Object getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        if (this.type == null) {
+            return super.toString();
         }
 
-        if (value instanceof Date) {
-            return "Date";
+        switch (type) {
+            case String:
+                return stringValue();
+            case Date:
+                return DateTimeUtil.DateToYMDString(dateValue());
+            case Number:
+                return "" + numberValue();
+            default:
+                return super.toString();
         }
-
-        if (value instanceof Number) {
-            return "Number";
-        }
-
-        return null;
     }
 }

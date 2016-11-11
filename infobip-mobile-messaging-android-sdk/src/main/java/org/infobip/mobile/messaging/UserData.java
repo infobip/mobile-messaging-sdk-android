@@ -2,11 +2,9 @@ package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 
-import org.infobip.mobile.messaging.api.data.CustomUserDataValueReport;
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,6 +99,10 @@ public class UserData {
 
     public CustomUserDataValue getCustomUserDataValue(String key) {
         return this.customUserData.get(key);
+    }
+
+    public void removeCustomUserDataElement(String key) {
+        this.customUserData.put(key, null);
     }
 
     public String getMsisdn() {

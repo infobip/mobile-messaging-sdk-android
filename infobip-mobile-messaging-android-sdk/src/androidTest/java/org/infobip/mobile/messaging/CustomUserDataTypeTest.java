@@ -105,6 +105,9 @@ public class CustomUserDataTypeTest extends InstrumentationTestCase {
         assertEquals(SOME_STRING_VALUE, userDataResponse.getCustomUserDataValue(KEY_FOR_STRING).stringValue());
         assertEquals(SOME_NUMBER_VALUE, userDataResponse.getCustomUserDataValue(KEY_FOR_NUMBER).numberValue().intValue());
         assertEquals(SOME_DATE_VALUE.toString(), userDataResponse.getCustomUserDataValue(KEY_FOR_DATE).dateValue().toString());
+        assertEquals(CustomUserDataValue.Type.String, userDataResponse.getCustomUserDataValue(KEY_FOR_STRING).getType());
+        assertEquals(CustomUserDataValue.Type.Number, userDataResponse.getCustomUserDataValue(KEY_FOR_NUMBER).getType());
+        assertEquals(CustomUserDataValue.Type.Date, userDataResponse.getCustomUserDataValue(KEY_FOR_DATE).getType());
     }
 
     public void test_get_custom_user_data_value_from_json_string() throws ParseException {
