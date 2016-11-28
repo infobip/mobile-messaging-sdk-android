@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.util.Pair;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -16,6 +17,11 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.geo.EventReport;
+import org.infobip.mobile.messaging.api.geo.EventReports;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
+import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -24,6 +30,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +92,8 @@ class GeoAreasHandler {
             return;
         }
 
-        List<GeoReport> reports = new ArrayList<>();
+        ArrayList<GeoReport> geoReports = new ArrayList<>();
+        ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>();
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
         for (Message message : messagesAndAreas.keySet()) {
@@ -95,37 +103,73 @@ class GeoAreasHandler {
 
             for (final Area area : geofenceAreasList) {
 
-                if (!shouldNotifyAboutTransition(message, area, geofenceTransition)) {
+                if (!shouldReportTransition(message, area, geofenceTransition)) {
                     continue;
                 }
 
                 Location triggeringLocation = geofencingEvent.getTriggeringLocation();
-                Geo geoToNotify = new Geo(
+                Geo geoToReportAndNotify = new Geo(
                         triggeringLocation.getLatitude(),
                         triggeringLocation.getLongitude(),
                         new ArrayList<Area>() {{
                             add(area);
                         }});
 
-                notifyAboutTransition(context, geoToNotify, geofenceTransition, message);
+                geoDataToNotify.add(new Pair<>(geoToReportAndNotify, message));
 
-                setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
-                setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
-                        getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition) + 1);
-
-                reports.add(new GeoReport(message.getGeo().getCampaignId(), message.getMessageId(),
+                geoReports.add(new GeoReport(message.getGeo().getCampaignId(), message.getMessageId(),
                         transitionReportEvents.get(geofenceTransition), area, System.currentTimeMillis()));
             }
         }
 
-        if (!reports.isEmpty()) {
+        if (!geoReports.isEmpty() && !geoDataToNotify.isEmpty()) {
             MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-            mobileMessagingCore.addUnreportedGeoEvents(reports);
-            mobileMessagingCore.sync();
+            EventReport reports[] = GeoReporter.prepareEventReport(geoReports.toArray(new GeoReport[geoReports.size()]));
+
+            List<String> finishedCampaignIds = Arrays.asList(mobileMessagingCore.getFinishedCampaignIds());
+            List<String> suspendedCampaignIds = Arrays.asList(mobileMessagingCore.getSuspendedCampaignIds());
+
+            try {
+                final GeoReportingResult result = new GeoReportingResult(MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context)
+                        .report(new EventReports(reports)));
+
+                if (result.getFinishedCampaignIds() != null) {
+                    finishedCampaignIds = Arrays.asList(result.getFinishedCampaignIds());
+                }
+                if (result.getSuspendedCampaignIds() != null) {
+                    suspendedCampaignIds = Arrays.asList(result.getSuspendedCampaignIds());
+                }
+
+                GeoReporter.handleSuccess(context, mobileMessagingCore, result, geoReports);
+
+            } catch (Exception e) {
+                GeoReporter.handleError(context, mobileMessagingCore, e, geoReports);
+            }
+
+            displayNotificationsForActiveCampaigns(geoDataToNotify, geofenceTransition, finishedCampaignIds, suspendedCampaignIds);
+        }
+
+    }
+
+    private void displayNotificationsForActiveCampaigns(ArrayList<Pair<Geo, Message>> geoDataToNotify, int geofenceTransition, List<String> finishedCampaignIds, List<String> suspendedCampaignIds) {
+        for (Pair<Geo, Message> geoData : geoDataToNotify) {
+            final Geo geo = geoData.first;
+            final Message message = geoData.second;
+            if (finishedCampaignIds.contains(message.getGeo().getCampaignId()) || suspendedCampaignIds.contains(message.getGeo().getCampaignId())) {
+                continue;
+            }
+
+            for (Area area : geo.getAreasList()) {
+                setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
+                setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
+                        getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition) + 1);
+            }
+
+            notifyAboutTransition(context, geo, geofenceTransition, geoData.second);
         }
     }
 
-    private boolean shouldNotifyAboutTransition(Message message, Area area, int geofenceTransition) {
+    private boolean shouldReportTransition(Message message, Area area, int geofenceTransition) {
         int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition);
         long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition);
         Geo geo = message.getGeo();

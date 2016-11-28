@@ -271,7 +271,7 @@ public class MobileMessagingCore {
         return null != getMessageStoreClass();
     }
 
-    protected MobileMessagingStats getStats() {
+    public MobileMessagingStats getStats() {
         return stats;
     }
 
@@ -487,6 +487,29 @@ public class MobileMessagingCore {
                 return null;
             }
         });
+    }
+
+    public void addCampaignStatus(final String[] finishedCampaignIds, final String[] suspendedCampaignIds) {
+        PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
+            @Override
+            public Void run() {
+                if (finishedCampaignIds != null && finishedCampaignIds.length != 0) {
+                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS, finishedCampaignIds);
+                }
+                if (suspendedCampaignIds != null && suspendedCampaignIds.length != 0) {
+                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS, suspendedCampaignIds);
+                }
+                return null;
+            }
+        });
+    }
+
+    public String[] getFinishedCampaignIds() {
+        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
+    }
+
+    public String[] getSuspendedCampaignIds() {
+        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
     }
 
     static void handleBootCompleted(Context context) {

@@ -1,5 +1,6 @@
 package it.org.infobip.mobile.messaging.api;
 
+import org.infobip.mobile.messaging.api.geo.CampaignStatusEventResponse;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventReports;
 import org.infobip.mobile.messaging.api.geo.EventType;
@@ -54,7 +55,10 @@ public class MobileApiGeoTest {
 
     @Test
     public void create_eventReport_success() throws Exception {
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+        String jsonResponse = "{\n" +
+                "  \"finishedCampaignIds\":[\"id1\", \"id2\", \"id3\"],\n" +
+                "  \"suspendedCampaignIds\":[\"id4\", \"id5\", \"id6\"]\n" +
+                "}";
 
         EventReport eventReport[] = {
                 new EventReport(EventType.entry, "myAreaId1", "campaignId1", "messageId1", 1L),
@@ -62,13 +66,25 @@ public class MobileApiGeoTest {
                 new EventReport(EventType.dwell, "myAreaId3", "campaignId3", "messageId3", 3L)
         };
 
-        mobileApiGeo.report(new EventReports(eventReport));
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
+
+        CampaignStatusEventResponse response = mobileApiGeo.report(new EventReports(eventReport));
 
         //inspect http context
         assertThat(debugServer.getUri()).isEqualTo("/mobile/3/geo/event");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
+
+        assertThat(response.getFinishedCampaignIds().length).isEqualTo(3);
+        assertThat(response.getFinishedCampaignIds()[0]).isEqualTo("id1");
+        assertThat(response.getFinishedCampaignIds()[1]).isEqualTo("id2");
+        assertThat(response.getFinishedCampaignIds()[2]).isEqualTo("id3");
+        assertThat(response.getSuspendedCampaignIds().length).isEqualTo(3);
+        assertThat(response.getSuspendedCampaignIds()[0]).isEqualTo("id4");
+        assertThat(response.getSuspendedCampaignIds()[1]).isEqualTo("id5");
+        assertThat(response.getSuspendedCampaignIds()[2]).isEqualTo("id6");
+
 
         JSONAssert.assertEquals(debugServer.getBody(),
                 "{" +

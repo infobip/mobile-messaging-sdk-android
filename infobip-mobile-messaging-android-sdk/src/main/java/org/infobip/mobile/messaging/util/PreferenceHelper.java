@@ -261,6 +261,14 @@ public abstract class PreferenceHelper {
         editSet(context, key, mutator);
     }
 
+    public static void saveStringArray(Context context, MobileMessagingProperty property, final String... strings) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        final HashSet<String> stringSet = new HashSet<String>() {{
+            addAll(Arrays.asList(strings));
+        }};
+        sharedPreferences.edit().putStringSet(property.getKey(), stringSet).apply();
+    }
+
     public static void editSet(Context context, String key, SetMutator mutator) {
         synchronized (LOCK) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

@@ -19,14 +19,14 @@ public class GeoReport implements Parcelable {
     private GeoEventType event;
     private String campaignId;
     private String messageId;
-    private Long timestampOccured;
+    private Long timestampOccurred;
 
-    public GeoReport(String campaignId, String messageId, GeoEventType event, Area area, Long timestampOccured) {
+    public GeoReport(String campaignId, String messageId, GeoEventType event, Area area, Long timestampOccurred) {
         this.area = area;
         this.campaignId = campaignId;
         this.messageId = messageId;
         this.event = event;
-        this.timestampOccured = timestampOccured;
+        this.timestampOccurred = timestampOccurred;
     }
 
     private GeoReport(Parcel parcel) {
@@ -34,7 +34,7 @@ public class GeoReport implements Parcelable {
         this.messageId = parcel.readString();
         this.event = GeoEventType.valueOf(parcel.readString());
         this.area = parcel.readParcelable(Area.class.getClassLoader());
-        this.timestampOccured = parcel.readLong();
+        this.timestampOccurred = parcel.readLong();
     }
 
     public static List<GeoReport> createFrom(Bundle bundle) {
@@ -57,8 +57,8 @@ public class GeoReport implements Parcelable {
         return area;
     }
 
-    public Long getTimestampOccured() {
-        return timestampOccured;
+    public Long getTimestampOccurred() {
+        return timestampOccurred;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class GeoReport implements Parcelable {
         parcel.writeString(messageId);
         parcel.writeString(event.name());
         parcel.writeParcelable(area, i);
-        parcel.writeLong(timestampOccured);
+        parcel.writeLong(timestampOccurred);
     }
 
     public static final Creator<GeoReport> CREATOR = new Creator<GeoReport>() {

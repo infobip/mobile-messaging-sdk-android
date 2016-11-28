@@ -21,16 +21,17 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.infobip.mobile.messaging.geo.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.geo.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -102,6 +103,11 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             }
 
             if (!geo.isEligibleForMonitoring()) {
+                continue;
+            }
+
+            final List<String> finishedCampaignIds = Arrays.asList(MobileMessagingCore.getInstance(context).getFinishedCampaignIds());
+            if (finishedCampaignIds.contains(geo.getCampaignId())) {
                 continue;
             }
 
@@ -190,6 +196,23 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                         logGeofenceStatus(status, false);
                     }
                 });
+    }
+
+    /**
+     * Has an async call to {@link GoogleApiClient#connect()}
+     * @param geofenceRequestIds
+     */
+    public void removeGeofencesFromMonitoring(List<String> geofenceRequestIds) {
+        if (!checkRequiredPermissions()) {
+            return;
+        }
+
+        if (!googleApiClient.isConnected()) {
+            googleApiClient.connect();
+            return;
+        }
+
+        LocationServices.GeofencingApi.removeGeofences(googleApiClient, geofenceRequestIds);
     }
 
     private boolean checkRequiredPermissions() {
