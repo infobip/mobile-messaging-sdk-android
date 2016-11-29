@@ -18,4 +18,5 @@ public class SystemDataReport {
     String deviceModel;
     String applicationVersion;
     Boolean geofencing;
+    Boolean notificationsEnabled;
 }

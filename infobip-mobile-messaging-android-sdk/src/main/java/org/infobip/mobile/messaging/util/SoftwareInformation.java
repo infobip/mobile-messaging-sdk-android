@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.BuildConfig;
@@ -19,6 +20,7 @@ public class SoftwareInformation {
     private static String appVersion = null;
     private static String appName = null;
     private static Integer appIconResourceId = null;
+    private static NotificationManagerCompat notificationManagerCompat = null;
 
     public static String getAppVersion(Context context) {
         if (appVersion != null) {
@@ -70,5 +72,13 @@ public class SoftwareInformation {
 
     public static boolean isDebuggableApplicationBuild(Context context) {
         return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    public static boolean areNotificationsEnabled(Context context) {
+        if (notificationManagerCompat == null) {
+            notificationManagerCompat = NotificationManagerCompat.from(context);
+        }
+
+        return notificationManagerCompat.areNotificationsEnabled();
     }
 }

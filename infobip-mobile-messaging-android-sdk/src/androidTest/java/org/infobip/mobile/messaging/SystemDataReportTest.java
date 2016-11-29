@@ -87,7 +87,6 @@ public class SystemDataReportTest extends InstrumentationTestCase {
         assertFalse(data.getDeviceModel().isEmpty());
         assertFalse(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
-        assertNotNull(data.getGeofencing());
     }
 
     public void test_reportSystemData_withSettingDisabled() {
@@ -109,7 +108,6 @@ public class SystemDataReportTest extends InstrumentationTestCase {
         assertTrue(data.getDeviceModel().isEmpty());
         assertTrue(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
-        assertNotNull(data.getGeofencing());
     }
 
     public void test_reportSystemData_noDoubleReports() {

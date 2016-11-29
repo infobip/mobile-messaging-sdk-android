@@ -88,6 +88,8 @@ public class MobileMessagingCore {
     }
 
     public void sync() {
+        readSystemData();
+
         registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
         messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
@@ -433,7 +435,8 @@ public class MobileMessagingCore {
                 reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
-                isGeofencingActivated(context));
+                isGeofencingActivated(context),
+                SoftwareInformation.areNotificationsEnabled(context));
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash == data.hashCode()) {
@@ -445,7 +448,7 @@ public class MobileMessagingCore {
 
     public SystemData getUnreportedSystemData() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA)) {
-            return new SystemData(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA));
+            return SystemData.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA));
         }
         return null;
     }

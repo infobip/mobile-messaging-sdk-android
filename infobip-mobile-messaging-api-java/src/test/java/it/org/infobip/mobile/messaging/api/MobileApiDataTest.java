@@ -4,14 +4,13 @@ import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.api.support.Generator;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Properties;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -128,6 +127,7 @@ public class MobileApiDataTest {
         systemDataReport.setDeviceModel("TEST");
         systemDataReport.setApplicationVersion("3.4.5.TEST");
         systemDataReport.setGeofencing(false);
+        systemDataReport.setNotificationsEnabled(true);
 
         // prepare server
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -147,12 +147,16 @@ public class MobileApiDataTest {
         assertEquals("myDeviceInstanceId", debugServer.getQueryParameter("deviceApplicationInstanceId"));
 
         //inspect request
-        HashMap<String, Object> request = new JsonSerializer().deserialize(debugServer.getBody(), HashMap.class);
-        assertEquals("1.2.3.TEST", request.get("sdkVersion"));
-        assertEquals("0.1.2.TEST", request.get("osVersion"));
-        assertEquals("INFOBIP", request.get("deviceManufacturer"));
-        assertEquals("TEST", request.get("deviceModel"));
-        assertEquals("3.4.5.TEST", request.get("applicationVersion"));
-        assertEquals(false, request.get("geofencing"));
+        JSONAssert.assertEquals(
+                "{" +
+                    "'sdkVersion':'1.2.3.TEST'," +
+                    "'osVersion':'0.1.2.TEST'," +
+                    "'deviceManufacturer':'INFOBIP'," +
+                    "'deviceModel':'TEST'," +
+                    "'applicationVersion':'3.4.5.TEST'," +
+                    "'geofencing':false," +
+                    "'notificationsEnabled':true" +
+                "}",
+                debugServer.getBody(), true);
     }
 }

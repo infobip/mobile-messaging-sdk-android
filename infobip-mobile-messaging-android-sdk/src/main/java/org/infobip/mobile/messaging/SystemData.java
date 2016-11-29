@@ -9,34 +9,26 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class SystemData {
 
-    String sdkVersion;
-    String osVersion;
-    String deviceManufacturer;
-    String deviceModel;
-    String applicationVersion;
-    Boolean geofencing;
+    private String sdkVersion;
+    private String osVersion;
+    private String deviceManufacturer;
+    private String deviceModel;
+    private String applicationVersion;
+    private boolean geofencing;
+    private boolean notificationsEnabled;
 
-    public SystemData(String json) {
-        SystemData data = new JsonSerializer().deserialize(json, SystemData.class);
-        if (data == null) {
-            return;
-        }
-
-        this.sdkVersion = data.sdkVersion;
-        this.osVersion = data.osVersion;
-        this.deviceManufacturer = data.deviceManufacturer;
-        this.deviceModel = data.deviceModel;
-        this.applicationVersion = data.applicationVersion;
-        this.geofencing = data.geofencing;
-    }
-
-    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion, Boolean geofencing) {
+    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion, boolean geofencing, boolean notificationsEnabled) {
         this.sdkVersion = sdkVersion;
         this.osVersion = osVersion;
         this.deviceManufacturer = deviceManufacturer;
         this.deviceModel = deviceModel;
         this.applicationVersion = applicationVersion;
         this.geofencing = geofencing;
+        this.notificationsEnabled = notificationsEnabled;
+    }
+
+    public static SystemData fromJson(String json) {
+        return new JsonSerializer().deserialize(json, SystemData.class);
     }
 
     public String getSdkVersion() {
@@ -59,8 +51,12 @@ public class SystemData {
         return applicationVersion;
     }
 
-    public Boolean getGeofencing() {
+    public boolean isGeofencing() {
         return geofencing;
+    }
+
+    public boolean areNotificationsEnabled() {
+        return notificationsEnabled;
     }
 
     @Override
@@ -73,6 +69,7 @@ public class SystemData {
         result = appendToHash(result, prime, deviceModel);
         result = appendToHash(result, prime, applicationVersion);
         result = appendToHash(result, prime, geofencing);
+        result = appendToHash(result, prime, notificationsEnabled);
         return result;
     }
 
@@ -96,7 +93,8 @@ public class SystemData {
                 StringUtils.isEqual(this.deviceManufacturer, other.deviceManufacturer) &&
                 StringUtils.isEqual(this.deviceModel, other.deviceModel) &&
                 StringUtils.isEqual(this.applicationVersion, other.applicationVersion) &&
-                (this.geofencing == other.geofencing);
+                (this.geofencing == other.geofencing) &&
+                (this.notificationsEnabled == other.notificationsEnabled);
     }
 
     @Override

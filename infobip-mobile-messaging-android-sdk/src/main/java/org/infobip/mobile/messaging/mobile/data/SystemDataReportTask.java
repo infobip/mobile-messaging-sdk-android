@@ -42,7 +42,8 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
                 report.getDeviceManufacturer(),
                 report.getDeviceModel(),
                 report.getApplicationVersion(),
-                report.getGeofencing());
+                report.getGeofencing(),
+                report.getNotificationsEnabled());
 
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();

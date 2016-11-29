@@ -32,7 +32,7 @@ public class SystemDataReporter {
 
         SystemDataReport report = new SystemDataReport(data.getSdkVersion(),
                 data.getOsVersion(), data.getDeviceManufacturer(), data.getDeviceModel(),
-                data.getApplicationVersion(), data.getGeofencing());
+                data.getApplicationVersion(), data.isGeofencing(), data.areNotificationsEnabled());
 
         new SystemDataReportTask(context) {
             @Override
