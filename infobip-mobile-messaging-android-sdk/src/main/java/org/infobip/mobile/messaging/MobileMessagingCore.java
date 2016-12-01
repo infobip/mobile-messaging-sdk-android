@@ -352,8 +352,8 @@ public class MobileMessagingCore {
 
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
+        setGeofencingActivated(context, geofencing != null);
         if (geofencing == null) return;
-        setGeofencingActivated(context, true);
         geofencing.activate();
     }
 
