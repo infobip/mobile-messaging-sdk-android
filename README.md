@@ -37,64 +37,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     }
     ```
 
-5. Add permissions and Mobile Messaging components to AndroidManifest.xml
-
-    ```xml
-    <manifest>
-    
-        <!-- Existing manifest entries -->
-     
-        <!-- Mobile Messaging permissions -->
-        
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-        <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
-        <permission android:name="${applicationId}.permission.C2D_MESSAGE" android:protectionLevel="signature" />
-     
-        <!-- Needed for push notifications that contain VIBRATE flag. Optional, but recommended. -->
-        <uses-permission android:name="android.permission.VIBRATE" />
-        
-        <!-- /Mobile Messaging permissions -->
-        
-      
-        <application>
-        
-            <!-- Existing application entries -->
-     
-            <!-- Mobile Messaging components -->
-            
-            <receiver
-                    android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver"
-                    android:exported="true"
-                    android:permission="com.google.android.c2dm.permission.SEND" >
-                <intent-filter>
-                    <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                </intent-filter>
-            </receiver>
-            
-            <service
-                    android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
-                    android:exported="true">
-            </service>
-            
-            <service
-                    android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
-                    android:exported="false">
-                    <intent-filter>
-                        <action android:name="com.google.android.gms.iid.InstanceID"/>
-                        <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
-                    </intent-filter>
-            </service>
-            
-            <!-- /Mobile Messaging components -->
-            
-            
-        </application>
-    </manifest>
-    ```
-
-6. Add GCM Sender ID, obtained in step 1, and Infobip Application Code, obtained in step 2, to values/strings.xml resource file
+5. Add GCM Sender ID, obtained in step 1, and Infobip Application Code, obtained in step 2, to values/strings.xml resource file
     ```groovy
     <resources>
         <string name="google_app_id">YOUR GCM SENDER</string>
@@ -103,7 +46,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     </resources>
     ```
 
-7. Add code to MainActivity#onCreate
+6. Add code to MainActivity#onCreate
 
     ```java
     import android.os.Bundle;

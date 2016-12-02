@@ -1,7 +1,49 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="org.infobip.mobile.messaging">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
-    <application/>
+    <uses-permission android:name=".permission.C2D_MESSAGE"/>
+    <permission android:name=".permission.C2D_MESSAGE" android:protectionLevel="signature"/>
+    <application>
+
+        <receiver
+            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
+            android:exported="false">
+        </service>
+        <service
+            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <!-- Intent filter below is for pre-4.4 KitKat devices -->
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
+            </intent-filter>
+        </service>
+
+        <!--Service that triggers when geofence area is entered-->
+        <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
+
+        <receiver android:name="org.infobip.mobile.messaging.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="org.infobip.mobile.messaging.geo.GeofencingAlarmReceiver"/>
+    </application>
 </manifest>
