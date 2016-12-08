@@ -130,6 +130,18 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    private final BroadcastReceiver pushRegistrationEnabledReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, false);
+            if (isPushRegistrationEnabled) {
+                showToast("Push Registration Enabled");
+            } else {
+                showToast("Push Registration Disabled");
+            }
+        }
+    };
     private BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -286,6 +298,16 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_register) {
+            MobileMessaging.getInstance(this).enablePushRegistration();
+            return true;
+        }
+
+        if (id == R.id.action_unregister) {
+            MobileMessaging.getInstance(this).disablePushRegistration();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -350,6 +372,8 @@ public class MainActivity extends AppCompatActivity {
                     new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
             localBroadcastManager.registerReceiver(geofenceAreaEnteredReceiver,
                     new IntentFilter(Event.GEOFENCE_AREA_ENTERED.getKey()));
+            localBroadcastManager.registerReceiver(pushRegistrationEnabledReceiver,
+                    new IntentFilter(Event.PUSH_REGISTRATION_ENABLED.getKey()));
             receiversRegistered = true;
         }
     }
@@ -361,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
             localBroadcastManager.unregisterReceiver(userDataReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
             localBroadcastManager.unregisterReceiver(playServicesErrorReceiver);
+            localBroadcastManager.unregisterReceiver(pushRegistrationEnabledReceiver);
             receiversRegistered = false;
         }
     }

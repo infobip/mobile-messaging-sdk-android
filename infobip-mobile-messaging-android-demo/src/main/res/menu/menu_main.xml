@@ -6,4 +6,14 @@
         android:title="@string/action_inspect"
         android:orderInCategory="100"
         app:showAsAction="never" />
+
+    <item android:id="@+id/action_register"
+        android:title="Register"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/action_unregister"
+        android:title="Unregister"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
 </menu>

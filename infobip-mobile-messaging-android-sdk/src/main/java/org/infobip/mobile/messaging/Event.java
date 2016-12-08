@@ -208,7 +208,17 @@ public enum Event {
      * }
      * </pre>
      */
-    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR");
+    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR"),
+
+    /**
+     * It is triggered when push registration status is changed.
+     * <pre>
+     * {@code
+     * boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED);
+     * }
+     * </pre>
+     */
+    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED");
 
     private final String key;
 

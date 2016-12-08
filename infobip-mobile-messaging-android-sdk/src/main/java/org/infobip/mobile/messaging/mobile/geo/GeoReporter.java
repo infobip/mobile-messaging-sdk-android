@@ -30,7 +30,7 @@ public class GeoReporter {
 
         final MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         final ArrayList<GeoReport> reports = mobileMessagingCore.removeUnreportedGeoEvents(context);
-        if (reports.isEmpty()) {
+        if (reports.isEmpty() || !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
 

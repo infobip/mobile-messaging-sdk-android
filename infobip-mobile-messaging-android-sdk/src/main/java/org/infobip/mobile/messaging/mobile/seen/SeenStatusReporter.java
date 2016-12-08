@@ -8,6 +8,7 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -25,7 +26,7 @@ public class SeenStatusReporter {
     private static BatchReporter batchReporter = null;
 
     public void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
-        if (unreportedSeenMessageIds.length == 0) {
+        if (unreportedSeenMessageIds.length == 0 || !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
             return;
         }
 

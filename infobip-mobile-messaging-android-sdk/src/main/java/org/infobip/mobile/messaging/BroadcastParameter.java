@@ -17,6 +17,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_SYSTEM_DATA = "org.infobip.mobile.messaging.systemdata";
     public static final String EXTRA_MESSAGES = "org.infobip.mobile.messaging.messages";
     public static final String EXTRA_PLAY_SERVICES_ERROR_CODE = "org.infobip.mobile.messaging.play.services";
+    public static final String EXTRA_PUSH_REGISTRATION_ENABLED = "org.infobip.mobile.messaging.push.registration.enabled";
 
     private BroadcastParameter() {
     }

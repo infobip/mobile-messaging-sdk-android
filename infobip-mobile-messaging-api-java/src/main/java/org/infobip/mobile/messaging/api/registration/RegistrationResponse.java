@@ -21,4 +21,9 @@ public class RegistrationResponse {
      * Application instance ID on Mobile Messaging backend.
      */
     private String deviceApplicationInstanceId;
+
+    /**
+     * Push registration status (enabled/disabled) on Mobile Messaging backend.
+     */
+    private Boolean pushRegistrationEnabled;
 }

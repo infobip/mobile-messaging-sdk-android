@@ -79,6 +79,35 @@ public class MobileMessaging {
     }
 
     /**
+     * Enables the push registration so that the application can receive push notifications
+     * (regular push messages/geofencing campaign messages/messages fetched from the server).
+     * MobileMessaging SDK has the push registration enabled by default.
+     */
+    public void enablePushRegistration() {
+        MobileMessagingCore.getInstance(context).enablePushRegistration();
+    }
+
+    /**
+     * Disables the push registration so that the application is no longer able to receive push notifications
+     * through MobileMessaging SDK (regular push messages/geofencing campaign messages/messages fetched from the server).
+     * MobileMessaging SDK has the push registration enabled by default.
+     */
+    public void disablePushRegistration() {
+        MobileMessagingCore.getInstance(context).disablePushRegistration();
+    }
+
+    /**
+     * Push registration status defines whether the device is allowed to receive push notifications
+     * (regular push messages/geofencing campaign messages/messages fetched from the server).
+     * MobileMessaging SDK has the push registration enabled by default.
+     *
+     * @return Current push registration status.
+     */
+    public boolean isPushRegistrationEnabled() {
+        return MobileMessagingCore.getInstance(context).isPushRegistrationEnabled();
+    }
+
+    /**
      * Reports delivery of messages to Mobile Messaging servers.
      * </p>
      * This method has to be used only if you handle GCM message notifications

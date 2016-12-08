@@ -91,12 +91,35 @@ public class MobileMessagingCore {
         readSystemData();
 
         registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
-        messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
-        userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
-        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
         systemDataReporter.report(context, getStats(), taskExecutor);
+        userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
         versionChecker.check(context);
-        geoReporter.report(context, getStats());
+
+        if (isPushRegistrationEnabled()) {
+            messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
+            seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
+            geoReporter.report(context, getStats());
+        }
+    }
+
+    void enablePushRegistration() {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), getStats(), taskExecutor);
+        if (isGeofencingActivated(context)) {
+            Geofencing.getInstance(context).activate();
+        }
+    }
+
+    void disablePushRegistration() {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), getStats(), taskExecutor);
+        if (isGeofencingActivated(context)) {
+            Geofencing.getInstance(context).deactivate();
+        }
+    }
+
+    public boolean isPushRegistrationEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
     }
 
     public String getRegistrationId() {

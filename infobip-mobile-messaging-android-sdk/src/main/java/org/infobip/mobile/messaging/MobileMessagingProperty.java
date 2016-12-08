@@ -37,6 +37,7 @@ public enum MobileMessagingProperty {
     SUSPENDED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.SUSPENDED_CAMPAIGN_IDS", new String[0]),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.infobip.GEOFENCING_ACTIVATED", false),
+    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", false),
 
     DISPLAY_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.DISPLAY_NOTIFICATION_ENABLED", true),
     CALLBACK_ACTIVITY("org.infobip.mobile.messaging.notification.CALLBACK_ACTIVITY"),

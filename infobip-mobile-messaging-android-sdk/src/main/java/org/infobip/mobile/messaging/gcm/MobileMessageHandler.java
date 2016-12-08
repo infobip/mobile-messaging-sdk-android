@@ -26,6 +26,10 @@ public class MobileMessageHandler {
     private SharedPreferencesMessageStore messageStore;
 
     public void handleMessage(Context context, Intent intent) {
+        if (!MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+            return;
+        }
+
         String from = intent.getStringExtra("from");
         Bundle data = intent.getExtras();
 
