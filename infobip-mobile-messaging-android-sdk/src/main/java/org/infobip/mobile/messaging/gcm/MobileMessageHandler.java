@@ -15,13 +15,13 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Random;
+
 /**
  * @author mstipanov
  * @since 14.04.2016.
  */
 public class MobileMessageHandler {
-
-    public static final int DEFAULT_NOTIFICATION_ID = 0;
 
     private SharedPreferencesMessageStore messageStore;
 
@@ -48,13 +48,19 @@ public class MobileMessageHandler {
 
         Log.d(MobileMessaging.TAG, "Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
-            NotificationHandler.displayNotification(context, message, DEFAULT_NOTIFICATION_ID);
+            NotificationHandler.displayNotification(context, message, getDefaultNotificationId(context));
         }
 
         Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
         messageReceived.putExtras(message.getBundle());
         context.sendBroadcast(messageReceived);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
+    }
+
+    private int getDefaultNotificationId(Context context) {
+        boolean areStackedNotificationsEnabled = MobileMessagingCore.getInstance(context).getNotificationSettings().areStackedNotificationsEnabled();
+        int defaultNotificationId = 0;
+        return areStackedNotificationsEnabled ? new Random().nextInt() : defaultNotificationId;
     }
 
     private void saveMessage(Context context, Message message) {

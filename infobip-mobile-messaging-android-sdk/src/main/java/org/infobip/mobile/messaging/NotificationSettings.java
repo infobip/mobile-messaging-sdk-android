@@ -109,6 +109,14 @@ public class NotificationSettings {
         return !isForegroundNotificationEnabled();
     }
 
+    private void setStackedNotificationsEnabled(boolean stackedNotificationsEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.STACKED_NOTIFICATIONS_ENABLED, stackedNotificationsEnabled);
+    }
+
+    public boolean areStackedNotificationsEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.STACKED_NOTIFICATIONS_ENABLED);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -134,6 +142,7 @@ public class NotificationSettings {
         private int pendingIntentFlags = (int) MobileMessagingProperty.PENDING_INTENT_FLAGS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
+        private boolean stackedNotificationsEnabled;
 
         public Builder(Context context) {
             if (null == context) {
@@ -277,6 +286,18 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to stack your notifications instead of overwrite them.
+         * <p/>
+         * By default foreground notifications are overwritten by newest one
+         *
+         * @return {@link Builder}
+         */
+        public Builder withStackedNotifications() {
+            this.stackedNotificationsEnabled = true;
+            return this;
+        }
+
+        /**
          * When you want to set notification auto-cancel to <i>false</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
          * <p/>
          * By default it will be set to <i>true</i>
@@ -317,6 +338,7 @@ public class NotificationSettings {
             notificationSettings.setPendingIntentFlags(pendingIntentFlags);
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
+            notificationSettings.setStackedNotificationsEnabled(stackedNotificationsEnabled);
 
             return notificationSettings;
         }
