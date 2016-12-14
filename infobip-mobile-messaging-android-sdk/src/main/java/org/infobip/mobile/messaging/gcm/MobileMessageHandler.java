@@ -58,9 +58,9 @@ public class MobileMessageHandler {
     }
 
     private int getDefaultNotificationId(Context context) {
-        boolean areStackedNotificationsEnabled = MobileMessagingCore.getInstance(context).getNotificationSettings().areStackedNotificationsEnabled();
+        boolean areMultipleNotificationsEnabled = MobileMessagingCore.getInstance(context).getNotificationSettings().areMultipleNotificationsEnabled();
         int defaultNotificationId = 0;
-        return areStackedNotificationsEnabled ? new Random().nextInt() : defaultNotificationId;
+        return areMultipleNotificationsEnabled ? new Random().nextInt() : defaultNotificationId;
     }
 
     private void saveMessage(Context context, Message message) {

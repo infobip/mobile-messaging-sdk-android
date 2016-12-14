@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                     .withMessageStore(SharedPreferencesMessageStore.class)
                     .withGeofencing()
                     .withDisplayNotification(new NotificationSettings.Builder(this)
-                            .withStackedNotifications()
+                            .withMultipleNotifications()
                             .withDefaultIcon(R.drawable.ic_notification)
                             .build())
                     .build();

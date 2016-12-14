@@ -109,12 +109,12 @@ public class NotificationSettings {
         return !isForegroundNotificationEnabled();
     }
 
-    private void setStackedNotificationsEnabled(boolean stackedNotificationsEnabled) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.STACKED_NOTIFICATIONS_ENABLED, stackedNotificationsEnabled);
+    private void setMultipleNotificationsEnabled(boolean multipleNotificationsEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED, multipleNotificationsEnabled);
     }
 
-    public boolean areStackedNotificationsEnabled() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.STACKED_NOTIFICATIONS_ENABLED);
+    public boolean areMultipleNotificationsEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED);
     }
 
     /**
@@ -142,7 +142,7 @@ public class NotificationSettings {
         private int pendingIntentFlags = (int) MobileMessagingProperty.PENDING_INTENT_FLAGS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
-        private boolean stackedNotificationsEnabled;
+        private boolean multipleNotificationsEnabled;
 
         public Builder(Context context) {
             if (null == context) {
@@ -286,14 +286,14 @@ public class NotificationSettings {
         }
 
         /**
-         * When you want to stack your notifications instead of overwrite them.
+         * When you want to show multiple notifications in status bar.
          * <p/>
-         * By default foreground notifications are overwritten by newest one
+         * By default in navigation bar, only one notification is shown which is overwritten by the newest one.
          *
          * @return {@link Builder}
          */
-        public Builder withStackedNotifications() {
-            this.stackedNotificationsEnabled = true;
+        public Builder withMultipleNotifications() {
+            this.multipleNotificationsEnabled = true;
             return this;
         }
 
@@ -338,7 +338,7 @@ public class NotificationSettings {
             notificationSettings.setPendingIntentFlags(pendingIntentFlags);
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
-            notificationSettings.setStackedNotificationsEnabled(stackedNotificationsEnabled);
+            notificationSettings.setMultipleNotificationsEnabled(multipleNotificationsEnabled);
 
             return notificationSettings;
         }
