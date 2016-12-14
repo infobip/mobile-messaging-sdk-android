@@ -181,31 +181,23 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MobileMessaging mobileMessaging;
-//        boolean notificationsEnabled = getNotificationEnabledFromPreferences();
-//        if (!notificationsEnabled) {
-//            mobileMessaging = new MobileMessaging.Builder(getApplication())
-//                    .withMessageStore(SharedPreferencesMessageStore.class)
-//                    .withoutDisplayNotification()
-//                    .withGeofencing()
-//                    .build();
-//        } else {
-//            mobileMessaging = new MobileMessaging.Builder(getApplication())
-//                    .withMessageStore(SharedPreferencesMessageStore.class)
-//                    .withGeofencing()
-//                    .withDisplayNotification(new NotificationSettings.Builder(this)
-//                            .withDefaultIcon(R.drawable.ic_notification)
-//                            .build())
-//                    .build();
-//        }
-
-        mobileMessaging = new MobileMessaging.Builder(getApplication())
-                .withMessageStore(SharedPreferencesMessageStore.class)
-                .withGeofencing()
-                .withDisplayNotification(new NotificationSettings.Builder(this)
-                        .withStackedNotifications()
-                        .withDefaultIcon(R.drawable.ic_notification)
-                        .build())
-                .build();
+        boolean notificationsEnabled = getNotificationEnabledFromPreferences();
+        if (!notificationsEnabled) {
+            mobileMessaging = new MobileMessaging.Builder(getApplication())
+                    .withMessageStore(SharedPreferencesMessageStore.class)
+                    .withoutDisplayNotification()
+                    .withGeofencing()
+                    .build();
+        } else {
+            mobileMessaging = new MobileMessaging.Builder(getApplication())
+                    .withMessageStore(SharedPreferencesMessageStore.class)
+                    .withGeofencing()
+                    .withDisplayNotification(new NotificationSettings.Builder(this)
+                            .withStackedNotifications()
+                            .withDefaultIcon(R.drawable.ic_notification)
+                            .build())
+                    .build();
+        }
 
         readMsisdnFromMobileMessaging();
         updateCount();
