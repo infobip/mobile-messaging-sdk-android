@@ -21,7 +21,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
  * @since 03.03.2016.
  */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-public class UpsertRegistrationTask extends AsyncTask<Object, Void, UpsertRegistrationResult> {
+public class UpsertRegistrationTask extends AsyncTask<Boolean, Void, UpsertRegistrationResult> {
     private final Context context;
 
     UpsertRegistrationTask(Context context) {
@@ -29,12 +29,12 @@ public class UpsertRegistrationTask extends AsyncTask<Object, Void, UpsertRegist
     }
 
     @Override
-    protected UpsertRegistrationResult doInBackground(Object... notUsed) {
+    protected UpsertRegistrationResult doInBackground(Boolean... params) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         try {
             String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
             String registrationId = mobileMessagingCore.getRegistrationId();
-            Boolean pushRegistrationEnabled = mobileMessagingCore.isPushRegistrationEnabled();
+            Boolean pushRegistrationEnabled = params.length > 0 ? params[0] : null;
             RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(deviceApplicationInstanceId, registrationId, pushRegistrationEnabled);
             return new UpsertRegistrationResult(registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
         } catch (Exception e) {

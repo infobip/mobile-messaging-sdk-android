@@ -194,7 +194,7 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
     }
 
     private void verifyRegistration(VerificationMode verificationMode) {
-        registrationSynchronizer.updatePushRegistrationStatus(context, "TestDeviceInstanceId", MobileMessagingCore.getInstance(context).getStats(), taskExecutor);
+        registrationSynchronizer.updatePushRegistrationStatus(context, "TestDeviceInstanceId", null, MobileMessagingCore.getInstance(context).getStats(), taskExecutor);
         Mockito.verify(pusgRegistrationEnabledReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 }

@@ -24,11 +24,7 @@ import static org.infobip.mobile.messaging.MobileMessaging.TAG;
  */
 public class RegistrationSynchronizer {
 
-    public void updatePushRegistrationStatus(Context context, String registrationId, MobileMessagingStats stats, Executor executor) {
-        updateRegistrationStatus(context, registrationId, stats, executor);
-    }
-
-    private void updateRegistrationStatus(final Context context, final String registrationId, final MobileMessagingStats stats, Executor executor) {
+    public void updatePushRegistrationStatus(final Context context, final String registrationId, final Boolean enabled, final MobileMessagingStats stats, Executor executor) {
         if (StringUtils.isBlank(registrationId)) {
             return;
         }
@@ -67,7 +63,7 @@ public class RegistrationSynchronizer {
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
                 stats.reportError(MobileMessagingError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
             }
-        }.executeOnExecutor(executor);
+        }.executeOnExecutor(executor, enabled);
     }
 
     public void synchronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {

@@ -104,7 +104,7 @@ public class MobileMessagingCore {
 
     void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), getStats(), taskExecutor);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), true, getStats(), taskExecutor);
         if (isGeofencingActivated(context)) {
             Geofencing.getInstance(context).activate();
         }
@@ -112,7 +112,7 @@ public class MobileMessagingCore {
 
     void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), getStats(), taskExecutor);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), false, getStats(), taskExecutor);
         if (isGeofencingActivated(context)) {
             Geofencing.getInstance(context).deactivate();
         }
