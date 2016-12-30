@@ -21,18 +21,22 @@ import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Random;
+
 /**
  * @author sslavin
  * @since 15/09/16.
  */
 public class NotificationHandler {
 
+    private static final int DEFAULT_NOTIFICATION_ID = 0;
+
     /**
      * Create and show a simple notification for the corresponding message.
      *
      * @param message message to display notification for.
      */
-    public static void displayNotification(Context context, Message message, int notificationId) {
+    public static void displayNotification(Context context, Message message) {
         NotificationCompat.Builder builder = notificationCompatBuilder(context, message);
         if (builder == null) return;
 
@@ -40,7 +44,7 @@ public class NotificationHandler {
         try {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = builder.build();
-            notificationManager.notify(notificationId, notification);
+            notificationManager.notify(getNotificationId(context, message), notification);
         } catch (SecurityException se) {
             Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
             Log.d(MobileMessaging.TAG, Log.getStackTraceString(se));
@@ -130,5 +134,15 @@ public class NotificationHandler {
         }
 
         notificationBuilder.setSound(soundUri);
+    }
+
+    private static int getNotificationId(Context context, Message message) {
+        NotificationSettings settings = notificationSettings(context, message);
+        if (settings == null) {
+            return DEFAULT_NOTIFICATION_ID;
+        }
+
+        boolean areMultipleNotificationsEnabled = settings.areMultipleNotificationsEnabled();
+        return areMultipleNotificationsEnabled ? new Random().nextInt() : DEFAULT_NOTIFICATION_ID;
     }
 }

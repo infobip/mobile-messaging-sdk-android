@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.PatternSyntaxException;
 
@@ -50,7 +49,6 @@ class GeoAreasHandler {
     private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent(GeoEventType.entry, 1, 0L);
 
     private final MessageStore messageStore = new SharedPreferencesMessageStore();
-    private final Random random = new Random();
     private final Context context;
 
     private static SparseArray<String> transitionNames = new SparseArray<String>() {{
@@ -288,7 +286,7 @@ class GeoAreasHandler {
     }
 
     private void notifyAboutTransition(Context context, Geo geo, int geofenceTransition, Message message) {
-        NotificationHandler.displayNotification(context, message, random.nextInt());
+        NotificationHandler.displayNotification(context, message);
         sendGeoEventBroadcast(context, geofenceTransition, geo, message);
     }
 

@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
@@ -157,10 +158,20 @@ public class NotificationSettings {
 
         private void loadCallbackActivity(Context context) {
             Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
-            String className = launchIntent.getComponent().getClassName();
+            if (launchIntent == null) {
+                return;
+            }
+
+            ComponentName componentName = launchIntent.getComponent();
+            if (componentName == null) {
+                return;
+            }
+
+            String className = componentName.getClassName();
             if (StringUtils.isBlank(className)) {
                 return;
             }
+
             try {
                 this.callbackActivity = Class.forName(className);
             } catch (ClassNotFoundException e) {
