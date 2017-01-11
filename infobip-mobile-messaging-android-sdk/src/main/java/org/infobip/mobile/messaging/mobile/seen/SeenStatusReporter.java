@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -12,10 +11,9 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import java.util.concurrent.Executor;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -41,7 +39,7 @@ public class SeenStatusReporter {
                     @Override
                     protected void onPostExecute(SeenStatusReportResult result) {
                         if (result.hasError()) {
-                            Log.e(TAG, "MobileMessaging API returned error (seen messages)!");
+                            MobileMessagingLogger.e("MobileMessaging API returned error (seen messages)!");
 
                             stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
                             Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -62,7 +60,7 @@ public class SeenStatusReporter {
                     @Override
                     protected void onCancelled() {
                         stats.reportError(MobileMessagingError.SEEN_REPORTING_ERROR);
-                        Log.e(TAG, "Error reporting seen status!");
+                        MobileMessagingLogger.e("Error reporting seen status!");
                     }
                 }.executeOnExecutor(executor);
             }

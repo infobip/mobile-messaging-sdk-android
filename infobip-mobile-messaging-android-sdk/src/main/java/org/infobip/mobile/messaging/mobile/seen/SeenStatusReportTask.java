@@ -6,13 +6,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -34,7 +33,7 @@ class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResul
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.e(MobileMessaging.TAG, "Can't send seen reports to MobileMessaging API without valid registration!");
+            MobileMessagingLogger.e("Can't send seen reports to MobileMessaging API without valid registration!");
             return new SeenStatusReportResult(new Exception("No valid registration"));
         }
 
@@ -46,7 +45,7 @@ class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResul
             return new SeenStatusReportResult(messageIDs);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error reporting seen status!", e);
+            MobileMessagingLogger.e("Error reporting seen status!", e);
             cancel(true);
 
             Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

@@ -11,7 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,7 +22,6 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
@@ -79,7 +78,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     public static void scheduleRefresh(Context context, Date when) {
-        Log.i(TAG, "Next refresh in: " + when);
+        MobileMessagingLogger.i(TAG, "Next refresh in: " + when);
 
         if (when == null) {
             return;
@@ -217,7 +216,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private boolean checkRequiredPermissions() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.e(MobileMessaging.TAG, "Unable to initialize geofencing. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.ACCESS_FINE_LOCATION);
+            MobileMessagingLogger.e("Unable to initialize geofencing. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.ACCESS_FINE_LOCATION);
             return false;
         }
 
@@ -242,10 +241,10 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private void logGeofenceStatus(@NonNull Status status, boolean activated) {
         if (status.isSuccess()) {
-            Log.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
+            MobileMessagingLogger.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
 
         } else {
-            Log.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed", new Throwable(status.getStatusMessage()));
+            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed", new Throwable(status.getStatusMessage()));
         }
     }
 
@@ -267,7 +266,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "GoogleApiClient connected");
+        MobileMessagingLogger.d(TAG, "GoogleApiClient connected");
         activate();
     }
 
@@ -278,6 +277,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, connectionResult.getErrorMessage(), new ConfigurationException(Reason.CHECK_LOCATION_SETTINGS));
+        MobileMessagingLogger.e(TAG, connectionResult.getErrorMessage(), new ConfigurationException(Reason.CHECK_LOCATION_SETTINGS));
     }
 }

@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.mobile.data;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -14,8 +14,6 @@ import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 
 import java.util.concurrent.Executor;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -38,7 +36,7 @@ public class SystemDataReporter {
             @Override
             protected void onPostExecute(SystemDataReportResult result) {
                 if (result.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error (system data)!");
+                    MobileMessagingLogger.e("MobileMessaging API returned error (system data)!");
                     stats.reportError(MobileMessagingError.SYSTEM_DATA_REPORT_ERROR);
 
                     Intent intent = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -49,7 +47,7 @@ public class SystemDataReporter {
                 }
 
                 if (result.isPostponed()) {
-                    Log.w(TAG, "System data report is saved and will be sent at a later time");
+                    MobileMessagingLogger.w("System data report is saved and will be sent at a later time");
                     return;
                 }
 
@@ -63,7 +61,7 @@ public class SystemDataReporter {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error reporting user data!");
+                MobileMessagingLogger.e("Error reporting user data!");
                 stats.reportError(MobileMessagingError.SYSTEM_DATA_REPORT_ERROR);
             }
         }.executeOnExecutor(executor, report);

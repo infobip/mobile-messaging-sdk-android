@@ -3,9 +3,9 @@ package org.infobip.mobile.messaging.util;
 import android.os.Build;
 import android.util.Log;
 
-import java.lang.reflect.Field;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
+import java.lang.reflect.Field;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -28,12 +28,8 @@ public class SystemInformation {
             int fieldValue = -1;
             try {
                 fieldValue = field.getInt(new Object());
-            } catch (IllegalArgumentException e) {
-                Log.d(TAG, Log.getStackTraceString(e));
-            } catch (IllegalAccessException e) {
-                Log.d(TAG, Log.getStackTraceString(e));
-            } catch (NullPointerException e) {
-                Log.d(TAG, Log.getStackTraceString(e));
+            } catch (IllegalArgumentException | NullPointerException | IllegalAccessException e) {
+                MobileMessagingLogger.d(Log.getStackTraceString(e));
             }
 
             if (fieldValue == Build.VERSION.SDK_INT) {

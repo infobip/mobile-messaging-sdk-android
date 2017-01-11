@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.gcm;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
@@ -11,11 +11,10 @@ import com.google.android.gms.iid.InstanceID;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.io.IOException;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author mstipanov
@@ -35,7 +34,7 @@ class RegistrationTokenHandler {
             sendRegistrationToServer(context, token);
             subscribeTopics(context, token);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to complete token refresh", e);
+            MobileMessagingLogger.e("Failed to complete token refresh", e);
         }
     }
 
@@ -84,7 +83,7 @@ class RegistrationTokenHandler {
      * Cleanup GCM token accosicated with a specific GCM sender ID.
      *
      * @param gcmSenderID GCM sender ID
-     * @param gcmToken GCM token to delete
+     * @param gcmToken    GCM token to delete
      * @throws IOException if unable to reach the GCM PubSub service
      */
     void handleRegistrationTokenCleanup(Context context, String gcmSenderID, String gcmToken) {
@@ -92,7 +91,7 @@ class RegistrationTokenHandler {
             InstanceID instanceID = InstanceID.getInstance(context);
             instanceID.deleteToken(gcmSenderID, gcmToken);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to complete GCM token cleanup", e);
+            MobileMessagingLogger.e("Failed to complete GCM token cleanup", e);
         }
     }
 }

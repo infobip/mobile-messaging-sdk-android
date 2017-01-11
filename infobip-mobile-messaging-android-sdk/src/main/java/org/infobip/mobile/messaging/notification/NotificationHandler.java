@@ -13,11 +13,11 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -46,8 +46,8 @@ public class NotificationHandler {
             Notification notification = builder.build();
             notificationManager.notify(getNotificationId(context, message), notification);
         } catch (SecurityException se) {
-            Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
-            Log.d(MobileMessaging.TAG, Log.getStackTraceString(se));
+            MobileMessagingLogger.e("Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+            MobileMessagingLogger.d(Log.getStackTraceString(se));
         }
     }
 
@@ -115,7 +115,7 @@ public class NotificationHandler {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
         } else if (message.isVibrate() && ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_DENIED) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
-            Log.e(MobileMessaging.TAG, "Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+            MobileMessagingLogger.e("Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
         }
         if (!message.isDefaultSound()) {
             notificationDefaults &= ~Notification.DEFAULT_SOUND;
@@ -129,7 +129,7 @@ public class NotificationHandler {
 
         Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
         if (soundUri == null) {
-            Log.e(MobileMessaging.TAG, "Cannot create uri for sound:" + sound + " messageId:" + message.getMessageId());
+            MobileMessagingLogger.e("Cannot create uri for sound:" + sound + " messageId:" + message.getMessageId());
             return;
         }
 

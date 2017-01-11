@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.util;
 import android.util.Base64;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.MobileMessagingLogger;
+
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,8 +12,6 @@ import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -28,7 +28,7 @@ public class Cryptor {
         try {
             sha = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return;
         }
         keyBytes = sha.digest(keyBytes);
@@ -61,7 +61,7 @@ public class Cryptor {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }
@@ -72,7 +72,7 @@ public class Cryptor {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }

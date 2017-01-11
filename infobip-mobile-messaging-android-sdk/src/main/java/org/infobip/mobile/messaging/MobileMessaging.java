@@ -44,8 +44,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class MobileMessaging {
 
-    public static final String TAG = "MobileMessaging";
-
     private static MobileMessaging instance;
     private final Context context;
 
@@ -536,6 +534,7 @@ public class MobileMessaging {
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
+            MobileMessagingLogger.init(application);
             MobileMessagingCore.setApiUri(application, apiUri);
             MobileMessagingCore.setGcmSenderId(application, gcmSenderId);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);

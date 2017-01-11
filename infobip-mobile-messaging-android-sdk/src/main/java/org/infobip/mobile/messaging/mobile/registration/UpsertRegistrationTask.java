@@ -6,13 +6,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
@@ -39,7 +38,7 @@ public class UpsertRegistrationTask extends AsyncTask<Boolean, Void, UpsertRegis
             return new UpsertRegistrationResult(registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error creating registration!", e);
+            MobileMessagingLogger.e("Error creating registration!", e);
             cancel(true);
 
             Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

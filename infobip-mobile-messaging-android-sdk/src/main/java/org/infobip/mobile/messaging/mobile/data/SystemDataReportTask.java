@@ -4,10 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
@@ -32,7 +31,7 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
     protected SystemDataReportResult doInBackground(SystemDataReport... params) {
 
         if (params.length < 1) {
-            Log.e(MobileMessaging.TAG, "System data is empty, cannot report!");
+            MobileMessagingLogger.e("System data is empty, cannot report!");
             return new SystemDataReportResult(new Exception("Syncing system data: request data is empty"));
         }
 
@@ -48,7 +47,7 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.w(MobileMessaging.TAG, "Can't report system data without valid registration");
+            MobileMessagingLogger.w("Can't report system data without valid registration");
             return new SystemDataReportResult(data, true);
         }
 
@@ -57,7 +56,7 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
             return new SystemDataReportResult(data);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error reporting system data!", e);
+            MobileMessagingLogger.e("Error reporting system data!", e);
             cancel(true);
 
             Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

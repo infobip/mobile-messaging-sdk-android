@@ -4,12 +4,12 @@ import android.content.Context;
 import android.util.Base64;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.MobileMessagingLogger;
+
 import java.security.Key;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -56,7 +56,7 @@ public class EncryptUtil {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }
@@ -68,7 +68,7 @@ public class EncryptUtil {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }

@@ -4,14 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 /**
  * @author mstipanov
@@ -37,11 +36,11 @@ public class PlayServicesSupport {
             isPlayServicesAvailable = false;
 
             if (apiAvailability.isUserResolvableError(errorCode)) {
-                Log.e(MobileMessaging.TAG, "Error accessing GCM.");
+                MobileMessagingLogger.e("Error accessing GCM.");
 
             } else {
                 errorCode = DEVICE_NOT_SUPPORTED;
-                Log.e(MobileMessaging.TAG, "This device is not supported.");
+                MobileMessagingLogger.e("This device is not supported.");
             }
 
             // Broadcast is not triggered unless it's posted to Main thread queue. See http://stackoverflow.com/a/23917619/2895571

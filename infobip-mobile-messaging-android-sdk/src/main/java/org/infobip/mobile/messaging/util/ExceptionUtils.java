@@ -2,10 +2,10 @@ package org.infobip.mobile.messaging.util;
 
 import android.util.Log;
 
+import org.infobip.mobile.messaging.MobileMessagingLogger;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author mstipanov
@@ -24,7 +24,7 @@ public abstract class ExceptionUtils {
         try {
             StringWriter sw = new StringWriter();
             writer = new PrintWriter(sw);
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return sw.toString();
         } finally {
             if (null != writer) {

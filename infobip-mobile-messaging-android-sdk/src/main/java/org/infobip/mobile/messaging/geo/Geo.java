@@ -5,10 +5,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.MobileMessagingLogger;
+
 import com.google.gson.annotations.SerializedName;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
@@ -120,8 +121,8 @@ public class Geo implements Parcelable {
         try {
             return DateTimeUtil.ISO8601DateFromString(expiryTime);
         } catch (ISO8601DateParseException e) {
-            Log.e(MobileMessaging.TAG, "Cannot parse expiry date: " + e.getMessage());
-            Log.d(MobileMessaging.TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Cannot parse expiry date: " + e.getMessage());
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }
@@ -130,8 +131,8 @@ public class Geo implements Parcelable {
         try {
             return DateTimeUtil.ISO8601DateFromString(startTime);
         } catch (ISO8601DateParseException e) {
-            Log.e(MobileMessaging.TAG, "Cannot parse start date: " + e.getMessage());
-            Log.d(MobileMessaging.TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Cannot parse start date: " + e.getMessage());
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
     }

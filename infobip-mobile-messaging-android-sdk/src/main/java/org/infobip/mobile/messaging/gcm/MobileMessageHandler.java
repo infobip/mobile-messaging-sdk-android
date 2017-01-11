@@ -4,15 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -35,16 +34,16 @@ public class MobileMessageHandler {
 
         Message message = createMessage(from, data);
         if (StringUtils.isBlank(message.getMessageId())) {
-            Log.w(MobileMessaging.TAG, "Ignoring message without messageId");
+            MobileMessagingLogger.w("Ignoring message without messageId");
             return;
         }
 
-        Log.d(MobileMessaging.TAG, "Message received from: " + from);
+        MobileMessagingLogger.d("Message received from: " + from);
 
         sendDeliveryReport(context, message);
         saveMessage(context, message);
 
-        Log.d(MobileMessaging.TAG, "Message is silent: " + message.isSilent());
+        MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
             NotificationHandler.displayNotification(context, message);
         }
@@ -57,22 +56,22 @@ public class MobileMessageHandler {
 
     private void saveMessage(Context context, Message message) {
         if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
-            Log.d(MobileMessaging.TAG, "Skipping save message: " + message.getMessageId());
+            MobileMessagingLogger.d("Skipping save message: " + message.getMessageId());
 
             if (message.getGeo() != null) {
                 // if message store is not enabled, we need to use it internally (by creating new instance of SharedPreferencesMessageStore.class),
                 // to save only those Messages which contains Geo, otherwise they would never be triggered.
                 messageStore().save(context, message);
-                Log.d(MobileMessaging.TAG, "Only save message that contains geofence areas: " + message.getMessageId());
+                MobileMessagingLogger.d("Only save message that contains geofence areas: " + message.getMessageId());
             }
             return;
         }
 
-        Log.d(MobileMessaging.TAG, "Saving message: " + message.getMessageId());
+        MobileMessagingLogger.d("Saving message: " + message.getMessageId());
         try {
             MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
         } catch (Exception e) {
-            Log.e(MobileMessaging.TAG, "Error saving message: " + message.getMessageId(), e);
+            MobileMessagingLogger.e("Error saving message: " + message.getMessageId(), e);
         }
     }
 
@@ -91,10 +90,10 @@ public class MobileMessageHandler {
 
     private void sendDeliveryReport(Context context, Message message) {
         if (StringUtils.isBlank(message.getMessageId())) {
-            Log.e(MobileMessaging.TAG, "No ID received for message: " + message);
+            MobileMessagingLogger.e("No ID received for message: " + message);
             return;
         }
-        Log.d(MobileMessaging.TAG, "Sending DR: " + message.getMessageId());
+        MobileMessagingLogger.d("Sending DR: " + message.getMessageId());
         MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
     }
 }

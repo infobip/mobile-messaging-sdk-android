@@ -16,14 +16,13 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -47,8 +46,8 @@ public class MessageSender {
             try {
                 object = new JSONObject(json);
             } catch (JSONException e) {
-                Log.w(TAG, "Cannot parse message from JSON: " + e.getMessage());
-                Log.d(TAG, Log.getStackTraceString(e));
+                MobileMessagingLogger.w("Cannot parse message from JSON: " + e.getMessage());
+                MobileMessagingLogger.d(Log.getStackTraceString(e));
                 return new Message();
             }
 
@@ -98,7 +97,7 @@ public class MessageSender {
             @Override
             protected void onPostExecute(SendMessageResult sendMessageResult) {
                 if (sendMessageResult.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error (sending message)!");
+                    MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!");
                     stats.reportError(MobileMessagingError.MESSAGE_SEND_ERROR);
 
                     Intent sendMessageError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());

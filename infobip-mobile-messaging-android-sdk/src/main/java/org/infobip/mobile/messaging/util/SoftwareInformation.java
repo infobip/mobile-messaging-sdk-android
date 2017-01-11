@@ -7,8 +7,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.BuildConfig;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -30,7 +29,7 @@ public class SoftwareInformation {
         try {
             appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
         } catch (PackageManager.NameNotFoundException e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
         }
         return appVersion;
     }
@@ -45,7 +44,7 @@ public class SoftwareInformation {
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
             appName = packageManager.getApplicationLabel(applicationInfo).toString();
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
         }
         return appName;
     }

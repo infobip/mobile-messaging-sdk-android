@@ -1,9 +1,9 @@
 package org.infobip.mobile.messaging.mobile.version;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.Version;
@@ -38,7 +38,7 @@ public class VersionChecker {
 
                 String current = SoftwareInformation.getLibraryVersion();
                 if (shouldUpdate(versionCheckResult.getVersion(), current)) {
-                    Log.w(TAG, "Your library version is outdated, find latest release " + versionCheckResult.getVersion() +
+                    MobileMessagingLogger.w(TAG, "Your library version is outdated, find latest release " + versionCheckResult.getVersion() +
                             " here: " + versionCheckResult.getUpdateUrl());
                 }
 

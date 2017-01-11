@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.util.Pair;
-import android.util.Log;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import android.util.SparseArray;
 
 import com.google.android.gms.location.Geofence;
@@ -15,7 +15,6 @@ import com.google.android.gms.location.GeofencingEvent;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventReports;
@@ -80,7 +79,7 @@ class GeoAreasHandler {
         if (geofencingEvent == null) return;
 
         if (geofencingEvent.hasError()) {
-            Log.e(TAG, "ERROR:" + geofencingErrors.get(geofencingEvent.getErrorCode()));
+            MobileMessagingLogger.e(TAG, "ERROR:" + geofencingErrors.get(geofencingEvent.getErrorCode()));
             return;
         }
 
@@ -198,7 +197,7 @@ class GeoAreasHandler {
             return checkIsDeliveryInTimeInterval(timeInterval);
 
         } catch (ParseException e) {
-            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            MobileMessagingLogger.e(e.getMessage(), e);
             return true;
         }
     }
@@ -213,7 +212,7 @@ class GeoAreasHandler {
         try {
             days = daysPayload.split(",");
         } catch (PatternSyntaxException e) {
-            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            MobileMessagingLogger.e(e.getMessage(), e);
         }
 
         if (days == null) {
@@ -305,7 +304,7 @@ class GeoAreasHandler {
 
     private void logGeofences(List<Area> areas, int transition) {
         for (Area a : areas) {
-            Log.i(TAG, transitionNames.get(transition) + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
+            MobileMessagingLogger.i(TAG, transitionNames.get(transition) + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
         }
     }
 

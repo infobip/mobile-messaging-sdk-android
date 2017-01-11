@@ -3,12 +3,13 @@ package org.infobip.mobile.messaging.gcm;
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
+
 import com.google.android.gms.gcm.GcmListenerService;
+
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 /**
  * MobileMessagingGcmIntentService processes GCM push notifications. To be able to use it you must register it as a receiver in AndroidManifest.xml
@@ -164,7 +165,7 @@ public class MobileMessagingGcmIntentService extends IntentService {
     private RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
 
     public MobileMessagingGcmIntentService() {
-        super(TAG + "-" + MobileMessagingGcmIntentService.class.getSimpleName());
+        super(MobileMessagingLogger.TAG + "-" + MobileMessagingGcmIntentService.class.getSimpleName());
     }
 
     @Override
@@ -174,7 +175,7 @@ public class MobileMessagingGcmIntentService extends IntentService {
             return;
         } else if (ACTION_TOKEN_CLEANUP.equals(intent.getAction())) {
             registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
-            return ;
+            return;
         }
 
         registrationTokenHandler.handleRegistrationTokenUpdate(this);

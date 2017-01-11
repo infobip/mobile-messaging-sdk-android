@@ -2,15 +2,14 @@ package org.infobip.mobile.messaging.mobile.geo;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.geo.CampaignStatusEventResponse;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventReports;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 /**
  * @author sslavin
@@ -36,7 +35,7 @@ class GeoReportingTask extends AsyncTask<GeoReport, Void, GeoReportingResult> {
 
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error reporting geo areas!", e);
+            MobileMessagingLogger.e("Error reporting geo areas!", e);
             cancel(true);
 
             return new GeoReportingResult(e);

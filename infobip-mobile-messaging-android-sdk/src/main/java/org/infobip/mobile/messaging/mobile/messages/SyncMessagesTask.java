@@ -2,14 +2,13 @@ package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            Log.w(MobileMessaging.TAG, "Registration is not available yet");
+            MobileMessagingLogger.w("Registration is not available yet");
             return new SyncMessagesResult(new SyncMessagesResponse(new ArrayList<MessageResponse>()));
         }
 
@@ -46,7 +45,7 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
 
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
-            Log.e(MobileMessaging.TAG, "Error syncing messages!", e);
+            MobileMessagingLogger.e("Error syncing messages!", e);
             cancel(true);
 
             return new SyncMessagesResult(e);

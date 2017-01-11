@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.mobile.data;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -14,8 +14,6 @@ import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 
 import java.util.concurrent.Executor;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author sslavin
@@ -34,7 +32,7 @@ public class UserDataSynchronizer {
             @Override
             protected void onPostExecute(SyncUserDataResult syncUserDataResult) {
                 if (syncUserDataResult.hasError()) {
-                    Log.e(TAG, "MobileMessaging API returned error (user data)!");
+                    MobileMessagingLogger.e("MobileMessaging API returned error (user data)!");
                     stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
 
                     if (syncUserDataResult.hasInvalidParameterError()) {
@@ -45,7 +43,7 @@ public class UserDataSynchronizer {
                         }
                     } else {
 
-                        Log.v(TAG, "User data synchronization will be postponed to a later time due to communication error");
+                        MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
                         if (listener != null) {
                             listener.onResult(UserData.merge(MobileMessagingCore.getInstance(context).getUserData(), userDataToReport));
                         }
@@ -74,10 +72,10 @@ public class UserDataSynchronizer {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error reporting user data!");
+                MobileMessagingLogger.e("Error reporting user data!");
                 stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
 
-                Log.v(TAG, "User data synchronization will be postponed to a later time due to communication error");
+                MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
                 if (listener != null) {
                     listener.onResult(MobileMessagingCore.getInstance(context).getUserData());
                 }

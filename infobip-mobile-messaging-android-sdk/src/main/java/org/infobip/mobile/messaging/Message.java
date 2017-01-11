@@ -45,7 +45,7 @@ public class Message implements Comparable<Message> {
         if (bundle == null) {
             return null;
         }
-        
+
         return new Message(bundle);
     }
 
@@ -194,7 +194,7 @@ public class Message implements Comparable<Message> {
         try {
             return new JsonSerializer().deserialize(getInternalData().toString(), Geo.class);
         } catch (Exception e) {
-            Log.e(MobileMessaging.TAG, e.getMessage(), e);
+            MobileMessagingLogger.e(e.getMessage(), e);
             return null;
         }
     }
@@ -208,8 +208,8 @@ public class Message implements Comparable<Message> {
         try {
             return new JSONObject(string);
         } catch (JSONException e) {
-            Log.w(TAG, "Cannot parse (" + key + "): " + e.getMessage());
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.w(TAG, "Cannot parse (" + key + "): " + e.getMessage());
+            MobileMessagingLogger.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }
@@ -237,7 +237,7 @@ public class Message implements Comparable<Message> {
         try {
             return (T) o;
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.d(TAG, Log.getStackTraceString(e));
             return defaultValue;
         }
     }

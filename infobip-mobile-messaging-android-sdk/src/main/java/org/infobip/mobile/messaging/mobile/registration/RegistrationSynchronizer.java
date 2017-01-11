@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.mobile.registration;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -11,12 +10,11 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.stats.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
-
-import static org.infobip.mobile.messaging.MobileMessaging.TAG;
 
 /**
  * @author mstipanov
@@ -33,7 +31,7 @@ public class RegistrationSynchronizer {
             @Override
             protected void onPostExecute(UpsertRegistrationResult result) {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
-                    Log.e(TAG, "MobileMessaging API returned error (push registration status update)!");
+                    MobileMessagingLogger.e("MobileMessaging API returned error (push registration status update)!");
                     stats.reportError(MobileMessagingError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -57,7 +55,7 @@ public class RegistrationSynchronizer {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error creating registration!");
+                MobileMessagingLogger.e("Error creating registration!");
                 setRegistrationIdReported(context, false);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
@@ -83,7 +81,7 @@ public class RegistrationSynchronizer {
             @Override
             protected void onPostExecute(UpsertRegistrationResult result) {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
-                    Log.e(TAG, "MobileMessaging API returned error (registration)!");
+                    MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
                     stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
@@ -108,7 +106,7 @@ public class RegistrationSynchronizer {
 
             @Override
             protected void onCancelled() {
-                Log.e(TAG, "Error creating registration!");
+                MobileMessagingLogger.e("Error creating registration!");
                 setRegistrationIdReported(context, false);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
