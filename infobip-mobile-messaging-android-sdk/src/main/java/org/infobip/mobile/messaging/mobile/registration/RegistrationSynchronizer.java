@@ -97,6 +97,8 @@ public class RegistrationSynchronizer {
                 setDeviceApplicationInstanceId(context, result.getDeviceInstanceId());
                 setRegistrationIdReported(context, true);
 
+                MobileMessagingCore.getInstance(context).reportSystemData();
+
                 Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
                 registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, registrationId);
                 registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, result.getDeviceInstanceId());

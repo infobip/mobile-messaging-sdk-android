@@ -88,12 +88,12 @@ public class MobileMessagingCore {
     }
 
     public void sync() {
-        readSystemData();
 
         registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
-        systemDataReporter.report(context, getStats(), taskExecutor);
         userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
         versionChecker.check(context);
+
+        reportSystemData();
 
         if (isPushRegistrationEnabled()) {
             messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
@@ -449,7 +449,7 @@ public class MobileMessagingCore {
         messageSender.send(context, getStats(), taskExecutor, listener, messages);
     }
 
-    public void readSystemData() {
+    public void reportSystemData() {
 
         boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
 
@@ -462,11 +462,11 @@ public class MobileMessagingCore {
                 SoftwareInformation.areNotificationsEnabled(context));
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
-        if (hash == data.hashCode()) {
-            return;
+        if (hash != data.hashCode()) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
         }
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
+        systemDataReporter.report(context, getStats(), taskExecutor);
     }
 
     public SystemData getUnreportedSystemData() {
@@ -636,7 +636,6 @@ public class MobileMessagingCore {
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
-            mobileMessagingCore.readSystemData();
             mobileMessagingCore.activateGeofencing(geofencing);
             return mobileMessagingCore;
         }

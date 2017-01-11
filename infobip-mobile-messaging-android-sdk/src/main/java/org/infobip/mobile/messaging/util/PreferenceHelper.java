@@ -283,7 +283,11 @@ public abstract class PreferenceHelper {
     }
 
     public static void remove(Context context, MobileMessagingProperty property) {
-        remove(context, property.getKey());
+        String key = property.getKey();
+        if (property.isEncrypted()) {
+            key = getCryptor(context).encrypt(key);
+        }
+        remove(context, key);
     }
 
     public static void remove(Context context, String key) {
@@ -294,7 +298,11 @@ public abstract class PreferenceHelper {
     }
 
     public static boolean contains(Context context, MobileMessagingProperty property) {
-        return contains(context, property.getKey());
+        String key = property.getKey();
+        if (property.isEncrypted()) {
+            key = getCryptor(context).encrypt(key);
+        }
+        return contains(context, key);
     }
 
     public static boolean contains(Context context, String key) {

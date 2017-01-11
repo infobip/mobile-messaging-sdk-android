@@ -22,11 +22,11 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class SystemDataReportTest extends InstrumentationTestCase {
 
-    DebugServer debugServer;
-    BroadcastReceiver receiver;
-    BroadcastReceiver errorReceiver;
-    ArgumentCaptor<Intent> captor;
-    MobileMessagingCore mobileMessagingCore;
+    private DebugServer debugServer;
+    private BroadcastReceiver receiver;
+    private BroadcastReceiver errorReceiver;
+    private ArgumentCaptor<Intent> captor;
+    private MobileMessagingCore mobileMessagingCore;
     Context context;
 
     @Override
@@ -74,8 +74,7 @@ public class SystemDataReportTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileMessagingCore.readSystemData();
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
         assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
@@ -95,8 +94,7 @@ public class SystemDataReportTest extends InstrumentationTestCase {
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, false);
 
-        mobileMessagingCore.readSystemData();
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
         assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
@@ -114,13 +112,11 @@ public class SystemDataReportTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileMessagingCore.readSystemData();
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
 
-        mobileMessagingCore.readSystemData();
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
@@ -129,16 +125,33 @@ public class SystemDataReportTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
 
-        mobileMessagingCore.readSystemData();
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
         Mockito.verify(errorReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileMessagingCore.sync();
+        mobileMessagingCore.reportSystemData();
 
         Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+    }
+
+    public void test_shouldReport_whenRegistrationIDAvailable() {
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+
+        mobileMessagingCore.reportSystemData();
+
+        Mockito.verify(receiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(errorReceiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+
+        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
+
+        mobileMessagingCore.reportSystemData();
+
+        Mockito.verify(receiver, Mockito.after(1000).times(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 }
