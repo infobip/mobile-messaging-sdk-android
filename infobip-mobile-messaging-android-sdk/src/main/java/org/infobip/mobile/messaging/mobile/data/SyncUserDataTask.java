@@ -9,10 +9,12 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.mobile.InternalError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -34,7 +36,7 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            MobileMessagingLogger.e("Can't sync user data without valid registration!");
+            MobileMessagingLogger.e(InternalError.NO_VALID_REGISTRATION.get());
             return new SyncUserDataResult(new Exception("Syncing user data: no valid registration"));
         }
 
@@ -53,7 +55,7 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
             cancel(true);
 
             Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            userDataSyncError.putExtra(EXTRA_EXCEPTION, e);
+            userDataSyncError.putExtra(EXTRA_EXCEPTION, MobileMessagingError.createFrom(e));
             context.sendBroadcast(userDataSyncError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
             return new SyncUserDataResult(e);

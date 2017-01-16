@@ -36,6 +36,7 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Geo;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -82,13 +83,13 @@ public class MainActivity extends AppCompatActivity {
     private final BroadcastReceiver errorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = getString(R.string.error_api_comm_unknown);
-            Throwable exception = (Throwable) intent.getSerializableExtra(EXTRA_EXCEPTION);
-            if (exception != null) {
-                message = exception.getMessage();
-            }
+            MobileMessagingError mobileMessagingError = (MobileMessagingError) intent.getSerializableExtra(EXTRA_EXCEPTION);
+            if (mobileMessagingError != null) {
+                showToast(mobileMessagingError.toString());
 
-            showToast(message);
+            } else {
+                showToast(getString(R.string.error_api_comm_unknown));
+            }
 
             unregisterPreferenceChangeListener();
             readMsisdnFromMobileMessaging();
@@ -353,8 +354,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onError(Throwable e) {
-                    Log.e(TAG, "User data sync error: " + e);
+                public void onError(MobileMessagingError e) {
+                    Log.e(TAG, String.format(Locale.getDefault(), "User data sync error message: %s, code: %s" + e.getMessage(), e.getCode()));
                 }
             });
         }

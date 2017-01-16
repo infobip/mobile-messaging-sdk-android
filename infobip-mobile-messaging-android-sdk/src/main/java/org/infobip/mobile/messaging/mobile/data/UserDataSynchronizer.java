@@ -3,15 +3,16 @@ package org.infobip.mobile.messaging.mobile.data;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
 import java.util.concurrent.Executor;
 
@@ -33,7 +34,7 @@ public class UserDataSynchronizer {
             protected void onPostExecute(SyncUserDataResult syncUserDataResult) {
                 if (syncUserDataResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (user data)!");
-                    stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
+                    stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
                     if (syncUserDataResult.hasInvalidParameterError()) {
 
@@ -50,7 +51,7 @@ public class UserDataSynchronizer {
                     }
 
                     Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    userDataSyncError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, syncUserDataResult.getError());
+                    userDataSyncError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(syncUserDataResult.getError()));
                     context.sendBroadcast(userDataSyncError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
 
@@ -73,7 +74,7 @@ public class UserDataSynchronizer {
             @Override
             protected void onCancelled() {
                 MobileMessagingLogger.e("Error reporting user data!");
-                stats.reportError(MobileMessagingError.USER_DATA_SYNC_ERROR);
+                stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
                 MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
                 if (listener != null) {

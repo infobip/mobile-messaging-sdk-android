@@ -4,13 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.content.LocalBroadcastManager;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
+import org.infobip.mobile.messaging.mobile.InternalError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
@@ -31,8 +33,8 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
     protected SystemDataReportResult doInBackground(SystemDataReport... params) {
 
         if (params.length < 1) {
-            MobileMessagingLogger.e("System data is empty, cannot report!");
-            return new SystemDataReportResult(new Exception("Syncing system data: request data is empty"));
+            MobileMessagingLogger.e(InternalError.EMPTY_SYSTEM_DATA_ERROR.get());
+            return new SystemDataReportResult(new Exception(InternalError.EMPTY_SYSTEM_DATA_ERROR.get()));
         }
 
         SystemDataReport report = params[0];
@@ -60,7 +62,7 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
             cancel(true);
 
             Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            userDataSyncError.putExtra(EXTRA_EXCEPTION, e);
+            userDataSyncError.putExtra(EXTRA_EXCEPTION, MobileMessagingError.createFrom(e));
             context.sendBroadcast(userDataSyncError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
             return new SystemDataReportResult(e);

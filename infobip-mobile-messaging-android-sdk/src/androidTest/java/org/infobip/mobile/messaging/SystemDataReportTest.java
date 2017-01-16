@@ -8,11 +8,10 @@ import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.tools.DebugServer;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import org.infobip.mobile.messaging.tools.DebugServer;
 
 import fi.iki.elonen.NanoHTTPD;
 

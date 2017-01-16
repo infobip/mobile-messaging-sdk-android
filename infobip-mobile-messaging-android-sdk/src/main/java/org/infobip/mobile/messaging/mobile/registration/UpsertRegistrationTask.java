@@ -9,9 +9,10 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
@@ -42,7 +43,7 @@ public class UpsertRegistrationTask extends AsyncTask<Boolean, Void, UpsertRegis
             cancel(true);
 
             Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            registrationSaveError.putExtra(EXTRA_EXCEPTION, e);
+            registrationSaveError.putExtra(EXTRA_EXCEPTION, MobileMessagingError.createFrom(e));
             context.sendBroadcast(registrationSaveError);
             LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
 

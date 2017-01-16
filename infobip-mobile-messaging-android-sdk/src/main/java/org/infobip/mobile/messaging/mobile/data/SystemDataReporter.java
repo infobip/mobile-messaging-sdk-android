@@ -3,15 +3,16 @@ package org.infobip.mobile.messaging.mobile.data;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
 import java.util.concurrent.Executor;
 
@@ -37,10 +38,10 @@ public class SystemDataReporter {
             protected void onPostExecute(SystemDataReportResult result) {
                 if (result.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (system data)!");
-                    stats.reportError(MobileMessagingError.SYSTEM_DATA_REPORT_ERROR);
+                    stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
 
                     Intent intent = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    intent.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
+                    intent.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
                     context.sendBroadcast(intent);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     return;
@@ -62,7 +63,7 @@ public class SystemDataReporter {
             @Override
             protected void onCancelled() {
                 MobileMessagingLogger.e("Error reporting user data!");
-                stats.reportError(MobileMessagingError.SYSTEM_DATA_REPORT_ERROR);
+                stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
             }
         }.executeOnExecutor(executor, report);
     }

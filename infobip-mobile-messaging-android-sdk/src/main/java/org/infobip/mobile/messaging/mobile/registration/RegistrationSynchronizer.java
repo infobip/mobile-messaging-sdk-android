@@ -7,10 +7,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
-import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -32,10 +33,10 @@ public class RegistrationSynchronizer {
             protected void onPostExecute(UpsertRegistrationResult result) {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (push registration status update)!");
-                    stats.reportError(MobileMessagingError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
+                    stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
+                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
                     context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
@@ -59,7 +60,7 @@ public class RegistrationSynchronizer {
                 setRegistrationIdReported(context, false);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
-                stats.reportError(MobileMessagingError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
+                stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
             }
         }.executeOnExecutor(executor, enabled);
     }
@@ -82,10 +83,10 @@ public class RegistrationSynchronizer {
             protected void onPostExecute(UpsertRegistrationResult result) {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
-                    stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
+                    stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, result.getError());
+                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
                     context.sendBroadcast(registrationSaveError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
                     return;
@@ -110,7 +111,7 @@ public class RegistrationSynchronizer {
                 setRegistrationIdReported(context, false);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
-                stats.reportError(MobileMessagingError.REGISTRATION_SYNC_ERROR);
+                stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
             }
         }.executeOnExecutor(executor);
     }

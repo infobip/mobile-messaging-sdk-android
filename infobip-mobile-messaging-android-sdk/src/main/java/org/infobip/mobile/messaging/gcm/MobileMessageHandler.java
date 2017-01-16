@@ -8,10 +8,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.InternalError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -71,7 +72,7 @@ public class MobileMessageHandler {
         try {
             MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
         } catch (Exception e) {
-            MobileMessagingLogger.e("Error saving message: " + message.getMessageId(), e);
+            MobileMessagingLogger.e(InternalError.SAVE_MESSAGE_ERROR.get(), e);
         }
     }
 

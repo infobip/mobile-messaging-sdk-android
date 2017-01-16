@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.geo.Geofencing;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -274,6 +275,8 @@ public class MobileMessaging {
          */
         public void onError(Throwable e) {
         }
+
+        public abstract void onError(MobileMessagingError e);
     }
 
 

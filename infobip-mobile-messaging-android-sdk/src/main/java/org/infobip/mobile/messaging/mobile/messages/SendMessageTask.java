@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.mobile.InternalError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -35,8 +36,8 @@ class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>{
 
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            MobileMessagingLogger.e("Can't send messages to MobileMessaging API without valid registration!");
-            return new SendMessageResult(new Exception("No valid registration"));
+            MobileMessagingLogger.e(InternalError.NO_VALID_REGISTRATION.get());
+            return new SendMessageResult(new Exception(InternalError.NO_VALID_REGISTRATION.get()));
         }
 
         try {

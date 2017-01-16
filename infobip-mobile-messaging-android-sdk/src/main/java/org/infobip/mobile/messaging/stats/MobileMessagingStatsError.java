@@ -4,7 +4,7 @@ package org.infobip.mobile.messaging.stats;
  * @author mstipanov
  * @since 01.04.2016.
  */
-public enum MobileMessagingError {
+public enum MobileMessagingStatsError {
     REGISTRATION_SYNC_ERROR,
     SYNC_MESSAGES_ERROR,
     DELIVERY_REPORTING_ERROR,

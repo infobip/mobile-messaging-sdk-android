@@ -11,8 +11,9 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventType;
 import org.infobip.mobile.messaging.geo.GeoReport;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,12 +79,12 @@ public class GeoReporter {
     }
 
     public static void handleError(Context context, MobileMessagingCore mobileMessagingCore, Throwable error, ArrayList<GeoReport> geoReports) {
-        MobileMessagingCore.getInstance(context).getStats().reportError(MobileMessagingError.GEO_REPORTING_ERROR);
+        MobileMessagingCore.getInstance(context).getStats().reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
 
         mobileMessagingCore.addUnreportedGeoEvents(geoReports);
 
         Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-        seenStatusReportError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, error);
+        seenStatusReportError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(error));
         context.sendBroadcast(seenStatusReportError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
     }

@@ -5,7 +5,7 @@ import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 
@@ -28,7 +28,7 @@ public class MessagesSynchronizer {
             protected void onPostExecute(SyncMessagesResult syncMessagesResult) {
                 if (syncMessagesResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (synchronizing messages)!");
-                    stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
+                    stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
                     return;
                 }
 
@@ -48,7 +48,7 @@ public class MessagesSynchronizer {
             @Override
             protected void onCancelled() {
                 MobileMessagingLogger.e("Error syncing messages!");
-                stats.reportError(MobileMessagingError.SYNC_MESSAGES_ERROR);
+                stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
             }
         }.executeOnExecutor(executor);
     }

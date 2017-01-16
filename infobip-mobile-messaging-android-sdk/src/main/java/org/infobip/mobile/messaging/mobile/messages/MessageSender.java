@@ -11,12 +11,13 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.stats.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -98,10 +99,10 @@ public class MessageSender {
             protected void onPostExecute(SendMessageResult sendMessageResult) {
                 if (sendMessageResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!");
-                    stats.reportError(MobileMessagingError.MESSAGE_SEND_ERROR);
+                    stats.reportError(MobileMessagingStatsError.MESSAGE_SEND_ERROR);
 
                     Intent sendMessageError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    sendMessageError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, sendMessageResult.getError());
+                    sendMessageError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(sendMessageResult.getError()));
                     context.sendBroadcast(sendMessageError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessageError);
 

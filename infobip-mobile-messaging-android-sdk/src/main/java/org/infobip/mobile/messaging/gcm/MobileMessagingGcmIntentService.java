@@ -8,8 +8,8 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.NotificationSettings;
 
 /**
  * MobileMessagingGcmIntentService processes GCM push notifications. To be able to use it you must register it as a receiver in AndroidManifest.xml

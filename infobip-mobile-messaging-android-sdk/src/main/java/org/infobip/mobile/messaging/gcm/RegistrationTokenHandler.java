@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.InternalError;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ class RegistrationTokenHandler {
             sendRegistrationToServer(context, token);
             subscribeTopics(context, token);
         } catch (IOException e) {
-            MobileMessagingLogger.e("Failed to complete token refresh", e);
+            MobileMessagingLogger.e(InternalError.TOKEN_REFRESH_ERROR.get(), e);
         }
     }
 
@@ -91,7 +92,7 @@ class RegistrationTokenHandler {
             InstanceID instanceID = InstanceID.getInstance(context);
             instanceID.deleteToken(gcmSenderID, gcmToken);
         } catch (IOException e) {
-            MobileMessagingLogger.e("Failed to complete GCM token cleanup", e);
+            MobileMessagingLogger.e(InternalError.GCM_TOKEN_CLEANUP_ERROR.get(), e);
         }
     }
 }

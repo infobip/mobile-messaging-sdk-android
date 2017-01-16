@@ -16,31 +16,31 @@ public class MobileMessagingStats {
         this.context = context;
     }
 
-    public static String getKey(MobileMessagingError mobileMessagingError) {
-        return STATS_KEY_BASE + mobileMessagingError.name();
+    public static String getKey(MobileMessagingStatsError mobileMessagingStatsError) {
+        return STATS_KEY_BASE + mobileMessagingStatsError.name();
     }
 
-    public long getErrorCount(MobileMessagingError mobileMessagingError) {
+    public long getErrorCount(MobileMessagingStatsError mobileMessagingStatsError) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getLong(getKey(mobileMessagingError), 0);
+        return sharedPreferences.getLong(getKey(mobileMessagingStatsError), 0);
     }
 
-    public synchronized void reportError(MobileMessagingError mobileMessagingError) {
-        saveLong(mobileMessagingError, getErrorCount(mobileMessagingError) + 1);
+    public synchronized void reportError(MobileMessagingStatsError mobileMessagingStatsError) {
+        saveLong(mobileMessagingStatsError, getErrorCount(mobileMessagingStatsError) + 1);
     }
 
     public void resetErrors() {
-        for (MobileMessagingError e : MobileMessagingError.values()) {
+        for (MobileMessagingStatsError e : MobileMessagingStatsError.values()) {
             resetError(e);
         }
     }
 
-    public synchronized void resetError(MobileMessagingError mobileMessagingError) {
-        saveLong(mobileMessagingError, getErrorCount(mobileMessagingError));
+    public synchronized void resetError(MobileMessagingStatsError mobileMessagingStatsError) {
+        saveLong(mobileMessagingStatsError, getErrorCount(mobileMessagingStatsError));
     }
 
-    private void saveLong(MobileMessagingError mobileMessagingError, long value) {
+    private void saveLong(MobileMessagingStatsError mobileMessagingStatsError, long value) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putLong(getKey(mobileMessagingError), value).apply();
+        sharedPreferences.edit().putLong(getKey(mobileMessagingStatsError), value).apply();
     }
 }
