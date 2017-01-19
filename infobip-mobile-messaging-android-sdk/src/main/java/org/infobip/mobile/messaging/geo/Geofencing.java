@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,11 +22,11 @@ import com.google.android.gms.location.LocationServices;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +55,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
         Geofencing.context = context;
         geofences = new ArrayList<>();
-        messageStore = new SharedPreferencesMessageStore();
+        messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -93,7 +92,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         Date now = new Date();
         Map<String, Geofence> geofences = new HashMap<>();
         Map<String, Date> expiryDates = new HashMap<>();
-        List<Message> messages = messageStore.bind(context);
+        List<Message> messages = messageStore.findAll(context);
 
         for (Message message : messages) {
             Geo geo = message.getGeo();

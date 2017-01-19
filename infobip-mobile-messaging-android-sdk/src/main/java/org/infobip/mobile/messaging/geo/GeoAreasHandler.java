@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.location.Location;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.util.Pair;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 import android.util.SparseArray;
 
 import com.google.android.gms.location.Geofence;
@@ -16,14 +15,15 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventReports;
+import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -47,7 +47,7 @@ class GeoAreasHandler {
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
     private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent(GeoEventType.entry, 1, 0L);
 
-    private final MessageStore messageStore = new SharedPreferencesMessageStore();
+    private final MessageStore messageStore;
     private final Context context;
 
     private static SparseArray<String> transitionNames = new SparseArray<String>() {{
@@ -72,6 +72,7 @@ class GeoAreasHandler {
 
     GeoAreasHandler(Context context) {
         this.context = context;
+        this.messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
     }
 
     void handleTransition(Intent intent) {
@@ -297,7 +298,7 @@ class GeoAreasHandler {
 
         Intent geofenceIntent = new Intent(event.getKey());
         geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
-        geofenceIntent.putExtras(message.getBundle());
+        geofenceIntent.putExtras(BundleMessageMapper.toBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
         context.sendBroadcast(geofenceIntent);
     }

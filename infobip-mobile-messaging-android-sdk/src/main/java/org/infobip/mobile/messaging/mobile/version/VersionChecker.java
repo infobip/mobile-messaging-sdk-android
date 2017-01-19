@@ -36,6 +36,10 @@ public class VersionChecker {
             protected void onPostExecute(VersionCheckResult versionCheckResult) {
                 super.onPostExecute(versionCheckResult);
 
+                if (versionCheckResult.hasError()) {
+                    return;
+                }
+
                 String current = SoftwareInformation.getLibraryVersion();
                 if (shouldUpdate(versionCheckResult.getVersion(), current)) {
                     MobileMessagingLogger.w(TAG, "Your library version is outdated, find latest release " + versionCheckResult.getVersion() +

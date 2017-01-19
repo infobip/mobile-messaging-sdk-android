@@ -1,11 +1,13 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
-import android.os.Bundle;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +39,7 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 continue;
             }
 
-            Message message = SyncMessageDelivery.toMessage(messageResponse);
+            Message message = responseToMessage(messageResponse);
             this.messages.add(message);
         }
     }
@@ -46,20 +48,40 @@ class SyncMessagesResult extends UnsuccessfulResult {
         return messages;
     }
 
-    private static class SyncMessageDelivery extends Message {
-
-        static Message toMessage(MessageResponse messageResponse) {
-            Bundle bundle = new Bundle();
-            bundle.putString(BundleField.MESSAGE_ID.getKey(), messageResponse.getMessageId());
-            bundle.putString(BundleField.TITLE.getKey(), messageResponse.getTitle());
-            bundle.putString(BundleField.BODY.getKey(), messageResponse.getBody());
-            bundle.putString(BundleField.SOUND.getKey(), messageResponse.getSound());
-            bundle.putString(BundleField.VIBRATE.getKey(), messageResponse.getVibrate());
-            bundle.putString(BundleField.SILENT.getKey(), messageResponse.getSilent());
-            bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), messageResponse.getCustomPayload());
-            bundle.putString(BundleField.INTERNAL_DATA.getKey(), messageResponse.getInternalData());
-
-            return Message.createFrom(bundle);
+    private static Message responseToMessage(MessageResponse response) {
+        JSONObject internalData = null;
+        try {
+            internalData = response.getInternalData() != null ? new JSONObject(response.getInternalData()) : null;
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+        JSONObject customPayload = null;
+        try {
+            customPayload = response.getCustomPayload() != null ? new JSONObject(response.getCustomPayload()) : null;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Geo geo = response.getInternalData() != null ?
+                new JsonSerializer().deserialize(response.getInternalData(), Geo.class) : null;
+
+        return new Message(
+                response.getMessageId(),
+                response.getTitle(),
+                response.getBody(),
+                response.getSound(),
+                "true".equals(response.getVibrate()),
+                null,
+                "true".equals(response.getSilent()),
+                response.getCategory(),
+                null,
+                System.currentTimeMillis(),
+                0,
+                internalData,
+                customPayload,
+                geo,
+                null,
+                Message.Status.UNKNOWN,
+                null
+        );
     }
 }

@@ -145,13 +145,13 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         verifyMessagesSynchronizer(atLeastOnce);
     }
 
-    public void test_push_registration_status() {
+    public void test_push_registration_default_status() {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, "{}");
         VerificationMode never = Mockito.after(1000).never();
-        MobileMessaging.getInstance(context).enablePushRegistration();
+        MobileMessaging.getInstance(context).disablePushRegistration();
 
         verifyRegistration(never);
-        assertFalse(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
+        assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
     }
 
 

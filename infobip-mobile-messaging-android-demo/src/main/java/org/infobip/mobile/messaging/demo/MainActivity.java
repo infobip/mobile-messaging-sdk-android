@@ -37,7 +37,7 @@ import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.Locale;
@@ -182,17 +182,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MobileMessaging mobileMessaging;
+        MobileMessaging.Builder builder = new MobileMessaging.Builder(getApplication())
+                .withMessageStore(SQLiteMessageStore.class)
+                .withGeofencing();
+
         boolean notificationsEnabled = getNotificationEnabledFromPreferences();
         if (!notificationsEnabled) {
-            mobileMessaging = new MobileMessaging.Builder(getApplication())
-                    .withMessageStore(SharedPreferencesMessageStore.class)
-                    .withoutDisplayNotification()
-                    .withGeofencing()
-                    .build();
+            mobileMessaging = builder.withoutDisplayNotification().build();
         } else {
-            mobileMessaging = new MobileMessaging.Builder(getApplication())
-                    .withMessageStore(SharedPreferencesMessageStore.class)
-                    .withGeofencing()
+            mobileMessaging = builder
                     .withDisplayNotification(new NotificationSettings.Builder(this)
                             .withMultipleNotifications()
                             .withDefaultIcon(R.drawable.ic_notification)

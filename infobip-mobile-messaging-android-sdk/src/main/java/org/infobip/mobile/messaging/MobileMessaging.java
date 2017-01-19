@@ -298,7 +298,6 @@ public class MobileMessaging {
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
-        private Geofencing geofencing;
         private final Application application;
         private String gcmSenderId = (String) MobileMessagingProperty.GCM_SENDER_ID.getDefaultValue();
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
@@ -306,6 +305,7 @@ public class MobileMessaging {
         private NotificationSettings notificationSettings = null;
         private boolean reportCarrierInfo = true;
         private boolean reportSystemInfo = true;
+        private boolean geofencingActivated = false;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -481,7 +481,7 @@ public class MobileMessaging {
          */
         @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
         public Builder withGeofencing() {
-            this.geofencing = Geofencing.getInstance(application);
+            this.geofencingActivated = true;
             return this;
         }
 
@@ -550,7 +550,7 @@ public class MobileMessaging {
             new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
-                    .withGeofencing(geofencing)
+                    .withGeofencing(geofencingActivated ? Geofencing.getInstance(application) : null)
                     .build();
 
             return mobileMessaging;

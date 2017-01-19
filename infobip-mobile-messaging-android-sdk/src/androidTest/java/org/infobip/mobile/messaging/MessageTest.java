@@ -5,6 +5,7 @@ import android.os.Bundle;
 import junit.framework.TestCase;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -18,7 +19,7 @@ import static org.junit.Assert.assertNotEquals;
  */
 public class MessageTest extends TestCase {
 
-    class GeoTest extends Geo {
+    private class GeoTest extends Geo {
         GeoTest() {
             super(null, null, null);
         }
@@ -28,32 +29,15 @@ public class MessageTest extends TestCase {
         }
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void test_toBundle_success() throws Exception {
 
-        Bundle notification = new Bundle();
-        notification.putShortArray("array", new short[]{1, 2, 3});
-
-        Bundle data = new Bundle();
-        data.putBundle("notification", notification);
-
-        Message message = Message.createFrom(data);
-        message.setBody("lala");
+        Message message = Message.createFrom(new Bundle());
+        message.setTitle("lala");
         message.setFrom("from");
 
-        Bundle plainBundle = message.getBundle();
-        assertEquals(plainBundle.getString("gcm.notification.body"), "lala");
+        Bundle plainBundle = BundleMessageMapper.toBundle(message);
+        assertEquals(plainBundle.getString("gcm.notification.title"), "lala");
         assertEquals(plainBundle.getString("from"), "from");
-        assertEquals(plainBundle.getBundle("notification").getShortArray("array")[2], 3);
     }
 
     public void test_fromBundle_success() throws Exception {

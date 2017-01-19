@@ -7,9 +7,9 @@ import android.util.Base64;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +33,11 @@ import java.util.Set;
  * Overwrite SharedPreferencesMessageStore#getStoreTag(String)
  * to provide alternate key to store data shared preferences.
  *
+ * Deprecated, use {@link SQLiteMessageStore} instead.
  * @author mstipanov
  * @since 29.03.2016.
  */
+@Deprecated
 public class SharedPreferencesMessageStore implements MessageStore {
 
     private static final String INFOBIP_MESSAGE_DATA_SET = "org.infobip.mobile.messaging.store.DATA";
@@ -65,20 +67,6 @@ public class SharedPreferencesMessageStore implements MessageStore {
         return findAll(context).size();
     }
 
-    public List<Message> bind(final Context context) {
-        return new AbstractList<Message>() {
-            @Override
-            public Message get(int location) {
-                return findAll(context).get(location);
-            }
-
-            @Override
-            public int size() {
-                return findAll(context).size();
-            }
-        };
-    }
-
     private void addMessages(final Context context, final Message... messages) {
         PreferenceHelper.editSet(context, getStoreTag(), new PreferenceHelper.SetMutator() {
             @Override
@@ -92,7 +80,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
                         }
                     }
 
-                    set.add(serialize(message.getBundle()));
+                    set.add(serialize(BundleMessageMapper.toBundle(message)));
                 }
             }
         });

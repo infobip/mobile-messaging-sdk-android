@@ -105,10 +105,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_MESSAGES));
 
         ArrayList<Bundle> bundles = captor.getValue().getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES);
-        List<Message> messages = new ArrayList<>();
-        for (Bundle bundle : bundles) {
-            messages.add(Message.createFrom(bundle));
-        }
+        List<Message> messages = Message.createFrom(bundles);
 
         assertEquals("myMessageId", messages.get(0).getMessageId());
         assertEquals(Message.Status.ERROR, messages.get(0).getStatus());

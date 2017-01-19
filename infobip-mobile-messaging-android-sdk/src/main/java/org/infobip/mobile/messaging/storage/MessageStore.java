@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * You can use the internal storage capabilities by implementing this interface.
- * If ne message store class is configured, messages will not me stored!
+ * If no message store class is configured, messages will not be stored!
  * <pre>
  * {@code
  * public class MyActivity extends AppCompatActivity {
@@ -22,18 +22,10 @@ import java.util.List;
  * </pre>
  *
  * @author mstipanov
- * @see SharedPreferencesMessageStore
+ * @see SQLiteMessageStore
  * @since 29.03.2016.
  */
 public interface MessageStore {
-
-    /**
-     * Binds message list to the message store
-     *
-     * @param context current context
-     * @return immutable list of all stored messages
-     */
-    List<Message> bind(final Context context);
 
     /**
      * Finds all stored messages
@@ -60,7 +52,9 @@ public interface MessageStore {
 
     /**
      * Deletes all stored messages
-     *
+     * </p>
+     * This is convenience method.
+     * Mobile Messaging SDK will never delete messages from the store by itself.
      * @param context current context
      */
     void deleteAll(Context context);

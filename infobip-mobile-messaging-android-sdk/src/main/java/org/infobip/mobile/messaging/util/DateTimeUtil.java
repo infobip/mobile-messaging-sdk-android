@@ -14,6 +14,7 @@ public class DateTimeUtil {
 
     private static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssX";
     private static final String GMT_TIME_ZONE = "+00:00";
     private static final String ISO8601_GMT_Z_MATCHER = "Z$";
 
@@ -33,8 +34,12 @@ public class DateTimeUtil {
         String date = dateString.trim().replaceAll(ISO8601_GMT_Z_MATCHER, GMT_TIME_ZONE);
         try {
             return new SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(date);
-        } catch (Exception e) {
-            throw new ISO8601DateParseException(ISO8601DateParseException.Reason.DATE_PARSE_EXCEPTION, e);
+        } catch (Exception ignored) {
+            try {
+                return new SimpleDateFormat(DATE_FORMAT2, Locale.getDefault()).parse(date);
+            } catch (Exception e) {
+                throw new ISO8601DateParseException(ISO8601DateParseException.Reason.DATE_PARSE_EXCEPTION, e);
+            }
         }
     }
 

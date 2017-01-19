@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -13,7 +12,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -22,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -31,67 +31,7 @@ import java.util.concurrent.Executor;
  */
 public class MessageSender {
 
-    private static class MessageDelivery extends Message {
-
-        static void setStatus(Message message, Status status, String statusMessage) {
-            if (message.getBundle() == null) {
-                return;
-            }
-
-            message.getBundle().putString(BundleField.STATUS.getKey(), status.getKey());
-            message.getBundle().putString(BundleField.STATUS_MESSAGE.getKey(), statusMessage);
-        }
-
-        public static Message fromJson(String json) {
-            JSONObject object;
-            try {
-                object = new JSONObject(json);
-            } catch (JSONException e) {
-                MobileMessagingLogger.w("Cannot parse message from JSON: " + e.getMessage());
-                MobileMessagingLogger.d(Log.getStackTraceString(e));
-                return new Message();
-            }
-
-            Bundle bundle = new Message().getBundle();
-            bundle.putString(BundleField.DESTINATION.getKey(), object.optString(JsonField.DESTINATION.getKey()));
-            bundle.putString(BundleField.MESSAGE_ID.getKey(), object.optString(JsonField.MESSAGE_ID.getKey()));
-            bundle.putString(BundleField.BODY.getKey(), object.optString(JsonField.TEXT.getKey()));
-            if (object.has(JsonField.CUSTOM_PAYLOAD.getKey())) {
-                bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), object.optJSONObject(JsonField.CUSTOM_PAYLOAD.getKey()).toString());
-            }
-            if (object.has(JsonField.STATUS_CODE.getKey())) {
-                int statusId = object.optInt(JsonField.STATUS_CODE.getKey(), Status.UNKNOWN.ordinal());
-                for (Status status : Status.values()) {
-                    if (status.ordinal() == statusId) {
-                        bundle.putString(BundleField.STATUS.getKey(), status.getKey());
-                        break;
-                    }
-                }
-            }
-            bundle.putString(BundleField.STATUS_MESSAGE.getKey(), object.optString(JsonField.STATUS.getKey()));
-
-            return Message.createFrom(bundle);
-        }
-
-        enum JsonField {
-            MESSAGE_ID("messageId"),
-            DESTINATION("destination"),
-            TEXT("text"),
-            CUSTOM_PAYLOAD("customPayload"),
-            STATUS_CODE("statusCode"),
-            STATUS("status");
-
-            private final String key;
-
-            JsonField(String key) {
-                this.key = key;
-            }
-
-            public String getKey() {
-                return key;
-            }
-        }
-    }
+    private static final String TAG = MessageSender.class.getSimpleName();
 
     public void send(final Context context, final MobileMessagingStats stats, Executor executor, final MobileMessaging.ResultListener<Message[]> listener, final Message... messages) {
         new SendMessageTask(context) {
@@ -119,41 +59,60 @@ public class MessageSender {
 
     private void reportMessageDelivery(Context context, MoMessageDelivery messageDeliveries[], MobileMessaging.ResultListener<Message[]> listener) {
 
-        ArrayList<Bundle> messageBundles = new ArrayList<>();
-        JsonSerializer serializer = new JsonSerializer();
+        List<Message> messages = new ArrayList<>(messageDeliveries.length);
         for (MoMessageDelivery delivery : messageDeliveries) {
-            Message message = MessageDelivery.fromJson(serializer.serialize(delivery));
-            messageBundles.add(message.getBundle());
+            Message message = new Message();
+            message.setMessageId(delivery.getMessageId());
+            message.setDestination(delivery.getDestination());
+            message.setBody(delivery.getText());
+            message.setStatusMessage(delivery.getStatus());
+            message.setReceivedTimestamp(System.currentTimeMillis());
+            message.setSeenTimestamp(System.currentTimeMillis());
+            messages.add(message);
+
+            String json = delivery.getCustomPayload() != null ? delivery.getCustomPayload().toString() : null;
+            try {
+                message.setCustomPayload(json != null ? new JSONObject(json) : null);
+            } catch (JSONException e) {
+                MobileMessagingLogger.w(TAG, Log.getStackTraceString(e));
+            }
+
+            Message.Status status = Message.Status.UNKNOWN;
+            int statusCode = delivery.getStatusCode();
+            if (statusCode < Message.Status.values().length) {
+                status = Message.Status.values()[statusCode];
+            } else {
+                MobileMessagingLogger.e(TAG, "Unexpected status code: " + statusCode);
+            }
+            message.setStatus(status);
         }
 
-        reportMessages(context, listener, messageBundles);
+        reportMessages(context, listener, messages);
     }
 
     private void reportFailedMessages(final Context context, final Message messages[], Throwable error, MobileMessaging.ResultListener<Message[]> listener) {
 
-        ArrayList<Bundle> messageBundles = new ArrayList<>();
         for (Message message : messages) {
-            MessageDelivery.setStatus(message, Message.Status.ERROR, error.getMessage());
-            messageBundles.add(message.getBundle());
+            message.setStatus(Message.Status.ERROR);
+            message.setStatusMessage(error.getMessage());
         }
 
-        reportMessages(context, listener, messageBundles);
+        reportMessages(context, listener, Arrays.asList(messages));
     }
 
-    private void reportMessages(Context context, MobileMessaging.ResultListener<Message[]> listener, ArrayList<Bundle> messageBundles) {
-        List<Message> messageList = Message.createFrom(messageBundles);
+    private void reportMessages(Context context, MobileMessaging.ResultListener<Message[]> listener, List<Message> messages) {
         MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
         if (messageStore != null) {
-            messageStore.save(context, messageList.toArray(new Message[messageList.size()]));
+            messageStore.save(context, messages.toArray(new Message[messages.size()]));
         }
 
         Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
-        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, messageBundles);
+        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMessageMapper.toBundles(messages));
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
 
         if (listener != null) {
-            listener.onResult(messageList.toArray(new Message[messageList.size()]));
+            listener.onResult(messages.toArray(new Message[messages.size()]));
         }
     }
 }

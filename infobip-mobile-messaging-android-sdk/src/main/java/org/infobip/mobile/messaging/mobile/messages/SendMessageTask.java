@@ -2,10 +2,10 @@ package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;

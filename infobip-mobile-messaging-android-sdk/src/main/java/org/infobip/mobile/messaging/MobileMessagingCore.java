@@ -6,6 +6,8 @@ import android.content.Intent;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
+import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.GeoReport;
@@ -20,6 +22,7 @@ import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
@@ -45,6 +48,7 @@ public class MobileMessagingCore {
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
 
     private static MobileMessagingCore instance;
+    private static DatabaseHelper databaseHelper;
     private final RegistrationSynchronizer registrationSynchronizer = new RegistrationSynchronizer();
     private final MessagesSynchronizer messagesSynchronizer = new MessagesSynchronizer();
     private final SeenStatusReporter seenStatusReporter = new SeenStatusReporter();
@@ -54,12 +58,13 @@ public class MobileMessagingCore {
     private final VersionChecker versionChecker = new VersionChecker();
     private final GeoReporter geoReporter = new GeoReporter();
     private final MobileMessagingStats stats;
-    private final Executor taskExecutor = Executors.newSingleThreadExecutor();
+    private final Executor registrationAlignedExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
+    private MessageStore internalStoreForGeo;
     private Context context;
     private Geofencing geofencing;
 
@@ -87,24 +92,31 @@ public class MobileMessagingCore {
         return new MobileMessagingCore(context);
     }
 
+    public static DatabaseHelper getDatabaseHelper(Context context) {
+        if (null == databaseHelper) {
+            databaseHelper = new DatabaseHelperImpl(context);
+        }
+        return databaseHelper;
+    }
+
     public void sync() {
 
-        registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), taskExecutor);
-        userDataSynchronizer.sync(context, getStats(), taskExecutor, null);
+        registrationSynchronizer.synchronize(context, getDeviceApplicationInstanceId(), getRegistrationId(), isRegistrationIdReported(), getStats(), registrationAlignedExecutor);
+        userDataSynchronizer.sync(context, getStats(), registrationAlignedExecutor, null);
         versionChecker.check(context);
 
         reportSystemData();
 
         if (isPushRegistrationEnabled()) {
-            messagesSynchronizer.synchronize(context, getStats(), taskExecutor);
-            seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), taskExecutor);
+            messagesSynchronizer.synchronize(context, getStats(), registrationAlignedExecutor);
+            seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), registrationAlignedExecutor);
             geoReporter.report(context, getStats());
         }
     }
 
     void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), true, getStats(), taskExecutor);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), true, getStats(), registrationAlignedExecutor);
         if (isGeofencingActivated(context)) {
             Geofencing.getInstance(context).activate();
         }
@@ -112,7 +124,7 @@ public class MobileMessagingCore {
 
     void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), false, getStats(), taskExecutor);
+        registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), false, getStats(), registrationAlignedExecutor);
         if (isGeofencingActivated(context)) {
             Geofencing.getInstance(context).deactivate();
         }
@@ -287,6 +299,36 @@ public class MobileMessagingCore {
         }
     }
 
+    public MessageStore getMessageStoreForGeo() {
+        MessageStore messageStore;
+        if (isMessageStoreEnabled()) {
+            messageStore = getMessageStore();
+        } else {
+            messageStore = getInternalStoreForGeo();
+        }
+        return messageStore;
+    }
+
+    public MessageStore getMessageStoreForMessage(Message message) {
+        if (hasGeo(message)) {
+            return getMessageStoreForGeo();
+        }
+        return getMessageStore();
+    }
+
+    static private boolean hasGeo(Message message) {
+        return message != null && message.getGeo() != null &&
+                message.getGeo().getAreasList() != null &&
+                !message.getGeo().getAreasList().isEmpty();
+    }
+
+    private MessageStore getInternalStoreForGeo() {
+        if (internalStoreForGeo == null) {
+            internalStoreForGeo = new SQLiteMessageStore();
+        }
+        return internalStoreForGeo;
+    }
+
     @SuppressWarnings({"unchecked", "WeakerAccess"})
     protected Class<? extends MessageStore> getMessageStoreClass() {
         return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
@@ -412,7 +454,7 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
 
-        userDataSynchronizer.sync(context, getStats(), taskExecutor, listener);
+        userDataSynchronizer.sync(context, getStats(), registrationAlignedExecutor, listener);
     }
 
     public UserData getUserData() {
@@ -446,7 +488,7 @@ public class MobileMessagingCore {
         if (isMessageStoreEnabled()) {
             getMessageStore().save(context, messages);
         }
-        messageSender.send(context, getStats(), taskExecutor, listener, messages);
+        messageSender.send(context, getStats(), registrationAlignedExecutor, listener, messages);
     }
 
     public void reportSystemData() {
@@ -466,7 +508,7 @@ public class MobileMessagingCore {
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
         }
 
-        systemDataReporter.report(context, getStats(), taskExecutor);
+        systemDataReporter.report(context, getStats(), registrationAlignedExecutor);
     }
 
     public SystemData getUnreportedSystemData() {

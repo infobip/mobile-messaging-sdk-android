@@ -43,7 +43,7 @@ public class BatchReporterTest extends InstrumentationTestCase {
 
         for (int i = 0; i < 5; i++) {
             batchReporter.put(runnable);
-            Thread.sleep(150);
+            Thread.sleep(200);
         }
 
         Mockito.verify(runnable, Mockito.times(5)).run();

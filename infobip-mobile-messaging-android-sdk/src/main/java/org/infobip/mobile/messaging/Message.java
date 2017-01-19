@@ -2,11 +2,9 @@ package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.geo.Geo;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -14,335 +12,219 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Message bundle adapter. Offers convenience methods to extract and save message data to a bundle.
+ * Message class
  *
  * @author sslavin
  * @since 05/09/16.
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class Message implements Comparable<Message> {
 
-    private static final String TAG = "Message";
+    private String messageId;
+    private String title;
+    private String body;
+    private String sound;
+    private boolean vibrate;
+    private String icon;
+    private boolean silent;
+    private String category;
+    private String from;
+    private long receivedTimestamp;
+    private long seenTimestamp;
+    private JSONObject internalData;
+    private JSONObject customPayload;
+    private Geo geo;
 
-    Bundle bundle;
-    String messageId;
-    String title;
-    String body;
-    String sound;
-    boolean vibrate;
-    String icon;
-    boolean silent;
-    String category;
-    String from;
-    Long receivedTimestamp;
-    Long seenTimestamp;
-    JSONObject internalData;
-    JSONObject customPayload;
-    String destination;
-    Status status;
-    String statusMessage;
+    public enum Status {
+        SUCCESS,
+        ERROR,
+        UNKNOWN
+    }
+
+    private String destination;
+    private Status status;
+    private String statusMessage;
 
     public static Message createFrom(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-
-        return new Message(bundle);
+        return BundleMessageMapper.fromBundle(bundle);
     }
 
     public static List<Message> createFrom(ArrayList<Bundle> bundles) {
-        List<Message> messages = new ArrayList<>();
-        for (Bundle bundle : bundles) {
-            messages.add(Message.createFrom(bundle));
-        }
-        return messages;
+        return BundleMessageMapper.fromBundles(bundles);
+    }
+
+    public Message(String messageId, String title, String body, String sound,
+                   boolean vibrate, String icon, boolean silent, String category,
+                   String from, long receivedTimestamp, long seenTimestamp,
+                   JSONObject internalData, JSONObject customPayload, Geo geo,
+                   String destination, Status status, String statusMessage) {
+        this.messageId = messageId;
+        this.title = title;
+        this.body = body;
+        this.sound = sound;
+        this.vibrate = vibrate;
+        this.icon = icon;
+        this.silent = silent;
+        this.category = category;
+        this.from = from;
+        this.receivedTimestamp = receivedTimestamp;
+        this.seenTimestamp = seenTimestamp;
+        this.internalData = internalData;
+        this.customPayload = customPayload;
+        this.geo = geo;
+        this.destination = destination;
+        this.status = status;
+        this.statusMessage = statusMessage;
     }
 
     public Message() {
         this.messageId = UUID.randomUUID().toString();
-        this.status = Status.UNKNOWN;
         this.receivedTimestamp = System.currentTimeMillis();
-        this.seenTimestamp = System.currentTimeMillis();
-        this.vibrate = true;
-        this.silent = false;
-
-        this.bundle = new Bundle();
-        this.bundle.putString(BundleField.MESSAGE_ID.getKey(), this.messageId);
-        this.bundle.putString(BundleField.STATUS.getKey(), this.status.getKey());
-        this.bundle.putLong(BundleField.RECEIVED_TIMESTAMP.getKey(), this.receivedTimestamp);
-        this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), this.seenTimestamp);
-        this.bundle.putString(BundleField.VIBRATE.getKey(), Boolean.toString(this.vibrate));
-        this.bundle.putString(BundleField.SILENT.getKey(), Boolean.toString(this.silent));
-    }
-
-    private Message(Bundle bundle) {
-
-        this.bundle = bundle;
-        this.silent = "true".equals(bundle.getString(BundleField.SILENT.getKey()));
-        this.messageId = bundle.getString(BundleField.MESSAGE_ID.getKey());
-        this.icon = bundle.getString(BundleField.ICON.getKey());
-        this.from = bundle.getString(BundleField.FROM.getKey());
-        this.receivedTimestamp = bundle.getLong(BundleField.RECEIVED_TIMESTAMP.getKey());
-        this.seenTimestamp = bundle.getLong(BundleField.SEEN_TIMESTAMP.getKey());
-        this.internalData = getJSON(bundle, BundleField.INTERNAL_DATA.getKey());
-        this.customPayload = getJSON(bundle, BundleField.CUSTOM_PAYLOAD.getKey());
-        this.destination = bundle.getString(BundleField.DESTINATION.getKey());
-        try {
-            this.status = Status.valueOf(bundle.getString(BundleField.STATUS.getKey()));
-        } catch (Exception ignored) {
-            this.status = Status.UNKNOWN;
-        }
-        this.statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
-
-        if (this.silent) {
-            this.title = getSilentField(InternalDataField.TITLE.getKey());
-            this.body = getSilentField(InternalDataField.BODY.getKey());
-            this.sound = getSilentField(InternalDataField.SOUND.getKey());
-            this.category = getSilentField(InternalDataField.CATEGORY.getKey());
-            this.vibrate = getSilentField(InternalDataField.VIBRATE.getKey(), true);
-        } else {
-            this.title = bundle.getString(BundleField.TITLE.getKey());
-            this.body = bundle.getString(BundleField.BODY.getKey());
-            this.sound = bundle.getString(BundleField.SOUND2.getKey(),
-                    bundle.getString(BundleField.SOUND.getKey()));
-            this.category = bundle.getString(BundleField.CATEGORY.getKey());
-            this.vibrate = "true".equals(bundle.getString(BundleField.VIBRATE.getKey(), "true"));
-        }
-    }
-
-    public Bundle getBundle() {
-        return bundle;
+        this.status = Status.UNKNOWN;
     }
 
     @Override
     public int compareTo(@NonNull Message another) {
-        return (int) Math.signum(another.getReceivedTimestamp() - getReceivedTimestamp());
+        return (int) Math.signum(another.receivedTimestamp - receivedTimestamp);
     }
 
     public String getMessageId() {
         return messageId;
     }
 
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
     public String getTitle() {
         return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getBody() {
         return body;
     }
 
+    public void setBody(String body) {
+        this.body = body;
+    }
+
     public String getSound() {
         return sound;
     }
 
+    public void setSound(String sound) {
+        this.sound = sound;
+    }
+
     public boolean isDefaultSound() {
-        return "default".equals(sound);
-    }
-
-    public String getIcon() {
-        return icon;
-    }
-
-    public boolean isSilent() {
-        return silent;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public Long getReceivedTimestamp() {
-        return receivedTimestamp;
-    }
-
-    public Long getSeenTimestamp() {
-        return seenTimestamp;
-    }
-
-    public JSONObject getInternalData() {
-        return internalData;
-    }
-
-    public JSONObject getCustomPayload() {
-        return customPayload;
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public String getStatusMessage() {
-        return statusMessage;
+        return "default".equals(this.sound);
     }
 
     public boolean isVibrate() {
         return vibrate;
     }
 
-    public Geo getGeo() {
-        if (getInternalData() == null) {
-            return null;
-        }
-
-        try {
-            return new JsonSerializer().deserialize(getInternalData().toString(), Geo.class);
-        } catch (Exception e) {
-            MobileMessagingLogger.e(e.getMessage(), e);
-            return null;
-        }
+    public void setVibrate(boolean vibrate) {
+        this.vibrate = vibrate;
     }
 
-    private static JSONObject getJSON(Bundle from, String key) {
-        String string = from.getString(key);
-        if (string == null) {
-            return null;
-        }
-
-        try {
-            return new JSONObject(string);
-        } catch (JSONException e) {
-            MobileMessagingLogger.w(TAG, "Cannot parse (" + key + "): " + e.getMessage());
-            MobileMessagingLogger.d(TAG, Log.getStackTraceString(e));
-            return null;
-        }
+    public String getIcon() {
+        return icon;
     }
 
-    private <T> T getSilentField(String key) {
-        return getSilentField(key, null);
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
-    private <T> T getSilentField(String key, T defaultValue) {
-        JSONObject internalData = getJSON(bundle, BundleField.INTERNAL_DATA.getKey());
-        if (internalData == null) {
-            return defaultValue;
-        }
+    public boolean isSilent() {
+        return silent;
+    }
 
-        JSONObject silentData = internalData.optJSONObject(InternalDataField.SILENT_DATA.getKey());
-        if (silentData == null) {
-            return defaultValue;
-        }
+    public void setSilent(boolean silent) {
+        this.silent = silent;
+    }
 
-        Object o = silentData.opt(key);
-        if (o == null) {
-            return defaultValue;
-        }
+    public String getCategory() {
+        return category;
+    }
 
-        try {
-            return (T) o;
-        } catch (Exception e) {
-            MobileMessagingLogger.d(TAG, Log.getStackTraceString(e));
-            return defaultValue;
-        }
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getFrom() {
+        return from;
     }
 
     public void setFrom(String from) {
         this.from = from;
-        this.bundle.putString(BundleField.FROM.getKey(), from);
     }
 
-    public void setBody(String body) {
-        this.body = body;
-        this.bundle.putString(BundleField.BODY.getKey(), body);
+    public long getReceivedTimestamp() {
+        return receivedTimestamp;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
-        this.bundle.putString(BundleField.DESTINATION.getKey(), destination);
+    public void setReceivedTimestamp(long receivedTimestamp) {
+        this.receivedTimestamp = receivedTimestamp;
     }
 
-    public void setCustomPayload(JSONObject customPayload) {
-        this.customPayload = customPayload;
-        if (customPayload != null) {
-            this.bundle.putString(BundleField.CUSTOM_PAYLOAD.getKey(), customPayload.toString());
-        }
-    }
-
-    public void setInternalData(JSONObject internalData) {
-        this.internalData = internalData;
-        if (internalData != null) {
-            this.bundle.putString(BundleField.INTERNAL_DATA.getKey(), internalData.toString());
-        }
+    public long getSeenTimestamp() {
+        return seenTimestamp;
     }
 
     public void setSeenTimestamp(long seenTimestamp) {
         this.seenTimestamp = seenTimestamp;
-        this.bundle.putLong(BundleField.SEEN_TIMESTAMP.getKey(), seenTimestamp);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-        this.bundle.putString(BundleField.TITLE.getKey(), title);
+    public JSONObject getInternalData() {
+        return internalData;
     }
 
-    protected enum BundleField {
-        MESSAGE_ID("gcm.notification.messageId"),
-        TITLE("gcm.notification.title"),
-        BODY("gcm.notification.body"),
-        SOUND("gcm.notification.sound"),
-        SOUND2("gcm.notification.sound2"),
-        VIBRATE("gcm.notification.vibrate"),
-        ICON("gcm.notification.icon"),
-        SILENT("gcm.notification.silent"),
-        CATEGORY("gcm.notification.category"),
-        FROM("from"),
-        RECEIVED_TIMESTAMP("received_timestamp"),
-        SEEN_TIMESTAMP("seen_timestamp"),
-        INTERNAL_DATA("internalData"),
-        CUSTOM_PAYLOAD("customPayload"),
-        STATUS("status"),
-        STATUS_MESSAGE("status_message"),
-        DESTINATION("destination");
-
-        private final String key;
-
-        BundleField(String key) {
-            this.key = key;
-        }
-
-        public String getKey() {
-            return key;
-        }
+    public void setInternalData(JSONObject internalData) {
+        this.internalData = internalData;
     }
 
-    protected enum InternalDataField {
-        SILENT_DATA("silent"),
-        TITLE("title"),
-        BODY("body"),
-        SOUND("sound"),
-        VIBRATE("vibrate"),
-        CATEGORY("category");
-
-        private final String key;
-
-        InternalDataField(String key) {
-            this.key = key;
-        }
-
-        public String getKey() {
-            return key;
-        }
+    public JSONObject getCustomPayload() {
+        return customPayload;
     }
 
-    public enum Status {
-        SUCCESS("SUCCESS"),
-        ERROR("ERROR"),
-        UNKNOWN("UNKNOWN");
+    public void setCustomPayload(JSONObject customPayload) {
+        this.customPayload = customPayload;
+    }
 
-        private final String key;
+    public Geo getGeo() {
+        return geo;
+    }
 
-        Status(String key) {
-            this.key = key;
-        }
+    public void setGeo(Geo geo) {
+        this.geo = geo;
+    }
 
-        public String getKey() {
-            return key;
-        }
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
     }
 }
