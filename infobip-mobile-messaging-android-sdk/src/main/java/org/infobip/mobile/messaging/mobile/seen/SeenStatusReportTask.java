@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
-import org.infobip.mobile.messaging.mobile.InternalError;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -35,8 +35,8 @@ class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResul
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            MobileMessagingLogger.e(InternalError.NO_VALID_REGISTRATION.get());
-            return new SeenStatusReportResult(new Exception("No valid registration"));
+            MobileMessagingLogger.e(InternalSdkError.NO_VALID_REGISTRATION.get());
+            return new SeenStatusReportResult(InternalSdkError.NO_VALID_REGISTRATION.getException());
         }
 
         try {

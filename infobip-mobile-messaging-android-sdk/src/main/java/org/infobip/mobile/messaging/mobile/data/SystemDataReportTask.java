@@ -10,7 +10,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
-import org.infobip.mobile.messaging.mobile.InternalError;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -33,8 +33,8 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
     protected SystemDataReportResult doInBackground(SystemDataReport... params) {
 
         if (params.length < 1) {
-            MobileMessagingLogger.e(InternalError.EMPTY_SYSTEM_DATA_ERROR.get());
-            return new SystemDataReportResult(new Exception(InternalError.EMPTY_SYSTEM_DATA_ERROR.get()));
+            MobileMessagingLogger.e(InternalSdkError.ERROR_EMPTY_SYSTEM_DATA.get());
+            return new SystemDataReportResult(InternalSdkError.ERROR_EMPTY_SYSTEM_DATA.getException());
         }
 
         SystemDataReport report = params[0];

@@ -12,7 +12,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
-import org.infobip.mobile.messaging.mobile.InternalError;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -36,8 +36,8 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
         if (StringUtils.isBlank(deviceApplicationInstanceId)) {
-            MobileMessagingLogger.e(InternalError.NO_VALID_REGISTRATION.get());
-            return new SyncUserDataResult(new Exception("Syncing user data: no valid registration"));
+            MobileMessagingLogger.e(InternalSdkError.NO_VALID_REGISTRATION.get());
+            return new SyncUserDataResult(InternalSdkError.NO_VALID_REGISTRATION.getException());
         }
 
         UserData userData = mobileMessagingCore.getUnreportedUserData();

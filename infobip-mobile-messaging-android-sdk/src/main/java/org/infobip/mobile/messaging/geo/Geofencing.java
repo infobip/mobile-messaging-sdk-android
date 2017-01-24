@@ -83,7 +83,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             return;
         }
 
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, new Intent(context, GeofencingAlarmReceiver.class), 0));
     }
 
@@ -198,6 +198,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     /**
      * Has an async call to {@link GoogleApiClient#connect()}
+     *
      * @param geofenceRequestIds
      */
     public void removeGeofencesFromMonitoring(List<String> geofenceRequestIds) {
@@ -215,7 +216,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     private boolean checkRequiredPermissions() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            MobileMessagingLogger.e("Unable to initialize geofencing. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.ACCESS_FINE_LOCATION);
+            MobileMessagingLogger.e("Unable to initialize geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION));
             return false;
         }
 
@@ -234,7 +235,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         try {
             context.getPackageManager().getServiceInfo(componentName, PackageManager.GET_META_DATA);
         } catch (PackageManager.NameNotFoundException localNameNotFoundException) {
-            throw new ConfigurationException(String.format(Reason.MISSING_REQUIRED_SERVICE.message(), serviceName));
+            throw new ConfigurationException(Reason.MISSING_REQUIRED_SERVICE, serviceName);
         }
     }
 

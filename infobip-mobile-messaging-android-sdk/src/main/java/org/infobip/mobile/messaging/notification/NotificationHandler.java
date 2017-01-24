@@ -19,6 +19,7 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.geo.ConfigurationException;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -47,7 +48,7 @@ public class NotificationHandler {
             Notification notification = builder.build();
             notificationManager.notify(getNotificationId(context, message), notification);
         } catch (SecurityException se) {
-            MobileMessagingLogger.e("Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+            MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
             MobileMessagingLogger.d(Log.getStackTraceString(se));
         }
     }
@@ -116,7 +117,7 @@ public class NotificationHandler {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
         } else if (message.isVibrate() && ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_DENIED) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
-            MobileMessagingLogger.e("Unable to vibrate. Please, add the following permission to the AndroidManifest.xml: " + Manifest.permission.VIBRATE);
+            MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
         }
         if (!message.isDefaultSound()) {
             notificationDefaults &= ~Notification.DEFAULT_SOUND;

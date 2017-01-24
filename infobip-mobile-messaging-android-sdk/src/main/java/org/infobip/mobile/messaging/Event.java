@@ -127,7 +127,7 @@ public enum Event {
      * Contains the exception information.
      * <pre>
      * {@code
-     * Throwable exception = (Throwable) intent.getSerializableExtra({@link BroadcastParameter#EXTRA_EXCEPTION });
+     * MobileMessagingError mobileMessagingError = (MobileMessagingError) intent.getSerializableExtra(EXTRA_EXCEPTION);
      * }
      * </pre>
      */

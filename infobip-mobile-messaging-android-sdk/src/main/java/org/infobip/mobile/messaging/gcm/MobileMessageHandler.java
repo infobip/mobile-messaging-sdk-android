@@ -10,7 +10,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
-import org.infobip.mobile.messaging.mobile.InternalError;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -64,7 +64,7 @@ public class MobileMessageHandler {
         try {
             messageStore.save(context, message);
         } catch (Exception e) {
-            MobileMessagingLogger.e(InternalError.SAVE_MESSAGE_ERROR.get(), e);
+            MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }
     }
 

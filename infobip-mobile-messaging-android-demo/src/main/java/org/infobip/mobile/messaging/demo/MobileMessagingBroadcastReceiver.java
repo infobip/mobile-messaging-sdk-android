@@ -6,8 +6,11 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.*;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_GCM_TOKEN;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_INFOBIP_ID;
 
 /**
  * @author sslavin
@@ -44,8 +47,8 @@ public class MobileMessagingBroadcastReceiver extends BroadcastReceiver {
     }
 
     void onApiCommunicationError(Context context, Intent intent) {
-        Throwable throwable = (Throwable)intent.getSerializableExtra(EXTRA_EXCEPTION);
-        String errorDescription = throwable != null ? throwable.getMessage() : context.getString(R.string.error_api_comm_unknown) + "\n";
+        MobileMessagingError mobileMessagingError = (MobileMessagingError) intent.getSerializableExtra(EXTRA_EXCEPTION);
+        String errorDescription = mobileMessagingError != null ? mobileMessagingError.getMessage() : context.getString(R.string.error_api_comm_unknown) + "\n";
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
                 .putString(ApplicationPreferences.LAST_API_COMMUNICATION_ERROR, errorDescription)
