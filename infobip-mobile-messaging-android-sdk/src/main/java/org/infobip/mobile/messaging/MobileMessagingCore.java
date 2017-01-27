@@ -107,9 +107,10 @@ public class MobileMessagingCore {
 
         reportSystemData();
 
+        seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), registrationAlignedExecutor);
+
         if (isPushRegistrationEnabled()) {
             messagesSynchronizer.synchronize(context, getStats(), registrationAlignedExecutor);
-            seenStatusReporter.report(context, getUnreportedSeenMessageIds(), getStats(), registrationAlignedExecutor);
             geoReporter.report(context, getStats());
         }
     }

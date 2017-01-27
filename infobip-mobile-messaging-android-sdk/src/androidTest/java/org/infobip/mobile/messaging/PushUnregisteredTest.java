@@ -118,11 +118,11 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         Intent intent = captor.getValue();
         boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, true);
         assertFalse(isPushRegistrationEnabled);
+        verifySeenStatusReporter(Mockito.after(1000).atLeastOnce());
 
         // reports should NOT be called if push is disabled
         VerificationMode never = Mockito.after(1000).never();
         verifyGeoReporting(never);
-        verifySeenStatusReporter(never);
         verifyMessagesSynchronizer(never);
     }
 

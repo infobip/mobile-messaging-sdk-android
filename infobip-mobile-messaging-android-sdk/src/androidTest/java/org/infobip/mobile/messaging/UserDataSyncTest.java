@@ -4,8 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.tools.DebugServer;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -36,6 +38,8 @@ public class UserDataSyncTest extends InstrumentationTestCase {
 
         debugServer = new DebugServer();
         debugServer.start();
+
+        MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
@@ -75,6 +79,7 @@ public class UserDataSyncTest extends InstrumentationTestCase {
     }
 
     public void test_remove_custom_element() throws Exception {
+
         UserData userData = new UserData();
         userData.setCustomUserDataElement("myKey1", new CustomUserDataValue("Some string"));
         userData.setCustomUserDataElement("myKey2", new CustomUserDataValue(12345));

@@ -25,7 +25,7 @@ public class SeenStatusReporter {
     private static BatchReporter batchReporter = null;
 
     public void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
-        if (unreportedSeenMessageIds.length == 0 || !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+        if (unreportedSeenMessageIds.length == 0) {
             return;
         }
 
