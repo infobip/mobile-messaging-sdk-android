@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
@@ -22,9 +23,9 @@ public class Cryptor {
     private static String AES_ALGO = "AES/ECB/PKCS5Padding";
     private Key key = null;
 
-    public Cryptor(String userPassword) {
-        byte keyBytes[] = userPassword.getBytes();
-        MessageDigest sha = null;
+    public Cryptor(@NonNull String keySecret) {
+        byte keyBytes[] = keySecret.getBytes();
+        MessageDigest sha;
         try {
             sha = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
@@ -37,7 +38,7 @@ public class Cryptor {
     }
 
     public String encrypt(String data) {
-        if (data == null) {
+        if (StringUtils.isBlank(data)) {
             return null;
         }
 
@@ -46,7 +47,7 @@ public class Cryptor {
     }
 
     public String decrypt(String encryptedBase64Data) {
-        if (encryptedBase64Data == null) {
+        if (StringUtils.isBlank(encryptedBase64Data)) {
             return null;
         }
 
