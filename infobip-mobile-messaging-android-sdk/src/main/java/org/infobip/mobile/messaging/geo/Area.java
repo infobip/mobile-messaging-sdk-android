@@ -1,10 +1,6 @@
 package org.infobip.mobile.messaging.geo;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.android.gms.location.Geofence;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
@@ -13,50 +9,21 @@ import java.util.Date;
  * @since 17/10/2016.
  */
 
-public class Area implements Parcelable {
+public class Area {
 
-    @SerializedName("id")
     private String id;
-
-    @SerializedName("title")
     private String title;
-
-    @SerializedName("latitude")
     private Double latitude;
-
-    @SerializedName("longitude")
     private Double longitude;
+    private Integer radiusInMeters;
 
-    @SerializedName("radiusInMeters")
-    private Integer radius;
-
-    public Area(String id, String title, Double latitude, Double longitude, Integer radius) {
+    public Area(String id, String title, Double latitude, Double longitude, Integer radiusInMeters) {
         this.id = id;
         this.title = title;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.radius = radius;
+        this.radiusInMeters = radiusInMeters;
     }
-
-    protected Area(Parcel in) {
-        id = in.readString();
-        title = in.readString();
-        latitude = in.readDouble();
-        longitude = in.readDouble();
-        radius = in.readInt();
-    }
-
-    public static final Creator<Area> CREATOR = new Creator<Area>() {
-        @Override
-        public Area createFromParcel(Parcel in) {
-            return new Area(in);
-        }
-
-        @Override
-        public Area[] newArray(int size) {
-            return new Area[size];
-        }
-    };
 
     public String getId() {
         return id;
@@ -75,7 +42,7 @@ public class Area implements Parcelable {
     }
 
     public Integer getRadius() {
-        return radius;
+        return radiusInMeters;
     }
 
     Geofence toGeofence(Date expiryDate) {
@@ -93,20 +60,6 @@ public class Area implements Parcelable {
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .setExpirationDuration(expirationDurationMillis)
                 .build();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(id);
-        parcel.writeString(title);
-        parcel.writeDouble(latitude);
-        parcel.writeDouble(longitude);
-        parcel.writeInt(radius);
     }
 
     /**

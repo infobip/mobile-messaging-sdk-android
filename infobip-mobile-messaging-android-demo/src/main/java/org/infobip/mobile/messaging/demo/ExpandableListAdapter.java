@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.json.JSONException;
 
@@ -159,12 +160,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         text += "\nfrom: " + m.getFrom();
         text += "\nreceivedTimestamp: " + m.getReceivedTimestamp();
         text += "\nseenTimestamp: " + m.getSeenTimestamp();
-        if (m.getInternalData() != null) {
-            try {
-                text += "\ninternalData: " + m.getInternalData().toString(1);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        if (m.getGeo() != null) {
+            text += "\ngeo: " + new GsonBuilder().setPrettyPrinting().create().toJson(m.getGeo());
         }
         if (m.getCustomPayload() != null) {
             try {

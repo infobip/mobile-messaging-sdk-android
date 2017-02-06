@@ -15,7 +15,7 @@ public abstract class ExceptionUtils {
     private ExceptionUtils() {
     }
 
-    public static String stacktrace(Exception e) {
+    public static String stacktrace(Throwable e) {
         if (null == e) {
             return null;
         }

@@ -44,6 +44,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         captor = ArgumentCaptor.forClass(Intent.class);
         receiver = Mockito.mock(BroadcastReceiver.class);
         getInstrumentation().getContext().registerReceiver(receiver, new IntentFilter(Event.MESSAGES_SENT.getKey()));
+        getInstrumentation().getContext().deleteDatabase("mm_infobip_database.db");
     }
 
     @Override
@@ -113,7 +114,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         assertEquals("myDestination", messages.get(0).getDestination());
         assertEquals("myText", messages.get(0).getBody());
         assertEquals("string", messages.get(0).getCustomPayload().opt("myStringKey"));
-        assertEquals(1, messages.get(0).getCustomPayload().opt("myNumberKey"));
+        assertEquals(1.0, messages.get(0).getCustomPayload().optDouble("myNumberKey"), 0.01);
         assertEquals(true, messages.get(0).getCustomPayload().opt("myBooleanKey"));
         assertEquals("myMessageId2", messages.get(1).getMessageId());
         assertEquals(Message.Status.SUCCESS, messages.get(1).getStatus());
@@ -121,7 +122,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         assertEquals("myDestination2", messages.get(1).getDestination());
         assertEquals("myText2", messages.get(1).getBody());
         assertEquals("string2", messages.get(1).getCustomPayload().opt("myStringKey"));
-        assertEquals(2, messages.get(1).getCustomPayload().opt("myNumberKey"));
+        assertEquals(2.0, messages.get(1).getCustomPayload().optDouble("myNumberKey"), 0.01);
         assertEquals(false, messages.get(1).getCustomPayload().opt("myBooleanKey"));
     }
 }

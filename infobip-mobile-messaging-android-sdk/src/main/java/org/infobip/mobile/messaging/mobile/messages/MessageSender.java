@@ -12,7 +12,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -107,7 +107,7 @@ public class MessageSender {
         }
 
         Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
-        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMessageMapper.toBundles(messages));
+        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMapper.messagesToBundles(messages));
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
 

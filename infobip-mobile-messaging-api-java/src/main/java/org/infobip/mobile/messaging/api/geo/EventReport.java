@@ -17,5 +17,6 @@ public class EventReport {
     String geoAreaId;
     String campaignId;
     String messageId;
+    String sdkMessageId;
     Long timestampDelta;
 }

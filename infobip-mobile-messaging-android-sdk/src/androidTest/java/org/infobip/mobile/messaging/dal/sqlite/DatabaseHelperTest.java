@@ -156,4 +156,8 @@ public class DatabaseHelperTest extends InstrumentationTestCase {
 
         assertEquals(100, databaseHelper.countAll(SomethingInDatabase.class));
     }
+
+    public void test_shouldMigrateTable() {
+
+    }
 }

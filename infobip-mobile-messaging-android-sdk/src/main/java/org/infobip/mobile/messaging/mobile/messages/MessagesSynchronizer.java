@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -41,7 +41,7 @@ public class MessagesSynchronizer {
 
                 for (Message message : messages) {
                     Intent intent = new Intent();
-                    intent.putExtras(BundleMessageMapper.toBundle(message));
+                    intent.putExtras(FCMMessageMapper.toCloudBundle(message));
                     messageHandler.handleMessage(context, intent);
                 }
             }

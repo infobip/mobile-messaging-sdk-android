@@ -26,5 +26,5 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 public interface MobileApiGeo {
 
     @HttpRequest(method = HttpMethod.POST, value = "event")
-    CampaignStatusEventResponse report(@Body() EventReports reports);
+    EventReportResponse report(@Body() EventReportBody reports);
 }

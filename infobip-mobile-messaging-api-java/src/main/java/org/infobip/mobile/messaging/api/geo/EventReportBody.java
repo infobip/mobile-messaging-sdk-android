@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.api.geo;
 
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,6 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class EventReports {
-    EventReport reports[];
+public class EventReportBody {
+    final String platformType = "GCM";
+
+    Set<MessagePayload> messages;
+    Set<EventReport> reports;
+    String deviceApplicationInstanceId;
 }

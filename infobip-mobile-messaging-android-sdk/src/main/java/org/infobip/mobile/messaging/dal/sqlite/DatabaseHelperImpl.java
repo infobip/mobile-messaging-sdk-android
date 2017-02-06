@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.api.support.util.StringUtils;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.DatabaseObject;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;
@@ -27,14 +28,33 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     private static final Map<Class<? extends DatabaseObject>, DatabaseContract.DatabaseObject> databaseObjectsCache = new HashMap<>();
 
-    private static final int VER_2017_JAN_12 = 1;
-    private static final int VER_CURRENT = VER_2017_JAN_12;
+    private static final int VER_2017_JAN_12 = 1; // Initial version
+    private static final int VER_2017_FEB_2 = 2;  // Removed internal data and added geo column
+    private static final int VER_CURRENT = VER_2017_FEB_2;
 
     @SuppressWarnings("WeakerAccess")
     static final String DATABASE_NAME = "mm_infobip_database.db";
 
-    private final SQLiteDatabase db;
+    static final String SQL_CREATE_MESSAGES_TABLE = "CREATE TABLE " + Tables.MESSAGES + " (" +
+            MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
+            MessageColumns.TITLE + " TEXT, " +
+            MessageColumns.BODY + " TEXT, " +
+            MessageColumns.SOUND + " TEXT, " +
+            MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
+            MessageColumns.ICON + " TEXT, " +
+            MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
+            MessageColumns.CATEGORY + " TEXT, " +
+            MessageColumns.FROM + " TEXT, " +
+            MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
+            MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
+            MessageColumns.GEO + " TEXT, " +
+            MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
+            MessageColumns.DESTINATION + " TEXT, " +
+            MessageColumns.STATUS + " TEXT," +
+            MessageColumns.STATUS_MESSAGE + " TEXT)";
+
     private final Context context;
+    private final SQLiteDatabase db;
 
     public DatabaseHelperImpl(Context context) {
         super(context, DATABASE_NAME, null, VER_CURRENT);
@@ -80,30 +100,45 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + Tables.MESSAGES + " (" +
-                MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
-                MessageColumns.TITLE + " TEXT, " +
-                MessageColumns.BODY + " TEXT, " +
-                MessageColumns.SOUND + " TEXT, " +
-                MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
-                MessageColumns.ICON + " TEXT, " +
-                MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
-                MessageColumns.CATEGORY + " TEXT, " +
-                MessageColumns.FROM + " TEXT, " +
-                MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
-                MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
-                MessageColumns.INTERNAL_DATA + " TEXT, " +
-                MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
-                MessageColumns.DESTINATION + " TEXT, " +
-                MessageColumns.STATUS + " TEXT," +
-                MessageColumns.STATUS_MESSAGE + " TEXT)");
-
+        db.execSQL(SQL_CREATE_MESSAGES_TABLE);
         SharedPreferencesMigrator.migrateMessages(context, db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        int version = oldVersion;
+        if (version < VER_2017_FEB_2) {
 
+            String messageColumns = StringUtils.join(",", MessageColumns.MESSAGE_ID, MessageColumns.TITLE,
+                    MessageColumns.BODY, MessageColumns.SOUND, MessageColumns.VIBRATE, MessageColumns.ICON,
+                    MessageColumns.SILENT, MessageColumns.CATEGORY, MessageColumns.FROM, MessageColumns.RECEIVED_TIMESTAMP,
+                    MessageColumns.SEEN_TIMESTAMP, MessageColumns.GEO, MessageColumns.CUSTOM_PAYLOAD, MessageColumns.DESTINATION,
+                    MessageColumns.STATUS, MessageColumns.STATUS_MESSAGE
+            );
+
+            String oldMessageColumns = StringUtils.join(",", MessageColumns.MESSAGE_ID, MessageColumns.TITLE,
+                    MessageColumns.BODY, MessageColumns.SOUND, MessageColumns.VIBRATE, MessageColumns.ICON,
+                    MessageColumns.SILENT, MessageColumns.CATEGORY, MessageColumns.FROM, MessageColumns.RECEIVED_TIMESTAMP,
+                    MessageColumns.SEEN_TIMESTAMP, MessageColumns.Deprecated.INTERNAL_DATA, MessageColumns.CUSTOM_PAYLOAD, MessageColumns.DESTINATION,
+                    MessageColumns.STATUS, MessageColumns.STATUS_MESSAGE
+            );
+
+            db.beginTransaction();
+            db.execSQL("ALTER TABLE " + Tables.MESSAGES + " RENAME TO tmp_" + Tables.MESSAGES);
+            db.execSQL(SQL_CREATE_MESSAGES_TABLE);
+            db.execSQL("INSERT INTO " + Tables.MESSAGES + "(" + messageColumns + ")" +
+                    " SELECT " + oldMessageColumns +
+                    " FROM tmp_" + Tables.MESSAGES);
+            db.execSQL("DROP TABLE tmp_" + Tables.MESSAGES);
+            db.setTransactionSuccessful();
+            db.endTransaction();
+
+            version = VER_2017_FEB_2;
+        }
+
+        if (version != VER_CURRENT) {
+            MobileMessagingLogger.e("SQLite DB version is not what expected: " + VER_CURRENT);
+        }
     }
 
     private DatabaseObject emptyDatabaseObject(Class<? extends DatabaseObject> cls) {
@@ -136,7 +171,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
                     object.fillFromCursor(cursor);
                     objects.add(object);
                 } catch (Exception e) {
-                    MobileMessagingLogger.w(Log.getStackTraceString(e));
+                    MobileMessagingLogger.e(Log.getStackTraceString(e));
                 }
             } while (cursor.moveToNext());
         }

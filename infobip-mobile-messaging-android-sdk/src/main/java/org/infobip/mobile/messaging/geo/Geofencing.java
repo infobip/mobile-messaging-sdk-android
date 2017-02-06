@@ -29,11 +29,11 @@ import org.infobip.mobile.messaging.geo.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author pandric
@@ -104,7 +104,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 continue;
             }
 
-            final List<String> finishedCampaignIds = Arrays.asList(MobileMessagingCore.getInstance(context).getFinishedCampaignIds());
+            final Set<String> finishedCampaignIds = MobileMessagingCore.getInstance(context).getFinishedCampaignIds();
             if (finishedCampaignIds.contains(geo.getCampaignId())) {
                 continue;
             }

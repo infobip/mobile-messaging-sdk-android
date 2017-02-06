@@ -4,6 +4,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
 import org.json.JSONException;
@@ -49,12 +50,6 @@ class SyncMessagesResult extends UnsuccessfulResult {
     }
 
     private static Message responseToMessage(MessageResponse response) {
-        JSONObject internalData = null;
-        try {
-            internalData = response.getInternalData() != null ? new JSONObject(response.getInternalData()) : null;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
         JSONObject customPayload = null;
         try {
             customPayload = response.getCustomPayload() != null ? new JSONObject(response.getCustomPayload()) : null;
@@ -64,7 +59,7 @@ class SyncMessagesResult extends UnsuccessfulResult {
         Geo geo = response.getInternalData() != null ?
                 new JsonSerializer().deserialize(response.getInternalData(), Geo.class) : null;
 
-        return new Message(
+        Message message = new Message(
                 response.getMessageId(),
                 response.getTitle(),
                 response.getBody(),
@@ -76,12 +71,14 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 null,
                 System.currentTimeMillis(),
                 0,
-                internalData,
                 customPayload,
                 geo,
                 null,
                 Message.Status.UNKNOWN,
                 null
         );
+
+        InternalDataMapper.updateMessageWithInternalData(message, response.getInternalData());
+        return message;
     }
 }

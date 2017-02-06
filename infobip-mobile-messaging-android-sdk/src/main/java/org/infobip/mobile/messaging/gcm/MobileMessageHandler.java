@@ -9,7 +9,8 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -47,8 +48,12 @@ public class MobileMessageHandler {
             NotificationHandler.displayNotification(context, message);
         }
 
+        sendBroadcast(context, message);
+    }
+
+    public static void sendBroadcast(Context context, Message message) {
         Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
-        messageReceived.putExtras(BundleMessageMapper.toBundle(message));
+        messageReceived.putExtras(BundleMapper.messageToBundle(message));
         context.sendBroadcast(messageReceived);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
     }
@@ -69,7 +74,7 @@ public class MobileMessageHandler {
     }
 
     private Message createMessage(String from, Bundle data) {
-        Message message = Message.createFrom(data);
+        Message message = FCMMessageMapper.fromCloudBundle(data);
         message.setFrom(from);
         return message;
     }

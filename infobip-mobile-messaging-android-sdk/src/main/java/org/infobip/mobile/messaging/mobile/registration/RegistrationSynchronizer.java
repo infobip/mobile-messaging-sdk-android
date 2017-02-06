@@ -56,7 +56,7 @@ public class RegistrationSynchronizer {
 
             @Override
             protected void onCancelled() {
-                MobileMessagingLogger.e("Error creating registration!");
+                MobileMessagingLogger.e("Error updating registration!");
                 setRegistrationIdReported(context, false);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());

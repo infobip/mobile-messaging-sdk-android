@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,11 +7,13 @@ import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.api.geo.EventReports;
+import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.api.geo.EventReport;
+import org.infobip.mobile.messaging.api.geo.EventReportBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.geo.Area;
-import org.infobip.mobile.messaging.geo.GeoEventType;
-import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.tools.DebugServer;
@@ -19,9 +21,13 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -80,13 +86,28 @@ public class GeoReportsTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
-        List<GeoReport> reports = new ArrayList<>();
-        reports.add(new GeoReport("campaignId1", "messageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L));
-        reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
-        reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId1", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId3", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
 
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId2", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().deleteAll(context);
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().save(context, messages);
         MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
-        geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
+        geoReporter.report(context);
 
         // Examine what is reported back via broadcast intent
 
@@ -95,9 +116,15 @@ public class GeoReportsTest extends InstrumentationTestCase {
         List<GeoReport> broadcastedReports = GeoReport.createFrom(captor.getValue().getExtras());
         assertEquals(broadcastedReports.size(), 3);
 
-        GeoReport geoReport1 = broadcastedReports.get(0);
+        Map<String, GeoReport> reportMap = new HashMap<>();
+        for (GeoReport r : broadcastedReports) {
+            reportMap.put(r.getMessageId(), r);
+        }
+
+        GeoReport geoReport1 = reportMap.get("messageId1");
         assertEquals(geoReport1.getEvent(), GeoEventType.entry);
         assertEquals(geoReport1.getCampaignId(), "campaignId1");
+        assertEquals("signalingMessageId1", geoReport1.getSignalingMessageId());
         assertEquals(geoReport1.getMessageId(), "messageId1");
         assertEquals(geoReport1.getTimestampOccurred(), (Long) 1001L);
         assertEquals(geoReport1.getArea().getId(), "areaId1");
@@ -106,9 +133,10 @@ public class GeoReportsTest extends InstrumentationTestCase {
         assertEquals(geoReport1.getArea().getLongitude(), 1.0);
         assertEquals(geoReport1.getArea().getRadius(), (Integer) 3);
 
-        GeoReport geoReport2 = broadcastedReports.get(1);
+        GeoReport geoReport2 = reportMap.get("messageId2");
         assertEquals(geoReport2.getEvent(), GeoEventType.exit);
-        assertEquals(geoReport2.getCampaignId(), "campaignId2");
+        assertEquals(geoReport2.getCampaignId(), "campaignId1");
+        assertEquals("signalingMessageId1", geoReport2.getSignalingMessageId());
         assertEquals(geoReport2.getMessageId(), "messageId2");
         assertEquals(geoReport2.getTimestampOccurred(), (Long) 1002L);
         assertEquals(geoReport2.getArea().getId(), "areaId2");
@@ -117,9 +145,10 @@ public class GeoReportsTest extends InstrumentationTestCase {
         assertEquals(geoReport2.getArea().getLongitude(), 2.0);
         assertEquals(geoReport2.getArea().getRadius(), (Integer) 4);
 
-        GeoReport geoReport3 = broadcastedReports.get(2);
+        GeoReport geoReport3 = reportMap.get("messageId3");
         assertEquals(geoReport3.getEvent(), GeoEventType.dwell);
         assertEquals(geoReport3.getCampaignId(), "campaignId3");
+        assertEquals("signalingMessageId2", geoReport3.getSignalingMessageId());
         assertEquals(geoReport3.getMessageId(), "messageId3");
         assertEquals(geoReport3.getTimestampOccurred(), (Long) 1003L);
         assertEquals(geoReport3.getArea().getId(), "areaId3");
@@ -128,44 +157,55 @@ public class GeoReportsTest extends InstrumentationTestCase {
         assertEquals(geoReport3.getArea().getLongitude(), 3.0);
         assertEquals(geoReport3.getArea().getRadius(), (Integer) 5);
 
-
         // Examine HTTP request body
 
         String stringBody = debugServer.getBody();
-        EventReports body = new JsonSerializer().deserialize(stringBody, EventReports.class);
+        EventReportBody body = new JsonSerializer().deserialize(stringBody, EventReportBody.class);
 
-        assertEquals(body.getReports().length, 3);
-        JSONAssert.assertEquals(debugServer.getBody(),
+        assertEquals(body.getReports().size(), 3);
+        EventReport r[] = body.getReports().toArray(new EventReport[body.getReports().size()]);
+        JSONAssert.assertEquals(
                 "{" +
+                        "\"messages\": [" +
+                        "{" +
+                        "\"messageId\":\"signalingMessageId1\"" +
+                        "}," +
+                        "{" +
+                        "\"messageId\":\"signalingMessageId2\"" +
+                        "}" +
+                        "]," +
                         "\"reports\": [" +
                         "{" +
                         "\"event\":\"entry\"," +
                         "\"geoAreaId\":\"areaId1\"," +
-                        "\"messageId\":\"messageId1\"," +
+                        "\"messageId\":\"signalingMessageId1\"," +
+                        "\"sdkMessageId\":\"messageId1\"," +
                         "\"campaignId\":\"campaignId1\"," +
-                        "\"timestampDelta\":" + body.getReports()[0].getTimestampDelta() +
+                        "\"timestampDelta\":" + r[0].getTimestampDelta() +
                         "}," +
                         "{" +
                         "\"event\":\"exit\"," +
                         "\"geoAreaId\":\"areaId2\"," +
-                        "\"messageId\":\"messageId2\"," +
-                        "\"campaignId\":\"campaignId2\"," +
-                        "\"timestampDelta\":" + body.getReports()[1].getTimestampDelta() +
+                        "\"messageId\":\"signalingMessageId1\"," +
+                        "\"sdkMessageId\":\"messageId2\"," +
+                        "\"campaignId\":\"campaignId1\"," +
+                        "\"timestampDelta\":" + r[1].getTimestampDelta() +
                         "}," +
                         "{" +
                         "\"event\":\"dwell\"," +
                         "\"geoAreaId\":\"areaId3\"," +
-                        "\"messageId\":\"messageId3\"," +
+                        "\"messageId\":\"signalingMessageId2\"," +
+                        "\"sdkMessageId\":\"messageId3\"," +
                         "\"campaignId\":\"campaignId3\"," +
-                        "\"timestampDelta\":" + body.getReports()[2].getTimestampDelta() +
+                        "\"timestampDelta\":" + r[2].getTimestampDelta() +
                         "}" +
                         "]" +
                         "}"
-                , true);
+                , debugServer.getBody(), JSONCompareMode.LENIENT);
 
-        assertNotSame(body.getReports()[0].getTimestampDelta(), body.getReports()[1].getTimestampDelta());
-        assertNotSame(body.getReports()[0].getTimestampDelta(), body.getReports()[2].getTimestampDelta());
-        assertNotSame(body.getReports()[1].getTimestampDelta(), body.getReports()[2].getTimestampDelta());
+        assertNotSame(r[0].getTimestampDelta(), r[1].getTimestampDelta());
+        assertNotSame(r[0].getTimestampDelta(), r[2].getTimestampDelta());
+        assertNotSame(r[1].getTimestampDelta(), r[2].getTimestampDelta());
     }
 
     public void test_withNonActiveCampaigns() {
@@ -176,13 +216,28 @@ public class GeoReportsTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
 
-        List<GeoReport> reports = new ArrayList<>();
-        reports.add(new GeoReport("campaignId1", "messageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L));
-        reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
-        reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId1", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId3", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
 
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId2", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().deleteAll(context);
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().save(context, messages);
         MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
-        geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
+        geoReporter.report(context);
 
 
         // Examine what is reported back via broadcast intent
@@ -202,13 +257,13 @@ public class GeoReportsTest extends InstrumentationTestCase {
         assertEquals(geoReport.getArea().getLongitude(), 3.0);
         assertEquals(geoReport.getArea().getRadius(), (Integer) 5);
 
-        final String[] finishedCampaignIds = PreferenceHelper.findStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
-        final String[] suspendedCampaignIds = PreferenceHelper.findStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
+        final Set<String> finishedCampaignIds = PreferenceHelper.findStringSet(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
+        final Set<String> suspendedCampaignIds = PreferenceHelper.findStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
 
-        assertEquals(finishedCampaignIds.length, 1);
-        assertEquals(finishedCampaignIds[0], "campaignId1");
+        assertEquals(finishedCampaignIds.size(), 1);
+        assertEquals(finishedCampaignIds.iterator().next(), "campaignId1");
 
-        assertEquals(suspendedCampaignIds.length, 1);
-        assertEquals(suspendedCampaignIds[0], "campaignId2");
+        assertEquals(suspendedCampaignIds.size(), 1);
+        assertEquals(suspendedCampaignIds.iterator().next(), "campaignId2");
     }
 }

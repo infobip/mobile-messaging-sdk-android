@@ -269,6 +269,30 @@ public abstract class PreferenceHelper {
         sharedPreferences.edit().putStringSet(property.getKey(), stringSet).apply();
     }
 
+    public static Set<String> findStringSet(Context context, MobileMessagingProperty property) {
+        return findStringSet(context, property.getKey(), (Set<String>) property.getDefaultValue());
+    }
+
+    public static Set<String> findStringSet(Context context, String key, Set<String> defaultValue) {
+        return find(context, key, defaultValue, new SetConverter<Set<String>>() {
+            @Override
+            public Set<String> convert(Set<String> set) {
+                return set;
+            }
+        });
+    }
+
+    public static void saveStringSet(Context context, MobileMessagingProperty property, final Set<String> set) {
+        SetMutator mutator = new SetMutator() {
+            @Override
+            public void mutate(Set<String> innerSet) {
+                innerSet.clear();
+                innerSet.addAll(set);
+            }
+        };
+        editSet(context, property.getKey(), mutator);
+    }
+
     public static void editSet(Context context, String key, SetMutator mutator) {
         synchronized (LOCK) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);

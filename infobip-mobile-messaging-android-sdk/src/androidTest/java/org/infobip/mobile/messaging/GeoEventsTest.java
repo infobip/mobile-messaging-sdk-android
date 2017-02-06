@@ -7,9 +7,10 @@ import android.test.InstrumentationTestCase;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEvent;
+import org.infobip.mobile.messaging.geo.GeoEventSetting;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -22,10 +23,10 @@ public class GeoEventsTest extends InstrumentationTestCase {
 
     private class GeoTest extends Geo {
         public GeoTest() {
-            super(null, null, null);
+            super(null, null, null, null, null, null, new ArrayList<Area>(), null);
         }
 
-        List<GeoEvent> getEventFilters() {
+        List<GeoEventSetting> getEventFilters() {
             return getEvents();
         }
     }
@@ -61,14 +62,14 @@ public class GeoEventsTest extends InstrumentationTestCase {
 
     public void test_handle_geo_events() throws InterruptedException {
         GeoTest geo = new JsonSerializer().deserialize(internalData(), GeoTest.class);
-        List<Area> geofenceAreasList = geo.getAreasList();
 
         int entryCnt = 0;
 
+        // TODO: Implement with reasonable test time, otherwise it takes forever to run
         for (int i = 0; i < 5; i++) {
 
-            List<GeoEvent> events = geo.getEventFilters();
-            for (GeoEvent event : events) {
+            List<GeoEventSetting> events = geo.getEventFilters();
+            for (GeoEventSetting event : events) {
 
                 for (Area area : geo.getAreasList()) {
 
@@ -81,11 +82,11 @@ public class GeoEventsTest extends InstrumentationTestCase {
                     boolean isTimeoutExpired = timeIntervalBetweenEvents > TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes());
 
                     int eventLimit = event.getLimit();
-                    boolean isLimitBreached = eventLimit != GeoEvent.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
+                    boolean isLimitBreached = eventLimit != GeoEventSetting.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
 
                     if (isTimeoutExpired && !isLimitBreached) {
 
-                        if (eventLimit != GeoEvent.UNLIMITED_RECURRING) {
+                        if (eventLimit != GeoEventSetting.UNLIMITED_RECURRING) {
                             ++timesTriggered;
                         }
 

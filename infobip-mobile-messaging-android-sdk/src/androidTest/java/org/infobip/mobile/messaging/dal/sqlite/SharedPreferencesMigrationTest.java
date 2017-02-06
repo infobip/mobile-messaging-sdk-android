@@ -53,7 +53,6 @@ public class SharedPreferencesMigrationTest extends InstrumentationTestCase {
                     0,
                     null,
                     null,
-                    null,
                     "SomeDestination" + i,
                     Message.Status.SUCCESS,
                     "SomeStatusMessage" + i
@@ -83,7 +82,6 @@ public class SharedPreferencesMigrationTest extends InstrumentationTestCase {
             Assert.assertEquals("SomeFrom" + i, map.get(id).getFrom());
             Assert.assertEquals(0, map.get(id).getReceivedTimestamp());
             Assert.assertEquals(0, map.get(id).getSeenTimestamp());
-            Assert.assertEquals(null, map.get(id).getInternalData());
             Assert.assertEquals(null, map.get(id).getCustomPayload());
             Assert.assertEquals(null, map.get(id).getGeo());
             Assert.assertEquals("SomeDestination" + i, map.get(id).getDestination());

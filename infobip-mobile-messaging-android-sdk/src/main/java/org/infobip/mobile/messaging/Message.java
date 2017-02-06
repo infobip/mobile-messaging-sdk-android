@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.json.JSONObject;
 
@@ -31,7 +31,6 @@ public class Message implements Comparable<Message> {
     private String from;
     private long receivedTimestamp;
     private long seenTimestamp;
-    private JSONObject internalData;
     private JSONObject customPayload;
     private Geo geo;
 
@@ -46,17 +45,17 @@ public class Message implements Comparable<Message> {
     private String statusMessage;
 
     public static Message createFrom(Bundle bundle) {
-        return BundleMessageMapper.fromBundle(bundle);
+        return BundleMapper.messageFromBundle(bundle);
     }
 
     public static List<Message> createFrom(ArrayList<Bundle> bundles) {
-        return BundleMessageMapper.fromBundles(bundles);
+        return BundleMapper.messagesFromBundles(bundles);
     }
 
     public Message(String messageId, String title, String body, String sound,
                    boolean vibrate, String icon, boolean silent, String category,
                    String from, long receivedTimestamp, long seenTimestamp,
-                   JSONObject internalData, JSONObject customPayload, Geo geo,
+                   JSONObject customPayload, Geo geo,
                    String destination, Status status, String statusMessage) {
         this.messageId = messageId;
         this.title = title;
@@ -69,7 +68,6 @@ public class Message implements Comparable<Message> {
         this.from = from;
         this.receivedTimestamp = receivedTimestamp;
         this.seenTimestamp = seenTimestamp;
-        this.internalData = internalData;
         this.customPayload = customPayload;
         this.geo = geo;
         this.destination = destination;
@@ -178,14 +176,6 @@ public class Message implements Comparable<Message> {
 
     public void setSeenTimestamp(long seenTimestamp) {
         this.seenTimestamp = seenTimestamp;
-    }
-
-    public JSONObject getInternalData() {
-        return internalData;
-    }
-
-    public void setInternalData(JSONObject internalData) {
-        this.internalData = internalData;
     }
 
     public JSONObject getCustomPayload() {

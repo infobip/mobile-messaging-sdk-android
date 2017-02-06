@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -33,7 +34,8 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -111,7 +113,7 @@ public class MobileMessagingCore {
 
         if (isPushRegistrationEnabled()) {
             messagesSynchronizer.synchronize(context, getStats(), registrationAlignedExecutor);
-            geoReporter.report(context, getStats());
+            geoReporter.report(context);
         }
     }
 
@@ -300,6 +302,7 @@ public class MobileMessagingCore {
         }
     }
 
+    @NonNull
     public MessageStore getMessageStoreForGeo() {
         MessageStore messageStore;
         if (isMessageStoreEnabled()) {
@@ -343,7 +346,7 @@ public class MobileMessagingCore {
         return stats;
     }
 
-    public void setLastHttpException(Exception lastHttpException) {
+    public void setLastHttpException(Throwable lastHttpException) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
     }
 
@@ -529,23 +532,27 @@ public class MobileMessagingCore {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
     }
 
-    public ArrayList<GeoReport> removeUnreportedGeoEvents(final Context context) {
-        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<ArrayList<GeoReport>>() {
+    public GeoReport[] removeUnreportedGeoEvents() {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
             @Override
-            public ArrayList<GeoReport> run() {
-                JsonSerializer deserializer = new JsonSerializer();
+            public GeoReport[] run() {
+                JsonSerializer serializer = new JsonSerializer();
                 String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
-                ArrayList<GeoReport> reports = new ArrayList<>();
+                Set<GeoReport> reports = new HashSet<>();
                 for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
-                    reports.add(deserializer.deserialize(unreportedGeoEventJson, GeoReport.class));
+                    try {
+                        GeoReport report = serializer.deserialize(unreportedGeoEventJson, GeoReport.class);
+                        reports.add(report);
+                    } catch (Exception ignored) {
+                    }
                 }
                 PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
-                return reports;
+                return reports.toArray(new GeoReport[reports.size()]);
             }
         });
     }
 
-    public void addUnreportedGeoEvents(final List<GeoReport> reports) {
+    public void addUnreportedGeoEvents(final GeoReport reports[]) {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {
@@ -558,27 +565,25 @@ public class MobileMessagingCore {
         });
     }
 
-    public void addCampaignStatus(final String[] finishedCampaignIds, final String[] suspendedCampaignIds) {
+    public void addCampaignStatus(final Set<String> finishedCampaignIds, final Set<String> suspendedCampaignIds) {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {
-                if (finishedCampaignIds != null && finishedCampaignIds.length != 0) {
-                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS, finishedCampaignIds);
-                }
-                if (suspendedCampaignIds != null && suspendedCampaignIds.length != 0) {
-                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS, suspendedCampaignIds);
-                }
+                PreferenceHelper.saveStringSet(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS,
+                        finishedCampaignIds != null ? finishedCampaignIds : new HashSet<String>());
+                PreferenceHelper.saveStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS,
+                        suspendedCampaignIds != null ? suspendedCampaignIds : new HashSet<String>());
                 return null;
             }
         });
     }
 
-    public String[] getFinishedCampaignIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
+    public Set<String> getFinishedCampaignIds() {
+        return PreferenceHelper.findStringSet(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
     }
 
-    public String[] getSuspendedCampaignIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
+    public Set<String> getSuspendedCampaignIds() {
+        return PreferenceHelper.findStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
     }
 
     static void handleBootCompleted(Context context) {

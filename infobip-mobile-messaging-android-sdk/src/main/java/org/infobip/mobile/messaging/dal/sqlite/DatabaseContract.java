@@ -85,10 +85,10 @@ interface DatabaseContract {
         String SEEN_TIMESTAMP = "seen_timestamp";
 
         /**
-         * Internal data json
+         * Geo json
          *  [TEXT]
          */
-        String INTERNAL_DATA = "internal_data";
+        String GEO = "geo";
 
         /**
          * Custom payload json
@@ -113,6 +113,14 @@ interface DatabaseContract {
          *  [TEXT]
          */
         String STATUS_MESSAGE = "status_message";
+
+        interface Deprecated {
+            /**
+             * Internal data json
+             *  [TEXT]
+             */
+            String INTERNAL_DATA = "internal_data";
+        }
     }
 
     interface DatabaseObject {

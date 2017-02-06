@@ -15,13 +15,13 @@ import org.json.JSONObject;
  * @since 09/01/2017.
  */
 
-public class SqliteMessageMapper extends Message implements DatabaseContract.DatabaseObject {
+public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
-    public SqliteMessageMapper() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, null, Status.UNKNOWN, null);
+    public SqliteMessage() {
+        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, Status.UNKNOWN, null);
     }
 
-    public SqliteMessageMapper(Message m) {
+    public SqliteMessage(Message m) {
         super(
                 m.getMessageId(),
                 m.getTitle(),
@@ -34,7 +34,6 @@ public class SqliteMessageMapper extends Message implements DatabaseContract.Dat
                 m.getFrom(),
                 m.getReceivedTimestamp(),
                 m.getSeenTimestamp(),
-                m.getInternalData(),
                 m.getCustomPayload(),
                 m.getGeo(),
                 m.getDestination(),
@@ -44,17 +43,17 @@ public class SqliteMessageMapper extends Message implements DatabaseContract.Dat
     }
 
     public static ContentValues save(Message message) {
-        return new SqliteMessageMapper(message).getContentValues();
+        return new SqliteMessage(message).getContentValues();
     }
 
     public static Message load(Cursor cursor) throws Exception {
-        SqliteMessageMapper sqliteMessageMapper = new SqliteMessageMapper();
-        sqliteMessageMapper.fillFromCursor(cursor);
-        return sqliteMessageMapper;
+        SqliteMessage sqliteMessage = new SqliteMessage();
+        sqliteMessage.fillFromCursor(cursor);
+        return sqliteMessage;
     }
 
     public static String getTable() {
-        return new SqliteMessageMapper().getTableName();
+        return new SqliteMessage().getTableName();
     }
 
     @Override
@@ -71,9 +70,8 @@ public class SqliteMessageMapper extends Message implements DatabaseContract.Dat
         setReceivedTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.RECEIVED_TIMESTAMP)));
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
 
-        String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
-        setInternalData(json == null ? null : new JSONObject(json));
-        setGeo(new JsonSerializer().deserialize(json, Geo.class));
+        String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.GEO));
+        setGeo(json != null ? new JsonSerializer().deserialize(json, Geo.class) : null);
 
         json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
         setCustomPayload(json == null ? null : new JSONObject(json));
@@ -98,7 +96,7 @@ public class SqliteMessageMapper extends Message implements DatabaseContract.Dat
         contentValues.put(MessageColumns.FROM, getFrom());
         contentValues.put(MessageColumns.RECEIVED_TIMESTAMP, getReceivedTimestamp());
         contentValues.put(MessageColumns.SEEN_TIMESTAMP, getSeenTimestamp());
-        contentValues.put(MessageColumns.INTERNAL_DATA, getInternalData() != null ? getInternalData().toString() : null);
+        contentValues.put(MessageColumns.GEO, getGeo() != null ? new JsonSerializer().serialize(getGeo()) : null);
         contentValues.put(MessageColumns.CUSTOM_PAYLOAD, getCustomPayload() != null ? getCustomPayload().toString() : null);
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);

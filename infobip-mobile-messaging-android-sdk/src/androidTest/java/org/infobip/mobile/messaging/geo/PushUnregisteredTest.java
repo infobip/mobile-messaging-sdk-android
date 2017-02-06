@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,9 +7,12 @@ import android.content.IntentFilter;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.geo.Area;
-import org.infobip.mobile.messaging.geo.GeoEventType;
-import org.infobip.mobile.messaging.geo.GeoReport;
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -23,7 +26,6 @@ import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -79,6 +81,7 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         seenStatusReceiver = Mockito.mock(BroadcastReceiver.class);
         messagesSynchronizerReceiver = Mockito.mock(BroadcastReceiver.class);
         errorReceiver = Mockito.mock(BroadcastReceiver.class);
+
         context.registerReceiver(geoEventsReceiver, new IntentFilter(Event.GEOFENCE_EVENTS_REPORTED.getKey()));
         context.registerReceiver(pusgRegistrationEnabledReceiver, new IntentFilter(Event.PUSH_REGISTRATION_ENABLED.getKey()));
         context.registerReceiver(seenStatusReceiver, new IntentFilter(Event.SEEN_REPORTS_SENT.getKey()));
@@ -183,13 +186,28 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
     }
 
     private void verifyGeoReporting(VerificationMode verificationMode) {
-        List<GeoReport> reports = new ArrayList<>();
-        reports.add(new GeoReport("campaignId1", "messageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L));
-        reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
-        reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId2", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId3", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
 
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId2", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().deleteAll(context);
+        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().save(context, messages);
         MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
-        geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
+        geoReporter.report(context);
         Mockito.verify(geoEventsReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 
