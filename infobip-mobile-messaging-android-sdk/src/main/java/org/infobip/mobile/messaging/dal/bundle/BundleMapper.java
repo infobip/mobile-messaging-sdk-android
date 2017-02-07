@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.dal.bundle;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
@@ -29,7 +30,7 @@ public class BundleMapper {
      * @param bundle where to load data from
      * @return new message object
      */
-    public static Message messageFromBundle(@NonNull Bundle bundle) {
+    public static @Nullable Message messageFromBundle(@NonNull Bundle bundle) {
         return objectFromBundle(bundle, BUNDLED_MESSAGE_TAG, Message.class);
     }
 
@@ -38,7 +39,7 @@ public class BundleMapper {
      * @param bundles where to read messages from
      * @return list of messages
      */
-    public static List<Message> messagesFromBundles(ArrayList<Bundle> bundles) {
+    public static @NonNull List<Message> messagesFromBundles(@NonNull ArrayList<Bundle> bundles) {
         return objectsFromBundles(bundles, BUNDLED_MESSAGE_TAG, Message.class);
     }
 
@@ -47,7 +48,7 @@ public class BundleMapper {
      * @param message object to serialize
      * @return bundle with message contents
      */
-    public static Bundle messageToBundle(Message message) {
+    public static @NonNull Bundle messageToBundle(@NonNull Message message) {
         return objectToBundle(message, BUNDLED_MESSAGE_TAG);
     }
 
@@ -56,7 +57,7 @@ public class BundleMapper {
      * @param messages objects to serialize
      * @return list of bundles with messages' contents
      */
-    public static ArrayList<Bundle> messagesToBundles(List<Message> messages) {
+    public static @NonNull ArrayList<Bundle> messagesToBundles(@NonNull List<Message> messages) {
         return objectsToBundles(messages, BUNDLED_MESSAGE_TAG);
     }
 
@@ -65,7 +66,7 @@ public class BundleMapper {
      * @param bundle where to load data from
      * @return new geo object
      */
-    public static Geo geoFromBundle(@NonNull Bundle bundle) {
+    public static @Nullable Geo geoFromBundle(@NonNull Bundle bundle) {
         return objectFromBundle(bundle, BUNDLED_GEO_TAG, Geo.class);
     }
 
@@ -74,7 +75,7 @@ public class BundleMapper {
      * @param geo object to serialize
      * @return bundle with geo contents
      */
-    public static Bundle geoToBundle(@NonNull Geo geo) {
+    public static @NonNull Bundle geoToBundle(@NonNull Geo geo) {
         return objectToBundle(geo, BUNDLED_GEO_TAG);
     }
 
@@ -83,7 +84,7 @@ public class BundleMapper {
      * @param bundle where to load data from
      * @return new geo report object
      */
-    public static List<GeoReport> geoReportsFromBundle(@NonNull Bundle bundle) {
+    public static @NonNull List<GeoReport> geoReportsFromBundle(@NonNull Bundle bundle) {
         return objectsFromBundle(bundle, BUNDLED_GEO_REPORTS_TAG, GeoReport.class);
     }
 
@@ -92,7 +93,7 @@ public class BundleMapper {
      * @param reports geo reports to serialize
      * @return bundle with geo reports' contents
      */
-    public static Bundle geoReportsToBundle(@NonNull List<GeoReport> reports) {
+    public static @NonNull Bundle geoReportsToBundle(@NonNull List<GeoReport> reports) {
         return objectsToBundle(reports, BUNDLED_GEO_REPORTS_TAG);
     }
 
@@ -107,7 +108,7 @@ public class BundleMapper {
      * @param <T> object type
      * @return deserialized object instance
      */
-    private static <T> T objectFromBundle(@NonNull Bundle bundle, @NonNull String tag, Class<T> cls) {
+    private static @Nullable <T> T objectFromBundle(@NonNull Bundle bundle, @NonNull String tag, Class<T> cls) {
         String json = bundle.getString(tag);
         if (json == null) {
             return null;
@@ -121,7 +122,7 @@ public class BundleMapper {
      * @param tag tag to use when storing data in bundle
      * @return bundle that contains object data
      */
-    private static Bundle objectToBundle(@NonNull Object object, @NonNull String tag) {
+    private static @NonNull Bundle objectToBundle(@NonNull Object object, @NonNull String tag) {
         Bundle bundle = new Bundle();
         bundle.putString(tag, serializer.serialize(object));
         return bundle;
@@ -134,7 +135,7 @@ public class BundleMapper {
      * @param <T> object type
      * @return list of deserialized objects
      */
-    private static <T> List<T> objectsFromBundle(@NonNull Bundle bundle, @NonNull String tag, Class<T> cls) {
+    private static @NonNull <T> List<T> objectsFromBundle(@NonNull Bundle bundle, @NonNull String tag, @NonNull Class<T> cls) {
         ArrayList<Bundle> bundles = bundle.getParcelableArrayList(tag);
         if (bundles == null) {
             return new ArrayList<>();
@@ -153,7 +154,7 @@ public class BundleMapper {
      * @param tag tag to use when storing data to bundle
      * @return bundle with objects' contents
      */
-    private static Bundle objectsToBundle(@NonNull List<?> objects, @NonNull String tag) {
+    private static @NonNull Bundle objectsToBundle(@NonNull List<?> objects, @NonNull String tag) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(tag, objectsToBundles(objects, tag));
         return bundle;
@@ -165,7 +166,7 @@ public class BundleMapper {
      * @param tag tag to use when storing data to bundle
      * @return bundles with objects' contents
      */
-    private static <T> List<T> objectsFromBundles(@NonNull List<Bundle> bundles, @NonNull String tag, Class<T> cls) {
+    private static @NonNull <T> List<T> objectsFromBundles(@NonNull List<Bundle> bundles, @NonNull String tag, @NonNull Class<T> cls) {
         ArrayList<T> objects = new ArrayList<>(bundles.size());
         for (Bundle bundle : bundles) {
             objects.add(serializer.deserialize(bundle.getString(tag), cls));
@@ -179,7 +180,7 @@ public class BundleMapper {
      * @param tag tag to use when storing data to bundle
      * @return bundles with objects' contents
      */
-    private static ArrayList<Bundle> objectsToBundles(@NonNull List<?> objects, @NonNull String tag) {
+    private static @NonNull ArrayList<Bundle> objectsToBundles(@NonNull List<?> objects, @NonNull String tag) {
         ArrayList<Bundle> bundles = new ArrayList<>(objects.size());
         for (Object object : objects) {
             Bundle bundle = new Bundle();

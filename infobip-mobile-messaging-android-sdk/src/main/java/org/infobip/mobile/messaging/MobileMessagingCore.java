@@ -320,7 +320,7 @@ public class MobileMessagingCore {
         return getMessageStore();
     }
 
-    static private boolean hasGeo(Message message) {
+    static public boolean hasGeo(Message message) {
         return message != null && message.getGeo() != null &&
                 message.getGeo().getAreasList() != null &&
                 !message.getGeo().getAreasList().isEmpty();

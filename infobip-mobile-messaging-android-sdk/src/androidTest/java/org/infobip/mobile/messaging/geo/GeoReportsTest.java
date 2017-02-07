@@ -16,6 +16,8 @@ import org.infobip.mobile.messaging.api.geo.EventReportBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
+import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.DebugServer;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -265,5 +267,194 @@ public class GeoReportsTest extends InstrumentationTestCase {
 
         assertEquals(suspendedCampaignIds.size(), 1);
         assertEquals(suspendedCampaignIds.iterator().next(), "campaignId2");
+    }
+
+    public void test_shouldUpdateMessageIdsOnSuccessfulReport() throws Exception {
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
+                "'messageIds': {" +
+                "   'messageId1':'ipCoreMessageId1'," +
+                "   'messageId2':'ipCoreMessageId2'," +
+                "   'messageId3':'ipCoreMessageId3'" +
+                "}" +
+                "}");
+
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId1", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId2", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
+
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId2", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        // Enable message store
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+
+        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
+        messageStore.deleteAll(context);
+        messageStore.save(context, messages);
+        MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
+
+        geoReporter.report(context);
+
+        // Wait for reporting to complete
+        Mockito.verify(receiver, Mockito.after(2000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+
+        // Examine message store
+        List<Message> messageList = messageStore.findAll(context);
+        assertEquals(messages.length + reports.length, messageList.size());
+
+        Map<String, Message> messageMap = new HashMap<>();
+        for (Message m : messageList) {
+            messageMap.put(m.getMessageId(), m);
+        }
+
+        assertTrue(messageMap.containsKey("ipCoreMessageId1"));
+        Message m1 = messageMap.get("ipCoreMessageId1");
+        assertEquals("campaignId1", m1.getGeo().getCampaignId());
+        assertEquals("areaId1", m1.getGeo().getAreasList().get(0).getId());
+
+        assertTrue(messageMap.containsKey("ipCoreMessageId2"));
+        Message m2 = messageMap.get("ipCoreMessageId2");
+        assertEquals("campaignId1", m2.getGeo().getCampaignId());
+        assertEquals("areaId2", m2.getGeo().getAreasList().get(0).getId());
+
+        assertTrue(messageMap.containsKey("ipCoreMessageId3"));
+        Message m3 = messageMap.get("ipCoreMessageId3");
+        assertEquals("campaignId2", m3.getGeo().getCampaignId());
+        assertEquals("areaId3", m3.getGeo().getAreasList().get(0).getId());
+    }
+
+    public void test_shouldKeepGeneratedIdsOnFailedReport() throws Exception {
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
+
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId1", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId2", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
+
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId2", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        // Enable message store
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+
+        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
+        messageStore.deleteAll(context);
+        messageStore.save(context, messages);
+        MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
+
+        geoReporter.report(context);
+
+        // Wait for reporting to complete
+        Mockito.verify(receiver, Mockito.after(2000).never()).onReceive(Mockito.any(Context.class), captor.capture());
+
+        // Examine message store
+        List<Message> messageList = messageStore.findAll(context);
+        assertEquals(messages.length + reports.length, messageList.size());
+
+        Map<String, Message> messageMap = new HashMap<>();
+        for (Message m : messageList) {
+            messageMap.put(m.getMessageId(), m);
+        }
+
+        assertTrue(messageMap.containsKey("messageId1"));
+        Message m1 = messageMap.get("messageId1");
+        assertEquals("campaignId1", m1.getGeo().getCampaignId());
+        assertEquals("areaId1", m1.getGeo().getAreasList().get(0).getId());
+
+        assertTrue(messageMap.containsKey("messageId2"));
+        Message m2 = messageMap.get("messageId2");
+        assertEquals("campaignId1", m2.getGeo().getCampaignId());
+        assertEquals("areaId2", m2.getGeo().getAreasList().get(0).getId());
+
+        assertTrue(messageMap.containsKey("messageId3"));
+        Message m3 = messageMap.get("messageId3");
+        assertEquals("campaignId2", m3.getGeo().getCampaignId());
+        assertEquals("areaId3", m3.getGeo().getAreasList().get(0).getId());
+    }
+
+    public void test_shouldSaveOnlyActiveMessages() {
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
+                "   'messageIds': {" +
+                    "   'messageId1':'ipCoreMessageId1'," +
+                    "   'messageId2':'ipCoreMessageId2'," +
+                    "   'messageId3':'ipCoreMessageId3'" +
+                "   }," +
+                "  'finishedCampaignIds':['campaignId1']," +
+                "  'suspendedCampaignIds':['campaignId2']" +
+                "}");
+
+        final GeoReport reports[] = new GeoReport[3];
+        reports[0] = new GeoReport("campaignId1", "messageId1", "signalingMessageId1", GeoEventType.entry, new Area("areaId1", "Area1", 1.0, 1.0, 3), 1001L, new GeoReport.GeoLatLng(1.0, 2.0));
+        reports[1] = new GeoReport("campaignId1", "messageId2", "signalingMessageId1", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L, new GeoReport.GeoLatLng(3.0, 4.0));
+        reports[2] = new GeoReport("campaignId3", "messageId3", "signalingMessageId2", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L, new GeoReport.GeoLatLng(5.0, 6.0));
+
+        Message messages[] = new Message[2];
+        messages[0] = new Message();
+        messages[0].setMessageId("signalingMessageId1");
+        messages[0].setGeo(new Geo(null, null, null, null, null, "campaignId1", new ArrayList<Area>(){{
+            add(reports[0].getArea());
+            add(reports[1].getArea());
+        }}, null));
+        messages[1] = new Message();
+        messages[1].setMessageId("signalingMessageId2");
+        messages[1].setGeo(new Geo(null, null, null, null, null, "campaignId3", new ArrayList<Area>(){{
+            add(reports[2].getArea());
+        }}, null));
+
+        // Enable message store
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+
+        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
+        messageStore.deleteAll(context);
+        messageStore.save(context, messages);
+        MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
+
+        geoReporter.report(context);
+
+        // Wait for reporting to complete
+        Mockito.verify(receiver, Mockito.after(2000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+
+        // Examine message store
+        List<Message> messageList = messageStore.findAll(context);
+        assertEquals(messages.length + 1, messageList.size());
+
+        Map<String, Message> messageMap = new HashMap<>();
+        for (Message m : messageList) {
+            messageMap.put(m.getMessageId(), m);
+        }
+
+        assertFalse(messageMap.containsKey("messageId1"));
+        assertFalse(messageMap.containsKey("messageId2"));
+        assertFalse(messageMap.containsKey("ipCoreMessageId1"));
+        assertFalse(messageMap.containsKey("ipCoreMessageId2"));
+
+        assertTrue(messageMap.containsKey("ipCoreMessageId3"));
+        Message m3 = messageMap.get("ipCoreMessageId3");
+        assertEquals("campaignId3", m3.getGeo().getCampaignId());
+        assertEquals("areaId3", m3.getGeo().getAreasList().get(0).getId());
     }
 }

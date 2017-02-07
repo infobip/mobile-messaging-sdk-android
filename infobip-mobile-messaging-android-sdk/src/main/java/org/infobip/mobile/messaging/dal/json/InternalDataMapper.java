@@ -156,13 +156,16 @@ public class InternalDataMapper {
             if (internalData == null) {
                 internalData = new InternalData<>();
             }
+            if (internalData.silent == null) {
+                internalData.silent = new Silent<>();
+            }
             internalData.silent.title = message.getTitle();
             internalData.silent.body = message.getBody();
             internalData.silent.sound = message.getSound();
             if (internalData.silent.vibrate instanceof Boolean) {
                 internalData.silent.vibrate = (VibrateValueType) Boolean.valueOf(message.isVibrate());
             } else if (internalData.silent.vibrate instanceof String) {
-                internalData.silent.vibrate = (VibrateValueType) (message.isVibrate() ? "true" : "else");
+                internalData.silent.vibrate = (VibrateValueType) (message.isVibrate() ? "true" : "false");
             }
             internalData.silent.category = message.getCategory();
         }

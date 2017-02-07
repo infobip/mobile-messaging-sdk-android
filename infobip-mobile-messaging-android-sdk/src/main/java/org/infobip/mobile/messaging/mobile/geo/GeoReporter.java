@@ -47,6 +47,7 @@ public class GeoReporter {
             @Override
             protected void onCancelled(GeoReportingResult result) {
                 GeoReporter.handleError(context, result.getError(), reports);
+                GeoAreasHandler.processGeoReportingResult(context, reports, result);
             }
         }.execute(reports);
     }
