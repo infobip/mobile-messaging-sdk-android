@@ -2,13 +2,7 @@ package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.support.annotation.NonNull;
-import android.util.SparseArray;
-
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofenceStatusCodes;
-import com.google.android.gms.location.GeofencingEvent;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -33,52 +27,45 @@ public class GeoAreasHandler {
     private final MessageStore messageStore;
     private final Context context;
 
-    /**
-     * Supported geofence transition events
-     */
-    private static SparseArray<GeoEventType> supportedTransitionEvents = new SparseArray<GeoEventType>() {{
-        put(Geofence.GEOFENCE_TRANSITION_ENTER, GeoEventType.entry);
-    }};
-
     GeoAreasHandler(Context context) {
         this.context = context;
         this.messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
     }
 
     /**
-     * Handles geofencing transition and reports corresponding areas to server
+     * Handles geofencing transition intent and reports corresponding areas to server
      * @param intent intent from Google Locaiton Services
      */
     void handleTransition(Intent intent) {
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if (geofencingEvent == null) {
-            MobileMessagingLogger.e(TAG, "Geofencing event is null, cannot process");
+
+        GeoTransition transition;
+        try {
+            transition = GeoTransitionHelper.resolveTransitionFromIntent(intent);
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "Cannot resolve transition information: " + e);
             return;
         }
 
-        if (geofencingEvent.hasError()) {
-            MobileMessagingLogger.e(TAG, "ERROR: " + GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode()));
-            return;
-        }
+        handleTransition(transition);
+    }
 
-        GeoEventType event = supportedTransitionEvents.get(geofencingEvent.getGeofenceTransition());
-        if (event == null) {
-            MobileMessagingLogger.e(TAG, "Cannot identify event for transition: " + geofencingEvent.getGeofenceTransition());
-            return;
-        }
-
-        Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, messageStore, geofencingEvent.getTriggeringGeofences(), event);
+    /**
+     * Handles geofencing intent and reports corresponding areas to server
+     * @param transition resolved transition information
+     */
+    @SuppressWarnings("WeakerAccess")
+    void handleTransition(GeoTransition transition) {
+        Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, messageStore, transition.getRequestIds(), transition.getEventType());
         if (messagesAndAreas.isEmpty()) {
             MobileMessagingLogger.d(TAG, "No messages for triggered areas");
             return;
         }
 
-        logGeofences(messagesAndAreas.values(), event);
+        logGeofences(messagesAndAreas.values(), transition.getEventType());
 
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        Location triggeringLocation = geofencingEvent.getTriggeringLocation();
 
-        mobileMessagingCore.addUnreportedGeoEvents(GeoReportHelper.createReportsForMultipleMessages(messagesAndAreas, event, triggeringLocation));
+        mobileMessagingCore.addUnreportedGeoEvents(GeoReportHelper.createReportsForMultipleMessages(messagesAndAreas, transition.getEventType(), transition.getTriggeringLocation()));
         GeoReport unreportedEvents[] = MobileMessagingCore.getInstance(context).removeUnreportedGeoEvents();
         if (unreportedEvents.length == 0) {
             MobileMessagingLogger.d(TAG, "No geofencing events to report at current time");
@@ -86,7 +73,7 @@ public class GeoAreasHandler {
         }
 
         GeoReportingResult result = GeoReporter.reportSync(context, unreportedEvents);
-        processGeoReportingResult(context, unreportedEvents, result);
+        handleGeoReportingResult(context, unreportedEvents, result);
     }
 
     /**
@@ -94,12 +81,17 @@ public class GeoAreasHandler {
      * @param geoReports reports that were sent to the server
      * @param result result from the server
      */
-    public static void processGeoReportingResult(Context context, @NonNull GeoReport geoReports[], @NonNull GeoReportingResult result) {
+    public static void handleGeoReportingResult(Context context, @NonNull GeoReport geoReports[], @NonNull GeoReportingResult result) {
         List<GeoReport> reports = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(geoReports), result);
         Map<GeoReport, Message> messages = GeoReportHelper.createMessagesToNotify(context, reports, result);
         saveAndUpdateMessageStore(context, messages.values(), result);
+        updateUnreportedSeenMessageIds(context, result);
 
         GeoNotificationHelper.notifyAboutGeoTransitions(context, messages);
+
+        if (!result.hasError()) {
+            MobileMessagingCore.getInstance(context).sync();
+        }
     }
 
     /**
@@ -134,6 +126,20 @@ public class GeoAreasHandler {
         }
         messageStore.deleteAll(context);
         messageStore.save(context, allMessages.toArray(new Message[allMessages.size()]));
+    }
+
+    /**
+     * Updates unreported ids that were marked as seen with the ones provided with report response
+     * @param reportingResult result of geo reporting
+     */
+    private static void updateUnreportedSeenMessageIds(Context context, @NonNull GeoReportingResult reportingResult) {
+        if (reportingResult.hasError() ||
+                reportingResult.getMessageIds() == null ||
+                reportingResult.getMessageIds().isEmpty()) {
+            return;
+        }
+
+        MobileMessagingCore.getInstance(context).updateUnreportedSeenMessageIds(reportingResult.getMessageIds());
     }
 
     /**

@@ -52,9 +52,14 @@ public class VersionChecker {
     }
 
     private boolean shouldUpdate(String latest, String current) {
-        Version latestVersion = new Version(latest);
-        Version currentVersion = new Version(current);
+        try {
+            Version latestVersion = new Version(latest);
+            Version currentVersion = new Version(current);
 
-        return latestVersion.compareTo(currentVersion) > 0;
+            return latestVersion.compareTo(currentVersion) > 0;
+        } catch (Exception e) {
+            MobileMessagingLogger.w(TAG, "Cannot process versions: current(" + current + ") latest(" + latest + ") " + e);
+            return false;
+        }
     }
 }

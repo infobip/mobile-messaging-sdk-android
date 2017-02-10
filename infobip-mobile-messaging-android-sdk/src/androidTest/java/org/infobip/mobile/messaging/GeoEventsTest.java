@@ -7,7 +7,7 @@ import android.test.InstrumentationTestCase;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEventSetting;
+import org.infobip.mobile.messaging.geo.GeoEventSettings;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ public class GeoEventsTest extends InstrumentationTestCase {
             super(null, null, null, null, null, null, new ArrayList<Area>(), null);
         }
 
-        List<GeoEventSetting> getEventFilters() {
+        List<GeoEventSettings> getEventFilters() {
             return getEvents();
         }
     }
@@ -68,8 +68,8 @@ public class GeoEventsTest extends InstrumentationTestCase {
         // TODO: Implement with reasonable test time, otherwise it takes forever to run
         for (int i = 0; i < 5; i++) {
 
-            List<GeoEventSetting> events = geo.getEventFilters();
-            for (GeoEventSetting event : events) {
+            List<GeoEventSettings> events = geo.getEventFilters();
+            for (GeoEventSettings event : events) {
 
                 for (Area area : geo.getAreasList()) {
 
@@ -82,11 +82,11 @@ public class GeoEventsTest extends InstrumentationTestCase {
                     boolean isTimeoutExpired = timeIntervalBetweenEvents > TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes());
 
                     int eventLimit = event.getLimit();
-                    boolean isLimitBreached = eventLimit != GeoEventSetting.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
+                    boolean isLimitBreached = eventLimit != GeoEventSettings.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
 
                     if (isTimeoutExpired && !isLimitBreached) {
 
-                        if (eventLimit != GeoEventSetting.UNLIMITED_RECURRING) {
+                        if (eventLimit != GeoEventSettings.UNLIMITED_RECURRING) {
                             ++timesTriggered;
                         }
 

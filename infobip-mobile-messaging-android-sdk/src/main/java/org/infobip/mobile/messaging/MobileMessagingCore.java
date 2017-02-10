@@ -35,6 +35,8 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -202,7 +204,58 @@ public class MobileMessagingCore {
     }
 
     public String[] getUnreportedSeenMessageIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+        String[] ids = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+        return filterOutGeneratedMessageIds(ids);
+    }
+
+    /**
+     * Method to update unreported seen ids
+     * @param messageIdMap map that contains old id as key and new id as value
+     */
+    public void updateUnreportedSeenMessageIds(final Map<String, String> messageIdMap) {
+        if (messageIdMap == null || messageIdMap.isEmpty()) {
+            return;
+        }
+
+        PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
+            @Override
+            public Void run() {
+                String[] reports = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+                if (reports.length == 0) {
+                    return null;
+                }
+
+                for (int i = 0; i < reports.length; i++) {
+                    String messageIdAndTimestamp[] = reports[i].split(StringUtils.COMMA_WITH_SPACE);
+                    String newMessageId = messageIdMap.get(messageIdAndTimestamp[0]);
+                    if (newMessageId != null) {
+                        reports[i] = StringUtils.concat(newMessageId, messageIdAndTimestamp[1], StringUtils.COMMA_WITH_SPACE);
+                    }
+                }
+
+                PreferenceHelper.saveStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, reports);
+                return null;
+            }
+        });
+
+    }
+
+    private String[] filterOutGeneratedMessageIds(String[] messageIDs) {
+        GeoReport geoRepors[] = getUnreportedGeoEvents();
+        if (geoRepors.length == 0) {
+            return messageIDs;
+        }
+
+        List<String> seenIds = getSeenMessageIdsFromReports(messageIDs);
+        List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
+        for (GeoReport geoReport : geoRepors) {
+            int ind = seenIds.indexOf(geoReport.getMessageId());
+            if (ind >= 0) {
+                filteredSeenReports.remove(ind);
+                seenIds.remove(ind);
+            }
+        }
+        return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
     }
 
     private void addUnreportedSeenMessageIds(final String... messageIDs) {
@@ -222,6 +275,29 @@ public class MobileMessagingCore {
         }
 
         return syncMessages;
+    }
+
+    /**
+     * Returns list of messageId and seenTimestamp
+     * @param reports concatenated message id and timestamp
+     * @return reports
+     */
+    private List<String> getSeenMessageIdsFromReports(String[] reports) {
+        List<String> ids = new ArrayList<>();
+        for (String report : reports) {
+            ids.add(getSeenMessageIdFromReport(report));
+        }
+        return ids;
+    }
+
+    /**
+     * Returns message id from seen report string
+     * @param report concatenated message id and timestamp
+     * @return message id
+     */
+    private String getSeenMessageIdFromReport(String report) {
+        String[] reportContents = report.split(StringUtils.COMMA_WITH_SPACE);
+        return reportContents.length > 0 ? reportContents[0] : null;
     }
 
     public void removeUnreportedSeenMessageIds(final String... messageIDs) {
@@ -532,6 +608,25 @@ public class MobileMessagingCore {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
     }
 
+    private GeoReport[] getUnreportedGeoEvents() {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
+            @Override
+            public GeoReport[] run() {
+                JsonSerializer serializer = new JsonSerializer();
+                String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
+                Set<GeoReport> reports = new HashSet<>();
+                for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
+                    try {
+                        GeoReport report = serializer.deserialize(unreportedGeoEventJson, GeoReport.class);
+                        reports.add(report);
+                    } catch (Exception ignored) {
+                    }
+                }
+                return reports.toArray(new GeoReport[reports.size()]);
+            }
+        });
+    }
+
     public GeoReport[] removeUnreportedGeoEvents() {
         return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
             @Override
@@ -552,7 +647,7 @@ public class MobileMessagingCore {
         });
     }
 
-    public void addUnreportedGeoEvents(final GeoReport reports[]) {
+    public void addUnreportedGeoEvents(final GeoReport... reports) {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {

@@ -31,9 +31,9 @@ public class Geo {
     private List<Area> areasList = new ArrayList<>();
 
     @SerializedName("event")
-    private List<GeoEventSetting> eventSettings = new ArrayList<>();
+    private List<GeoEventSettings> eventSettings = new ArrayList<>();
 
-    public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId, List<Area> areasList, List<GeoEventSetting> eventSettings) {
+    public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId, List<Area> areasList, List<GeoEventSettings> eventSettings) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.deliveryTime = deliveryTime;
@@ -60,7 +60,7 @@ public class Geo {
         return areasList;
     }
 
-    protected List<GeoEventSetting> getEvents() {
+    protected List<GeoEventSettings> getEvents() {
         return eventSettings;
     }
 

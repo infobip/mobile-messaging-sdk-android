@@ -4,6 +4,7 @@ import android.content.Context;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -27,10 +28,11 @@ public class SharedPreferencesMigrationTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         context = getInstrumentation().getContext();
-        context.deleteDatabase(DatabaseHelperImpl.DATABASE_NAME);
 
         sharedPreferencesMessageStore = new SharedPreferencesMessageStore();
         sharedPreferencesMessageStore.deleteAll(context);
+
+        MobileMessagingCore.getDatabaseHelper(context).deleteAll(SqliteMessage.class);
     }
 
     public void test_shouldMigrateAllMessagesToSqlite() throws Exception {

@@ -1,14 +1,12 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
-import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
-import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
-import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
-import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -40,9 +38,7 @@ public class MessagesSynchronizer {
                 }
 
                 for (Message message : messages) {
-                    Intent intent = new Intent();
-                    intent.putExtras(FCMMessageMapper.toCloudBundle(message));
-                    messageHandler.handleMessage(context, intent);
+                    messageHandler.handleMessage(context, message);
                 }
             }
 

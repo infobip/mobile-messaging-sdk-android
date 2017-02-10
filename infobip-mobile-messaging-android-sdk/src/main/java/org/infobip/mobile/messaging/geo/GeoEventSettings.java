@@ -5,7 +5,7 @@ package org.infobip.mobile.messaging.geo;
  * @since 17/10/2016.
  */
 
-public class GeoEventSetting {
+public class GeoEventSettings {
 
     public static final int UNLIMITED_RECURRING = 0;
 
@@ -13,7 +13,7 @@ public class GeoEventSetting {
     private Integer limit;
     private Long timeoutInMinutes;
 
-    GeoEventSetting(GeoEventType type, Integer limit, Long timeoutInMinutes) {
+    GeoEventSettings(GeoEventType type, Integer limit, Long timeoutInMinutes) {
         this.type = type;
         this.limit = limit;
         this.timeoutInMinutes = timeoutInMinutes;

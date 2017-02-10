@@ -14,11 +14,11 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.ConfigurationException;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -58,7 +58,7 @@ public class NotificationHandler {
         if (notificationSettings == null) return null;
 
         Intent intent = new Intent(context, notificationSettings.getCallbackActivity());
-        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), FCMMessageMapper.toCloudBundle(message));
+        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMapper.messageToBundle(message));
         intent.addFlags(notificationSettings.getIntentFlags());
         @SuppressWarnings("ResourceType") PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, notificationSettings.getPendingIntentFlags());
 

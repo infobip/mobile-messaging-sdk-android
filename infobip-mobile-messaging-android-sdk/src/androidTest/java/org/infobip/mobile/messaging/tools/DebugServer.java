@@ -1,9 +1,12 @@
 package org.infobip.mobile.messaging.tools;
 
+import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.util.StreamUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,13 +15,13 @@ import fi.iki.elonen.NanoHTTPD;
 public class DebugServer extends NanoHTTPD {
     private Map<String, String> queryParameters = new HashMap<>();
     private Map<String, String> headers = new HashMap<>();
+    private List<Tuple<String, String>> bodies = new ArrayList<>();
     private AtomicInteger requestCount = new AtomicInteger(0);
     private Response.Status status;
     private String mimeType;
     private String txt;
     private Method requestMethod;
     private String uri;
-    private String body;
 
     public DebugServer() {
         super(0);
@@ -32,7 +35,7 @@ public class DebugServer extends NanoHTTPD {
         uri = session.getUri();
         queryParameters = session.getParms();
         headers = session.getHeaders();
-        body = readBody(session);
+        bodies.add(new Tuple<>(session.getUri(), readBody(session)));
 
         return new Response(status, mimeType, txt);
     }
@@ -81,7 +84,19 @@ public class DebugServer extends NanoHTTPD {
     }
 
     public String getBody() {
-        return body;
+        if (!bodies.isEmpty()) {
+            return bodies.get(bodies.size() - 1).getRight();
+        }
+        return null;
+    }
+
+    public String getBody(String uri) {
+        for (Tuple<String, String> t : bodies) {
+            if (t.getLeft().toLowerCase().contains(uri.toLowerCase())) {
+                return t.getRight();
+            }
+        }
+        return null;
     }
 
     public String getHeader(String headerName) {

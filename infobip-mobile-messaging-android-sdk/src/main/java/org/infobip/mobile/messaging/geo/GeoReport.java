@@ -13,71 +13,85 @@ import java.util.List;
 
 public class GeoReport {
 
-    public static class GeoLatLng {
-        private Double lat;
-        private Double lng;
-
-        GeoLatLng(Double lat, Double lng) {
-            this.lat = lat;
-            this.lng = lng;
-        }
-
-        public Double getLat() {
-            return lat;
-        }
-
-        public Double getLng() {
-            return lng;
-        }
-    }
-
     private Area area;
     private GeoEventType event;
     private String campaignId;
     private String signalingMessageId;
     private String messageId;
     private Long timestampOccurred;
-    private GeoLatLng triggeringLatLng;
+    private GeoLatLng triggeringLocation;
 
-    protected GeoReport(String campaignId, String messageId, String signalingMessageId, GeoEventType event, Area area, Long timestampOccurred, GeoLatLng triggeringLatLng) {
+    public GeoReport() {
+
+    }
+
+    public GeoReport(String campaignId, String messageId, String signalingMessageId, GeoEventType event, Area area, Long timestampOccurred, GeoLatLng triggeringLocation) {
         this.area = area;
         this.campaignId = campaignId;
         this.signalingMessageId = signalingMessageId;
         this.messageId = messageId;
         this.event = event;
         this.timestampOccurred = timestampOccurred;
-        this.triggeringLatLng = triggeringLatLng;
+        this.triggeringLocation = triggeringLocation;
     }
 
     public static List<GeoReport> createFrom(Bundle bundle) {
         return BundleMapper.geoReportsFromBundle(bundle);
     }
 
-    public String getMessageId() {
-        return messageId;
+    public Area getArea() {
+        return area;
     }
 
-    public String getCampaignId() {
-        return campaignId;
+    public void setArea(Area area) {
+        this.area = area;
     }
 
     public GeoEventType getEvent() {
         return event;
     }
 
-    public Area getArea() {
-        return area;
+    public void setEvent(GeoEventType event) {
+        this.event = event;
+    }
+
+    public String getCampaignId() {
+        return campaignId;
+    }
+
+    public void setCampaignId(String campaignId) {
+        this.campaignId = campaignId;
+    }
+
+    public String getSignalingMessageId() {
+        return signalingMessageId;
+    }
+
+    public void setSignalingMessageId(String signalingMessageId) {
+        this.signalingMessageId = signalingMessageId;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
     }
 
     public Long getTimestampOccurred() {
         return timestampOccurred;
     }
 
-    public GeoLatLng getTriggeringLocation() {
-        return triggeringLatLng;
+    public void setTimestampOccurred(Long timestampOccurred) {
+        this.timestampOccurred = timestampOccurred;
     }
 
-    public String getSignalingMessageId() {
-        return signalingMessageId;
+    public GeoLatLng getTriggeringLocation() {
+        return triggeringLocation;
+    }
+
+    public void setTriggeringLocation(GeoLatLng triggeringLocation) {
+        this.triggeringLocation = triggeringLocation;
     }
 }

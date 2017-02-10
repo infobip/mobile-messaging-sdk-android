@@ -29,7 +29,7 @@ class GeoNotificationHelper {
 
     private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
-    private static final GeoEventSetting DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEventSetting(GeoEventType.entry, 1, 0L);
+    private static final GeoEventSettings DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEventSettings(GeoEventType.entry, 1, 0L);
 
     private static Map<GeoEventType, Event> eventBroadcasts = new HashMap<GeoEventType, Event>() {{
         put(GeoEventType.entry, Event.GEOFENCE_AREA_ENTERED);
@@ -63,13 +63,13 @@ class GeoNotificationHelper {
         int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(context, originalMessage.getMessageId(), area.getId(), event);
         long lastNotificationTimeForArea = getLastNotificationTimeForArea(context, originalMessage.getMessageId(), area.getId(), event);
         Geo geo = originalMessage.getGeo();
-        GeoEventSetting settings = getNotificationSettingsForTransition(geo.getEvents(), event);
+        GeoEventSettings settings = getNotificationSettingsForTransition(geo.getEvents(), event);
 
         boolean isInDeliveryWindow = checkIsAreaInDeliveryWindow(geo.getDeliveryTime());
 
         return settings != null &&
                 isInDeliveryWindow &&
-                (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEventSetting.UNLIMITED_RECURRING) &&
+                (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEventSettings.UNLIMITED_RECURRING) &&
                 TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
                 geoEventMatchesTransition(settings, event) &&
                 !geo.isExpired();
@@ -135,12 +135,12 @@ class GeoNotificationHelper {
         return DateTimeUtil.isCurrentTimeBetweenDates(startTime, endTime);
     }
 
-    private static GeoEventSetting getNotificationSettingsForTransition(List<GeoEventSetting> eventFilters, GeoEventType event) {
+    private static GeoEventSettings getNotificationSettingsForTransition(List<GeoEventSettings> eventFilters, GeoEventType event) {
         if (eventFilters == null || eventFilters.isEmpty()) {
             return DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER;
         }
 
-        for (GeoEventSetting e : eventFilters) {
+        for (GeoEventSettings e : eventFilters) {
             if (!geoEventMatchesTransition(e, event)) {
                 continue;
             }
@@ -157,7 +157,7 @@ class GeoNotificationHelper {
         return AREA_LAST_TIME_PREF_PREFIX + messageId + "-" + areaId + "-" + event.ordinal();
     }
 
-    private static boolean geoEventMatchesTransition(GeoEventSetting eventSetting, GeoEventType eventType) {
+    private static boolean geoEventMatchesTransition(GeoEventSettings eventSetting, GeoEventType eventType) {
         return eventSetting.getType().equals(DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER.getType()) && eventType == GeoEventType.entry;
     }
 

@@ -1,11 +1,8 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import com.google.android.gms.location.Geofence;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -71,9 +68,9 @@ public class GeoReportHelper {
      * @param messagesAndAreas map of signaling message and triggered geofence areas
      * @param event transition type
      * @param triggeringLocation event location
-     * @return list of geofencing reports for
+     * @return list of geofencing reports for the provided messages and areas
      */
-    static GeoReport[] createReportsForMultipleMessages(Map<Message, List<Area>> messagesAndAreas, @NonNull GeoEventType event, @NonNull Location triggeringLocation) {
+    static GeoReport[] createReportsForMultipleMessages(Map<Message, List<Area>> messagesAndAreas, @NonNull GeoEventType event, @NonNull GeoLatLng triggeringLocation) {
         List<GeoReport> reports = new ArrayList<>();
         for (Message message : messagesAndAreas.keySet()) {
             reports.addAll(createReports(message, messagesAndAreas.get(message), event, triggeringLocation));
@@ -88,7 +85,7 @@ public class GeoReportHelper {
      * @param event transition type
      * @return set of geofencing reports to send to server
      */
-    private static Set<GeoReport> createReports(Message signalingMessage, List<Area> areas, @NonNull GeoEventType event, @NonNull Location triggeringLocation) {
+    private static Set<GeoReport> createReports(Message signalingMessage, List<Area> areas, @NonNull GeoEventType event, @NonNull GeoLatLng triggeringLocation) {
         Set<GeoReport> reports = new HashSet<>();
         for (Area area : areas) {
             reports.add(
@@ -105,7 +102,7 @@ public class GeoReportHelper {
      * @param event transition type
      * @return generated report with unique messageId or null if no report available for this geofence and transition
      */
-    private static @NonNull GeoReport createReport(Message signalingMessage, Area area, @NonNull GeoEventType event, @NonNull Location triggeringLocation) {
+    private static @NonNull GeoReport createReport(Message signalingMessage, Area area, @NonNull GeoEventType event, @NonNull GeoLatLng triggeringLocation) {
         return new GeoReport(
                 signalingMessage.getGeo().getCampaignId(),
                 UUID.randomUUID().toString(),
@@ -113,7 +110,7 @@ public class GeoReportHelper {
                 event,
                 area,
                 System.currentTimeMillis(),
-                new GeoReport.GeoLatLng(triggeringLocation.getLatitude(), triggeringLocation.getLongitude())
+                triggeringLocation
         );
     }
 
@@ -125,25 +122,31 @@ public class GeoReportHelper {
      * @return new message based on triggering event, area and original signaling message
      */
     private static Message createNewMessageForReport(@NonNull final GeoReport report, @NonNull GeoReportingResult reportingResult, @NonNull Message originalMessage) {
+        GeoLatLng triggeringLocation = report.getTriggeringLocation();
+        if (triggeringLocation == null) {
+            triggeringLocation = new GeoLatLng(null, null);
+        }
+
+        List<Area> areas = new ArrayList<>();
+        if (report.getArea() != null) {
+            areas.add(report.getArea());
+        }
+
         Geo geo;
         if (originalMessage.getGeo() != null) {
-            geo = new Geo(report.getTriggeringLocation().getLat(),
-                    report.getTriggeringLocation().getLng(),
+            geo = new Geo(triggeringLocation.getLat(),
+                    triggeringLocation.getLng(),
                     originalMessage.getGeo().getDeliveryTime(),
                     originalMessage.getGeo().getExpiryTime(),
                     originalMessage.getGeo().getStartTime(),
                     originalMessage.getGeo().getCampaignId(),
-                    new ArrayList<Area>() {{
-                        add(report.getArea());
-                    }},
+                    areas,
                     originalMessage.getGeo().getEvents());
         } else {
-            geo = new Geo(report.getTriggeringLocation().getLat(),
-                    report.getTriggeringLocation().getLng(),
+            geo = new Geo(triggeringLocation.getLat(),
+                    triggeringLocation.getLng(),
                     null, null, null, null,
-                    new ArrayList<Area>() {{
-                        add(report.getArea());
-                    }},
+                    areas,
                     null);
         }
 
@@ -212,12 +215,12 @@ public class GeoReportHelper {
     /**
      * Returns map of signaling messages and corresponding areas that match geofence and transition event
      * @param messageStore message store to look messages for
-     * @param geofences geofences received from Google Location Services during transition event
+     * @param requestIds requestIds received from Google Location Services during transition event
      * @param event transition event type
      * @return signaling messages with corresponding areas
      */
     @NonNull
-    static Map<Message, List<Area>> findSignalingMessagesAndAreas(Context context, MessageStore messageStore, List<Geofence> geofences, @NonNull GeoEventType event) {
+    static Map<Message, List<Area>> findSignalingMessagesAndAreas(Context context, MessageStore messageStore, Set<String> requestIds, @NonNull GeoEventType event) {
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
             Geo geo = message.getGeo();
@@ -228,8 +231,8 @@ public class GeoReportHelper {
             List<Area> campaignAreas = geo.getAreasList();
             List<Area> triggeredAreas = new ArrayList<>();
             for (Area area : campaignAreas) {
-                for (Geofence geofence : geofences) {
-                    if (!geofence.getRequestId().equalsIgnoreCase(area.getId())) {
+                for (String requestId : requestIds) {
+                    if (!requestId.equalsIgnoreCase(area.getId())) {
                         continue;
                     }
 

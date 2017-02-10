@@ -22,23 +22,31 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class MobileMessageHandler {
 
+    /**
+     * Handles GCM/FCM new push message intent
+     * @param intent intent that contains new message
+     */
     public void handleMessage(Context context, Intent intent) {
+        Bundle data = intent.getExtras();
+        handleMessage(context, FCMMessageMapper.fromCloudBundle(data));
+    }
+
+    /**
+     * Handles new push message
+     * @param message new message
+     */
+    public void handleMessage(Context context, Message message) {
+
         if (!MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
             return;
         }
 
-        String from = intent.getStringExtra("from");
-        Bundle data = intent.getExtras();
-
-        data.putLong("received_timestamp", System.currentTimeMillis());
-
-        Message message = createMessage(from, data);
         if (StringUtils.isBlank(message.getMessageId())) {
             MobileMessagingLogger.w("Ignoring message without messageId");
             return;
         }
 
-        MobileMessagingLogger.d("Message received from: " + from);
+        message.setReceivedTimestamp(System.currentTimeMillis());
 
         sendDeliveryReport(context, message);
         saveMessage(context, message);
@@ -48,7 +56,9 @@ public class MobileMessageHandler {
             NotificationHandler.displayNotification(context, message);
         }
 
-        sendBroadcast(context, message);
+        if (!MobileMessagingCore.hasGeo(message)) {
+            sendBroadcast(context, message);
+        }
     }
 
     public static void sendBroadcast(Context context, Message message) {
@@ -75,12 +85,6 @@ public class MobileMessageHandler {
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }
-    }
-
-    private Message createMessage(String from, Bundle data) {
-        Message message = FCMMessageMapper.fromCloudBundle(data);
-        message.setFrom(from);
-        return message;
     }
 
     private void sendDeliveryReport(Context context, Message message) {
