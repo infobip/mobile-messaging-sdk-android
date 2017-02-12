@@ -5,11 +5,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
-
 import com.google.gson.annotations.SerializedName;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
@@ -53,6 +52,8 @@ public class Geo implements Parcelable {
         this.areasList = areasList;
     }
 
+
+
     protected Geo(Parcel in) {
         this.triggeringLatitude = in.readDouble();
         this.triggeringLongitude = in.readDouble();
@@ -62,6 +63,17 @@ public class Geo implements Parcelable {
         this.expiryTime = in.readString();
         this.startTime = in.readString();
         this.campaignId = in.readString();
+    }
+
+    protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList, DeliveryTime deliveryTime, List<GeoEvent> events, String expiryTime, String startTime, String campaignId) {
+        this.triggeringLatitude = triggeringLatitude;
+        this.triggeringLongitude = triggeringLongitude;
+        this.areasList = areasList;
+        this.deliveryTime = deliveryTime;
+        this.events = events;
+        this.expiryTime = expiryTime;
+        this.startTime = startTime;
+        this.campaignId = campaignId;
     }
 
     @Override

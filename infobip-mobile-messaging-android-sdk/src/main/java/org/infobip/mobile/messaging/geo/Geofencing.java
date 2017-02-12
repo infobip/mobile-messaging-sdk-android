@@ -87,9 +87,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, new Intent(context, GeofencingAlarmReceiver.class), 0));
     }
 
-    private static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
+    @SuppressWarnings("WeakerAccess")
+    static Tuple<List<Geofence>, Date> calculateGeofencesToMonitorAndNextCheckDate(MessageStore messageStore) {
         Date nextCheckDate = null;
-        Date now = new Date();
         Map<String, Geofence> geofences = new HashMap<>();
         Map<String, Date> expiryDates = new HashMap<>();
         List<Message> messages = messageStore.findAll(context);
@@ -100,42 +100,52 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 continue;
             }
 
-            if (!geo.isEligibleForMonitoring()) {
-                continue;
-            }
-
             final List<String> finishedCampaignIds = Arrays.asList(MobileMessagingCore.getInstance(context).getFinishedCampaignIds());
             if (finishedCampaignIds.contains(geo.getCampaignId())) {
                 continue;
             }
 
-            List<Area> geoAreasList = message.getGeo().getAreasList();
-            for (Area area : geoAreasList) {
-                if (!area.isValid()) {
-                    continue;
-                }
+            if (geo.isEligibleForMonitoring()) {
+                List<Area> geoAreasList = message.getGeo().getAreasList();
+                for (Area area : geoAreasList) {
+                    if (!area.isValid()) {
+                        continue;
+                    }
 
-                Date expiry = expiryDates.get(area.getId());
-                if (expiry != null && expiry.after(geo.getExpiryDate())) {
-                    continue;
-                }
+                    Date expiry = expiryDates.get(area.getId());
+                    if (expiry != null && expiry.after(geo.getExpiryDate())) {
+                        continue;
+                    }
 
-                expiryDates.put(area.getId(), geo.getExpiryDate());
-                geofences.put(area.getId(), area.toGeofence(geo.getExpiryDate()));
+                    expiryDates.put(area.getId(), geo.getExpiryDate());
+                    geofences.put(area.getId(), area.toGeofence(geo.getExpiryDate()));
+                }
             }
 
-            Date startDate = geo.getStartDate();
-            Date expiryDate = geo.getExpiryDate();
-            if (nextCheckDate == null) {
-                nextCheckDate = startDate;
-            } else if (startDate != null && startDate.before(nextCheckDate) &&
-                    expiryDate != null && expiryDate.after(now)) {
-                nextCheckDate = startDate;
-            }
+            nextCheckDate = calculateNextCheckDateForGeo(geo, nextCheckDate);
         }
 
         List<Geofence> geofenceList = new ArrayList<>(geofences.values());
         return new Tuple<>(geofenceList, nextCheckDate);
+    }
+
+    private static Date calculateNextCheckDateForGeo(Geo geo, Date oldCheckDate) {
+        Date now = new Date();
+        Date expiryDate = geo.getExpiryDate();
+        if (expiryDate != null && expiryDate.before(now)) {
+            return oldCheckDate;
+        }
+
+        Date startDate = geo.getStartDate();
+        if (startDate == null || startDate.before(now)) {
+            return oldCheckDate;
+        }
+
+        if (oldCheckDate != null && oldCheckDate.before(startDate)) {
+            return oldCheckDate;
+        }
+
+        return startDate;
     }
 
     @SuppressWarnings("MissingPermission")
@@ -171,8 +181,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                         logGeofenceStatus(status, true);
                     }
                 });
-
-
     }
 
     public void deactivate() {

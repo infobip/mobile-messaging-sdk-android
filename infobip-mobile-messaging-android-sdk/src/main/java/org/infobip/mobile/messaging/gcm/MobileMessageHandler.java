@@ -63,6 +63,10 @@ public class MobileMessageHandler {
         MobileMessagingLogger.d("Saving message: " + message.getMessageId());
         try {
             messageStore.save(context, message);
+
+            if (MobileMessagingCore.hasGeo(message)) {
+                MobileMessagingCore.getInstance(context).activateGeofencing();
+            }
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }

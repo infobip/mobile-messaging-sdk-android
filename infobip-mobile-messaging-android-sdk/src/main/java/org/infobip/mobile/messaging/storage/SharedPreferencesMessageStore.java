@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.util.Base64;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -84,8 +83,6 @@ public class SharedPreferencesMessageStore implements MessageStore {
                 }
             }
         });
-
-        MobileMessagingCore.getInstance(context).activateGeofencing();
     }
 
     private String serialize(Bundle in) {
