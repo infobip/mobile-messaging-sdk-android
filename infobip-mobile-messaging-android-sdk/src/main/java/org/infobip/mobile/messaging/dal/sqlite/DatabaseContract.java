@@ -113,6 +113,14 @@ interface DatabaseContract {
          *  [TEXT]
          */
         String STATUS_MESSAGE = "status_message";
+
+        interface Deprecated {
+            /**
+             * Internal data json
+             *  [TEXT]
+             */
+            String INTERNAL_DATA = "internal_data";
+        }
     }
 
     interface DatabaseObject {
