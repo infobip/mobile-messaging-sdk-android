@@ -241,18 +241,18 @@ public class MobileMessagingCore {
     }
 
     private String[] filterOutGeneratedMessageIds(String[] messageIDs) {
-        GeoReport geoRepors[] = getUnreportedGeoEvents();
-        if (geoRepors.length == 0) {
+        GeoReport geoReports[] = getUnreportedGeoEvents();
+        if (geoReports.length == 0) {
             return messageIDs;
         }
 
         List<String> seenIds = getSeenMessageIdsFromReports(messageIDs);
         List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
-        for (GeoReport geoReport : geoRepors) {
-            int ind = seenIds.indexOf(geoReport.getMessageId());
-            if (ind >= 0) {
-                filteredSeenReports.remove(ind);
-                seenIds.remove(ind);
+        for (GeoReport geoReport : geoReports) {
+            int idIndex = seenIds.indexOf(geoReport.getMessageId());
+            if (idIndex >= 0) {
+                filteredSeenReports.remove(idIndex);
+                seenIds.remove(idIndex);
             }
         }
         return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);

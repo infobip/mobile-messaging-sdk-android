@@ -26,6 +26,7 @@ public class Helper {
      * Generates messages with provided ids
      * @param saveToStorage set to true to save messages to message store
      * @param messageId message id for a message
+     * @param campaignId id of a campaign for a message
      * @param areas list of areas to save to message
      * @return new message
      */
