@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.dal.sqlite;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.test.InstrumentationTestCase;
@@ -145,5 +146,12 @@ public class SqliteMessageMigrationTest extends InstrumentationTestCase {
         assertEquals("SomeMessageDestination", messages.get(0).getDestination());
         assertEquals(Message.Status.SUCCESS, messages.get(0).getStatus());
         assertEquals("SomeStatusMessage", messages.get(0).getStatusMessage());
+
+        // Check that geo table exists
+        SqliteDatabaseProvider provider = (SqliteDatabaseProvider) databaseHelper;
+        SQLiteDatabase database = provider.getDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM sqlite_master WHERE name ='" + DatabaseContract.Tables.GEO_MESSAGES + "' and type='table'", null);
+        assertEquals(1, cursor.getCount());
+        cursor.close();
     }
 }

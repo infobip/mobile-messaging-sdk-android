@@ -53,6 +53,24 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             MessageColumns.STATUS + " TEXT," +
             MessageColumns.STATUS_MESSAGE + " TEXT)";
 
+    static final String SQL_CREATE_GEO_MESSAGES_TABLE = "CREATE TABLE " + Tables.GEO_MESSAGES + " (" +
+            MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
+            MessageColumns.TITLE + " TEXT, " +
+            MessageColumns.BODY + " TEXT, " +
+            MessageColumns.SOUND + " TEXT, " +
+            MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
+            MessageColumns.ICON + " TEXT, " +
+            MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
+            MessageColumns.CATEGORY + " TEXT, " +
+            MessageColumns.FROM + " TEXT, " +
+            MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
+            MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
+            MessageColumns.GEO + " TEXT, " +
+            MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
+            MessageColumns.DESTINATION + " TEXT, " +
+            MessageColumns.STATUS + " TEXT," +
+            MessageColumns.STATUS_MESSAGE + " TEXT)";
+
     private final Context context;
     private final SQLiteDatabase db;
 
@@ -101,6 +119,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_MESSAGES_TABLE);
+        db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
         SharedPreferencesMigrator.migrateMessages(context, db);
     }
 
@@ -130,6 +149,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
                     " SELECT " + oldMessageColumns +
                     " FROM tmp_" + Tables.MESSAGES);
             db.execSQL("DROP TABLE tmp_" + Tables.MESSAGES);
+            db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
             db.setTransactionSuccessful();
             db.endTransaction();
 

@@ -8,13 +8,18 @@ import android.database.Cursor;
  * @since 12/01/2017.
  */
 
-interface DatabaseContract {
+public interface DatabaseContract {
 
     interface Tables {
         /**
          * Table for messages
          */
         String MESSAGES = "messages";
+
+        /**
+         * Table for geo messages
+         */
+        String  GEO_MESSAGES = "geo_messages";
     }
 
     interface MessageColumns {
