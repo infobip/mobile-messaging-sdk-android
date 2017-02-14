@@ -56,6 +56,7 @@ public class MobileMessaging {
      * @see MobileMessaging.Builder
      */
     private MobileMessaging(Context context) {
+        MobileMessagingLogger.init(context);
         this.context = context;
     }
 
@@ -537,7 +538,6 @@ public class MobileMessaging {
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
-            MobileMessagingLogger.init(application);
             MobileMessagingCore.setApiUri(application, apiUri);
             MobileMessagingCore.setGcmSenderId(application, gcmSenderId);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
