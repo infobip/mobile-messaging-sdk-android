@@ -41,13 +41,13 @@ public class GeoReporter {
             @Override
             protected void onPostExecute(GeoReportingResult result) {
                 GeoReporter.handleSuccess(context, reports, result);
-                GeoAreasHandler.handleGeoReportingResult(context, reports, result);
+                GeoAreasHandler.handleGeoReportingResult(context, result);
             }
 
             @Override
             protected void onCancelled(GeoReportingResult result) {
                 GeoReporter.handleError(context, result.getError(), reports);
-                GeoAreasHandler.handleGeoReportingResult(context, reports, result);
+                GeoAreasHandler.handleGeoReportingResult(context, result);
             }
         }.execute(reports);
     }

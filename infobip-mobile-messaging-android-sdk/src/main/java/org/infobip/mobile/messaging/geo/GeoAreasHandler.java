@@ -73,21 +73,43 @@ public class GeoAreasHandler {
         }
 
         GeoReportingResult result = GeoReporter.reportSync(context, unreportedEvents);
-        handleGeoReportingResult(context, unreportedEvents, result);
+        handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
     }
 
     /**
-     * Processes geo reporting result, generates necessary notification messages and sends broadcasts
-     * @param geoReports reports that were sent to the server
+     * Generates new geo messages based on events and result data and also provides broadcasts and notifications.
+     * @param unreportedEvents events that occured and has been reported to the server.
+     * @param result result of reporting that contains non-active campaign data and new message ids.
+     */
+    private void handleReportingResultWithNewMessagesAndNotifications(GeoReport[] unreportedEvents, GeoReportingResult result) {
+        List<GeoReport> reports = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(unreportedEvents), result);
+        Map<Message, GeoEventType> messages = GeoReportHelper.createMessagesToNotify(context, reports, result);
+        saveMessages(messages.keySet());
+        handleGeoReportingResult(context, result);
+        GeoNotificationHelper.notifyAboutGeoTransitions(context, messages);
+    }
+
+    /**
+     * Saves new geo notification messages into message store.
+     * @param generatedMessages generated messages to save to message store.
+     */
+    private void saveMessages(Collection<Message> generatedMessages) {
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        if (!mobileMessagingCore.isMessageStoreEnabled()) {
+            return;
+        }
+
+        MessageStore messageStore = mobileMessagingCore.getMessageStore();
+        messageStore.save(context, generatedMessages.toArray(new Message[generatedMessages.size()]));
+    }
+
+    /**
+     * Processes geo reporting result and updates any stored data based on it
      * @param result result from the server
      */
-    public static void handleGeoReportingResult(Context context, @NonNull GeoReport geoReports[], @NonNull GeoReportingResult result) {
-        List<GeoReport> reports = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(geoReports), result);
-        Map<GeoReport, Message> messages = GeoReportHelper.createMessagesToNotify(context, reports, result);
-        saveAndUpdateMessageStore(context, messages.values(), result);
+    public static void handleGeoReportingResult(Context context, @NonNull GeoReportingResult result) {
+        updateMessageStoreWithReportingResult(context, result);
         updateUnreportedSeenMessageIds(context, result);
-
-        GeoNotificationHelper.notifyAboutGeoTransitions(context, messages);
 
         if (!result.hasError()) {
             MobileMessagingCore.getInstance(context).sync();
@@ -95,23 +117,21 @@ public class GeoAreasHandler {
     }
 
     /**
-     * Saves new geo notification messages into message store and also updates ids of existing messages based on reporting result.
+     * Updates ids of existing messages based on reporting result.
      * </p> Does nothing if message store is not enabled.
-     * @param messages new messages to save in message store
      * @param reportingResult geo reporting result that contains mapping for new message ids
      */
-    private static void saveAndUpdateMessageStore(Context context, Collection<Message> messages, @NonNull GeoReportingResult reportingResult) {
+    private static void updateMessageStoreWithReportingResult(Context context, @NonNull GeoReportingResult reportingResult) {
+        if (reportingResult.getMessageIds() == null || reportingResult.getMessageIds().isEmpty()) {
+            return;
+        }
+
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         if (!mobileMessagingCore.isMessageStoreEnabled()) {
             return;
         }
 
         MessageStore messageStore = mobileMessagingCore.getMessageStore();
-        messageStore.save(context, messages.toArray(new Message[messages.size()]));
-        if (reportingResult.getMessageIds() == null || reportingResult.getMessageIds().isEmpty()) {
-            return;
-        }
-
         // Code below is far from being effective but messageId is primary key
         // so we will have to remove messages with invalid keys
         List<Message> allMessages = messageStore.findAll(context);

@@ -251,6 +251,10 @@ public class GeoReportsTest extends InstrumentationTestCase {
         Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
         Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
         Helper.createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, area3);
+        messageStore.save(context,
+            Helper.createMessage(context, "messageId1", "campaignId1", false, area1),
+            Helper.createMessage(context, "messageId2", "campaignId1", false, area2),
+            Helper.createMessage(context, "messageId3", "campaignId2", false, area3));
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
                 "'messageIds': {" +
                 "   'messageId1':'ipCoreMessageId1'," +
@@ -268,7 +272,7 @@ public class GeoReportsTest extends InstrumentationTestCase {
 
         // Examine message store
         List<Message> messageList = messageStore.findAll(context);
-        assertEquals(2/*signaling*/ + 3/*generated*/, messageList.size());
+        assertEquals(3, messageList.size());
 
         Map<String, Message> messageMap = new HashMap<>();
         for (Message m : messageList) messageMap.put(m.getMessageId(), m);
@@ -287,84 +291,6 @@ public class GeoReportsTest extends InstrumentationTestCase {
         Message m3 = messageMap.get("ipCoreMessageId3");
         assertEquals("campaignId2", m3.getGeo().getCampaignId());
         assertEquals("areaId3", m3.getGeo().getAreasList().get(0).getId());
-    }
-
-    public void test_shouldKeepGeneratedMessagesOnFailedReport() throws Exception {
-
-        // Given
-        Helper.createMessage(context,"signalingMessageId1", "campaignId1", true);
-        Helper.createMessage(context,"signalingMessageId2", "campaignId2", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "messageId1", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "messageId2", true);
-        Helper.createReport(context,"signalingMessageId2", "campaignId2", "messageId3", true);
-        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
-
-        // When
-        geoReporter.report(context);
-
-        // Then
-        Mockito.verify(geoReportedReceiver, Mockito.after(2000).never()).onReceive(Mockito.any(Context.class), captor.capture());
-
-        List<Message> messageList = messageStore.findAll(context);
-        assertEquals(2/*signaling*/ + 3/*generated*/, messageList.size());
-
-        Map<String, Message> messageMap = new HashMap<>();
-        for (Message m : messageList) {
-            messageMap.put(m.getMessageId(), m);
-        }
-
-        assertTrue(messageMap.containsKey("messageId1"));
-        Message m1 = messageMap.get("messageId1");
-        assertEquals("campaignId1", m1.getGeo().getCampaignId());
-
-        assertTrue(messageMap.containsKey("messageId2"));
-        Message m2 = messageMap.get("messageId2");
-        assertEquals("campaignId1", m2.getGeo().getCampaignId());
-
-        assertTrue(messageMap.containsKey("messageId3"));
-        Message m3 = messageMap.get("messageId3");
-        assertEquals("campaignId2", m3.getGeo().getCampaignId());
-    }
-
-    public void test_geoReportsShouldGenerateMessagesOnlyForActiveCampaigns() {
-
-        // Given
-        Helper.createMessage(context,"signalingMessageId1", "campaignId1", true);
-        Helper.createMessage(context,"signalingMessageId2", "campaignId2", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "messageId1", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "messageId2", true);
-        Helper.createReport(context,"signalingMessageId2", "campaignId2", "messageId3", true);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
-                "   'messageIds': {" +
-                "   'messageId1':'ipCoreMessageId1'," +
-                "   'messageId2':'ipCoreMessageId2'," +
-                "   'messageId3':'ipCoreMessageId3'" +
-                "   }," +
-                "  'suspendedCampaignIds':['campaignId1']" +
-                "}");
-
-        // When
-        geoReporter.report(context);
-
-        // Then
-        Mockito.verify(geoReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        List<Message> messageList = MobileMessaging.getInstance(context).getMessageStore().findAll(context);
-        assertEquals(2 /*signaling*/ + 1 /*generated*/, messageList.size());
-
-        Map<String, Message> messageMap = new HashMap<>();
-        for (Message m : messageList) {
-            messageMap.put(m.getMessageId(), m);
-        }
-
-        assertFalse(messageMap.containsKey("messageId1"));
-        assertFalse(messageMap.containsKey("messageId2"));
-        assertFalse(messageMap.containsKey("messageId3"));
-        assertFalse(messageMap.containsKey("ipCoreMessageId1"));
-        assertFalse(messageMap.containsKey("ipCoreMessageId2"));
-
-        assertTrue(messageMap.containsKey("ipCoreMessageId3"));
-        Message m3 = messageMap.get("ipCoreMessageId3");
-        assertEquals("campaignId2", m3.getGeo().getCampaignId());
     }
 
     public void test_shouldReportSeenForMessageIdsIfNoCorrespondingGeoReport() {

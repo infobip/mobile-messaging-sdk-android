@@ -46,11 +46,11 @@ public class GeoReportHelper {
      * Creates new geo notification messages based on reporting result
      * @param reportedEvents events that were reported to server
      * @param reportingResult response from the server
-     * @return map of geo reports and corresponding messages
+     * @return map of messages and corresponding geo event types for each message
      */
-    static Map<GeoReport, Message> createMessagesToNotify(Context context, List<GeoReport> reportedEvents, @NonNull GeoReportingResult reportingResult) {
+    static Map<Message, GeoEventType> createMessagesToNotify(Context context, List<GeoReport> reportedEvents, @NonNull GeoReportingResult reportingResult) {
         List<Message> allMessages = MobileMessagingCore.getInstance(context).getMessageStoreForGeo().findAll(context);
-        Map<GeoReport, Message> messages = new HashMap<>();
+        Map<Message, GeoEventType> messages = new HashMap<>();
         for (GeoReport report : reportedEvents) {
             Message signalingMessage = GeoReportHelper.getSignalingMessageForReport(allMessages, report);
             if (signalingMessage == null) {
@@ -58,7 +58,7 @@ public class GeoReportHelper {
                 continue;
             }
 
-            messages.put(report, createNewMessageForReport(report, reportingResult, signalingMessage));
+            messages.put(createNewMessageForReport(report, reportingResult, signalingMessage), report.getEvent());
         }
         return messages;
     }

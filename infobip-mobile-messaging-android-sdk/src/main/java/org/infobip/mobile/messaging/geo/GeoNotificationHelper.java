@@ -39,16 +39,16 @@ class GeoNotificationHelper {
      * Broadcasts geofencing events and displays appropriate notifications for geo events
      * @param messages messages with geo to notify
      */
-    static void notifyAboutGeoTransitions(Context context, Map<GeoReport, Message> messages) {
-        for (GeoReport r : messages.keySet()) {
-            Message m = messages.get(r);
+    static void notifyAboutGeoTransitions(Context context, Map<Message, GeoEventType> messages) {
+        for (Message m : messages.keySet()) {
+            GeoEventType eventType = messages.get(m);
             for (Area area : m.getGeo().getAreasList()) {
-                setLastNotificationTimeForArea(context, m.getMessageId(), area.getId(), r.getEvent(), System.currentTimeMillis());
-                setNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), r.getEvent(),
-                        getNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), r.getEvent()) + 1);
+                setLastNotificationTimeForArea(context, m.getMessageId(), area.getId(), eventType, System.currentTimeMillis());
+                setNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), eventType,
+                        getNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), eventType) + 1);
             }
 
-            notifyAboutTransition(context, m.getGeo(), m, r.getEvent());
+            notifyAboutTransition(context, m.getGeo(), m, eventType);
         }
     }
 
