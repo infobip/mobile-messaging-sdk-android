@@ -4,13 +4,14 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEventSettings;
 import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.GeoLatLng;
 import org.infobip.mobile.messaging.geo.GeoReport;
-import org.infobip.mobile.messaging.util.StringUtils;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 public class Helper {
 
     /**
-     * Generates messages with provided ids
+     * Generates messages with provided id
      * @param saveToStorage set to true to save messages to message store
      * @param messageId message id for a message
      * @param campaignId id of a campaign for a message
@@ -31,13 +32,29 @@ public class Helper {
      * @return new message
      */
     public static Message createMessage(Context context, String messageId, String campaignId, boolean saveToStorage, Area... areas) {
+        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>()));
+    }
+
+    /**
+     * Generates messages with provided ids and geo campaign object
+     * @param saveToStorage set to true to save messages to message store
+     * @param messageId message id for a message
+     * @param geo geo campaign object
+     * @return new message
+     */
+    public static Message createMessage(Context context, String messageId, boolean saveToStorage, Geo... geo) {
         Message message = new Message();
         message.setMessageId(messageId);
-        if (StringUtils.isNotBlank(campaignId)) {
-            message.setGeo(new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>()));
+        boolean isGeo = geo.length > 0 && geo[0] != null && geo[0].getAreasList() != null && !geo[0].getAreasList().isEmpty();
+        if (isGeo) {
+            message.setGeo(geo[0]);
         }
         if (saveToStorage) {
-            MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
+            if (isGeo) {
+                MobileMessagingCore.getInstance(context).getMessageStoreForGeo().save(context, message);
+            } else {
+                MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
+            }
         }
         return message;
     }
@@ -82,10 +99,49 @@ public class Helper {
 
     /**
      * Generates area
-     * @param areaId id of an area
+     * @param areaId area id
      * @return new area
      */
     public static Area createArea(String areaId) {
-        return new Area(areaId, "", 1.0, 1.0, 1);
+        return createArea(areaId, "", 1.0, 1.0, 1);
+    }
+
+    /**
+     * Generates new area
+     * @param areaId area id
+     * @param title area name
+     * @param lat center latitude
+     * @param lon center longitude
+     * @param radius area radius
+     * @return new area
+     */
+    public static Area createArea(String areaId, String title, Double lat, Double lon, Integer radius) {
+        return new Area(areaId, title, lat, lon, radius);
+    }
+
+    /**
+     * Generates new Geo object
+     * @param triggeringLatitude latitude that event was triggered with
+     * @param triggeringLongitude longitude that event was triggered with
+     * @param campaignId campaign id
+     * @param areas array of areas to include
+     * @return new Geo object
+     */
+    public static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String campaignId, Area... areas) {
+        return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>());
+    }
+
+    /**
+     * Asserts that two objects are strictly the same using JSONAssert and JSON serialization
+     * @param expected expected object
+     * @param actual actual object
+     * @throws Exception if serialization or assertion fails
+     */
+    public static <T> void assertEquals(T expected, T actual) throws Exception {
+        if (expected == actual) {
+            return;
+        }
+        JsonSerializer serializer = new JsonSerializer();
+        JSONAssert.assertEquals(serializer.serialize(expected), serializer.serialize(actual), true);
     }
 }

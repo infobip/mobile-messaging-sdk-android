@@ -22,7 +22,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  */
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}/geo")
-@Version("3")
+@Version("4")
 public interface MobileApiGeo {
 
     @HttpRequest(method = HttpMethod.POST, value = "event")

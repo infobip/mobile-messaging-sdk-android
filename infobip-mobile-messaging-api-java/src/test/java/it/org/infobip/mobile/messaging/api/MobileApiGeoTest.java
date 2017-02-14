@@ -59,9 +59,10 @@ public class MobileApiGeoTest {
 
     @Test
     public void create_eventReport_success() throws Exception {
-        String jsonResponse = "{\n" +
-                "  \"finishedCampaignIds\":[\"id1\", \"id2\", \"id3\"],\n" +
-                "  \"suspendedCampaignIds\":[\"id4\", \"id5\", \"id6\"]\n" +
+        String jsonResponse = "{" +
+                "  'finishedCampaignIds':['id1', 'id2', 'id3']," +
+                "  'suspendedCampaignIds':['id4', 'id5', 'id6']," +
+                "  'messageIds':{'messageId1':'newMessageId1', 'messageId2':'newMessageId2', 'messageId3':'newMessageId3'}" +
                 "}";
 
         Set<EventReport> events = new HashSet<EventReport>(){{
@@ -80,7 +81,7 @@ public class MobileApiGeoTest {
         EventReportResponse response = mobileApiGeo.report(new EventReportBody(messages, events, "SomeDeviceInstanceId"));
 
         //inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/3/geo/event");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/4/geo/event");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
@@ -93,7 +94,9 @@ public class MobileApiGeoTest {
         assertThat(response.getSuspendedCampaignIds()).contains("id4");
         assertThat(response.getSuspendedCampaignIds()).contains("id5");
         assertThat(response.getSuspendedCampaignIds()).contains("id6");
-
+        assertThat(response.getMessageIds().get("messageId1")).isEqualTo("newMessageId1");
+        assertThat(response.getMessageIds().get("messageId2")).isEqualTo("newMessageId2");
+        assertThat(response.getMessageIds().get("messageId3")).isEqualTo("newMessageId3");
 
         JSONAssert.assertEquals(debugServer.getBody(),
                 "{" +

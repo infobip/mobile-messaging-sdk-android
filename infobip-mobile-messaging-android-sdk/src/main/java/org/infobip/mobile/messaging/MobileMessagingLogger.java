@@ -8,9 +8,14 @@ public final class MobileMessagingLogger {
 
     public static final String TAG = "MobileMessaging";
     private static Context context;
+    private static boolean forceEnable;
 
     public static void init(Context context) {
         MobileMessagingLogger.context = context;
+    }
+
+    public static void forceEnable() {
+        forceEnable = true;
     }
 
     public static void v(String tag, String msg) {
@@ -95,7 +100,7 @@ public final class MobileMessagingLogger {
 
     private static void log(int logLevel, String tag, String msg, Throwable tr) {
         boolean isDebuggable = (context != null && 0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-        if (!isDebuggable) {
+        if (!isDebuggable && !forceEnable) {
             return;
         }
 

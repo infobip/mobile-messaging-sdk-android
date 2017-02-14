@@ -312,7 +312,23 @@ public class MobileMessagingCore {
 
     void setMessagesSeen(String... messageIds) {
         addUnreportedSeenMessageIds(messageIds);
+        updateStoredMessagesWithSeenStatus(messageIds);
         sync();
+    }
+
+    private void updateStoredMessagesWithSeenStatus(String[] messageIds) {
+        if (!isMessageStoreEnabled()) {
+            return;
+        }
+
+        MessageStore messageStore = getMessageStore();
+        List<String> messageIdList = Arrays.asList(messageIds);
+        for (Message m : new ArrayList<>(messageStore.findAll(context))) {
+            if (messageIdList.contains(m.getMessageId())) {
+                m.setSeenTimestamp(System.currentTimeMillis());
+                messageStore.save(context, m);
+            }
+        }
     }
 
     public NotificationSettings getNotificationSettings() {
