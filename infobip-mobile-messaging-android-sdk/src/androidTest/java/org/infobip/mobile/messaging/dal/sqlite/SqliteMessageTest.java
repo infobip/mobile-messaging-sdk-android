@@ -15,7 +15,7 @@ import java.util.List;
  * @since 12/01/2017.
  */
 
-public class SqliteMessageMapperTest extends InstrumentationTestCase {
+public class SqliteMessageTest extends InstrumentationTestCase {
 
     private DatabaseHelper databaseHelper;
 
@@ -25,7 +25,7 @@ public class SqliteMessageMapperTest extends InstrumentationTestCase {
 
         Context context = getInstrumentation().getContext();
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
-        databaseHelper.deleteAll(SqliteMessageMapper.class);
+        databaseHelper.deleteAll(SqliteMessage.class);
     }
 
     public void test_message_toFromSqlite() throws Exception {
@@ -58,9 +58,9 @@ public class SqliteMessageMapperTest extends InstrumentationTestCase {
                 "SomeStatusMessage"
         );
 
-        databaseHelper.save(new SqliteMessageMapper(message));
+        databaseHelper.save(new SqliteMessage(message));
 
-        List<SqliteMessageMapper> messages = databaseHelper.findAll(SqliteMessageMapper.class);
+        List<SqliteMessage> messages = databaseHelper.findAll(SqliteMessage.class);
         assertEquals(1, messages.size());
 
         Message m = messages.get(0);
@@ -92,10 +92,10 @@ public class SqliteMessageMapperTest extends InstrumentationTestCase {
         Message message = new Message();
         message.setMessageId(null);
 
-        long countBefore = databaseHelper.countAll(SqliteMessageMapper.class);
+        long countBefore = databaseHelper.countAll(SqliteMessage.class);
 
-        databaseHelper.save(new SqliteMessageMapper(message));
+        databaseHelper.save(new SqliteMessage(message));
 
-        assertEquals(countBefore, databaseHelper.countAll(SqliteMessageMapper.class));
+        assertEquals(countBefore, databaseHelper.countAll(SqliteMessage.class));
     }
 }

@@ -15,13 +15,13 @@ import org.json.JSONObject;
  * @since 09/01/2017.
  */
 
-public class SqliteMessageMapper extends Message implements DatabaseContract.DatabaseObject {
+public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
-    public SqliteMessageMapper() {
+    public SqliteMessage() {
         super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, null, Status.UNKNOWN, null);
     }
 
-    public SqliteMessageMapper(Message m) {
+    public SqliteMessage(Message m) {
         super(
                 m.getMessageId(),
                 m.getTitle(),
@@ -44,17 +44,17 @@ public class SqliteMessageMapper extends Message implements DatabaseContract.Dat
     }
 
     public static ContentValues save(Message message) {
-        return new SqliteMessageMapper(message).getContentValues();
+        return new SqliteMessage(message).getContentValues();
     }
 
     public static Message load(Cursor cursor) throws Exception {
-        SqliteMessageMapper sqliteMessageMapper = new SqliteMessageMapper();
+        SqliteMessage sqliteMessageMapper = new SqliteMessage();
         sqliteMessageMapper.fillFromCursor(cursor);
         return sqliteMessageMapper;
     }
 
     public static String getTable() {
-        return new SqliteMessageMapper().getTableName();
+        return new SqliteMessage().getTableName();
     }
 
     @Override

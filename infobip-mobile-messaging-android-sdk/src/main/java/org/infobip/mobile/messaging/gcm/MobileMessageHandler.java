@@ -47,10 +47,12 @@ public class MobileMessageHandler {
             NotificationHandler.displayNotification(context, message);
         }
 
-        Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
-        messageReceived.putExtras(BundleMessageMapper.toBundle(message));
-        context.sendBroadcast(messageReceived);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
+        if (!MobileMessagingCore.hasGeo(message)) {
+            Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
+            messageReceived.putExtras(BundleMessageMapper.toBundle(message));
+            context.sendBroadcast(messageReceived);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
+        }
     }
 
     private void saveMessage(Context context, Message message) {

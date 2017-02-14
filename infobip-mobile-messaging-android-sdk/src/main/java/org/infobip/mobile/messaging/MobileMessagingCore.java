@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.GeoReport;
+import org.infobip.mobile.messaging.geo.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.Geofencing;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
@@ -22,7 +23,6 @@ import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
@@ -64,7 +64,7 @@ public class MobileMessagingCore {
     private PlayServicesSupport playServicesSupport;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
-    private MessageStore internalStoreForGeo;
+    private GeoSQLiteMessageStore internalStoreForGeo;
     private Context context;
     private Geofencing geofencing;
 
@@ -317,13 +317,10 @@ public class MobileMessagingCore {
     }
 
     public MessageStore getMessageStoreForGeo() {
-        MessageStore messageStore;
-        if (isMessageStoreEnabled()) {
-            messageStore = getMessageStore();
-        } else {
-            messageStore = getInternalStoreForGeo();
+        if (internalStoreForGeo == null) {
+            internalStoreForGeo = new GeoSQLiteMessageStore();
         }
-        return messageStore;
+        return internalStoreForGeo;
     }
 
     public MessageStore getMessageStoreForMessage(Message message) {
@@ -337,13 +334,6 @@ public class MobileMessagingCore {
         return message != null && message.getGeo() != null &&
                 message.getGeo().getAreasList() != null &&
                 !message.getGeo().getAreasList().isEmpty();
-    }
-
-    private MessageStore getInternalStoreForGeo() {
-        if (internalStoreForGeo == null) {
-            internalStoreForGeo = new SQLiteMessageStore();
-        }
-        return internalStoreForGeo;
     }
 
     @SuppressWarnings({"unchecked", "WeakerAccess"})

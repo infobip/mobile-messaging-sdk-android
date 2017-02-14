@@ -65,7 +65,7 @@ public class Geo implements Parcelable {
         this.campaignId = in.readString();
     }
 
-    protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList, DeliveryTime deliveryTime, List<GeoEvent> events, String expiryTime, String startTime, String campaignId) {
+    public Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList, DeliveryTime deliveryTime, List<GeoEvent> events, String expiryTime, String startTime, String campaignId) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.areasList = areasList;

@@ -27,14 +27,53 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     private static final Map<Class<? extends DatabaseObject>, DatabaseContract.DatabaseObject> databaseObjectsCache = new HashMap<>();
 
-    private static final int VER_2017_JAN_12 = 1;
-    private static final int VER_CURRENT = VER_2017_JAN_12;
+    private static final int VER_2017_JAN_12 = 1; // Initial version
+    private static final int VER_2017_FEB_14 = 2; // Added separate table for geo messages
+    private static final int VER_CURRENT = VER_2017_FEB_14;
 
     @SuppressWarnings("WeakerAccess")
     static final String DATABASE_NAME = "mm_infobip_database.db";
 
-    private final SQLiteDatabase db;
+    @SuppressWarnings("WeakerAccess")
+    static final String SQL_CREATE_MESSAGES_TABLE = "CREATE TABLE " + Tables.MESSAGES + " (" +
+            MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
+            MessageColumns.TITLE + " TEXT, " +
+            MessageColumns.BODY + " TEXT, " +
+            MessageColumns.SOUND + " TEXT, " +
+            MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
+            MessageColumns.ICON + " TEXT, " +
+            MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
+            MessageColumns.CATEGORY + " TEXT, " +
+            MessageColumns.FROM + " TEXT, " +
+            MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
+            MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
+            MessageColumns.INTERNAL_DATA + " TEXT, " +
+            MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
+            MessageColumns.DESTINATION + " TEXT, " +
+            MessageColumns.STATUS + " TEXT," +
+            MessageColumns.STATUS_MESSAGE + " TEXT)";
+
+    @SuppressWarnings("WeakerAccess")
+    static final String SQL_CREATE_GEO_MESSAGES_TABLE = "CREATE TABLE " + Tables.GEO_MESSAGES + " (" +
+            MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
+            MessageColumns.TITLE + " TEXT, " +
+            MessageColumns.BODY + " TEXT, " +
+            MessageColumns.SOUND + " TEXT, " +
+            MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
+            MessageColumns.ICON + " TEXT, " +
+            MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
+            MessageColumns.CATEGORY + " TEXT, " +
+            MessageColumns.FROM + " TEXT, " +
+            MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
+            MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
+            MessageColumns.INTERNAL_DATA + " TEXT, " +
+            MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
+            MessageColumns.DESTINATION + " TEXT, " +
+            MessageColumns.STATUS + " TEXT," +
+            MessageColumns.STATUS_MESSAGE + " TEXT)";
+
     private final Context context;
+    private final SQLiteDatabase db;
 
     public DatabaseHelperImpl(Context context) {
         super(context, DATABASE_NAME, null, VER_CURRENT);
@@ -65,7 +104,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public void save(DatabaseObject object) {
-        db.insertWithOnConflict(object.getTableName(), null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+        db.insert(object.getTableName(), null, object.getContentValues());
     }
 
     @Override
@@ -80,30 +119,25 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + Tables.MESSAGES + " (" +
-                MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
-                MessageColumns.TITLE + " TEXT, " +
-                MessageColumns.BODY + " TEXT, " +
-                MessageColumns.SOUND + " TEXT, " +
-                MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
-                MessageColumns.ICON + " TEXT, " +
-                MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
-                MessageColumns.CATEGORY + " TEXT, " +
-                MessageColumns.FROM + " TEXT, " +
-                MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
-                MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
-                MessageColumns.INTERNAL_DATA + " TEXT, " +
-                MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
-                MessageColumns.DESTINATION + " TEXT, " +
-                MessageColumns.STATUS + " TEXT," +
-                MessageColumns.STATUS_MESSAGE + " TEXT)");
-
+        db.beginTransaction();
+        db.execSQL(SQL_CREATE_MESSAGES_TABLE);
+        db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
+        db.setTransactionSuccessful();
+        db.endTransaction();
         SharedPreferencesMigrator.migrateMessages(context, db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        int version = oldVersion;
+        if (version <= VER_2017_JAN_12) {
+            db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
+            version = VER_2017_FEB_14;
+        }
 
+        if (version != VER_CURRENT) {
+            MobileMessagingLogger.e("SQLite DB version is not what expected: " + VER_CURRENT);
+        }
     }
 
     private DatabaseObject emptyDatabaseObject(Class<? extends DatabaseObject> cls) {
@@ -136,7 +170,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
                     object.fillFromCursor(cursor);
                     objects.add(object);
                 } catch (Exception e) {
-                    MobileMessagingLogger.w(Log.getStackTraceString(e));
+                    MobileMessagingLogger.e(Log.getStackTraceString(e));
                 }
             } while (cursor.moveToNext());
         }

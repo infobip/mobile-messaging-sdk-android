@@ -23,7 +23,7 @@ class SharedPreferencesMigrator {
         }
 
         for (Message message : messages) {
-            db.insert(SqliteMessageMapper.getTable(), null, SqliteMessageMapper.save(message));
+            db.insert(SqliteMessage.getTable(), null, SqliteMessage.save(message));
         }
     }
 }

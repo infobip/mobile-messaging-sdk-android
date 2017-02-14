@@ -84,8 +84,15 @@ class GeoAreasHandler {
             return;
         }
 
+        handleTransition(geofencingEvent.getTriggeringGeofences(),
+                geofencingEvent.getGeofenceTransition(),
+                geofencingEvent.getTriggeringLocation());
+    }
+
+    void handleTransition(List<Geofence> triggeringGeofences, int geofenceTransition, Location triggeringLocation) {
+
         Map<Message, List<Area>> messagesAndAreas = findMessagesAndAreasForTriggeringGeofences(
-                context, geofencingEvent.getTriggeringGeofences());
+                context, triggeringGeofences);
         if (messagesAndAreas == null || messagesAndAreas.isEmpty()) {
             return;
         }
@@ -93,7 +100,6 @@ class GeoAreasHandler {
         ArrayList<GeoReport> geoReports = new ArrayList<>();
         ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>();
 
-        int geofenceTransition = geofencingEvent.getGeofenceTransition();
         for (Message message : messagesAndAreas.keySet()) {
 
             List<Area> geofenceAreasList = messagesAndAreas.get(message);
@@ -105,7 +111,6 @@ class GeoAreasHandler {
                     continue;
                 }
 
-                Location triggeringLocation = geofencingEvent.getTriggeringLocation();
                 Geo geoToReportAndNotify = new Geo(
                         triggeringLocation.getLatitude(),
                         triggeringLocation.getLongitude(),
@@ -301,6 +306,11 @@ class GeoAreasHandler {
         geofenceIntent.putExtras(BundleMessageMapper.toBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
         context.sendBroadcast(geofenceIntent);
+
+        Intent messageIntent = new Intent(Event.MESSAGE_RECEIVED.getKey());
+        messageIntent.putExtras(BundleMessageMapper.toBundle(message));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
+        context.sendBroadcast(messageIntent);
     }
 
     private void logGeofences(List<Area> areas, int transition) {
