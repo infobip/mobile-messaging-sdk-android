@@ -388,6 +388,10 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
     }
 
+    static void setDoSetSeenOnNotificationTap(Context context, boolean doSetSeenOnNotificationTap) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SET_SEEN_ON_NOTIFICATION_TAP, doSetSeenOnNotificationTap);
+    }
+
     private static void cleanup(Context context) {
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
         String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);

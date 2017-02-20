@@ -307,6 +307,7 @@ public class MobileMessaging {
         private boolean reportCarrierInfo = true;
         private boolean reportSystemInfo = true;
         private boolean geofencingActivated = false;
+        private boolean doSetSeenOnNotificationTap= true;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -528,6 +529,21 @@ public class MobileMessaging {
          */
         public Builder withoutSystemInfo() {
             this.reportSystemInfo = false;
+            return this;
+        }
+
+        /**
+         * It will not set message as seen after user tapped on the notification.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withoutSetSeenOnNotificationTap()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutSetSeenOnNotificationTap() {
+            this.doSetSeenOnNotificationTap = false;
             return this;
         }
 

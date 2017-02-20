@@ -28,6 +28,7 @@ public enum MobileMessagingProperty {
     SIM_NETWORK_CODE("org.infobip.mobile.messaging.infobip.SIM_MNC", ""),
     REPORT_CARRIER_INFO("org.infobip.mobile.messaging.infobip.REPORT_CARRIER_INFO", true),
     REPORT_SYSTEM_INFO("org.infobip.mobile.messaging.infobip.REPORT_SYSTEM_INFO", true),
+    SET_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.SET_SEEN_ON_NOTIFICATION_TAP", true),
     UNREPORTED_USER_DATA("org.ninfobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
     USER_DATA("org.ninfobip.mobile.messaging.infobip.USER_DATA"),
     UNREPORTED_SYSTEM_DATA("org.ninfobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
@@ -53,7 +54,8 @@ public enum MobileMessagingProperty {
     VERSION_CHECK_INTERVAL_DAYS("org.infobip.mobile.messaging.notification.VERSION_CHECK_INTERVAL_DAYS", 1),
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),
 
-    EXTRA_MESSAGE("org.infobip.mobile.messaging.infobip.EXTRA_MESSAGE");
+    EXTRA_MESSAGE("org.infobip.mobile.messaging.infobip.EXTRA_MESSAGE"),
+    EXTRA_NOTIFICATION_CALLBACK_ACTIVITY_INTENT("org.infobip.mobile.messaging.infobip.EXTRA_NOTIFICATION_CALLBACK_ACTIVITY_INTENT");
 
     private final String key;
     private final Object defaultValue;

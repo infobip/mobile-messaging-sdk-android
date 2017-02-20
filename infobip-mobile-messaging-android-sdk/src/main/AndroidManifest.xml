@@ -44,5 +44,8 @@
         </receiver>
 
         <receiver android:name="org.infobip.mobile.messaging.geo.GeofencingAlarmReceiver"/>
+
+        <activity android:name=".notification.DefaultNotificationTapActivity"
+            android:theme="@android:style/Theme.NoDisplay"/>
     </application>
 </manifest>
