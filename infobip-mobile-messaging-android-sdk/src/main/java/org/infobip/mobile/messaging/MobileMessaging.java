@@ -559,6 +559,7 @@ public class MobileMessaging {
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
+            MobileMessagingCore.setDoSetSeenOnNotificationTap(application, doSetSeenOnNotificationTap);
 
             MobileMessaging mobileMessaging = new MobileMessaging(application);
             MobileMessaging.instance = mobileMessaging;

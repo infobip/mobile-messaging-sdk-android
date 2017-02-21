@@ -20,14 +20,14 @@ public class DefaultNotificationTapActivity extends Activity {
         finish();
 
         Intent intent = getIntent();
-        Message message = BundleMessageMapper.fromBundle(intent.getBundleExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey()));
+        Intent originalIntent = intent.getParcelableExtra(MobileMessagingProperty.EXTRA_NOTIFICATION_CALLBACK_ACTIVITY_INTENT.getKey());
+        Message message = BundleMessageMapper.fromBundle(originalIntent.getBundleExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey()));
         if (message != null && message.getMessageId() != null) {
             MobileMessaging.getInstance(this).setMessagesSeen(message.getMessageId());
         }
 
         super.onResume();
 
-        Intent originalIntent = intent.getParcelableExtra(MobileMessagingProperty.EXTRA_NOTIFICATION_CALLBACK_ACTIVITY_INTENT.getKey());
         if (originalIntent != null) {
             startActivity(originalIntent);
         }

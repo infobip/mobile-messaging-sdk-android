@@ -62,7 +62,7 @@ public class NotificationHandler {
         Intent intent = new Intent(context, notificationSettings.getCallbackActivity());
         intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMessageMapper.toBundle(message));
         intent.addFlags(notificationSettings.getIntentFlags());
-        
+
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.SET_SEEN_ON_NOTIFICATION_TAP)) {
             // by default we mark message as seen on tap
             Intent originalIntent = intent;
