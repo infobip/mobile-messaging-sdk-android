@@ -291,8 +291,18 @@ class GeoAreasHandler {
     }
 
     private void notifyAboutTransition(Context context, Geo geo, int geofenceTransition, Message message) {
+        saveMessage(message);
         NotificationHandler.displayNotification(context, message);
         sendGeoEventBroadcast(context, geofenceTransition, geo, message);
+    }
+
+    private void saveMessage(Message message) {
+        if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
+            return;
+        }
+
+        message.setSeenTimestamp(0);
+        MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
     }
 
     private void sendGeoEventBroadcast(Context context, int geofenceTransition, Geo geo, Message message) {
