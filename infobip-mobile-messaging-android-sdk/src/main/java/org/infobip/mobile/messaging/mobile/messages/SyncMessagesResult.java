@@ -26,8 +26,18 @@ class SyncMessagesResult extends UnsuccessfulResult {
 
     SyncMessagesResult(SyncMessagesResponse syncMessagesResponse) {
         super(null);
+
+        if (syncMessagesResponse == null) {
+            return;
+        }
+
         List<MessageResponse> payloads = syncMessagesResponse.getPayloads();
         mapResponseToMessage(payloads);
+    }
+
+    @Override
+    public boolean hasError() {
+        return true;
     }
 
     private void mapResponseToMessage(List<MessageResponse> payloads) {

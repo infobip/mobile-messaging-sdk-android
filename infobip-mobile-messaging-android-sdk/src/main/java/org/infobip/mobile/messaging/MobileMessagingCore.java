@@ -119,7 +119,7 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), true, getStats(), registrationAlignedExecutor);
         if (isGeofencingActivated(context)) {
-            Geofencing.getInstance(context).activate();
+            Geofencing.getInstance(context).startGeoMonitoring();
         }
     }
 
@@ -127,7 +127,7 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
         registrationSynchronizer.updatePushRegistrationStatus(context, getRegistrationId(), false, getStats(), registrationAlignedExecutor);
         if (isGeofencingActivated(context)) {
-            Geofencing.getInstance(context).deactivate();
+            Geofencing.getInstance(context).stopGeoMonitoring();
         }
     }
 
@@ -422,21 +422,25 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
-    public void activateGeofencing() {
-        activateGeofencing(geofencing);
+    public void startGeoMonitoringIfNecessary() {
+        if (isGeofencingActivated(context) && isPushRegistrationEnabled()) {
+            if (geofencing == null) {
+                geofencing = Geofencing.getInstance(context);
+            }
+            geofencing.startGeoMonitoring();
+        }
     }
 
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
-        setGeofencingActivated(context, geofencing != null);
-        if (geofencing == null) return;
-        geofencing.activate();
+        setGeofencingActivated(context, true);
+        geofencing.startGeoMonitoring();
     }
 
     void deactivateGeofencing() {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
-        geofencing.deactivate();
+        geofencing.stopGeoMonitoring();
         this.geofencing = null;
     }
 
@@ -660,7 +664,7 @@ public class MobileMessagingCore {
         }
 
         /**
-         * It will activate monitoring geo areas and notify when area is entered.
+         * It will start monitoring geo areas and notify device when area is entered.
          *
          * @param geofencing - handles monitored geo areas
          * @return {@link Builder}
