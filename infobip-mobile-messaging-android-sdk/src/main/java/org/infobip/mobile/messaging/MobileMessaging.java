@@ -307,7 +307,7 @@ public class MobileMessaging {
         private boolean reportCarrierInfo = true;
         private boolean reportSystemInfo = true;
         private boolean geofencingActivated = false;
-        private boolean doSetSeenOnNotificationTap= true;
+        private boolean doMarkSeenOnNotificationTap = true;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -533,17 +533,17 @@ public class MobileMessaging {
         }
 
         /**
-         * It will not set message as seen after user tapped on the notification.
+         * It will not mark message as seen after user tapped on the notification.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
-         *       .withoutSetSeenOnNotificationTap()
+         *       .withoutMarkingSeenOnNotificationTap()
          *       .build();}
          * </pre>
          *
          * @return {@link Builder}
          */
-        public Builder withoutSetSeenOnNotificationTap() {
-            this.doSetSeenOnNotificationTap = false;
+        public Builder withoutMarkingSeenOnNotificationTap() {
+            this.doMarkSeenOnNotificationTap = false;
             return this;
         }
 
@@ -559,7 +559,7 @@ public class MobileMessaging {
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
-            MobileMessagingCore.setDoSetSeenOnNotificationTap(application, doSetSeenOnNotificationTap);
+            MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
 
             MobileMessaging mobileMessaging = new MobileMessaging(application);
             MobileMessaging.instance = mobileMessaging;

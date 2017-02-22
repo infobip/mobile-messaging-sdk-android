@@ -388,8 +388,8 @@ public class MobileMessagingCore {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, reportSystemInfo);
     }
 
-    static void setDoSetSeenOnNotificationTap(Context context, boolean doSetSeenOnNotificationTap) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SET_SEEN_ON_NOTIFICATION_TAP, doSetSeenOnNotificationTap);
+    static void setDoMarkSeenOnNotificationTap(Context context, boolean doMarkSeenOnNotificationTap) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, doMarkSeenOnNotificationTap);
     }
 
     private static void cleanup(Context context) {
