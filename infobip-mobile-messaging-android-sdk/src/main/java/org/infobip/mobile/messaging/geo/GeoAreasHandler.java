@@ -302,6 +302,7 @@ class GeoAreasHandler {
         }
 
         message.setSeenTimestamp(0);
+        message.setSilent(false);
         MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
     }
 
