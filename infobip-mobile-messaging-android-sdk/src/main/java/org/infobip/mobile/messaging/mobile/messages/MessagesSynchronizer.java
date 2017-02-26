@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.mobile.messages;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.util.Log;
+import android.os.Looper;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class MessagesSynchronizer {
 
     private static final int DEFAULT_MAX_RETRY_COUNT = 3;
-    private final Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     public void synchronize(Context context, MobileMessagingStats stats, Executor executor) {
         scheduleSyncMessagesTask(context, stats, executor, 0);
