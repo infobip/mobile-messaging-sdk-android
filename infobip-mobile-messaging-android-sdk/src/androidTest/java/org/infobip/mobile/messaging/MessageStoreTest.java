@@ -5,7 +5,7 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.geo.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.TestMessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -34,15 +34,15 @@ public class MessageStoreTest extends InstrumentationTestCase {
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
     }
 
-    public void test_shouldUseSqlStoreForGeo_whenConfiguredWithoutMessageStore() {
+    public void test_shouldUseGeoSqlStoreForGeo_whenConfiguredWithoutMessageStore() {
         MobileMessagingCore.setMessageStoreClass(context, null);
 
-        assertTrue(MobileMessagingCore.getInstance(context).getMessageStoreForGeo() instanceof SQLiteMessageStore);
+        assertTrue(MobileMessagingCore.getInstance(context).getMessageStoreForGeo() instanceof GeoSQLiteMessageStore);
     }
 
-    public void test_shouldUseUserStoreForGeo_whenConfiguredWithMessageStore() {
+    public void test_shouldUseGeoSqlStoreForGeo_whenConfiguredWithMessageStore() {
         MobileMessagingCore.setMessageStoreClass(context, TestMessageStore.class);
 
-        assertTrue(MobileMessagingCore.getInstance(context).getMessageStoreForGeo() instanceof TestMessageStore);
+        assertTrue(MobileMessagingCore.getInstance(context).getMessageStoreForGeo() instanceof GeoSQLiteMessageStore);
     }
 }
