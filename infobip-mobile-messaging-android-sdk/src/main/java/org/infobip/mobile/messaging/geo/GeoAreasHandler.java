@@ -30,6 +30,9 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,23 +94,24 @@ class GeoAreasHandler {
 
     void handleTransition(List<Geofence> triggeringGeofences, int geofenceTransition, Location triggeringLocation) {
 
-        Map<Message, List<Area>> messagesAndAreas = findMessagesAndAreasForTriggeringGeofences(
-                context, triggeringGeofences);
-        if (messagesAndAreas == null || messagesAndAreas.isEmpty()) {
+        Map<Message, List<Area>> messagesAndAreas = findActiveMessagesAndAreasForTriggeredGeofences(context, triggeringGeofences);
+        Map<Message, List<Area>> filteredMessagesAndAreas = filterOverlappingAreas(messagesAndAreas);
+
+        if (filteredMessagesAndAreas == null || filteredMessagesAndAreas.isEmpty()) {
             return;
         }
 
-        ArrayList<GeoReport> geoReports = new ArrayList<>();
-        ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>();
+        ArrayList<GeoReport> geoReports = new ArrayList<>(filteredMessagesAndAreas.size());
+        ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>(filteredMessagesAndAreas.size());
 
-        for (Message message : messagesAndAreas.keySet()) {
+        for (Message message : filteredMessagesAndAreas.keySet()) {
 
-            List<Area> geofenceAreasList = messagesAndAreas.get(message);
+            List<Area> geofenceAreasList = filteredMessagesAndAreas.get(message);
             logGeofences(geofenceAreasList, geofenceTransition);
 
             for (final Area area : geofenceAreasList) {
 
-                if (!shouldReportTransition(message, area, geofenceTransition)) {
+                if (!shouldReportTransition(message, geofenceTransition)) {
                     continue;
                 }
 
@@ -162,19 +166,17 @@ class GeoAreasHandler {
                 continue;
             }
 
-            for (Area area : geo.getAreasList()) {
-                setLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition, System.currentTimeMillis());
-                setNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition,
-                        getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition) + 1);
-            }
+            setLastNotificationTimeForArea(message.getGeo().getCampaignId(), geofenceTransition, System.currentTimeMillis());
+            setNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition,
+                    getNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition) + 1);
 
             notifyAboutTransition(context, geo, geofenceTransition, geoData.second);
         }
     }
 
-    private boolean shouldReportTransition(Message message, Area area, int geofenceTransition) {
-        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getMessageId(), area.getId(), geofenceTransition);
-        long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getMessageId(), area.getId(), geofenceTransition);
+    private boolean shouldReportTransition(Message message, int geofenceTransition) {
+        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition);
+        long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getGeo().getCampaignId(), geofenceTransition);
         Geo geo = message.getGeo();
         GeoEvent settings = getNotificationSettingsForTransition(geo.getEvents(), geofenceTransition);
 
@@ -262,32 +264,32 @@ class GeoAreasHandler {
         return null;
     }
 
-    private String areaNotificationNumKey(String messageId, String areaId, int geofenceTransition) {
-        return AREA_NOTIFIED_PREF_PREFIX + messageId + "-" + areaId + "-" + geofenceTransition;
+    private String areaNotificationNumKey(String campaignId, int geofenceTransition) {
+        return AREA_NOTIFIED_PREF_PREFIX + campaignId + "-" + geofenceTransition;
     }
 
-    private String areaNotificationTimeKey(String messageId, String areaId, int geofenceTransition) {
-        return AREA_LAST_TIME_PREF_PREFIX + messageId + "-" + areaId + "-" + geofenceTransition;
+    private String areaNotificationTimeKey(String campaignId, int geofenceTransition) {
+        return AREA_LAST_TIME_PREF_PREFIX + campaignId + "-" + geofenceTransition;
     }
 
     private boolean geoEventMatchesTransition(GeoEvent event, int geofenceTransition) {
         return event.getType().equals(DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER.getType()) && geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER;
     }
 
-    private int getNumberOfDisplayedNotificationsForArea(String messageId, String areaId, int geofenceTransition) {
-        return PreferenceHelper.findInt(context, areaNotificationNumKey(messageId, areaId, geofenceTransition), 0);
+    private int getNumberOfDisplayedNotificationsForArea(String campaignId, int geofenceTransition) {
+        return PreferenceHelper.findInt(context, areaNotificationNumKey(campaignId, geofenceTransition), 0);
     }
 
-    private void setNumberOfDisplayedNotificationsForArea(String messageId, String areaId, int geofenceTransition, int n) {
-        PreferenceHelper.saveInt(context, areaNotificationNumKey(messageId, areaId, geofenceTransition), n);
+    private void setNumberOfDisplayedNotificationsForArea(String campaignId, int geofenceTransition, int n) {
+        PreferenceHelper.saveInt(context, areaNotificationNumKey(campaignId, geofenceTransition), n);
     }
 
-    private long getLastNotificationTimeForArea(String messageId, String areaId, int geofenceTransition) {
-        return PreferenceHelper.findLong(context, areaNotificationTimeKey(messageId, areaId, geofenceTransition), 0);
+    private long getLastNotificationTimeForArea(String campaignId, int geofenceTransition) {
+        return PreferenceHelper.findLong(context, areaNotificationTimeKey(campaignId, geofenceTransition), 0);
     }
 
-    private void setLastNotificationTimeForArea(String messageId, String areaId, int geofenceTransition, long timeMs) {
-        PreferenceHelper.saveLong(context, areaNotificationTimeKey(messageId, areaId, geofenceTransition), timeMs);
+    private void setLastNotificationTimeForArea(String campaignId, int geofenceTransition, long timeMs) {
+        PreferenceHelper.saveLong(context, areaNotificationTimeKey(campaignId, geofenceTransition), timeMs);
     }
 
     private void notifyAboutTransition(Context context, Geo geo, int geofenceTransition, Message message) {
@@ -331,11 +333,20 @@ class GeoAreasHandler {
         }
     }
 
-    private Map<Message, List<Area>> findMessagesAndAreasForTriggeringGeofences(Context context, List<Geofence> geofences) {
+    private Map<Message, List<Area>> findActiveMessagesAndAreasForTriggeredGeofences(Context context, List<Geofence> geofences) {
+        Date now = new Date();
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
+
         for (Message message : messageStore.findAll(context)) {
             Geo geo = message.getGeo();
+
             if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
+                continue;
+            }
+
+            //don't trigger geo event before start date
+            Date startDate = geo.getStartDate();
+            if (startDate != null && startDate.after(now)) {
                 continue;
             }
 
@@ -356,4 +367,30 @@ class GeoAreasHandler {
 
         return messagesAndAreas;
     }
+
+    private Map<Message, List<Area>> filterOverlappingAreas(Map<Message, List<Area>> messagesAndAreas) {
+        Map<Message, List<Area>> filteredMessagesAndAreas = new HashMap<>(messagesAndAreas.size());
+
+        for (Message message : messagesAndAreas.keySet()) {
+            List<Area> areasList = message.getGeo().getAreasList();
+
+            if (areasList != null) {
+                //using only area that has the smallest radius
+                Collections.sort(areasList, new GeoAreaRadiusComparator());
+                filteredMessagesAndAreas.put(message, Collections.singletonList(areasList.get(0)));
+            }
+        }
+
+        return filteredMessagesAndAreas;
+    }
+
+
+    static class GeoAreaRadiusComparator implements Comparator<Area> {
+
+        @Override
+        public int compare(Area area1, Area area2) {
+            return area1.getRadius() - area2.getRadius();
+        }
+    }
+
 }
