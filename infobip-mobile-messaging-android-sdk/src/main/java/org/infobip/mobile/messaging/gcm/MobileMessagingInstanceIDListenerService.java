@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.gcm;
 
+import android.content.Intent;
+
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
@@ -12,7 +14,8 @@ public class MobileMessagingInstanceIDListenerService extends InstanceIDListener
     public void onTokenRefresh() {
         super.onTokenRefresh();
 
-        final RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
-        registrationTokenHandler.handleRegistrationTokenUpdate(this);
+        Intent intent = new Intent(this, MobileMessagingGcmIntentService.class);
+        intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
+        startService(intent);
     }
 }

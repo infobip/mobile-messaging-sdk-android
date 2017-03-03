@@ -157,6 +157,7 @@ import org.infobip.mobile.messaging.NotificationSettings;
  */
 public class MobileMessagingGcmIntentService extends IntentService {
     public static final String ACTION_GCM_MESSAGE_RECEIVE = "com.google.android.c2dm.intent.RECEIVE";
+    public static final String ACTION_ACQUIRE_INSTANCE_ID = "org.infobip.mobile.messaging.gcm.INSTANCE_ID";
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
     public static final String EXTRA_GCM_TOKEN = "org.infobip.mobile.messaging.gcm.GCM_TOKEN";
@@ -174,10 +175,23 @@ public class MobileMessagingGcmIntentService extends IntentService {
             return;
         }
 
-        if (ACTION_GCM_MESSAGE_RECEIVE.equals(intent.getAction())) {
-            mobileMessageHandler.handleMessage(this, intent);
-        } else if (ACTION_TOKEN_CLEANUP.equals(intent.getAction())) {
-            registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+        String action = intent.getAction();
+        if (action == null) {
+            return;
+        }
+
+        switch (action) {
+            case ACTION_GCM_MESSAGE_RECEIVE:
+                mobileMessageHandler.handleMessage(this, intent);
+                break;
+
+            case ACTION_TOKEN_CLEANUP:
+                registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+                break;
+
+            case ACTION_ACQUIRE_INSTANCE_ID:
+                registrationTokenHandler.handleRegistrationTokenUpdate(this);
+                break;
         }
     }
 }
