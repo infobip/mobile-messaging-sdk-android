@@ -170,14 +170,14 @@ public class MobileMessagingGcmIntentService extends IntentService {
 
     @Override
     public void onHandleIntent(Intent intent) {
-        if (ACTION_GCM_MESSAGE_RECEIVE.equals(intent.getAction())) {
-            mobileMessageHandler.handleMessage(this, intent);
-            return;
-        } else if (ACTION_TOKEN_CLEANUP.equals(intent.getAction())) {
-            registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+        if (intent == null) {
             return;
         }
 
-        registrationTokenHandler.handleRegistrationTokenUpdate(this);
+        if (ACTION_GCM_MESSAGE_RECEIVE.equals(intent.getAction())) {
+            mobileMessageHandler.handleMessage(this, intent);
+        } else if (ACTION_TOKEN_CLEANUP.equals(intent.getAction())) {
+            registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+        }
     }
 }
