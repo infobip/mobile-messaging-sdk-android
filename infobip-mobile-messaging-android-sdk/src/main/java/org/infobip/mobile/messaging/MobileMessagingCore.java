@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
+import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.GeoReport;
@@ -97,6 +98,10 @@ public class MobileMessagingCore {
             databaseHelper = new DatabaseHelperImpl(context);
         }
         return databaseHelper;
+    }
+
+    public static SqliteDatabaseProvider getDatabaseProvider(Context context) {
+        return (SqliteDatabaseProvider) getDatabaseHelper(context);
     }
 
     public void sync() {

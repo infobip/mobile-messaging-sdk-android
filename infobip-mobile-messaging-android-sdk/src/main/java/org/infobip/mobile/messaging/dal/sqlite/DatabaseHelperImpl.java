@@ -73,17 +73,23 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             MessageColumns.STATUS_MESSAGE + " TEXT)";
 
     private final Context context;
-    private final SQLiteDatabase db;
+    private SQLiteDatabase sqLiteDatabase;
 
     public DatabaseHelperImpl(Context context) {
         super(context, DATABASE_NAME, null, VER_CURRENT);
         this.context = context;
-        this.db = getWritableDatabase();
+    }
+
+    private SQLiteDatabase db() {
+        if (sqLiteDatabase == null) {
+            sqLiteDatabase = getWritableDatabase();
+        }
+        return sqLiteDatabase;
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> List<T> findAll(Class<T> cls) {
-        Cursor cursor = db.rawQuery("SELECT * FROM " + getTableName(cls), new String[0]);
+        Cursor cursor = db().rawQuery("SELECT * FROM " + getTableName(cls), new String[0]);
         List<T> objects = loadFromCursor(cursor, cls);
         cursor.close();
         return objects;
@@ -91,7 +97,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> T find(Class<T> cls, @NonNull String primaryKey) {
-        Cursor cursor = db.rawQuery("SELECT * FROM " + getTableName(cls) + " WHERE " + getPrimaryKeyColumn(cls) + " = ?", new String[]{primaryKey});
+        Cursor cursor = db().rawQuery("SELECT * FROM " + getTableName(cls) + " WHERE " + getPrimaryKeyColumn(cls) + " = ?", new String[]{primaryKey});
         List<T> objects = loadFromCursor(cursor, cls);
         cursor.close();
         return objects != null && !objects.isEmpty() ? objects.get(0) : null;
@@ -99,22 +105,22 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> long countAll(Class<T> cls) {
-        return DatabaseUtils.queryNumEntries(db, getTableName(cls));
+        return DatabaseUtils.queryNumEntries(db(), getTableName(cls));
     }
 
     @Override
     public void save(DatabaseObject object) {
-        db.insertWithOnConflict(object.getTableName(), null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+        db().insertWithOnConflict(object.getTableName(), null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> void deleteAll(Class<T> cls) {
-        db.delete(getTableName(cls), null, new String[0]);
+        db().delete(getTableName(cls), null, new String[0]);
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> void delete(Class<T> cls, @NonNull String primaryKey) {
-        db.delete(getTableName(cls), getPrimaryKeyColumn(cls) + "=?", new String[]{primaryKey});
+        db().delete(getTableName(cls), getPrimaryKeyColumn(cls) + "=?", new String[]{primaryKey});
     }
 
     @Override
@@ -189,6 +195,15 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public SQLiteDatabase getDatabase() {
-        return db;
+        return db();
+    }
+
+    @Override
+    public void deleteDatabase() {
+        if (sqLiteDatabase != null) {
+            sqLiteDatabase.close();
+            sqLiteDatabase = null;
+        }
+        context.deleteDatabase(DATABASE_NAME);
     }
 }

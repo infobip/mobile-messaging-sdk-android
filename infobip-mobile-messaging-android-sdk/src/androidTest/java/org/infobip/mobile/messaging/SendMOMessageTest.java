@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.test.InstrumentationTestCase;
 
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.tools.DebugServer;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +42,8 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 
+        MobileApiResourceProvider.INSTANCE.resetMobileApi();
+
         captor = ArgumentCaptor.forClass(Intent.class);
         receiver = Mockito.mock(BroadcastReceiver.class);
         getInstrumentation().getContext().registerReceiver(receiver, new IntentFilter(Event.MESSAGES_SENT.getKey()));
@@ -61,7 +64,7 @@ public class SendMOMessageTest extends InstrumentationTestCase {
         super.tearDown();
     }
 
-    public void test_sendMultipleMessages() {
+    public void test_sendMultipleMessages() throws Exception {
 
         String serverResponse =
         "{" +

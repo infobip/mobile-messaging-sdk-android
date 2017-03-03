@@ -67,6 +67,7 @@ public class NotificationsTest extends InstrumentationTestCase {
         Mockito.when(contextMock.getApplicationContext()).thenReturn(context.getApplicationContext());
         Mockito.when(contextMock.getMainLooper()).thenReturn(context.getMainLooper());
         Mockito.when(contextMock.getPackageName()).thenReturn(context.getPackageName());
+        Mockito.when(contextMock.getResources()).thenReturn(context.getResources());
     }
 
     public void test_shouldNotProduceNPE_whenMessageArrivesAndNotificationsDisabled() {

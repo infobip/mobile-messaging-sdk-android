@@ -19,7 +19,7 @@ public class BatchReporterTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
+        PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 50L);
 
         batchReporter = new BatchReporter(getInstrumentation().getContext());
         runnable = Mockito.mock(Runnable.class);

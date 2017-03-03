@@ -19,6 +19,7 @@ import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEvent;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.tools.BroadcastReceiverMockito;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.json.JSONObject;
 import org.mockito.Mockito;
@@ -52,7 +53,7 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         commonStore.deleteAll(context);
         geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         geoStore.deleteAll(context);
-        messageReceiver = Mockito.mock(BroadcastReceiver.class);
+        messageReceiver = BroadcastReceiverMockito.mock();
         LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
     }
 
@@ -114,7 +115,7 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         handler.handleMessage(context, intent);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        BroadcastReceiverMockito.verify(messageReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 
     public void test_shouldNotSend_MESSAGE_RECEIVED_forGeoMessage() throws Exception {
@@ -135,6 +136,6 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         handler.handleMessage(context, intent);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        BroadcastReceiverMockito.verify(messageReceiver, Mockito.never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 }
