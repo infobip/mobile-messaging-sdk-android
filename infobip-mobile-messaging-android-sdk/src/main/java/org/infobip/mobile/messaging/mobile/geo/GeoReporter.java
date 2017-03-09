@@ -8,10 +8,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventType;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -25,10 +28,14 @@ import java.util.concurrent.TimeUnit;
  * @since 20/10/2016.
  */
 
-public class GeoReporter {
+public class GeoReporter extends RetryableSynchronizer {
 
-    public void report(final Context context, final MobileMessagingStats stats) {
+    public GeoReporter(Context context, MobileMessagingStats stats) {
+        super(context, stats);
+    }
 
+    @Override
+    public void synchronize() {
         final MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         final ArrayList<GeoReport> reports = mobileMessagingCore.removeUnreportedGeoEvents(context);
         if (reports.isEmpty() || !mobileMessagingCore.isPushRegistrationEnabled()) {
@@ -36,16 +43,29 @@ public class GeoReporter {
         }
 
         new GeoReportingTask(context) {
-            @Override
+
             protected void onPostExecute(GeoReportingResult result) {
+                if (result.hasError()) {
+                    MobileMessagingLogger.e("MobileMessaging API returned error (report geo events)!");
+                    stats.reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
+                    retry(result);
+                    return;
+                }
+
                 GeoReporter.handleSuccess(context, mobileMessagingCore, result, reports);
             }
 
-            @Override
             protected void onCancelled(GeoReportingResult result) {
+                MobileMessagingLogger.e("Error reporting geo events!");
                 GeoReporter.handleError(context, mobileMessagingCore, result.getError(), reports);
+                retry(result);
             }
         }.execute(reports.toArray(new GeoReport[reports.size()]));
+    }
+
+    @Override
+    public Task getTask() {
+        return Task.GEO_REPORT;
     }
 
     public static void handleSuccess(Context context, MobileMessagingCore mobileMessagingCore, GeoReportingResult result, ArrayList<GeoReport> geoReports) {

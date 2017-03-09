@@ -37,11 +37,13 @@ public class GeoReportsTest extends InstrumentationTestCase {
     private GeoReporter geoReporter;
     private BroadcastReceiver receiver;
     private ArgumentCaptor<Intent> captor;
+    private MobileMessagingCore mobileMessagingCore;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         context = getInstrumentation().getContext();
+        mobileMessagingCore = MobileMessagingCore.getInstance(context);
 
         debugServer = new DebugServer();
         debugServer.start();
@@ -52,7 +54,7 @@ public class GeoReportsTest extends InstrumentationTestCase {
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 
-        geoReporter = new GeoReporter();
+        geoReporter = new GeoReporter(context, mobileMessagingCore.getStats());
 
         MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
@@ -85,8 +87,8 @@ public class GeoReportsTest extends InstrumentationTestCase {
         reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
         reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
 
-        MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
-        geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
+        mobileMessagingCore.addUnreportedGeoEvents(reports);
+        geoReporter.synchronize();
 
         // Examine what is reported back via broadcast intent
 
@@ -181,8 +183,8 @@ public class GeoReportsTest extends InstrumentationTestCase {
         reports.add(new GeoReport("campaignId2", "messageId2", GeoEventType.exit, new Area("areaId2", "Area2", 2.0, 2.0, 4), 1002L));
         reports.add(new GeoReport("campaignId3", "messageId3", GeoEventType.dwell, new Area("areaId3", "Area3", 3.0, 3.0, 5), 1003L));
 
-        MobileMessagingCore.getInstance(context).addUnreportedGeoEvents(reports);
-        geoReporter.report(context, MobileMessagingCore.getInstance(context).getStats());
+        mobileMessagingCore.addUnreportedGeoEvents(reports);
+        geoReporter.synchronize();
 
 
         // Examine what is reported back via broadcast intent

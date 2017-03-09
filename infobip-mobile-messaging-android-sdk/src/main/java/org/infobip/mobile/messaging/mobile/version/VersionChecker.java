@@ -2,8 +2,12 @@ package org.infobip.mobile.messaging.mobile.version;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
+import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.Version;
@@ -15,12 +19,16 @@ import java.util.concurrent.TimeUnit;
  * @since 04/10/2016.
  */
 
-public class VersionChecker {
+public class VersionChecker extends RetryableSynchronizer {
 
     private static final String TAG = "VersionChecker";
 
-    public void check(final Context context) {
+    public VersionChecker(Context context, MobileMessagingStats stats) {
+        super(context, stats);
+    }
 
+    @Override
+    public void synchronize() {
         if (!SoftwareInformation.isDebuggableApplicationBuild(context)) {
             return;
         }
@@ -34,9 +42,10 @@ public class VersionChecker {
         new VersionCheckTask(context) {
             @Override
             protected void onPostExecute(VersionCheckResult versionCheckResult) {
-                super.onPostExecute(versionCheckResult);
-
                 if (versionCheckResult.hasError()) {
+                    MobileMessagingLogger.e("MobileMessaging API returned error (version check)!");
+                    stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
+                    retry(versionCheckResult);
                     return;
                 }
 
@@ -48,7 +57,19 @@ public class VersionChecker {
 
                 PreferenceHelper.saveLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME, System.currentTimeMillis());
             }
+
+            @Override
+            protected void onCancelled(VersionCheckResult versionCheckResult) {
+                MobileMessagingLogger.e("Error while checking version!");
+                stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
+                retry(versionCheckResult);
+            }
         }.execute();
+    }
+
+    @Override
+    public Task getTask() {
+        return Task.VERSION_CHECK;
     }
 
     private boolean shouldUpdate(String latest, String current) {
