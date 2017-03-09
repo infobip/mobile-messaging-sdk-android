@@ -307,6 +307,7 @@ public class MobileMessaging {
         private boolean reportCarrierInfo = true;
         private boolean reportSystemInfo = true;
         private boolean geofencingActivated = false;
+        private boolean doMarkSeenOnNotificationTap = true;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -532,6 +533,21 @@ public class MobileMessaging {
         }
 
         /**
+         * It will not mark message as seen after user tapped on the notification.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withoutMarkingSeenOnNotificationTap()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutMarkingSeenOnNotificationTap() {
+            this.doMarkSeenOnNotificationTap = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -543,6 +559,7 @@ public class MobileMessaging {
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
+            MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
 
             MobileMessaging mobileMessaging = new MobileMessaging(application);
             MobileMessaging.instance = mobileMessaging;

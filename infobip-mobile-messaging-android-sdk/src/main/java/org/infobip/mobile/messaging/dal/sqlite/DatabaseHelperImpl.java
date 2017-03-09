@@ -105,7 +105,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     @Override
     public void save(DatabaseObject object) {
-        db.insert(object.getTableName(), null, object.getContentValues());
+        db.insertWithOnConflict(object.getTableName(), null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     @Override

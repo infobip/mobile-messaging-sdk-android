@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -57,23 +58,39 @@ public class NotificationHandler {
         NotificationSettings notificationSettings = notificationSettings(context, message);
         if (notificationSettings == null) return null;
 
-        Intent intent = new Intent(context, notificationSettings.getCallbackActivity());
-        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMapper.messageToBundle(message));
-        intent.addFlags(notificationSettings.getIntentFlags());
-        @SuppressWarnings("ResourceType") PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, notificationSettings.getPendingIntentFlags());
-
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
-                .setContentIntent(pendingIntent)
+                .setContentIntent(createPendingIntent(context, notificationSettings, message))
                 .setWhen(message.getReceivedTimestamp());
 
         setNotificationSoundAndVibrate(context, notificationBuilder, message);
         setNotificationIcon(context, notificationBuilder, message);
 
         return notificationBuilder;
+    }
+
+    private static @NonNull PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
+
+        Intent intent = new Intent();
+        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMapper.messageToBundle(message));
+
+        if (notificationSettings.markSeenOnTap()) {
+            intent.setClass(context, NotificationTapReceiver.class);
+            intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
+            intent.putExtra(MobileMessagingProperty.EXTRA_CALLBACK_ACTIVITY.getKey(), notificationSettings.getCallbackActivity());
+
+            //noinspection WrongConstant
+            return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
+        } else {
+            intent.setClass(context, notificationSettings.getCallbackActivity());
+            intent.addFlags(notificationSettings.getIntentFlags());
+
+            //noinspection WrongConstant
+            return PendingIntent.getActivity(context, 0, intent, notificationSettings.getPendingIntentFlags());
+        }
     }
 
     private static NotificationSettings notificationSettings(Context context, Message message) {

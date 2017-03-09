@@ -50,5 +50,8 @@
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver"/>
+
     </application>
 </manifest>

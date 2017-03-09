@@ -34,7 +34,7 @@ public class MobileMessagingGcmReceiver extends GcmReceiver {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
-        Intent service = new Intent("com.google.android.c2dm.intent.RECEIVE", null, context, MobileMessagingGcmIntentService.class);
+        Intent service = new Intent(MobileMessagingGcmIntentService.ACTION_GCM_MESSAGE_RECEIVE, null, context, MobileMessagingGcmIntentService.class);
         service.putExtras(intent);
         context.startService(service);
     }

@@ -118,6 +118,10 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED);
     }
 
+    public boolean markSeenOnTap() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
