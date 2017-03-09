@@ -42,11 +42,10 @@ class GeoNotificationHelper {
     static void notifyAboutGeoTransitions(Context context, Map<Message, GeoEventType> messages) {
         for (Message m : messages.keySet()) {
             GeoEventType eventType = messages.get(m);
-            for (Area area : m.getGeo().getAreasList()) {
-                setLastNotificationTimeForArea(context, m.getMessageId(), area.getId(), eventType, System.currentTimeMillis());
-                setNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), eventType,
-                        getNumberOfDisplayedNotificationsForArea(context, m.getMessageId(), area.getId(), eventType) + 1);
-            }
+
+            setLastNotificationTimeForArea(context, m.getGeo().getCampaignId(), eventType, System.currentTimeMillis());
+            setNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType,
+                        getNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType) + 1);
 
             notifyAboutTransition(context, m.getGeo(), m, eventType);
         }
@@ -55,13 +54,12 @@ class GeoNotificationHelper {
     /**
      * Determines if transition should be reported to server
      * @param originalMessage original push signaling message with areas
-     * @param area current area
      * @param event transition type
      * @return returns true if transition could be reported now
      */
-    static boolean shouldReportTransition(Context context, Message originalMessage, Area area, GeoEventType event) {
-        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(context, originalMessage.getMessageId(), area.getId(), event);
-        long lastNotificationTimeForArea = getLastNotificationTimeForArea(context, originalMessage.getMessageId(), area.getId(), event);
+    static boolean shouldReportTransition(Context context, Message originalMessage, GeoEventType event) {
+        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(context, originalMessage.getGeo().getCampaignId(), event);
+        long lastNotificationTimeForArea = getLastNotificationTimeForArea(context, originalMessage.getGeo().getCampaignId(), event);
         Geo geo = originalMessage.getGeo();
         GeoEventSettings settings = getNotificationSettingsForTransition(geo.getEvents(), event);
 
@@ -149,32 +147,32 @@ class GeoNotificationHelper {
         return null;
     }
 
-    private static String areaNotificationNumKey(String messageId, String areaId, GeoEventType event) {
-        return AREA_NOTIFIED_PREF_PREFIX + messageId + "-" + areaId + "-" + event.ordinal();
+    private static String areaNotificationNumKey(String campaignId, GeoEventType event) {
+        return AREA_NOTIFIED_PREF_PREFIX + campaignId + "-" + event.ordinal();
     }
 
-    private static String areaNotificationTimeKey(String messageId, String areaId, GeoEventType event) {
-        return AREA_LAST_TIME_PREF_PREFIX + messageId + "-" + areaId + "-" + event.ordinal();
+    private static String areaNotificationTimeKey(String campaignId, GeoEventType event) {
+        return AREA_LAST_TIME_PREF_PREFIX + campaignId + "-" + event.ordinal();
     }
 
     private static boolean geoEventMatchesTransition(GeoEventSettings eventSetting, GeoEventType eventType) {
         return eventSetting.getType().equals(DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER.getType()) && eventType == GeoEventType.entry;
     }
 
-    private static int getNumberOfDisplayedNotificationsForArea(Context context, String messageId, String areaId, GeoEventType event) {
-        return PreferenceHelper.findInt(context, areaNotificationNumKey(messageId, areaId, event), 0);
+    private static int getNumberOfDisplayedNotificationsForArea(Context context, String campaignId, GeoEventType event) {
+        return PreferenceHelper.findInt(context, areaNotificationNumKey(campaignId, event), 0);
     }
 
-    private static void setNumberOfDisplayedNotificationsForArea(Context context, String messageId, String areaId, GeoEventType event, int n) {
-        PreferenceHelper.saveInt(context, areaNotificationNumKey(messageId, areaId, event), n);
+    private static void setNumberOfDisplayedNotificationsForArea(Context context, String campaignId, GeoEventType event, int n) {
+        PreferenceHelper.saveInt(context, areaNotificationNumKey(campaignId, event), n);
     }
 
-    private static long getLastNotificationTimeForArea(Context context, String messageId, String areaId, GeoEventType event) {
-        return PreferenceHelper.findLong(context, areaNotificationTimeKey(messageId, areaId, event), 0);
+    private static long getLastNotificationTimeForArea(Context context, String campaignId, GeoEventType event) {
+        return PreferenceHelper.findLong(context, areaNotificationTimeKey(campaignId, event), 0);
     }
 
-    private static void setLastNotificationTimeForArea(Context context, String messageId, String areaId, GeoEventType event, long timeMs) {
-        PreferenceHelper.saveLong(context, areaNotificationTimeKey(messageId, areaId, event), timeMs);
+    private static void setLastNotificationTimeForArea(Context context, String campaignId, GeoEventType event, long timeMs) {
+        PreferenceHelper.saveLong(context, areaNotificationTimeKey(campaignId, event), timeMs);
     }
 
     private static void notifyAboutTransition(Context context, Geo geo, Message message, GeoEventType event) {

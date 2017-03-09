@@ -11,6 +11,9 @@ import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -221,10 +224,17 @@ public class GeoReportHelper {
      */
     @NonNull
     static Map<Message, List<Area>> findSignalingMessagesAndAreas(Context context, MessageStore messageStore, Set<String> requestIds, @NonNull GeoEventType event) {
+        Date now = new Date();
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
             Geo geo = message.getGeo();
             if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
+                continue;
+            }
+
+            //don't trigger geo event before start date
+            Date startDate = geo.getStartDate();
+            if (startDate != null && startDate.after(now)) {
                 continue;
             }
 
@@ -236,7 +246,7 @@ public class GeoReportHelper {
                         continue;
                     }
 
-                    if (!GeoNotificationHelper.shouldReportTransition(context, message, area, event)) {
+                    if (!GeoNotificationHelper.shouldReportTransition(context, message, event)) {
                         continue;
                     }
 
@@ -249,7 +259,7 @@ public class GeoReportHelper {
             }
         }
 
-        return messagesAndAreas;
+        return filterOverlappingAreas(messagesAndAreas);
     }
 
     /**
@@ -277,5 +287,37 @@ public class GeoReportHelper {
             activeReports.add(r);
         }
         return activeReports;
+    }
+
+    /**
+     * Filters out overlapping areas for each campaign and returns only the smallest area
+     * @param messagesAndAreas all triggered areas for each message
+     * @return filteted areas
+     */
+    static private Map<Message, List<Area>> filterOverlappingAreas(Map<Message, List<Area>> messagesAndAreas) {
+        Map<Message, List<Area>> filteredMessagesAndAreas = new HashMap<>(messagesAndAreas.size());
+
+        for (Message message : messagesAndAreas.keySet()) {
+            List<Area> areasList = message.getGeo().getAreasList();
+
+            if (areasList != null) {
+                //using only area that has the smallest radius
+                Collections.sort(areasList, new GeoAreaRadiusComparator());
+                filteredMessagesAndAreas.put(message, Collections.singletonList(areasList.get(0)));
+            }
+        }
+
+        return filteredMessagesAndAreas;
+    }
+
+    /**
+     * Compares areas by radius
+     */
+    static class GeoAreaRadiusComparator implements Comparator<Area> {
+
+        @Override
+        public int compare(Area area1, Area area2) {
+            return area1.getRadius() - area2.getRadius();
+        }
     }
 }
