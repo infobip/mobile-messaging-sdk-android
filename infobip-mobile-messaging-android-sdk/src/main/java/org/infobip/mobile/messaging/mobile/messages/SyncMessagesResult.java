@@ -36,11 +36,6 @@ class SyncMessagesResult extends UnsuccessfulResult {
         mapResponseToMessage(payloads);
     }
 
-    @Override
-    public boolean hasError() {
-        return true;
-    }
-
     private void mapResponseToMessage(List<MessageResponse> payloads) {
         if (payloads == null) return;
 
