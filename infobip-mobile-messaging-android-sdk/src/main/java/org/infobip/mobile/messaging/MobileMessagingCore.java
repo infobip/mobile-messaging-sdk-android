@@ -512,6 +512,7 @@ public class MobileMessagingCore {
 
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
+        if (geofencing == null) return;
         setGeofencingActivated(context, true);
         geofencing.startGeoMonitoring();
     }
