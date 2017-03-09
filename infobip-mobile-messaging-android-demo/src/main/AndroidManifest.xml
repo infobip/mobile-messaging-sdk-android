@@ -1,43 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="org.infobip.mobile.messaging.demo">
+    package="org.infobip.mobile.messaging.demo">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
-            android:allowBackup="false"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:supportsRtl="true"
-            android:theme="@style/AppTheme">
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
 
         <activity
-                android:name=".MainActivity"
-                android:label="@string/app_name"
-                android:theme="@style/AppTheme.NoActionBar">
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
-                android:name=".InspectActivity"
-                android:label="@string/title_activity_inspect">
+            android:name=".InspectActivity"
+            android:label="@string/title_activity_inspect">
             <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".MainActivity"/>
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
 
-        <receiver
-            android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver">
+        <receiver android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver">
             <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.REGISTRATION_ACQUIRED"/>
-                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED"/>
-                <action android:name="org.infobip.mobile.messaging.API_COMMUNICATION_ERROR"/>
-                <action android:name="org.infobip.mobile.messaging.API_PARAMETER_VALIDATION_ERROR"/>
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_ACQUIRED" />
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
+                <action android:name="org.infobip.mobile.messaging.API_COMMUNICATION_ERROR" />
+                <action android:name="org.infobip.mobile.messaging.API_PARAMETER_VALIDATION_ERROR" />
             </intent-filter>
         </receiver>
 

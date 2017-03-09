@@ -68,7 +68,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         MobileMessagingCore.getInstance(context).getMessageStoreForGeo().deleteAll(context);
         MobileMessagingCore.getInstance(context).removeUnreportedGeoEvents();
         MobileMessaging.getInstance(context).getMessageStore().deleteAll(context);
-        MobileMessagingLogger.forceEnable();
+        MobileMessagingLogger.enforce();
     }
 
     @Override

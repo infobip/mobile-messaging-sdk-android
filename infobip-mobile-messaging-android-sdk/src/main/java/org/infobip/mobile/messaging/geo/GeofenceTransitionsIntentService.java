@@ -5,7 +5,6 @@ import android.content.Intent;
 
 public class GeofenceTransitionsIntentService extends IntentService {
 
-    final GeoAreasHandler geoAreasHandler = new GeoAreasHandler(this);
 
     public GeofenceTransitionsIntentService() {
         super(GeofenceTransitionsIntentService.class.getSimpleName());
@@ -13,6 +12,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        final GeoAreasHandler geoAreasHandler = new GeoAreasHandler(this);
         geoAreasHandler.handleTransition(intent);
     }
 }

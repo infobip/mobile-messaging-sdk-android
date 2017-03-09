@@ -84,7 +84,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
         }
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, new Intent(context, GeofencingAlarmReceiver.class), 0));
+        Intent intent = new Intent(context, GeofencingConsistencyReceiver.class);
+        intent.setAction(GeofencingConsistencyReceiver.SCHEDULED_GEO_REFRESH_ACTION);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, when.getTime(), PendingIntent.getBroadcast(context, 0, intent, 0));
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -149,7 +151,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     @SuppressWarnings("MissingPermission")
-    public void activate() {
+    public void startGeoMonitoring() {
 
         if (!PlayServicesSupport.isPlayServicesAvailable(context) ||
                 !MobileMessagingCore.isGeofencingActivated(context)) {
@@ -177,13 +179,12 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        MobileMessagingCore.setGeofencingActivated(context, status.isSuccess());
                         logGeofenceStatus(status, true);
                     }
                 });
     }
 
-    public void deactivate() {
+    public void stopGeoMonitoring() {
 
         if (!checkRequiredPermissions()) {
             return;
@@ -198,7 +199,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        MobileMessagingCore.setGeofencingActivated(context, !status.isSuccess());
                         logGeofenceStatus(status, false);
                     }
                 });
@@ -275,7 +275,7 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         MobileMessagingLogger.d(TAG, "GoogleApiClient connected");
-        activate();
+        startGeoMonitoring();
     }
 
     @Override

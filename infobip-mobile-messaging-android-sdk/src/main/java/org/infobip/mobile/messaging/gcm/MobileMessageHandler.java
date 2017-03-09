@@ -80,7 +80,7 @@ public class MobileMessageHandler {
             messageStore.save(context, message);
 
             if (MobileMessagingCore.hasGeo(message)) {
-                MobileMessagingCore.getInstance(context).activateGeofencing();
+                MobileMessagingCore.getInstance(context).startGeoMonitoringIfNecessary();
             }
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
