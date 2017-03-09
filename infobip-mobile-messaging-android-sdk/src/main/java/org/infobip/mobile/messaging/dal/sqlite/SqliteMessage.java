@@ -70,7 +70,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setReceivedTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.RECEIVED_TIMESTAMP)));
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
 
-        String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.GEO));
+        String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
         setGeo(json != null ? new JsonSerializer().deserialize(json, Geo.class) : null);
 
         json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
@@ -96,7 +96,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.FROM, getFrom());
         contentValues.put(MessageColumns.RECEIVED_TIMESTAMP, getReceivedTimestamp());
         contentValues.put(MessageColumns.SEEN_TIMESTAMP, getSeenTimestamp());
-        contentValues.put(MessageColumns.GEO, getGeo() != null ? new JsonSerializer().serialize(getGeo()) : null);
+        contentValues.put(MessageColumns.INTERNAL_DATA, getGeo() != null ? new JsonSerializer().serialize(getGeo()) : null);
         contentValues.put(MessageColumns.CUSTOM_PAYLOAD, getCustomPayload() != null ? getCustomPayload().toString() : null);
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);

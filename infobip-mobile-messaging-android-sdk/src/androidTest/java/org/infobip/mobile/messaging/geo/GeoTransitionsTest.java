@@ -56,6 +56,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         geoReporter = new GeoReporter();
         debugServer = new DebugServer();
         debugServer.start();
+        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
 
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");

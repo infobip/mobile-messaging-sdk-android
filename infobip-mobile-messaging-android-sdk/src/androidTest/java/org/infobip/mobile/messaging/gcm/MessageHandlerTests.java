@@ -12,18 +12,13 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
-import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEvent;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.json.JSONObject;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -65,18 +60,11 @@ public class MessageHandlerTests extends InstrumentationTestCase {
     public void test_shouldSaveGeoMessageToGeoStore() throws Exception {
 
         // Given
-        final Area area = new Area("areaId", "", 1.0, 2.0, 3);
-        Geo geo = new Geo(1.0, 2.0, new ArrayList<Area>(){{add(area);}}, null, new ArrayList<GeoEvent>(), null, null, "campaignId");
-        JSONObject internalData = new JSONObject(new JsonSerializer().serialize(geo));
-        Message m = new Message();
-        m.setMessageId("SomeMessageId");
-        m.setGeo(geo);
-        m.setInternalData(internalData);
-        Intent intent = new Intent();
-        intent.putExtras(BundleMessageMapper.toBundle(m));
+        Geo geo = Helper.createGeo(1.0, 2.0, "campaignId", Helper.createArea("areaId"));
+        Message m = Helper.createMessage(context, "SomeMessageId", false, geo);
 
         // When
-        handler.handleMessage(context, intent);
+        handler.handleMessage(context, m);
 
         // Then
         List<Message> messages = geoStore.findAll(context);
@@ -87,13 +75,10 @@ public class MessageHandlerTests extends InstrumentationTestCase {
     public void test_shouldSaveNonGeoMessageToUserStore() throws Exception {
 
         // Given
-        Message m = new Message();
-        m.setMessageId("SomeMessageId");
-        Intent intent = new Intent();
-        intent.putExtras(BundleMessageMapper.toBundle(m));
+        Message m = Helper.createMessage(context, "SomeMessageId", false);
 
         // When
-        handler.handleMessage(context, intent);
+        handler.handleMessage(context, m);
 
         // Then
         List<Message> messages = commonStore.findAll(context);
@@ -104,35 +89,23 @@ public class MessageHandlerTests extends InstrumentationTestCase {
     public void test_shouldSend_MESSAGE_RECEIVED_forNonGeoMessage() throws Exception {
 
         // Given
-        Message m = new Message();
-        m.setMessageId("SomeMessageId");
-        m.setBody("SomeMessageBody");
-        Intent intent = new Intent();
-        intent.putExtras(BundleMessageMapper.toBundle(m));
+        Message m = Helper.createMessage(context, "SomeMessageId", false);
 
         // When
-        handler.handleMessage(context, intent);
+        handler.handleMessage(context, m);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(messageReceiver, Mockito.times(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 
     public void test_shouldNotSend_MESSAGE_RECEIVED_forGeoMessage() throws Exception {
 
         // Given
-        final Area area = new Area("areaId", "", 1.0, 2.0, 3);
-        Geo geo = new Geo(1.0, 2.0, new ArrayList<Area>(){{add(area);}}, null, new ArrayList<GeoEvent>(), null, null, "campaignId");
-        JSONObject internalData = new JSONObject(new JsonSerializer().serialize(geo));
-        Message m = new Message();
-        m.setMessageId("SomeMessageId");
-        m.setBody("SomeMessageBody");
-        m.setGeo(geo);
-        m.setInternalData(internalData);
-        Intent intent = new Intent();
-        intent.putExtras(BundleMessageMapper.toBundle(m));
+        Geo geo = Helper.createGeo(1.0, 2.0, "campaignId", Helper.createArea("areaId"));
+        Message m = Helper.createMessage(context, "SomeMessageId", false, geo);
 
         // When
-        handler.handleMessage(context, intent);
+        handler.handleMessage(context, m);
 
         // Then
         Mockito.verify(messageReceiver, Mockito.never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
