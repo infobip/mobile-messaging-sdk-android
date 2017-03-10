@@ -7,11 +7,16 @@ import android.database.sqlite.SQLiteDatabase;
  * @since 13/01/2017.
  */
 
-interface SqliteDatabaseProvider {
+public interface SqliteDatabaseProvider {
     /**
      * Returns SQLite database for raw operations
      * You don't need to close it when you're done.
      * @return writable sqlite database
      */
     SQLiteDatabase getDatabase();
+
+    /**
+     * Deletes database and releases related resources.
+     */
+    void deleteDatabase();
 }

@@ -32,7 +32,7 @@ public class SharedPreferencesMigrationTest extends InstrumentationTestCase {
         sharedPreferencesMessageStore = new SharedPreferencesMessageStore();
         sharedPreferencesMessageStore.deleteAll(context);
 
-        MobileMessagingCore.getDatabaseHelper(context).deleteAll(SqliteMessage.class);
+        MobileMessagingCore.getDatabaseProvider(context).deleteDatabase();
     }
 
     public void test_shouldMigrateAllMessagesToSqlite() throws Exception {

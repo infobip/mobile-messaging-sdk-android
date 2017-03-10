@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Message;
@@ -82,10 +83,10 @@ public class SqliteMessageTest extends InstrumentationTestCase {
         Message message = new Message();
         message.setMessageId(null);
 
-        long countBefore = databaseHelper.countAll(SqliteMessage.class);
-
-        databaseHelper.save(new SqliteMessage(message));
-
-        assertEquals(countBefore, databaseHelper.countAll(SqliteMessage.class));
+        try {
+            databaseHelper.save(new SqliteMessage(message));
+            fail();
+        } catch (SQLiteConstraintException ignored) {
+        }
     }
 }

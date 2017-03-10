@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class GeoEventsTest extends InstrumentationTestCase {
 
     private Context context;
+    private long timeDelta;
 
     private class GeoTest extends Geo {
         public GeoTest() {
@@ -44,6 +45,48 @@ public class GeoEventsTest extends InstrumentationTestCase {
         super.tearDown();
     }
 
+    public void test_handle_event_notification_settings() throws InterruptedException {
+        GeoTest geo = new JsonSerializer().deserialize(internalData(), GeoTest.class);
+
+        int entryCnt = 0;
+        for (int i = 0; i < 5; i++) {
+
+            List<GeoEventSettings> events = geo.getEventFilters();
+            for (GeoEventSettings event : events) {
+
+                for (Area area : geo.getAreasList()) {
+
+                    // time travel - simulate delay between events
+                    advanceTimeByMS(TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes() + 1));
+
+                    long lastDisplayTime = getLastNotificationTimeForArea(area);
+                    int timesTriggered = getNumberOfDisplayedNotificationsForArea(area);
+
+                    long timeIntervalBetweenEvents = currentTimeMillis() - lastDisplayTime;
+                    boolean isTimeoutExpired = timeIntervalBetweenEvents > TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes());
+
+                    int eventLimit = event.getLimit();
+                    boolean isLimitBreached = eventLimit != GeoEventSettings.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
+
+                    if (isTimeoutExpired && !isLimitBreached) {
+
+                        if (eventLimit != GeoEventSettings.UNLIMITED_RECURRING) {
+                            ++timesTriggered;
+                        }
+
+                        lastDisplayTime = currentTimeMillis();
+                        setLastNotificationTimeForArea(area, lastDisplayTime);
+                        setNumberOfDisplayedNotificationsForArea(area, timesTriggered);
+
+                        entryCnt++;
+                    }
+                }
+            }
+        }
+
+        assertEquals(entryCnt, 5);
+    }
+
     private int getNumberOfDisplayedNotificationsForArea(Area area) {
         return PreferenceHelper.findInt(context, "num" + area.getId(), 0);
     }
@@ -60,47 +103,12 @@ public class GeoEventsTest extends InstrumentationTestCase {
         PreferenceHelper.saveLong(context, "time" + area.getId(), timeMs);
     }
 
-    public void test_handle_geo_events() throws InterruptedException {
-        GeoTest geo = new JsonSerializer().deserialize(internalData(), GeoTest.class);
+    private void advanceTimeByMS(long milliseconds) {
+        timeDelta += milliseconds;
+    }
 
-        int entryCnt = 0;
-
-        // TODO: Implement with reasonable test time, otherwise it takes forever to run
-        for (int i = 0; i < 5; i++) {
-
-            List<GeoEventSettings> events = geo.getEventFilters();
-            for (GeoEventSettings event : events) {
-
-                for (Area area : geo.getAreasList()) {
-
-                    Thread.sleep(TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes() + 1)); // simulate delay between events
-
-                    long lastDisplayTime = getLastNotificationTimeForArea(area);
-                    int timesTriggered = getNumberOfDisplayedNotificationsForArea(area);
-
-                    long timeIntervalBetweenEvents = System.currentTimeMillis() - lastDisplayTime;
-                    boolean isTimeoutExpired = timeIntervalBetweenEvents > TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes());
-
-                    int eventLimit = event.getLimit();
-                    boolean isLimitBreached = eventLimit != GeoEventSettings.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
-
-                    if (isTimeoutExpired && !isLimitBreached) {
-
-                        if (eventLimit != GeoEventSettings.UNLIMITED_RECURRING) {
-                            ++timesTriggered;
-                        }
-
-                        lastDisplayTime = System.currentTimeMillis();
-                        setLastNotificationTimeForArea(area, lastDisplayTime);
-                        setNumberOfDisplayedNotificationsForArea(area, timesTriggered);
-
-                        entryCnt++;
-                    }
-                }
-            }
-        }
-
-        assertEquals(entryCnt, 5);
+    private long currentTimeMillis() {
+        return System.currentTimeMillis() + timeDelta;
     }
 
     private String internalData() {
@@ -110,16 +118,6 @@ public class GeoEventsTest extends InstrumentationTestCase {
                 "    \"type\": \"entry\",\n" +
                 "    \"limit\": 0,\n" +
                 "    \"timeoutInMinutes\": 1\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"type\": \"exit\",\n" +
-                "    \"limit\": 2,\n" +
-                "    \"timeoutInMinutes\": 2\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"type\": \"remain\",\n" +
-                "    \"limit\": 3,\n" +
-                "    \"timeoutInMinutes\": 3\n" +
                 "  }],\n" +
                 "  \"geo\": [\n" +
                 "    {\n" +

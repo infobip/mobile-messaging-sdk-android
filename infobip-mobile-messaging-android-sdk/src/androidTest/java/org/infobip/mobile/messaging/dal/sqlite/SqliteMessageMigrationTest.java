@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.test.InstrumentationTestCase;
 
+import org.infobip.mobile.messaging.MobileMessagingCore;
+
 /**
  * @author sslavin
  * @since 02/02/2017.
@@ -39,7 +41,7 @@ public class SqliteMessageMigrationTest extends InstrumentationTestCase {
         super.setUp();
 
         context = getInstrumentation().getContext();
-        context.deleteDatabase(DatabaseHelperImpl.DATABASE_NAME);
+        MobileMessagingCore.getDatabaseProvider(context).deleteDatabase();
     }
 
     public void test_shouldCreateTableForGeoMessagesDuringMigration() throws Exception {
