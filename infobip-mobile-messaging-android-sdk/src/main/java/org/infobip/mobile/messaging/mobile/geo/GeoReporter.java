@@ -14,6 +14,9 @@ import org.infobip.mobile.messaging.geo.GeoAreasHandler;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.geo.GeoReportHelper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
 import java.util.Arrays;
@@ -24,13 +27,14 @@ import java.util.List;
  * @since 20/10/2016.
  */
 
-public class GeoReporter {
+public class GeoReporter extends RetryableSynchronizer {
 
-    /**
-     * Reports geo events to server asynchronously and produces {@link Event#GEOFENCE_AREA_ENTERED}
-     */
-    public void report(final Context context) {
+    public GeoReporter(Context context, MobileMessagingStats stats) {
+        super(context, stats);
+    }
 
+    @Override
+    public void synchronize() {
         final MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
         final GeoReport reports[] = mobileMessagingCore.removeUnreportedGeoEvents();
         if (reports.length == 0 || !mobileMessagingCore.isPushRegistrationEnabled()) {
@@ -38,16 +42,19 @@ public class GeoReporter {
         }
 
         new GeoReportingTask(context) {
-            @Override
+
             protected void onPostExecute(GeoReportingResult result) {
                 GeoReporter.handleSuccess(context, reports, result);
                 GeoAreasHandler.handleGeoReportingResult(context, result);
+                if (result.hasError()) {
+                    retry(result);
+                }
             }
 
-            @Override
             protected void onCancelled(GeoReportingResult result) {
                 GeoReporter.handleError(context, result.getError(), reports);
                 GeoAreasHandler.handleGeoReportingResult(context, result);
+                retry(result);
             }
         }.execute(reports);
     }
@@ -103,5 +110,10 @@ public class GeoReporter {
         reportingError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(error));
         context.sendBroadcast(reportingError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(reportingError);
+    }
+
+    @Override
+    public Task getTask() {
+        return Task.GEO_REPORT;
     }
 }

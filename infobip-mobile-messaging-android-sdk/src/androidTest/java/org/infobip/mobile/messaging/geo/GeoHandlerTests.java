@@ -72,7 +72,7 @@ public class GeoHandlerTests extends InstrumentationTestCase {
         handler.handleTransition(transition);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(messageReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
         Message message = Message.createFrom(captor.getValue().getExtras());
         assertNotSame("SomeMessageId", message.getMessageId());
         assertEquals("campaignId", message.getGeo().getCampaignId());

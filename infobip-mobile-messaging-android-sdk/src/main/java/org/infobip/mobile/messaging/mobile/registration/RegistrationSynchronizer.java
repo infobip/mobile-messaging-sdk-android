@@ -10,6 +10,8 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -21,9 +23,21 @@ import java.util.concurrent.Executor;
  * @author mstipanov
  * @since 07.04.2016.
  */
-public class RegistrationSynchronizer {
+public class RegistrationSynchronizer extends RetryableSynchronizer {
 
-    public void updatePushRegistrationStatus(final Context context, final String registrationId, final Boolean enabled, final MobileMessagingStats stats, Executor executor) {
+    private final String registrationId;
+    private String deviceApplicationInstanceId;
+    private boolean registrationIdSaved;
+
+    public RegistrationSynchronizer(Context context, MobileMessagingStats stats, Executor executor, MobileMessagingCore mobileMessagingCore) {
+        super(context, stats, executor);
+        this.registrationId = mobileMessagingCore.getRegistrationId();
+        this.deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        this.registrationIdSaved = isRegistrationIdReported(context);
+    }
+
+    @Override
+    public void updatePushRegistrationStatus(final Boolean enabled) {
         if (StringUtils.isBlank(registrationId)) {
             return;
         }
@@ -65,15 +79,20 @@ public class RegistrationSynchronizer {
         }.executeOnExecutor(executor, enabled);
     }
 
-    public void synchronize(Context context, String deviceApplicationInstanceId, String registrationId, boolean registrationIdSaved, MobileMessagingStats stats, Executor executor) {
+    @Override
+    public Task getTask() {
+        return Task.UPDATE_REGISTRATION_STATUS;
+    }
+
+    @Override
+    public void synchronize() {
         if (null != deviceApplicationInstanceId && registrationIdSaved) {
             return;
         }
-
-        reportRegistration(context, registrationId, stats, executor);
+        reportRegistration(registrationId);
     }
 
-    private void reportRegistration(final Context context, final String registrationId, final MobileMessagingStats stats, Executor executor) {
+    private void reportRegistration(final String registrationId) {
         if (StringUtils.isBlank(registrationId)) {
             return;
         }
@@ -84,6 +103,7 @@ public class RegistrationSynchronizer {
                 if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
                     stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
+                    retry(result);
 
                     Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
@@ -106,9 +126,10 @@ public class RegistrationSynchronizer {
             }
 
             @Override
-            protected void onCancelled() {
+            protected void onCancelled(UpsertRegistrationResult result) {
                 MobileMessagingLogger.e("Error creating registration!");
                 setRegistrationIdReported(context, false);
+                retry(result);
 
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
