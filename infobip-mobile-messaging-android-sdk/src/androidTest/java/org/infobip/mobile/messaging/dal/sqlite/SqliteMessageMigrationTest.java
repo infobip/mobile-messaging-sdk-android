@@ -1,21 +1,17 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 
 /**
  * @author sslavin
  * @since 02/02/2017.
  */
 
-public class SqliteMessageMigrationTest extends InstrumentationTestCase {
-
-    private Context context;
+public class SqliteMessageMigrationTest extends InfobipAndroidTestCase {
 
     private static final int OLD_DB_VERSION = 1; // See database versions in DatabaseHelperImpl
     private static final String SQL_CREATE_OLD_MESSAGES_TABLE = "CREATE TABLE " + DatabaseContract.Tables.MESSAGES + " (" +
@@ -39,9 +35,6 @@ public class SqliteMessageMigrationTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        context = getInstrumentation().getContext();
-        MobileMessagingCore.getDatabaseProvider(context).deleteDatabase();
     }
 
     public void test_shouldCreateTableForGeoMessagesDuringMigration() throws Exception {

@@ -66,7 +66,7 @@ public class InternalDataMapper {
         InternalData internalData = serializer.deserialize(internalDataJson, InternalData.class);
         message.setGeo(internalData);
 
-        if (!message.isSilent() || internalData.silent == null) {
+        if (internalData == null || internalData.silent == null) {
             return;
         }
 

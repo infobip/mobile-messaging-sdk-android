@@ -4,10 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.tools.DebugServer;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -20,13 +18,10 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
-public class CustomUserDataTypeTest extends InstrumentationTestCase {
+public class CustomUserDataTypeTest extends InfobipAndroidTestCase {
 
-    private Context context;
-    DebugServer debugServer;
     BroadcastReceiver receiver;
     ArgumentCaptor<Intent> captor;
-    MobileMessaging mobileMessaging;
 
     private static final String KEY_FOR_STRING = "keyForString";
     private static final String KEY_FOR_NUMBER = "keyForNumber";
@@ -58,15 +53,6 @@ public class CustomUserDataTypeTest extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        context = getInstrumentation().getContext();
-        mobileMessaging = MobileMessaging.getInstance(context);
-
-        debugServer = new DebugServer();
-        debugServer.start();
-
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 
         captor = ArgumentCaptor.forClass(Intent.class);
         receiver = Mockito.mock(BroadcastReceiver.class);
@@ -76,15 +62,6 @@ public class CustomUserDataTypeTest extends InstrumentationTestCase {
     @Override
     protected void tearDown() throws Exception {
         context.unregisterReceiver(receiver);
-
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception e) {
-                //ignore
-            }
-        }
-        PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
 
         super.tearDown();
     }

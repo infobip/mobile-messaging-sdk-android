@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -17,8 +15,9 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.DebugServer;
+import org.infobip.mobile.messaging.tools.Brockito;
 import org.infobip.mobile.messaging.tools.Helper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -33,12 +32,10 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 13/02/2017.
  */
 
-public class GeoTransitionsTest extends InstrumentationTestCase {
+public class GeoTransitionsTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private GeoAreasHandler handler;
     private GeoReporter geoReporter;
-    private DebugServer debugServer;
     private BroadcastReceiver messageReceiver;
     private BroadcastReceiver geoEnteredReceiver;
     private ArgumentCaptor<Intent> captor;
@@ -48,20 +45,13 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        context = getInstrumentation().getContext();
         handler = new GeoAreasHandler(context);
-        messageReceiver = Mockito.mock(BroadcastReceiver.class);
-        geoEnteredReceiver = Mockito.mock(BroadcastReceiver.class);
+        messageReceiver = Brockito.mock();
+        geoEnteredReceiver = Brockito.mock();
         captor = ArgumentCaptor.forClass(Intent.class);
-        geoReporter = new GeoReporter();
-        debugServer = new DebugServer();
-        debugServer.start();
-        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
+        geoReporter = new GeoReporter(context, MobileMessagingCore.getInstance(context).getStats());
+
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
         LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
         LocalBroadcastManager.getInstance(context).registerReceiver(geoEnteredReceiver, new IntentFilter(Event.GEOFENCE_AREA_ENTERED.getKey()));
@@ -75,14 +65,6 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
     protected void tearDown() throws Exception {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(messageReceiver);
         LocalBroadcastManager.getInstance(context).unregisterReceiver(geoEnteredReceiver);
-
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception e) {
-                //ignore
-            }
-        }
 
         super.tearDown();
     }
@@ -98,7 +80,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         handler.handleTransition(geoTransition);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(messageReceiver, Mockito.times(1)).onReceive(Mockito.any(Context.class), captor.capture());
         Message message = Message.createFrom(captor.getValue().getExtras());
         assertNotSame("signalingMessageId", message.getMessageId());
         assertEquals("campaignId1", message.getGeo().getCampaignId());
@@ -118,7 +100,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         handler.handleTransition(geoTransition);
 
         // Then
-        Mockito.verify(geoEnteredReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(geoEnteredReceiver, Mockito.atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
         Helper.assertEquals(geo, Geo.createFrom(captor.getValue().getExtras()));
         Message message = Message.createFrom(captor.getValue().getExtras());
         Helper.assertEquals(geo, message.getGeo());
@@ -155,27 +137,28 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
 
         // When
         handler.handleTransition(geoTransition);
-        geoReporter.report(context);
+        geoReporter.synchronize();
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(messageReceiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), captor.capture());
         Message message = Message.createFrom(captor.getValue().getExtras());
         Helper.assertEquals(geo, message.getGeo());
         assertNotSame("signalingMessageId", message.getMessageId());
-        Mockito.verify(geoEnteredReceiver, Mockito.atMost(1)).onReceive(Mockito.any(Context.class), captor.capture());
+
+        Brockito.verify(geoEnteredReceiver, Mockito.atMost(1)).onReceive(Mockito.any(Context.class), captor.capture());
         Helper.assertEquals(geo, Geo.createFrom(captor.getValue().getExtras()));
         message = Message.createFrom(captor.getValue().getExtras());
         Helper.assertEquals(geo, message.getGeo());
         assertNotSame("signalingMessageId", message.getMessageId());
     }
 
-    public void test_geoReportsShouldGenerateMessagesOnlyForActiveCampaigns() {
+    public void test_geoReportsShouldGenerateMessagesOnlyForActiveCampaigns() throws InterruptedException {
 
         // Given
         Area area = Helper.createArea("areaId1");
         Helper.createMessage(context,"signalingMessageId1", "campaignId1", true, area);
         Helper.createMessage(context,"signalingMessageId2", "campaignId2", true, area);
-        GeoTransition transition = GeoHelper.createTransition(area.getId());
+        GeoTransition transition = GeoHelper.createTransition("areaId1");
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
                 "  'suspendedCampaignIds':['campaignId1']" +
                 "}");
@@ -184,7 +167,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         handler.handleTransition(transition);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.after(1000).times(1)).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(messageReceiver, Mockito.after(1000).times(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
         List<Message> messages = MobileMessaging.getInstance(context).getMessageStore().findAll(context);
         assertEquals(1, messages.size());
         assertEquals("campaignId2", messages.get(0).getGeo().getCampaignId());
@@ -203,7 +186,7 @@ public class GeoTransitionsTest extends InstrumentationTestCase {
         handler.handleTransition(transition);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.after(2000).times(2)).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(messageReceiver, Mockito.after(1000).times(2)).onReceive(Mockito.any(Context.class), captor.capture());
         List<Message> messages = MobileMessaging.getInstance(context).getMessageStore().findAll(context);
         assertEquals(2, messages.size());
         List<String> campaignIds = Arrays.asList(messages.get(0).getGeo().getCampaignId(), messages.get(1).getGeo().getCampaignId());

@@ -27,13 +27,11 @@ public class RegistrationSynchronizer extends RetryableSynchronizer {
 
     private final String registrationId;
     private String deviceApplicationInstanceId;
-    private boolean registrationIdSaved;
 
     public RegistrationSynchronizer(Context context, MobileMessagingStats stats, Executor executor, MobileMessagingCore mobileMessagingCore) {
         super(context, stats, executor);
         this.registrationId = mobileMessagingCore.getRegistrationId();
         this.deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-        this.registrationIdSaved = isRegistrationIdReported(context);
     }
 
     @Override
@@ -86,7 +84,7 @@ public class RegistrationSynchronizer extends RetryableSynchronizer {
 
     @Override
     public void synchronize() {
-        if (null != deviceApplicationInstanceId && registrationIdSaved) {
+        if (null != deviceApplicationInstanceId && isRegistrationIdReported(context)) {
             return;
         }
         reportRegistration(registrationId);

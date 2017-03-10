@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -15,8 +14,9 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.BroadcastReceiverMockito;
+import org.infobip.mobile.messaging.tools.Brockito;
 import org.infobip.mobile.messaging.tools.Helper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
 
@@ -27,9 +27,8 @@ import java.util.List;
  * @since 15/02/2017.
  */
 
-public class MessageHandlerTests extends InstrumentationTestCase {
+public class MessageHandlerTests extends InfobipAndroidTestCase {
 
-    private Context context;
     private MobileMessageHandler handler;
     private MessageStore commonStore;
     private MessageStore geoStore;
@@ -39,8 +38,6 @@ public class MessageHandlerTests extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        context = getInstrumentation().getContext();
-
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
         handler = new MobileMessageHandler();
@@ -48,7 +45,7 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         commonStore.deleteAll(context);
         geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         geoStore.deleteAll(context);
-        messageReceiver = BroadcastReceiverMockito.mock();
+        messageReceiver = Brockito.mock();
         LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
     }
 
@@ -96,7 +93,7 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         handler.handleMessage(context, m);
 
         // Then
-        BroadcastReceiverMockito.verify(messageReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Brockito.verify(messageReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 
     public void test_shouldNotSend_MESSAGE_RECEIVED_forGeoMessage() throws Exception {
@@ -109,6 +106,6 @@ public class MessageHandlerTests extends InstrumentationTestCase {
         handler.handleMessage(context, m);
 
         // Then
-        BroadcastReceiverMockito.verify(messageReceiver, Mockito.never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Brockito.verify(messageReceiver, Mockito.never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 }

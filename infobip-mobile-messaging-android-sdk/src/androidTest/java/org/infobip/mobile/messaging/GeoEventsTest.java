@@ -1,13 +1,10 @@
 package org.infobip.mobile.messaging;
 
-import android.content.Context;
-import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEventSettings;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -17,9 +14,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by pandric on 20/09/16.
  */
-public class GeoEventsTest extends InstrumentationTestCase {
+public class GeoEventsTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private long timeDelta;
 
     private class GeoTest extends Geo {
@@ -30,14 +26,6 @@ public class GeoEventsTest extends InstrumentationTestCase {
         List<GeoEventSettings> getEventFilters() {
             return getEvents();
         }
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        context = getInstrumentation().getContext();
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
     }
 
     @Override

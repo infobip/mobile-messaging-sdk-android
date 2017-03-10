@@ -5,11 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.tools.DebugServer;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -22,45 +19,23 @@ import fi.iki.elonen.NanoHTTPD;
  * @author sslavin
  * @since 22/07/16.
  */
-public class SendMOMessageTest extends InstrumentationTestCase {
+public class SendMOMessageTest extends InfobipAndroidTestCase {
 
-    DebugServer debugServer;
-    BroadcastReceiver receiver;
-    ArgumentCaptor<Intent> captor;
-    MobileMessaging mobileMessaging;
+    private BroadcastReceiver receiver;
+    private ArgumentCaptor<Intent> captor;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mobileMessaging = MobileMessaging.getInstance(getInstrumentation().getContext());
-
-        debugServer = new DebugServer();
-        debugServer.start();
-
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
-
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
-
         captor = ArgumentCaptor.forClass(Intent.class);
         receiver = Mockito.mock(BroadcastReceiver.class);
         getInstrumentation().getContext().registerReceiver(receiver, new IntentFilter(Event.MESSAGES_SENT.getKey()));
-        getInstrumentation().getContext().deleteDatabase("mm_infobip_database.db");
     }
 
     @Override
     protected void tearDown() throws Exception {
         getInstrumentation().getContext().unregisterReceiver(receiver);
-
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception e) {
-                //ignore
-            }
-        }
 
         super.tearDown();
     }

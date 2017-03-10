@@ -1,13 +1,10 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import android.content.Context;
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.junit.Assert;
 
 import java.util.HashMap;
@@ -19,20 +16,16 @@ import java.util.UUID;
  * @since 16/01/2017.
  */
 
-public class SharedPreferencesMigrationTest extends InstrumentationTestCase {
+public class SharedPreferencesMigrationTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private SharedPreferencesMessageStore sharedPreferencesMessageStore;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        context = getInstrumentation().getContext();
 
         sharedPreferencesMessageStore = new SharedPreferencesMessageStore();
         sharedPreferencesMessageStore.deleteAll(context);
-
-        MobileMessagingCore.getDatabaseProvider(context).deleteDatabase();
     }
 
     public void test_shouldMigrateAllMessagesToSqlite() throws Exception {

@@ -5,17 +5,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.Helper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -29,9 +26,8 @@ import java.util.List;
  * @since 15/02/2017.
  */
 
-public class GeoHandlerTests extends InstrumentationTestCase {
+public class GeoHandlerTests extends InfobipAndroidTestCase {
 
-    private Context context;
     private GeoAreasHandler handler;
     private BroadcastReceiver messageReceiver;
     private ArgumentCaptor<Intent> captor;
@@ -41,17 +37,12 @@ public class GeoHandlerTests extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        context = getInstrumentation().getContext();
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
         handler = new GeoAreasHandler(context);
         messageReceiver = Mockito.mock(BroadcastReceiver.class);
         captor = ArgumentCaptor.forClass(Intent.class);
 
-        MobileMessaging.getInstance(context).getMessageStore().deleteAll(context);
-        MobileMessagingCore.getInstance(context).getMessageStoreForGeo().deleteAll(context);
         LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
     }
 

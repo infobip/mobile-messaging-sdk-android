@@ -31,8 +31,8 @@ public class SeenStatusReporter extends RetryableSynchronizer {
     }
 
     public void synchronize() {
-        String[] unreportedMessageIds = MobileMessagingCore.getInstance(context).getUnreportedMessageIds();
-        if (unreportedMessageIds.length == 0) {
+        String[] unreportedSeenMessageIds = MobileMessagingCore.getInstance(context).getUnreportedSeenMessageIds();
+        if (unreportedSeenMessageIds.length == 0) {
             return;
         }
 

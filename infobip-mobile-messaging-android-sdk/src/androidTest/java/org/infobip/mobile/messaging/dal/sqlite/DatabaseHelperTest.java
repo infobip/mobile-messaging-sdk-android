@@ -1,11 +1,9 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,19 +15,15 @@ import static org.junit.Assert.assertNotEquals;
  * @since 13/01/2017.
  */
 
-public class DatabaseHelperTest extends InstrumentationTestCase {
+public class DatabaseHelperTest extends InfobipAndroidTestCase {
 
-    private DatabaseHelper databaseHelper;
     private SQLiteDatabase database;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        Context context = getInstrumentation().getContext();
-        databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
-        database = ((SqliteDatabaseProvider) databaseHelper).getDatabase();
-
+        database = databaseProvider.getDatabase();
         database.execSQL("DROP TABLE IF EXISTS '" + SomethingInDatabase.getTable() + "'");
         database.execSQL("CREATE TABLE '" + SomethingInDatabase.getTable() + "' (" +
                 "'string_value' TEXT PRIMARY KEY," +

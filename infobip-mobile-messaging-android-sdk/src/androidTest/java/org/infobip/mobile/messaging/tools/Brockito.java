@@ -19,18 +19,18 @@ import java.util.concurrent.TimeUnit;
  * @since 02/03/2017.
  */
 
-public class BroadcastReceiverMockito extends BroadcastReceiver {
+public class Brockito extends BroadcastReceiver {
 
     private BroadcastReceiver innerReceiverMock;
     private Semaphore semaphore;
 
-    private BroadcastReceiverMockito() {
+    private Brockito() {
         innerReceiverMock = Mockito.mock(BroadcastReceiver.class);
         semaphore = new Semaphore(0);
     }
 
     public static BroadcastReceiver mock() {
-        return new BroadcastReceiverMockito();
+        return new Brockito();
     }
 
     @Override
@@ -40,12 +40,21 @@ public class BroadcastReceiverMockito extends BroadcastReceiver {
     }
 
     public static BroadcastReceiver verify(BroadcastReceiver mock, VerificationMode verificationMode) throws InterruptedException {
-        BroadcastReceiverMockito rm = (BroadcastReceiverMockito) mock;
+        Brockito rm = (Brockito) mock;
+        int times = getTimes(verificationMode);
         long waitTimeout = getTimeout(verificationMode);
         if (waitTimeout >= 0) {
-            rm.semaphore.tryAcquire(waitTimeout, TimeUnit.MILLISECONDS);
+            if (times > 0) {
+                rm.semaphore.tryAcquire(times, waitTimeout, TimeUnit.MILLISECONDS);
+            } else {
+                rm.semaphore.tryAcquire(waitTimeout, TimeUnit.MILLISECONDS);
+            }
         } else if (!isNever(verificationMode)) {
-            rm.semaphore.acquire();
+            if (times > 0) {
+                rm.semaphore.acquire(times);
+            } else {
+                rm.semaphore.acquire();
+            }
         }
         return Mockito.verify(rm.innerReceiverMock, getNextVerificationMode(verificationMode));
     }
@@ -65,7 +74,7 @@ public class BroadcastReceiverMockito extends BroadcastReceiver {
         return getTimes(mode) == 0;
     }
 
-    private static int getTimes(VerificationMode mode) {
+    static int getTimes(VerificationMode mode) {
         try {
             Field f = Times.class.getDeclaredField("wantedCount");
             f.setAccessible(true);

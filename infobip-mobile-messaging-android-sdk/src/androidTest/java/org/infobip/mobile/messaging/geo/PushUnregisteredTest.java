@@ -5,23 +5,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tools.BroadcastReceiverMockito;
-import org.infobip.mobile.messaging.tools.DebugServer;
+import org.infobip.mobile.messaging.tools.Brockito;
 import org.infobip.mobile.messaging.tools.Helper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -33,10 +29,7 @@ import java.util.concurrent.Executors;
 import fi.iki.elonen.NanoHTTPD;
 
 
-public class PushUnregisteredTest extends InstrumentationTestCase {
-
-    private Context context;
-    private DebugServer debugServer;
+public class PushUnregisteredTest extends InfobipAndroidTestCase {
 
     private GeoReporter geoReporter;
     private SeenStatusReporter seenStatusReporter;
@@ -50,28 +43,14 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
     private BroadcastReceiver seenStatusReceiver;
     private BroadcastReceiver messagesSynchronizerReceiver;
     private BroadcastReceiver errorReceiver;
-    private MobileMessagingCore mobileMessagingCore;
 
     @SuppressLint({"CommitPrefEdits", "ApplySharedPref"})
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        context = getInstrumentation().getContext();
         ExecutorService taskExecutor = Executors.newSingleThreadExecutor();
-        mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        mobileMessagingCore.getMessageStoreForGeo().deleteAll(context);
         MobileMessagingStats stats = mobileMessagingCore.getStats();
 
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
-        debugServer = new DebugServer();
-        debugServer.start();
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
-
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
         PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         PreferenceHelper.saveBoolean(getInstrumentation().getContext(), MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
@@ -81,11 +60,11 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         messagesSynchronizer = new MessagesSynchronizer(context, stats, taskExecutor);
 
         captor = ArgumentCaptor.forClass(Intent.class);
-        geoEventsReceiver = BroadcastReceiverMockito.mock();
-        pushRegistrationEnabledReceiver = BroadcastReceiverMockito.mock();
-        seenStatusReceiver = BroadcastReceiverMockito.mock();
-        messagesSynchronizerReceiver = BroadcastReceiverMockito.mock();
-        errorReceiver = BroadcastReceiverMockito.mock();
+        geoEventsReceiver = Brockito.mock();
+        pushRegistrationEnabledReceiver = Brockito.mock();
+        seenStatusReceiver = Brockito.mock();
+        messagesSynchronizerReceiver = Brockito.mock();
+        errorReceiver = Brockito.mock();
 
         context.registerReceiver(geoEventsReceiver, new IntentFilter(Event.GEOFENCE_EVENTS_REPORTED.getKey()));
         context.registerReceiver(pushRegistrationEnabledReceiver, new IntentFilter(Event.PUSH_REGISTRATION_ENABLED.getKey()));
@@ -101,14 +80,6 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         context.unregisterReceiver(seenStatusReceiver);
         context.unregisterReceiver(messagesSynchronizerReceiver);
         context.unregisterReceiver(errorReceiver);
-
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception e) {
-                //ignore
-            }
-        }
 
         super.tearDown();
     }
@@ -127,8 +98,8 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         Intent intent = captor.getValue();
         boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, true);
         assertFalse(isPushRegistrationEnabled);
-        verifySeenStatusReporter(Mockito.after(4000).atLeastOnce());
 
+        verifySeenStatusReporter(Mockito.after(4000).atLeastOnce());
 
         // reports should NOT be called if push is disabled
         verifyGeoReporting(Mockito.after(4000).never());
@@ -149,8 +120,8 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         verifySeenStatusReporter(Mockito.after(4000).atLeastOnce());
 
         // reports should BE called if push is enabled
-        verifyGeoReporting(Mockito.after(15000).atLeastOnce());
-        verifyMessagesSynchronizer(Mockito.after(4000).atLeastOnce());
+        verifyGeoReporting(Mockito.after(4000).atLeastOnce());
+        verifyMessagesSynchronizer(Mockito.after(90000).atLeastOnce());
     }
 
     public void test_push_registration_default_status() throws Exception {
@@ -162,7 +133,7 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         MobileMessaging.getInstance(context).disablePushRegistration(); // this method shall trigger pushRegistrationEnabledReceiver only once
 
         registrationSynchronizer.synchronize();
-        BroadcastReceiverMockito.verify(pushRegistrationEnabledReceiver, Mockito.after(4000).times(1)).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(pushRegistrationEnabledReceiver, Mockito.after(4000).times(1)).onReceive(Mockito.any(Context.class), captor.capture());
         assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
     }
 
@@ -185,14 +156,14 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
         messagesSynchronizer.synchronize();
-        BroadcastReceiverMockito.verify(messagesSynchronizerReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(messagesSynchronizerReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 
     private void verifySeenStatusReporter(VerificationMode verificationMode) throws InterruptedException {
         String messageIds[] = {"1"};
-        mobileMessagingCore.addUnreportedMessageIds(messageIds);
+        mobileMessagingCore.setMessagesSeen(messageIds);
         seenStatusReporter.synchronize();
-        BroadcastReceiverMockito.verify(seenStatusReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(seenStatusReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 
     private void verifyGeoReporting(VerificationMode verificationMode) throws InterruptedException {
@@ -208,11 +179,11 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
         geoReporter.synchronize();
 
         // Then
-        BroadcastReceiverMockito.verify(geoEventsReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(geoEventsReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
         registrationSynchronizer.updatePushRegistrationStatus(enable);
-        BroadcastReceiverMockito.verify(pushRegistrationEnabledReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
+        Brockito.verify(pushRegistrationEnabledReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }
 }

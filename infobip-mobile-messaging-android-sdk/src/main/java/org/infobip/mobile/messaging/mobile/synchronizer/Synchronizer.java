@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.mobile.synchronizer;
 
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.UserData;
 
 public interface Synchronizer<T> {
     void synchronize();

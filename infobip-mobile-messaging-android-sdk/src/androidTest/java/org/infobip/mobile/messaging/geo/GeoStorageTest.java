@@ -1,8 +1,5 @@
 package org.infobip.mobile.messaging.geo;
 
-import android.content.Context;
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
@@ -10,6 +7,7 @@ import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.Helper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.List;
@@ -19,9 +17,8 @@ import java.util.List;
  * @since 13/02/2017.
  */
 
-public class GeoStorageTest extends InstrumentationTestCase {
+public class GeoStorageTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private MessageStore geoStore;
     private MessageStore commonStore;
     private MobileMessageHandler handler;
@@ -32,7 +29,6 @@ public class GeoStorageTest extends InstrumentationTestCase {
 
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
-        context = getInstrumentation().getContext();
         handler = new MobileMessageHandler();
         geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         geoStore.deleteAll(context);

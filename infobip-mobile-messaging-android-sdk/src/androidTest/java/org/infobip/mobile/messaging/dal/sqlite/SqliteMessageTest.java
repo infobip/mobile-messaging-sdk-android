@@ -1,11 +1,9 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.json.JSONObject;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -16,18 +14,7 @@ import java.util.List;
  * @since 12/01/2017.
  */
 
-public class SqliteMessageTest extends InstrumentationTestCase {
-
-    private DatabaseHelper databaseHelper;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        Context context = getInstrumentation().getContext();
-        databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
-        databaseHelper.deleteAll(SqliteMessage.class);
-    }
+public class SqliteMessageTest extends InfobipAndroidTestCase {
 
     public void test_message_toFromSqlite() throws Exception {
 

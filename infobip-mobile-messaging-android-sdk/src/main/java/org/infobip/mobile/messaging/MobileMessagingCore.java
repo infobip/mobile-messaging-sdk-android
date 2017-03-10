@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +63,7 @@ public class MobileMessagingCore {
     private final VersionChecker versionChecker;
     private final GeoReporter geoReporter;
     private final MobileMessagingStats stats;
-    private final Executor registrationAlignedExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService registrationAlignedExecutor = Executors.newSingleThreadExecutor();
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
@@ -120,6 +120,7 @@ public class MobileMessagingCore {
         userDataSynchronizer.synchronize(null);
         seenStatusReporter.synchronize();
         versionChecker.synchronize();
+
         reportSystemData();
 
         if (isPushRegistrationEnabled()) {
@@ -319,7 +320,7 @@ public class MobileMessagingCore {
         sync();
     }
 
-    void setMessagesSeen(String... messageIds) {
+    public void setMessagesSeen(String... messageIds) {
         addUnreportedSeenMessageIds(messageIds);
         updateStoredMessagesWithSeenStatus(messageIds);
         sync();
@@ -707,6 +708,11 @@ public class MobileMessagingCore {
 
     static void handleBootCompleted(Context context) {
         Geofencing.scheduleRefresh(context);
+    }
+
+    public void shutdownTasks(long waitTimeout, TimeUnit unit) throws InterruptedException {
+        registrationAlignedExecutor.shutdownNow();
+        registrationAlignedExecutor.awaitTermination(waitTimeout, unit);
     }
 
     /**

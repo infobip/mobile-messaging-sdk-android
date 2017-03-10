@@ -1,8 +1,5 @@
 package org.infobip.mobile.messaging.geo;
 
-import android.content.Context;
-import android.test.InstrumentationTestCase;
-
 import com.google.android.gms.location.Geofence;
 
 import org.infobip.mobile.messaging.Message;
@@ -11,6 +8,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -23,9 +21,8 @@ import java.util.List;
  * @since 12/02/2017.
  */
 
-public class GeoMonitoringTest extends InstrumentationTestCase {
+public class GeoMonitoringTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private MessageStore messageStore;
     private Long now;
 
@@ -33,7 +30,6 @@ public class GeoMonitoringTest extends InstrumentationTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        context = getInstrumentation().getContext().getApplicationContext();
         now = System.currentTimeMillis();
 
         Geofencing.getInstance(context);
