@@ -206,4 +206,21 @@ public class DefaultApiClient implements ApiClient {
             sb.append(sb.length() == 0 ? "?" : "&").append(URLEncoder.encode(entry.getKey(), "UTF-8")).append("=").append(URLEncoder.encode(s, "UTF-8"));
         }
     }
+
+    public enum ErrorCode {
+        UNKNOWN_ERROR("-1"), // responseCode >= 400
+        UNKNOWN_API_BACKEND_ERROR("-2"), // responseCode >= 500
+        UNKNOWN_API_ERROR("-3"), // apiResponse == null
+        API_IO_ERROR("-4"); // Can't access URI (404?)
+
+        private String value;
+
+        ErrorCode(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
 }

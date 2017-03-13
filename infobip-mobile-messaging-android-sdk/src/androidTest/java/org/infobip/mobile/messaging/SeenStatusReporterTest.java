@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging;
 
+import android.content.Context;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
@@ -10,6 +11,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * @author sslavin
@@ -17,16 +19,18 @@ import java.util.concurrent.Executor;
  */
 public class SeenStatusReporterTest extends InstrumentationTestCase {
 
-    SeenStatusReporter seenStatusReporter;
-    Executor executor;
+    private Executor executor;
+    private MobileMessagingCore mobileMessagingCore;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
+        Context context = getInstrumentation().getContext();
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
 
-        seenStatusReporter = new SeenStatusReporter();
+        executor = Executors.newSingleThreadExecutor();
+        mobileMessagingCore = MobileMessagingCore.getInstance(context);
         executor = Mockito.mock(Executor.class);
     }
 
@@ -41,8 +45,7 @@ public class SeenStatusReporterTest extends InstrumentationTestCase {
         for (String messageId : messageIds) {
             List<String> ids = new ArrayList<>();
             ids.add(messageId);
-
-            seenStatusReporter.report(getInstrumentation().getContext(), ids.toArray(new String[ids.size()]), new MobileMessagingStats(getInstrumentation().getContext()), executor);
+            mobileMessagingCore.setMessagesSeen(ids.toArray(new String[ids.size()]));
         }
 
         Mockito.verify(executor, Mockito.after(50).never()).execute(Mockito.any(Runnable.class));

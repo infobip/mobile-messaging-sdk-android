@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -20,10 +22,14 @@ import java.util.concurrent.Executor;
  * @author sslavin
  * @since 25/08/16.
  */
-public class SystemDataReporter {
+public class SystemDataReporter extends RetryableSynchronizer {
 
-    public void report(final Context context, final MobileMessagingStats stats, Executor executor) {
+    public SystemDataReporter(Context context, MobileMessagingStats stats, Executor executor) {
+        super(context, stats, executor);
+    }
 
+    @Override
+    public void synchronize() {
         SystemData data = MobileMessagingCore.getInstance(context).getUnreportedSystemData();
         if (data == null) {
             return;
@@ -39,6 +45,7 @@ public class SystemDataReporter {
                 if (result.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (system data)!");
                     stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
+                    retry(result);
 
                     Intent intent = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
                     intent.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
@@ -61,10 +68,16 @@ public class SystemDataReporter {
             }
 
             @Override
-            protected void onCancelled() {
+            protected void onCancelled(SystemDataReportResult result) {
                 MobileMessagingLogger.e("Error reporting user data!");
                 stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
+                retry(result);
             }
         }.executeOnExecutor(executor, report);
+    }
+
+    @Override
+    public Task getTask() {
+        return Task.SYSTEM_DATA_REPORT;
     }
 }

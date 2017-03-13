@@ -7,9 +7,12 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
+import org.infobip.mobile.messaging.mobile.synchronizer.Task;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -19,11 +22,16 @@ import java.util.concurrent.Executor;
  * @author sslavin
  * @since 25.04.2016.
  */
-public class SeenStatusReporter {
+public class SeenStatusReporter extends RetryableSynchronizer {
 
     private static BatchReporter batchReporter = null;
 
-    public void report(final Context context, String[] unreportedSeenMessageIds, final MobileMessagingStats stats, final Executor executor) {
+    public SeenStatusReporter(Context context, MobileMessagingStats stats, Executor executor) {
+        super(context, stats, executor);
+    }
+
+    public void synchronize() {
+        String[] unreportedSeenMessageIds = MobileMessagingCore.getInstance(context).getUnreportedSeenMessageIds();
         if (unreportedSeenMessageIds.length == 0) {
             return;
         }
@@ -58,12 +66,17 @@ public class SeenStatusReporter {
                     }
 
                     @Override
-                    protected void onCancelled() {
+                    protected void onCancelled(SeenStatusReportResult result) {
                         stats.reportError(MobileMessagingStatsError.SEEN_REPORTING_ERROR);
                         MobileMessagingLogger.e("Error reporting seen status!");
                     }
                 }.executeOnExecutor(executor);
             }
         });
+    }
+
+    @Override
+    public Task getTask() {
+        return Task.SEEN_STATUS_REPORT;
     }
 }
