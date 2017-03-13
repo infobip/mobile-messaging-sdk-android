@@ -167,9 +167,9 @@ class GeoAreasHandler {
                             add(area);
                         }},
                         message.getGeo().getDeliveryTime(),
-                        null,
-                        message.getGeo().getExpiryDate().toString(),
-                        message.getGeo().getStartDate().toString(),
+                        message.getGeo().getEvents(),
+                        DateTimeUtil.ISO8601DateToString(message.getGeo().getExpiryDate()),
+                        DateTimeUtil.ISO8601DateToString(message.getGeo().getStartDate()),
                         message.getGeo().getCampaignId());
 
 

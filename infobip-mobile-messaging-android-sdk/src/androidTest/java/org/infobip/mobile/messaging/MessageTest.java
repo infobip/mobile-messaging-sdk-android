@@ -21,7 +21,7 @@ public class MessageTest extends TestCase {
 
     private class GeoTest extends Geo {
         GeoTest() {
-            super(null, null, null, null, null, null, null);
+            super(null, null, null, null, null, null, null, null);
         }
 
         Date getExpiry() {

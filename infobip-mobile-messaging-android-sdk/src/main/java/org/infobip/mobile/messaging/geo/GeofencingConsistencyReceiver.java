@@ -63,6 +63,10 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                     }
                     break;
 
+                /**
+                 * This action gets called whenever user deletes data from some app, and we're interested in clear Play Services cleared event
+                 *  because all registered geofences stop being monitored by GPS in that case.
+                 */
                 case Intent.ACTION_PACKAGE_DATA_CLEARED:
                     Uri data = intent.getData();
                     if (data != null && GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE.equals(data.getSchemeSpecificPart())) {
@@ -75,6 +79,10 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                     }
                     break;
 
+                /**
+                 * Scheduled to be invoked when first area from geo storage needs to expire. In that case GPS stop monitoring areas, but we
+                 *  also need to be aware of this event.
+                 */
                 case SCHEDULED_GEO_EXPIRE_ACTION:
                     MobileMessagingCore.getInstance(context).removeExpiredAreas();
                     break;
