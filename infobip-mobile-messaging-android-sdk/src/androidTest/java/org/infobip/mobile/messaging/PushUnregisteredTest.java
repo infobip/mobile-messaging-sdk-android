@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -154,9 +153,9 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
 
     public void test_push_registration_default_status() throws Exception {
         String response = "{\n" +
-                        "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
-                        "  \"pushRegistrationEnabled\": true" +
-                        "}";
+                "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
+                "  \"pushRegistrationEnabled\": true" +
+                "}";
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
         MobileMessaging.getInstance(context).disablePushRegistration(); // this method shall trigger pushRegistrationEnabledReceiver only once
 
@@ -189,7 +188,7 @@ public class PushUnregisteredTest extends InstrumentationTestCase {
 
     private void verifySeenStatusReporter(VerificationMode verificationMode) throws InterruptedException {
         String messageIds[] = {"1"};
-        mobileMessagingCore.addUnreportedMessageIds(messageIds);
+        mobileMessagingCore.addUnreportedSeenMessageIds(messageIds);
         seenStatusReporter.synchronize();
         BroadcastReceiverMockito.verify(seenStatusReceiver, verificationMode).onReceive(Mockito.any(Context.class), captor.capture());
     }

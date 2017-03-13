@@ -161,11 +161,11 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
 
-    public void addUnreportedMessageIds(String... messageIDs) {
+    private void addUnreportedMessageIds(String... messageIDs) {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
-    public void addSyncMessagesIds(String... messageIDs) {
+    void addSyncMessagesIds(String... messageIDs) {
         String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
     }
@@ -212,7 +212,7 @@ public class MobileMessagingCore {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
     }
 
-    private void addUnreportedSeenMessageIds(final String... messageIDs) {
+    void addUnreportedSeenMessageIds(final String... messageIDs) {
         String[] seenMessages = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, seenMessages);
     }

@@ -19,8 +19,7 @@ import java.util.concurrent.Executors;
  */
 public class SeenStatusReporterTest extends InstrumentationTestCase {
 
-    SeenStatusReporter seenStatusReporter;
-    Executor executor;
+    private Executor executor;
     private MobileMessagingCore mobileMessagingCore;
 
     @Override
@@ -32,8 +31,6 @@ public class SeenStatusReporterTest extends InstrumentationTestCase {
 
         executor = Executors.newSingleThreadExecutor();
         mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        MobileMessagingStats stats = mobileMessagingCore.getStats();
-        seenStatusReporter = new SeenStatusReporter(context, stats, executor);
         executor = Mockito.mock(Executor.class);
     }
 
@@ -48,9 +45,7 @@ public class SeenStatusReporterTest extends InstrumentationTestCase {
         for (String messageId : messageIds) {
             List<String> ids = new ArrayList<>();
             ids.add(messageId);
-            mobileMessagingCore.addUnreportedMessageIds(ids.toArray(new String[ids.size()]));
-
-            seenStatusReporter.synchronize();
+            mobileMessagingCore.setMessagesSeen(ids.toArray(new String[ids.size()]));
         }
 
         Mockito.verify(executor, Mockito.after(50).never()).execute(Mockito.any(Runnable.class));
