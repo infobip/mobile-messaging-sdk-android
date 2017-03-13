@@ -23,7 +23,7 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
 
     public static final String NETWORK_PROVIDER_ENABLED_ACTION = "org.infobip.mobile.messaging.geo.intent.NETWORK_PROVIDER_ENABLED";
     public static final String SCHEDULED_GEO_REFRESH_ACTION = "org.infobip.mobile.messaging.geo.intent.SCHEDULED_GEO_REFRESH";
-    public static final String SCHEDULED_GEO_EXPIRE_ACTION = "org.infobip.mobile.messaging.geo.intent.SCHEDULED_GEO_EXPIRE_ACTION";
+    public static final String SCHEDULED_GEO_EXPIRE_ACTION = "org.infobip.mobile.messaging.geo.intent.SCHEDULED_GEO_EXPIRE";
 
     @Override
     public void onReceive(final Context context, final Intent intent) {

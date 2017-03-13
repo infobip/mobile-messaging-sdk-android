@@ -39,8 +39,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.PatternSyntaxException;
 
-import static com.google.android.gms.location.GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE;
-
 /**
  * @author pandric
  * @since 24.06.2016.
@@ -62,7 +60,7 @@ class GeoAreasHandler {
     }};
 
     private static SparseArray<String> geofencingErrors = new SparseArray<String>() {{
-        put(GEOFENCE_NOT_AVAILABLE, "Geofence not available");
+        put(GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE, "Geofence not available");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES, "Too many geofences");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
     }};

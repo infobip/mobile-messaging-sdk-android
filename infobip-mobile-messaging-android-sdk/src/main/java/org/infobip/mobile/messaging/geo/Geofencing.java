@@ -126,7 +126,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
             }
         }
 
-        messageStoreForGeo.deleteByIds(context, messageIdsToDelete.toArray(new String[]{}));
+        if (!messageIdsToDelete.isEmpty()) {
+            messageStoreForGeo.deleteByIds(context, messageIdsToDelete.toArray(new String[]{}));
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -217,10 +219,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
         if (expiryDate.before(now)) {
             return now;
-
-        } else {
-            return expiryDate;
         }
+
+        return expiryDate;
     }
 
     @SuppressWarnings("MissingPermission")
