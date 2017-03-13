@@ -1,17 +1,10 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -29,8 +22,7 @@ import java.util.List;
 public class GeoHandlerTests extends InfobipAndroidTestCase {
 
     private GeoAreasHandler handler;
-    private BroadcastReceiver messageReceiver;
-    private ArgumentCaptor<Intent> captor;
+    private ArgumentCaptor<Message> captor;
 
     @SuppressLint({"CommitPrefEdits", "ApplySharedPref"})
     @Override
@@ -39,41 +31,32 @@ public class GeoHandlerTests extends InfobipAndroidTestCase {
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
-        handler = new GeoAreasHandler(context);
-        messageReceiver = Mockito.mock(BroadcastReceiver.class);
-        captor = ArgumentCaptor.forClass(Intent.class);
-
-        LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(messageReceiver);
-        super.tearDown();
+        handler = new GeoAreasHandler(context, broadcaster);
+        captor = ArgumentCaptor.forClass(Message.class);
     }
 
     public void test_shouldProvide_MESSAGE_RECEIVED_forGeoTransition() throws Exception {
 
         // Given
-        Geo geo = Helper.createGeo(1.0, 2.0, "campaignId", Helper.createArea("areaId"));
-        Message m = Helper.createMessage(context, "SomeMessageId", true, geo);
+        Geo geo = createGeo(1.0, 2.0, "campaignId", createArea("areaId"));
+        Message m = createMessage(context, "SomeMessageId", true, geo);
         GeoTransition transition = GeoHelper.createTransition("areaId");
 
         // When
         handler.handleTransition(transition);
 
         // Then
-        Mockito.verify(messageReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        Message message = Message.createFrom(captor.getValue().getExtras());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).messageReceived(captor.capture());
+        Message message = captor.getValue();
         assertNotSame("SomeMessageId", message.getMessageId());
         assertEquals("campaignId", message.getGeo().getCampaignId());
         assertEquals("areaId", message.getGeo().getAreasList().get(0).getId());
     }
 
     public void test_shouldCompareRadiusInGeoAreasList() {
-        final Area area1 = Helper.createArea("areaId1", "", 1.0, 2.0, 700);
-        final Area area2 = Helper.createArea("areaId2", "", 1.0, 2.0, 250);
-        final Area area3 = Helper.createArea("areaId3", "", 1.0, 2.0, 1000);
+        final Area area1 = createArea("areaId1", "", 1.0, 2.0, 700);
+        final Area area2 = createArea("areaId2", "", 1.0, 2.0, 250);
+        final Area area3 = createArea("areaId3", "", 1.0, 2.0, 1000);
         List<Area> areasList = new ArrayList<Area>() {{
             add(area1);
             add(area2);

@@ -113,7 +113,7 @@ public enum Event {
      * Contains messages that were sent and status information for each message.
      * <pre>
      * {@code
-     * Message messages[] = Message.createFrom(intent.getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES));
+     * List<Message> messages = Message.createFrom(intent.getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES));
      * }
      * </pre>
      *
@@ -194,7 +194,7 @@ public enum Event {
      * It is triggered when system data is successfully reported to the server.
      * <pre>
      * {@code
-     * String systemData = intent.getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA);
+     * SystemData systemData = SystemData.createFrom(intent.getExtras());
      * }
      * </pre>
      */

@@ -1,21 +1,17 @@
 package org.infobip.mobile.messaging.mobile.geo;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.GeoAreasHandler;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.geo.GeoReportHelper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -29,8 +25,11 @@ import java.util.List;
 
 public class GeoReporter extends RetryableSynchronizer {
 
-    public GeoReporter(Context context, MobileMessagingStats stats) {
+    private Broadcaster broadcaster;
+
+    public GeoReporter(Context context, Broadcaster broadcaster, MobileMessagingStats stats) {
         super(context, stats);
+        this.broadcaster = broadcaster;
     }
 
     @Override
@@ -44,7 +43,7 @@ public class GeoReporter extends RetryableSynchronizer {
         new GeoReportingTask(context) {
 
             protected void onPostExecute(GeoReportingResult result) {
-                GeoReporter.handleSuccess(context, reports, result);
+                handleSuccess(context, reports, result);
                 GeoAreasHandler.handleGeoReportingResult(context, result);
                 if (result.hasError()) {
                     retry(result);
@@ -52,7 +51,7 @@ public class GeoReporter extends RetryableSynchronizer {
             }
 
             protected void onCancelled(GeoReportingResult result) {
-                GeoReporter.handleError(context, result.getError(), reports);
+                handleError(context, result.getError(), reports);
                 GeoAreasHandler.handleGeoReportingResult(context, result);
                 retry(result);
             }
@@ -64,13 +63,13 @@ public class GeoReporter extends RetryableSynchronizer {
      * @param geoReports set that contains original messages and corresponding events
      * @return result that will contain lists of campaign ids and mappings between library generated message ids and IPCore ids
      */
-    public static @NonNull GeoReportingResult reportSync(@NonNull Context context, @NonNull GeoReport geoReports[]) {
+    public @NonNull GeoReportingResult reportSync(@NonNull Context context, @NonNull GeoReport geoReports[]) {
         try {
             GeoReportingResult result = GeoReportingTask.executeSync(context, geoReports);
-            GeoReporter.handleSuccess(context, geoReports, result);
+            handleSuccess(context, geoReports, result);
             return result;
         } catch (Exception e) {
-            GeoReporter.handleError(context, e, geoReports);
+            handleError(context, e, geoReports);
             return new GeoReportingResult(e);
         }
     }
@@ -80,16 +79,9 @@ public class GeoReporter extends RetryableSynchronizer {
      * @param geoReports reports that were sent to the server.
      * @param result result from the server
      */
-    private static void handleSuccess(Context context, GeoReport geoReports[], GeoReportingResult result) {
+    private void handleSuccess(Context context, GeoReport geoReports[], GeoReportingResult result) {
         List<GeoReport> geoReportsToBroadcast = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(geoReports), result);
-        if (geoReportsToBroadcast.isEmpty()) {
-            return;
-        }
-
-        Intent geoReportsSent = new Intent(Event.GEOFENCE_EVENTS_REPORTED.getKey());
-        geoReportsSent.putExtras(BundleMapper.geoReportsToBundle(geoReportsToBroadcast));
-        context.sendBroadcast(geoReportsSent);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(geoReportsSent);
+        broadcaster.geoReported(geoReportsToBroadcast);
     }
 
     /**
@@ -97,7 +89,7 @@ public class GeoReporter extends RetryableSynchronizer {
      * @param error error that happens
      * @param geoReports reports sent to server
      */
-    private static void handleError(Context context, Throwable error, GeoReport geoReports[]) {
+    private void handleError(Context context, Throwable error, GeoReport geoReports[]) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
 
         MobileMessagingLogger.e("Error reporting geo areas: " + error);
@@ -106,10 +98,7 @@ public class GeoReporter extends RetryableSynchronizer {
         mobileMessagingCore.getStats().reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
         mobileMessagingCore.addUnreportedGeoEvents(geoReports);
 
-        Intent reportingError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-        reportingError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(error));
-        context.sendBroadcast(reportingError);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(reportingError);
+        broadcaster.error(MobileMessagingError.createFrom(error));
     }
 
     @Override

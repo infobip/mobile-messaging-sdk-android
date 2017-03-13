@@ -1,11 +1,5 @@
 package org.infobip.mobile.messaging.geo;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -16,8 +10,6 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.Brockito;
-import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -41,9 +33,8 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
 
     private MessageStore messageStore;
     private GeoReporter geoReporter;
-    private BroadcastReceiver geoReportedReceiver;
-    private BroadcastReceiver seenReportedReceiver;
-    private ArgumentCaptor<Intent> captor;
+
+    private ArgumentCaptor<List<GeoReport>> geoReportCaptor;
 
     @Override
     protected void setUp() throws Exception {
@@ -53,33 +44,21 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
         messageStore = MobileMessaging.getInstance(context).getMessageStore();
-        geoReporter = new GeoReporter(context, MobileMessagingCore.getInstance(context).getStats());
-        captor = ArgumentCaptor.forClass(Intent.class);
-        geoReportedReceiver = Brockito.mock();
-        seenReportedReceiver = Brockito.mock();
-        context.registerReceiver(geoReportedReceiver, new IntentFilter(Event.GEOFENCE_EVENTS_REPORTED.getKey()));
-        context.registerReceiver(seenReportedReceiver, new IntentFilter(Event.SEEN_REPORTS_SENT.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        context.unregisterReceiver(geoReportedReceiver);
-        context.unregisterReceiver(seenReportedReceiver);
-
-        super.tearDown();
+        geoReporter = new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats());
+        geoReportCaptor = new ArgumentCaptor<>();
     }
 
     public void test_success() throws Exception {
 
         // Given
-        Area area1 = Helper.createArea("areaId1");
-        Area area2 = Helper.createArea("areaId2");
-        Area area3 = Helper.createArea("areaId3");
-        Helper.createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
-        Helper.createMessage(context, "signalingMessageId2", "campaignId3", true, area3);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
-        Helper.createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
+        Area area1 = createArea("areaId1");
+        Area area2 = createArea("areaId2");
+        Area area3 = createArea("areaId3");
+        createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
+        createMessage(context, "signalingMessageId2", "campaignId3", true, area3);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
+        createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
         // When
@@ -87,9 +66,9 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
 
         // Then
         // Examine what is reported back via broadcast intent
-        Brockito.verify(geoReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).geoReported(geoReportCaptor.capture());
 
-        List<GeoReport> broadcastedReports = GeoReport.createFrom(captor.getValue().getExtras());
+        List<GeoReport> broadcastedReports = geoReportCaptor.getValue();
         assertEquals(broadcastedReports.size(), 3);
 
         Map<String, GeoReport> reportMap = new HashMap<>();
@@ -172,14 +151,14 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
     public void test_withNonActiveCampaigns() throws InterruptedException {
 
         // Given
-        Area area1 = Helper.createArea("areaId1");
-        Area area2 = Helper.createArea("areaId2");
-        Area area3 = Helper.createArea("areaId3");
-        Helper.createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
-        Helper.createMessage(context, "signalingMessageId2", "campaignId3", true, area3);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
-        Helper.createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
+        Area area1 = createArea("areaId1");
+        Area area2 = createArea("areaId2");
+        Area area3 = createArea("areaId3");
+        createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
+        createMessage(context, "signalingMessageId2", "campaignId3", true, area3);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
+        createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{\n" +
                 "  \"finishedCampaignIds\":[\"campaignId1\"],\n" +
                 "  \"suspendedCampaignIds\":[\"campaignId2\"]\n" +
@@ -190,9 +169,9 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
 
         // Then
         // Examine what is reported back via broadcast intent
-        Brockito.verify(geoReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).geoReported(geoReportCaptor.capture());
 
-        List<GeoReport> broadcastedReports = GeoReport.createFrom(captor.getValue().getExtras());
+        List<GeoReport> broadcastedReports = geoReportCaptor.getValue();
         assertEquals(broadcastedReports.size(), 1);
 
         GeoReport geoReport = broadcastedReports.get(0);
@@ -214,18 +193,18 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
     public void test_shouldUpdateMessageIdsOnSuccessfulReport() throws Exception {
 
         // Given
-        Area area1 = Helper.createArea("areaId1");
-        Area area2 = Helper.createArea("areaId2");
-        Area area3 = Helper.createArea("areaId3");
-        Helper.createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
-        Helper.createMessage(context, "signalingMessageId2", "campaignId2", true, area3);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
-        Helper.createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, area3);
+        Area area1 = createArea("areaId1");
+        Area area2 = createArea("areaId2");
+        Area area3 = createArea("areaId3");
+        createMessage(context, "signalingMessageId1", "campaignId1", true, area1, area2);
+        createMessage(context, "signalingMessageId2", "campaignId2", true, area3);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
+        createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, area3);
         messageStore.save(context,
-            Helper.createMessage(context, "messageId1", "campaignId1", false, area1),
-            Helper.createMessage(context, "messageId2", "campaignId1", false, area2),
-            Helper.createMessage(context, "messageId3", "campaignId2", false, area3));
+            createMessage(context, "messageId1", "campaignId1", false, area1),
+            createMessage(context, "messageId2", "campaignId1", false, area2),
+            createMessage(context, "messageId3", "campaignId2", false, area3));
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
                 "'messageIds': {" +
                 "   'messageId1':'ipCoreMessageId1'," +
@@ -239,7 +218,7 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
 
         // Then
         // Wait for reporting to complete
-        Brockito.verify(geoReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).geoReported(geoReportCaptor.capture());
 
         // Examine message store
         List<Message> messageList = messageStore.findAll(context);
@@ -266,48 +245,48 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
 
     public void test_shouldReportSeenForMessageIdsIfNoCorrespondingGeoReport() throws InterruptedException {
         // Given
-        Helper.createMessage(context,"generatedMessageId1", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId2", true);
+        createMessage(context,"generatedMessageId1", true);
+        createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId2", true);
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         // When
-        MobileMessaging.getInstance(context).setMessagesSeen("generatedMessageId1");
+        mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Brockito.verify(seenReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
     }
 
     public void test_shouldNotReportSeenForMessageIdsGeneratedForGeoReports() throws InterruptedException {
 
         // Given
-        Helper.createMessage(context,"signalingMessageId1", "campaignId1", true);
-        Helper.createMessage(context,"generatedMessageId1", "campaignId1", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId1", true);
+        createMessage(context,"signalingMessageId1", "campaignId1", true);
+        createMessage(context,"generatedMessageId1", "campaignId1", true);
+        createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId1", true);
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         // When
-        MobileMessaging.getInstance(context).setMessagesSeen("generatedMessageId1");
+        mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Brockito.verify(seenReportedReceiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).never()).seenStatusReported(Mockito.any(String[].class));
     }
 
     public void test_shouldReportSeenAfterGeoSuccessfullyReported() throws InterruptedException {
 
         // Given
-        Helper.createMessage(context,"signalingMessageId1", "campaignId1", true);
-        Helper.createMessage(context,"generatedMessageId1", "campaignId1", true);
-        Helper.createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId1", true);
+        createMessage(context,"signalingMessageId1", "campaignId1", true);
+        createMessage(context,"generatedMessageId1", "campaignId1", true);
+        createReport(context,"signalingMessageId1", "campaignId1", "generatedMessageId1", true);
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
         // When
-        MobileMessaging.getInstance(context).setMessagesSeen("generatedMessageId1");
+        mobileMessaging.setMessagesSeen("generatedMessageId1");
         geoReporter.synchronize();
 
         // Then
-        Brockito.verify(seenReportedReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
     }
 }

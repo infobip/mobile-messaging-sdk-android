@@ -26,7 +26,7 @@ public class SeenStatusReporterTest extends InfobipAndroidTestCase {
 
         executor = Executors.newSingleThreadExecutor();
         MobileMessagingStats stats = mobileMessagingCore.getStats();
-        seenStatusReporter = new SeenStatusReporter(context, stats, executor);
+        seenStatusReporter = new SeenStatusReporter(context, stats, executor, broadcaster);
         executor = Mockito.mock(Executor.class);
     }
 

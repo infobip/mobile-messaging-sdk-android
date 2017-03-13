@@ -23,6 +23,8 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -47,23 +49,23 @@ import java.util.concurrent.TimeUnit;
  * @author sslavin
  * @since 28.04.2016.
  */
-public class MobileMessagingCore {
+public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
 
-    private static MobileMessagingCore instance;
+    static MobileMessagingCore instance;
     private static DatabaseHelper databaseHelper;
     private final RegistrationSynchronizer registrationSynchronizer;
     private final MessagesSynchronizer messagesSynchronizer;
     private final SeenStatusReporter seenStatusReporter;
     private final UserDataSynchronizer userDataSynchronizer;
-    private final MessageSender messageSender = new MessageSender();
+    private final MessageSender messageSender;
     private final SystemDataReporter systemDataReporter;
     private final VersionChecker versionChecker;
     private final GeoReporter geoReporter;
     private final MobileMessagingStats stats;
-    private final ExecutorService registrationAlignedExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService registrationAlignedExecutor;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
@@ -74,15 +76,22 @@ public class MobileMessagingCore {
     private Geofencing geofencing;
 
     protected MobileMessagingCore(Context context) {
+        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
+    }
+
+    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor) {
+        MobileMessagingLogger.init(context);
         this.context = context;
+        this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor);
-        this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor);
-        this.userDataSynchronizer = new UserDataSynchronizer(context, stats, registrationAlignedExecutor);
-        this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor);
+        this.messageSender = new MessageSender(broadcaster);
+        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
+        this.userDataSynchronizer = new UserDataSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.versionChecker = new VersionChecker(context, stats);
-        this.geoReporter = new GeoReporter(context, stats);
-        this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, this);
+        this.geoReporter = new GeoReporter(context, broadcaster, stats);
+        this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
     }
 
     /**
@@ -129,7 +138,8 @@ public class MobileMessagingCore {
         }
     }
 
-    void enablePushRegistration() {
+    @Override
+    public void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         registrationSynchronizer.updatePushRegistrationStatus(true);
         if (isGeofencingActivated(context)) {
@@ -137,7 +147,8 @@ public class MobileMessagingCore {
         }
     }
 
-    void disablePushRegistration() {
+    @Override
+    public void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
         registrationSynchronizer.updatePushRegistrationStatus(false);
         if (isGeofencingActivated(context)) {
@@ -247,7 +258,6 @@ public class MobileMessagingCore {
                 return null;
             }
         });
-
     }
 
     private String[] filterOutGeneratedMessageIds(String[] messageIDs) {
@@ -520,6 +530,11 @@ public class MobileMessagingCore {
         }
     }
 
+    @Override
+    public void activateGeofencing() {
+        activateGeofencing(Geofencing.getInstance(context));
+    }
+
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
         if (geofencing == null) return;
@@ -527,14 +542,21 @@ public class MobileMessagingCore {
         geofencing.startGeoMonitoring();
     }
 
-    void deactivateGeofencing() {
+    @Override
+    public void deactivateGeofencing() {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
         geofencing.stopGeoMonitoring();
         this.geofencing = null;
     }
 
-    void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
+    @Override
+    public void syncUserData(UserData userData) {
+        syncUserData(userData, null);
+    }
+
+    @Override
+    public void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
 
         UserData userDataToReport = new UserData();
         if (userData != null) {
@@ -560,6 +582,16 @@ public class MobileMessagingCore {
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
 
         userDataSynchronizer.synchronize(listener);
+    }
+
+    @Override
+    public void fetchUserData() {
+        fetchUserData(null);
+    }
+
+    @Override
+    public void fetchUserData(MobileMessaging.ResultListener<UserData> listener) {
+        syncUserData(null, listener);
     }
 
     public UserData getUserData() {
@@ -589,7 +621,13 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
-    void sendMessages(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
+    @Override
+    public void sendMessages(Message... messages) {
+        sendMessages(null, messages);
+    }
+
+    @Override
+    public void sendMessages(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
         if (isMessageStoreEnabled()) {
             getMessageStore().save(context, messages);
         }
@@ -708,11 +746,6 @@ public class MobileMessagingCore {
 
     static void handleBootCompleted(Context context) {
         Geofencing.scheduleRefresh(context);
-    }
-
-    public void shutdownTasks(long waitTimeout, TimeUnit unit) throws InterruptedException {
-        registrationAlignedExecutor.shutdownNow();
-        registrationAlignedExecutor.awaitTermination(waitTimeout, unit);
     }
 
     /**

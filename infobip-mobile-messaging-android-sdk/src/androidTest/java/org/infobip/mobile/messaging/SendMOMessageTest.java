@@ -1,16 +1,9 @@
 package org.infobip.mobile.messaging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -21,23 +14,13 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class SendMOMessageTest extends InfobipAndroidTestCase {
 
-    private BroadcastReceiver receiver;
-    private ArgumentCaptor<Intent> captor;
+    private ArgumentCaptor<List<Message>> captor;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        captor = ArgumentCaptor.forClass(Intent.class);
-        receiver = Mockito.mock(BroadcastReceiver.class);
-        getInstrumentation().getContext().registerReceiver(receiver, new IntentFilter(Event.MESSAGES_SENT.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        getInstrumentation().getContext().unregisterReceiver(receiver);
-
-        super.tearDown();
+        captor = new ArgumentCaptor<>();
     }
 
     public void test_sendMultipleMessages() throws Exception {
@@ -80,11 +63,9 @@ public class SendMOMessageTest extends InfobipAndroidTestCase {
         Message messagesToSend[] = {new Message(), new Message()};
         mobileMessaging.sendMessages(messagesToSend);
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_MESSAGES));
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).messagesSent(captor.capture());
 
-        ArrayList<Bundle> bundles = captor.getValue().getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES);
-        List<Message> messages = Message.createFrom(bundles);
+        List<Message> messages = captor.getValue();
 
         assertEquals("myMessageId", messages.get(0).getMessageId());
         assertEquals(Message.Status.ERROR, messages.get(0).getStatus());

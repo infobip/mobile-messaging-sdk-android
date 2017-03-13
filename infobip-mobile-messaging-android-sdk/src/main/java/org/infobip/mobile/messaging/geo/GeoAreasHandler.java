@@ -9,6 +9,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.Arrays;
@@ -25,10 +26,14 @@ public class GeoAreasHandler {
     private static final String TAG = "GeofenceTransitions";
 
     private final MessageStore messageStore;
+    private final GeoNotificationHelper geoNotificationHelper;
+    private final GeoReporter geoReporter;
     private final Context context;
 
-    GeoAreasHandler(Context context) {
+    GeoAreasHandler(Context context, Broadcaster broadcaster) {
         this.context = context;
+        this.geoNotificationHelper = new GeoNotificationHelper(context, broadcaster);
+        this.geoReporter = new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats());
         this.messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
     }
 
@@ -72,7 +77,7 @@ public class GeoAreasHandler {
             return;
         }
 
-        GeoReportingResult result = GeoReporter.reportSync(context, unreportedEvents);
+        GeoReportingResult result = geoReporter.reportSync(context, unreportedEvents);
         handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
     }
 
@@ -86,7 +91,7 @@ public class GeoAreasHandler {
         Map<Message, GeoEventType> messages = GeoReportHelper.createMessagesToNotify(context, reports, result);
         saveMessages(messages.keySet());
         handleGeoReportingResult(context, result);
-        GeoNotificationHelper.notifyAboutGeoTransitions(context, messages);
+        geoNotificationHelper.notifyAboutGeoTransitions(messages);
     }
 
     /**

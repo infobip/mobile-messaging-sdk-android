@@ -3,16 +3,14 @@ package org.infobip.mobile.messaging.gcm;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -21,6 +19,12 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @since 14.04.2016.
  */
 public class MobileMessageHandler {
+
+    private Broadcaster broadcaster;
+
+    public MobileMessageHandler(Broadcaster broadcaster) {
+        this.broadcaster = broadcaster;
+    }
 
     /**
      * Handles GCM/FCM new push message intent
@@ -57,15 +61,8 @@ public class MobileMessageHandler {
         }
 
         if (!MobileMessagingCore.hasGeo(message)) {
-            sendBroadcast(context, message);
+            broadcaster.messageReceived(message);
         }
-    }
-
-    public static void sendBroadcast(Context context, Message message) {
-        Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
-        messageReceived.putExtras(BundleMapper.messageToBundle(message));
-        context.sendBroadcast(messageReceived);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
     }
 
     private void saveMessage(Context context, Message message) {
@@ -94,5 +91,6 @@ public class MobileMessageHandler {
         }
         MobileMessagingLogger.d("Sending DR: " + message.getMessageId());
         MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
+        broadcaster.deliveryReported(message.getMessageId());
     }
 }

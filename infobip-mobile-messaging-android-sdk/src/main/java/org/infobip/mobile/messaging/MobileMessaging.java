@@ -43,23 +43,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * @since 29.02.2016.
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class MobileMessaging {
-
-    private static MobileMessaging instance;
-    private final Context context;
-
-
-    /**
-     * Default constructor. Use MobileMessaging.Builder to construct MobileMessaging.
-     *
-     * @param context android context object.
-     * @see MobileMessaging.Builder
-     */
-    private MobileMessaging(Context context) {
-        MobileMessagingLogger.init(context);
-        this.context = context;
-    }
-
+public abstract class MobileMessaging {
 
     /**
      * Gets an instance of MobileMessaging after it is initialized via {@link MobileMessaging.Builder}.
@@ -71,11 +55,7 @@ public class MobileMessaging {
      * @see MobileMessaging.Builder
      */
     public synchronized static MobileMessaging getInstance(Context context) {
-        if (null != instance) {
-            return instance;
-        }
-
-        return new MobileMessaging(context);
+        return MobileMessagingCore.getInstance(context);
     }
 
     /**
@@ -83,18 +63,14 @@ public class MobileMessaging {
      * (regular push messages/geofencing campaign messages/messages fetched from the server).
      * MobileMessaging SDK has the push registration enabled by default.
      */
-    public void enablePushRegistration() {
-        MobileMessagingCore.getInstance(context).enablePushRegistration();
-    }
+    public abstract void enablePushRegistration();
 
     /**
      * Disables the push registration so that the application is no longer able to receive push notifications
      * through MobileMessaging SDK (regular push messages/geofencing campaign messages/messages fetched from the server).
      * MobileMessaging SDK has the push registration enabled by default.
      */
-    public void disablePushRegistration() {
-        MobileMessagingCore.getInstance(context).disablePushRegistration();
-    }
+    public abstract void disablePushRegistration();
 
     /**
      * Push registration status defines whether the device is allowed to receive push notifications
@@ -103,9 +79,7 @@ public class MobileMessaging {
      *
      * @return Current push registration status.
      */
-    public boolean isPushRegistrationEnabled() {
-        return MobileMessagingCore.getInstance(context).isPushRegistrationEnabled();
-    }
+    public abstract boolean isPushRegistrationEnabled();
 
     /**
      * Reports delivery of messages to Mobile Messaging servers.
@@ -117,9 +91,7 @@ public class MobileMessaging {
      * @param messageIds ids of messages to report delivery for
      * @see Event#DELIVERY_REPORTS_SENT
      */
-    public void setMessagesDelivered(final String... messageIds) {
-        MobileMessagingCore.getInstance(context).setMessagesDelivered(messageIds);
-    }
+    public abstract void setMessagesDelivered(final String... messageIds);
 
     /**
      * Reports seen status of messages to Mobile Messaging servers.
@@ -129,9 +101,7 @@ public class MobileMessaging {
      * @param messageIds message ids to report seen status for
      * @see Event#SEEN_REPORTS_SENT
      */
-    public void setMessagesSeen(final String... messageIds) {
-        MobileMessagingCore.getInstance(context).setMessagesSeen(messageIds);
-    }
+    public abstract void setMessagesSeen(final String... messageIds);
 
     /**
      * Returns instance of message store that is used within the library or null if message store is not set.
@@ -139,9 +109,7 @@ public class MobileMessaging {
      * @return instance of message store.
      * @see MessageStore
      */
-    public MessageStore getMessageStore() {
-        return MobileMessagingCore.getInstance(context).getMessageStore();
-    }
+    public abstract MessageStore getMessageStore();
 
     /**
      * Does a synchronization of user data with server.
@@ -152,9 +120,7 @@ public class MobileMessaging {
      * @param userData user data object with desired changes
      * @see Event#USER_DATA_REPORTED
      */
-    public void syncUserData(UserData userData) {
-        MobileMessagingCore.getInstance(context).syncUserData(userData, null);
-    }
+    public abstract void syncUserData(UserData userData);
 
     /**
      * Does a synchronization of user data with server.
@@ -167,9 +133,7 @@ public class MobileMessaging {
      * @see ResultListener
      * @see Event#USER_DATA_REPORTED
      */
-    public void syncUserData(UserData userData, ResultListener<UserData> listener) {
-        MobileMessagingCore.getInstance(context).syncUserData(userData, listener);
-    }
+    public abstract void syncUserData(UserData userData, ResultListener<UserData> listener);
 
     /**
      * Does a fetch of user data from the server.
@@ -178,9 +142,7 @@ public class MobileMessaging {
      *
      * @see Event#USER_DATA_REPORTED
      */
-    public void fetchUserData() {
-        MobileMessagingCore.getInstance(context).syncUserData(null, null);
-    }
+    public abstract void fetchUserData();
 
     /**
      * Does a fetch of user data from the server.
@@ -191,9 +153,7 @@ public class MobileMessaging {
      * @see ResultListener
      * @see Event#USER_DATA_REPORTED
      */
-    public void fetchUserData(ResultListener<UserData> listener) {
-        MobileMessagingCore.getInstance(context).syncUserData(null, listener);
-    }
+    public abstract void fetchUserData(ResultListener<UserData> listener);
 
     /**
      * Reads user data that is currently stored in the library.
@@ -202,9 +162,7 @@ public class MobileMessaging {
      *
      * @return last synchronized UserData object
      */
-    public UserData getUserData() {
-        return MobileMessagingCore.getInstance(context).getUserData();
-    }
+    public abstract UserData getUserData();
 
     /**
      * Send mobile originated messages.
@@ -213,9 +171,7 @@ public class MobileMessaging {
      *
      * @param messages messages to send
      */
-    public void sendMessages(Message... messages) {
-        MobileMessagingCore.getInstance(context).sendMessages(null, messages);
-    }
+    public abstract void sendMessages(Message... messages);
 
     /**
      * Send mobile originated messages.
@@ -229,9 +185,7 @@ public class MobileMessaging {
      * @param messages messages to send
      * @see ResultListener
      */
-    public void sendMessages(ResultListener<Message[]> listener, Message... messages) {
-        MobileMessagingCore.getInstance(context).sendMessages(listener, messages);
-    }
+    public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
      * Starts tracking geofence areas.
@@ -239,18 +193,14 @@ public class MobileMessaging {
      * @see Geofencing
      */
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    public void activateGeofencing() {
-        MobileMessagingCore.getInstance(context).activateGeofencing(Geofencing.getInstance(context));
-    }
+    public abstract void activateGeofencing();
 
     /**
      * Stops tracking geofence areas.
      *
      * @see Geofencing
      */
-    public void deactivateGeofencing() {
-        MobileMessagingCore.getInstance(context).deactivateGeofencing();
-    }
+    public abstract void deactivateGeofencing();
 
     /**
      * Default result listener interface for asynchronous operations.
@@ -274,10 +224,9 @@ public class MobileMessaging {
          *
          * @param e object that contains error description
          */
-        public void onError(Throwable e) {
-        }
+        public void onError(MobileMessagingError e) {
 
-        public abstract void onError(MobileMessagingError e);
+        }
     }
 
 
@@ -561,16 +510,11 @@ public class MobileMessaging {
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
 
-            MobileMessaging mobileMessaging = new MobileMessaging(application);
-            MobileMessaging.instance = mobileMessaging;
-
-            new MobileMessagingCore.Builder(application)
+            return new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
                     .withApplicationCode(applicationCode)
                     .withGeofencing(geofencingActivated ? Geofencing.getInstance(application) : null)
                     .build();
-
-            return mobileMessaging;
         }
     }
 }

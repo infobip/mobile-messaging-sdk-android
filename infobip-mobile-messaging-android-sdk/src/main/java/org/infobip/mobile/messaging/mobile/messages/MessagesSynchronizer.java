@@ -5,8 +5,10 @@ import android.content.Context;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -19,8 +21,13 @@ import java.util.concurrent.Executor;
  */
 public class MessagesSynchronizer extends RetryableSynchronizer {
 
-    public MessagesSynchronizer(Context context, MobileMessagingStats stats, Executor executor) {
+    private final Broadcaster broadcaster;
+    private final MobileMessageHandler mobileMessageHandler;
+
+    public MessagesSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
         super(context, stats, executor);
+        this.broadcaster = broadcaster;
+        this.mobileMessageHandler = new MobileMessageHandler(broadcaster);
     }
 
     @Override
@@ -31,18 +38,18 @@ public class MessagesSynchronizer extends RetryableSynchronizer {
                 if (syncMessagesResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (synchronizing messages)!");
                     stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
+                    broadcaster.error(MobileMessagingError.createFrom(syncMessagesResult.getError()));
                     retry(syncMessagesResult);
                     return;
                 }
 
-                MobileMessageHandler messageHandler = new MobileMessageHandler();
                 List<Message> messages = syncMessagesResult.getMessages();
                 if (messages == null) {
                     return;
                 }
 
                 for (Message message : messages) {
-                    messageHandler.handleMessage(context, message);
+                    mobileMessageHandler.handleMessage(context, message);
                 }
             }
 
@@ -50,6 +57,7 @@ public class MessagesSynchronizer extends RetryableSynchronizer {
             protected void onCancelled(SyncMessagesResult result) {
                 MobileMessagingLogger.e("Error syncing messages!");
                 stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(result.getError()));
                 retry(result);
             }
         }.executeOnExecutor(executor);

@@ -1,20 +1,15 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
-import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -31,15 +26,19 @@ class GeoNotificationHelper {
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
     private static final GeoEventSettings DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEventSettings(GeoEventType.entry, 1, 0L);
 
-    private static Map<GeoEventType, Event> eventBroadcasts = new HashMap<GeoEventType, Event>() {{
-        put(GeoEventType.entry, Event.GEOFENCE_AREA_ENTERED);
-    }};
+    private Context context;
+    private Broadcaster broadcaster;
+
+    public GeoNotificationHelper(Context context, Broadcaster broadcaster) {
+        this.context = context;
+        this.broadcaster = broadcaster;
+    }
 
     /**
      * Broadcasts geofencing events and displays appropriate notifications for geo events
      * @param messages messages with geo to notify
      */
-    static void notifyAboutGeoTransitions(Context context, Map<Message, GeoEventType> messages) {
+    void notifyAboutGeoTransitions(Map<Message, GeoEventType> messages) {
         for (Message m : messages.keySet()) {
             GeoEventType eventType = messages.get(m);
 
@@ -47,7 +46,7 @@ class GeoNotificationHelper {
             setNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType,
                         getNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType) + 1);
 
-            notifyAboutTransition(context, m.getGeo(), m, eventType);
+            notifyAboutTransition(m.getGeo(), m, eventType);
         }
     }
 
@@ -175,22 +174,10 @@ class GeoNotificationHelper {
         PreferenceHelper.saveLong(context, areaNotificationTimeKey(campaignId, event), timeMs);
     }
 
-    private static void notifyAboutTransition(Context context, Geo geo, Message message, GeoEventType event) {
+    private void notifyAboutTransition(Geo geo, Message message, GeoEventType event) {
         NotificationHandler.displayNotification(context, message);
-        sendGeoEventBroadcast(context, geo, message, event);
-        MobileMessageHandler.sendBroadcast(context, message);
-    }
 
-    private static void sendGeoEventBroadcast(Context context, Geo geo, Message message, GeoEventType event) {
-        Event broadcastEvent = eventBroadcasts.get(event);
-        if (broadcastEvent == null) {
-            return;
-        }
-
-        Intent geofenceIntent = new Intent(broadcastEvent.getKey());
-        geofenceIntent.putExtras(BundleMapper.geoToBundle(geo));
-        geofenceIntent.putExtras(BundleMapper.messageToBundle(message));
-        LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
-        context.sendBroadcast(geofenceIntent);
+        broadcaster.messageReceived(message);
+        broadcaster.geoEvent(event, message, geo);
     }
 }

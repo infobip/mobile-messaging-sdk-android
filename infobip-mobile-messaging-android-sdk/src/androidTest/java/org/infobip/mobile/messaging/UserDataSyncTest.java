@@ -1,10 +1,5 @@
 package org.infobip.mobile.messaging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -21,23 +16,13 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class UserDataSyncTest extends InfobipAndroidTestCase {
 
-    BroadcastReceiver receiver;
-    ArgumentCaptor<Intent> captor;
+    private ArgumentCaptor<UserData> captor;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        captor = ArgumentCaptor.forClass(Intent.class);
-        receiver = Mockito.mock(BroadcastReceiver.class);
-        context.registerReceiver(receiver, new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        context.unregisterReceiver(receiver);
-
-        super.tearDown();
+        captor = ArgumentCaptor.forClass(UserData.class);
     }
 
     public void test_empty_user_data() throws Exception {
@@ -45,10 +30,9 @@ public class UserDataSyncTest extends InfobipAndroidTestCase {
 
         mobileMessaging.fetchUserData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
 
-        UserData userData = UserData.createFrom(captor.getValue().getExtras());
-
+        UserData userData = captor.getValue();
         assertTrue(userData.getPredefinedUserData() == null || userData.getPredefinedUserData().isEmpty());
         assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
     }
@@ -68,7 +52,7 @@ public class UserDataSyncTest extends InfobipAndroidTestCase {
 
         mobileMessaging.syncUserData(userData);
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
 
         JSONAssert.assertEquals(
                 "{"  +

@@ -1,11 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -19,9 +14,7 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class SystemDataReportTest extends InfobipAndroidTestCase {
 
-    private BroadcastReceiver receiver;
-    private BroadcastReceiver errorReceiver;
-    private ArgumentCaptor<Intent> captor;
+    private ArgumentCaptor<SystemData> captor;
 
     @Override
     protected void setUp() throws Exception {
@@ -30,18 +23,7 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, true);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
-        captor = ArgumentCaptor.forClass(Intent.class);
-        receiver = Mockito.mock(BroadcastReceiver.class);
-        errorReceiver = Mockito.mock(BroadcastReceiver.class);
-        context.registerReceiver(receiver, new IntentFilter(Event.SYSTEM_DATA_REPORTED.getKey()));
-        context.registerReceiver(errorReceiver, new IntentFilter(Event.API_COMMUNICATION_ERROR.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        context.unregisterReceiver(receiver);
-
-        super.tearDown();
+        captor = ArgumentCaptor.forClass(SystemData.class);
     }
 
     public void test_reportSystemData() {
@@ -50,10 +32,8 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
-
-        SystemData data = new JsonSerializer().deserialize(captor.getValue().getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).systemDataReported(captor.capture());
+        SystemData data = captor.getValue();
         // application version is null in test
         //assertFalse(data.getApplicationVersion().isEmpty());
         assertFalse(data.getDeviceManufacturer().isEmpty());
@@ -70,10 +50,8 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_SYSTEM_DATA));
-
-        SystemData data = new JsonSerializer().deserialize(captor.getValue().getStringExtra(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).systemDataReported(captor.capture());
+        SystemData data = captor.getValue();
         // application version is null in test
         //assertTrue(data.getApplicationVersion().isEmpty());
         assertTrue(data.getDeviceManufacturer().isEmpty());
@@ -88,11 +66,11 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
     }
 
     public void test_reportSystemData_repeatAfterError() {
@@ -101,14 +79,14 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
-        Mockito.verify(errorReceiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).never()).systemDataReported(Mockito.any(SystemData.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).error(Mockito.any(MobileMessagingError.class));
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atMost(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
     }
 
     public void test_shouldReport_whenRegistrationIDAvailable() {
@@ -119,13 +97,13 @@ public class SystemDataReportTest extends InfobipAndroidTestCase {
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
-        Mockito.verify(errorReceiver, Mockito.after(1000).never()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).never()).systemDataReported(Mockito.any(SystemData.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).never()).error(Mockito.any(MobileMessagingError.class));
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(receiver, Mockito.after(1000).times(1)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).times(1)).systemDataReported(Mockito.any(SystemData.class));
     }
 }

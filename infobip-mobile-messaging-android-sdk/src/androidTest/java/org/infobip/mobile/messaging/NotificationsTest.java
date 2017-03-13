@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +35,7 @@ public class NotificationsTest extends InfobipAndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        mobileMessageHandler = new MobileMessageHandler();
+        mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(context));
         notificationCaptor = ArgumentCaptor.forClass(Integer.class);
         notificationManagerMock = Mockito.mock(NotificationManager.class);
 

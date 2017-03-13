@@ -1,18 +1,14 @@
 package org.infobip.mobile.messaging;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -31,7 +27,6 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
 
-    private BroadcastReceiver errorReceiver;
     private Executor executor;
 
     private SystemDataReporter systemDataReporter;
@@ -51,15 +46,12 @@ public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_EXP_BACKOFF_MULTIPLIER, 0);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
-        errorReceiver = Mockito.mock(BroadcastReceiver.class);
-        context.registerReceiver(errorReceiver, new IntentFilter(Event.API_COMMUNICATION_ERROR.getKey()));
-
         executor = Executors.newSingleThreadExecutor();
-        geoReporter = new GeoReporter(context, stats);
-        systemDataReporter = new SystemDataReporter(context, stats, executor);
-        messagesSynchronizer = new MessagesSynchronizer(context, stats, executor);
-        registrationSynchronizer = new RegistrationSynchronizer(context, stats, executor, mobileMessagingCore);
-        userDataSynchronizer = new UserDataSynchronizer(context, stats, executor);
+        geoReporter = new GeoReporter(context, broadcaster, stats);
+        systemDataReporter = new SystemDataReporter(context, stats, executor, broadcaster);
+        messagesSynchronizer = new MessagesSynchronizer(context, stats, executor, broadcaster);
+        registrationSynchronizer = new RegistrationSynchronizer(context, stats, executor, broadcaster);
+        userDataSynchronizer = new UserDataSynchronizer(context, stats, executor, broadcaster);
 
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, "{\n" +
                 "  \"code\": \"500\",\n" +
@@ -67,16 +59,9 @@ public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
                 "}");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        context.unregisterReceiver(errorReceiver);
-
-        super.tearDown();
-    }
-
     public void test_system_data_retry() {
         reportSystemData();
-        Mockito.verify(errorReceiver, Mockito.after(4000).atLeast(3)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(3)).error(Mockito.any(MobileMessagingError.class));
     }
 
     private void reportSystemData() {
@@ -100,27 +85,27 @@ public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
     public void test_geo_report_retry() {
 
         // Given
-        Helper.createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, Helper.createArea("areaId1"));
-        Helper.createReport(context, "signalingMessageId2", "campaignId2", "messageId2", true, Helper.createArea("areaId2"));
-        Helper.createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, Helper.createArea("areaId3"));
+        createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, createArea("areaId1"));
+        createReport(context, "signalingMessageId2", "campaignId2", "messageId2", true, createArea("areaId2"));
+        createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, createArea("areaId3"));
 
         // When
         geoReporter.synchronize();
 
         // Then
-        Mockito.verify(errorReceiver, Mockito.after(4000).atLeast(4)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_sync_messages_retry() {
         messagesSynchronizer.synchronize();
-        Mockito.verify(errorReceiver, Mockito.after(4000).times(4)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_registration_retry() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
 
         registrationSynchronizer.synchronize();
-        Mockito.verify(errorReceiver, Mockito.after(4000).times(4)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_user_data_retry() {
@@ -130,6 +115,6 @@ public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userData.toString());
 
         userDataSynchronizer.synchronize(null);
-        Mockito.verify(errorReceiver, Mockito.after(4000).times(4)).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 }

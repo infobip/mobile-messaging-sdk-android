@@ -4,9 +4,9 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -29,7 +29,7 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
         PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
 
-        handler = new MobileMessageHandler();
+        handler = new MobileMessageHandler(new AndroidBroadcaster(context));
         geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         geoStore.deleteAll(context);
         commonStore = MobileMessagingCore.getInstance(context).getMessageStore();
@@ -39,7 +39,7 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
     public void test_shouldSaveGeoMessagesToGeoStore() throws Exception {
 
         // Given
-        Message message = Helper.createMessage(context, "SomeMessageId", "SomeCampaignId", false, Helper.createArea("SomeAreaId"));
+        Message message = createMessage(context, "SomeMessageId", "SomeCampaignId", false, createArea("SomeAreaId"));
 
         // When
         handler.handleMessage(context, message);
@@ -55,7 +55,7 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
     public void test_shouldSaveNonGeoMessagesToCommonStore() throws Exception {
         // Given
-        Message message = Helper.createMessage(context, "SomeMessageId", null, false);
+        Message message = createMessage(context, "SomeMessageId", null, false);
 
         // When
         handler.handleMessage(context, message);
@@ -69,8 +69,8 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
     public void test_shouldSaveMessagesToCorrespondingSeparateStores() throws Exception {
         // Given
-        Message message1 = Helper.createMessage(context, "SomeMessageId1", null, false);
-        Message message2 = Helper.createMessage(context, "SomeMessageId2", "SomeCampaignId2", false, Helper.createArea("SomeAreaId1"));
+        Message message1 = createMessage(context, "SomeMessageId1", null, false);
+        Message message2 = createMessage(context, "SomeMessageId2", "SomeCampaignId2", false, createArea("SomeAreaId1"));
 
         // When
         handler.handleMessage(context, message1);

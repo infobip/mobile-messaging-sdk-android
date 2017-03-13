@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -25,17 +26,16 @@ import java.util.concurrent.Executor;
  */
 public class RegistrationSynchronizer extends RetryableSynchronizer {
 
-    private final String registrationId;
-    private String deviceApplicationInstanceId;
+    private Broadcaster broadcaster;
 
-    public RegistrationSynchronizer(Context context, MobileMessagingStats stats, Executor executor, MobileMessagingCore mobileMessagingCore) {
+    public RegistrationSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
         super(context, stats, executor);
-        this.registrationId = mobileMessagingCore.getRegistrationId();
-        this.deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        this.broadcaster = broadcaster;
     }
 
     @Override
     public void updatePushRegistrationStatus(final Boolean enabled) {
+        final String registrationId = MobileMessagingCore.getInstance(context).getRegistrationId();
         if (StringUtils.isBlank(registrationId)) {
             return;
         }
@@ -58,21 +58,17 @@ public class RegistrationSynchronizer extends RetryableSynchronizer {
                 setDeviceApplicationInstanceId(context, result.getDeviceInstanceId());
                 setRegistrationIdReported(context, true);
 
-                Intent registrationUpdated = new Intent(Event.PUSH_REGISTRATION_ENABLED.getKey());
-                registrationUpdated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, registrationId);
-                registrationUpdated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, result.getDeviceInstanceId());
-                registrationUpdated.putExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, result.getPushRegistrationEnabled());
-                context.sendBroadcast(registrationUpdated);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(registrationUpdated);
+                broadcaster.registrationEnabled(registrationId, result.getDeviceInstanceId(), result.getPushRegistrationEnabled());
             }
 
             @Override
-            protected void onCancelled() {
+            protected void onCancelled(UpsertRegistrationResult upsertRegistrationResult) {
                 MobileMessagingLogger.e("Error updating registration!");
                 setRegistrationIdReported(context, false);
-
                 setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
+
                 stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(upsertRegistrationResult.getError()));
             }
         }.executeOnExecutor(executor, enabled);
     }
@@ -84,9 +80,11 @@ public class RegistrationSynchronizer extends RetryableSynchronizer {
 
     @Override
     public void synchronize() {
+        String deviceApplicationInstanceId = MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId();
         if (null != deviceApplicationInstanceId && isRegistrationIdReported(context)) {
             return;
         }
+        String registrationId = MobileMessagingCore.getInstance(context).getRegistrationId();
         reportRegistration(registrationId);
     }
 
@@ -116,21 +114,19 @@ public class RegistrationSynchronizer extends RetryableSynchronizer {
 
                 MobileMessagingCore.getInstance(context).reportSystemData();
 
-                Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
-                registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, registrationId);
-                registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, result.getDeviceInstanceId());
-                context.sendBroadcast(registrationCreated);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
+                broadcaster.registrationCreated(registrationId, result.getDeviceInstanceId());
             }
 
             @Override
             protected void onCancelled(UpsertRegistrationResult result) {
                 MobileMessagingLogger.e("Error creating registration!");
                 setRegistrationIdReported(context, false);
+                setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
+
                 retry(result);
 
-                setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(result.getError()));
             }
         }.executeOnExecutor(executor);
     }

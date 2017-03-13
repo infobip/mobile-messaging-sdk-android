@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging;
 
+import android.os.Bundle;
+
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -29,6 +31,10 @@ public class SystemData {
 
     public static SystemData fromJson(String json) {
         return new JsonSerializer().deserialize(json, SystemData.class);
+    }
+
+    public static SystemData createFrom(Bundle bundle) {
+        return new JsonSerializer().deserialize(bundle.getString(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
     }
 
     public String getSdkVersion() {

@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.geo;
 import android.app.IntentService;
 import android.content.Intent;
 
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+
 public class GeofenceTransitionsIntentService extends IntentService {
 
 
@@ -12,7 +14,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        final GeoAreasHandler geoAreasHandler = new GeoAreasHandler(this);
+        final GeoAreasHandler geoAreasHandler = new GeoAreasHandler(this, new AndroidBroadcaster(this));
         geoAreasHandler.handleTransition(intent);
     }
 }

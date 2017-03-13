@@ -1,11 +1,7 @@
 package org.infobip.mobile.messaging.mobile.data;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
@@ -13,6 +9,7 @@ import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -24,8 +21,11 @@ import java.util.concurrent.Executor;
  */
 public class SystemDataReporter extends RetryableSynchronizer {
 
-    public SystemDataReporter(Context context, MobileMessagingStats stats, Executor executor) {
+    private Broadcaster broadcaster;
+
+    public SystemDataReporter(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
         super(context, stats, executor);
+        this.broadcaster = broadcaster;
     }
 
     @Override
@@ -45,12 +45,8 @@ public class SystemDataReporter extends RetryableSynchronizer {
                 if (result.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (system data)!");
                     stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
+                    broadcaster.error(MobileMessagingError.createFrom(result.getError()));
                     retry(result);
-
-                    Intent intent = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    intent.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
-                    context.sendBroadcast(intent);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                     return;
                 }
 
@@ -60,17 +56,14 @@ public class SystemDataReporter extends RetryableSynchronizer {
                 }
 
                 MobileMessagingCore.getInstance(context).setSystemDataReported();
-
-                Intent dataReported = new Intent(Event.SYSTEM_DATA_REPORTED.getKey());
-                dataReported.putExtra(BroadcastParameter.EXTRA_SYSTEM_DATA, result.getData().toString());
-                context.sendBroadcast(dataReported);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(dataReported);
+                broadcaster.systemDataReported(result.getData());
             }
 
             @Override
             protected void onCancelled(SystemDataReportResult result) {
                 MobileMessagingLogger.e("Error reporting user data!");
                 stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(result.getError()));
                 retry(result);
             }
         }.executeOnExecutor(executor, report);

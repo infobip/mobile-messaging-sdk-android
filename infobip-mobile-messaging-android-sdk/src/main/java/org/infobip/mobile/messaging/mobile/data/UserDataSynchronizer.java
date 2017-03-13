@@ -1,11 +1,7 @@
 package org.infobip.mobile.messaging.mobile.data;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -13,6 +9,7 @@ import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
@@ -25,8 +22,11 @@ import java.util.concurrent.Executor;
 @SuppressWarnings("unchecked")
 public class UserDataSynchronizer extends RetryableSynchronizer {
 
-    public UserDataSynchronizer(Context context, MobileMessagingStats stats, Executor executor) {
+    private Broadcaster broadcaster;
+
+    public UserDataSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
         super(context, stats, executor);
+        this.broadcaster = broadcaster;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserDataSynchronizer extends RetryableSynchronizer {
 
                         MobileMessagingCore.getInstance(context).setUserDataReportedWithError();
                         if (listener != null) {
-                            listener.onError(syncUserDataResult.getError());
+                            listener.onError(MobileMessagingError.createFrom(syncUserDataResult.getError()));
                         }
                     } else {
 
@@ -59,21 +59,14 @@ public class UserDataSynchronizer extends RetryableSynchronizer {
                         }
                     }
 
-                    Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    userDataSyncError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(syncUserDataResult.getError()));
-                    context.sendBroadcast(userDataSyncError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
-
+                    broadcaster.error(MobileMessagingError.createFrom(syncUserDataResult.getError()));
                     return;
                 }
 
                 UserData userData = UserDataMapper.fromUserDataReport(userDataToReport.getExternalUserId(), syncUserDataResult.getPredefined(), syncUserDataResult.getCustom());
                 MobileMessagingCore.getInstance(context).setUserDataReported(userData);
 
-                Intent userDataReported = new Intent(Event.USER_DATA_REPORTED.getKey());
-                userDataReported.putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
-                context.sendBroadcast(userDataReported);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(userDataReported);
+                broadcaster.userDataReported(userData);
 
                 if (listener != null) {
                     listener.onResult(userData);
@@ -84,6 +77,7 @@ public class UserDataSynchronizer extends RetryableSynchronizer {
             protected void onCancelled(SyncUserDataResult syncUserDataResult) {
                 MobileMessagingLogger.e("Error reporting user data!");
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(syncUserDataResult.getError()));
 
                 MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
                 if (listener != null) {

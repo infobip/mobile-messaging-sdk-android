@@ -1,10 +1,5 @@
 package org.infobip.mobile.messaging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -20,8 +15,7 @@ import fi.iki.elonen.NanoHTTPD;
 
 public class CustomUserDataTypeTest extends InfobipAndroidTestCase {
 
-    BroadcastReceiver receiver;
-    ArgumentCaptor<Intent> captor;
+    ArgumentCaptor<UserData> captor;
 
     private static final String KEY_FOR_STRING = "keyForString";
     private static final String KEY_FOR_NUMBER = "keyForNumber";
@@ -54,16 +48,7 @@ public class CustomUserDataTypeTest extends InfobipAndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        captor = ArgumentCaptor.forClass(Intent.class);
-        receiver = Mockito.mock(BroadcastReceiver.class);
-        context.registerReceiver(receiver, new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        context.unregisterReceiver(receiver);
-
-        super.tearDown();
+        captor = ArgumentCaptor.forClass(UserData.class);
     }
 
     public void test_sync_user_data() {
@@ -73,12 +58,10 @@ public class CustomUserDataTypeTest extends InfobipAndroidTestCase {
         userData.setCustomUserDataElement(KEY_FOR_STRING, new CustomUserDataValue(SOME_STRING_VALUE));
         userData.setCustomUserDataElement(KEY_FOR_NUMBER, new CustomUserDataValue(SOME_NUMBER_VALUE));
         userData.setCustomUserDataElement(KEY_FOR_DATE, new CustomUserDataValue(SOME_DATE_VALUE));
-        MobileMessaging.getInstance(context).syncUserData(userData);
+        mobileMessaging.syncUserData(userData);
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
-        assertTrue(captor.getValue().hasExtra(BroadcastParameter.EXTRA_USER_DATA));
-
-        UserData userDataResponse = UserData.createFrom(captor.getValue().getExtras());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
+        UserData userDataResponse = captor.getValue();
         assertEquals(SOME_STRING_VALUE, userDataResponse.getCustomUserDataValue(KEY_FOR_STRING).stringValue());
         assertEquals(SOME_NUMBER_VALUE, userDataResponse.getCustomUserDataValue(KEY_FOR_NUMBER).numberValue().intValue());
         assertEquals(SOME_DATE_VALUE.toString(), userDataResponse.getCustomUserDataValue(KEY_FOR_DATE).dateValue().toString());

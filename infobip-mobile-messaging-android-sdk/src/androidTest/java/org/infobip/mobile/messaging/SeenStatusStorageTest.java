@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.Helper;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -23,7 +22,7 @@ public class SeenStatusStorageTest extends InfobipAndroidTestCase {
 
         // Given
         Long now = System.currentTimeMillis();
-        Helper.createMessage(context, "SomeMessageId", true);
+        createMessage(context, "SomeMessageId", true);
 
         // When
         MobileMessaging.getInstance(context).setMessagesSeen("SomeMessageId");
