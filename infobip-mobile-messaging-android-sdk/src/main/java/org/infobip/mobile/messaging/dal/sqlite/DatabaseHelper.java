@@ -51,4 +51,11 @@ public interface DatabaseHelper {
      * @param primaryKey object primary key
      */
     <T extends DatabaseContract.DatabaseObject> void delete(Class<T> cls, String primaryKey);
+
+    /**
+     * Deletes object from database
+     * @param cls object class
+     * @param primaryKeys object primary keys
+     */
+    <T extends DatabaseContract.DatabaseObject> void delete(Class<T> cls, String[] primaryKeys);
 }

@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Message;
@@ -12,10 +13,13 @@ import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,19 +33,25 @@ public class GeoStorageTest extends InstrumentationTestCase {
     private MessageStore geoStore;
     private MessageStore commonStore;
     private MobileMessageHandler handler;
+    private long now;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
-
         context = getInstrumentation().getContext();
+
+        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
+
         handler = new MobileMessageHandler();
         geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
         geoStore.deleteAll(context);
         commonStore = MobileMessagingCore.getInstance(context).getMessageStore();
         commonStore.deleteAll(context);
+        now = System.currentTimeMillis();
     }
 
     public void test_shouldSaveGeoMessagesToGeoStore() throws Exception {
@@ -113,5 +123,60 @@ public class GeoStorageTest extends InstrumentationTestCase {
         assertEquals("SomeMessageId2", messages.get(0).getMessageId());
         assertEquals("SomeCampaignId2", messages.get(0).getGeo().getCampaignId());
         assertEquals("SomeAreaId1", messages.get(0).getGeo().getAreasList().get(0).getId());
+    }
+
+    public void test_shouldDeleteExpiredAreas() throws Exception {
+        // Given
+        long now = System.currentTimeMillis();
+        Long millis30MinBeforeNow = now - 30 * 60 * 1000;
+        Long millis15MinBeforeNow = now - 15 * 60 * 1000;
+        Long millis15MinAfterNow = now + 15 * 60 * 1000;
+        String date30MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinBeforeNow));
+        String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
+        String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
+        String nonExpiredMessageId = "SomeMessageId5";
+
+        saveGeoMessageToDb("SomeMessageId1", null, date30MinBeforeNow);
+        saveGeoMessageToDb("SomeMessageId2", null, date30MinBeforeNow);
+        saveGeoMessageToDb("SomeMessageId3", null, date15MinBeforeNow);
+        saveGeoMessageToDb("SomeMessageId4", null, date15MinBeforeNow);
+        saveGeoMessageToDb(nonExpiredMessageId, null, date15MinAfterNow);
+
+        assertEquals(5, geoStore.countAll(context));
+
+        // When
+        MobileMessagingCore.getInstance(context).removeExpiredAreas();
+
+        // Then
+        assertEquals(1, geoStore.countAll(context));
+        assertEquals(nonExpiredMessageId, geoStore.findAll(context).get(0).getMessageId());
+    }
+
+    private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) throws JSONException {
+        Geo geo = new Geo(0.0, 0.0, new ArrayList<Area>() {{
+            add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
+        }}, null, new ArrayList<GeoEvent>(), expiryTimeMillis, startTimeMillis, "SomeCampaignId");
+
+        JSONObject internalData = new JSONObject(new JsonSerializer().serialize(geo));
+        Message message = new Message(
+                messageId,
+                "SomeTitle",
+                "SomeBody",
+                "SomeSound",
+                true,
+                "SomeIcon",
+                true,
+                "SomeCategory",
+                "SomeFrom",
+                now,
+                0,
+                internalData,
+                null,
+                geo,
+                "SomeDestination",
+                Message.Status.UNKNOWN,
+                "SomeStatusMessage"
+        );
+        geoStore.save(context, message);
     }
 }

@@ -62,4 +62,8 @@ public class GeoSQLiteMessageStore implements MessageStore {
     public void deleteById(Context context, String messageId) {
         MobileMessagingCore.getDatabaseHelper(context).delete(SqliteGeoMessage.class, messageId);
     }
+
+    public void deleteByIds(Context context, String[] messageIds) {
+        MobileMessagingCore.getDatabaseHelper(context).delete(SqliteGeoMessage.class, messageIds);
+    }
 }

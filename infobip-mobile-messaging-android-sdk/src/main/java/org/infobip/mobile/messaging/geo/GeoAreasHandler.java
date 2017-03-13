@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.PatternSyntaxException;
 
+import static com.google.android.gms.location.GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE;
+
 /**
  * @author pandric
  * @since 24.06.2016.
@@ -60,7 +62,7 @@ class GeoAreasHandler {
     }};
 
     private static SparseArray<String> geofencingErrors = new SparseArray<String>() {{
-        put(GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE, "Geofence not available");
+        put(GEOFENCE_NOT_AVAILABLE, "Geofence not available");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES, "Too many geofences");
         put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
     }};
@@ -83,7 +85,12 @@ class GeoAreasHandler {
         if (geofencingEvent == null) return;
 
         if (geofencingEvent.hasError()) {
-            MobileMessagingLogger.e(TAG, "ERROR:" + geofencingErrors.get(geofencingEvent.getErrorCode()));
+            int errorCode = geofencingEvent.getErrorCode();
+            MobileMessagingLogger.e(TAG, "ERROR:" + geofencingErrors.get(errorCode));
+
+            if (GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE == errorCode) {
+                MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
+            }
             return;
         }
 
@@ -101,6 +108,46 @@ class GeoAreasHandler {
             return;
         }
 
+        Pair<ArrayList<GeoReport>, ArrayList<Pair<Geo, Message>>> geoReportsAndDataToNotify =
+                prepareGeoReportsAndDataToNotify(geofenceTransition, triggeringLocation, filteredMessagesAndAreas);
+
+        ArrayList<GeoReport> geoReports = geoReportsAndDataToNotify.first;
+        ArrayList<Pair<Geo, Message>> geoDataToNotify = geoReportsAndDataToNotify.second;
+
+        if (!geoReports.isEmpty() && !geoDataToNotify.isEmpty()) {
+            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+            EventReport reports[] = GeoReporter.prepareEventReport(geoReports.toArray(new GeoReport[geoReports.size()]));
+
+            List<String> finishedCampaignIds = Arrays.asList(mobileMessagingCore.getFinishedCampaignIds());
+            List<String> suspendedCampaignIds = Arrays.asList(mobileMessagingCore.getSuspendedCampaignIds());
+
+            //send reports
+            try {
+                final GeoReportingResult result = new GeoReportingResult(MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context)
+                        .report(new EventReports(reports)));
+
+                if (result.getFinishedCampaignIds() != null) {
+                    finishedCampaignIds = Arrays.asList(result.getFinishedCampaignIds());
+                }
+                if (result.getSuspendedCampaignIds() != null) {
+                    suspendedCampaignIds = Arrays.asList(result.getSuspendedCampaignIds());
+                }
+
+                GeoReporter.handleSuccess(context, mobileMessagingCore, result, geoReports);
+
+            } catch (Exception e) {
+                GeoReporter.handleError(context, mobileMessagingCore, e, geoReports);
+            }
+
+            //display notifications
+            displayNotificationsForActiveCampaigns(geoDataToNotify, geofenceTransition, finishedCampaignIds, suspendedCampaignIds);
+        }
+
+    }
+
+    private Pair<ArrayList<GeoReport>, ArrayList<Pair<Geo, Message>>> prepareGeoReportsAndDataToNotify(int geofenceTransition,
+                                                                                                       Location triggeringLocation,
+                                                                                                       Map<Message, List<Area>> filteredMessagesAndAreas) {
         ArrayList<GeoReport> geoReports = new ArrayList<>(filteredMessagesAndAreas.size());
         ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>(filteredMessagesAndAreas.size());
 
@@ -129,48 +176,22 @@ class GeoAreasHandler {
             }
         }
 
-        if (!geoReports.isEmpty() && !geoDataToNotify.isEmpty()) {
-            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-            EventReport reports[] = GeoReporter.prepareEventReport(geoReports.toArray(new GeoReport[geoReports.size()]));
-
-            List<String> finishedCampaignIds = Arrays.asList(mobileMessagingCore.getFinishedCampaignIds());
-            List<String> suspendedCampaignIds = Arrays.asList(mobileMessagingCore.getSuspendedCampaignIds());
-
-            try {
-                final GeoReportingResult result = new GeoReportingResult(MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context)
-                        .report(new EventReports(reports)));
-
-                if (result.getFinishedCampaignIds() != null) {
-                    finishedCampaignIds = Arrays.asList(result.getFinishedCampaignIds());
-                }
-                if (result.getSuspendedCampaignIds() != null) {
-                    suspendedCampaignIds = Arrays.asList(result.getSuspendedCampaignIds());
-                }
-
-                GeoReporter.handleSuccess(context, mobileMessagingCore, result, geoReports);
-
-            } catch (Exception e) {
-                GeoReporter.handleError(context, mobileMessagingCore, e, geoReports);
-            }
-
-            displayNotificationsForActiveCampaigns(geoDataToNotify, geofenceTransition, finishedCampaignIds, suspendedCampaignIds);
-        }
-
+        return new Pair<>(geoReports, geoDataToNotify);
     }
 
     private void displayNotificationsForActiveCampaigns(ArrayList<Pair<Geo, Message>> geoDataToNotify, int geofenceTransition, List<String> finishedCampaignIds, List<String> suspendedCampaignIds) {
         for (Pair<Geo, Message> geoData : geoDataToNotify) {
             final Geo geo = geoData.first;
             final Message message = geoData.second;
-            if (finishedCampaignIds.contains(message.getGeo().getCampaignId()) || suspendedCampaignIds.contains(message.getGeo().getCampaignId())) {
+            if (finishedCampaignIds.contains(geo.getCampaignId()) || suspendedCampaignIds.contains(geo.getCampaignId())) {
                 continue;
             }
 
-            setLastNotificationTimeForArea(message.getGeo().getCampaignId(), geofenceTransition, System.currentTimeMillis());
-            setNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition,
-                    getNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition) + 1);
+            setLastNotificationTimeForArea(geo.getCampaignId(), geofenceTransition, System.currentTimeMillis());
+            setNumberOfDisplayedNotificationsForArea(geo.getCampaignId(), geofenceTransition,
+                    getNumberOfDisplayedNotificationsForArea(geo.getCampaignId(), geofenceTransition) + 1);
 
-            notifyAboutTransition(context, geo, geofenceTransition, geoData.second);
+            notifyAboutTransition(context, geo, geofenceTransition, message);
         }
     }
 

@@ -67,6 +67,7 @@ public class MobileMessageHandler {
             messageStore.save(context, message);
 
             if (MobileMessagingCore.hasGeo(message)) {
+                MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
                 MobileMessagingCore.getInstance(context).startGeoMonitoringIfNecessary();
             }
         } catch (Exception e) {

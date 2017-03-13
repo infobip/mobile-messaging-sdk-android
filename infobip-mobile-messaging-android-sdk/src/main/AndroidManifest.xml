@@ -49,9 +49,13 @@
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+                <data android:scheme="package" />
+            </intent-filter>
         </receiver>
 
-        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver"/>
+        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
 
     </application>
 </manifest>
