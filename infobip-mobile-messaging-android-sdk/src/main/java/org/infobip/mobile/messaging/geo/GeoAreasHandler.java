@@ -165,7 +165,13 @@ class GeoAreasHandler {
                         triggeringLocation.getLongitude(),
                         new ArrayList<Area>() {{
                             add(area);
-                        }});
+                        }},
+                        message.getGeo().getDeliveryTime(),
+                        null,
+                        message.getGeo().getExpiryDate().toString(),
+                        message.getGeo().getStartDate().toString(),
+                        message.getGeo().getCampaignId());
+
 
                 geoDataToNotify.add(new Pair<>(geoToReportAndNotify, message));
 

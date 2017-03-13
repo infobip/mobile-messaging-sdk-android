@@ -23,7 +23,7 @@ public class GeoEventsTest extends InstrumentationTestCase {
 
     private class GeoTest extends Geo {
         public GeoTest() {
-            super(null, null, null);
+            super(null, null, null, null, null, null, null);
         }
 
         List<GeoEvent> getEventFilters() {

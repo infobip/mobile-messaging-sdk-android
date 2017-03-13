@@ -46,13 +46,15 @@ public class Geo implements Parcelable {
     @SerializedName("campaignId")
     private String campaignId;
 
-    protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
+    protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList, DeliveryTime deliveryTime, Date expiryDate, Date startDate, String campaignId) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.areasList = areasList;
+        this.deliveryTime = deliveryTime;
+        this.expiryTime = DateTimeUtil.ISO8601DateToString(expiryDate);
+        this.startTime = DateTimeUtil.ISO8601DateToString(startDate);
+        this.campaignId = campaignId;
     }
-
-
 
     protected Geo(Parcel in) {
         this.triggeringLatitude = in.readDouble();
