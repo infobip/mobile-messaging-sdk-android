@@ -13,6 +13,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.Time;
 
 import java.util.Date;
 
@@ -45,7 +46,7 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                  */
                 case LocationManager.PROVIDERS_CHANGED_ACTION:
                     if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                        Date triggerDate = new Date(System.currentTimeMillis() + 15 * 1000);
+                        Date triggerDate = new Date(Time.now() + 15 * 1000);
                         scheduleConsistencyAlarm(context, AlarmManager.RTC, triggerDate, NETWORK_PROVIDER_ENABLED_ACTION, 0);
                     }
                     break;

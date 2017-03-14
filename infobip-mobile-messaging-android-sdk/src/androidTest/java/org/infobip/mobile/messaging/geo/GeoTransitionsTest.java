@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -24,7 +24,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 13/02/2017.
  */
 
-public class GeoTransitionsTest extends InfobipAndroidTestCase {
+public class GeoTransitionsTest extends MobileMessagingTestCase {
 
     private GeoAreasHandler handler;
     private GeoReporter geoReporter;

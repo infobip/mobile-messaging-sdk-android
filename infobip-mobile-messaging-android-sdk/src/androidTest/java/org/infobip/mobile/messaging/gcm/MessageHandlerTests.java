@@ -7,7 +7,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
 
@@ -18,7 +18,7 @@ import java.util.List;
  * @since 15/02/2017.
  */
 
-public class MessageHandlerTests extends InfobipAndroidTestCase {
+public class MessageHandlerTests extends MobileMessagingTestCase {
 
     private MobileMessageHandler handler;
     private MessageStore commonStore;

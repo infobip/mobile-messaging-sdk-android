@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
@@ -25,7 +25,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @author pandric on 08/03/2017.
  */
 
-public class RetryableSynchronizerTest extends InfobipAndroidTestCase {
+public class RetryableSynchronizerTest extends MobileMessagingTestCase {
 
     private Executor executor;
 

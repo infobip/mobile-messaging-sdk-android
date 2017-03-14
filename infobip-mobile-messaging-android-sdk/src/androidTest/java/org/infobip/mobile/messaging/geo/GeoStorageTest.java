@@ -5,9 +5,10 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -19,7 +20,7 @@ import java.util.List;
  * @since 13/02/2017.
  */
 
-public class GeoStorageTest extends InfobipAndroidTestCase {
+public class GeoStorageTest extends MobileMessagingTestCase {
 
     private MobileMessageHandler handler;
     private MessageStore commonStore;
@@ -91,7 +92,7 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
     public void test_shouldDeleteExpiredAreas() throws Exception {
         // Given
-        long now = System.currentTimeMillis();
+        long now = Time.now();
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         Long millis15MinAfterNow = now + 15 * 60 * 1000;

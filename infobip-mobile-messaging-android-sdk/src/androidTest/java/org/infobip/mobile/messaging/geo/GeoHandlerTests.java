@@ -5,7 +5,7 @@ import android.annotation.SuppressLint;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -19,7 +19,7 @@ import java.util.List;
  * @since 15/02/2017.
  */
 
-public class GeoHandlerTests extends InfobipAndroidTestCase {
+public class GeoHandlerTests extends MobileMessagingTestCase {
 
     private GeoAreasHandler handler;
     private ArgumentCaptor<Message> captor;

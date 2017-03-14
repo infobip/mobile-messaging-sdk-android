@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -12,7 +12,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @author sslavin
  * @since 22/07/16.
  */
-public class SendMOMessageTest extends InfobipAndroidTestCase {
+public class SendMOMessageTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<List<Message>> captor;
 

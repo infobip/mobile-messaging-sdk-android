@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.dal.sqlite;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotEquals;
  * @since 13/01/2017.
  */
 
-public class DatabaseHelperTest extends InfobipAndroidTestCase {
+public class DatabaseHelperTest extends MobileMessagingTestCase {
 
     private SQLiteDatabase database;
 

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.Geo;
+import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -77,7 +78,7 @@ public class Message implements Comparable<Message> {
 
     public Message() {
         this.messageId = UUID.randomUUID().toString();
-        this.receivedTimestamp = System.currentTimeMillis();
+        this.receivedTimestamp = Time.now();
         this.status = Status.UNKNOWN;
     }
 

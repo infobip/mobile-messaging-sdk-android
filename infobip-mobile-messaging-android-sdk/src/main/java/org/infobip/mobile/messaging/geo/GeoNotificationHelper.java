@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -42,7 +43,7 @@ class GeoNotificationHelper {
         for (Message m : messages.keySet()) {
             GeoEventType eventType = messages.get(m);
 
-            setLastNotificationTimeForArea(context, m.getGeo().getCampaignId(), eventType, System.currentTimeMillis());
+            setLastNotificationTimeForArea(context, m.getGeo().getCampaignId(), eventType, Time.now());
             setNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType,
                         getNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType) + 1);
 
@@ -67,7 +68,7 @@ class GeoNotificationHelper {
         return settings != null &&
                 isInDeliveryWindow &&
                 (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEventSettings.UNLIMITED_RECURRING) &&
-                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
+                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < Time.now() - lastNotificationTimeForArea &&
                 geoEventMatchesTransition(settings, event) &&
                 !geo.isExpired();
     }

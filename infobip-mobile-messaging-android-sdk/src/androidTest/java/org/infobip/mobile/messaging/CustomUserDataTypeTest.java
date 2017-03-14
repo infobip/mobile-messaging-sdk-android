@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -13,7 +13,7 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
-public class CustomUserDataTypeTest extends InfobipAndroidTestCase {
+public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
     ArgumentCaptor<UserData> captor;
 

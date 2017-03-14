@@ -1,7 +1,8 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 /**
@@ -9,7 +10,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
  * @since 14/02/2017.
  */
 
-public class SeenStatusStorageTest extends InfobipAndroidTestCase {
+public class SeenStatusStorageTest extends MobileMessagingTestCase {
 
     @Override
     protected void setUp() throws Exception {
@@ -21,7 +22,7 @@ public class SeenStatusStorageTest extends InfobipAndroidTestCase {
     public void test_shouldUpdateSeenTimestampInMessageStore() {
 
         // Given
-        Long now = System.currentTimeMillis();
+        Long now = Time.now();
         createMessage(context, "SomeMessageId", true);
 
         // When

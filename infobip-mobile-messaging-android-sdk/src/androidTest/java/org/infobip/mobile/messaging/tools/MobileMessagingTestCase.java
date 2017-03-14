@@ -22,6 +22,8 @@ import org.infobip.mobile.messaging.geo.GeoLatLng;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.platform.TimeProvider;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
@@ -31,6 +33,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -39,7 +42,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 10/03/2017.
  */
 
-public class InfobipAndroidTestCase extends InstrumentationTestCase {
+public class MobileMessagingTestCase extends InstrumentationTestCase {
 
     protected Context context;
     protected Context contextMock;
@@ -50,6 +53,29 @@ public class InfobipAndroidTestCase extends InstrumentationTestCase {
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
     protected Broadcaster broadcaster;
+    protected TestTimeProvider time;
+
+    private static class TestTimeProvider implements TimeProvider {
+
+        long delta = 0;
+
+        public void forward(long time, TimeUnit unit) {
+            delta += unit.toMillis(time);
+        }
+
+        public void backward(long time, TimeUnit unit) {
+            delta -= unit.toMillis(time);
+        }
+
+        public void reset() {
+            delta = 0;
+        }
+
+        @Override
+        public long now() {
+            return System.currentTimeMillis() + delta;
+        }
+    }
 
     @SuppressLint("ApplySharedPref")
     @Override
@@ -65,6 +91,9 @@ public class InfobipAndroidTestCase extends InstrumentationTestCase {
                 "  \"message\": \"Internal server error\"\n" +
                 "}");
         debugServer.start();
+
+        time = new TestTimeProvider();
+        Time.reset(time);
 
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
 

@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -35,7 +36,7 @@ public class VersionChecker extends RetryableSynchronizer {
 
         Long lastCheckTime = PreferenceHelper.findLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME);
         Integer minimumInterval = PreferenceHelper.findInt(context, MobileMessagingProperty.VERSION_CHECK_INTERVAL_DAYS);
-        if (TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - lastCheckTime) < minimumInterval) {
+        if (TimeUnit.MILLISECONDS.toDays(Time.now() - lastCheckTime) < minimumInterval) {
             return;
         }
 
@@ -55,7 +56,7 @@ public class VersionChecker extends RetryableSynchronizer {
                             " here: " + versionCheckResult.getUpdateUrl());
                 }
 
-                PreferenceHelper.saveLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME, System.currentTimeMillis());
+                PreferenceHelper.saveLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME, Time.now());
             }
 
             @Override

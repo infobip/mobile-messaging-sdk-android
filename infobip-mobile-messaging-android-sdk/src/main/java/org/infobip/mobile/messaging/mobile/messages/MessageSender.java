@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -64,8 +65,8 @@ public class MessageSender {
             message.setDestination(delivery.getDestination());
             message.setBody(delivery.getText());
             message.setStatusMessage(delivery.getStatus());
-            message.setReceivedTimestamp(System.currentTimeMillis());
-            message.setSeenTimestamp(System.currentTimeMillis());
+            message.setReceivedTimestamp(Time.now());
+            message.setSeenTimestamp(Time.now());
             messages.add(message);
 
             String json = delivery.getCustomPayload() != null ? delivery.getCustomPayload().toString() : null;

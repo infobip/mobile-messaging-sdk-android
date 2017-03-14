@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
  * @author sslavin
  * @since 07/07/16.
  */
-public class SeenStatusReporterTest extends InfobipAndroidTestCase {
+public class SeenStatusReporterTest extends MobileMessagingTestCase {
 
     SeenStatusReporter seenStatusReporter;
     Executor executor;

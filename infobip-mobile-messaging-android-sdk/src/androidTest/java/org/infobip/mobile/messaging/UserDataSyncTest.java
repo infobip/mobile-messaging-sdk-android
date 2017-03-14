@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -14,7 +14,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 10/11/2016.
  */
 
-public class UserDataSyncTest extends InfobipAndroidTestCase {
+public class UserDataSyncTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<UserData> captor;
 
