@@ -12,7 +12,9 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author sslavin
@@ -114,6 +116,24 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
         // Then
         assertEquals(1, geoStore.countAll(context));
         assertEquals(nonExpiredMessageId, geoStore.findAll(context).get(0).getMessageId());
+    }
+
+    public void test_shouldDeleteAreasFromGeoStoreByIds() throws Exception {
+        // Given
+        Set<String> geoMessageIds = new HashSet<>(6);
+        for (int i = 0; i < 6; i++) {
+            String tempMessageId = "SomeMessageId" + i;
+            geoMessageIds.add(tempMessageId);
+            saveGeoMessageToDb(tempMessageId, null, null);
+        }
+
+        assertEquals(6, geoStore.countAll(context));
+
+        // When
+        ((GeoSQLiteMessageStore) geoStore).deleteByIds(context, geoMessageIds.toArray(new String[]{}));
+
+        // Then
+        assertEquals(0, geoStore.countAll(context));
     }
 
     private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) {
