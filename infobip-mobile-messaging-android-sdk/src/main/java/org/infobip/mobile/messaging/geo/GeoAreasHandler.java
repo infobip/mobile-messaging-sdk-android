@@ -46,6 +46,10 @@ public class GeoAreasHandler {
         GeoTransition transition;
         try {
             transition = GeoTransitionHelper.resolveTransitionFromIntent(intent);
+        } catch (GeoTransitionHelper.GeofenceNotAvailableException e) {
+            MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
+            MobileMessagingLogger.e(TAG, "Geofence not available");
+            return;
         } catch (Exception e) {
             MobileMessagingLogger.e(TAG, "Cannot resolve transition information: " + e);
             return;

@@ -18,6 +18,10 @@ import java.util.Set;
 
 class GeoTransitionHelper {
 
+    static class GeofenceNotAvailableException extends RuntimeException {
+
+    }
+
     /**
      * Supported geofence transition events
      */
@@ -38,6 +42,9 @@ class GeoTransitionHelper {
         }
 
         if (geofencingEvent.hasError()) {
+            if (geofencingEvent.getErrorCode() == GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE) {
+                throw new GeofenceNotAvailableException();
+            }
             throw new RuntimeException("ERROR: " + GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode()));
         }
 
