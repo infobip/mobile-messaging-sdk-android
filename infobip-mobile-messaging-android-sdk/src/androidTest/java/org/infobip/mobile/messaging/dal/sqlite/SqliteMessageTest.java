@@ -1,11 +1,9 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteConstraintException;
-import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.json.JSONObject;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -16,18 +14,7 @@ import java.util.List;
  * @since 12/01/2017.
  */
 
-public class SqliteMessageTest extends InstrumentationTestCase {
-
-    private DatabaseHelper databaseHelper;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        Context context = getInstrumentation().getContext();
-        databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
-        databaseHelper.deleteAll(SqliteMessage.class);
-    }
+public class SqliteMessageTest extends InfobipAndroidTestCase {
 
     public void test_message_toFromSqlite() throws Exception {
 
@@ -43,11 +30,6 @@ public class SqliteMessageTest extends InstrumentationTestCase {
                 "SomeFrom",
                 1234L,
                 5678L,
-                new JSONObject() {{
-                    put("stringValue", "StringValue1");
-                    put("numberValue", 1);
-                    put("booleanValue", false);
-                }},
                 new JSONObject() {{
                     put("stringValue", "StringValue2");
                     put("numberValue", 2);
@@ -74,11 +56,6 @@ public class SqliteMessageTest extends InstrumentationTestCase {
         assertEquals("SomeIcon", m.getIcon());
         assertEquals(1234L, m.getReceivedTimestamp());
         assertEquals(5678L, m.getSeenTimestamp());
-        JSONAssert.assertEquals("{" +
-                "'stringValue': 'StringValue1'," +
-                "'numberValue': 1," +
-                "'booleanValue':false" +
-        "}", m.getInternalData(), true);
         JSONAssert.assertEquals("{" +
                 "'stringValue': 'StringValue2'," +
                 "'numberValue': 2," +

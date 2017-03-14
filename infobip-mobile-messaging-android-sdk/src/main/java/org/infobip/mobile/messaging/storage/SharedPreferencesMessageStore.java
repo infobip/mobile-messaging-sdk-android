@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.util.Base64;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
             public List<Message> convert(Set<String> set) {
                 List<Message> messages = new ArrayList<Message>();
                 for (String bundle : set) {
-                    messages.add(Message.createFrom(deserialize(bundle)));
+                    messages.add(FCMMessageMapper.fromCloudBundle(deserialize(bundle)));
                 }
                 return messages;
             }
@@ -72,14 +72,14 @@ public class SharedPreferencesMessageStore implements MessageStore {
             public void mutate(Set<String> set) {
                 for (Message message : messages) {
                     for (String serializedBundle : new HashSet<>(set)) {
-                        Message messageInSet = Message.createFrom(deserialize(serializedBundle));
+                        Message messageInSet = FCMMessageMapper.fromCloudBundle(deserialize(serializedBundle));
                         if (messageInSet.getMessageId().equals(message.getMessageId())) {
                             set.remove(serializedBundle);
                             break;
                         }
                     }
 
-                    set.add(serialize(BundleMessageMapper.toBundle(message)));
+                    set.add(serialize(FCMMessageMapper.toCloudBundle(message)));
                 }
             }
         });

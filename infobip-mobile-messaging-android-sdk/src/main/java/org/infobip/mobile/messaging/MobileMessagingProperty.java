@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import java.util.HashSet;
+
 /**
  * @author mstipanov
  * @since 07.04.2016.
@@ -34,8 +36,9 @@ public enum MobileMessagingProperty {
     UNREPORTED_SYSTEM_DATA("org.ninfobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
     REPORTED_SYSTEM_DATA_HASH("org.ninfobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     UNREPORTED_GEO_EVENTS("org.ninfobip.mobile.messaging.infobip.UNREPORTED_GEO_EVENTS", new String[0]),
-    FINISHED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.FINISHED_CAMPAIGN_IDS", new String[0]),
-    SUSPENDED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.SUSPENDED_CAMPAIGN_IDS", new String[0]),
+    FINISHED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.FINISHED_CAMPAIGN_IDS", new HashSet<String>()),
+    SUSPENDED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.SUSPENDED_CAMPAIGN_IDS", new HashSet<String>()),
+    ALL_ACTIVE_GEO_AREAS_MONITORED("org.infobip.mobile.messaging.infobip.ALL_ACTIVE_GEO_AREAS_MONITORED", false),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.infobip.GEOFENCING_ACTIVATED", false),
     PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", true),

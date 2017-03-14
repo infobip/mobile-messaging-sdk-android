@@ -1,15 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
-
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.tools.DebugServer;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -23,46 +14,15 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 10/11/2016.
  */
 
-public class UserDataSyncTest extends InstrumentationTestCase {
+public class UserDataSyncTest extends InfobipAndroidTestCase {
 
-    DebugServer debugServer;
-    BroadcastReceiver receiver;
-    ArgumentCaptor<Intent> captor;
-    MobileMessaging mobileMessaging;
+    private ArgumentCaptor<UserData> captor;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
-        mobileMessaging = MobileMessaging.getInstance(getInstrumentation().getContext());
-
-        debugServer = new DebugServer();
-        debugServer.start();
-
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
-
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(getInstrumentation().getContext(), MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
-
-        captor = ArgumentCaptor.forClass(Intent.class);
-        receiver = Mockito.mock(BroadcastReceiver.class);
-        getInstrumentation().getContext().registerReceiver(receiver, new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        getInstrumentation().getContext().unregisterReceiver(receiver);
-
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception e) {
-                //ignore
-            }
-        }
-
-        super.tearDown();
+        captor = ArgumentCaptor.forClass(UserData.class);
     }
 
     public void test_empty_user_data() throws Exception {
@@ -70,10 +30,9 @@ public class UserDataSyncTest extends InstrumentationTestCase {
 
         mobileMessaging.fetchUserData();
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
 
-        UserData userData = UserData.createFrom(captor.getValue().getExtras());
-
+        UserData userData = captor.getValue();
         assertTrue(userData.getPredefinedUserData() == null || userData.getPredefinedUserData().isEmpty());
         assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
     }
@@ -93,7 +52,7 @@ public class UserDataSyncTest extends InstrumentationTestCase {
 
         mobileMessaging.syncUserData(userData);
 
-        Mockito.verify(receiver, Mockito.after(1000).atLeastOnce()).onReceive(Mockito.any(Context.class), Mockito.any(Intent.class));
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
 
         JSONAssert.assertEquals(
                 "{"  +

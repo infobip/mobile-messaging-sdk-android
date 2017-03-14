@@ -3,15 +3,14 @@ package org.infobip.mobile.messaging.gcm;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -21,23 +20,37 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class MobileMessageHandler {
 
+    private Broadcaster broadcaster;
+
+    public MobileMessageHandler(Broadcaster broadcaster) {
+        this.broadcaster = broadcaster;
+    }
+
+    /**
+     * Handles GCM/FCM new push message intent
+     * @param intent intent that contains new message
+     */
     public void handleMessage(Context context, Intent intent) {
+        Bundle data = intent.getExtras();
+        handleMessage(context, FCMMessageMapper.fromCloudBundle(data));
+    }
+
+    /**
+     * Handles new push message
+     * @param message new message
+     */
+    public void handleMessage(Context context, Message message) {
+
         if (!MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
             return;
         }
 
-        String from = intent.getStringExtra("from");
-        Bundle data = intent.getExtras();
-
-        data.putLong("received_timestamp", System.currentTimeMillis());
-
-        Message message = createMessage(from, data);
         if (StringUtils.isBlank(message.getMessageId())) {
             MobileMessagingLogger.w("Ignoring message without messageId");
             return;
         }
 
-        MobileMessagingLogger.d("Message received from: " + from);
+        message.setReceivedTimestamp(System.currentTimeMillis());
 
         sendDeliveryReport(context, message);
         saveMessage(context, message);
@@ -48,10 +61,7 @@ public class MobileMessageHandler {
         }
 
         if (!MobileMessagingCore.hasGeo(message)) {
-            Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
-            messageReceived.putExtras(BundleMessageMapper.toBundle(message));
-            context.sendBroadcast(messageReceived);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
+            broadcaster.messageReceived(message);
         }
     }
 
@@ -67,17 +77,12 @@ public class MobileMessageHandler {
             messageStore.save(context, message);
 
             if (MobileMessagingCore.hasGeo(message)) {
+                MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
                 MobileMessagingCore.getInstance(context).startGeoMonitoringIfNecessary();
             }
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }
-    }
-
-    private Message createMessage(String from, Bundle data) {
-        Message message = Message.createFrom(data);
-        message.setFrom(from);
-        return message;
     }
 
     private void sendDeliveryReport(Context context, Message message) {
@@ -87,5 +92,6 @@ public class MobileMessageHandler {
         }
         MobileMessagingLogger.d("Sending DR: " + message.getMessageId());
         MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
+        broadcaster.deliveryReported(message.getMessageId());
     }
 }

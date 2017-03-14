@@ -19,7 +19,7 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.ConfigurationException;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -75,7 +75,7 @@ public class NotificationHandler {
     private static @NonNull PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
 
         Intent intent = new Intent();
-        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMessageMapper.toBundle(message));
+        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMapper.messageToBundle(message));
 
         if (notificationSettings.markSeenOnTap()) {
             intent.setClass(context, NotificationTapReceiver.class);

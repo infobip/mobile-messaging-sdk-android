@@ -2,22 +2,16 @@ package org.infobip.mobile.messaging.mobile.data;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
 /**
  * @author sslavin
@@ -53,11 +47,6 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
             mobileMessagingCore.setLastHttpException(e);
             MobileMessagingLogger.e("Error synchronizing user data!", e);
             cancel(true);
-
-            Intent userDataSyncError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            userDataSyncError.putExtra(EXTRA_EXCEPTION, MobileMessagingError.createFrom(e));
-            context.sendBroadcast(userDataSyncError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(userDataSyncError);
             return new SyncUserDataResult(e);
         }
     }

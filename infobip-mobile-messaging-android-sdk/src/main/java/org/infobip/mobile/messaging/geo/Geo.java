@@ -1,14 +1,12 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
@@ -20,93 +18,34 @@ import java.util.List;
  * @author pandric
  * @since 14.06.2016.
  */
-public class Geo implements Parcelable {
+public class Geo {
 
-    @SerializedName("triggeringLatitude")
     private Double triggeringLatitude;
-
-    @SerializedName("triggeringLongitude")
     private Double triggeringLongitude;
+    private DeliveryTime deliveryTime;
+    private String expiryTime;
+    private String startTime;
+    private String campaignId;
 
     @SerializedName("geo")
     private List<Area> areasList = new ArrayList<>();
 
-    @SerializedName("deliveryTime")
-    private DeliveryTime deliveryTime;
-
     @SerializedName("event")
-    private List<GeoEvent> events = new ArrayList<>();
+    private List<GeoEventSettings> eventSettings = new ArrayList<>();
 
-    @SerializedName("expiryTime")
-    private String expiryTime;
-
-    @SerializedName("startTime")
-    private String startTime;
-
-    @SerializedName("campaignId")
-    private String campaignId;
-
-    protected Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList) {
+    public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId, List<Area> areasList, List<GeoEventSettings> eventSettings) {
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
-        this.areasList = areasList;
-    }
-
-
-
-    protected Geo(Parcel in) {
-        this.triggeringLatitude = in.readDouble();
-        this.triggeringLongitude = in.readDouble();
-        in.readTypedList(this.areasList, Area.CREATOR);
-        this.deliveryTime = in.readParcelable(DeliveryTime.class.getClassLoader());
-        in.readTypedList(this.events, GeoEvent.CREATOR);
-        this.expiryTime = in.readString();
-        this.startTime = in.readString();
-        this.campaignId = in.readString();
-    }
-
-    public Geo(Double triggeringLatitude, Double triggeringLongitude, List<Area> areasList, DeliveryTime deliveryTime, List<GeoEvent> events, String expiryTime, String startTime, String campaignId) {
-        this.triggeringLatitude = triggeringLatitude;
-        this.triggeringLongitude = triggeringLongitude;
-        this.areasList = areasList;
         this.deliveryTime = deliveryTime;
-        this.events = events;
         this.expiryTime = expiryTime;
         this.startTime = startTime;
         this.campaignId = campaignId;
+        this.areasList = areasList;
+        this.eventSettings = eventSettings;
     }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeDouble(triggeringLatitude);
-        parcel.writeDouble(triggeringLongitude);
-        parcel.writeTypedList(areasList);
-        parcel.writeParcelable(deliveryTime, i);
-        parcel.writeTypedList(events);
-        parcel.writeString(expiryTime);
-        parcel.writeString(startTime);
-        parcel.writeString(campaignId);
-    }
-
-    public static final Creator<Geo> CREATOR = new Creator<Geo>() {
-        @Override
-        public Geo createFromParcel(Parcel in) {
-            return new Geo(in);
-        }
-
-        @Override
-        public Geo[] newArray(int size) {
-            return new Geo[size];
-        }
-    };
 
     public static Geo createFrom(Bundle bundle) {
-        return bundle.getParcelable(BroadcastParameter.EXTRA_GEOFENCE_AREAS);
+        return BundleMapper.geoFromBundle(bundle);
     }
 
     public Double getTriggeringLatitude() {
@@ -121,12 +60,8 @@ public class Geo implements Parcelable {
         return areasList;
     }
 
-    protected List<GeoEvent> getEvents() {
-        return events;
-    }
-
-    protected DeliveryTime getDeliveryTime() {
-        return deliveryTime;
+    protected List<GeoEventSettings> getEvents() {
+        return eventSettings;
     }
 
     protected Date getExpiryDate() {
@@ -137,20 +72,6 @@ public class Geo implements Parcelable {
             MobileMessagingLogger.d(Log.getStackTraceString(e));
             return null;
         }
-    }
-
-    protected Date getStartDate() {
-        try {
-            return DateTimeUtil.ISO8601DateFromString(startTime);
-        } catch (ISO8601DateParseException e) {
-            MobileMessagingLogger.e("Cannot parse start date: " + e.getMessage());
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
-            return null;
-        }
-    }
-
-    protected String getCampaignId() {
-        return campaignId;
     }
 
     /**
@@ -173,5 +94,31 @@ public class Geo implements Parcelable {
         Date now = new Date();
         Date expiryDate = getExpiryDate();
         return expiryDate != null && expiryDate.before(now);
+    }
+
+    DeliveryTime getDeliveryTime() {
+        return deliveryTime;
+    }
+
+    Date getStartDate() {
+        try {
+            return DateTimeUtil.ISO8601DateFromString(startTime);
+        } catch (ISO8601DateParseException e) {
+            MobileMessagingLogger.e("Cannot parse start date: " + e.getMessage());
+            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            return null;
+        }
+    }
+
+    String getCampaignId() {
+        return campaignId;
+    }
+
+    String getExpiryTime() {
+        return expiryTime;
+    }
+
+    String getStartTime() {
+        return startTime;
     }
 }

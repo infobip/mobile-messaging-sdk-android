@@ -1,27 +1,22 @@
 package org.infobip.mobile.messaging.mobile.geo;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.api.geo.EventReport;
-import org.infobip.mobile.messaging.api.geo.EventType;
+import org.infobip.mobile.messaging.geo.GeoAreasHandler;
 import org.infobip.mobile.messaging.geo.GeoReport;
+import org.infobip.mobile.messaging.geo.GeoReportHelper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author sslavin
@@ -30,96 +25,84 @@ import java.util.concurrent.TimeUnit;
 
 public class GeoReporter extends RetryableSynchronizer {
 
-    public GeoReporter(Context context, MobileMessagingStats stats) {
+    private Broadcaster broadcaster;
+
+    public GeoReporter(Context context, Broadcaster broadcaster, MobileMessagingStats stats) {
         super(context, stats);
+        this.broadcaster = broadcaster;
     }
 
     @Override
     public void synchronize() {
         final MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        final ArrayList<GeoReport> reports = mobileMessagingCore.removeUnreportedGeoEvents(context);
-        if (reports.isEmpty() || !mobileMessagingCore.isPushRegistrationEnabled()) {
+        final GeoReport reports[] = mobileMessagingCore.removeUnreportedGeoEvents();
+        if (reports.length == 0 || !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
 
         new GeoReportingTask(context) {
 
             protected void onPostExecute(GeoReportingResult result) {
+                handleSuccess(context, reports, result);
+                GeoAreasHandler.handleGeoReportingResult(context, result);
                 if (result.hasError()) {
-                    MobileMessagingLogger.e("MobileMessaging API returned error (report geo events)!");
-                    stats.reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
                     retry(result);
-                    return;
                 }
-
-                GeoReporter.handleSuccess(context, mobileMessagingCore, result, reports);
             }
 
             protected void onCancelled(GeoReportingResult result) {
-                MobileMessagingLogger.e("Error reporting geo events!");
-                GeoReporter.handleError(context, mobileMessagingCore, result.getError(), reports);
+                handleError(context, result.getError(), reports);
+                GeoAreasHandler.handleGeoReportingResult(context, result);
                 retry(result);
             }
-        }.execute(reports.toArray(new GeoReport[reports.size()]));
+        }.execute(reports);
+    }
+
+    /**
+     * Reports geo events synchronously
+     * @param geoReports set that contains original messages and corresponding events
+     * @return result that will contain lists of campaign ids and mappings between library generated message ids and IPCore ids
+     */
+    public @NonNull GeoReportingResult reportSync(@NonNull Context context, @NonNull GeoReport geoReports[]) {
+        try {
+            GeoReportingResult result = GeoReportingTask.executeSync(context, geoReports);
+            handleSuccess(context, geoReports, result);
+            return result;
+        } catch (Exception e) {
+            handleError(context, e, geoReports);
+            return new GeoReportingResult(e);
+        }
+    }
+
+    /**
+     * Handles successful reporting of events to the server, will send out events with what was reported to the server.
+     * @param geoReports reports that were sent to the server.
+     * @param result result from the server
+     */
+    private void handleSuccess(Context context, GeoReport geoReports[], GeoReportingResult result) {
+        List<GeoReport> geoReportsToBroadcast = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(geoReports), result);
+        broadcaster.geoReported(geoReportsToBroadcast);
+    }
+
+    /**
+     * Handles any error that happens during reporting to the server.
+     * @param error error that happens
+     * @param geoReports reports sent to server
+     */
+    private void handleError(Context context, Throwable error, GeoReport geoReports[]) {
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+
+        MobileMessagingLogger.e("Error reporting geo areas: " + error);
+
+        mobileMessagingCore.setLastHttpException(error);
+        mobileMessagingCore.getStats().reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
+        mobileMessagingCore.addUnreportedGeoEvents(geoReports);
+
+        broadcaster.error(MobileMessagingError.createFrom(error));
     }
 
     @Override
     public Task getTask() {
         return Task.GEO_REPORT;
-    }
-
-    public static void handleSuccess(Context context, MobileMessagingCore mobileMessagingCore, GeoReportingResult result, ArrayList<GeoReport> geoReports) {
-        mobileMessagingCore.addCampaignStatus(result.getFinishedCampaignIds(), result.getSuspendedCampaignIds());
-
-        List<String> finishedCampaignIds = new ArrayList<>();
-        List<String> suspendedCampaignIds = new ArrayList<>();
-        ArrayList<GeoReport> geoReportsToBroadcast = new ArrayList<>(geoReports);
-
-        if (result.getFinishedCampaignIds() != null) {
-            finishedCampaignIds = Arrays.asList(result.getFinishedCampaignIds());
-        }
-        if (result.getSuspendedCampaignIds() != null) {
-            suspendedCampaignIds = Arrays.asList(result.getSuspendedCampaignIds());
-        }
-
-        if (!finishedCampaignIds.isEmpty() || !suspendedCampaignIds.isEmpty()) {
-            for (GeoReport geoReport : geoReports) {
-                if (finishedCampaignIds.contains(geoReport.getCampaignId()) || suspendedCampaignIds.contains(geoReport.getCampaignId())) {
-                    geoReportsToBroadcast.remove(geoReport);
-                }
-            }
-        }
-
-        if (!geoReports.isEmpty()) {
-            Intent geoReportsSent = new Intent(Event.GEOFENCE_EVENTS_REPORTED.getKey());
-            geoReportsSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_GEOFENCE_REPORTS, geoReportsToBroadcast);
-            context.sendBroadcast(geoReportsSent);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(geoReportsSent);
-        }
-    }
-
-    public static void handleError(Context context, MobileMessagingCore mobileMessagingCore, Throwable error, ArrayList<GeoReport> geoReports) {
-        MobileMessagingCore.getInstance(context).getStats().reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
-
-        mobileMessagingCore.addUnreportedGeoEvents(geoReports);
-
-        Intent seenStatusReportError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-        seenStatusReportError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(error));
-        context.sendBroadcast(seenStatusReportError);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(seenStatusReportError);
-    }
-
-    @NonNull
-    public static EventReport[] prepareEventReport(GeoReport[] geoReports) {
-        EventReport reports[] = new EventReport[geoReports.length];
-        for (int i = 0; i < reports.length; i++) {
-
-            Long timestampDelta = System.currentTimeMillis() - geoReports[i].getTimestampOccurred();
-            Long timestampDeltaSeconds = TimeUnit.MILLISECONDS.toSeconds(timestampDelta);
-
-            reports[i] = new EventReport(EventType.valueOf(geoReports[i].getEvent().name()), geoReports[i].getArea().getId(),
-                    geoReports[i].getCampaignId(), geoReports[i].getMessageId(), timestampDeltaSeconds);
-        }
-        return reports;
     }
 }

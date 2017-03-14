@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 /**
  * MobileMessagingGcmIntentService processes GCM push notifications. To be able to use it you must register it as a receiver in AndroidManifest.xml
@@ -162,7 +163,7 @@ public class MobileMessagingGcmIntentService extends IntentService {
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
     public static final String EXTRA_GCM_TOKEN = "org.infobip.mobile.messaging.gcm.GCM_TOKEN";
 
-    private MobileMessageHandler mobileMessageHandler = new MobileMessageHandler();
+    private MobileMessageHandler mobileMessageHandler;
     private RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
 
     public MobileMessagingGcmIntentService() {
@@ -178,6 +179,10 @@ public class MobileMessagingGcmIntentService extends IntentService {
         String action = intent.getAction();
         if (action == null) {
             return;
+        }
+
+        if (mobileMessageHandler == null) {
+            mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(this));
         }
 
         switch (action) {

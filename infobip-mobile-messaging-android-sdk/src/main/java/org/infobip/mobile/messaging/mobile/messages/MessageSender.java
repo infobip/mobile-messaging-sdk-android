@@ -1,19 +1,15 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -33,6 +29,12 @@ public class MessageSender {
 
     private static final String TAG = MessageSender.class.getSimpleName();
 
+    private final Broadcaster broadcaster;
+
+    public MessageSender(Broadcaster broadcaster) {
+        this.broadcaster = broadcaster;
+    }
+
     public void send(final Context context, final MobileMessagingStats stats, Executor executor, final MobileMessaging.ResultListener<Message[]> listener, final Message... messages) {
         new SendMessageTask(context) {
             @Override
@@ -40,11 +42,7 @@ public class MessageSender {
                 if (sendMessageResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!");
                     stats.reportError(MobileMessagingStatsError.MESSAGE_SEND_ERROR);
-
-                    Intent sendMessageError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    sendMessageError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(sendMessageResult.getError()));
-                    context.sendBroadcast(sendMessageError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(sendMessageError);
+                    broadcaster.error(MobileMessagingError.createFrom(sendMessageResult.getError()));
 
                     reportFailedMessages(context, messages, sendMessageResult.getError(), listener);
 
@@ -106,10 +104,7 @@ public class MessageSender {
             messageStore.save(context, messages.toArray(new Message[messages.size()]));
         }
 
-        Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
-        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMessageMapper.toBundles(messages));
-        context.sendBroadcast(messagesSent);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
+        broadcaster.messagesSent(messages);
 
         if (listener != null) {
             listener.onResult(messages.toArray(new Message[messages.size()]));

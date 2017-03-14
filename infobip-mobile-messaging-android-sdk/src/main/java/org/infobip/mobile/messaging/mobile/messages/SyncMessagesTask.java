@@ -1,23 +1,17 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 
 /**
  * @author pandric
@@ -53,11 +47,6 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
             mobileMessagingCore.setLastHttpException(e);
             MobileMessagingLogger.e("Error syncing messages!", e);
             cancel(true);
-
-            Intent syncMessagesError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-            syncMessagesError.putExtra(EXTRA_EXCEPTION, MobileMessagingError.createFrom(e));
-            context.sendBroadcast(syncMessagesError);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(syncMessagesError);
 
             return new SyncMessagesResult(e);
         }

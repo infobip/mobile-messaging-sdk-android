@@ -1,10 +1,8 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 
 import java.util.List;
 
@@ -13,77 +11,87 @@ import java.util.List;
  * @since 20/10/2016.
  */
 
-public class GeoReport implements Parcelable {
+public class GeoReport {
 
     private Area area;
     private GeoEventType event;
     private String campaignId;
+    private String signalingMessageId;
     private String messageId;
     private Long timestampOccurred;
+    private GeoLatLng triggeringLocation;
 
-    public GeoReport(String campaignId, String messageId, GeoEventType event, Area area, Long timestampOccurred) {
+    public GeoReport() {
+
+    }
+
+    public GeoReport(String campaignId, String messageId, String signalingMessageId, GeoEventType event, Area area, Long timestampOccurred, GeoLatLng triggeringLocation) {
         this.area = area;
         this.campaignId = campaignId;
+        this.signalingMessageId = signalingMessageId;
         this.messageId = messageId;
         this.event = event;
         this.timestampOccurred = timestampOccurred;
-    }
-
-    private GeoReport(Parcel parcel) {
-        this.campaignId = parcel.readString();
-        this.messageId = parcel.readString();
-        this.event = GeoEventType.valueOf(parcel.readString());
-        this.area = parcel.readParcelable(Area.class.getClassLoader());
-        this.timestampOccurred = parcel.readLong();
+        this.triggeringLocation = triggeringLocation;
     }
 
     public static List<GeoReport> createFrom(Bundle bundle) {
-        return bundle.getParcelableArrayList(BroadcastParameter.EXTRA_GEOFENCE_REPORTS);
-    }
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public String getCampaignId() {
-        return campaignId;
-    }
-
-    public GeoEventType getEvent() {
-        return event;
+        return BundleMapper.geoReportsFromBundle(bundle);
     }
 
     public Area getArea() {
         return area;
     }
 
+    public void setArea(Area area) {
+        this.area = area;
+    }
+
+    public GeoEventType getEvent() {
+        return event;
+    }
+
+    public void setEvent(GeoEventType event) {
+        this.event = event;
+    }
+
+    public String getCampaignId() {
+        return campaignId;
+    }
+
+    public void setCampaignId(String campaignId) {
+        this.campaignId = campaignId;
+    }
+
+    public String getSignalingMessageId() {
+        return signalingMessageId;
+    }
+
+    public void setSignalingMessageId(String signalingMessageId) {
+        this.signalingMessageId = signalingMessageId;
+    }
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
     public Long getTimestampOccurred() {
         return timestampOccurred;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public void setTimestampOccurred(Long timestampOccurred) {
+        this.timestampOccurred = timestampOccurred;
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(campaignId);
-        parcel.writeString(messageId);
-        parcel.writeString(event.name());
-        parcel.writeParcelable(area, i);
-        parcel.writeLong(timestampOccurred);
+    public GeoLatLng getTriggeringLocation() {
+        return triggeringLocation;
     }
 
-    public static final Creator<GeoReport> CREATOR = new Creator<GeoReport>() {
-        @Override
-        public GeoReport createFromParcel(Parcel in) {
-            return new GeoReport(in);
-        }
-
-        @Override
-        public GeoReport[] newArray(int size) {
-            return new GeoReport[size];
-        }
-    };
+    public void setTriggeringLocation(GeoLatLng triggeringLocation) {
+        this.triggeringLocation = triggeringLocation;
+    }
 }

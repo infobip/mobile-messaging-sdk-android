@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -22,6 +23,8 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -34,8 +37,11 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -43,23 +49,23 @@ import java.util.concurrent.TimeUnit;
  * @author sslavin
  * @since 28.04.2016.
  */
-public class MobileMessagingCore {
+public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
 
-    private static MobileMessagingCore instance;
+    static MobileMessagingCore instance;
     private static DatabaseHelper databaseHelper;
     private final RegistrationSynchronizer registrationSynchronizer;
     private final MessagesSynchronizer messagesSynchronizer;
     private final SeenStatusReporter seenStatusReporter;
     private final UserDataSynchronizer userDataSynchronizer;
-    private final MessageSender messageSender = new MessageSender();
+    private final MessageSender messageSender;
     private final SystemDataReporter systemDataReporter;
     private final VersionChecker versionChecker;
     private final GeoReporter geoReporter;
     private final MobileMessagingStats stats;
-    private final Executor registrationAlignedExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService registrationAlignedExecutor;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
@@ -70,15 +76,22 @@ public class MobileMessagingCore {
     private Geofencing geofencing;
 
     protected MobileMessagingCore(Context context) {
+        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
+    }
+
+    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor) {
+        MobileMessagingLogger.init(context);
         this.context = context;
+        this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor);
-        this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor);
-        this.userDataSynchronizer = new UserDataSynchronizer(context, stats, registrationAlignedExecutor);
-        this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor);
+        this.messageSender = new MessageSender(broadcaster);
+        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
+        this.userDataSynchronizer = new UserDataSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.versionChecker = new VersionChecker(context, stats);
-        this.geoReporter = new GeoReporter(context, stats);
-        this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, this);
+        this.geoReporter = new GeoReporter(context, broadcaster, stats);
+        this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
     }
 
     /**
@@ -116,6 +129,7 @@ public class MobileMessagingCore {
         userDataSynchronizer.synchronize(null);
         seenStatusReporter.synchronize();
         versionChecker.synchronize();
+
         reportSystemData();
 
         if (isPushRegistrationEnabled()) {
@@ -124,7 +138,8 @@ public class MobileMessagingCore {
         }
     }
 
-    void enablePushRegistration() {
+    @Override
+    public void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         registrationSynchronizer.updatePushRegistrationStatus(true);
         if (isGeofencingActivated(context)) {
@@ -132,7 +147,8 @@ public class MobileMessagingCore {
         }
     }
 
-    void disablePushRegistration() {
+    @Override
+    public void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
         registrationSynchronizer.updatePushRegistrationStatus(false);
         if (isGeofencingActivated(context)) {
@@ -165,7 +181,7 @@ public class MobileMessagingCore {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
-    void addSyncMessagesIds(String... messageIDs) {
+    public void addSyncMessagesIds(String... messageIDs) {
         String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
     }
@@ -209,7 +225,57 @@ public class MobileMessagingCore {
     }
 
     public String[] getUnreportedSeenMessageIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+        String[] ids = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+        return filterOutGeneratedMessageIds(ids);
+    }
+
+    /**
+     * Method to update unreported seen ids
+     * @param messageIdMap map that contains old id as key and new id as value
+     */
+    public void updateUnreportedSeenMessageIds(final Map<String, String> messageIdMap) {
+        if (messageIdMap == null || messageIdMap.isEmpty()) {
+            return;
+        }
+
+        PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
+            @Override
+            public Void run() {
+                String[] reports = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+                if (reports.length == 0) {
+                    return null;
+                }
+
+                for (int i = 0; i < reports.length; i++) {
+                    String messageIdAndTimestamp[] = reports[i].split(StringUtils.COMMA_WITH_SPACE);
+                    String newMessageId = messageIdMap.get(messageIdAndTimestamp[0]);
+                    if (newMessageId != null) {
+                        reports[i] = StringUtils.concat(newMessageId, messageIdAndTimestamp[1], StringUtils.COMMA_WITH_SPACE);
+                    }
+                }
+
+                PreferenceHelper.saveStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, reports);
+                return null;
+            }
+        });
+    }
+
+    private String[] filterOutGeneratedMessageIds(String[] messageIDs) {
+        GeoReport geoReports[] = getUnreportedGeoEvents();
+        if (geoReports.length == 0) {
+            return messageIDs;
+        }
+
+        List<String> seenIds = getSeenMessageIdsFromReports(messageIDs);
+        List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
+        for (GeoReport geoReport : geoReports) {
+            int idIndex = seenIds.indexOf(geoReport.getMessageId());
+            if (idIndex >= 0) {
+                filteredSeenReports.remove(idIndex);
+                seenIds.remove(idIndex);
+            }
+        }
+        return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
     }
 
     void addUnreportedSeenMessageIds(final String... messageIDs) {
@@ -231,6 +297,29 @@ public class MobileMessagingCore {
         return syncMessages;
     }
 
+    /**
+     * Returns list of messageId and seenTimestamp
+     * @param reports concatenated message id and timestamp
+     * @return reports
+     */
+    private List<String> getSeenMessageIdsFromReports(String[] reports) {
+        List<String> ids = new ArrayList<>();
+        for (String report : reports) {
+            ids.add(getSeenMessageIdFromReport(report));
+        }
+        return ids;
+    }
+
+    /**
+     * Returns message id from seen report string
+     * @param report concatenated message id and timestamp
+     * @return message id
+     */
+    private String getSeenMessageIdFromReport(String report) {
+        String[] reportContents = report.split(StringUtils.COMMA_WITH_SPACE);
+        return reportContents.length > 0 ? reportContents[0] : null;
+    }
+
     public void removeUnreportedSeenMessageIds(final String... messageIDs) {
         PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, messageIDs);
     }
@@ -241,7 +330,7 @@ public class MobileMessagingCore {
         sync();
     }
 
-    void setMessagesSeen(String... messageIds) {
+    public void setMessagesSeen(String... messageIds) {
         addUnreportedSeenMessageIds(messageIds);
         updateStoredMessagesWithSeenStatus(messageIds);
         sync();
@@ -325,6 +414,7 @@ public class MobileMessagingCore {
         }
     }
 
+    @NonNull
     public MessageStore getMessageStoreForGeo() {
         if (internalStoreForGeo == null) {
             internalStoreForGeo = new GeoSQLiteMessageStore();
@@ -358,7 +448,7 @@ public class MobileMessagingCore {
         return stats;
     }
 
-    public void setLastHttpException(Exception lastHttpException) {
+    public void setLastHttpException(Throwable lastHttpException) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
     }
 
@@ -431,30 +521,65 @@ public class MobileMessagingCore {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
+    public boolean areAllActiveGeoAreasMonitored() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.ALL_ACTIVE_GEO_AREAS_MONITORED);
+    }
+
+    public void setAllActiveGeoAreasMonitored(boolean allActiveGeoAreasMonitored) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.ALL_ACTIVE_GEO_AREAS_MONITORED, allActiveGeoAreasMonitored);
+    }
+
+    public void removeExpiredAreas() {
+        if (isGeofencingActivated(context) && isPushRegistrationEnabled()) {
+            if (geofencing == null) {
+                geofencing = Geofencing.getInstance(context);
+            }
+
+            geofencing.removeExpiredAreasFromStorage();
+        }
+    }
+
     public void startGeoMonitoringIfNecessary() {
         if (isGeofencingActivated(context) && isPushRegistrationEnabled()) {
             if (geofencing == null) {
                 geofencing = Geofencing.getInstance(context);
             }
-            geofencing.startGeoMonitoring();
+
+            if (!areAllActiveGeoAreasMonitored()) {
+                geofencing.startGeoMonitoring();
+            }
         }
+    }
+
+    @Override
+    public void activateGeofencing() {
+        activateGeofencing(Geofencing.getInstance(context));
     }
 
     void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
         if (geofencing == null) return;
         setGeofencingActivated(context, true);
-        geofencing.startGeoMonitoring();
+        if (!areAllActiveGeoAreasMonitored()) {
+            geofencing.startGeoMonitoring();
+        }
     }
 
-    void deactivateGeofencing() {
+    @Override
+    public void deactivateGeofencing() {
         if (geofencing == null) return;
         setGeofencingActivated(context, false);
         geofencing.stopGeoMonitoring();
         this.geofencing = null;
     }
 
-    void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
+    @Override
+    public void syncUserData(UserData userData) {
+        syncUserData(userData, null);
+    }
+
+    @Override
+    public void syncUserData(UserData userData, MobileMessaging.ResultListener<UserData> listener) {
 
         UserData userDataToReport = new UserData();
         if (userData != null) {
@@ -480,6 +605,16 @@ public class MobileMessagingCore {
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
 
         userDataSynchronizer.synchronize(listener);
+    }
+
+    @Override
+    public void fetchUserData() {
+        fetchUserData(null);
+    }
+
+    @Override
+    public void fetchUserData(MobileMessaging.ResultListener<UserData> listener) {
+        syncUserData(null, listener);
     }
 
     public UserData getUserData() {
@@ -509,7 +644,13 @@ public class MobileMessagingCore {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
-    void sendMessages(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
+    @Override
+    public void sendMessages(Message... messages) {
+        sendMessages(null, messages);
+    }
+
+    @Override
+    public void sendMessages(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
         if (isMessageStoreEnabled()) {
             getMessageStore().save(context, messages);
         }
@@ -553,23 +694,46 @@ public class MobileMessagingCore {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH, systemData.hashCode());
     }
 
-    public ArrayList<GeoReport> removeUnreportedGeoEvents(final Context context) {
-        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<ArrayList<GeoReport>>() {
+    private GeoReport[] getUnreportedGeoEvents() {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
             @Override
-            public ArrayList<GeoReport> run() {
-                JsonSerializer deserializer = new JsonSerializer();
+            public GeoReport[] run() {
+                JsonSerializer serializer = new JsonSerializer();
                 String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
-                ArrayList<GeoReport> reports = new ArrayList<>();
+                Set<GeoReport> reports = new HashSet<>();
                 for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
-                    reports.add(deserializer.deserialize(unreportedGeoEventJson, GeoReport.class));
+                    try {
+                        GeoReport report = serializer.deserialize(unreportedGeoEventJson, GeoReport.class);
+                        reports.add(report);
+                    } catch (Exception ignored) {
+                    }
                 }
-                PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
-                return reports;
+                return reports.toArray(new GeoReport[reports.size()]);
             }
         });
     }
 
-    public void addUnreportedGeoEvents(final List<GeoReport> reports) {
+    public GeoReport[] removeUnreportedGeoEvents() {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
+            @Override
+            public GeoReport[] run() {
+                JsonSerializer serializer = new JsonSerializer();
+                String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
+                Set<GeoReport> reports = new HashSet<>();
+                for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
+                    try {
+                        GeoReport report = serializer.deserialize(unreportedGeoEventJson, GeoReport.class);
+                        reports.add(report);
+                    } catch (Exception ignored) {
+                    }
+                }
+                PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_GEO_EVENTS);
+                return reports.toArray(new GeoReport[reports.size()]);
+            }
+        });
+    }
+
+    public void addUnreportedGeoEvents(final GeoReport... reports) {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {
@@ -582,30 +746,30 @@ public class MobileMessagingCore {
         });
     }
 
-    public void addCampaignStatus(final String[] finishedCampaignIds, final String[] suspendedCampaignIds) {
+    public void addCampaignStatus(final Set<String> finishedCampaignIds, final Set<String> suspendedCampaignIds) {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {
-                if (finishedCampaignIds != null && finishedCampaignIds.length != 0) {
-                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS, finishedCampaignIds);
-                }
-                if (suspendedCampaignIds != null && suspendedCampaignIds.length != 0) {
-                    PreferenceHelper.saveStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS, suspendedCampaignIds);
-                }
+                PreferenceHelper.saveStringSet(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS,
+                        finishedCampaignIds != null ? finishedCampaignIds : new HashSet<String>());
+                PreferenceHelper.saveStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS,
+                        suspendedCampaignIds != null ? suspendedCampaignIds : new HashSet<String>());
                 return null;
             }
         });
     }
 
-    public String[] getFinishedCampaignIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
+    public Set<String> getFinishedCampaignIds() {
+        return PreferenceHelper.findStringSet(context, MobileMessagingProperty.FINISHED_CAMPAIGN_IDS);
     }
 
-    public String[] getSuspendedCampaignIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
+    public Set<String> getSuspendedCampaignIds() {
+        return PreferenceHelper.findStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
     }
 
-    static void handleBootCompleted(Context context) {
+    void handleBootCompleted() {
+        //active areas stop being monitored on boot and we need to re-register them
+        instance.setAllActiveGeoAreasMonitored(false);
         Geofencing.scheduleRefresh(context);
     }
 

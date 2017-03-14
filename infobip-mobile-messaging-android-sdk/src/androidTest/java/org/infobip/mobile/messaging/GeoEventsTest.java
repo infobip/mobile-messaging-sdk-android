@@ -1,42 +1,31 @@
 package org.infobip.mobile.messaging;
 
-import android.content.Context;
-import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEvent;
+import org.infobip.mobile.messaging.geo.GeoEventSettings;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by pandric on 20/09/16.
  */
-public class GeoEventsTest extends InstrumentationTestCase {
+public class GeoEventsTest extends InfobipAndroidTestCase {
 
-    private Context context;
     private long timeDelta;
 
     private class GeoTest extends Geo {
         public GeoTest() {
-            super(null, null, null);
+            super(null, null, null, null, null, null, null, null);
         }
 
-        List<GeoEvent> getEventFilters() {
+        List<GeoEventSettings> getEventFilters() {
             return getEvents();
         }
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        context = getInstrumentation().getContext();
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
     }
 
     @Override
@@ -50,8 +39,8 @@ public class GeoEventsTest extends InstrumentationTestCase {
         int entryCnt = 0;
         for (int i = 0; i < 5; i++) {
 
-            List<GeoEvent> events = geo.getEventFilters();
-            for (GeoEvent event : events) {
+            List<GeoEventSettings> events = geo.getEventFilters();
+            for (GeoEventSettings event : events) {
 
                 for (Area area : geo.getAreasList()) {
 
@@ -65,11 +54,11 @@ public class GeoEventsTest extends InstrumentationTestCase {
                     boolean isTimeoutExpired = timeIntervalBetweenEvents > TimeUnit.MINUTES.toMillis(event.getTimeoutInMinutes());
 
                     int eventLimit = event.getLimit();
-                    boolean isLimitBreached = eventLimit != GeoEvent.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
+                    boolean isLimitBreached = eventLimit != GeoEventSettings.UNLIMITED_RECURRING && timesTriggered >= eventLimit;
 
                     if (isTimeoutExpired && !isLimitBreached) {
 
-                        if (eventLimit != GeoEvent.UNLIMITED_RECURRING) {
+                        if (eventLimit != GeoEventSettings.UNLIMITED_RECURRING) {
                             ++timesTriggered;
                         }
 

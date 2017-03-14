@@ -1,31 +1,46 @@
 package org.infobip.mobile.messaging.mobile.geo;
 
 
-import org.infobip.mobile.messaging.api.geo.CampaignStatusEventResponse;
+import org.infobip.mobile.messaging.api.geo.EventReportResponse;
 import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
+
+import java.util.Map;
+import java.util.Set;
 
 public class GeoReportingResult extends UnsuccessfulResult {
 
-    private final String[] finishedCampaignIds;
-    private final String[] suspendedCampaignIds;
+    private final Set<String> finishedCampaignIds;
+    private final Set<String> suspendedCampaignIds;
 
-    public GeoReportingResult(Throwable exception) {
+    /**
+     * key = sdkMessageId
+     * value = realMessageId
+     */
+    private final Map<String, String> messageIds;
+
+    GeoReportingResult(Throwable exception) {
         super(exception);
         finishedCampaignIds = null;
         suspendedCampaignIds = null;
+        messageIds = null;
     }
 
-    public GeoReportingResult(CampaignStatusEventResponse campaignStatusEventResponse) {
+    GeoReportingResult(EventReportResponse eventReportResponse) {
         super(null);
-        this.finishedCampaignIds = campaignStatusEventResponse.getFinishedCampaignIds();
-        this.suspendedCampaignIds = campaignStatusEventResponse.getSuspendedCampaignIds();
+        this.finishedCampaignIds = eventReportResponse.getFinishedCampaignIds();
+        this.suspendedCampaignIds = eventReportResponse.getSuspendedCampaignIds();
+        this.messageIds = eventReportResponse.getMessageIds();
     }
 
-    public String[] getFinishedCampaignIds() {
+    public Set<String> getFinishedCampaignIds() {
         return finishedCampaignIds;
     }
 
-    public String[] getSuspendedCampaignIds() {
+    public Set<String> getSuspendedCampaignIds() {
         return suspendedCampaignIds;
+    }
+
+    public Map<String, String> getMessageIds() {
+        return messageIds;
     }
 }

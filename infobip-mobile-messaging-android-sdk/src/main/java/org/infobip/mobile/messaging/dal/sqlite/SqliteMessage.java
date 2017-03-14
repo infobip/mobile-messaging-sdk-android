@@ -18,7 +18,7 @@ import org.json.JSONObject;
 public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
     public SqliteMessage() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, null, Status.UNKNOWN, null);
+        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, Status.UNKNOWN, null);
     }
 
     public SqliteMessage(Message m) {
@@ -34,7 +34,6 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getFrom(),
                 m.getReceivedTimestamp(),
                 m.getSeenTimestamp(),
-                m.getInternalData(),
                 m.getCustomPayload(),
                 m.getGeo(),
                 m.getDestination(),
@@ -48,9 +47,9 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
     }
 
     public static Message load(Cursor cursor) throws Exception {
-        SqliteMessage sqliteMessageMapper = new SqliteMessage();
-        sqliteMessageMapper.fillFromCursor(cursor);
-        return sqliteMessageMapper;
+        SqliteMessage sqliteMessage = new SqliteMessage();
+        sqliteMessage.fillFromCursor(cursor);
+        return sqliteMessage;
     }
 
     public static String getTable() {
@@ -72,8 +71,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
 
         String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
-        setInternalData(json == null ? null : new JSONObject(json));
-        setGeo(new JsonSerializer().deserialize(json, Geo.class));
+        setGeo(json != null ? new JsonSerializer().deserialize(json, Geo.class) : null);
 
         json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
         setCustomPayload(json == null ? null : new JSONObject(json));
@@ -98,7 +96,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.FROM, getFrom());
         contentValues.put(MessageColumns.RECEIVED_TIMESTAMP, getReceivedTimestamp());
         contentValues.put(MessageColumns.SEEN_TIMESTAMP, getSeenTimestamp());
-        contentValues.put(MessageColumns.INTERNAL_DATA, getInternalData() != null ? getInternalData().toString() : null);
+        contentValues.put(MessageColumns.INTERNAL_DATA, getGeo() != null ? new JsonSerializer().serialize(getGeo()) : null);
         contentValues.put(MessageColumns.CUSTOM_PAYLOAD, getCustomPayload() != null ? getCustomPayload().toString() : null);
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);

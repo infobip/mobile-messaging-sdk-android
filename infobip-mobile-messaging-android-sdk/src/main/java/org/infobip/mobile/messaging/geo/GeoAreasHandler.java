@@ -2,395 +2,185 @@ package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.util.Pair;
-import android.util.SparseArray;
+import android.support.annotation.NonNull;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofenceStatusCodes;
-import com.google.android.gms.location.GeofencingEvent;
-
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.api.geo.EventReport;
-import org.infobip.mobile.messaging.api.geo.EventReports;
-import org.infobip.mobile.messaging.dal.bundle.BundleMessageMapper;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
-import org.infobip.mobile.messaging.notification.NotificationHandler;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.util.DateTimeUtil;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * @author pandric
  * @since 24.06.2016.
  */
-class GeoAreasHandler {
+public class GeoAreasHandler {
 
     private static final String TAG = "GeofenceTransitions";
-    private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
-    private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
-    private static final GeoEvent DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER = new GeoEvent(GeoEventType.entry, 1, 0L);
 
     private final MessageStore messageStore;
+    private final GeoNotificationHelper geoNotificationHelper;
+    private final GeoReporter geoReporter;
     private final Context context;
 
-    private static SparseArray<String> transitionNames = new SparseArray<String>() {{
-        put(Geofence.GEOFENCE_TRANSITION_ENTER, "GEOFENCE_TRANSITION_ENTER");
-        put(Geofence.GEOFENCE_TRANSITION_EXIT, "GEOFENCE_TRANSITION_EXIT");
-        put(Geofence.GEOFENCE_TRANSITION_DWELL, "GEOFENCE_TRANSITION_DWELL");
-    }};
-
-    private static SparseArray<String> geofencingErrors = new SparseArray<String>() {{
-        put(GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE, "Geofence not available");
-        put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES, "Too many geofences");
-        put(GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS, "Too many pending intents");
-    }};
-
-    private static SparseArray<Event> transitionBroadcasts = new SparseArray<Event>() {{
-        put(Geofence.GEOFENCE_TRANSITION_ENTER, Event.GEOFENCE_AREA_ENTERED);
-    }};
-
-    private static SparseArray<GeoEventType> transitionReportEvents = new SparseArray<GeoEventType>() {{
-        put(Geofence.GEOFENCE_TRANSITION_ENTER, GeoEventType.entry);
-    }};
-
-    GeoAreasHandler(Context context) {
+    GeoAreasHandler(Context context, Broadcaster broadcaster) {
         this.context = context;
+        this.geoNotificationHelper = new GeoNotificationHelper(context, broadcaster);
+        this.geoReporter = new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats());
         this.messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
     }
 
+    /**
+     * Handles geofencing transition intent and reports corresponding areas to server
+     * @param intent intent from Google Locaiton Services
+     */
     void handleTransition(Intent intent) {
-        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        if (geofencingEvent == null) return;
 
-        if (geofencingEvent.hasError()) {
-            MobileMessagingLogger.e(TAG, "ERROR:" + geofencingErrors.get(geofencingEvent.getErrorCode()));
-            return;
-        }
-
-        handleTransition(geofencingEvent.getTriggeringGeofences(),
-                geofencingEvent.getGeofenceTransition(),
-                geofencingEvent.getTriggeringLocation());
-    }
-
-    void handleTransition(List<Geofence> triggeringGeofences, int geofenceTransition, Location triggeringLocation) {
-
-        Map<Message, List<Area>> messagesAndAreas = findActiveMessagesAndAreasForTriggeredGeofences(context, triggeringGeofences);
-        Map<Message, List<Area>> filteredMessagesAndAreas = filterOverlappingAreas(messagesAndAreas);
-
-        if (filteredMessagesAndAreas == null || filteredMessagesAndAreas.isEmpty()) {
-            return;
-        }
-
-        ArrayList<GeoReport> geoReports = new ArrayList<>(filteredMessagesAndAreas.size());
-        ArrayList<Pair<Geo, Message>> geoDataToNotify = new ArrayList<>(filteredMessagesAndAreas.size());
-
-        for (Message message : filteredMessagesAndAreas.keySet()) {
-
-            List<Area> geofenceAreasList = filteredMessagesAndAreas.get(message);
-            logGeofences(geofenceAreasList, geofenceTransition);
-
-            for (final Area area : geofenceAreasList) {
-
-                if (!shouldReportTransition(message, geofenceTransition)) {
-                    continue;
-                }
-
-                Geo geoToReportAndNotify = new Geo(
-                        triggeringLocation.getLatitude(),
-                        triggeringLocation.getLongitude(),
-                        new ArrayList<Area>() {{
-                            add(area);
-                        }});
-
-                geoDataToNotify.add(new Pair<>(geoToReportAndNotify, message));
-
-                geoReports.add(new GeoReport(message.getGeo().getCampaignId(), message.getMessageId(),
-                        transitionReportEvents.get(geofenceTransition), area, System.currentTimeMillis()));
-            }
-        }
-
-        if (!geoReports.isEmpty() && !geoDataToNotify.isEmpty()) {
-            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-            EventReport reports[] = GeoReporter.prepareEventReport(geoReports.toArray(new GeoReport[geoReports.size()]));
-
-            List<String> finishedCampaignIds = Arrays.asList(mobileMessagingCore.getFinishedCampaignIds());
-            List<String> suspendedCampaignIds = Arrays.asList(mobileMessagingCore.getSuspendedCampaignIds());
-
-            try {
-                final GeoReportingResult result = new GeoReportingResult(MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context)
-                        .report(new EventReports(reports)));
-
-                if (result.getFinishedCampaignIds() != null) {
-                    finishedCampaignIds = Arrays.asList(result.getFinishedCampaignIds());
-                }
-                if (result.getSuspendedCampaignIds() != null) {
-                    suspendedCampaignIds = Arrays.asList(result.getSuspendedCampaignIds());
-                }
-
-                GeoReporter.handleSuccess(context, mobileMessagingCore, result, geoReports);
-
-            } catch (Exception e) {
-                GeoReporter.handleError(context, mobileMessagingCore, e, geoReports);
-            }
-
-            displayNotificationsForActiveCampaigns(geoDataToNotify, geofenceTransition, finishedCampaignIds, suspendedCampaignIds);
-        }
-
-    }
-
-    private void displayNotificationsForActiveCampaigns(ArrayList<Pair<Geo, Message>> geoDataToNotify, int geofenceTransition, List<String> finishedCampaignIds, List<String> suspendedCampaignIds) {
-        for (Pair<Geo, Message> geoData : geoDataToNotify) {
-            final Geo geo = geoData.first;
-            final Message message = geoData.second;
-            if (finishedCampaignIds.contains(message.getGeo().getCampaignId()) || suspendedCampaignIds.contains(message.getGeo().getCampaignId())) {
-                continue;
-            }
-
-            setLastNotificationTimeForArea(message.getGeo().getCampaignId(), geofenceTransition, System.currentTimeMillis());
-            setNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition,
-                    getNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition) + 1);
-
-            notifyAboutTransition(context, geo, geofenceTransition, geoData.second);
-        }
-    }
-
-    private boolean shouldReportTransition(Message message, int geofenceTransition) {
-        int numberOfDisplayedNotifications = getNumberOfDisplayedNotificationsForArea(message.getGeo().getCampaignId(), geofenceTransition);
-        long lastNotificationTimeForArea = getLastNotificationTimeForArea(message.getGeo().getCampaignId(), geofenceTransition);
-        Geo geo = message.getGeo();
-        GeoEvent settings = getNotificationSettingsForTransition(geo.getEvents(), geofenceTransition);
-
-        boolean isInDeliveryWindow = checkIsAreaInDeliveryWindow(geo.getDeliveryTime());
-
-        return settings != null &&
-                isInDeliveryWindow &&
-                (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEvent.UNLIMITED_RECURRING) &&
-                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
-                geoEventMatchesTransition(settings, geofenceTransition) &&
-                !geo.isExpired();
-    }
-
-    private boolean checkIsAreaInDeliveryWindow(DeliveryTime deliveryTime) {
+        GeoTransition transition;
         try {
-            if (deliveryTime == null) {
-                return true;
-            }
-
-            String daysPayload = deliveryTime.getDays();
-            if (!shouldDeliverToday(daysPayload)) {
-                return false;
-            }
-
-            String timeInterval = deliveryTime.getTimeInterval();
-            return checkIsDeliveryInTimeInterval(timeInterval);
-
-        } catch (ParseException e) {
-            MobileMessagingLogger.e(e.getMessage(), e);
-            return true;
-        }
-    }
-
-    private boolean shouldDeliverToday(String daysPayload) {
-        String[] days = null;
-
-        if (daysPayload == null) {
-            return false;
-        }
-
-        try {
-            days = daysPayload.split(",");
-        } catch (PatternSyntaxException e) {
-            MobileMessagingLogger.e(e.getMessage(), e);
-        }
-
-        if (days == null) {
-            return false;
-        }
-
-        int dayOfMonthISO8601 = DateTimeUtil.dayOfWeekISO8601();
-
-        for (String day : days) {
-            if (day.equalsIgnoreCase(String.valueOf(dayOfMonthISO8601))) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean checkIsDeliveryInTimeInterval(String timeInterval) throws ParseException {
-        if (timeInterval == null) {
-            return false;
-        }
-
-        String[] timeIntervalStartEnd = timeInterval.split("/");
-        String startTime = timeIntervalStartEnd[0];
-        String endTime = timeIntervalStartEnd[1];
-
-        return DateTimeUtil.isCurrentTimeBetweenDates(startTime, endTime);
-    }
-
-    private GeoEvent getNotificationSettingsForTransition(List<GeoEvent> eventFilters, int geofenceTransition) {
-        if (eventFilters == null || eventFilters.isEmpty()) {
-            return DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER;
-        }
-
-        for (GeoEvent e : eventFilters) {
-            if (!geoEventMatchesTransition(e, geofenceTransition)) {
-                continue;
-            }
-            return e;
-        }
-        return null;
-    }
-
-    private String areaNotificationNumKey(String campaignId, int geofenceTransition) {
-        return AREA_NOTIFIED_PREF_PREFIX + campaignId + "-" + geofenceTransition;
-    }
-
-    private String areaNotificationTimeKey(String campaignId, int geofenceTransition) {
-        return AREA_LAST_TIME_PREF_PREFIX + campaignId + "-" + geofenceTransition;
-    }
-
-    private boolean geoEventMatchesTransition(GeoEvent event, int geofenceTransition) {
-        return event.getType().equals(DEFAULT_NOTIFICATION_SETTINGS_FOR_ENTER.getType()) && geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER;
-    }
-
-    private int getNumberOfDisplayedNotificationsForArea(String campaignId, int geofenceTransition) {
-        return PreferenceHelper.findInt(context, areaNotificationNumKey(campaignId, geofenceTransition), 0);
-    }
-
-    private void setNumberOfDisplayedNotificationsForArea(String campaignId, int geofenceTransition, int n) {
-        PreferenceHelper.saveInt(context, areaNotificationNumKey(campaignId, geofenceTransition), n);
-    }
-
-    private long getLastNotificationTimeForArea(String campaignId, int geofenceTransition) {
-        return PreferenceHelper.findLong(context, areaNotificationTimeKey(campaignId, geofenceTransition), 0);
-    }
-
-    private void setLastNotificationTimeForArea(String campaignId, int geofenceTransition, long timeMs) {
-        PreferenceHelper.saveLong(context, areaNotificationTimeKey(campaignId, geofenceTransition), timeMs);
-    }
-
-    private void notifyAboutTransition(Context context, Geo geo, int geofenceTransition, Message message) {
-        saveMessage(message);
-        NotificationHandler.displayNotification(context, message);
-        sendGeoEventBroadcast(context, geofenceTransition, geo, message);
-    }
-
-    private void saveMessage(Message message) {
-        if (!MobileMessagingCore.getInstance(context).isMessageStoreEnabled()) {
+            transition = GeoTransitionHelper.resolveTransitionFromIntent(intent);
+        } catch (GeoTransitionHelper.GeofenceNotAvailableException e) {
+            MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
+            MobileMessagingLogger.e(TAG, "Geofence not available");
+            return;
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "Cannot resolve transition information: " + e);
             return;
         }
 
-        message.setSeenTimestamp(0);
-        message.setSilent(false);
-        message.setReceivedTimestamp(System.currentTimeMillis());
-        MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
+        handleTransition(transition);
     }
 
-    private void sendGeoEventBroadcast(Context context, int geofenceTransition, Geo geo, Message message) {
-        Event event = transitionBroadcasts.get(geofenceTransition);
-        if (event == null) {
+    /**
+     * Handles geofencing intent and reports corresponding areas to server
+     * @param transition resolved transition information
+     */
+    @SuppressWarnings("WeakerAccess")
+    void handleTransition(GeoTransition transition) {
+        Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, messageStore, transition.getRequestIds(), transition.getEventType());
+        if (messagesAndAreas.isEmpty()) {
+            MobileMessagingLogger.d(TAG, "No messages for triggered areas");
             return;
         }
 
-        Intent geofenceIntent = new Intent(event.getKey());
-        geofenceIntent.putExtra(BroadcastParameter.EXTRA_GEOFENCE_AREAS, geo);
-        geofenceIntent.putExtras(BundleMessageMapper.toBundle(message));
-        LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
-        context.sendBroadcast(geofenceIntent);
+        logGeofences(messagesAndAreas.values(), transition.getEventType());
 
-        Intent messageIntent = new Intent(Event.MESSAGE_RECEIVED.getKey());
-        messageIntent.putExtras(BundleMessageMapper.toBundle(message));
-        LocalBroadcastManager.getInstance(context).sendBroadcast(messageIntent);
-        context.sendBroadcast(messageIntent);
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+
+        mobileMessagingCore.addUnreportedGeoEvents(GeoReportHelper.createReportsForMultipleMessages(messagesAndAreas, transition.getEventType(), transition.getTriggeringLocation()));
+        GeoReport unreportedEvents[] = MobileMessagingCore.getInstance(context).removeUnreportedGeoEvents();
+        if (unreportedEvents.length == 0) {
+            MobileMessagingLogger.d(TAG, "No geofencing events to report at current time");
+            return;
+        }
+
+        GeoReportingResult result = geoReporter.reportSync(context, unreportedEvents);
+        handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
     }
 
-    private void logGeofences(List<Area> areas, int transition) {
-        for (Area a : areas) {
-            MobileMessagingLogger.i(TAG, transitionNames.get(transition) + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
+    /**
+     * Generates new geo messages based on events and result data and also provides broadcasts and notifications.
+     * @param unreportedEvents events that occured and has been reported to the server.
+     * @param result result of reporting that contains non-active campaign data and new message ids.
+     */
+    private void handleReportingResultWithNewMessagesAndNotifications(GeoReport[] unreportedEvents, GeoReportingResult result) {
+        List<GeoReport> reports = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(unreportedEvents), result);
+        Map<Message, GeoEventType> messages = GeoReportHelper.createMessagesToNotify(context, reports, result);
+        saveMessages(messages.keySet());
+        handleGeoReportingResult(context, result);
+        geoNotificationHelper.notifyAboutGeoTransitions(messages);
+    }
+
+    /**
+     * Saves new geo notification messages into message store.
+     * @param generatedMessages generated messages to save to message store.
+     */
+    private void saveMessages(Collection<Message> generatedMessages) {
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        if (!mobileMessagingCore.isMessageStoreEnabled()) {
+            return;
+        }
+
+        MessageStore messageStore = mobileMessagingCore.getMessageStore();
+        messageStore.save(context, generatedMessages.toArray(new Message[generatedMessages.size()]));
+    }
+
+    /**
+     * Processes geo reporting result and updates any stored data based on it
+     * @param result result from the server
+     */
+    public static void handleGeoReportingResult(Context context, @NonNull GeoReportingResult result) {
+        updateMessageStoreWithReportingResult(context, result);
+        updateUnreportedSeenMessageIds(context, result);
+
+        if (!result.hasError()) {
+            MobileMessagingCore.getInstance(context).sync();
         }
     }
 
-    private Map<Message, List<Area>> findActiveMessagesAndAreasForTriggeredGeofences(Context context, List<Geofence> geofences) {
-        Date now = new Date();
-        Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
+    /**
+     * Updates ids of existing messages based on reporting result.
+     * </p> Does nothing if message store is not enabled.
+     * @param reportingResult geo reporting result that contains mapping for new message ids
+     */
+    private static void updateMessageStoreWithReportingResult(Context context, @NonNull GeoReportingResult reportingResult) {
+        if (reportingResult.getMessageIds() == null || reportingResult.getMessageIds().isEmpty()) {
+            return;
+        }
 
-        for (Message message : messageStore.findAll(context)) {
-            Geo geo = message.getGeo();
+        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        if (!mobileMessagingCore.isMessageStoreEnabled()) {
+            return;
+        }
 
-            if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
+        MessageStore messageStore = mobileMessagingCore.getMessageStore();
+        // Code below is far from being effective but messageId is primary key
+        // so we will have to remove messages with invalid keys
+        List<Message> allMessages = messageStore.findAll(context);
+        Map<String, String> messageIds = reportingResult.getMessageIds();
+        for (Message message : allMessages) {
+            String newMessageId = messageIds.get(message.getMessageId());
+            if (newMessageId == null) {
                 continue;
             }
 
-            //don't trigger geo event before start date
-            Date startDate = geo.getStartDate();
-            if (startDate != null && startDate.after(now)) {
-                continue;
-            }
-
-            List<Area> campaignAreas = geo.getAreasList();
-            List<Area> triggeredAreas = new ArrayList<>();
-            for (Area area : campaignAreas) {
-                for (Geofence geofence : geofences) {
-                    if (geofence.getRequestId().equalsIgnoreCase(area.getId())) {
-                        triggeredAreas.add(area);
-                    }
-                }
-            }
-
-            if (!triggeredAreas.isEmpty()) {
-                messagesAndAreas.put(message, triggeredAreas);
-            }
+            message.setMessageId(newMessageId);
         }
-
-        return messagesAndAreas;
+        messageStore.deleteAll(context);
+        messageStore.save(context, allMessages.toArray(new Message[allMessages.size()]));
     }
 
-    private Map<Message, List<Area>> filterOverlappingAreas(Map<Message, List<Area>> messagesAndAreas) {
-        Map<Message, List<Area>> filteredMessagesAndAreas = new HashMap<>(messagesAndAreas.size());
+    /**
+     * Updates unreported ids that were marked as seen with the ones provided with report response
+     * @param reportingResult result of geo reporting
+     */
+    private static void updateUnreportedSeenMessageIds(Context context, @NonNull GeoReportingResult reportingResult) {
+        if (reportingResult.hasError() ||
+                reportingResult.getMessageIds() == null ||
+                reportingResult.getMessageIds().isEmpty()) {
+            return;
+        }
 
-        for (Message message : messagesAndAreas.keySet()) {
-            List<Area> areasList = message.getGeo().getAreasList();
+        MobileMessagingCore.getInstance(context).updateUnreportedSeenMessageIds(reportingResult.getMessageIds());
+    }
 
-            if (areasList != null) {
-                //using only area that has the smallest radius
-                Collections.sort(areasList, new GeoAreaRadiusComparator());
-                filteredMessagesAndAreas.put(message, Collections.singletonList(areasList.get(0)));
+    /**
+     * Prints geofence details as information log
+     * @param collection lists of geofences
+     * @param event transition event type
+     */
+    private static void logGeofences(Collection<List<Area>> collection, @NonNull GeoEventType event) {
+        for (List<Area> areas : collection) {
+            for (Area a : areas) {
+                MobileMessagingLogger.i(TAG, event.name().toUpperCase() + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
             }
         }
-
-        return filteredMessagesAndAreas;
     }
-
-
-    static class GeoAreaRadiusComparator implements Comparator<Area> {
-
-        @Override
-        public int compare(Area area1, Area area2) {
-            return area1.getRadius() - area2.getRadius();
-        }
-    }
-
 }
