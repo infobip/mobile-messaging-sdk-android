@@ -22,6 +22,7 @@ import org.infobip.mobile.messaging.geo.GeoLatLng;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -45,6 +46,7 @@ public class InfobipAndroidTestCase extends InstrumentationTestCase {
     protected DebugServer debugServer;
     protected MobileMessaging mobileMessaging;
     protected MobileMessagingTestable mobileMessagingCore;
+    protected MessageStore geoStore;
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
     protected Broadcaster broadcaster;
@@ -81,6 +83,7 @@ public class InfobipAndroidTestCase extends InstrumentationTestCase {
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
         databaseProvider = MobileMessagingCore.getDatabaseProvider(context);
+        geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
     }
 
     private static Context mockContext(final Context realContext) {
@@ -223,6 +226,20 @@ public class InfobipAndroidTestCase extends InstrumentationTestCase {
      */
     protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String campaignId, Area... areas) {
         return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>());
+    }
+
+    /**
+     * Generates new Geo object
+     * @param triggeringLatitude latitude that event was triggered with
+     * @param triggeringLongitude longitude that event was triggered with
+     * @param expiryTime geo campaign expiration time
+     * @param startTime geo campaign start time
+     * @param campaignId campaign id
+     * @param areas array of areas to include
+     * @return new Geo object
+     */
+    protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String expiryTime, String startTime, String campaignId, Area... areas) {
+        return new Geo(triggeringLatitude, triggeringLongitude, null, expiryTime, startTime, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>());
     }
 
     /**

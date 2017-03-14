@@ -38,8 +38,6 @@ public enum MobileMessagingProperty {
     UNREPORTED_GEO_EVENTS("org.ninfobip.mobile.messaging.infobip.UNREPORTED_GEO_EVENTS", new String[0]),
     FINISHED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.FINISHED_CAMPAIGN_IDS", new HashSet<String>()),
     SUSPENDED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.SUSPENDED_CAMPAIGN_IDS", new HashSet<String>()),
-    FINISHED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.FINISHED_CAMPAIGN_IDS", new String[0]),
-    SUSPENDED_CAMPAIGN_IDS("org.infobip.mobile.messaging.infobip.SUSPENDED_CAMPAIGN_IDS", new String[0]),
     ALL_ACTIVE_GEO_AREAS_MONITORED("org.infobip.mobile.messaging.infobip.ALL_ACTIVE_GEO_AREAS_MONITORED", false),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.infobip.GEOFENCING_ACTIVATED", false),

@@ -1,18 +1,16 @@
 package org.infobip.mobile.messaging.geo;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
-import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,10 +21,8 @@ import java.util.List;
 
 public class GeoStorageTest extends InfobipAndroidTestCase {
 
-    private MessageStore geoStore;
-    private MessageStore commonStore;
     private MobileMessageHandler handler;
-    private long now;
+    private MessageStore commonStore;
 
     @Override
     protected void setUp() throws Exception {
@@ -34,18 +30,12 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
         context = getInstrumentation().getContext();
 
-        handler = new MobileMessageHandler(new AndroidBroadcaster(context));
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
-        handler = new MobileMessageHandler();
-        geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
-        geoStore.deleteAll(context);
-        commonStore = MobileMessagingCore.getInstance(context).getMessageStore();
-        commonStore.deleteAll(context);
-        now = System.currentTimeMillis();
+        handler = new MobileMessageHandler(broadcaster);
+        commonStore = MobileMessaging.getInstance(context).getMessageStore();
     }
 
     public void test_shouldSaveGeoMessagesToGeoStore() throws Exception {
@@ -126,31 +116,9 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
         assertEquals(nonExpiredMessageId, geoStore.findAll(context).get(0).getMessageId());
     }
 
-    private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) throws JSONException {
-        Geo geo = new Geo(0.0, 0.0, new ArrayList<Area>() {{
-            add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
-        }}, null, new ArrayList<GeoEvent>(), expiryTimeMillis, startTimeMillis, "SomeCampaignId");
-
-        JSONObject internalData = new JSONObject(new JsonSerializer().serialize(geo));
-        Message message = new Message(
-                messageId,
-                "SomeTitle",
-                "SomeBody",
-                "SomeSound",
-                true,
-                "SomeIcon",
-                true,
-                "SomeCategory",
-                "SomeFrom",
-                now,
-                0,
-                internalData,
-                null,
-                geo,
-                "SomeDestination",
-                Message.Status.UNKNOWN,
-                "SomeStatusMessage"
-        );
-        geoStore.save(context, message);
+    private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) {
+        Geo geo = createGeo(0.0, 0.0, expiryTimeMillis, startTimeMillis, "SomeCampaignId",
+                createArea("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
+        createMessage(context, messageId, true, geo);
     }
 }

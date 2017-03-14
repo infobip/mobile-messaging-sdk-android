@@ -2,17 +2,13 @@ package org.infobip.mobile.messaging.geo;
 
 import com.google.android.gms.location.Geofence;
 
-import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.Tuple;
-import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -23,7 +19,6 @@ import java.util.List;
 
 public class GeoMonitoringTest extends InfobipAndroidTestCase {
 
-    private MessageStore messageStore;
     private Long now;
 
     @Override
@@ -32,12 +27,8 @@ public class GeoMonitoringTest extends InfobipAndroidTestCase {
 
         now = System.currentTimeMillis();
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
-
         Geofencing.getInstance(context);
-        geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
-        geoStore.deleteAll(context);
     }
 
     public void test_shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
@@ -137,30 +128,9 @@ public class GeoMonitoringTest extends InfobipAndroidTestCase {
         assertEquals(millis15MinAfterNow, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
     }
 
-    private void saveGeoMessageToDb(String startTimeMillis, String expiryTimeMillis) throws JSONException {
-        Geo geo = new Geo(0.0, 0.0, new ArrayList<Area>() {{
-            add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
-        }}, null, new ArrayList<GeoEvent>(), expiryTimeMillis, startTimeMillis, "SomeCampaignId");
-
-        Message message = new Message(
-                "SomeMessageId",
-                "SomeTitle",
-                "SomeBody",
-                "SomeSound",
-                true,
-                "SomeIcon",
-                true,
-                "SomeCategory",
-                "SomeFrom",
-                now,
-                0,
-                null,
-                geo,
-                "SomeDestination",
-                Message.Status.UNKNOWN,
-                "SomeStatusMessage"
-        );
-        geoStore.save(context, message);
+    private void saveGeoMessageToDb(String startTimeMillis, String expiryTimeMillis) {
+        Geo geo = createGeo(0.0, 0.0, expiryTimeMillis, startTimeMillis, "SomeCampaignId",
+                createArea("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
+        createMessage(context, "SomeMessageId", true, geo);
     }
-
 }

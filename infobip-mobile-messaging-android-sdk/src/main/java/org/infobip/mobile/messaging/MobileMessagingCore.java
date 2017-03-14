@@ -181,7 +181,7 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
-    void addSyncMessagesIds(String... messageIDs) {
+    public void addSyncMessagesIds(String... messageIDs) {
         String[] timestampMessageIdPair = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, timestampMessageIdPair);
     }
