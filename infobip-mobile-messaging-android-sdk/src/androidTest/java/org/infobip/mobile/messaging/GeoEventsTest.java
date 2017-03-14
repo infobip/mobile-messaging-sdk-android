@@ -20,7 +20,7 @@ public class GeoEventsTest extends InfobipAndroidTestCase {
 
     private class GeoTest extends Geo {
         public GeoTest() {
-            super(null, null, null, null, null, null, new ArrayList<Area>(), null);
+            super(null, null, null, null, null, null, null, null);
         }
 
         List<GeoEventSettings> getEventFilters() {

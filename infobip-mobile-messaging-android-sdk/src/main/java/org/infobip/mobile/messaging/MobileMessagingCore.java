@@ -521,12 +521,33 @@ public class MobileMessagingCore extends MobileMessaging {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
+    public boolean areAllActiveGeoAreasMonitored() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.ALL_ACTIVE_GEO_AREAS_MONITORED);
+    }
+
+    public void setAllActiveGeoAreasMonitored(boolean allActiveGeoAreasMonitored) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.ALL_ACTIVE_GEO_AREAS_MONITORED, allActiveGeoAreasMonitored);
+    }
+
+    public void removeExpiredAreas() {
+        if (isGeofencingActivated(context) && isPushRegistrationEnabled()) {
+            if (geofencing == null) {
+                geofencing = Geofencing.getInstance(context);
+            }
+
+            geofencing.removeExpiredAreasFromStorage();
+        }
+    }
+
     public void startGeoMonitoringIfNecessary() {
         if (isGeofencingActivated(context) && isPushRegistrationEnabled()) {
             if (geofencing == null) {
                 geofencing = Geofencing.getInstance(context);
             }
-            geofencing.startGeoMonitoring();
+
+            if (!areAllActiveGeoAreasMonitored()) {
+                geofencing.startGeoMonitoring();
+            }
         }
     }
 
@@ -539,7 +560,9 @@ public class MobileMessagingCore extends MobileMessaging {
         this.geofencing = geofencing;
         if (geofencing == null) return;
         setGeofencingActivated(context, true);
-        geofencing.startGeoMonitoring();
+        if (!areAllActiveGeoAreasMonitored()) {
+            geofencing.startGeoMonitoring();
+        }
     }
 
     @Override
@@ -744,7 +767,9 @@ public class MobileMessagingCore extends MobileMessaging {
         return PreferenceHelper.findStringSet(context, MobileMessagingProperty.SUSPENDED_CAMPAIGN_IDS);
     }
 
-    static void handleBootCompleted(Context context) {
+    void handleBootCompleted() {
+        //active areas stop being monitored on boot and we need to re-register them
+        instance.setAllActiveGeoAreasMonitored(false);
         Geofencing.scheduleRefresh(context);
     }
 

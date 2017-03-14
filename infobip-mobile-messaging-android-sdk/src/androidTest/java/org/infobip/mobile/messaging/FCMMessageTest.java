@@ -23,7 +23,7 @@ public class FCMMessageTest extends TestCase {
 
     private class GeoTest extends Geo {
         GeoTest() {
-            super(null, null, null, null, null, null, new ArrayList<Area>(), null);
+            super(null, null, null, null, null, null, null, null);
         }
 
         Date getExpiry() {

@@ -125,6 +125,12 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
     }
 
     @Override
+    public <T extends DatabaseObject> void delete(Class<T> cls, String[] primaryKeys) {
+        db().delete(getTableName(cls), getPrimaryKeyColumn(cls) +
+                " IN (" + new String(new char[primaryKeys.length-1]).replace("\0", "?,") + "?)", primaryKeys);
+    }
+
+    @Override
     public void onCreate(SQLiteDatabase db) {
         db.beginTransaction();
         db.execSQL(SQL_CREATE_MESSAGES_TABLE);

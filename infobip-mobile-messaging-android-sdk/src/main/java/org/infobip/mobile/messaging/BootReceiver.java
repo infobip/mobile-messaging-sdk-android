@@ -12,6 +12,6 @@ public class BootReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         MobileMessagingLogger.i("Received boot completed intent");
-        MobileMessagingCore.handleBootCompleted(context);
+        MobileMessagingCore.getInstance(context).handleBootCompleted();
     }
 }

@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.geo;
 import com.google.android.gms.location.Geofence;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -32,104 +32,115 @@ public class GeoMonitoringTest extends InfobipAndroidTestCase {
 
         now = System.currentTimeMillis();
 
-        Geofencing.getInstance(context);
-
+        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
-        messageStore = MobileMessaging.getInstance(context).getMessageStore();
-        messageStore.deleteAll(context);
+
+        Geofencing.getInstance(context);
+        geoStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
+        geoStore.deleteAll(context);
     }
 
-    public void test_shouldCalculateRefreshDateForGeoStart() throws Exception {
+    public void test_shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
         // Given
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
         Long millis30MinAfterNow = now + 30 * 60 * 1000;
         String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
         String date30MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinAfterNow));
 
-        Geo geo = new Geo(0.0, 0.0, null, date30MinAfterNow, date15MinAfterNow, "SomeCampaignId", new ArrayList<Area>() {{
-            add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
-        }}, new ArrayList<GeoEventSettings>());
-
-        Message message = new Message(
-                "SomeMessageId",
-                "SomeTitle",
-                "SomeBody",
-                "SomeSound",
-                true,
-                "SomeIcon",
-                true,
-                "SomeCategory",
-                "SomeFrom",
-                now,
-                0,
-                null,
-                geo,
-                "SomeDestination",
-                Message.Status.UNKNOWN,
-                "SomeStatusMessage"
-        );
-        messageStore.save(context, message);
+        saveGeoMessageToDb(date15MinAfterNow, date30MinAfterNow);
 
         // When
-        Tuple<List<Geofence>, Date> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDate(messageStore);
+        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
         assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
         assertNotNull(geofencesAndNextRefreshDate.getRight());
-        assertEquals(millis15MinAfterNow, geofencesAndNextRefreshDate.getRight().getTime(), 3000);
+
+        Date refreshStartDate = geofencesAndNextRefreshDate.getRight().getLeft();
+        Date refreshExpiryDate = geofencesAndNextRefreshDate.getRight().getRight();
+        assertEquals(millis15MinAfterNow, refreshStartDate.getTime(), 3000);
+        assertEquals(millis30MinAfterNow, refreshExpiryDate.getTime(), 3000);
     }
 
-    public void test_shouldNotCalculateRefreshDateIfGeoExpired() throws Exception {
+    public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoExpired() throws Exception {
         // Given
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         String date30MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinBeforeNow));
         String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
 
-        Geo geo = new Geo(0.0, 0.0, null, date15MinBeforeNow, date30MinBeforeNow, "SomeCampaignId", new ArrayList<Area>() {{
-            add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
-        }}, new ArrayList<GeoEventSettings>());
-
-        Message message = new Message(
-                "SomeMessageId",
-                "SomeTitle",
-                "SomeBody",
-                "SomeSound",
-                true,
-                "SomeIcon",
-                true,
-                "SomeCategory",
-                "SomeFrom",
-                now,
-                0,
-                null,
-                geo,
-                "SomeDestination",
-                Message.Status.UNKNOWN,
-                "SomeStatusMessage"
-        );
-        messageStore.save(context, message);
+        saveGeoMessageToDb(date30MinBeforeNow, date15MinBeforeNow);
 
         // When
-        Tuple<List<Geofence>, Date> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDate(messageStore);
+        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
         assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight());
+        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
     }
 
-    public void test_shouldNotCalculateRefreshDateIfGeoIsMonitoredNow() throws Exception {
+    public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoExpired() throws Exception {
+        // Given
+        Long millis30MinBeforeNow = now - 30 * 60 * 1000;
+        Long millis15MinBeforeNow = now - 15 * 60 * 1000;
+        String date30MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinBeforeNow));
+        String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
+
+        saveGeoMessageToDb(date30MinBeforeNow, date15MinBeforeNow);
+
+        // When
+        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDates(geoStore);
+
+        // Then
+        assertNotNull(geofencesAndNextRefreshDate);
+        assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
+        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
+        assertEquals(now, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
+    }
+
+    public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoIsMonitoredNow() throws Exception {
         // Given
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
         String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
         String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
 
-        Geo geo = new Geo(0.0, 0.0, null, date15MinBeforeNow, date15MinAfterNow, "SomeCampaignId", new ArrayList<Area>() {{
+        saveGeoMessageToDb(date15MinBeforeNow, date15MinAfterNow);
+
+        // When
+        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDates(geoStore);
+
+        // Then
+        assertNotNull(geofencesAndNextRefreshDate);
+        assertFalse(geofencesAndNextRefreshDate.getLeft().isEmpty());
+        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
+    }
+
+    public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoIsMonitoredNow() throws Exception {
+        // Given
+        Long millis15MinBeforeNow = now - 15 * 60 * 1000;
+        Long millis15MinAfterNow = now + 15 * 60 * 1000;
+        String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
+        String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
+
+        saveGeoMessageToDb(date15MinBeforeNow, date15MinAfterNow);
+
+        // When
+        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDates(geoStore);
+
+        // Then
+        assertNotNull(geofencesAndNextRefreshDate);
+        assertFalse(geofencesAndNextRefreshDate.getLeft().isEmpty());
+        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
+        assertEquals(millis15MinAfterNow, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
+    }
+
+    private void saveGeoMessageToDb(String startTimeMillis, String expiryTimeMillis) throws JSONException {
+        Geo geo = new Geo(0.0, 0.0, new ArrayList<Area>() {{
             add(new Area("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
-        }}, new ArrayList<GeoEventSettings>());
+        }}, null, new ArrayList<GeoEvent>(), expiryTimeMillis, startTimeMillis, "SomeCampaignId");
 
         Message message = new Message(
                 "SomeMessageId",
@@ -149,14 +160,7 @@ public class GeoMonitoringTest extends InfobipAndroidTestCase {
                 Message.Status.UNKNOWN,
                 "SomeStatusMessage"
         );
-        messageStore.save(context, message);
-
-        // When
-        Tuple<List<Geofence>, Date> geofencesAndNextRefreshDate = Geofencing.calculateGeofencesToMonitorAndNextCheckDate(messageStore);
-
-        // Then
-        assertNotNull(geofencesAndNextRefreshDate);
-        assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight());
+        geoStore.save(context, message);
     }
+
 }
