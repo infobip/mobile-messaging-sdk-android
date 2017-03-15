@@ -2,13 +2,10 @@ package org.infobip.mobile.messaging.geo;
 
 import com.google.android.gms.location.Geofence;
 
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.platform.Time;
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Date;
 import java.util.List;
@@ -28,7 +25,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
 
         now = Time.now();
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+        enableMessageStoreForReceivedMessages();
         Geofencing.getInstance(context);
     }
 

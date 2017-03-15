@@ -220,9 +220,9 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Area area = createArea("areaId1");
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Arrays.asList(
-                createMessage(context,"signalingMessageId1", "campaignId1", false, area),
-                createMessage(context,"signalingMessageId2", "campaignId2", false, area),
-                createMessage(context,"signalingMessageId3", "campaignId3", false, area)));
+                createMessage(context,"signalingMessageId1", "campaignId1", true, area),
+                createMessage(context,"signalingMessageId2", "campaignId2", true, area),
+                createMessage(context,"signalingMessageId3", "campaignId3", true, area)));
         EventReportResponse response = new EventReportResponse();
         response.setSuspendedCampaignIds(Sets.newSet("campaignId1"));
         response.setFinishedCampaignIds(Sets.newSet("campaignId2"));

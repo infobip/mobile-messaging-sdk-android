@@ -1,9 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.platform.Time;
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 /**
  * @author sslavin
@@ -15,8 +13,7 @@ public class SeenStatusStorageTest extends MobileMessagingTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+        enableMessageStoreForReceivedMessages();
     }
 
     public void test_shouldUpdateSeenTimestampInMessageStore() {
