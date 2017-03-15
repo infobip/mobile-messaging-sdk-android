@@ -78,7 +78,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).messageReceived(Mockito.any(Message.class));
     }
 
-    public void test_shouldNotSend_MESSAGE_RECEIVED_forGeoMessage() throws Exception {
+    public void test_shouldNotSend_messageReceived_forGeoMessage() throws Exception {
 
         // Given
         Geo geo = createGeo(1.0, 2.0, "campaignId", createArea("areaId"));
