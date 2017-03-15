@@ -18,14 +18,14 @@ public class GeoReportingResult extends UnsuccessfulResult {
      */
     private final Map<String, String> messageIds;
 
-    GeoReportingResult(Throwable exception) {
+    public GeoReportingResult(Throwable exception) {
         super(exception);
         finishedCampaignIds = null;
         suspendedCampaignIds = null;
         messageIds = null;
     }
 
-    GeoReportingResult(EventReportResponse eventReportResponse) {
+    public GeoReportingResult(EventReportResponse eventReportResponse) {
         super(null);
         this.finishedCampaignIds = eventReportResponse.getFinishedCampaignIds();
         this.suspendedCampaignIds = eventReportResponse.getSuspendedCampaignIds();

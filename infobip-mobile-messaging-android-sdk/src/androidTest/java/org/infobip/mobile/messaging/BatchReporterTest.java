@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.mobile.BatchReporter;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.Mockito;
 
@@ -9,7 +9,7 @@ import org.mockito.Mockito;
  * @author sslavin
  * @since 07/07/16.
  */
-public class BatchReporterTest extends InfobipAndroidTestCase {
+public class BatchReporterTest extends MobileMessagingTestCase {
 
     private BatchReporter batchReporter;
     private Runnable runnable;

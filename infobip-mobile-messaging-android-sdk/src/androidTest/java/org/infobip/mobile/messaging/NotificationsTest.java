@@ -11,7 +11,7 @@ import android.support.annotation.RequiresApi;
 
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -24,7 +24,7 @@ import java.util.Set;
  * @since 30/12/2016.
  */
 
-public class NotificationsTest extends InfobipAndroidTestCase {
+public class NotificationsTest extends MobileMessagingTestCase {
 
     private MobileMessageHandler mobileMessageHandler;
     private NotificationManager notificationManagerMock;

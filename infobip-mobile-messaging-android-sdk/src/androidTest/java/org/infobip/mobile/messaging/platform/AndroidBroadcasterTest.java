@@ -13,7 +13,7 @@ import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * @since 13/03/2017.
  */
 
-public class AndroidBroadcasterTest extends InfobipAndroidTestCase {
+public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
     private AndroidBroadcaster broadcastSender;
     private ArgumentCaptor<Intent> intentArgumentCaptor;

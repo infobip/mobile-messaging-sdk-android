@@ -10,7 +10,7 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -23,7 +23,7 @@ import java.util.concurrent.Executors;
 import fi.iki.elonen.NanoHTTPD;
 
 
-public class PushUnregisteredTest extends InfobipAndroidTestCase {
+public class PushUnregisteredTest extends MobileMessagingTestCase {
 
     private GeoReporter geoReporter;
     private SeenStatusReporter seenStatusReporter;

@@ -4,14 +4,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 
 /**
  * @author sslavin
  * @since 02/02/2017.
  */
 
-public class SqliteMessageMigrationTest extends InfobipAndroidTestCase {
+public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
 
     private static final int OLD_DB_VERSION = 1; // See database versions in DatabaseHelperImpl
     private static final String SQL_CREATE_OLD_MESSAGES_TABLE = "CREATE TABLE " + DatabaseContract.Tables.MESSAGES + " (" +

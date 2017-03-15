@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -20,7 +21,7 @@ import java.util.regex.PatternSyntaxException;
  * @since 06/02/2017.
  */
 
-class GeoNotificationHelper {
+public class GeoNotificationHelper {
 
     private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
@@ -38,11 +39,11 @@ class GeoNotificationHelper {
      * Broadcasts geofencing events and displays appropriate notifications for geo events
      * @param messages messages with geo to notify
      */
-    void notifyAboutGeoTransitions(Map<Message, GeoEventType> messages) {
+    public void notifyAboutGeoTransitions(Map<Message, GeoEventType> messages) {
         for (Message m : messages.keySet()) {
             GeoEventType eventType = messages.get(m);
 
-            setLastNotificationTimeForArea(context, m.getGeo().getCampaignId(), eventType, System.currentTimeMillis());
+            setLastNotificationTimeForArea(context, m.getGeo().getCampaignId(), eventType, Time.now());
             setNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType,
                         getNumberOfDisplayedNotificationsForArea(context, m.getGeo().getCampaignId(), eventType) + 1);
 
@@ -67,7 +68,7 @@ class GeoNotificationHelper {
         return settings != null &&
                 isInDeliveryWindow &&
                 (settings.getLimit() > numberOfDisplayedNotifications || settings.getLimit() == GeoEventSettings.UNLIMITED_RECURRING) &&
-                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < System.currentTimeMillis() - lastNotificationTimeForArea &&
+                TimeUnit.MINUTES.toMillis(settings.getTimeoutInMinutes()) < Time.now() - lastNotificationTimeForArea &&
                 geoEventMatchesTransition(settings, event) &&
                 !geo.isExpired();
     }

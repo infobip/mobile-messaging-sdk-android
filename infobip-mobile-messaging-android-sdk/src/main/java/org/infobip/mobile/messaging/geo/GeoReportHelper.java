@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class GeoReportHelper {
                 signalingMessage.getMessageId(),
                 event,
                 area,
-                System.currentTimeMillis(),
+                Time.now(),
                 triggeringLocation
         );
     }
@@ -163,7 +164,7 @@ public class GeoReportHelper {
                 false, // enforcing non-silent
                 originalMessage.getCategory(),
                 originalMessage.getFrom(),
-                System.currentTimeMillis(),
+                Time.now(),
                 0,
                 originalMessage.getCustomPayload(),
                 geo,
@@ -224,7 +225,7 @@ public class GeoReportHelper {
      */
     @NonNull
     static Map<Message, List<Area>> findSignalingMessagesAndAreas(Context context, MessageStore messageStore, Set<String> requestIds, @NonNull GeoEventType event) {
-        Date now = new Date();
+        Date now = Time.date();
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
             Geo geo = message.getGeo();

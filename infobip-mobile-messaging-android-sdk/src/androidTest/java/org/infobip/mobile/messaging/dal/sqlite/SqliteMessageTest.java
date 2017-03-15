@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.dal.sqlite;
 import android.database.sqlite.SQLiteConstraintException;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.json.JSONObject;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * @since 12/01/2017.
  */
 
-public class SqliteMessageTest extends InfobipAndroidTestCase {
+public class SqliteMessageTest extends MobileMessagingTestCase {
 
     public void test_message_toFromSqlite() throws Exception {
 

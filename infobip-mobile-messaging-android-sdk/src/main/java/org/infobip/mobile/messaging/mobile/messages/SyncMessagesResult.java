@@ -7,6 +7,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
+import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,7 +75,7 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 "true".equals(response.getSilent()),
                 response.getCategory(),
                 null,
-                System.currentTimeMillis(),
+                Time.now(),
                 0,
                 customPayload,
                 geo,

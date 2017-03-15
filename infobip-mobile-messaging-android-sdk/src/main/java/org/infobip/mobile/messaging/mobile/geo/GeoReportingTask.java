@@ -16,6 +16,7 @@ import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.geo.GeoReportHelper;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.HashSet;
@@ -98,7 +99,7 @@ class GeoReportingTask extends AsyncTask<GeoReport, Void, GeoReportingResult> {
                     InternalDataMapper.createInternalDataBasedOnMessageContents(m)
             ));
 
-            Long timestampDelta = System.currentTimeMillis() - r.getTimestampOccurred();
+            Long timestampDelta = Time.now() - r.getTimestampOccurred();
             Long timestampDeltaSeconds = TimeUnit.MILLISECONDS.toSeconds(timestampDelta);
 
             eventReports.add(new EventReport(

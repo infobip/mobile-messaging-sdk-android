@@ -9,8 +9,7 @@ import org.infobip.mobile.messaging.api.geo.EventReportBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -29,7 +28,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 20/10/2016.
  */
 
-public class GeoReportsTest extends InfobipAndroidTestCase {
+public class GeoReporterTest extends MobileMessagingTestCase {
 
     private MessageStore messageStore;
     private GeoReporter geoReporter;
@@ -41,7 +40,7 @@ public class GeoReportsTest extends InfobipAndroidTestCase {
         super.setUp();
 
         // Enable message store for notification messages
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
+        enableMessageStoreForReceivedMessages();
 
         messageStore = MobileMessaging.getInstance(context).getMessageStore();
         geoReporter = new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats());

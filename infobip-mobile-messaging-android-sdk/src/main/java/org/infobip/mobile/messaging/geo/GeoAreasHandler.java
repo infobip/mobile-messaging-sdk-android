@@ -25,16 +25,22 @@ public class GeoAreasHandler {
 
     private static final String TAG = "GeofenceTransitions";
 
-    private final MessageStore messageStore;
+    private final MessageStore geoMessageStore;
     private final GeoNotificationHelper geoNotificationHelper;
     private final GeoReporter geoReporter;
     private final Context context;
 
     GeoAreasHandler(Context context, Broadcaster broadcaster) {
+        this(context, new GeoNotificationHelper(context, broadcaster),
+                new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats()),
+                MobileMessagingCore.getInstance(context).getMessageStoreForGeo());
+    }
+
+    GeoAreasHandler(Context context, GeoNotificationHelper geoNotificationHelper, GeoReporter geoReporter, MessageStore geoMessageStore) {
         this.context = context;
-        this.geoNotificationHelper = new GeoNotificationHelper(context, broadcaster);
-        this.geoReporter = new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats());
-        this.messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForGeo();
+        this.geoNotificationHelper = geoNotificationHelper;
+        this.geoReporter = geoReporter;
+        this.geoMessageStore = geoMessageStore;
     }
 
     /**
@@ -64,7 +70,7 @@ public class GeoAreasHandler {
      */
     @SuppressWarnings("WeakerAccess")
     void handleTransition(GeoTransition transition) {
-        Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, messageStore, transition.getRequestIds(), transition.getEventType());
+        Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, geoMessageStore, transition.getRequestIds(), transition.getEventType());
         if (messagesAndAreas.isEmpty()) {
             MobileMessagingLogger.d(TAG, "No messages for triggered areas");
             return;

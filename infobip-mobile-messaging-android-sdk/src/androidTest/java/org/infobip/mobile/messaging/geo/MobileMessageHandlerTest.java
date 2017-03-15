@@ -5,23 +5,21 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
-import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author sslavin
  * @since 13/02/2017.
  */
 
-public class GeoStorageTest extends InfobipAndroidTestCase {
+public class MobileMessageHandlerTest extends MobileMessagingTestCase {
 
     private MobileMessageHandler handler;
     private MessageStore commonStore;
@@ -30,9 +28,8 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        context = getInstrumentation().getContext();
+        enableMessageStoreForReceivedMessages();
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, SQLiteMessageStore.class.getName());
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
@@ -93,7 +90,7 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
 
     public void test_shouldDeleteExpiredAreas() throws Exception {
         // Given
-        long now = System.currentTimeMillis();
+        long now = Time.now();
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
@@ -116,24 +113,6 @@ public class GeoStorageTest extends InfobipAndroidTestCase {
         // Then
         assertEquals(1, geoStore.countAll(context));
         assertEquals(nonExpiredMessageId, geoStore.findAll(context).get(0).getMessageId());
-    }
-
-    public void test_shouldDeleteAreasFromGeoStoreByIds() throws Exception {
-        // Given
-        Set<String> geoMessageIds = new HashSet<>(6);
-        for (int i = 0; i < 6; i++) {
-            String tempMessageId = "SomeMessageId" + i;
-            geoMessageIds.add(tempMessageId);
-            saveGeoMessageToDb(tempMessageId, null, null);
-        }
-
-        assertEquals(6, geoStore.countAll(context));
-
-        // When
-        ((GeoSQLiteMessageStore) geoStore).deleteByIds(context, geoMessageIds.toArray(new String[]{}));
-
-        // Then
-        assertEquals(0, geoStore.countAll(context));
     }
 
     private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) {

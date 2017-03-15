@@ -2,6 +2,8 @@ package org.infobip.mobile.messaging.geo;
 
 import com.google.android.gms.location.Geofence;
 
+import org.infobip.mobile.messaging.platform.Time;
+
 import java.util.Date;
 
 /**
@@ -48,7 +50,7 @@ public class Area {
     Geofence toGeofence(Date expiryDate) {
         Long expirationDurationMillis = 0L;
         if (expiryDate != null) {
-            expirationDurationMillis = expiryDate.getTime() - System.currentTimeMillis();
+            expirationDurationMillis = expiryDate.getTime() - Time.now();
         }
         if (expirationDurationMillis <= 0) {
             expirationDurationMillis = Geofence.NEVER_EXPIRE;

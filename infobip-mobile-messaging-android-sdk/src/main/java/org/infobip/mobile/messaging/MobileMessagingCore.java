@@ -23,8 +23,9 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
-import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
@@ -81,6 +82,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor) {
         MobileMessagingLogger.init(context);
+
         this.context = context;
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
@@ -200,7 +202,7 @@ public class MobileMessagingCore extends MobileMessaging {
             String strTimeMessageReceived = messageIdWithTimestamp[1];
 
             long timeMessageReceived = Long.valueOf(strTimeMessageReceived);
-            long timeInterval = System.currentTimeMillis() - timeMessageReceived;
+            long timeInterval = Time.now() - timeMessageReceived;
 
             if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
                 messageIdsArrayList.remove(i);
@@ -289,7 +291,7 @@ public class MobileMessagingCore extends MobileMessaging {
         if (messageIDs.length > 0) {
             for (int i = 0; i < messageIDs.length; i++) {
                 String messageId = messageIDs[i];
-                String seenTimestamp = String.valueOf(System.currentTimeMillis());
+                String seenTimestamp = String.valueOf(Time.now());
                 syncMessages[i] = StringUtils.concat(messageId, seenTimestamp, StringUtils.COMMA_WITH_SPACE);
             }
         }
@@ -345,7 +347,7 @@ public class MobileMessagingCore extends MobileMessaging {
         List<String> messageIdList = Arrays.asList(messageIds);
         for (Message m : new ArrayList<>(messageStore.findAll(context))) {
             if (messageIdList.contains(m.getMessageId())) {
-                m.setSeenTimestamp(System.currentTimeMillis());
+                m.setSeenTimestamp(Time.now());
                 messageStore.save(context, m);
             }
         }

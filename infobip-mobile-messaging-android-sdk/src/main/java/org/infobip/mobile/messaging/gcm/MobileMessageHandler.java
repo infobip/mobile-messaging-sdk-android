@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -50,7 +51,7 @@ public class MobileMessageHandler {
             return;
         }
 
-        message.setReceivedTimestamp(System.currentTimeMillis());
+        message.setReceivedTimestamp(Time.now());
 
         sendDeliveryReport(context, message);
         saveMessage(context, message);

@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -12,7 +12,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @author sslavin
  * @since 25/08/16.
  */
-public class SystemDataReportTest extends InfobipAndroidTestCase {
+public class SystemDataReportTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<SystemData> captor;
 

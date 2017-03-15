@@ -4,17 +4,17 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEventSettings;
-import org.infobip.mobile.messaging.tools.InfobipAndroidTestCase;
+import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by pandric on 20/09/16.
  */
-public class GeoEventsTest extends InfobipAndroidTestCase {
+public class GeoEventsTest extends MobileMessagingTestCase {
 
     private long timeDelta;
 
@@ -96,7 +96,7 @@ public class GeoEventsTest extends InfobipAndroidTestCase {
     }
 
     private long currentTimeMillis() {
-        return System.currentTimeMillis() + timeDelta;
+        return Time.now() + timeDelta;
     }
 
     private String internalData() {

@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.mobile.seen;
 
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ class SeenMessagesReport extends SeenMessages {
             String seenTimestampString = messageIdWithTimestamp[1];
 
             long seenTimestamp = Long.valueOf(seenTimestampString);
-            long deltaTimestamp = System.currentTimeMillis() - seenTimestamp;
+            long deltaTimestamp = Time.now() - seenTimestamp;
             long deltaInSeconds = Math.round((float) deltaTimestamp / 1000);
 
             messages.add(new Message(messageId, deltaInSeconds));
