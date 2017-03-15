@@ -18,7 +18,7 @@ import java.util.List;
  * @since 15/02/2017.
  */
 
-public class MessageHandlerTests extends MobileMessagingTestCase {
+public class MobileMessageHandlerTest extends MobileMessagingTestCase {
 
     private MobileMessageHandler handler;
     private MessageStore commonStore;

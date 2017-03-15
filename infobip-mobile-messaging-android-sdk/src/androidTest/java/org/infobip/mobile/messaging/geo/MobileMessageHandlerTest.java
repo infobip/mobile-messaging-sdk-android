@@ -20,7 +20,7 @@ import java.util.List;
  * @since 13/02/2017.
  */
 
-public class GeoStorageTest extends MobileMessagingTestCase {
+public class MobileMessageHandlerTest extends MobileMessagingTestCase {
 
     private MobileMessageHandler handler;
     private MessageStore commonStore;

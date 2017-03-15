@@ -29,7 +29,7 @@ import fi.iki.elonen.NanoHTTPD;
  * @since 20/10/2016.
  */
 
-public class GeoReportsTest extends MobileMessagingTestCase {
+public class GeoReporterTest extends MobileMessagingTestCase {
 
     private MessageStore messageStore;
     private GeoReporter geoReporter;
