@@ -18,7 +18,7 @@ import java.util.List;
  * @since 12/02/2017.
  */
 
-public class GeoMonitoringTest extends MobileMessagingTestCase {
+public class GeofencingTest extends MobileMessagingTestCase {
 
     private Long now;
 

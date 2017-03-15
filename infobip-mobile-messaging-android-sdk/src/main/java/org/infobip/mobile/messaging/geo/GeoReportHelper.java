@@ -225,7 +225,7 @@ public class GeoReportHelper {
      */
     @NonNull
     static Map<Message, List<Area>> findSignalingMessagesAndAreas(Context context, MessageStore messageStore, Set<String> requestIds, @NonNull GeoEventType event) {
-        Date now = new Date();
+        Date now = Time.date();
         Map<Message, List<Area>> messagesAndAreas = new HashMap<>();
         for (Message message : messageStore.findAll(context)) {
             Geo geo = message.getGeo();

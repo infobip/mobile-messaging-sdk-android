@@ -9,6 +9,7 @@ import android.test.InstrumentationTestCase;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
@@ -33,6 +34,9 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -55,9 +59,10 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
     protected Broadcaster broadcaster;
     protected TestTimeProvider time;
 
-    private static class TestTimeProvider implements TimeProvider {
+    protected static class TestTimeProvider implements TimeProvider {
 
         long delta = 0;
+        boolean overwritten = false;
 
         public void forward(long time, TimeUnit unit) {
             delta += unit.toMillis(time);
@@ -68,12 +73,50 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
         }
 
         public void reset() {
+            overwritten = false;
             delta = 0;
+        }
+
+        public void set(long time) {
+            overwritten = true;
+            delta = time;
         }
 
         @Override
         public long now() {
-            return System.currentTimeMillis() + delta;
+            if (overwritten) {
+                return delta;
+            } else {
+                return System.currentTimeMillis() + delta;
+            }
+        }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class TestMessageStore implements MessageStore {
+
+        Map<String, Message> messages = new HashMap<>();
+
+        @Override
+        public List<Message> findAll(Context context) {
+            return new ArrayList<>(messages.values());
+        }
+
+        @Override
+        public long countAll(Context context) {
+            return messages.values().size();
+        }
+
+        @Override
+        public void save(Context context, Message... messages) {
+            for (Message message : messages) {
+                this.messages.put(message.getMessageId(), message);
+            }
+        }
+
+        @Override
+        public void deleteAll(Context context) {
+            messages.clear();
         }
     }
 
@@ -81,6 +124,8 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        MobileMessagingLogger.enforce();
 
         context = getInstrumentation().getContext();
         contextMock = mockContext(context);
@@ -131,12 +176,18 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
         Mockito.when(contextSpy.getMainLooper()).thenReturn(realContext.getMainLooper());
         Mockito.when(contextSpy.getPackageName()).thenReturn(realContext.getPackageName());
         Mockito.when(contextSpy.getResources()).thenReturn(realContext.getResources());
+        Mockito.when(contextSpy.getPackageName()).thenReturn(realContext.getPackageName());
 
         return contextSpy;
     }
 
+    protected void enableMessageStoreForReceivedMessages() {
+        PreferenceHelper.saveClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, TestMessageStore.class);
+    }
+
     @Override
     protected void tearDown() throws Exception {
+        time.reset();
         if (null != debugServer) {
             try {
                 debugServer.stop();
@@ -278,9 +329,6 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
      * @throws Exception if serialization or assertion fails
      */
     protected static <T> void assertJEquals(T expected, T actual) throws Exception {
-        if (expected == actual) {
-            return;
-        }
         JsonSerializer serializer = new JsonSerializer();
         JSONAssert.assertEquals(serializer.serialize(expected), serializer.serialize(actual), true);
     }

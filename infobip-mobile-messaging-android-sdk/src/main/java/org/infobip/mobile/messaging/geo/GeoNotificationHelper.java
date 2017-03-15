@@ -21,7 +21,7 @@ import java.util.regex.PatternSyntaxException;
  * @since 06/02/2017.
  */
 
-class GeoNotificationHelper {
+public class GeoNotificationHelper {
 
     private static final String AREA_NOTIFIED_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.notified.";
     private static final String AREA_LAST_TIME_PREF_PREFIX = "org.infobip.mobile.messaging.geo.area.last.time.";
@@ -39,7 +39,7 @@ class GeoNotificationHelper {
      * Broadcasts geofencing events and displays appropriate notifications for geo events
      * @param messages messages with geo to notify
      */
-    void notifyAboutGeoTransitions(Map<Message, GeoEventType> messages) {
+    public void notifyAboutGeoTransitions(Map<Message, GeoEventType> messages) {
         for (Message m : messages.keySet()) {
             GeoEventType eventType = messages.get(m);
 
