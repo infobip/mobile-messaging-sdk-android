@@ -771,7 +771,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     void handleBootCompleted() {
         //active areas stop being monitored on boot and we need to re-register them
-        instance.setAllActiveGeoAreasMonitored(false);
+        setAllActiveGeoAreasMonitored(false);
         Geofencing.scheduleRefresh(context);
     }
 
