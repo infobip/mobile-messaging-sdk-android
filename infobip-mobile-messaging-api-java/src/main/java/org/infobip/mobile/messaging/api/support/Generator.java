@@ -1,8 +1,16 @@
 package org.infobip.mobile.messaging.api.support;
 
-import lombok.Data;
-import lombok.NonNull;
-import org.infobip.mobile.messaging.api.support.http.*;
+import org.infobip.mobile.messaging.api.support.http.ApiKey;
+import org.infobip.mobile.messaging.api.support.http.Body;
+import org.infobip.mobile.messaging.api.support.http.Credentials;
+import org.infobip.mobile.messaging.api.support.http.Header;
+import org.infobip.mobile.messaging.api.support.http.Headers;
+import org.infobip.mobile.messaging.api.support.http.HttpRequest;
+import org.infobip.mobile.messaging.api.support.http.Path;
+import org.infobip.mobile.messaging.api.support.http.Paths;
+import org.infobip.mobile.messaging.api.support.http.Queries;
+import org.infobip.mobile.messaging.api.support.http.Query;
+import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
@@ -12,8 +20,16 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
+import lombok.Data;
+import lombok.NonNull;
 
 import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.loadPackageInfo;
 
@@ -29,6 +45,11 @@ import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.load
  */
 @Data
 public class Generator {
+
+    public interface CommonHeaderProvider {
+        Map<String, Collection<Object>> get();
+    }
+
     private DefaultApiClient apiClient;
     private String baseUrl = "https://oneapi.infobip.com/";
     private ConcurrentHashMap<Class<?>, CachingInvocationHandler> proxyCacheMap = new ConcurrentHashMap<>();
@@ -36,6 +57,7 @@ public class Generator {
     private int connectTimeout = DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
     private int readTimeout = DefaultApiClient.DEFAULT_READ_TIMEOUT;
     private String[] userAgentAdditions = new String[0];
+    private CommonHeaderProvider commonHeaderProvider = null;
 
     private DefaultApiClient getApiClient() {
         if (null != apiClient) {
@@ -233,6 +255,17 @@ public class Generator {
             return this;
         }
 
+        /**
+         * It will set dynamic header provider for generator.
+         *
+         * @param provider callaback interface which providers headers.
+         * @return {@link Builder}
+         */
+        public Builder withDynamicHeaderProvider(@NonNull CommonHeaderProvider provider) {
+            generator.commonHeaderProvider = provider;
+            return this;
+        }
+
         public Generator build() {
             if (StringUtils.isBlank(generator.getBaseUrl())) {
                 throw new IllegalArgumentException("baseUrl is mandatory");
@@ -255,7 +288,6 @@ public class Generator {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             ProxyCache proxyCache = getProxyCache(method);
-//            HttpRequest httpRequest = proxyCache.getHttpRequest();
             String uri = proxyCache.getUri();
 
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
@@ -293,6 +325,10 @@ public class Generator {
                     String name = h.name();
                     headerMap.put(name, toCollection(arg));
                 }
+            }
+
+            if (commonHeaderProvider != null) {
+                headerMap.putAll(commonHeaderProvider.get());
             }
 
             return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, credentials, queryParams, headerMap, body, method.getReturnType());

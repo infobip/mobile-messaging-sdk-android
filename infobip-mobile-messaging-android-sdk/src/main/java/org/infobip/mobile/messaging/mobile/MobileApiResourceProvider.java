@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
+import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -18,7 +19,11 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -28,6 +33,17 @@ import java.util.Properties;
 public enum MobileApiResourceProvider {
     INSTANCE;
 
+    public static class ForegroundStateProvider implements Generator.CommonHeaderProvider {
+
+        @Override
+        public Map<String, Collection<Object>> get() {
+            return new HashMap<String, Collection<Object>>() {{
+                put("foreground", Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
+            }};
+        }
+    }
+
+    private static final ForegroundStateProvider foregroundStateProvider = new ForegroundStateProvider();
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiMessages mobileApiMessages;
@@ -127,7 +143,9 @@ public enum MobileApiResourceProvider {
                 withBaseUrl(MobileMessagingCore.getInstance(context).getApiUri()).
                 withProperties(properties).
                 withUserAgentAdditions(getUserAgentAdditions(context)).
+                withDynamicHeaderProvider(foregroundStateProvider).
                 build();
+
         return generator;
     }
 

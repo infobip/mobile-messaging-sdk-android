@@ -54,7 +54,7 @@ public class DefaultApiClient implements ApiClient {
         try {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Collection<Object>> entry : queryParams.entrySet()) {
-                appendVaule(sb, entry);
+                appendValue(sb, entry);
             }
 
             urlConnection = (HttpURLConnection) new URL(uri + sb.toString()).openConnection();
@@ -188,7 +188,7 @@ public class DefaultApiClient implements ApiClient {
         return new Tuple<>(apiResponse.getRequestError().getServiceException().getMessageId(), apiResponse.getRequestError().getServiceException().getText());
     }
 
-    private void appendVaule(StringBuilder sb, Map.Entry<String, Collection<Object>> entry) throws UnsupportedEncodingException {
+    private void appendValue(StringBuilder sb, Map.Entry<String, Collection<Object>> entry) throws UnsupportedEncodingException {
         if (null == entry) {
             return;
         }

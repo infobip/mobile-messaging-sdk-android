@@ -61,7 +61,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
 
     public void test_system_data_retry() {
         reportSystemData();
-        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(3)).error(Mockito.any(MobileMessagingError.class));
+        Mockito.verify(broadcaster, Mockito.after(8000).atLeast(3)).error(Mockito.any(MobileMessagingError.class));
     }
 
     private void reportSystemData() {
@@ -93,7 +93,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         geoReporter.synchronize();
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
+        Mockito.verify(broadcaster, Mockito.after(8000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_sync_messages_retry() {
