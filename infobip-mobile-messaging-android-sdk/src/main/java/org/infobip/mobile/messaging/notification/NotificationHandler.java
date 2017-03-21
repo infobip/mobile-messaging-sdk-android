@@ -13,6 +13,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -75,7 +76,7 @@ public class NotificationHandler {
     private static @NonNull PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
 
         Intent intent = new Intent();
-        intent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), BundleMapper.messageToBundle(message));
+        intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message));
 
         if (notificationSettings.markSeenOnTap()) {
             intent.setClass(context, NotificationTapReceiver.class);

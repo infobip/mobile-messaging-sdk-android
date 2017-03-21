@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -18,7 +19,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 public class NotificationTapReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Bundle messageBundle = intent.getBundleExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey());
+        Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
         Message message = Message.createFrom(messageBundle);
         if (message == null) {
             MobileMessagingLogger.e("Received no message in NotificationTapReceiver");
@@ -37,7 +38,7 @@ public class NotificationTapReceiver extends BroadcastReceiver {
                 (Integer) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue());
 
         Intent callbackIntent = new Intent(context, callbackActivity);
-        callbackIntent.putExtra(MobileMessagingProperty.EXTRA_MESSAGE.getKey(), messageBundle);
+        callbackIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, messageBundle);
         // FLAG_ACTIVITY_NEW_TASK has to be here
         // because we're starting activity outside of activity context
         callbackIntent.addFlags(intentFlags | Intent.FLAG_ACTIVITY_NEW_TASK);
