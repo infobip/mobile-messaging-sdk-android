@@ -238,4 +238,17 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertNotSame(systemData, systemDataAfter);
         assertJEquals(systemData, systemDataAfter);
     }
+
+    public void test_should_set_package_for_intent() throws Exception {
+        // Given
+        Message message = createMessage(context, "SomeMessageId", false);
+        Mockito.when(contextMock.getPackageName()).thenReturn("test.package.name");
+
+        // When
+        broadcastSender.messageReceived(message);
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+        assertEquals("test.package.name", intentArgumentCaptor.getValue().getPackage());
+    }
 }

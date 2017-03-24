@@ -40,7 +40,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void messageReceived(@NonNull Message message) {
-        Intent messageReceived = new Intent(Event.MESSAGE_RECEIVED.getKey());
+        Intent messageReceived = prepareIntent(Event.MESSAGE_RECEIVED);
         messageReceived.putExtras(BundleMapper.messageToBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
         context.sendBroadcast(messageReceived);
@@ -53,7 +53,7 @@ public class AndroidBroadcaster implements Broadcaster {
             return;
         }
 
-        Intent geofenceIntent = new Intent(broadcastEvent.getKey());
+        Intent geofenceIntent = prepareIntent(broadcastEvent);
         geofenceIntent.putExtras(BundleMapper.geoToBundle(geo));
         geofenceIntent.putExtras(BundleMapper.messageToBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
@@ -66,7 +66,7 @@ public class AndroidBroadcaster implements Broadcaster {
             return;
         }
 
-        Intent geoReportsSent = new Intent(Event.GEOFENCE_EVENTS_REPORTED.getKey());
+        Intent geoReportsSent = prepareIntent(Event.GEOFENCE_EVENTS_REPORTED);
         geoReportsSent.putExtras(BundleMapper.geoReportsToBundle(reports));
         context.sendBroadcast(geoReportsSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(geoReportsSent);
@@ -74,7 +74,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void error(@NonNull MobileMessagingError error) {
-        Intent reportingError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
+        Intent reportingError = prepareIntent(Event.API_COMMUNICATION_ERROR);
         reportingError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, error);
         context.sendBroadcast(reportingError);
         LocalBroadcastManager.getInstance(context).sendBroadcast(reportingError);
@@ -82,7 +82,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void registrationAcquired(String cloudToken) {
-        Intent registrationComplete = new Intent(Event.REGISTRATION_ACQUIRED.getKey());
+        Intent registrationComplete = prepareIntent(Event.REGISTRATION_ACQUIRED);
         registrationComplete.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken);
         context.sendBroadcast(registrationComplete);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationComplete);
@@ -90,7 +90,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void registrationCreated(String cloudToken, String deviceApplicationInstanceId) {
-        Intent registrationCreated = new Intent(Event.REGISTRATION_CREATED.getKey());
+        Intent registrationCreated = prepareIntent(Event.REGISTRATION_CREATED);
         registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken);
         registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, deviceApplicationInstanceId);
         context.sendBroadcast(registrationCreated);
@@ -99,7 +99,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void registrationEnabled(String cloudToken, String deviceInstanceId, Boolean registrationEnabled) {
-        Intent registrationUpdated = new Intent(Event.PUSH_REGISTRATION_ENABLED.getKey());
+        Intent registrationUpdated = prepareIntent(Event.PUSH_REGISTRATION_ENABLED);
         registrationUpdated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken);
         registrationUpdated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, deviceInstanceId);
         registrationUpdated.putExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, registrationEnabled);
@@ -113,7 +113,7 @@ public class AndroidBroadcaster implements Broadcaster {
             return;
         }
 
-        Intent deliveryReportsSent = new Intent(Event.DELIVERY_REPORTS_SENT.getKey());
+        Intent deliveryReportsSent = prepareIntent(Event.DELIVERY_REPORTS_SENT);
         Bundle extras = new Bundle();
         extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, messageIds);
         deliveryReportsSent.putExtras(extras);
@@ -127,7 +127,7 @@ public class AndroidBroadcaster implements Broadcaster {
             return;
         }
 
-        Intent seenReportsSent = new Intent(Event.SEEN_REPORTS_SENT.getKey());
+        Intent seenReportsSent = prepareIntent(Event.SEEN_REPORTS_SENT);
         Bundle extras = new Bundle();
         extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, messageIds);
         seenReportsSent.putExtras(extras);
@@ -137,7 +137,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void messagesSent(List<Message> messages) {
-        Intent messagesSent = new Intent(Event.MESSAGES_SENT.getKey());
+        Intent messagesSent = prepareIntent(Event.MESSAGES_SENT);
         messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMapper.messagesToBundles(messages));
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
@@ -145,7 +145,7 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void userDataReported(UserData userData) {
-        Intent userDataReported = new Intent(Event.USER_DATA_REPORTED.getKey());
+        Intent userDataReported = prepareIntent(Event.USER_DATA_REPORTED);
         userDataReported.putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
         context.sendBroadcast(userDataReported);
         LocalBroadcastManager.getInstance(context).sendBroadcast(userDataReported);
@@ -153,9 +153,14 @@ public class AndroidBroadcaster implements Broadcaster {
 
     @Override
     public void systemDataReported(SystemData systemData) {
-        Intent dataReported = new Intent(Event.SYSTEM_DATA_REPORTED.getKey());
+        Intent dataReported = prepareIntent(Event.SYSTEM_DATA_REPORTED);
         dataReported.putExtra(BroadcastParameter.EXTRA_SYSTEM_DATA, systemData.toString());
         context.sendBroadcast(dataReported);
         LocalBroadcastManager.getInstance(context).sendBroadcast(dataReported);
+    }
+
+    private Intent prepareIntent(Event event) {
+        return new Intent(event.getKey())
+                .setPackage(context.getPackageName());
     }
 }
