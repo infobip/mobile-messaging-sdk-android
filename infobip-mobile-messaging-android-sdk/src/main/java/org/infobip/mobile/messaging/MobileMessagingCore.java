@@ -191,8 +191,7 @@ public class MobileMessagingCore extends MobileMessaging {
     public String[] getSyncMessagesIds() {
         String[] messageIds = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
         ArrayList<String> messageIdsArrayList = new ArrayList<>(Arrays.asList(messageIds));
-        String[] messageIdsToSync = new String[messageIdsArrayList.size() <= MESSAGE_ID_PARAMETER_LIMIT ? messageIdsArrayList.size() : MESSAGE_ID_PARAMETER_LIMIT];
-
+        Set<String> messageIdsToSync = new HashSet<>(messageIdsArrayList.size() <= MESSAGE_ID_PARAMETER_LIMIT ? messageIdsArrayList.size() : MESSAGE_ID_PARAMETER_LIMIT);
         boolean shouldUpdateMessageIds = false;
 
         for (int i = 0; i < messageIdsArrayList.size(); i++) {
@@ -208,7 +207,7 @@ public class MobileMessagingCore extends MobileMessaging {
                 messageIdsArrayList.remove(i);
                 shouldUpdateMessageIds = true;
             } else {
-                messageIdsToSync[i] = messageIdWithTimestamp[0];
+                messageIdsToSync.add(messageIdWithTimestamp[0]);
             }
         }
 
@@ -219,7 +218,7 @@ public class MobileMessagingCore extends MobileMessaging {
             PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, messageIdsToUpdate);
         }
 
-        return messageIdsToSync;
+        return messageIdsToSync.toArray(new String[messageIdsToSync.size()]);
     }
 
     public void removeUnreportedMessageIds(final String... messageIDs) {
@@ -233,6 +232,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     /**
      * Method to update unreported seen ids
+     *
      * @param messageIdMap map that contains old id as key and new id as value
      */
     public void updateUnreportedSeenMessageIds(final Map<String, String> messageIdMap) {
@@ -280,27 +280,29 @@ public class MobileMessagingCore extends MobileMessaging {
         return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
     }
 
-    void addUnreportedSeenMessageIds(final String... messageIDs) {
+    private void addUnreportedSeenMessageIds(final String... messageIDs) {
         String[] seenMessages = concatTimestampToMessageId(messageIDs);
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS, seenMessages);
     }
 
     private String[] concatTimestampToMessageId(String[] messageIDs) {
-        String[] syncMessages = new String[messageIDs.length];
-
+        List<String> syncMessages = new ArrayList<>(messageIDs.length);
         if (messageIDs.length > 0) {
-            for (int i = 0; i < messageIDs.length; i++) {
-                String messageId = messageIDs[i];
+            for (String messageId : messageIDs) {
+                if (messageId == null) {
+                    continue;
+                }
                 String seenTimestamp = String.valueOf(Time.now());
-                syncMessages[i] = StringUtils.concat(messageId, seenTimestamp, StringUtils.COMMA_WITH_SPACE);
+                syncMessages.add(StringUtils.concat(messageId, seenTimestamp, StringUtils.COMMA_WITH_SPACE));
             }
         }
 
-        return syncMessages;
+        return syncMessages.toArray(new String[syncMessages.size()]);
     }
 
     /**
      * Returns list of messageId and seenTimestamp
+     *
      * @param reports concatenated message id and timestamp
      * @return reports
      */
@@ -314,6 +316,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     /**
      * Returns message id from seen report string
+     *
      * @param report concatenated message id and timestamp
      * @return message id
      */

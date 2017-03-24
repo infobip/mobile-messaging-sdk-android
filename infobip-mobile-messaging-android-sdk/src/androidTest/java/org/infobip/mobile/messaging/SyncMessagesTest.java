@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import android.test.InstrumentationTestCase;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 
 import java.util.UUID;
 
@@ -8,18 +8,9 @@ import java.util.UUID;
  * @author pandric
  * @since 09/09/16.
  */
-public class SyncMessagesTest extends InstrumentationTestCase {
+public class SyncMessagesTest extends MobileMessagingTestCase {
 
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+    private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
 
     public void test_find_all_messageIDs() {
         String[] mockIDs = new String[120];
@@ -27,11 +18,24 @@ public class SyncMessagesTest extends InstrumentationTestCase {
             mockIDs[i] = UUID.randomUUID().toString();
         }
 
-        MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(getInstrumentation().getContext());
         mobileMessagingCore.addSyncMessagesIds(mockIDs);
         String[] messageIDs = mobileMessagingCore.getSyncMessagesIds();
 
         assertNotNull(messageIDs);
-        assertTrue(100 >= messageIDs.length);
+        assertTrue(MESSAGE_ID_PARAMETER_LIMIT >= messageIDs.length);
+    }
+
+    public void test_find_all_no_duplicates_and_nulls() {
+        String mockId = UUID.randomUUID().toString();
+        String[] mockIDs = new String[10];
+        for (int i = 0; i < mockIDs.length; i++) {
+            mockIDs[i] = i % 2 == 0 ? mockId : null;
+        }
+
+        mobileMessagingCore.addSyncMessagesIds(mockIDs);
+        String[] messageIDs = mobileMessagingCore.getSyncMessagesIds();
+
+        assertNotNull(messageIDs);
+        assertTrue(messageIDs.length == 1);
     }
 }
