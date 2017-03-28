@@ -107,6 +107,15 @@ public class MainActivity extends AppCompatActivity {
             updateCount();
         }
     };
+    private final BroadcastReceiver notificationTapped = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Message message = Message.createFrom(intent.getExtras());
+            String body = message.getBody();
+            Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), getString(R.string.toast_notification_tapped), body), Toast.LENGTH_LONG).show();
+            updateCount();
+        }
+    };
     private boolean receiversRegistered = false;
     private ExpandableListAdapter.OnMessageExpandedListener onMessageExpandedListener = new ExpandableListAdapter.OnMessageExpandedListener() {
         @Override
@@ -368,6 +377,8 @@ public class MainActivity extends AppCompatActivity {
                     new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
             localBroadcastManager.registerReceiver(messageReceiver,
                     new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
+            localBroadcastManager.registerReceiver(notificationTapped,
+                    new IntentFilter(Event.NOTIFICATION_TAPPED.getKey()));
             localBroadcastManager.registerReceiver(playServicesErrorReceiver,
                     new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
             localBroadcastManager.registerReceiver(geofenceAreaEnteredReceiver,

@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.DrawableRes;
 import android.support.v4.app.NotificationCompat;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -250,7 +251,7 @@ public class NotificationSettings {
          * @param defaultIcon will be displayed in the notification area, if the notification doesn't override it.
          * @return {@link Builder}
          */
-        public Builder withDefaultIcon(int defaultIcon) {
+        public Builder withDefaultIcon(@DrawableRes int defaultIcon) {
             this.defaultIcon = defaultIcon;
             return this;
         }

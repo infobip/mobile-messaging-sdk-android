@@ -47,6 +47,14 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
+    public void notificationTapped(Message message) {
+        Intent notificationTapped = prepareIntent(Event.NOTIFICATION_TAPPED);
+        notificationTapped.putExtras(BundleMapper.messageToBundle(message));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(notificationTapped);
+        context.sendBroadcast(notificationTapped);
+    }
+
+    @Override
     public void geoEvent(@NonNull GeoEventType event, @NonNull Message message, @NonNull Geo geo) {
         Event broadcastEvent = eventBroadcasts.get(event);
         if (broadcastEvent == null) {

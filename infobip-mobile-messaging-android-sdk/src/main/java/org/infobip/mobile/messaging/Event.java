@@ -158,6 +158,18 @@ public enum Event {
     SEEN_REPORTS_SENT("org.infobip.mobile.messaging.SEEN_REPORTS_SENT"),
 
     /**
+     * It is triggered when notification is tapped.
+     * <p>
+     * Contains message that was sent.
+     * <pre>
+     * {@code
+     * Message message = Message.createFrom(intent.getExtras());
+     * }
+     * </pre>
+     */
+    NOTIFICATION_TAPPED("org.infobip.mobile.messaging.NOTIFICATION_TAPPED"),
+
+    /**
      * It is triggered when monitored geofence area is entered.
      * <p>
      * Contains the {@link Geo} object which contains the list of all triggered geofence areas and {@link Message}.
