@@ -3,10 +3,14 @@ package org.infobip.mobile.messaging;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -17,7 +21,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     private ArgumentCaptor<SystemData> captor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, true);
@@ -26,6 +30,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         captor = ArgumentCaptor.forClass(SystemData.class);
     }
 
+    @Test
     public void test_reportSystemData() {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -42,6 +47,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         assertFalse(data.getSdkVersion().isEmpty());
     }
 
+    @Test
     public void test_reportSystemData_withSettingDisabled() {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -60,6 +66,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         assertFalse(data.getSdkVersion().isEmpty());
     }
 
+    @Test
     public void test_reportSystemData_noDoubleReports() {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -73,6 +80,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
     }
 
+    @Test
     public void test_reportSystemData_repeatAfterError() {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
@@ -89,6 +97,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
     }
 
+    @Test
     public void test_shouldReport_whenRegistrationIDAvailable() {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);

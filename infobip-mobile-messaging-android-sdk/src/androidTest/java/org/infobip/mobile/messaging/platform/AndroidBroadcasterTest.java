@@ -14,11 +14,15 @@ import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Collections;
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
 
 /**
  * @author sslavin
@@ -31,13 +35,14 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     private ArgumentCaptor<Intent> intentArgumentCaptor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         broadcastSender = new AndroidBroadcaster(contextMock);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
     }
 
+    @Test
     public void test_should_send_message_broadcast() {
         // Given
         Message message = createMessage(context, "SomeMessageId", false);
@@ -56,6 +61,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("SomeMessageId", messageAfter.getMessageId());
     }
 
+    @Test
     public void test_should_send_geo_broadcast() throws Exception {
         // Given
         Message message = createMessage(context, "SomeMessageId", false);
@@ -80,6 +86,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertJEquals(geo, geoAfter);
     }
 
+    @Test
     public void test_should_send_geo_reports() throws Exception {
         // Given
         GeoReport report = createReport(context, "SomeSignalingMessageId", "SomeCampaignId", "SomeSDKMessageId", false);
@@ -98,6 +105,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertJEquals(report, reportsAfter.get(0));
     }
 
+    @Test
     public void test_should_send_error() throws Exception {
         // Given
         MobileMessagingError error = new MobileMessagingError("SomeCode", "SomeMessage");
@@ -115,6 +123,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertJEquals(error, errorAfter);
     }
 
+    @Test
     public void test_should_send_push_registration_enabled() {
 
         // When
@@ -130,6 +139,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals(false, intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, true));
     }
 
+    @Test
     public void test_should_send_push_registration_acquired() {
         // When
         broadcastSender.registrationAcquired("SomeCloudToken");
@@ -142,6 +152,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_GCM_TOKEN));
     }
 
+    @Test
     public void test_should_send_push_registration_created() {
         // When
         broadcastSender.registrationCreated("SomeCloudToken", "SomeDeviceInstanceId");
@@ -155,6 +166,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("SomeDeviceInstanceId", intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
     }
 
+    @Test
     public void test_should_send_delivery_report_message_ids() {
         // When
         broadcastSender.deliveryReported("id1", "id2");
@@ -168,6 +180,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("id2", intent.getStringArrayExtra(BroadcastParameter.EXTRA_MESSAGE_IDS)[1]);
     }
 
+    @Test
     public void test_should_send_seen_report_message_ids() {
         // When
         broadcastSender.seenStatusReported("id1", "id2");
@@ -181,6 +194,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("id2", intent.getStringArrayExtra(BroadcastParameter.EXTRA_MESSAGE_IDS)[1]);
     }
 
+    @Test
     public void test_should_send_mo_messages() {
         // Given
         Message message = createMessage(context, "SomeMessageId", false);
@@ -200,6 +214,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
     }
 
+    @Test
     public void test_should_send_user_data() {
         // Given
         UserData userData = new UserData();
@@ -221,6 +236,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("LastName", userDataAfter.getLastName());
     }
 
+    @Test
     public void test_should_send_system_data() throws Exception {
         // Given
         SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true);
@@ -239,6 +255,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertJEquals(systemData, systemDataAfter);
     }
 
+    @Test
     public void test_should_set_package_for_intent() throws Exception {
         // Given
         Message message = createMessage(context, "SomeMessageId", false);

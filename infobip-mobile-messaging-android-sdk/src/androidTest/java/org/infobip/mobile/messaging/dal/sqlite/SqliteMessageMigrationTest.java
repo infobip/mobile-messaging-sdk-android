@@ -5,6 +5,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -33,10 +36,11 @@ public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
             DatabaseContract.MessageColumns.STATUS_MESSAGE + " TEXT)";
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
+    @Test
     public void test_shouldCreateTableForGeoMessagesDuringMigration() throws Exception {
         // Create SQLiteOpenHelper directly to perform raw operations on database
         SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, DatabaseHelperImpl.DATABASE_NAME, null, OLD_DB_VERSION) {

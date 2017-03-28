@@ -5,9 +5,14 @@ import android.database.sqlite.SQLiteConstraintException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.json.JSONObject;
+import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.fail;
 
 /**
  * @author sslavin
@@ -16,6 +21,7 @@ import java.util.List;
 
 public class SqliteMessageTest extends MobileMessagingTestCase {
 
+    @Test
     public void test_message_toFromSqlite() throws Exception {
 
         Message message = new Message(
@@ -66,6 +72,7 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
         assertEquals("SomeStatusMessage", message.getStatusMessage());
     }
 
+    @Test
     public void test_message_shouldNotSaveMessageWithNullId() throws Exception {
         Message message = new Message();
         message.setMessageId(null);

@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging;
 
-import android.test.InstrumentationTestCase;
-
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
+import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,23 +10,27 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 /**
  * @author pandric
  * @since 06/10/16.
  */
 
-public class GeoDeliveryTimeWindowTest extends InstrumentationTestCase {
+public class GeoDeliveryTimeWindowTest extends MobileMessagingTestCase {
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_iso8601_time_interval_window() throws ParseException {
         String hoursISO8601 = "0815/1633";
         String[] timeIntervalStartEnd = hoursISO8601.split("/");
@@ -65,6 +69,7 @@ public class GeoDeliveryTimeWindowTest extends InstrumentationTestCase {
         assertFalse(isDeliveryTimeInWindow);
     }
 
+    @Test
     public void test_ISO8601_days_of_week() {
         String daysISO8601 = "1,2,3,4,5,6,7";
         String[] days = daysISO8601.split(",");

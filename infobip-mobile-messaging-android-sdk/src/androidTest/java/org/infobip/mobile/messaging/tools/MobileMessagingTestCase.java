@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.test.InstrumentationTestCase;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -27,6 +27,9 @@ import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.platform.TimeProvider;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -41,12 +44,15 @@ import java.util.concurrent.TimeUnit;
 
 import fi.iki.elonen.NanoHTTPD;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+
 /**
  * @author sslavin
  * @since 10/03/2017.
  */
 
-public class MobileMessagingTestCase extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public abstract class MobileMessagingTestCase {
 
     protected Context context;
     protected Context contextMock;
@@ -121,9 +127,8 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
     }
 
     @SuppressLint("ApplySharedPref")
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         MobileMessagingLogger.enforce();
 
@@ -185,8 +190,8 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
         PreferenceHelper.saveClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, TestMessageStore.class);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         time.reset();
         if (null != debugServer) {
             try {
@@ -195,10 +200,7 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
             }
         }
         databaseProvider.deleteDatabase();
-        super.tearDown();
     }
-
-
 
     /**
      * Generates messages with provided id

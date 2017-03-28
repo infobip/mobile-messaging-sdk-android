@@ -4,10 +4,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.UUID;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static org.junit.Assert.assertNotEquals;
 
 /**
@@ -31,6 +35,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
                 "'double_value' REAL)");
     }
 
+    @Test
     public void test_shouldCreateObjectsInDatabase() throws Exception {
         Cursor cursor = database.rawQuery("SELECT * FROM '" + SomethingInDatabase.getTable() + "'", new String[0]);
         cursor.moveToFirst();
@@ -57,6 +62,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
         assertFalse(cursor.moveToNext());
     }
 
+    @Test
     public void test_shouldFindAllObjectsInDatabase() {
         UUID uuid = UUID.randomUUID();
         SomethingInDatabase something1 = new SomethingInDatabase("Something1" + uuid, 1, 2);
@@ -83,6 +89,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
         assertEquals(6, somethings.get(2).doubleValue, 0.001);
     }
 
+    @Test
     public void test_shouldFindObjectInDatabaseById() {
         UUID uuid = UUID.randomUUID();
         SomethingInDatabase something1 = new SomethingInDatabase("Something1" + uuid, 1, 2);
@@ -114,6 +121,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
         assertNull(somethingNotFound);
     }
 
+    @Test
     public void test_shouldDeleteObjectFromDatabaseById() {
         database.insert(SomethingInDatabase.getTable(), null, new SomethingInDatabase("Something1", 1, 2).getContentValues());
         database.insert(SomethingInDatabase.getTable(), null, new SomethingInDatabase("Something2", 3, 4).getContentValues());
@@ -129,6 +137,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
         cursor.close();
     }
 
+    @Test
     public void test_shouldDeleteAllObjectsFromDatabase() {
         database.insert(SomethingInDatabase.getTable(), null, new SomethingInDatabase("Something1", 1, 2).getContentValues());
         database.insert(SomethingInDatabase.getTable(), null, new SomethingInDatabase("Something2", 1, 2).getContentValues());
@@ -142,6 +151,7 @@ public class DatabaseHelperTest extends MobileMessagingTestCase {
         cursor.close();
     }
 
+    @Test
     public void test_shouldCountAllObjectsInDatabase() {
         int numOfSomethings = 100;
         for (int i = 0; i < numOfSomethings; i++) {

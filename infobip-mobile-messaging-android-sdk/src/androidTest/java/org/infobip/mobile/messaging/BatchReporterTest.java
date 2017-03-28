@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
@@ -15,20 +16,21 @@ public class BatchReporterTest extends MobileMessagingTestCase {
     private Runnable runnable;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 50L);
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 50L);
 
-        batchReporter = new BatchReporter(getInstrumentation().getContext());
+        batchReporter = new BatchReporter(context);
         runnable = Mockito.mock(Runnable.class);
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_scheduleMultipleRunOne() throws Exception {
 
         for (int i = 0; i < 5; i++) {
@@ -38,6 +40,7 @@ public class BatchReporterTest extends MobileMessagingTestCase {
         Mockito.verify(runnable, Mockito.after(500).atMost(1)).run();
     }
 
+    @Test
     public void test_scheduleMultipleRunMultiple() throws Exception {
 
         for (int i = 0; i < 5; i++) {

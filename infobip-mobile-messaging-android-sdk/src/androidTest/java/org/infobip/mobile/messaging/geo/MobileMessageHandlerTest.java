@@ -10,9 +10,12 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -25,7 +28,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
     private MessageStore commonStore;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
@@ -37,6 +40,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         commonStore = MobileMessaging.getInstance(context).getMessageStore();
     }
 
+    @Test
     public void test_shouldSaveGeoMessagesToGeoStore() throws Exception {
 
         // Given
@@ -54,6 +58,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         assertEquals(0, commonStore.countAll(context));
     }
 
+    @Test
     public void test_shouldSaveNonGeoMessagesToCommonStore() throws Exception {
         // Given
         Message message = createMessage(context, "SomeMessageId", null, false);
@@ -68,6 +73,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         assertEquals(0, geoStore.countAll(context));
     }
 
+    @Test
     public void test_shouldSaveMessagesToCorrespondingSeparateStores() throws Exception {
         // Given
         Message message1 = createMessage(context, "SomeMessageId1", null, false);
@@ -88,6 +94,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         assertEquals("SomeAreaId1", messages.get(0).getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_shouldDeleteExpiredAreas() throws Exception {
         // Given
         long now = Time.now();

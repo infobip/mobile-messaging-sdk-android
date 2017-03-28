@@ -13,11 +13,14 @@ import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -32,7 +35,7 @@ public class NotificationsTest extends MobileMessagingTestCase {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(context));
@@ -43,6 +46,7 @@ public class NotificationsTest extends MobileMessagingTestCase {
         Mockito.when(contextMock.getSystemService(Mockito.eq(Context.NOTIFICATION_SERVICE))).thenReturn(notificationManagerMock);
     }
 
+    @Test
     public void test_shouldNotProduceNPE_whenMessageArrivesAndNotificationsDisabled() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, false);
 
@@ -64,6 +68,7 @@ public class NotificationsTest extends MobileMessagingTestCase {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
+    @Test
     public void test_shouldProvideMultipleNotifications_whenMultipleNotificationsEnabled() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED, true);

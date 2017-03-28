@@ -6,9 +6,16 @@ import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
+import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -20,7 +27,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
     private Long now;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         now = Time.now();
@@ -29,6 +36,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         Geofencing.getInstance(context);
     }
 
+    @Test
     public void test_shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
         // Given
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
@@ -52,6 +60,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         assertEquals(millis30MinAfterNow, refreshExpiryDate.getTime(), 3000);
     }
 
+    @Test
     public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoExpired() throws Exception {
         // Given
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
@@ -70,6 +79,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
     }
 
+    @Test
     public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoExpired() throws Exception {
         // Given
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
@@ -89,6 +99,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         assertEquals(now, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
     }
 
+    @Test
     public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoIsMonitoredNow() throws Exception {
         // Given
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
@@ -107,6 +118,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
     }
 
+    @Test
     public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoIsMonitoredNow() throws Exception {
         // Given
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;

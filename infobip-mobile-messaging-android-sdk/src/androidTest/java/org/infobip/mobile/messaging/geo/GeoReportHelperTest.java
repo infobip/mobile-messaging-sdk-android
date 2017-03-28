@@ -4,6 +4,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.geo.EventReportResponse;
 import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
 
 import java.util.Arrays;
@@ -13,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+
 /**
  * @author sslavin
  * @since 14/03/2017.
@@ -21,10 +25,11 @@ import java.util.Set;
 public class GeoReportHelperTest extends MobileMessagingTestCase {
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
+    @Test
     public void test_should_find_signaling_messages_for_report() throws Exception {
 
         // Given
@@ -40,6 +45,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertJEquals(m1, foundMessage);
     }
 
+    @Test
     public void test_should_find_signaling_messages_and_areas_for_geofencing_request_ids_and_event_type() throws Exception {
 
         // Given
@@ -54,6 +60,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertJEquals(area, messageAreas.values().iterator().next().get(0));
     }
 
+    @Test
     public void test_should_create_messages_with_generated_ids_for_unsuccessful_report () {
 
         // Given
@@ -71,6 +78,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertEquals(GeoEventType.entry, messages.values().iterator().next());
     }
 
+    @Test
     public void test_should_create_messages_with_server_ids_for_successful_report () {
 
         // Given
@@ -92,6 +100,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertEquals(GeoEventType.entry, messages.values().iterator().next());
     }
 
+    @Test
     public void test_should_filter_reports_for_inactive_campaigns() throws Exception {
 
         // Given
@@ -115,6 +124,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertJEquals(reports.get(2), filtered.get(0));
     }
 
+    @Test
     public void test_should_update_list_of_inactive_campaigns_based_on_report_result() {
 
         // Given
@@ -132,6 +142,7 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertTrue(ids.contains("campaignId2"));
     }
 
+    @Test
     public void test_should_compare_radius_in_geo_areas_list() {
         Area area1 = createArea("areaId1", "", 1.0, 2.0, 700);
         Area area2 = createArea("areaId2", "", 1.0, 2.0, 250);

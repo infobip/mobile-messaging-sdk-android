@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -22,6 +23,10 @@ import java.util.Map;
 import java.util.Set;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -36,7 +41,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
     private ArgumentCaptor<List<GeoReport>> geoReportCaptor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         // Enable message store for notification messages
@@ -47,6 +52,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         geoReportCaptor = new ArgumentCaptor<>();
     }
 
+    @Test
     public void test_success() throws Exception {
 
         // Given
@@ -147,6 +153,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
                 , stringBody, JSONCompareMode.LENIENT);
     }
 
+    @Test
     public void test_withNonActiveCampaigns() throws InterruptedException {
 
         // Given
@@ -189,6 +196,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         assertEquals(suspendedCampaignIds.iterator().next(), "campaignId2");
     }
 
+    @Test
     public void test_shouldUpdateMessageIdsOnSuccessfulReport() throws Exception {
 
         // Given
@@ -242,6 +250,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         assertEquals("areaId3", m3.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_shouldReportSeenForMessageIdsIfNoCorrespondingGeoReport() throws InterruptedException {
         // Given
         createMessage(context,"generatedMessageId1", true);
@@ -256,6 +265,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
     }
 
+    @Test
     public void test_shouldNotReportSeenForMessageIdsGeneratedForGeoReports() throws InterruptedException {
 
         // Given
@@ -272,6 +282,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).never()).seenStatusReported(Mockito.any(String[].class));
     }
 
+    @Test
     public void test_shouldReportSeenAfterGeoSuccessfullyReported() throws InterruptedException {
 
         // Given

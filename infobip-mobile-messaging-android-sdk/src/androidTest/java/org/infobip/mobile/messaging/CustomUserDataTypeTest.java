@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -12,6 +13,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertEquals;
 
 public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
@@ -45,12 +48,13 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
             "}";
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         captor = ArgumentCaptor.forClass(UserData.class);
     }
 
+    @Test
     public void test_sync_user_data() {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
 
@@ -70,6 +74,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
         assertEquals(CustomUserDataValue.Type.Date, userDataResponse.getCustomUserDataValue(KEY_FOR_DATE).getType());
     }
 
+    @Test
     public void test_get_custom_user_data_value_from_json_string() throws ParseException {
         UserData userData = new UserData(serverResponse);
         String keyForString = userData.getCustomUserDataValue(KEY_FOR_STRING).stringValue();
@@ -84,6 +89,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
         assertEquals(3, customUserData.size());
     }
 
+    @Test
     public void test_set_multi_custom_user_data() throws ParseException {
         Date date = new Date();
         HashMap<String, CustomUserDataValue> userDataValueHashMap = new HashMap<>();

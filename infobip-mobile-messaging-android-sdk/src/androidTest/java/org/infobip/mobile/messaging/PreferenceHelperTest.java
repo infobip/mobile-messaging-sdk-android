@@ -4,6 +4,7 @@ import android.content.Context;
 import android.test.InstrumentationTestCase;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 
 /**
  * @author sslavin
@@ -14,16 +15,17 @@ public class PreferenceHelperTest extends InstrumentationTestCase {
     Context context = null;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         context = getInstrumentation().getContext();
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_encryptedPreferencesTest() throws Exception {
         String key = "thisIsMyUnencryptedKey";
         String value = "thisIsMyUnencryptedData";
@@ -36,6 +38,7 @@ public class PreferenceHelperTest extends InstrumentationTestCase {
         assertEquals(value, foundValue);
     }
 
+    @Test
     public void test_shouldFindAndRemoveDeviceInstanceIdAsEncryptedProperty() throws Exception {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "StubStringValue");
 

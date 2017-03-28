@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -8,6 +9,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import java.util.Date;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -19,12 +22,13 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
     private ArgumentCaptor<UserData> captor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         captor = ArgumentCaptor.forClass(UserData.class);
     }
 
+    @Test
     public void test_empty_user_data() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
@@ -37,6 +41,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
     }
 
+    @Test
     public void test_remove_custom_element() throws Exception {
 
         UserData userData = new UserData();

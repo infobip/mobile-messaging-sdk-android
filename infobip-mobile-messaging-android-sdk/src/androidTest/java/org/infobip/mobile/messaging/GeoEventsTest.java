@@ -7,9 +7,12 @@ import org.infobip.mobile.messaging.geo.GeoEventSettings;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * Created by pandric on 20/09/16.
@@ -29,10 +32,11 @@ public class GeoEventsTest extends MobileMessagingTestCase {
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Test
     public void test_handle_event_notification_settings() throws InterruptedException {
         GeoTest geo = new JsonSerializer().deserialize(internalData(), GeoTest.class);
 

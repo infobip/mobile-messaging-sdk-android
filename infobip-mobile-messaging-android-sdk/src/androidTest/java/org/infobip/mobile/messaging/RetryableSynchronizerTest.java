@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
@@ -37,7 +38,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
 
     @SuppressLint("CommitPrefEdits")
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         MobileMessagingStats stats = mobileMessagingCore.getStats();
@@ -59,6 +60,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
                 "}");
     }
 
+    @Test
     public void test_system_data_retry() {
         reportSystemData();
         Mockito.verify(broadcaster, Mockito.after(8000).atLeast(3)).error(Mockito.any(MobileMessagingError.class));
@@ -82,6 +84,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         systemDataReporter.synchronize();
     }
 
+    @Test
     public void test_geo_report_retry() {
 
         // Given
@@ -96,11 +99,13 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(8000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
+    @Test
     public void test_sync_messages_retry() {
         messagesSynchronizer.synchronize();
         Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
+    @Test
     public void test_registration_retry() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
 
@@ -108,6 +113,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
+    @Test
     public void test_user_data_retry() {
         UserData userData = new UserData();
         userData.setFirstName("Retry");

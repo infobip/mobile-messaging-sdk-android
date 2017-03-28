@@ -5,9 +5,12 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -20,7 +23,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
     private MessageStore commonStore;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
@@ -29,6 +32,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         commonStore = MobileMessaging.getInstance(context).getMessageStore();
     }
 
+    @Test
     public void test_shouldSaveGeoMessageToGeoStore() throws Exception {
 
         // Given
@@ -44,6 +48,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         assertEquals("SomeMessageId", messages.get(0).getMessageId());
     }
 
+    @Test
     public void test_shouldSaveNonGeoMessageToUserStore() throws Exception {
 
         // Given
@@ -58,6 +63,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         assertEquals("SomeMessageId", messages.get(0).getMessageId());
     }
 
+    @Test
     public void test_shouldSend_messageReceived_forNonGeoMessage() throws Exception {
 
         // Given
@@ -70,6 +76,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).messageReceived(Mockito.any(Message.class));
     }
 
+    @Test
     public void test_shouldNotSend_messageReceived_forGeoMessage() throws Exception {
 
         // Given

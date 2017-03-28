@@ -1,11 +1,14 @@
 package org.infobip.mobile.messaging.mobile;
 
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 
-public class MobileMessagingErrorTest extends InstrumentationTestCase {
+import static junit.framework.Assert.assertEquals;
 
+public class MobileMessagingErrorTest extends MobileMessagingTestCase {
+
+    @Test
     public void test_mobileMessagingServerError() throws Exception {
         MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(new ApiBackendException("3", "SomeWeirdError"));
 
@@ -14,6 +17,7 @@ public class MobileMessagingErrorTest extends InstrumentationTestCase {
         assertEquals("SomeWeirdError", mobileMessagingError.getMessage());
     }
 
+    @Test
     public void test_unknownError() throws Exception {
         MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(new Exception("Some exception"));
 

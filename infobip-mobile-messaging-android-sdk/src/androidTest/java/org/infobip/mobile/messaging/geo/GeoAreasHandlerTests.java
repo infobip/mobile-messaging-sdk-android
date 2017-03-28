@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.mobile.geo.GeoReportingResult;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -21,6 +22,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -37,7 +42,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
     private ArgumentCaptor<Map<Message, GeoEventType>> geoNotificationCaptor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
@@ -50,6 +55,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         geoNotificationCaptor = new ArgumentCaptor<>();
     }
 
+    @Test
     public void test_should_report_transition() {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", false, createArea("SomeAreaId"));
@@ -74,6 +80,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals(456.0, report.getTriggeringLocation().getLng());
     }
 
+    @Test
     public void test_should_notify_messages_with_generated_ids_if_report_unsuccessful() {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
@@ -99,6 +106,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("SomeAreaId", message.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_should_notify_messages_with_server_ids_if_report_successful() {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
@@ -133,6 +141,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("SomeAreaId", message.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_should_save_messages_with_generated_ids_if_report_unsuccessful() {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
@@ -154,6 +163,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("SomeAreaId", message.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_should_save_messages_with_server_ids_if_report_successful() {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
@@ -185,6 +195,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("SomeAreaId", message.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_should_notify_messages_only_for_active_campaigns() throws InterruptedException {
 
         // Given
@@ -215,6 +226,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("areaId1", message.getGeo().getAreasList().get(0).getId());
     }
 
+    @Test
     public void test_should_generate_messages_only_for_active_campaigns() throws InterruptedException {
 
         // Given

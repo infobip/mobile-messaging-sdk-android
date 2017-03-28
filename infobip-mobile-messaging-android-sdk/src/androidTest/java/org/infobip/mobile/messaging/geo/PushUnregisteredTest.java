@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
@@ -21,6 +22,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 
 public class PushUnregisteredTest extends MobileMessagingTestCase {
@@ -34,13 +38,13 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
 
     @SuppressLint({"CommitPrefEdits", "ApplySharedPref"})
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         ExecutorService taskExecutor = Executors.newSingleThreadExecutor();
         MobileMessagingStats stats = mobileMessagingCore.getStats();
 
-        PreferenceHelper.saveLong(getInstrumentation().getContext(), MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
-        PreferenceHelper.saveBoolean(getInstrumentation().getContext(), MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
         registrationSynchronizer = new RegistrationSynchronizer(context, stats, taskExecutor, broadcaster);
         seenStatusReporter = new SeenStatusReporter(context, stats, taskExecutor, broadcaster);
@@ -50,6 +54,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         captor = ArgumentCaptor.forClass(Boolean.class);
     }
 
+    @Test
     public void test_push_registration_disabled() throws Exception {
         String response =
                 "{\n" +
@@ -70,6 +75,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         verifyMessagesSynchronizer(Mockito.after(1000).never());
     }
 
+    @Test
     public void test_push_registration_enabled() throws Exception {
         String response = "{\n" +
                 "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
@@ -87,6 +93,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         verifyMessagesSynchronizer(Mockito.after(1000).atLeastOnce());
     }
 
+    @Test
     public void test_push_registration_default_status() throws Exception {
         String response = "{\n" +
                         "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +

@@ -2,11 +2,14 @@ package org.infobip.mobile.messaging.geo;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -21,7 +24,7 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
     private ArgumentCaptor<GeoEventType> geoEventTypeArgumentCaptor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         geoNotificationHelper = new GeoNotificationHelper(context, broadcaster);
@@ -30,6 +33,7 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
         geoEventTypeArgumentCaptor = ArgumentCaptor.forClass(GeoEventType.class);
     }
 
+    @Test
     public void test_shoud_broadcast_message_and_geo() throws Exception {
 
         // Given

@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +22,14 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
     private SharedPreferencesMessageStore sharedPreferencesMessageStore;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         sharedPreferencesMessageStore = new SharedPreferencesMessageStore();
         sharedPreferencesMessageStore.deleteAll(context);
     }
 
+    @Test
     public void test_shouldMigrateAllMessagesToSqlite() throws Exception {
 
         UUID uuid = UUID.randomUUID();

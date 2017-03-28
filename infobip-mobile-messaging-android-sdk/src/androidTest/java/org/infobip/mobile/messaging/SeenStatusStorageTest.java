@@ -2,6 +2,9 @@ package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -11,11 +14,12 @@ import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 public class SeenStatusStorageTest extends MobileMessagingTestCase {
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         enableMessageStoreForReceivedMessages();
     }
 
+    @Test
     public void test_shouldUpdateSeenTimestampInMessageStore() {
 
         // Given

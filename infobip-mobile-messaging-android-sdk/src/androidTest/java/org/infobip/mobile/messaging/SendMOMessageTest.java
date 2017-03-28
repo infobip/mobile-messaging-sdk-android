@@ -1,12 +1,15 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.List;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -17,12 +20,13 @@ public class SendMOMessageTest extends MobileMessagingTestCase {
     private ArgumentCaptor<List<Message>> captor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         captor = new ArgumentCaptor<>();
     }
 
+    @Test
     public void test_sendMultipleMessages() throws Exception {
 
         String serverResponse =
