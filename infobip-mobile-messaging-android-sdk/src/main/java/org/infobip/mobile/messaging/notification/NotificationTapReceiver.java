@@ -24,6 +24,8 @@ public class NotificationTapReceiver extends BroadcastReceiver {
     private Broadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
 
+    public NotificationTapReceiver() {}
+
     public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
