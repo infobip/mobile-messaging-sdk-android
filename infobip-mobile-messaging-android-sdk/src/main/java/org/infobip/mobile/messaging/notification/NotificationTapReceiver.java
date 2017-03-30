@@ -46,7 +46,7 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         }
 
         if (notificationSettings.markSeenOnTap()) {
-            broadcaster(context).seenStatusReported(message.getMessageId());
+            mobileMessagingCore(context).setMessagesSeen(message.getMessageId());
         }
 
         Class callbackActivity = notificationSettings.getCallbackActivity();

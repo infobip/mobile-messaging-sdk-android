@@ -71,8 +71,8 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         sendNotificationTapBroadcast(givenMessage);
 
         // Then
-        Mockito.verify(contextMock, Mockito.times(2)).sendBroadcast(intentArgumentCaptor.capture());
-        Intent intent = intentArgumentCaptor.getAllValues().get(0);
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+        Intent intent = intentArgumentCaptor.getValue();
 
         assertEquals(Event.NOTIFICATION_TAPPED.getKey(), intent.getAction());
     }
@@ -86,19 +86,15 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         sendNotificationTapBroadcast(givenMessage);
 
         // Then
-        Mockito.verify(contextMock, Mockito.times(2)).sendBroadcast(intentArgumentCaptor.capture());
-        Intent intent = intentArgumentCaptor.getValue();
-
-        assertEquals(Event.SEEN_REPORTS_SENT.getKey(), intent.getAction());
-        assertEquals("SomeMessageId", intent.getStringArrayExtra(BroadcastParameter.EXTRA_MESSAGE_IDS)[0]);
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+        Mockito.verify(mobileMessagingCore, Mockito.times(1)).setMessagesSeen(givenMessage.getMessageId());
     }
 
     public void test_should_not_send_seen_report_message_ids() {
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, false);
-
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, false);
 
         // When
         sendNotificationTapBroadcast(givenMessage);
@@ -111,7 +107,7 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
     }
 
     private void sendNotificationTapBroadcast(Message givenMessage) {
-        Intent givenIntent = new Intent(context, NotificationTapReceiver.class);
+        Intent givenIntent = new Intent(contextMock, NotificationTapReceiver.class);
         givenIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(givenMessage));
         givenIntent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
 
