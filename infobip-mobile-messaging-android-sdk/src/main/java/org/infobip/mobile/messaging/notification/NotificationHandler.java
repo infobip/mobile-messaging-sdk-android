@@ -73,25 +73,13 @@ public class NotificationHandler {
         return notificationBuilder;
     }
 
-    private static @NonNull PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
-
-        Intent intent = new Intent();
+    @SuppressWarnings("WrongConstant")
+    @NonNull
+    private static PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
+        Intent intent = new Intent(context, NotificationTapReceiver.class);
         intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message));
-
-        if (notificationSettings.markSeenOnTap()) {
-            intent.setClass(context, NotificationTapReceiver.class);
-            intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
-            intent.putExtra(MobileMessagingProperty.EXTRA_CALLBACK_ACTIVITY.getKey(), notificationSettings.getCallbackActivity());
-
-            //noinspection WrongConstant
-            return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
-        } else {
-            intent.setClass(context, notificationSettings.getCallbackActivity());
-            intent.addFlags(notificationSettings.getIntentFlags());
-
-            //noinspection WrongConstant
-            return PendingIntent.getActivity(context, 0, intent, notificationSettings.getPendingIntentFlags());
-        }
+        intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
+        return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
     }
 
     private static NotificationSettings notificationSettings(Context context, Message message) {

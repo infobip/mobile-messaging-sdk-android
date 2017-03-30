@@ -21,9 +21,16 @@ public interface Broadcaster {
     /**
      * Sends broadcast that message is received
      *
-     * @param message recieved message
+     * @param message received message
      */
     void messageReceived(Message message);
+
+    /**
+     * Sends broadcast that notification is tapped
+     *
+     * @param message received message
+     */
+    void notificationTapped(Message message);
 
     /**
      * Sends geo occured broadcast

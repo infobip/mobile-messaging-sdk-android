@@ -268,4 +268,22 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
         assertEquals("test.package.name", intentArgumentCaptor.getValue().getPackage());
     }
+
+    public void test_should_send_notification_tapped_event() throws Exception {
+        // Given
+        Message message = createMessage(context, "SomeMessageId", false);
+
+        // When
+        broadcastSender.notificationTapped(message);
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.NOTIFICATION_TAPPED.getKey(), intent.getAction());
+
+        Message messageAfter = Message.createFrom(intent.getExtras());
+        assertNotSame(message, messageAfter);
+        assertEquals("SomeMessageId", messageAfter.getMessageId());
+    }
 }

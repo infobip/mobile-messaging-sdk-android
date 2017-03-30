@@ -58,6 +58,7 @@
     <string name="toast_message_userdata_cannot_save">Cannot save user data</string>
     <string name="toast_message_userdata_set">User data is set</string>
     <string name="toast_message_received">"Message received: %s"</string>
+    <string name="toast_notification_tapped">"Notification tapped: %s"</string>
 
     <!-- Strings related to Reply -->
     <string name="reply_close_label">Close</string>
