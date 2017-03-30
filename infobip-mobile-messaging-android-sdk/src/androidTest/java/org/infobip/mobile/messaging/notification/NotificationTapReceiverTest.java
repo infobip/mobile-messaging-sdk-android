@@ -14,26 +14,31 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MockActivity;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class NotificationTappedTest extends MobileMessagingTestCase {
+public class NotificationTapReceiverTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<Intent> intentArgumentCaptor;
+    private ArgumentCaptor<Message> messageArgumentCaptor;
     private NotificationSettings notificationSettings;
     private NotificationTapReceiver notificationTapReceiver;
     private Broadcaster broadcastSender;
     private MobileMessagingCore mobileMessagingCore;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         broadcastSender = new AndroidBroadcaster(contextMock);
         mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
+        messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
         notificationTapReceiver = new NotificationTapReceiver(broadcastSender, mobileMessagingCore);
 
         notificationSettings = new NotificationSettings.Builder(context)
@@ -45,13 +50,15 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, true);
     }
 
+    @Test
     public void test_should_set_flags_and_message_for_activity_intent() throws Exception {
 
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
+        Intent givenIntent = givenIntent(givenMessage, notificationSettings.getIntentFlags());
 
         // When
-        sendNotificationTapBroadcast(givenMessage);
+        notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
@@ -62,28 +69,30 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         assertJEquals(givenMessage, message);
     }
 
-    public void test_should_send_notification_tapped_event() {
+    @Test
+    public void test_should_send_notification_tapped_event() throws Exception {
 
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
+        Intent givenIntent = givenIntent(givenMessage, notificationSettings.getIntentFlags());
 
         // When
-        sendNotificationTapBroadcast(givenMessage);
+        notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        Mockito.verify(contextMock, Mockito.times(2)).sendBroadcast(intentArgumentCaptor.capture());
-        Intent intent = intentArgumentCaptor.getAllValues().get(0);
-
-        assertEquals(Event.NOTIFICATION_TAPPED.getKey(), intent.getAction());
+        Mockito.verify(broadcastSender, Mockito.times(1)).notificationTapped(messageArgumentCaptor.capture());
+        assertJEquals(givenMessage, messageArgumentCaptor.getValue());
     }
 
+    @Test
     public void test_should_send_seen_report_message_ids() {
 
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
+        Intent givenIntent = givenIntent(givenMessage, notificationSettings.getIntentFlags());
 
         // When
-        sendNotificationTapBroadcast(givenMessage);
+        notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(2)).sendBroadcast(intentArgumentCaptor.capture());
@@ -93,15 +102,17 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         assertEquals("SomeMessageId", intent.getStringArrayExtra(BroadcastParameter.EXTRA_MESSAGE_IDS)[0]);
     }
 
-    public void test_should_not_send_seen_report_message_ids() {
+    @Test
+    public void test_should_not_send_seen_report_message_ids_when_seen_on_tap_disabled() {
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, false);
 
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
+        Intent givenIntent = givenIntent(givenMessage, notificationSettings.getIntentFlags());
 
         // When
-        sendNotificationTapBroadcast(givenMessage);
+        notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -110,11 +121,18 @@ public class NotificationTappedTest extends MobileMessagingTestCase {
         assertNotEquals(Event.SEEN_REPORTS_SENT.getKey(), intent.getAction());
     }
 
-    private void sendNotificationTapBroadcast(Message givenMessage) {
-        Intent givenIntent = new Intent(context, NotificationTapReceiver.class);
-        givenIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(givenMessage));
-        givenIntent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
+    private Intent givenIntent(Message message, int flags) {
+        return new Intent(context, NotificationTapReceiver.class)
+                .putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message))
+                .putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), flags);
+    }
 
-        notificationTapReceiver.onReceive(contextMock, givenIntent);
+    private ArgumentMatcher<Intent> intentMatcher(final String action) {
+        return new ArgumentMatcher<Intent>() {
+            @Override
+            public boolean matches(Object argument) {
+                return ((Intent) argument).getAction().equals(action);
+            }
+        };
     }
 }
