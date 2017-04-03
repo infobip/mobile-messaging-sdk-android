@@ -1,10 +1,8 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.util;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 import android.util.Base64;
-
-import org.infobip.mobile.messaging.util.EncryptUtil;
 
 /**
  * @author sslavin
@@ -12,17 +10,12 @@ import org.infobip.mobile.messaging.util.EncryptUtil;
  */
 public class EncryptUtilTest extends InstrumentationTestCase {
 
-    Context context = null;
+    private Context context = null;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         context = getInstrumentation().getContext();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
     }
 
     public void test_encryptDecrypt() throws Exception {

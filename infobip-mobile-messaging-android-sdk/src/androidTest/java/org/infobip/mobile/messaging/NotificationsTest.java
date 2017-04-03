@@ -44,6 +44,7 @@ public class NotificationsTest extends MobileMessagingTestCase {
     }
 
     public void test_shouldNotProduceNPE_whenMessageArrivesAndNotificationsDisabled() {
+        // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, false);
 
         Bundle bundle = new Bundle();
@@ -57,24 +58,29 @@ public class NotificationsTest extends MobileMessagingTestCase {
         Intent intent = new Intent();
         intent.putExtras(bundle);
 
+        // When
         // should not produce NPE
         mobileMessageHandler.handleMessage(contextMock, intent);
 
+        // Then
         Mockito.verify(notificationManagerMock, Mockito.never()).notify(Mockito.anyInt(), Mockito.any(Notification.class));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void test_shouldProvideMultipleNotifications_whenMultipleNotificationsEnabled() {
+        // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED, true);
         PreferenceHelper.saveClass(context, MobileMessagingProperty.CALLBACK_ACTIVITY, Activity.class);
 
+        // When
         for (int i = 0; i < 10; i++) {
             Message message = new Message();
             message.setBody("SomeText");
             mobileMessageHandler.handleMessage(contextMock, message);
         }
 
+        // Then
         Mockito.verify(notificationManagerMock, Mockito.times(10)).notify(notificationCaptor.capture(), Mockito.any(Notification.class));
 
         Set<Integer> notificationIDs = new HashSet<>(notificationCaptor.getAllValues());

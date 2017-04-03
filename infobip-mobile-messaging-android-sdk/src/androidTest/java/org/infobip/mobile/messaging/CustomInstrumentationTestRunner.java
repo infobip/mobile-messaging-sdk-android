@@ -9,7 +9,8 @@ import android.test.InstrumentationTestRunner;
  */
 public class CustomInstrumentationTestRunner extends InstrumentationTestRunner {
 
-    @Override public void onCreate (final Bundle arguments) {
+    @Override
+    public void onCreate(final Bundle arguments) {
         super.onCreate(arguments);
 
         // temporary workaround for an incompatibility in current dexmaker (1.1) implementation and Android >= 4.3

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import android.test.InstrumentationTestCase;
 
@@ -16,16 +16,6 @@ import java.util.Locale;
  */
 
 public class GeoDeliveryTimeWindowTest extends InstrumentationTestCase {
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     public void test_iso8601_time_interval_window() throws ParseException {
         String hoursISO8601 = "0815/1633";

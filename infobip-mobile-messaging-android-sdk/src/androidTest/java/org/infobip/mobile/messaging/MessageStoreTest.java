@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.geo.GeoSQLiteMessageStore;
-import org.infobip.mobile.messaging.storage.TestMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 
 /**

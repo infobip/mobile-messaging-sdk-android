@@ -28,13 +28,18 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
+
+        if (!MobileMessagingCore.isGeofencingActivated(context)) {
+            return;
+        }
+
         String action = intent.getAction();
         if (action != null) {
             MobileMessagingLogger.i(String.format("[%s]", action));
             final LocationManager lm = (LocationManager) context.getSystemService(Service.LOCATION_SERVICE);
 
             switch (action) {
-                /**
+                /*
                  * This action gets called when GPS or network provider changes it's state. Redundancy in switching GPS only while network available.
                  *
                  * If the network provider is enabled, local alarm for adding geo areas is scheduled on GeofencingConsistencyReceiver class in 15 seconds.
@@ -51,7 +56,7 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                     }
                     break;
 
-                /**
+                /*
                  * NETWORK_PROVIDER_ENABLED_ACTION - scheduled 15 seconds after NETWORK_PROVIDER is enabled. Starts monitoring geofences from storage if geo is enabled.
                  * SCHEDULED_GEO_REFRESH_ACTION - scheduled to start when campaign needs to be started and area monitored
                  */
@@ -64,7 +69,7 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                     }
                     break;
 
-                /**
+                /*
                  * This action gets called whenever user deletes data from some app, and we're interested in clear Play Services cleared event
                  *  because all registered geofences stop being monitored by GPS in that case.
                  */
@@ -80,7 +85,7 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                     }
                     break;
 
-                /**
+                /*
                  * Scheduled to be invoked when first area from geo storage needs to expire. In that case GPS stop monitoring areas, but we
                  *  also need to be aware of this event.
                  */
