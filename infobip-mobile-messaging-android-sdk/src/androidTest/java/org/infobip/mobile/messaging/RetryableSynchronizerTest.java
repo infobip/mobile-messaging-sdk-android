@@ -51,7 +51,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         systemDataReporter = new SystemDataReporter(context, stats, executor, broadcaster);
         messagesSynchronizer = new MessagesSynchronizer(context, stats, executor, broadcaster);
         registrationSynchronizer = new RegistrationSynchronizer(context, stats, executor, broadcaster);
-        userDataSynchronizer = new UserDataSynchronizer(context, stats, executor, broadcaster);
+        userDataSynchronizer = new UserDataSynchronizer(context, mobileMessagingCore, executor, broadcaster);
 
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, "{\n" +
                 "  \"code\": \"500\",\n" +
@@ -60,7 +60,11 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
     }
 
     public void test_system_data_retry() {
+
+        // When
         reportSystemData();
+
+        // Then
         Mockito.verify(broadcaster, Mockito.after(8000).atLeast(3)).error(Mockito.any(MobileMessagingError.class));
     }
 
@@ -97,24 +101,57 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
     }
 
     public void test_sync_messages_retry() {
+
+        // When
         messagesSynchronizer.synchronize();
+
+        // Then
         Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_registration_retry() {
+
+        // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
 
+        // When
         registrationSynchronizer.synchronize();
+
+        // Then
         Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     public void test_user_data_retry() {
+
+        // Given
         UserData userData = new UserData();
         userData.setFirstName("Retry");
         userData.setLastName("Everything");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userData.toString());
 
-        userDataSynchronizer.synchronize(null);
-        Mockito.verify(broadcaster, Mockito.after(4000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
+        // When
+        userDataSynchronizer.synchronize(null, userData);
+
+        // Then
+        Mockito.verify(broadcaster, Mockito.after(10000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
+    }
+
+    public void test_user_data_opt_out_retry() {
+
+        // Given
+        withoutStoringUserData();
+
+        UserData userData = new UserData();
+        userData.setFirstName("Retry");
+        userData.setLastName("Everything");
+
+        // When
+        userDataSynchronizer.synchronize(null, userData);
+
+        // Then
+        Mockito.verify(broadcaster, Mockito.after(4000).times(1)).error(Mockito.any(MobileMessagingError.class));
+    }
+
+    private void withoutStoringUserData() {
+        PreferenceHelper.saveBoolean(contextMock, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE, false);
     }
 }

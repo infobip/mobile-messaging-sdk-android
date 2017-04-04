@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -58,7 +59,7 @@ public abstract class RetryableSynchronizer implements Synchronizer {
     }
 
     @Override
-    public void synchronize(MobileMessaging.ResultListener listener) {
+    public void synchronize(MobileMessaging.ResultListener listener, Object object) {
     }
 
     protected int maxRetryCount() {
@@ -98,7 +99,11 @@ public abstract class RetryableSynchronizer implements Synchronizer {
 
                 switch (getTask()) {
                     case SYNC_USER_DATA:
-                        synchronize(null);
+                        UserData unreportedUserData = MobileMessagingCore.getInstance(context).getUnreportedUserData();
+                        if (unreportedUserData == null) {
+                            return;
+                        }
+                        synchronize(null, unreportedUserData);
                         break;
                     default:
                         synchronize();

@@ -339,4 +339,16 @@ public class MobileMessagingTestCase extends InstrumentationTestCase {
         JsonSerializer serializer = new JsonSerializer();
         JSONAssert.assertEquals(serializer.serialize(expected), serializer.serialize(actual), true);
     }
+
+    /**
+     * Asserts that two objects are not strictly the same using JSONAssert and JSON serialization
+     *
+     * @param expected expected object
+     * @param actual   actual object
+     * @throws Exception if serialization or assertion fails
+     */
+    protected static <T> void assertJNotEquals(T expected, T actual) throws Exception {
+        JsonSerializer serializer = new JsonSerializer();
+        JSONAssert.assertNotEquals(serializer.serialize(expected), serializer.serialize(actual), true);
+    }
 }

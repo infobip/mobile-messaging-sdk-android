@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.geo.Geofencing;
@@ -162,6 +163,7 @@ public abstract class MobileMessaging {
      *
      * @return last synchronized UserData object
      */
+    @Nullable
     public abstract UserData getUserData();
 
     /**
@@ -257,6 +259,7 @@ public abstract class MobileMessaging {
         private boolean reportSystemInfo = true;
         private boolean geofencingActivated = false;
         private boolean doMarkSeenOnNotificationTap = true;
+        private boolean shouldSaveUserData = true;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -497,6 +500,25 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * It will not store {@link UserData} on device.
+         * <p>
+         * <b>Note:</b> since {@link UserData} is not stored on device, automatic retries will not be applied.
+         * It should be handled manually using {@link MobileMessaging#syncUserData(UserData, ResultListener)}} method,
+         * where you can check error in callback and retry accordingly.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withoutStoringUserData()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutStoringUserData() {
+            this.shouldSaveUserData = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -509,6 +531,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
+            MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
 
             return new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)

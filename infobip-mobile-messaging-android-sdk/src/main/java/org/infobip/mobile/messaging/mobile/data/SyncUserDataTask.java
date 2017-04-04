@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -20,9 +21,11 @@ import org.infobip.mobile.messaging.util.StringUtils;
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
     private final Context context;
+    private final UserData userDataToReport;
 
-    SyncUserDataTask(Context context) {
+    SyncUserDataTask(Context context, @NonNull UserData userDataToReport) {
         this.context = context;
+        this.userDataToReport = userDataToReport;
     }
 
     @Override
@@ -34,14 +37,9 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
             return new SyncUserDataResult(InternalSdkError.NO_VALID_REGISTRATION.getException());
         }
 
-        UserData userData = mobileMessagingCore.getUnreportedUserData();
-        if (userData == null) {
-            userData = new UserData();
-        }
-
         try {
-            UserDataReport request = UserDataMapper.toUserDataReport(userData.getPredefinedUserData(), userData.getCustomUserData());
-            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(deviceApplicationInstanceId, userData.getExternalUserId(), request);
+            UserDataReport request = UserDataMapper.toUserDataReport(userDataToReport.getPredefinedUserData(), userDataToReport.getCustomUserData());
+            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(deviceApplicationInstanceId, userDataToReport.getExternalUserId(), request);
             return new SyncUserDataResult(response.getPredefinedUserData(), response.getCustomUserData());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
