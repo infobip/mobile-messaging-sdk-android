@@ -35,7 +35,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        broadcastSender = new AndroidBroadcaster(contextMock);
+        broadcastSender = Mockito.spy(new AndroidBroadcaster(contextMock));
         mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
