@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         MobileMessaging mobileMessaging;
         MobileMessaging.Builder builder = new MobileMessaging.Builder(getApplication())
                 .withMessageStore(SQLiteMessageStore.class)
+                .withoutStoringUserData()
                 .withGeofencing();
 
         boolean notificationsEnabled = getNotificationEnabledFromPreferences();

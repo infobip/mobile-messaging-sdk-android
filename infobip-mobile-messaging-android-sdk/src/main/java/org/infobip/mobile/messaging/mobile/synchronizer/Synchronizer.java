@@ -5,7 +5,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 public interface Synchronizer<T> {
     void synchronize();
 
-    void synchronize(final MobileMessaging.ResultListener<T> listener);
+    void synchronize(final MobileMessaging.ResultListener<T> listener, T object);
 
     void updatePushRegistrationStatus(final Boolean enabled);
 

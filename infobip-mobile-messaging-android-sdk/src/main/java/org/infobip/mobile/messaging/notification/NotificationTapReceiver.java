@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
@@ -24,6 +25,9 @@ public class NotificationTapReceiver extends BroadcastReceiver {
     private Broadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
 
+    public NotificationTapReceiver() {}
+
+    @VisibleForTesting
     public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
@@ -46,7 +50,7 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         }
 
         if (notificationSettings.markSeenOnTap()) {
-            broadcaster(context).seenStatusReported(message.getMessageId());
+            mobileMessagingCore(context).setMessagesSeen(message.getMessageId());
         }
 
         Class callbackActivity = notificationSettings.getCallbackActivity();

@@ -1,9 +1,6 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.geo.Area;
-import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEventSettings;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -29,11 +26,6 @@ public class GeoEventsTest extends MobileMessagingTestCase {
         List<GeoEventSettings> getEventFilters() {
             return getEvents();
         }
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test

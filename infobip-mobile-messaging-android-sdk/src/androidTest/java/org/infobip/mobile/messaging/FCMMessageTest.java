@@ -6,11 +6,9 @@ import junit.framework.TestCase;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
-import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import static org.junit.Assert.assertNotEquals;

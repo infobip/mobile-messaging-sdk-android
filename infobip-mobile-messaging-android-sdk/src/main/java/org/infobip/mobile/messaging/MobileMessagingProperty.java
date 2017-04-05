@@ -33,6 +33,7 @@ public enum MobileMessagingProperty {
     MARK_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.MARK_SEEN_ON_NOTIFICATION_TAP", true),
     UNREPORTED_USER_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
     USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA"),
+    SAVE_USER_DATA_ON_DEVICE("org.infobip.mobile.messaging.infobip.SAVE_USER_DATA_ON_DEVICE", true),
     UNREPORTED_SYSTEM_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
     REPORTED_SYSTEM_DATA_HASH("org.infobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     UNREPORTED_GEO_EVENTS("org.infobip.mobile.messaging.infobip.UNREPORTED_GEO_EVENTS", new String[0]),
@@ -58,7 +59,7 @@ public enum MobileMessagingProperty {
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),
 
     DEFAULT_MAX_RETRY_COUNT("org.infobip.mobile.messaging.infobip.DEFAULT_MAX_RETRY_COUNT", 3),
-    DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.EXTRA_CALLBACK_ACTIVITY", 2),
+    DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.DEFAULT_EXP_BACKOFF_MULTIPLIER", 2),
 
     EXTRA_INTENT_FLAGS("org.infobip.mobile.messaging.infobip.EXTRA_INTENT_FLAGS"),
     EXTRA_CALLBACK_ACTIVITY("org.infobip.mobile.messaging.infobip.EXTRA_CALLBACK_ACTIVITY");

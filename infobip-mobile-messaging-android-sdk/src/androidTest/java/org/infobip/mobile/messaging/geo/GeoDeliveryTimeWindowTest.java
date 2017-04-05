@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.geo;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
@@ -19,16 +19,6 @@ import static junit.framework.Assert.assertTrue;
  */
 
 public class GeoDeliveryTimeWindowTest extends MobileMessagingTestCase {
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
 
     @Test
     public void test_iso8601_time_interval_window() throws ParseException {

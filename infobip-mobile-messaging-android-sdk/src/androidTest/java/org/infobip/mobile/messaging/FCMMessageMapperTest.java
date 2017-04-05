@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 public class FCMMessageMapperTest extends TestCase {
 
     public void test_message_should_be_possible_to_construct_message_from_bundle() throws Exception {
+        // Given
         Bundle bundle = new Bundle();
         bundle.putString("gcm.notification.messageId", "SomeMessageId");
         bundle.putString("gcm.notification.title", "SomeMessageTitle");
@@ -33,8 +34,10 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("status", "SUCCESS");
         bundle.putString("status_message", "SomeStatusMessage");
 
+        // When
         Message message = FCMMessageMapper.fromCloudBundle(bundle);
 
+        // Then
         assertEquals("SomeMessageId", message.getMessageId());
         assertEquals("SomeMessageTitle", message.getTitle());
         assertEquals("SomeMessageBody", message.getBody());

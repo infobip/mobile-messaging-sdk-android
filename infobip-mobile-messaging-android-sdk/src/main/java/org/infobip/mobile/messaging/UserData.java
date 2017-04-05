@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
@@ -44,7 +45,12 @@ public class UserData {
         this.customUserData = customUserData;
     }
 
+    @Nullable
     public static UserData merge(UserData old, UserData latest) {
+        if (old == null && latest == null) {
+            return null;
+        }
+
         UserData merged = new UserData();
         merged.add(old);
         merged.add(latest);

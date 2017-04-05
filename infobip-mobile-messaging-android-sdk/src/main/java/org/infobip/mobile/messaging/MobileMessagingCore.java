@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -89,7 +90,7 @@ public class MobileMessagingCore extends MobileMessaging {
         this.messageSender = new MessageSender(broadcaster);
         this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
         this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
-        this.userDataSynchronizer = new UserDataSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.userDataSynchronizer = new UserDataSynchronizer(context, this, registrationAlignedExecutor, broadcaster);
         this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.versionChecker = new VersionChecker(context, stats);
         this.geoReporter = new GeoReporter(context, broadcaster, stats);
@@ -128,7 +129,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public void sync() {
         registrationSynchronizer.synchronize();
-        userDataSynchronizer.synchronize(null);
+        userDataSynchronizer.synchronize(null, getUnreportedUserData());
         seenStatusReporter.synchronize();
         versionChecker.synchronize();
 
@@ -496,6 +497,14 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, doMarkSeenOnNotificationTap);
     }
 
+    public static void setShouldSaveUserData(Context context, boolean shouldSaveUserData) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE, shouldSaveUserData);
+    }
+
+    public boolean shouldSaveUserData() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE.getKey(), true);
+    }
+
     private static void cleanup(Context context) {
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
         String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
@@ -606,10 +615,7 @@ public class MobileMessagingCore extends MobileMessaging {
             }
         }
 
-        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userDataToReport.toString());
-
-        userDataSynchronizer.synchronize(listener);
+        userDataSynchronizer.synchronize(listener, userDataToReport);
     }
 
     @Override
@@ -622,6 +628,7 @@ public class MobileMessagingCore extends MobileMessaging {
         syncUserData(null, listener);
     }
 
+    @Nullable
     public UserData getUserData() {
         UserData existing = null;
         if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
@@ -631,6 +638,7 @@ public class MobileMessagingCore extends MobileMessaging {
         return UserData.merge(existing, getUnreportedUserData());
     }
 
+    @Nullable
     public UserData getUnreportedUserData() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
             return new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
@@ -643,7 +651,7 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public void setUserDataReported(UserData userData) {
-        if (userData != null) {
+        if (userData != null && shouldSaveUserData()) {
             PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);

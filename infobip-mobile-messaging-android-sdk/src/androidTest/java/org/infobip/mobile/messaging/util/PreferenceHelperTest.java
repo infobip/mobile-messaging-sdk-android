@@ -1,9 +1,9 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.util;
 
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
-import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.junit.Test;
 
 /**
@@ -12,17 +12,12 @@ import org.junit.Test;
  */
 public class PreferenceHelperTest extends InstrumentationTestCase {
 
-    Context context = null;
+    private Context context = null;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         context = getInstrumentation().getContext();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     @Test
