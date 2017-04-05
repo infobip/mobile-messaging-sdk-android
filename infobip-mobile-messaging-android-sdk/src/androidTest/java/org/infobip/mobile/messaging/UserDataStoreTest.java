@@ -4,10 +4,14 @@ import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import fi.iki.elonen.NanoHTTPD;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 public class UserDataStoreTest extends MobileMessagingTestCase {
 
@@ -15,7 +19,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
     private ArgumentCaptor<UserData> captor;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
         core = new MobileMessagingCore(contextMock);
         captor = ArgumentCaptor.forClass(UserData.class);
@@ -23,6 +27,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
     }
 
+    @Test
     public void test_should_save_user_data_on_disk() throws Exception {
 
         // Given
@@ -37,6 +42,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         assertNull(core.getUnreportedUserData());
     }
 
+    @Test
     public void test_should_not_save_user_data_on_disk() throws Exception {
 
         // Given
@@ -52,6 +58,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         assertNull(core.getUnreportedUserData());
     }
 
+    @Test
     public void test_should_sync_user_data_if_opted_out() throws Exception {
 
         // Given

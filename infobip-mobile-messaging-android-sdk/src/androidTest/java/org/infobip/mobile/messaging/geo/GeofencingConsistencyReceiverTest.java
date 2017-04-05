@@ -7,7 +7,12 @@ import android.location.LocationManager;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
 import org.mockito.Mockito;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by tjuric on 31/03/2017.
@@ -19,13 +24,14 @@ public class GeofencingConsistencyReceiverTest extends MobileMessagingTestCase {
     private GeofencingConsistencyReceiver geofencingConsistencyReceiver;
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
 
         locationManagerMock = Mockito.mock(LocationManager.class);
         geofencingConsistencyReceiver = new GeofencingConsistencyReceiver();
     }
 
+    @Test
     public void test_shouldNotProduceSecurityExceptionWithoutPermission_whenProvidersChangedAndGeoDeactivated() {
         // Given
         //noinspection WrongConstant
@@ -46,6 +52,7 @@ public class GeofencingConsistencyReceiverTest extends MobileMessagingTestCase {
         Mockito.verify(locationManagerMock, Mockito.never()).isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
+    @Test
     public void test_shouldProduceSecurityExceptionWithoutPermission_whenProvidersChangedAndGeoActivated() {
         // Given
         //noinspection WrongConstant
@@ -67,6 +74,7 @@ public class GeofencingConsistencyReceiverTest extends MobileMessagingTestCase {
         Mockito.verify(locationManagerMock, Mockito.never()).isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
+    @Test
     public void test_shouldCallProvidersEnabledWithPermission_whenProvidersChangedAndGeoActivated() {
         // Given
         //noinspection WrongConstant
