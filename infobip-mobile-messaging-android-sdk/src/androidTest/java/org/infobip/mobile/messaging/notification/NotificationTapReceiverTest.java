@@ -3,24 +3,20 @@ package org.infobip.mobile.messaging.notification;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
-import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MockActivity;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class NotificationTapReceiverTest extends MobileMessagingTestCase {
 
@@ -35,7 +31,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        broadcastSender = Mockito.spy(new AndroidBroadcaster(contextMock));
+        broadcastSender = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
@@ -95,7 +91,6 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
         notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
         Mockito.verify(mobileMessagingCore, Mockito.times(1)).setMessagesSeen(givenMessage.getMessageId());
     }
 
@@ -103,6 +98,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
     public void test_should_not_send_seen_report_message_ids_when_seen_on_tap_disabled() {
 
         // Given
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP, false);
         Message givenMessage = createMessage(context, "SomeMessageId", false);
         Intent givenIntent = givenIntent(givenMessage, notificationSettings.getIntentFlags());
 
@@ -110,24 +106,12 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
         notificationTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-        Intent intent = intentArgumentCaptor.getValue();
-
-        assertNotEquals(Event.SEEN_REPORTS_SENT.getKey(), intent.getAction());
+        Mockito.verify(mobileMessagingCore, Mockito.never()).setMessagesSeen(Mockito.any(String[].class));
     }
 
     private Intent givenIntent(Message message, int flags) {
         return new Intent(context, NotificationTapReceiver.class)
                 .putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message))
                 .putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), flags);
-    }
-
-    private ArgumentMatcher<Intent> intentMatcher(final String action) {
-        return new ArgumentMatcher<Intent>() {
-            @Override
-            public boolean matches(Object argument) {
-                return ((Intent) argument).getAction().equals(action);
-            }
-        };
     }
 }
