@@ -535,7 +535,7 @@ public class MobileMessagingCore extends MobileMessaging {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED);
     }
 
-    public boolean areAllActiveGeoAreasMonitored() {
+    public static boolean areAllActiveGeoAreasMonitored(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.ALL_ACTIVE_GEO_AREAS_MONITORED);
     }
 
@@ -559,9 +559,7 @@ public class MobileMessagingCore extends MobileMessaging {
                 geofencing = Geofencing.getInstance(context);
             }
 
-            if (!areAllActiveGeoAreasMonitored()) {
-                geofencing.startGeoMonitoring();
-            }
+            geofencing.startGeoMonitoring();
         }
     }
 
@@ -570,21 +568,33 @@ public class MobileMessagingCore extends MobileMessaging {
         activateGeofencing(Geofencing.getInstance(context));
     }
 
-    void activateGeofencing(Geofencing geofencing) {
+    public void activateGeofencing(Geofencing geofencing) {
         this.geofencing = geofencing;
         if (geofencing == null) return;
+
         setGeofencingActivated(context, true);
-        if (!areAllActiveGeoAreasMonitored()) {
-            geofencing.startGeoMonitoring();
-        }
+        geofencing.setGeoComponentsEnabledSettings(context, true);
+        geofencing.startGeoMonitoring();
     }
 
     @Override
     public void deactivateGeofencing() {
-        if (geofencing == null) return;
-        setGeofencingActivated(context, false);
-        geofencing.stopGeoMonitoring();
+        deactivateGeofencing(this.geofencing);
         this.geofencing = null;
+    }
+
+    public void deactivateGeofencing(Geofencing geofencing) {
+        if (geofencing == null) {
+            geofencing = Geofencing.getInstance(context);
+        }
+        setGeofencingActivated(context, false);
+        geofencing.setGeoComponentsEnabledSettings(context, false);
+        geofencing.stopGeoMonitoring();
+    }
+
+    @Override
+    public boolean isGeofencingActivated() {
+        return isGeofencingActivated(context);
     }
 
     @Override

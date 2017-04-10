@@ -2,11 +2,13 @@ package org.infobip.mobile.messaging.geo;
 
 import com.google.android.gms.location.Geofence;
 
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Date;
 import java.util.List;
@@ -25,6 +27,7 @@ import static junit.framework.Assert.assertTrue;
 public class GeofencingTest extends MobileMessagingTestCase {
 
     private Long now;
+    private Geofencing geofencingMock;
 
     @Override
     public void setUp() throws Exception {
@@ -33,11 +36,46 @@ public class GeofencingTest extends MobileMessagingTestCase {
         now = Time.now();
 
         enableMessageStoreForReceivedMessages();
-        Geofencing.getInstance(context);
+        geofencingMock = Mockito.mock(Geofencing.class);
     }
 
     @Test
-    public void test_shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
+    @SuppressWarnings("MissingPermission")
+    public void shouldActivateGeo() {
+        // When
+        mobileMessagingCore.activateGeofencing(geofencingMock);
+
+        // Then
+        Mockito.verify(geofencingMock, Mockito.times(1)).setGeoComponentsEnabledSettings(context, true);
+        Mockito.verify(geofencingMock, Mockito.times(1)).startGeoMonitoring();
+        assertTrue(MobileMessagingCore.isGeofencingActivated(context));
+    }
+
+    @Test
+    @SuppressWarnings("MissingPermission")
+    public void shouldNotActivateGeo() {
+        // When
+        mobileMessagingCore.activateGeofencing(null);  //null if withGeofencing or activateGeofencing aren't called
+
+        // Then
+        Mockito.verify(geofencingMock, Mockito.never()).setGeoComponentsEnabledSettings(context, true);
+        Mockito.verify(geofencingMock, Mockito.never()).startGeoMonitoring();
+        assertFalse(MobileMessagingCore.isGeofencingActivated(context));
+    }
+
+    @Test
+    public void shouldDeactivateGeo() {
+        // When
+        mobileMessagingCore.deactivateGeofencing(geofencingMock);
+
+        // Then
+        Mockito.verify(geofencingMock, Mockito.times(1)).setGeoComponentsEnabledSettings(context, false);
+        Mockito.verify(geofencingMock, Mockito.times(1)).stopGeoMonitoring();
+        assertFalse(MobileMessagingCore.isGeofencingActivated(context));
+    }
+
+    @Test
+    public void shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
         // Given
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
         Long millis30MinAfterNow = now + 30 * 60 * 1000;
@@ -61,7 +99,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoExpired() throws Exception {
+    public void shouldNotCalculateRefreshDateForGeoStartIfGeoExpired() throws Exception {
         // Given
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
@@ -80,7 +118,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoExpired() throws Exception {
+    public void shouldCalculateRefreshDateForGeoExpiredIfGeoExpired() throws Exception {
         // Given
         Long millis30MinBeforeNow = now - 30 * 60 * 1000;
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
@@ -100,7 +138,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_shouldNotCalculateRefreshDateForGeoStartIfGeoIsMonitoredNow() throws Exception {
+    public void shouldNotCalculateRefreshDateForGeoStartIfGeoIsMonitoredNow() throws Exception {
         // Given
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         Long millis15MinAfterNow = now + 15 * 60 * 1000;
@@ -119,7 +157,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_shouldCalculateRefreshDateForGeoExpiredIfGeoIsMonitoredNow() throws Exception {
+    public void shouldCalculateRefreshDateForGeoExpiredIfGeoIsMonitoredNow() throws Exception {
         // Given
         Long millis15MinBeforeNow = now - 15 * 60 * 1000;
         Long millis15MinAfterNow = now + 15 * 60 * 1000;

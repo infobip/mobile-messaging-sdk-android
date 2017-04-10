@@ -1,5 +1,11 @@
 package org.infobip.mobile.messaging.geo;
 
+/**
+ * Thrown when MobileMessaging SDK configuration is wrong and action described
+ * in error message needs to be taken to fix this.
+ *
+ * @see java.lang.RuntimeException
+ */
 public class ConfigurationException extends RuntimeException {
 
     public ConfigurationException(String detailMessage) {
@@ -23,10 +29,8 @@ public class ConfigurationException extends RuntimeException {
     }
 
     public enum Reason {
-        MISSING_REQUIRED_SERVICE("Missing required service in AndroidManifest.xml, add: %s"),
-
+        MISSING_REQUIRED_COMPONENT("Missing required component in AndroidManifest.xml, add: %s"),
         MISSING_REQUIRED_PERMISSION("Missing required permission in AndroidManifest.xml, add: %s"),
-
         CHECK_LOCATION_SETTINGS("Check your location settings.");
 
         private String message;

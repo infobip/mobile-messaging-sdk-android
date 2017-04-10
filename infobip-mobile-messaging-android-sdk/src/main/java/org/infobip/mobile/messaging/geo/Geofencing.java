@@ -20,6 +20,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 
+import org.infobip.mobile.messaging.BootReceiver;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -58,8 +59,6 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     }
 
     private Geofencing(Context context) {
-        checkRequiredService(context, GeofenceTransitionsIntentService.class);
-
         Geofencing.context = context;
         requestType = GoogleApiClientRequestType.NONE;
         geofences = new ArrayList<>();
@@ -228,7 +227,9 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
     public void startGeoMonitoring() {
 
         if (!PlayServicesSupport.isPlayServicesAvailable(context) ||
-                !MobileMessagingCore.isGeofencingActivated(context)) {
+                !MobileMessagingCore.isGeofencingActivated(context) ||
+                // checking this to avoid multiple activation of geofencing API on Play services
+                MobileMessagingCore.areAllActiveGeoAreasMonitored(context)) {
             return;
         }
 
@@ -267,6 +268,8 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
 
     public void stopGeoMonitoring() {
 
+        MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
+
         if (!checkRequiredPermissions()) {
             return;
         }
@@ -283,34 +286,42 @@ public class Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleAp
                     public void onResult(@NonNull Status status) {
                         logGeofenceStatus(status, false);
                         requestType = GoogleApiClientRequestType.NONE;
-                        MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(!status.isSuccess());
                     }
                 });
     }
 
-    private boolean checkRequiredPermissions() {
+    /**
+     * Sets component enabled parameter to enabled or disabled for every required geo component
+     *
+     * @param context                android context object
+     * @param componentsStateEnabled state of the component from {@link PackageManager}
+     * @throws ConfigurationException if component is missing in Manifest
+     * @see #setComponentEnabledSetting(Context, int, Class)
+     */
+    public void setGeoComponentsEnabledSettings(Context context, boolean componentsStateEnabled) {
+        int state = componentsStateEnabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+
+        setComponentEnabledSetting(context, state, GeofenceTransitionsIntentService.class);
+        setComponentEnabledSetting(context, state, GeofencingConsistencyReceiver.class);
+        setComponentEnabledSetting(context, state, BootReceiver.class);
+    }
+
+    private void setComponentEnabledSetting(Context context, int state, Class componentClass) {
+        ComponentName componentName = new ComponentName(context, componentClass);
+        try {
+            context.getPackageManager().setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
+        } catch (Exception e) {
+            throw new ConfigurationException(Reason.MISSING_REQUIRED_COMPONENT, componentClass.getCanonicalName());
+        }
+    }
+
+    public boolean checkRequiredPermissions() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             MobileMessagingLogger.e("Unable to initialize geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION));
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Checks if required service is defined.
-     *
-     * @param serviceClass Class of the service to be checked.
-     * @throws ConfigurationException
-     */
-    private void checkRequiredService(Context context, Class serviceClass) {
-        String serviceName = serviceClass.getCanonicalName();
-        ComponentName componentName = new ComponentName(context.getPackageName(), serviceName);
-        try {
-            context.getPackageManager().getServiceInfo(componentName, PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException localNameNotFoundException) {
-            throw new ConfigurationException(Reason.MISSING_REQUIRED_SERVICE, serviceName);
-        }
     }
 
     private void logGeofenceStatus(@NonNull Status status, boolean activated) {

@@ -205,6 +205,14 @@ public abstract class MobileMessaging {
     public abstract void deactivateGeofencing();
 
     /**
+     * Checks if geo area tracking is activated.
+     * MobileMessaging SDK has geofencing disabled by default.
+     *
+     * @return Current geofencing status.
+     */
+    public abstract boolean isGeofencingActivated();
+
+    /**
      * Default result listener interface for asynchronous operations.
      *
      * @param <T> type of successful result

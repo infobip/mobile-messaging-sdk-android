@@ -36,16 +36,23 @@
             </intent-filter>
         </service>
 
-        <!--Service that triggers when geofence area is entered-->
-        <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService" />
+        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
 
-        <receiver android:name="org.infobip.mobile.messaging.BootReceiver">
+        <!-- Geo components -->
+
+        <!--Service that triggers when geofence area is entered-->
+        <service android:name="org.infobip.mobile.messaging.geo.GeofenceTransitionsIntentService"
+            android:enabled="false"/>
+
+        <receiver android:name="org.infobip.mobile.messaging.BootReceiver"
+            android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver">
+        <receiver android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver"
+            android:enabled="false">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>
@@ -55,7 +62,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
+        <!-- /Geo components -->
 
     </application>
 </manifest>
