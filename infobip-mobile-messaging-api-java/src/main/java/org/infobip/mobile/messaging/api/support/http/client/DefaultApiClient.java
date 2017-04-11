@@ -79,6 +79,7 @@ public class DefaultApiClient implements ApiClient {
                         continue;
                     }
                     for (Object v : value) {
+                        if (v == null) continue;
                         urlConnection.setRequestProperty(key, v.toString());
                     }
                 }

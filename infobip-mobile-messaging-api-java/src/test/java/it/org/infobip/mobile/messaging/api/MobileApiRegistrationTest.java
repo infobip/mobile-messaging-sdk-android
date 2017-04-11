@@ -1,9 +1,11 @@
 package it.org.infobip.mobile.messaging.api;
 
-import fi.iki.elonen.NanoHTTPD;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
-import org.infobip.mobile.messaging.api.support.*;
+import org.infobip.mobile.messaging.api.support.ApiBackendException;
+import org.infobip.mobile.messaging.api.support.ApiException;
+import org.infobip.mobile.messaging.api.support.ApiIOException;
+import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
@@ -12,6 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Properties;
+
+import fi.iki.elonen.NanoHTTPD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -55,10 +59,10 @@ public class MobileApiRegistrationTest {
     public void create_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new RegistrationResponse("11", true)));
 
-        RegistrationResponse response = mobileApiRegistration.upsert(null, "123", true);
+        RegistrationResponse response = mobileApiRegistration.upsert("123", true);
 
         //inspect http context
-        assertEquals("/mobile/2/registration", debugServer.getUri());
+        assertEquals("/mobile/4/registration", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(3, debugServer.getQueryParametersCount());
@@ -79,31 +83,31 @@ public class MobileApiRegistrationTest {
         debugServer.stop();
         debugServer = null;
 
-        mobileApiRegistration.upsert(null, "123", true);
+        mobileApiRegistration.upsert("123", true);
     }
 
     @Test(expected = ApiException.class)
     public void create_onResponseError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some error!")));
 
-        mobileApiRegistration.upsert(null, "123", true);
+        mobileApiRegistration.upsert("123", true);
     }
 
     @Test(expected = ApiBackendException.class)
     public void create_onBackendError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some internal error!")));
 
-        mobileApiRegistration.upsert(null, "123", true);
+        mobileApiRegistration.upsert("123", true);
     }
 
     @Test
     public void update() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new RegistrationResponse("11", true)));
 
-        mobileApiRegistration.upsert("12", "123", true);
+        mobileApiRegistration.upsert("123", true);
 
         //inspect http context
-        assertEquals("/mobile/2/registration", debugServer.getUri());
+        assertEquals("/mobile/4/registration", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
     }

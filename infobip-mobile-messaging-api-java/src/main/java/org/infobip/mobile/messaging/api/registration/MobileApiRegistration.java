@@ -20,7 +20,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * @see Generator.Builder
  * @since 17.03.2016.
  */
-@Version("2")
+@Version("4")
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}")
 public interface MobileApiRegistration {
@@ -28,13 +28,11 @@ public interface MobileApiRegistration {
     /**
      * Updates or creates the cloud registration token on the Mobile Messaging backend system.
      *
-     * @param deviceApplicationInstanceId null if it doesn't exist
-     * @param registrationId              new registration token
+     * @param registrationId new registration token
      * @return {@link RegistrationResponse}
      */
     @HttpRequest(method = HttpMethod.POST, value = "registration")
     @Query(name = "platformType", value = "${platform.type:GCM}")
-    RegistrationResponse upsert(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
-                                @Query(name = "registrationId") String registrationId,
+    RegistrationResponse upsert(@Query(name = "registrationId") String registrationId,
                                 @Query(name = "pushRegistrationEnabled") Boolean pushRegistrationEnabled);
 }

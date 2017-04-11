@@ -26,14 +26,12 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 @HttpRequest("/mobile/{version}/data")
 public interface MobileApiData {
 
-    @Version("1")
+    @Version("2")
     @HttpRequest(method = HttpMethod.POST, value = "system")
-    void reportSystemData(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
-                          @Body SystemDataReport systemDataReport);
+    void reportSystemData(@Body SystemDataReport systemDataReport);
 
-    @Version("3")
+    @Version("4")
     @HttpRequest(method = HttpMethod.POST, value = "user")
-    UserDataReport reportUserData(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
-                                  @Query(name = "externalUserId") String externalUserId,
+    UserDataReport reportUserData(@Query(name = "externalUserId") String externalUserId,
                                   @Body org.infobip.mobile.messaging.api.data.UserDataReport userDataReport);
 }

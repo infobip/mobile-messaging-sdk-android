@@ -90,18 +90,17 @@ public class MobileApiDataTest {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
 
-        UserDataReport response = mobileApiData.reportUserData("myDeviceInstanceId", "myExternalUserId", null);
+        UserDataReport response = mobileApiData.reportUserData("myExternalUserId", null);
 
         //inspect http context
-        assertEquals("/mobile/3/data/user", debugServer.getUri());
+        assertEquals("/mobile/4/data/user", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        assertEquals(2, debugServer.getQueryParametersCount());
+        assertEquals(1, debugServer.getQueryParametersCount());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertNull(debugServer.getBody());
 
         //inspect parameters
-        assertEquals("myDeviceInstanceId", debugServer.getQueryParameter("deviceApplicationInstanceId"));
         assertEquals("myExternalUserId", debugServer.getQueryParameter("externalUserId"));
 
         //inspect response
@@ -133,18 +132,15 @@ public class MobileApiDataTest {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
         // send request
-        mobileApiData.reportSystemData("myDeviceInstanceId", systemDataReport);
+        mobileApiData.reportSystemData(systemDataReport);
 
         //inspect http context
-        assertEquals("/mobile/1/data/system", debugServer.getUri());
+        assertEquals("/mobile/2/data/system", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        assertEquals(1, debugServer.getQueryParametersCount());
+        assertEquals(0, debugServer.getQueryParametersCount());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertNotNull(debugServer.getBody());
-
-        //inspect parameters
-        assertEquals("myDeviceInstanceId", debugServer.getQueryParameter("deviceApplicationInstanceId"));
 
         //inspect request
         JSONAssert.assertEquals(

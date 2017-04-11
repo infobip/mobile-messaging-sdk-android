@@ -1,10 +1,13 @@
 package it.org.infobip.mobile.messaging.api;
 
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
 import org.junit.After;
@@ -14,6 +17,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.UUID;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -162,5 +166,49 @@ public class MobileApiMessagesTest {
         assertEquals("string2", moMessagesResponse.getMessages()[1].getCustomPayload().get("myStringKey"));
         assertEquals(2.0, moMessagesResponse.getMessages()[1].getCustomPayload().get("myNumberKey"));
         assertEquals(false, moMessagesResponse.getMessages()[1].getCustomPayload().get("myBooleanKey"));
+    }
+
+    @Test
+    public void sync_messages_success() {
+        String serverResponse = "{\n" +
+                "  \"payloads\": [\n" +
+                "    {\n" +
+                "      \"gcm.notification.messageId\": \"test-message-id\",\n" +
+                "      \"gcm.notification.title\": \"this is title\",\n" +
+                "      \"gcm.notification.body\": \"body\",\n" +
+                "      \"gcm.notification.sound\": \"true\",\n" +
+                "      \"gcm.notification.vibrate\": \"true\",\n" +
+                "      \"gcm.notification.silent\": \"true\",\n" +
+                "      \"gcm.notification.category\": \"UNKNOWN\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
+
+        String[] mIDs = new String[1];
+        mIDs[0] = "test-message-id";
+        String[] drIDs = new String[1];
+        drIDs[0] = "test-message-id";
+
+        SyncMessagesBody syncMessagesBody = new SyncMessagesBody(mIDs, drIDs);
+        SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
+
+        // inspect http context
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages/");
+        assertThat(debugServer.getRequestCount()).isEqualTo(1);
+        assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
+        assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);
+
+        // inspect response
+        assertEquals(1, syncMessagesResponse.getPayloads().size());
+        MessageResponse messageResponse = syncMessagesResponse.getPayloads().get(0);
+        assertEquals("test-message-id", messageResponse.getMessageId());
+        assertEquals("this is title", messageResponse.getTitle());
+        assertEquals("body", messageResponse.getBody());
+        assertEquals("true", messageResponse.getSound());
+        assertEquals("true", messageResponse.getVibrate());
+        assertEquals("true", messageResponse.getSilent());
+        assertEquals("UNKNOWN", messageResponse.getCategory());
     }
 }

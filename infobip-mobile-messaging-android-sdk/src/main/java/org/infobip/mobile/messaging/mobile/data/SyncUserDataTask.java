@@ -31,15 +31,14 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
     @Override
     protected SyncUserDataResult doInBackground(Void... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+        if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
             MobileMessagingLogger.e(InternalSdkError.NO_VALID_REGISTRATION.get());
             return new SyncUserDataResult(InternalSdkError.NO_VALID_REGISTRATION.getException());
         }
 
         try {
             UserDataReport request = UserDataMapper.toUserDataReport(userDataToReport.getPredefinedUserData(), userDataToReport.getCustomUserData());
-            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(deviceApplicationInstanceId, userDataToReport.getExternalUserId(), request);
+            UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(userDataToReport.getExternalUserId(), request);
             return new SyncUserDataResult(response.getPredefinedUserData(), response.getCustomUserData());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

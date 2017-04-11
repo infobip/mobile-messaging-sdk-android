@@ -28,8 +28,7 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
     @Override
     protected SyncMessagesResult doInBackground(Object... notUsed) {
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+        if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
             MobileMessagingLogger.w("Registration is not available yet");
             return new SyncMessagesResult(new SyncMessagesResponse(new ArrayList<MessageResponse>()));
         }
@@ -39,7 +38,7 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
             String[] unreportedMessageIds = mobileMessagingCore.getUnreportedMessageIds();
 
             SyncMessagesBody syncMessagesBody = new SyncMessagesBody(messageIds, unreportedMessageIds);
-            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(deviceApplicationInstanceId, syncMessagesBody);
+            SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(syncMessagesBody);
             mobileMessagingCore.removeUnreportedMessageIds(unreportedMessageIds);
             return new SyncMessagesResult(syncMessagesResponse);
 

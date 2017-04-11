@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
+import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -33,17 +34,24 @@ import java.util.Properties;
 public enum MobileApiResourceProvider {
     INSTANCE;
 
-    public static class ForegroundStateProvider implements Generator.CommonHeaderProvider {
+    public static class MobileMessagingHeaderProvider implements Generator.CommonHeaderProvider {
+
+        private final Context context;
+
+        public MobileMessagingHeaderProvider(Context context) {
+            this.context = context;
+        }
 
         @Override
         public Map<String, Collection<Object>> get() {
             return new HashMap<String, Collection<Object>>() {{
-                put("foreground", Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
+                put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
+                put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId()));
             }};
         }
     }
 
-    private static final ForegroundStateProvider foregroundStateProvider = new ForegroundStateProvider();
+    private MobileMessagingHeaderProvider mobileMessagingDynamicHeaderProvider;
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiMessages mobileApiMessages;
@@ -134,6 +142,7 @@ public enum MobileApiResourceProvider {
             return generator;
         }
 
+
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
         properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
@@ -143,10 +152,17 @@ public enum MobileApiResourceProvider {
                 withBaseUrl(MobileMessagingCore.getInstance(context).getApiUri()).
                 withProperties(properties).
                 withUserAgentAdditions(getUserAgentAdditions(context)).
-                withDynamicHeaderProvider(foregroundStateProvider).
+                withDynamicHeaderProvider(mobileMessagingDynamicHeaderProvider(context)).
                 build();
 
         return generator;
+    }
+
+    private MobileMessagingHeaderProvider mobileMessagingDynamicHeaderProvider(Context context) {
+        if (mobileMessagingDynamicHeaderProvider == null) {
+            mobileMessagingDynamicHeaderProvider = new MobileMessagingHeaderProvider(context);
+        }
+        return mobileMessagingDynamicHeaderProvider;
     }
 
     public void resetMobileApi() {

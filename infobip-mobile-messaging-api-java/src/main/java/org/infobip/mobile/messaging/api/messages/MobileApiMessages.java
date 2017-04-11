@@ -33,9 +33,8 @@ public interface MobileApiMessages {
     @Query(name = "platformType", value = "${platform.type:GCM}")
     MoMessagesResponse sendMO(@Body() MoMessagesBody moMessagesBody);
 
-    @Version("3")
+    @Version("5")
     @HttpRequest(method = HttpMethod.POST)
     @Query(name = "platformType", value = "${platform.type:GCM}")
-    SyncMessagesResponse sync(@Query(name = "deviceApplicationInstanceId") String deviceApplicationInstanceId,
-                              @Body() SyncMessagesBody pushMessagesBody);
+    SyncMessagesResponse sync(@Body() SyncMessagesBody pushMessagesBody);
 }

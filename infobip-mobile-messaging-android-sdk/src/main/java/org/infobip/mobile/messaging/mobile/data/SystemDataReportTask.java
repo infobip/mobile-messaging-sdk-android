@@ -41,14 +41,13 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
                 report.getNotificationsEnabled());
 
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        String deviceApplicationInstanceId = mobileMessagingCore.getDeviceApplicationInstanceId();
-        if (StringUtils.isBlank(deviceApplicationInstanceId)) {
+        if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
             MobileMessagingLogger.w("Can't report system data without valid registration");
             return new SystemDataReportResult(data, true);
         }
 
         try {
-            MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(deviceApplicationInstanceId, report);
+            MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(report);
             return new SystemDataReportResult(data);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);
