@@ -37,6 +37,7 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -57,6 +58,8 @@ public class MobileMessagingCore extends MobileMessaging {
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
 
     static MobileMessagingCore instance;
+    static String applicationCode;
+    static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private final RegistrationSynchronizer registrationSynchronizer;
     private final MessagesSynchronizer messagesSynchronizer;
@@ -464,14 +467,46 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     private void setApplicationCode(String applicationCode) {
-        if (StringUtils.isBlank(applicationCode)) {
-            throw new IllegalArgumentException("applicationCode is mandatory! Get one here: https://portal.infobip.com/push/applications");
+        if (shouldSaveApplicationCode(context)) {
+            if (StringUtils.isBlank(applicationCode)) {
+                throw new IllegalArgumentException("applicationCode is mandatory! Get one here: https://portal.infobip.com/push/applications");
+            }
+            PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, applicationCode);
+            return;
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, applicationCode);
+
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "");
     }
 
     public static String getApplicationCode(Context context) {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
+
+        if (shouldSaveApplicationCode(context)) {
+            applicationCode = PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
+            return applicationCode;
+        }
+
+        if (applicationCode != null) {
+            return applicationCode;
+        }
+
+        if (applicationCodeProvider != null) {
+            applicationCode = applicationCodeProvider.resolve();
+            return applicationCode;
+        }
+
+        String appCodeProviderCanonicalClassName = getInstance(context).getApplicationCodeProviderClassName();
+
+        try {
+            Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
+            Object applicationCodeProvider = c.newInstance();
+            Method resolve = ApplicationCodeProvider.class.getMethod("resolve");
+            applicationCode = String.valueOf(resolve.invoke(applicationCodeProvider));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return applicationCode;
     }
 
     static void setApiUri(Context context, String apiUri) {
@@ -505,7 +540,21 @@ public class MobileMessagingCore extends MobileMessaging {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE.getKey(), true);
     }
 
+    public static void setShouldSaveAppCode(Context context, boolean shouldSaveAppCode) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK, shouldSaveAppCode);
+    }
+
+    public static boolean shouldSaveApplicationCode(Context context) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK.getKey(), true);
+    }
+
+    @Override
+    public void cleanup() {
+        MobileMessagingCore.cleanup(context);
+    }
+
     private static void cleanup(Context context) {
+        applicationCode = null;
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
         String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
 
@@ -796,6 +845,15 @@ public class MobileMessagingCore extends MobileMessaging {
         Geofencing.scheduleRefresh(context);
     }
 
+    private void setApplicationCodeProviderClassName(ApplicationCodeProvider applicationCodeProvider) {
+        this.applicationCodeProvider = applicationCodeProvider;
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME, applicationCodeProvider.getClass().getCanonicalName());
+    }
+
+    private String getApplicationCodeProviderClassName() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME);
+    }
+
     /**
      * The {@link MobileMessagingCore} builder class.
      *
@@ -812,6 +870,7 @@ public class MobileMessagingCore extends MobileMessaging {
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
         private Geofencing geofencing;
+        private ApplicationCodeProvider applicationCodeProvider;
 
         public Builder(Application application) {
             if (null == application) {
@@ -861,6 +920,23 @@ public class MobileMessagingCore extends MobileMessaging {
         }
 
         /**
+         * When you want to take more care about privacy and don't want to store Application code in <i>infobip_application_code</i>
+         * string resource nor in our persistent storage, but would like to use it only from memory. In this case, you should
+         * provide it on demand. For example, you should implement <b>sync</b> API call to your server where you store required
+         * Application code and provide it to {@link ApplicationCodeProvider#resolve()} method as a return type.
+         * <p>
+         * Sync (not async) API call is encouraged because we already handle your code in a background thread.
+         *
+         * @param applicationCodeProvider if you don't have application code, you should get one <a href="https://portal.infobip.com/push/applications">here</a>
+         * @return {@link Builder}
+         */
+        public Builder withApplicationCode(ApplicationCodeProvider applicationCodeProvider) {
+            validateWithParam(applicationCodeProvider);
+            this.applicationCodeProvider = applicationCodeProvider;
+            return this;
+        }
+
+        /**
          * It will start monitoring geo areas and notify device when area is entered.
          *
          * @param geofencing - handles monitored geo areas
@@ -878,14 +954,17 @@ public class MobileMessagingCore extends MobileMessaging {
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build() {
-            if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application.getApplicationContext()))) {
-                MobileMessagingCore.cleanup(application);
+            if (shouldSaveApplicationCode(application.getApplicationContext())) {
+                if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application.getApplicationContext()))) {
+                    MobileMessagingCore.cleanup(application);
+                }
             }
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             MobileMessagingCore.instance = mobileMessagingCore;
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
+            mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();

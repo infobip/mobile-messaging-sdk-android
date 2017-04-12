@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
@@ -213,6 +214,16 @@ public abstract class MobileMessaging {
     public abstract boolean isGeofencingActivated();
 
     /**
+     * Deletes SDK data related to current application code.
+     * There might be a situation where you'll want to switch between different Application Codes during development/testing.
+     * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
+     * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
+     * In this case you should manually invoke {@link #cleanup()} prior to {@link Builder#build()} otherwise the SDK will not
+     * detect Application Code changes.
+     */
+    public abstract void cleanup();
+
+    /**
      * Default result listener interface for asynchronous operations.
      *
      * @param <T> type of successful result
@@ -238,7 +249,6 @@ public abstract class MobileMessaging {
 
         }
     }
-
 
     /**
      * The {@link MobileMessaging} builder class.
@@ -268,6 +278,8 @@ public abstract class MobileMessaging {
         private boolean geofencingActivated = false;
         private boolean doMarkSeenOnNotificationTap = true;
         private boolean shouldSaveUserData = true;
+        private boolean storeAppCodeOnDisk = true;
+        private ApplicationCodeProvider applicationCodeProvider = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -351,7 +363,32 @@ public abstract class MobileMessaging {
          */
         public Builder withApplicationCode(String applicationCode) {
             validateWithParam(applicationCode);
+            this.storeAppCodeOnDisk = true;
             this.applicationCode = applicationCode;
+            return this;
+        }
+
+        /**
+         * When you want to take more care about privacy and don't want to store Application code in <i>infobip_application_code</i>
+         * string resource nor in our persistent storage, but would like to use it only from memory. In this case, you should
+         * provide it on demand. For example, you should implement <b>sync</b> API call to your server where you store required
+         * Application code and provide it to {@link ApplicationCodeProvider#resolve()} method as a return type.
+         * <p>
+         * Sync (not async) API call is encouraged because we already handle you code in a background thread.
+         *
+         * @param applicationCodeProvider resolves provided application code. Should be implemented as a separate class.
+         *                                If you don't have Application code, you should resolve one
+         *                                <a href="https://portal.infobip.com/push/applications">here</a>
+         * @return {@link Builder}
+         * @throws IllegalArgumentException when {@link ApplicationCodeProvider} is implemented in Activity class
+         */
+        public Builder withoutStoringApplicationCode(ApplicationCodeProvider applicationCodeProvider) {
+            if (applicationCodeProvider instanceof Activity) {
+                throw new IllegalArgumentException("Application code provider should be implemented in a separate (non Activity) class!");
+            }
+            validateWithParam(applicationCodeProvider);
+            this.storeAppCodeOnDisk = false;
+            this.applicationCodeProvider = applicationCodeProvider;
             return this;
         }
 
@@ -540,12 +577,19 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
+            MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
 
-            return new MobileMessagingCore.Builder(application)
+            MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
-                    .withApplicationCode(applicationCode)
-                    .withGeofencing(geofencingActivated ? Geofencing.getInstance(application) : null)
-                    .build();
+                    .withGeofencing(geofencingActivated ? Geofencing.getInstance(application) : null);
+
+            if (storeAppCodeOnDisk) {
+                mobileMessagingCoreBuilder.withApplicationCode(applicationCode);
+            } else if (applicationCodeProvider != null) {
+                mobileMessagingCoreBuilder.withApplicationCode(applicationCodeProvider);
+            }
+
+            return mobileMessagingCoreBuilder.build();
         }
     }
 }

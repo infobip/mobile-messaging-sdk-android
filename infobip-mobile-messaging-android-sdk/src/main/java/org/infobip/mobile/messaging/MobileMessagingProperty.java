@@ -34,6 +34,8 @@ public enum MobileMessagingProperty {
     UNREPORTED_USER_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
     USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA"),
     SAVE_USER_DATA_ON_DEVICE("org.infobip.mobile.messaging.infobip.SAVE_USER_DATA_ON_DEVICE", true),
+    SAVE_APP_CODE_ON_DISK("org.infobip.mobile.messaging.infobip.SAVE_APP_CODE_ON_DISK", true),
+    APP_CODE_PROVIDER_CANONICAL_CLASS_NAME("org.infobip.mobile.messaging.infobip.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME"),
     UNREPORTED_SYSTEM_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
     REPORTED_SYSTEM_DATA_HASH("org.infobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     UNREPORTED_GEO_EVENTS("org.infobip.mobile.messaging.infobip.UNREPORTED_GEO_EVENTS", new String[0]),
