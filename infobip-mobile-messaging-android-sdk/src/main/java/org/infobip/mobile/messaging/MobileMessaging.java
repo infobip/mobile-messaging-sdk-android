@@ -374,7 +374,7 @@ public abstract class MobileMessaging {
          * provide it on demand. For example, you should implement <b>sync</b> API call to your server where you store required
          * Application code and provide it to {@link ApplicationCodeProvider#resolve()} method as a return type.
          * <p>
-         * Sync (not async) API call is encouraged because we already handle you code in a background thread.
+         * Sync (not async) API call is encouraged because we already handle your code in a background thread.
          *
          * @param applicationCodeProvider resolves provided application code. Should be implemented as a separate class.
          *                                If you don't have Application code, you should resolve one
@@ -383,9 +383,17 @@ public abstract class MobileMessaging {
          * @throws IllegalArgumentException when {@link ApplicationCodeProvider} is implemented in Activity class
          */
         public Builder withoutStoringApplicationCode(ApplicationCodeProvider applicationCodeProvider) {
-            if (applicationCodeProvider instanceof Activity) {
-                throw new IllegalArgumentException("Application code provider should be implemented in a separate (non Activity) class!");
+            Exception exception = null;
+            try {
+                application.getClassLoader().loadClass(applicationCodeProvider.getClass().getCanonicalName());
+            } catch (ClassNotFoundException | NullPointerException e) {
+                exception = e;
             }
+
+            if (exception != null || applicationCodeProvider instanceof Activity)
+            throw new IllegalArgumentException("Application code provider should be implemented in a separate class file " +
+                    "that implements ApplicationCodeProvider!");
+
             validateWithParam(applicationCodeProvider);
             this.storeAppCodeOnDisk = false;
             this.applicationCodeProvider = applicationCodeProvider;

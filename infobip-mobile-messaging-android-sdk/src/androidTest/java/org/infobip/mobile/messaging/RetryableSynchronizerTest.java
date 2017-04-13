@@ -158,6 +158,6 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
     }
 
     private void withoutStoringUserData() {
-        PreferenceHelper.saveBoolean(contextMock, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE, false);
+        PreferenceHelper.saveBoolean(contextMock, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK, false);
     }
 }

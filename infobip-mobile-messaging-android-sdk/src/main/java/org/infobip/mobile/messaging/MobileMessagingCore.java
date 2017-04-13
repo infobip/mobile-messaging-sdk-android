@@ -533,11 +533,11 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public static void setShouldSaveUserData(Context context, boolean shouldSaveUserData) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE, shouldSaveUserData);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK, shouldSaveUserData);
     }
 
     public boolean shouldSaveUserData() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DEVICE.getKey(), true);
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK.getKey(), true);
     }
 
     public static void setShouldSaveAppCode(Context context, boolean shouldSaveAppCode) {
@@ -846,7 +846,8 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     private void setApplicationCodeProviderClassName(ApplicationCodeProvider applicationCodeProvider) {
-        this.applicationCodeProvider = applicationCodeProvider;
+        MobileMessagingCore.applicationCodeProvider = applicationCodeProvider;
+        if (applicationCodeProvider == null) return;
         PreferenceHelper.saveString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME, applicationCodeProvider.getClass().getCanonicalName());
     }
 
