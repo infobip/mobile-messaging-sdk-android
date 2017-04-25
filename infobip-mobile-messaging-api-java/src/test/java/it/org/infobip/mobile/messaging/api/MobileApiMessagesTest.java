@@ -5,9 +5,10 @@ import org.infobip.mobile.messaging.api.messages.MoMessage;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
-import org.infobip.mobile.messaging.api.messages.SeenMessages;
+import org.infobip.mobile.messaging.api.messages.SeenBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.messages.reporting.MessageReport;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.tools.DebugServer;
 import org.junit.After;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.UUID;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -62,18 +62,18 @@ public class MobileApiMessagesTest {
     public void create_seenReport_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        SeenMessages messages = new SeenMessages()
+        SeenBody messages = new SeenBody()
         {{
-            setMessages(new ArrayList<Message>()
+            setMessages(new ArrayList<MessageReport>()
             {{
-                add(new Message("myMessageId", System.currentTimeMillis()));
-            }}.toArray(new Message[1]));
+                add(new MessageReport("myMessageId", System.currentTimeMillis()));
+            }}.toArray(new MessageReport[1]));
         }};
 
         mobileApiMessages.reportSeen(messages);
 
         //inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/messages/seen");
+        assertThat(debugServer.getUri()).isEqualTo("/api/v2/dr/push");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
@@ -195,7 +195,7 @@ public class MobileApiMessagesTest {
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages/");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);

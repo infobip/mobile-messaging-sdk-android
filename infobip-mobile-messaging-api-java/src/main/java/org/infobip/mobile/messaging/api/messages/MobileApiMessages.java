@@ -5,7 +5,6 @@ import org.infobip.mobile.messaging.api.support.http.ApiKey;
 import org.infobip.mobile.messaging.api.support.http.Body;
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
 import org.infobip.mobile.messaging.api.support.http.Query;
-import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
 /**
@@ -22,19 +21,16 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * @since 25.03.2016.
  */
 @ApiKey("${api.key}")
-@HttpRequest("/mobile/{version}/messages")
 public interface MobileApiMessages {
-    @Version("1")
-    @HttpRequest(method = HttpMethod.POST, value = "seen")
-    void reportSeen(@Body() SeenMessages seenReport);
 
-    @Version("1")
-    @HttpRequest(method = HttpMethod.POST, value = "mo")
+    @HttpRequest(method = HttpMethod.POST, value = "/api/v2/dr/push")
+    void reportSeen(@Body() SeenBody seenReport);
+
+    @HttpRequest(method = HttpMethod.POST, value = "/mobile/1/messages/mo")
     @Query(name = "platformType", value = "${platform.type:GCM}")
     MoMessagesResponse sendMO(@Body() MoMessagesBody moMessagesBody);
 
-    @Version("5")
-    @HttpRequest(method = HttpMethod.POST)
+    @HttpRequest(method = HttpMethod.POST, value = "/mobile/5/messages")
     @Query(name = "platformType", value = "${platform.type:GCM}")
     SyncMessagesResponse sync(@Body() SyncMessagesBody pushMessagesBody);
 }
