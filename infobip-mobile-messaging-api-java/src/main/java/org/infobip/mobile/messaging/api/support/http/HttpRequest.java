@@ -21,7 +21,8 @@ public @interface HttpRequest {
     HttpMethod method() default HttpMethod.GET;
 
     /**
-     * A relative or absolute path, or full URL of the endpoint.
+     * A relative or absolute path, or full URL of the endpoint. This value is optional if the first
+     * parameter of the method is annotated with {@link Url @Url}.
      */
     String value() default "";
 }
