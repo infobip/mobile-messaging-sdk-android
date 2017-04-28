@@ -7,7 +7,6 @@ import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static org.infobip.mobile.messaging.MobileMessagingCore.applicationCode;
 
 
 public class ApplicationCodeProviderTest extends MobileMessagingTestCase {
@@ -27,7 +26,7 @@ public class ApplicationCodeProviderTest extends MobileMessagingTestCase {
         // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK, false);
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "");
-        applicationCode = null;
+        MobileMessagingCore.applicationCode = null;
 
         // When
         String applicationCode = MobileMessagingCore.getApplicationCode(context);

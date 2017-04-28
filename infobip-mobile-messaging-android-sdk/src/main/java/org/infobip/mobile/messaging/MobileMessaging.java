@@ -1,15 +1,12 @@
 package org.infobip.mobile.messaging;
 
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
 
-import org.infobip.mobile.messaging.geo.Geofencing;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -191,29 +188,6 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
-     * Starts tracking geofence areas.
-     *
-     * @see Geofencing
-     */
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    public abstract void activateGeofencing();
-
-    /**
-     * Stops tracking geofence areas.
-     *
-     * @see Geofencing
-     */
-    public abstract void deactivateGeofencing();
-
-    /**
-     * Checks if geo area tracking is activated.
-     * MobileMessaging SDK has geofencing disabled by default.
-     *
-     * @return Current geofencing status.
-     */
-    public abstract boolean isGeofencingActivated();
-
-    /**
      * Deletes SDK data related to current application code.
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
@@ -391,8 +365,8 @@ public abstract class MobileMessaging {
             }
 
             if (exception != null || applicationCodeProvider instanceof Activity)
-            throw new IllegalArgumentException("Application code provider should be implemented in a separate class file " +
-                    "that implements ApplicationCodeProvider!");
+                throw new IllegalArgumentException("Application code provider should be implemented in a separate class file " +
+                        "that implements ApplicationCodeProvider!");
 
             validateWithParam(applicationCodeProvider);
             this.storeAppCodeOnDisk = false;
@@ -473,22 +447,6 @@ public abstract class MobileMessaging {
         public Builder withMessageStore(Class<? extends MessageStore> messageStoreClass) {
             validateWithParam(messageStoreClass);
             this.messageStoreClass = messageStoreClass;
-            return this;
-        }
-
-        /**
-         * It will enable tracking of geofence areas.
-         * <pre>
-         * {@code new MobileMessaging.Builder(application)
-         *       .withGeofencing()
-         *       .build();}
-         * </pre>
-         *
-         * @return {@link Builder}
-         */
-        @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-        public Builder withGeofencing() {
-            this.geofencingActivated = true;
             return this;
         }
 
@@ -588,8 +546,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
-                    .withDisplayNotification(notificationSettings)
-                    .withGeofencing(geofencingActivated ? Geofencing.getInstance(application) : null);
+                    .withDisplayNotification(notificationSettings);
 
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);

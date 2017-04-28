@@ -3,8 +3,7 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
-import org.infobip.mobile.messaging.geo.Geo;
+import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
 
@@ -33,7 +32,7 @@ public class Message implements Comparable<Message> {
     private long receivedTimestamp;
     private long seenTimestamp;
     private JSONObject customPayload;
-    private Geo geo;
+    private String internalData;
 
     public enum Status {
         SUCCESS,
@@ -46,17 +45,17 @@ public class Message implements Comparable<Message> {
     private String statusMessage;
 
     public static Message createFrom(Bundle bundle) {
-        return BundleMapper.messageFromBundle(bundle);
+        return MessageBundleMapper.messageFromBundle(bundle);
     }
 
     public static List<Message> createFrom(ArrayList<Bundle> bundles) {
-        return BundleMapper.messagesFromBundles(bundles);
+        return MessageBundleMapper.messagesFromBundles(bundles);
     }
 
     public Message(String messageId, String title, String body, String sound,
                    boolean vibrate, String icon, boolean silent, String category,
                    String from, long receivedTimestamp, long seenTimestamp,
-                   JSONObject customPayload, Geo geo,
+                   JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage) {
         this.messageId = messageId;
         this.title = title;
@@ -70,7 +69,7 @@ public class Message implements Comparable<Message> {
         this.receivedTimestamp = receivedTimestamp;
         this.seenTimestamp = seenTimestamp;
         this.customPayload = customPayload;
-        this.geo = geo;
+        this.internalData = internalData;
         this.destination = destination;
         this.status = status;
         this.statusMessage = statusMessage;
@@ -85,6 +84,14 @@ public class Message implements Comparable<Message> {
     @Override
     public int compareTo(@NonNull Message another) {
         return (int) Math.signum(another.receivedTimestamp - receivedTimestamp);
+    }
+
+    public String getInternalData() {
+        return internalData;
+    }
+
+    public void setInternalData(String internalData) {
+        this.internalData = internalData;
     }
 
     public String getMessageId() {
@@ -185,14 +192,6 @@ public class Message implements Comparable<Message> {
 
     public void setCustomPayload(JSONObject customPayload) {
         this.customPayload = customPayload;
-    }
-
-    public Geo getGeo() {
-        return geo;
-    }
-
-    public void setGeo(Geo geo) {
-        this.geo = geo;
     }
 
     public String getDestination() {

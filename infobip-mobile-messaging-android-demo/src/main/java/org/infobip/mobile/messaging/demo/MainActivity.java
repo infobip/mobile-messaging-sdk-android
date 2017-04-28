@@ -36,6 +36,9 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Geo;
+import org.infobip.mobile.messaging.geo.GeoEvent;
+import org.infobip.mobile.messaging.geo.GeoMessage;
+import org.infobip.mobile.messaging.geo.MobileGeo;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -155,10 +158,11 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Geo geo = Geo.createFrom(intent.getExtras());
-            Message message = Message.createFrom(intent.getExtras());
+            GeoMessage geoMessage = GeoMessage.createFrom(intent.getExtras());
+            Geo geo = geoMessage.getGeo();
+
             showToast(String.format(Locale.getDefault(), "Message: %s \n triggered for area: %f, %f",
-                    message.getBody(), geo.getTriggeringLatitude(), geo.getTriggeringLongitude()));
+                    geoMessage.getBody(), geo.getTriggeringLatitude(), geo.getTriggeringLongitude()));
         }
     };
 
@@ -193,8 +197,7 @@ public class MainActivity extends AppCompatActivity {
         MobileMessaging mobileMessaging;
         MobileMessaging.Builder builder = new MobileMessaging.Builder(getApplication())
                 .withMessageStore(SQLiteMessageStore.class)
-                .withoutStoringUserData()
-                .withGeofencing();
+                .withoutStoringUserData();
 
         boolean notificationsEnabled = getNotificationEnabledFromPreferences();
         if (!notificationsEnabled) {
@@ -225,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        initializeMobileMessaging();
+        MobileGeo.getInstance(this).activateGeofencing();
     }
 
     @Override
@@ -247,6 +250,13 @@ public class MainActivity extends AppCompatActivity {
         registerReceivers();
         registerPreferenceChangeListener();
         clearNotifications();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            String permissions[] = {Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            return;
+        }
+        MobileGeo.getInstance(this).activateGeofencing();
     }
 
     @Override
@@ -383,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
             localBroadcastManager.registerReceiver(playServicesErrorReceiver,
                     new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
             localBroadcastManager.registerReceiver(geofenceAreaEnteredReceiver,
-                    new IntentFilter(Event.GEOFENCE_AREA_ENTERED.getKey()));
+                    new IntentFilter(GeoEvent.GEOFENCE_AREA_ENTERED.getKey()));
             localBroadcastManager.registerReceiver(pushRegistrationEnabledReceiver,
                     new IntentFilter(Event.PUSH_REGISTRATION_ENABLED.getKey()));
             receiversRegistered = true;

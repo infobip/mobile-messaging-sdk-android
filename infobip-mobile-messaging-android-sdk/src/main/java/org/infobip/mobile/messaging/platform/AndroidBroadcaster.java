@@ -8,18 +8,14 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
-import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEventType;
-import org.infobip.mobile.messaging.geo.GeoReport;
+import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author sslavin
@@ -27,10 +23,6 @@ import java.util.Map;
  */
 
 public class AndroidBroadcaster implements Broadcaster {
-
-    private static Map<GeoEventType, Event> eventBroadcasts = new HashMap<GeoEventType, Event>() {{
-        put(GeoEventType.entry, Event.GEOFENCE_AREA_ENTERED);
-    }};
 
     private final Context context;
 
@@ -41,7 +33,15 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void messageReceived(@NonNull Message message) {
         Intent messageReceived = prepareIntent(Event.MESSAGE_RECEIVED);
-        messageReceived.putExtras(BundleMapper.messageToBundle(message));
+        messageReceived.putExtras(MessageBundleMapper.messageToBundle(message));
+        LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
+        context.sendBroadcast(messageReceived);
+    }
+
+    @Override
+    public void geoMessageReceived(Message message) {
+        Intent messageReceived = prepareIntent(LocalEvent.GEO_MESSAGE_RECEIVED.getKey());
+        messageReceived.putExtras(MessageBundleMapper.messageToBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
         context.sendBroadcast(messageReceived);
     }
@@ -49,35 +49,9 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void notificationTapped(Message message) {
         Intent notificationTapped = prepareIntent(Event.NOTIFICATION_TAPPED);
-        notificationTapped.putExtras(BundleMapper.messageToBundle(message));
+        notificationTapped.putExtras(MessageBundleMapper.messageToBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(notificationTapped);
         context.sendBroadcast(notificationTapped);
-    }
-
-    @Override
-    public void geoEvent(@NonNull GeoEventType event, @NonNull Message message, @NonNull Geo geo) {
-        Event broadcastEvent = eventBroadcasts.get(event);
-        if (broadcastEvent == null) {
-            return;
-        }
-
-        Intent geofenceIntent = prepareIntent(broadcastEvent);
-        geofenceIntent.putExtras(BundleMapper.geoToBundle(geo));
-        geofenceIntent.putExtras(BundleMapper.messageToBundle(message));
-        LocalBroadcastManager.getInstance(context).sendBroadcast(geofenceIntent);
-        context.sendBroadcast(geofenceIntent);
-    }
-
-    @Override
-    public void geoReported(@NonNull List<GeoReport> reports) {
-        if (reports.isEmpty()) {
-            return;
-        }
-
-        Intent geoReportsSent = prepareIntent(Event.GEOFENCE_EVENTS_REPORTED);
-        geoReportsSent.putExtras(BundleMapper.geoReportsToBundle(reports));
-        context.sendBroadcast(geoReportsSent);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(geoReportsSent);
     }
 
     @Override
@@ -116,7 +90,7 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void deliveryReported(@NonNull String...messageIds) {
+    public void deliveryReported(@NonNull String... messageIds) {
         if (messageIds.length == 0) {
             return;
         }
@@ -130,7 +104,7 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void seenStatusReported(@NonNull String...messageIds) {
+    public void seenStatusReported(@NonNull String... messageIds) {
         if (messageIds.length == 0) {
             return;
         }
@@ -146,7 +120,7 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void messagesSent(List<Message> messages) {
         Intent messagesSent = prepareIntent(Event.MESSAGES_SENT);
-        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, BundleMapper.messagesToBundles(messages));
+        messagesSent.putParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES, MessageBundleMapper.messagesToBundles(messages));
         context.sendBroadcast(messagesSent);
         LocalBroadcastManager.getInstance(context).sendBroadcast(messagesSent);
     }
@@ -168,7 +142,11 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     private Intent prepareIntent(Event event) {
-        return new Intent(event.getKey())
+        return prepareIntent(event.getKey());
+    }
+
+    private Intent prepareIntent(String event) {
+        return new Intent(event)
                 .setPackage(context.getPackageName());
     }
 }

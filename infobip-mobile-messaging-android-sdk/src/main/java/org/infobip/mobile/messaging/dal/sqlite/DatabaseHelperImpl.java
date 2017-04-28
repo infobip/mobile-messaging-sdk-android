@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.api.support.util.StringUtils;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.DatabaseObject;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;
@@ -127,7 +126,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
     @Override
     public <T extends DatabaseObject> void delete(Class<T> cls, String[] primaryKeys) {
         db().delete(getTableName(cls), getPrimaryKeyColumn(cls) +
-                " IN (" + new String(new char[primaryKeys.length-1]).replace("\0", "?,") + "?)", primaryKeys);
+                " IN (" + new String(new char[primaryKeys.length - 1]).replace("\0", "?,") + "?)", primaryKeys);
     }
 
     @Override

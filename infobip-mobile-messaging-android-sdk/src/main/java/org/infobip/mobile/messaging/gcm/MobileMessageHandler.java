@@ -29,6 +29,7 @@ public class MobileMessageHandler {
 
     /**
      * Handles GCM/FCM new push message intent
+     *
      * @param intent intent that contains new message
      */
     public void handleMessage(Context context, Intent intent) {
@@ -38,6 +39,7 @@ public class MobileMessageHandler {
 
     /**
      * Handles new push message
+     *
      * @param message new message
      */
     public void handleMessage(Context context, Message message) {
@@ -54,7 +56,6 @@ public class MobileMessageHandler {
         message.setReceivedTimestamp(Time.now());
 
         sendDeliveryReport(context, message);
-        saveMessage(context, message);
 
         MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
@@ -62,12 +63,16 @@ public class MobileMessageHandler {
         }
 
         if (!MobileMessagingCore.hasGeo(message)) {
+            saveMessage(context, message);
             broadcaster.messageReceived(message);
+        } else {
+            // not saving geo messages, just dispatch them
+            broadcaster.geoMessageReceived(message);
         }
     }
 
     private void saveMessage(Context context, Message message) {
-        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStoreForMessage(message);
+        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
         if (messageStore == null) {
             MobileMessagingLogger.d("Skipping save message: " + message.getMessageId());
             return;
@@ -77,10 +82,6 @@ public class MobileMessageHandler {
         try {
             messageStore.save(context, message);
 
-            if (MobileMessagingCore.hasGeo(message)) {
-                MobileMessagingCore.getInstance(context).setAllActiveGeoAreasMonitored(false);
-                MobileMessagingCore.getInstance(context).startGeoMonitoringIfNecessary();
-            }
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }

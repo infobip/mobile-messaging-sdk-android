@@ -1,13 +1,10 @@
 package org.infobip.mobile.messaging.dal.json;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.geo.Area;
-import org.infobip.mobile.messaging.geo.Geo;
-
-import java.util.ArrayList;
 
 /**
  * @author sslavin
@@ -29,11 +26,7 @@ public class InternalDataMapper {
         String category;
     }
 
-    private static class InternalData<VibrateValueType> extends Geo {
-
-        InternalData() {
-            super(null, null, null, null, null, null, new ArrayList<Area>(), null);
-        }
+    private static class InternalData<VibrateValueType> {
 
         Silent<VibrateValueType> silent;
     }
@@ -41,6 +34,7 @@ public class InternalDataMapper {
     /**
      * Creates internal data json based on message contents
      * </p> Note that boolean fields will be saved as String for FCM.
+     *
      * @param message a message which to create internal data for
      * @return internal data json
      */
@@ -50,6 +44,7 @@ public class InternalDataMapper {
 
     /**
      * Creates internal data json based on message contents
+     *
      * @param message a message which to create internal data for
      * @return internal data json
      */
@@ -59,12 +54,12 @@ public class InternalDataMapper {
 
     /**
      * Updates message fields based on what is set in internal data (such as geo data and silent data)
-     * @param message message to update
+     *
+     * @param message          message to update
      * @param internalDataJson json object with internal data
      */
     public static void updateMessageWithInternalData(@NonNull Message message, String internalDataJson) {
         InternalData internalData = serializer.deserialize(internalDataJson, InternalData.class);
-        message.setGeo(internalData);
 
         if (internalData == null || internalData.silent == null) {
             return;
@@ -79,6 +74,7 @@ public class InternalDataMapper {
 
     /**
      * Returns title from internal data
+     *
      * @param json internal data json
      * @return title if present or null otherwise
      */
@@ -92,6 +88,7 @@ public class InternalDataMapper {
 
     /**
      * Returns body from internal data
+     *
      * @param json internal data json
      * @return body if present or null otherwise
      */
@@ -105,6 +102,7 @@ public class InternalDataMapper {
 
     /**
      * Returns sound from internal data
+     *
      * @param json internal data json
      * @return sound if present or null otherwise
      */
@@ -118,7 +116,8 @@ public class InternalDataMapper {
 
     /**
      * Returns vibrate flag from internal data
-     * @param json internal data json
+     *
+     * @param json           internal data json
      * @param defaultVibrate value to return if no vibrate set in internal data
      * @return vibrate if present or defaultVibrate otherwise
      */
@@ -133,6 +132,7 @@ public class InternalDataMapper {
 
     /**
      * Returns category from internal data
+     *
      * @param json internal data json
      * @return category if present or null otherwise
      */
@@ -145,17 +145,21 @@ public class InternalDataMapper {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     private static <VibrateValueType> String createInternalDataForMessage(Message message) {
         InternalData<VibrateValueType> internalData = null;
-        if (message.getGeo() != null) {
-            internalData = serializer.deserialize(
-                    serializer.serialize(message.getGeo()), InternalData.class);
+
+        String internalDataJson = message.getInternalData();
+        if (internalDataJson != null) {
+            internalData = serializer.deserialize(internalDataJson, InternalData.class);
         }
 
         if (message.isSilent()) {
+
             if (internalData == null) {
                 internalData = new InternalData<>();
             }
+
             if (internalData.silent == null) {
                 internalData.silent = new Silent<>();
             }

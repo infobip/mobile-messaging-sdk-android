@@ -20,8 +20,8 @@ import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
-import org.infobip.mobile.messaging.geo.ConfigurationException;
+import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -77,7 +77,7 @@ public class NotificationHandler {
     @NonNull
     private static PendingIntent createPendingIntent(Context context, NotificationSettings notificationSettings, Message message) {
         Intent intent = new Intent(context, NotificationTapReceiver.class);
-        intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message));
+        intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
         intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
         return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
     }

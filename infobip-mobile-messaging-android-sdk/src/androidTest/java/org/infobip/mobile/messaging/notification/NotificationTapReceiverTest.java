@@ -7,7 +7,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MockActivity;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -111,7 +111,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
 
     private Intent givenIntent(Message message, int flags) {
         return new Intent(context, NotificationTapReceiver.class)
-                .putExtra(BroadcastParameter.EXTRA_MESSAGE, BundleMapper.messageToBundle(message))
+                .putExtra(BroadcastParameter.EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message))
                 .putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), flags);
     }
 }

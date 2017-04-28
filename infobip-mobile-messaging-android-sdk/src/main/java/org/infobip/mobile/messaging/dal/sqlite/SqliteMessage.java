@@ -4,10 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;
-import org.infobip.mobile.messaging.geo.Geo;
 import org.json.JSONObject;
 
 /**
@@ -35,7 +33,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getReceivedTimestamp(),
                 m.getSeenTimestamp(),
                 m.getCustomPayload(),
-                m.getGeo(),
+                m.getInternalData(),
                 m.getDestination(),
                 m.getStatus(),
                 m.getStatusMessage()
@@ -70,11 +68,11 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setReceivedTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.RECEIVED_TIMESTAMP)));
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
 
-        String json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
-        setGeo(json != null ? new JsonSerializer().deserialize(json, Geo.class) : null);
+        String internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
+        setInternalData(internalDataJson);
 
-        json = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
-        setCustomPayload(json == null ? null : new JSONObject(json));
+        internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
+        setCustomPayload(internalDataJson == null ? null : new JSONObject(internalDataJson));
 
         setDestination(cursor.getString(cursor.getColumnIndex(MessageColumns.DESTINATION)));
         String statusName = cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS));
@@ -96,7 +94,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.FROM, getFrom());
         contentValues.put(MessageColumns.RECEIVED_TIMESTAMP, getReceivedTimestamp());
         contentValues.put(MessageColumns.SEEN_TIMESTAMP, getSeenTimestamp());
-        contentValues.put(MessageColumns.INTERNAL_DATA, getGeo() != null ? new JsonSerializer().serialize(getGeo()) : null);
+        contentValues.put(MessageColumns.INTERNAL_DATA, getInternalData());
         contentValues.put(MessageColumns.CUSTOM_PAYLOAD, getCustomPayload() != null ? getCustomPayload().toString() : null);
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);

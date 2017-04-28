@@ -80,7 +80,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             Assert.assertEquals(0, map.get(id).getReceivedTimestamp());
             Assert.assertEquals(0, map.get(id).getSeenTimestamp());
             Assert.assertEquals(null, map.get(id).getCustomPayload());
-            Assert.assertEquals(null, map.get(id).getGeo());
+            Assert.assertEquals(null, map.get(id).getInternalData());
             Assert.assertEquals("SomeDestination" + i, map.get(id).getDestination());
             Assert.assertEquals(Message.Status.SUCCESS, map.get(id).getStatus());
             Assert.assertEquals("SomeStatusMessage" + i, map.get(id).getStatusMessage());

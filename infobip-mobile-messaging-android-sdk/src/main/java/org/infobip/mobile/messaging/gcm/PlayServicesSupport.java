@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.gcm;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -22,7 +23,7 @@ public class PlayServicesSupport {
     public static final int DEVICE_NOT_SUPPORTED = -1;
 
     private static Boolean isPlayServicesAvailable;
-    private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     /**
      * Check the device to make sure it has the Google Play Services APK. If

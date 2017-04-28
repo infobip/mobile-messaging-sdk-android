@@ -79,7 +79,6 @@ class RegistrationTokenHandler {
      *
      * @param gcmSenderID GCM sender ID
      * @param gcmToken    GCM token to delete
-     * @throws IOException if unable to reach the GCM PubSub service
      */
     void handleRegistrationTokenCleanup(Context context, String gcmSenderID, String gcmToken) {
         try {

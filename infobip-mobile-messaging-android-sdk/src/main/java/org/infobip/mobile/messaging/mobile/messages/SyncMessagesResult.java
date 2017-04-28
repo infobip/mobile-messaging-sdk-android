@@ -3,9 +3,7 @@ package org.infobip.mobile.messaging.mobile.messages;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
-import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONException;
@@ -62,8 +60,6 @@ class SyncMessagesResult extends UnsuccessfulResult {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Geo geo = response.getInternalData() != null ?
-                new JsonSerializer().deserialize(response.getInternalData(), Geo.class) : null;
 
         Message message = new Message(
                 response.getMessageId(),
@@ -78,7 +74,7 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 Time.now(),
                 0,
                 customPayload,
-                geo,
+                response.getInternalData(),
                 null,
                 Message.Status.UNKNOWN,
                 null

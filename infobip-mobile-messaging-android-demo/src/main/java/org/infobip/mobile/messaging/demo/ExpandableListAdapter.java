@@ -11,9 +11,9 @@ import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +76,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtListChild = (TextView) convertView
                 .findViewById(R.id.lblListItem);
 
-        txtListChild.setText(getFullMessageText(groupPosition));
+        try {
+            txtListChild.setText(getFullMessageText(groupPosition));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         txtListChild.setBackgroundColor(Color.LTGRAY);
         txtListChild.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -143,7 +147,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    private String getFullMessageText(int groupPosition) {
+    private String getFullMessageText(int groupPosition) throws JSONException {
         Message m = messages.get(groupPosition);
         if (m == null) {
             return null;
@@ -160,12 +164,12 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         text += "\nfrom: " + m.getFrom();
         text += "\nreceivedTimestamp: " + m.getReceivedTimestamp();
         text += "\nseenTimestamp: " + m.getSeenTimestamp();
-        if (m.getGeo() != null) {
-            text += "\ngeo: " + new GsonBuilder().setPrettyPrinting().create().toJson(m.getGeo());
+        if (m.getInternalData() != null) {
+            text += "\ngeo: " + new JSONObject(m.getInternalData()).toString(4);
         }
         if (m.getCustomPayload() != null) {
             try {
-                text += "\ncustomPayload: " + m.getCustomPayload().toString(1);
+                text += "\ncustomPayload: " + m.getCustomPayload().toString(4);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

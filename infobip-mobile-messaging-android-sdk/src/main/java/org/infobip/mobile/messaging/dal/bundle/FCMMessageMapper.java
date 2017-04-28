@@ -5,9 +5,7 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
-import org.infobip.mobile.messaging.geo.Geo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +20,7 @@ public class FCMMessageMapper {
 
     /**
      * De-serializes Push message from the Bundle we receive from GCM/FCM
+     *
      * @param bundle data from the intent
      * @return deserialized message
      */
@@ -46,23 +45,20 @@ public class FCMMessageMapper {
         String sound = silent ? InternalDataMapper.getInternalDataSound(internalDataJson) : bundle.getString(BundleField.SOUND2.getKey(), bundle.getString(BundleField.SOUND.getKey()));
         String category = silent ? InternalDataMapper.getInternalDataCategory(internalDataJson) : bundle.getString(BundleField.CATEGORY.getKey());
 
-        Geo geo = null;
-        try {
-            geo = internalDataJson != null ? new JsonSerializer().deserialize(internalDataJson, Geo.class) : null;
-        } catch (Exception ignored) {}
-
         String destination = bundle.getString(BundleField.DESTINATION.getKey());
         String statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
         Message.Status status = Message.Status.UNKNOWN;
         try {
             status = Message.Status.valueOf(bundle.getString(BundleField.STATUS.getKey()));
-        } catch (Exception ignored) { }
+        } catch (Exception ignored) {
+        }
 
-        return new Message(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTs, seenTs, customPayload, geo, destination, status, statusMessage);
+        return new Message(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTs, seenTs, customPayload, internalDataJson, destination, status, statusMessage);
     }
 
     /**
      * Serializes message to the same bundle as we receive from GCM/FCM
+     *
      * @param message message to serialize
      * @return bundle with message contents
      */

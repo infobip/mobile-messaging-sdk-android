@@ -1,23 +1,21 @@
 package org.infobip.mobile.messaging.util;
 
-import android.content.Context;
-import android.test.InstrumentationTestCase;
-
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 
 /**
  * @author sslavin
  * @since 29/08/16.
  */
-public class PreferenceHelperTest extends InstrumentationTestCase {
-
-    private Context context = null;
+public class PreferenceHelperTest extends MobileMessagingTestCase {
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = getInstrumentation().getContext();
     }
 
     @Test

@@ -282,7 +282,7 @@ public abstract class PreferenceHelper {
         });
     }
 
-    public static void saveStringSet(Context context, MobileMessagingProperty property, final Set<String> set) {
+    public static void saveStringSet(Context context, String key, final Set<String> set) {
         SetMutator mutator = new SetMutator() {
             @Override
             public void mutate(Set<String> innerSet) {
@@ -290,7 +290,7 @@ public abstract class PreferenceHelper {
                 innerSet.addAll(set);
             }
         };
-        editSet(context, property.getKey(), mutator);
+        editSet(context, key, mutator);
     }
 
     public static void editSet(Context context, String key, SetMutator mutator) {

@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
-import org.infobip.mobile.messaging.mobile.geo.GeoReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -31,7 +30,6 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
     private Executor executor;
 
     private SystemDataReporter systemDataReporter;
-    private GeoReporter geoReporter;
     private MessagesSynchronizer messagesSynchronizer;
     private RegistrationSynchronizer registrationSynchronizer;
     private UserDataSynchronizer userDataSynchronizer;
@@ -48,7 +46,6 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
         executor = Executors.newSingleThreadExecutor();
-        geoReporter = new GeoReporter(context, broadcaster, stats);
         systemDataReporter = new SystemDataReporter(context, stats, executor, broadcaster);
         messagesSynchronizer = new MessagesSynchronizer(context, stats, executor, broadcaster);
         registrationSynchronizer = new RegistrationSynchronizer(context, stats, executor, broadcaster);
@@ -78,7 +75,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
                 reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
-                MobileMessagingCore.isGeofencingActivated(context),
+                mobileMessagingCore.isGeofencingActivated(),
                 SoftwareInformation.areNotificationsEnabled(context));
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
@@ -86,21 +83,6 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
         }
         systemDataReporter.synchronize();
-    }
-
-    @Test
-    public void test_geo_report_retry() {
-
-        // Given
-        createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, createArea("areaId1"));
-        createReport(context, "signalingMessageId2", "campaignId2", "messageId2", true, createArea("areaId2"));
-        createReport(context, "signalingMessageId2", "campaignId2", "messageId3", true, createArea("areaId3"));
-
-        // When
-        geoReporter.synchronize();
-
-        // Then
-        Mockito.verify(broadcaster, Mockito.after(8000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
     }
 
     @Test

@@ -1,0 +1,46 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+
+    package="com.infobip.mobile.messaging.geo">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application>
+
+        <!--Service that triggers when geofence area is entered-->
+        <service
+            android:name="org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService"
+            android:enabled="false" />
+
+        <receiver
+            android:name="org.infobip.mobile.messaging.geo.BootReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="org.infobip.mobile.messaging.geo.push.PushMessageReceiver"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.GEO_MESSAGE_RECEIVED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

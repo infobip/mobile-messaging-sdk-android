@@ -80,7 +80,7 @@ idea {
 }
 
 dependencies {
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
     compile group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
     provided group: 'org.projectlombok', name: 'lombok', version: '1.16.8'

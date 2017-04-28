@@ -25,11 +25,6 @@ public class BatchReporterTest extends MobileMessagingTestCase {
         runnable = Mockito.mock(Runnable.class);
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void test_scheduleMultipleRunOne() throws Exception {
 
@@ -37,7 +32,7 @@ public class BatchReporterTest extends MobileMessagingTestCase {
             batchReporter.put(runnable);
         }
 
-        Mockito.verify(runnable, Mockito.after(500).atMost(1)).run();
+        Mockito.verify(runnable, Mockito.atMost(1)).run();
     }
 
     @Test
@@ -45,7 +40,7 @@ public class BatchReporterTest extends MobileMessagingTestCase {
 
         for (int i = 0; i < 5; i++) {
             batchReporter.put(runnable);
-            Thread.sleep(200);
+            Thread.sleep(500);
         }
 
         Mockito.verify(runnable, Mockito.times(5)).run();

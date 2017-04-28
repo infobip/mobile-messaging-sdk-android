@@ -50,7 +50,6 @@ public class FCMMessageMapperTest extends TestCase {
         assertEquals(1234L, message.getReceivedTimestamp());
         assertEquals(5678L, message.getSeenTimestamp());
         assertEquals(0, message.getCustomPayload().length());
-        assertTrue(message.getGeo() == null || message.getGeo().getAreasList() == null);
         assertEquals("SomeDestination", message.getDestination());
         assertEquals(Message.Status.SUCCESS, message.getStatus());
         assertEquals("SomeStatusMessage", message.getStatusMessage());

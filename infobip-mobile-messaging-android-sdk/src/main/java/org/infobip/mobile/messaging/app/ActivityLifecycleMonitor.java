@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+
+import org.infobip.mobile.messaging.LocalEvent;
 
 /**
  * @author sslavin
@@ -28,7 +32,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         ActivityLifecycleMonitor.foreground = foreground;
     }
 
-    private static Application getApplication(Context context) {
+    protected static Application getApplication(Context context) {
         if (context instanceof Activity) {
             return ((Activity) context).getApplication();
         } else if (context instanceof Service) {
@@ -52,6 +56,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     @Override
     public void onActivityResumed(Activity activity) {
         setForeground(true);
+        LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(LocalEvent.APPLICATION_FOREGROUND.getKey()));
     }
 
     @Override

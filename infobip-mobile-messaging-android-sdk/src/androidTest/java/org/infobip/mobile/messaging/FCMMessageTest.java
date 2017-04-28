@@ -4,12 +4,8 @@ import android.os.Bundle;
 
 import junit.framework.TestCase;
 
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
-import org.infobip.mobile.messaging.geo.Geo;
 import org.skyscreamer.jsonassert.JSONAssert;
-
-import java.util.Date;
 
 import static org.junit.Assert.assertNotEquals;
 
@@ -18,16 +14,6 @@ import static org.junit.Assert.assertNotEquals;
  * @since 30.03.2016.
  */
 public class FCMMessageTest extends TestCase {
-
-    private class GeoTest extends Geo {
-        GeoTest() {
-            super(null, null, null, null, null, null, null, null);
-        }
-
-        Date getExpiry() {
-            return super.getExpiryDate();
-        }
-    }
 
     public void test_toBundle_success() throws Exception {
 
@@ -208,47 +194,5 @@ public class FCMMessageTest extends TestCase {
         assertNotEquals("silentBody", message.getBody());
         assertNotEquals("silentSound", message.getSound());
         assertNotEquals("silentCategory", message.getCategory());
-    }
-
-    public void test_geofence_expiryTime() throws Exception {
-        String geofence =
-        "{" +
-            "\"expiryTime\":\"2016-08-06T12:20:16+03:00\"" +
-        "}";
-
-        GeoTest geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
-
-        assertNotNull(geo.getExpiry());
-        assertNotEquals(0L, geo.getExpiry().getTime());
-
-        geofence =
-        "{" +
-            "\"expiryTime\":\"2016-12-06T13:20:16+0300\"" +
-        "}";
-
-        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
-
-        assertNotNull(geo.getExpiry());
-        assertNotEquals(0L, geo.getExpiry().getTime());
-
-        geofence =
-        "{" +
-            "\"expiryTime\":\"2016-08-31T14:20:16+03\"" +
-        "}";
-
-        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
-
-        assertNotNull(geo.getExpiry());
-        assertNotEquals(0L, geo.getExpiry().getTime());
-
-        geofence =
-        "{" +
-            "\"expiryTime\":\"2016-08-31T14:20:16Z\"" +
-        "}";
-
-        geo = new JsonSerializer().deserialize(geofence, GeoTest.class);
-
-        assertNotNull(geo.getExpiry());
-        assertNotEquals(0L, geo.getExpiry().getTime());
     }
 }

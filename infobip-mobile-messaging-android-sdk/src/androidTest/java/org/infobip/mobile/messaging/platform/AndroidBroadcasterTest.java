@@ -8,10 +8,6 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.geo.Area;
-import org.infobip.mobile.messaging.geo.Geo;
-import org.infobip.mobile.messaging.geo.GeoEventType;
-import org.infobip.mobile.messaging.geo.GeoReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
@@ -59,50 +55,6 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Message messageAfter = Message.createFrom(intent.getExtras());
         assertNotSame(message, messageAfter);
         assertEquals("SomeMessageId", messageAfter.getMessageId());
-    }
-
-    @Test
-    public void test_should_send_geo_broadcast() throws Exception {
-        // Given
-        Message message = createMessage(context, "SomeMessageId", false);
-        Area area = createArea("SomeAreaId");
-        Geo geo = createGeo(1.0, 2.0, "SomeCampaignId", area);
-
-        // When
-        broadcastSender.geoEvent(GeoEventType.entry, message, geo);
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.GEOFENCE_AREA_ENTERED.getKey(), intent.getAction());
-
-        Message messageAfter = Message.createFrom(intent.getExtras());
-        assertNotSame(message, messageAfter);
-        assertEquals("SomeMessageId", messageAfter.getMessageId());
-
-        Geo geoAfter = Geo.createFrom(intent.getExtras());
-        assertNotSame(geo, geoAfter);
-        assertJEquals(geo, geoAfter);
-    }
-
-    @Test
-    public void test_should_send_geo_reports() throws Exception {
-        // Given
-        GeoReport report = createReport(context, "SomeSignalingMessageId", "SomeCampaignId", "SomeSDKMessageId", false);
-
-        // When
-        broadcastSender.geoReported(Collections.singletonList(report));
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.GEOFENCE_EVENTS_REPORTED.getKey(), intent.getAction());
-
-        List<GeoReport> reportsAfter = GeoReport.createFrom(intent.getExtras());
-        assertEquals(1, reportsAfter.size());
-        assertJEquals(report, reportsAfter.get(0));
     }
 
     @Test
@@ -269,6 +221,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertEquals("test.package.name", intentArgumentCaptor.getValue().getPackage());
     }
 
+    @Test
     public void test_should_send_notification_tapped_event() throws Exception {
         // Given
         Message message = createMessage(context, "SomeMessageId", false);
