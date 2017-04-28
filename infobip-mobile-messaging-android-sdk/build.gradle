@@ -86,7 +86,7 @@ bintray {
         repo = 'maven'
         name = project.name
         userOrg = 'infobip'
-        vcsUrl = "http://git.infobip.local/projects/MML/repos/infobip-mobile-messaging-android/browse"
+        vcsUrl = "https://git.ib-ci.com/projects/MML/repos/infobip-mobile-messaging-android/browse"
         licenses = ['Apache-2.0']
         labels = ['aar', 'android']
     }
