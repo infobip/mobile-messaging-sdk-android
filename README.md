@@ -1,5 +1,6 @@
 # Mobile Messaging SDK for Android
 
+[![Download](https://api.bintray.com/packages/infobip/maven/infobip-mobile-messaging-android-sdk/images/download.svg)](https://bintray.com/infobip/maven/infobip-mobile-messaging-android-sdk/_latestVersion)
 [![License](https://img.shields.io/github/license/infobip/mobile-messaging-sdk-android.svg?label=License)](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE)
 
 Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of [Infobip IP Messaging Platform](https://portal.infobip.com/push/). 
