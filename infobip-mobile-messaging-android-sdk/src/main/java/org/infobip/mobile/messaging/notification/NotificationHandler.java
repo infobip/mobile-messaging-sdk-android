@@ -65,7 +65,10 @@ public class NotificationHandler {
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(createPendingIntent(context, notificationSettings, message))
-                .setWhen(message.getReceivedTimestamp());
+                .setWhen(message.getReceivedTimestamp())
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(message.getBody())
+                        .setBigContentTitle(title));
 
         setNotificationSoundAndVibrate(context, notificationBuilder, message);
         setNotificationIcon(context, notificationBuilder, message);
