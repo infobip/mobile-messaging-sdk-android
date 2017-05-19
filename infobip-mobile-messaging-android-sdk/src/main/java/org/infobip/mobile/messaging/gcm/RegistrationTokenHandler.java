@@ -25,6 +25,7 @@ class RegistrationTokenHandler {
         try {
             InstanceID instanceID = InstanceID.getInstance(context);
             String token = instanceID.getToken(MobileMessagingCore.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            MobileMessagingLogger.d(token);
             new AndroidBroadcaster(context).registrationAcquired(token);
             sendRegistrationToServer(context, token);
             subscribeTopics(context, token);

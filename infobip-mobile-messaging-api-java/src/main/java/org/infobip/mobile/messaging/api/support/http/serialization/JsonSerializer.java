@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.api.support.http.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 
 /**
  * @author mstipanov
@@ -17,5 +18,13 @@ public class JsonSerializer {
 
     public <T> String serialize(T t) {
         return gson.toJson(t);
+    }
+
+    public String getStringPropertyFromJson(String json, String property) {
+        try {
+            return new JsonParser().parse(json).getAsJsonObject().get(property).getAsString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

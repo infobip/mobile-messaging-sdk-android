@@ -33,6 +33,7 @@ public class Message implements Comparable<Message> {
     private long seenTimestamp;
     private JSONObject customPayload;
     private String internalData;
+    private String contentUrl;
 
     public enum Status {
         SUCCESS,
@@ -56,7 +57,7 @@ public class Message implements Comparable<Message> {
                    boolean vibrate, String icon, boolean silent, String category,
                    String from, long receivedTimestamp, long seenTimestamp,
                    JSONObject customPayload, String internalData,
-                   String destination, Status status, String statusMessage) {
+                   String destination, Status status, String statusMessage, String contentUrl) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -73,6 +74,7 @@ public class Message implements Comparable<Message> {
         this.destination = destination;
         this.status = status;
         this.statusMessage = statusMessage;
+        this.contentUrl = contentUrl;
     }
 
     public Message() {
@@ -84,6 +86,14 @@ public class Message implements Comparable<Message> {
     @Override
     public int compareTo(@NonNull Message another) {
         return (int) Math.signum(another.receivedTimestamp - receivedTimestamp);
+    }
+
+    public String getContentUrl() {
+        return contentUrl;
+    }
+
+    public void setContentUrl(String contentUrl) {
+        this.contentUrl = contentUrl;
     }
 
     public String getInternalData() {

@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;
 import org.json.JSONObject;
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
     public SqliteMessage() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, Status.UNKNOWN, null);
+        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, Status.UNKNOWN, null, null);
     }
 
     public SqliteMessage(Message m) {
@@ -36,7 +37,8 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getInternalData(),
                 m.getDestination(),
                 m.getStatus(),
-                m.getStatusMessage()
+                m.getStatusMessage(),
+                m.getContentUrl()
         );
     }
 
@@ -70,6 +72,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
 
         String internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
         setInternalData(internalDataJson);
+        setContentUrl(InternalDataMapper.getInternalDataContentUrl(internalDataJson));
 
         internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
         setCustomPayload(internalDataJson == null ? null : new JSONObject(internalDataJson));
@@ -99,6 +102,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);
         contentValues.put(MessageColumns.STATUS_MESSAGE, getStatusMessage());
+        contentValues.put(MessageColumns.CONTENT_URL, getContentUrl());
         return contentValues;
     }
 

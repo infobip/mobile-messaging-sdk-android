@@ -188,7 +188,8 @@ public class GeoReportHelper {
                 GeoDataMapper.geoToInternalData(geo),
                 originalMessage.getDestination(),
                 originalMessage.getStatus(),
-                originalMessage.getStatusMessage()
+                originalMessage.getStatusMessage(),
+                originalMessage.getContentUrl()
         );
     }
 

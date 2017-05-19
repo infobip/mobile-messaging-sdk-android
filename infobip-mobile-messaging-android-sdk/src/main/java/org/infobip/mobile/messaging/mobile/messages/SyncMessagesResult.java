@@ -77,7 +77,8 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 response.getInternalData(),
                 null,
                 Message.Status.UNKNOWN,
-                null
+                null,
+                InternalDataMapper.getInternalDataContentUrl(response.getInternalData())
         );
 
         InternalDataMapper.updateMessageWithInternalData(message, response.getInternalData());

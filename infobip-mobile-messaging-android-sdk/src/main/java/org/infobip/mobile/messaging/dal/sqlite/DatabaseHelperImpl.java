@@ -27,15 +27,15 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
 
     private static final Map<Class<? extends DatabaseObject>, DatabaseContract.DatabaseObject> databaseObjectsCache = new HashMap<>();
 
-    private static final int VER_2017_JAN_12 = 1; // Initial version
-    private static final int VER_2017_FEB_14 = 2; // Added separate table for geo messages
-    private static final int VER_CURRENT = VER_2017_FEB_14;
+    static final int VER_2017_JAN_12 = 1; // Initial version
+    static final int VER_2017_FEB_14 = 2; // Added separate table for geo messages
+    static final int VER_2017_MAY_15 = 3; // Added "content_url" column to messages/geo_messages table
+    private static final int VER_CURRENT = VER_2017_MAY_15;
 
     @SuppressWarnings("WeakerAccess")
     static final String DATABASE_NAME = "mm_infobip_database.db";
 
-    @SuppressWarnings("WeakerAccess")
-    static final String SQL_CREATE_MESSAGES_TABLE = "CREATE TABLE " + Tables.MESSAGES + " (" +
+    private static final String SQL_CREATE_MESSAGES_TABLE = "CREATE TABLE " + Tables.MESSAGES + " (" +
             MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
             MessageColumns.TITLE + " TEXT, " +
             MessageColumns.BODY + " TEXT, " +
@@ -53,8 +53,7 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             MessageColumns.STATUS + " TEXT," +
             MessageColumns.STATUS_MESSAGE + " TEXT)";
 
-    @SuppressWarnings("WeakerAccess")
-    static final String SQL_CREATE_GEO_MESSAGES_TABLE = "CREATE TABLE " + Tables.GEO_MESSAGES + " (" +
+    private static final String SQL_CREATE_GEO_MESSAGES_TABLE = "CREATE TABLE " + Tables.GEO_MESSAGES + " (" +
             MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
             MessageColumns.TITLE + " TEXT, " +
             MessageColumns.BODY + " TEXT, " +
@@ -71,6 +70,12 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             MessageColumns.DESTINATION + " TEXT, " +
             MessageColumns.STATUS + " TEXT," +
             MessageColumns.STATUS_MESSAGE + " TEXT)";
+
+    private static final String SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL = "ALTER TABLE "
+            + Tables.MESSAGES + " ADD COLUMN " + MessageColumns.CONTENT_URL + " TEXT;";
+
+    private static final String SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL = "ALTER TABLE "
+            + Tables.GEO_MESSAGES + " ADD COLUMN " + MessageColumns.CONTENT_URL + " TEXT;";
 
     private final Context context;
     private SQLiteDatabase sqLiteDatabase;
@@ -133,7 +138,9 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
     public void onCreate(SQLiteDatabase db) {
         db.beginTransaction();
         db.execSQL(SQL_CREATE_MESSAGES_TABLE);
+        db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL);
         db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
+        db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL);
         db.setTransactionSuccessful();
         db.endTransaction();
         SharedPreferencesMigrator.migrateMessages(context, db);
@@ -145,6 +152,12 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
         if (version <= VER_2017_JAN_12) {
             db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
             version = VER_2017_FEB_14;
+        }
+
+        if (version <= VER_2017_FEB_14) {
+            db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL);
+            db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL);
+            version = VER_2017_MAY_15;
         }
 
         if (version != VER_CURRENT) {

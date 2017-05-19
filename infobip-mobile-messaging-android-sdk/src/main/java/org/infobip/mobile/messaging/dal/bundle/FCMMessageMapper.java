@@ -44,6 +44,7 @@ public class FCMMessageMapper {
         String body = silent ? InternalDataMapper.getInternalDataBody(internalDataJson) : bundle.getString(BundleField.BODY.getKey());
         String sound = silent ? InternalDataMapper.getInternalDataSound(internalDataJson) : bundle.getString(BundleField.SOUND2.getKey(), bundle.getString(BundleField.SOUND.getKey()));
         String category = silent ? InternalDataMapper.getInternalDataCategory(internalDataJson) : bundle.getString(BundleField.CATEGORY.getKey());
+        String contentUrl = InternalDataMapper.getInternalDataContentUrl(internalDataJson);
 
         String destination = bundle.getString(BundleField.DESTINATION.getKey());
         String statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
@@ -53,7 +54,7 @@ public class FCMMessageMapper {
         } catch (Exception ignored) {
         }
 
-        return new Message(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTs, seenTs, customPayload, internalDataJson, destination, status, statusMessage);
+        return new Message(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTs, seenTs, customPayload, internalDataJson, destination, status, statusMessage, contentUrl);
     }
 
     /**

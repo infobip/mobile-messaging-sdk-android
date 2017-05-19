@@ -57,17 +57,17 @@ public class MobileMessageHandler {
 
         sendDeliveryReport(context, message);
 
-        MobileMessagingLogger.d("Message is silent: " + message.isSilent());
-        if (!message.isSilent()) {
-            NotificationHandler.displayNotification(context, message);
-        }
-
         if (!MobileMessagingCore.hasGeo(message)) {
             saveMessage(context, message);
             broadcaster.messageReceived(message);
         } else {
             // not saving geo messages, just dispatch them
             broadcaster.geoMessageReceived(message);
+        }
+
+        MobileMessagingLogger.d("Message is silent: " + message.isSilent());
+        if (!message.isSilent()) {
+            NotificationHandler.displayNotification(context, message);
         }
     }
 

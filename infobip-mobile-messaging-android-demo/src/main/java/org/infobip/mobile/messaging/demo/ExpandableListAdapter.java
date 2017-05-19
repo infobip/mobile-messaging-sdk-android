@@ -114,8 +114,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
+    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         Message message = getGroup(groupPosition);
         String headerTitle = message.getBody(); //TODO trim to some max char count
         if (convertView == null) {
@@ -165,7 +164,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         text += "\nreceivedTimestamp: " + m.getReceivedTimestamp();
         text += "\nseenTimestamp: " + m.getSeenTimestamp();
         if (m.getInternalData() != null) {
-            text += "\ngeo: " + new JSONObject(m.getInternalData()).toString(4);
+            text += "\ninternalData: " + new JSONObject(m.getInternalData()).toString(4);
         }
         if (m.getCustomPayload() != null) {
             try {
@@ -177,6 +176,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         text += "\ndestination: " + m.getDestination();
         text += "\nstatus: " + m.getStatus();
         text += "\nstatusMessage: " + m.getStatusMessage();
+        text += "\ncontentUrl: " + m.getContentUrl();
 
         return text;
     }

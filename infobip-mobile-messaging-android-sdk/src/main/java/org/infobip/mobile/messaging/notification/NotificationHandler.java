@@ -7,13 +7,18 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
@@ -21,10 +26,12 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
-import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Random;
 
 /**
@@ -66,14 +73,49 @@ public class NotificationHandler {
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(createPendingIntent(context, notificationSettings, message))
                 .setWhen(message.getReceivedTimestamp())
-                .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText(message.getBody())
-                        .setBigContentTitle(title));
+                .setStyle(notificationStyle(message, title));
 
         setNotificationSoundAndVibrate(context, notificationBuilder, message);
         setNotificationIcon(context, notificationBuilder, message);
 
         return notificationBuilder;
+    }
+
+    @NonNull
+    private static NotificationCompat.Style notificationStyle(Message message, String title) {
+        String contentUrl = message.getContentUrl();
+        Bitmap notificationPicture = fetchNotificationPicture(contentUrl);
+
+        if (notificationPicture != null) {
+            return new NotificationCompat.BigPictureStyle()
+                    .bigPicture(notificationPicture)
+                    .setBigContentTitle(title)
+                    .setSummaryText(message.getBody());
+        }
+
+        return new NotificationCompat.BigTextStyle()
+                .bigText(message.getBody())
+                .setBigContentTitle(title);
+    }
+
+    @Nullable
+    private static Bitmap fetchNotificationPicture(String contentUrl) {
+        if (contentUrl == null) return null;
+
+        try {
+            URL url = new URL(contentUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap bitmap = BitmapFactory.decodeStream(input);
+            input.close();
+            return bitmap;
+
+        } catch (Exception e) {
+            MobileMessagingLogger.e(e.getMessage());
+            return null;
+        }
     }
 
     @SuppressWarnings("WrongConstant")

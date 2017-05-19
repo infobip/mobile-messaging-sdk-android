@@ -118,6 +118,12 @@ public interface DatabaseContract {
          *  [TEXT]
          */
         String STATUS_MESSAGE = "status_message";
+
+        /**
+         * url of media content
+         *  [TEXT]
+         */
+        String CONTENT_URL = "content_url";
     }
 
     interface DatabaseObject {

@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
+import com.google.gson.JsonObject;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
@@ -35,6 +37,10 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         UUID uuid = UUID.randomUUID();
         int numberOfMessages = 100;
 
+        JsonObject internalData = new JsonObject();
+        internalData.addProperty("contentUrl", "http://www.some-content.com.ru.hr");
+        internalData.add("silent", null);
+
         for (int i = 0; i < numberOfMessages; i++) {
             sharedPreferencesMessageStore.save(context, new Message(
                     i + uuid.toString(),
@@ -49,10 +55,11 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     0,
                     0,
                     null,
-                    null,
+                    internalData.toString(),
                     "SomeDestination" + i,
                     Message.Status.SUCCESS,
-                    "SomeStatusMessage" + i
+                    "SomeStatusMessage" + i,
+                    "http://www.some-content.com.ru.hr"
             ));
         }
 
@@ -80,10 +87,11 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             Assert.assertEquals(0, map.get(id).getReceivedTimestamp());
             Assert.assertEquals(0, map.get(id).getSeenTimestamp());
             Assert.assertEquals(null, map.get(id).getCustomPayload());
-            Assert.assertEquals(null, map.get(id).getInternalData());
+            Assert.assertEquals(internalData.toString(), map.get(id).getInternalData());
             Assert.assertEquals("SomeDestination" + i, map.get(id).getDestination());
             Assert.assertEquals(Message.Status.SUCCESS, map.get(id).getStatus());
             Assert.assertEquals("SomeStatusMessage" + i, map.get(id).getStatusMessage());
+            Assert.assertEquals("http://www.some-content.com.ru.hr", map.get(id).getContentUrl());
         }
     }
 }

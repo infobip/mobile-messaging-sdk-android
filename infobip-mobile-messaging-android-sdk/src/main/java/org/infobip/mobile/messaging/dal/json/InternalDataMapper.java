@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 public class InternalDataMapper {
 
     private static final JsonSerializer serializer = new JsonSerializer();
+    private static final String KEY_CONTENT_URL = "contentUrl";
 
     /**
      * @param <VibrateValueType> vibrate comes as String from FCM and as Boolean from Infobip Services
@@ -27,7 +28,7 @@ public class InternalDataMapper {
     }
 
     private static class InternalData<VibrateValueType> {
-
+        String contentUrl;
         Silent<VibrateValueType> silent;
     }
 
@@ -139,6 +140,20 @@ public class InternalDataMapper {
     public static String getInternalDataCategory(String json) {
         try {
             return new JsonSerializer().deserialize(json, InternalData.class).silent.category;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns content url from internal data
+     *
+     * @param json internal data json
+     * @return content url if present or null otherwise
+     */
+    public static String getInternalDataContentUrl(String json) {
+        try {
+            return new JsonSerializer().getStringPropertyFromJson(json, KEY_CONTENT_URL);
         } catch (Exception e) {
             return null;
         }
