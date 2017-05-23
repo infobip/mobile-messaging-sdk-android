@@ -1,14 +1,17 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.UUID;
 public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
 
     private SharedPreferencesMessageStore sharedPreferencesMessageStore;
+    private JsonSerializer jsonSerializer = new JsonSerializer();
 
     @Override
     public void setUp() throws Exception {
@@ -37,8 +41,14 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         UUID uuid = UUID.randomUUID();
         int numberOfMessages = 100;
 
+        JsonObject attachment = new JsonObject();
+        attachment.addProperty("url", "http://www.some-content.com.ru.hr");
+
+        JsonArray attachments = new JsonArray();
+        attachments.add(attachment);
+
         JsonObject internalData = new JsonObject();
-        internalData.addProperty("contentUrl", "http://www.some-content.com.ru.hr");
+        internalData.add("atts", attachments);
         internalData.add("silent", null);
 
         for (int i = 0; i < numberOfMessages; i++) {
@@ -87,7 +97,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             Assert.assertEquals(0, map.get(id).getReceivedTimestamp());
             Assert.assertEquals(0, map.get(id).getSeenTimestamp());
             Assert.assertEquals(null, map.get(id).getCustomPayload());
-            Assert.assertEquals(internalData.toString(), map.get(id).getInternalData());
+            JSONAssert.assertEquals(internalData.toString(), map.get(id).getInternalData(), false);
             Assert.assertEquals("SomeDestination" + i, map.get(id).getDestination());
             Assert.assertEquals(Message.Status.SUCCESS, map.get(id).getStatus());
             Assert.assertEquals("SomeStatusMessage" + i, map.get(id).getStatusMessage());

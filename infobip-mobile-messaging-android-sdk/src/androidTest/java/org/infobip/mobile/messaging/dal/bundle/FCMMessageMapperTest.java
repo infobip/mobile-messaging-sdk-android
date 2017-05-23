@@ -1,19 +1,62 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.dal.bundle;
 
 import android.os.Bundle;
 
 import junit.framework.TestCase;
 
-import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
+import org.infobip.mobile.messaging.Message;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import static org.junit.Assert.assertNotEquals;
 
 /**
- * @author mstipanov
- * @since 30.03.2016.
+ * @author sslavin
+ * @since 29/12/2016.
  */
-public class FCMMessageTest extends TestCase {
+
+public class FCMMessageMapperTest extends TestCase {
+
+    public void test_message_should_be_possible_to_construct_message_from_bundle() throws Exception {
+        // Given
+        Bundle bundle = new Bundle();
+        bundle.putString("gcm.notification.messageId", "SomeMessageId");
+        bundle.putString("gcm.notification.title", "SomeMessageTitle");
+        bundle.putString("gcm.notification.body", "SomeMessageBody");
+        bundle.putString("gcm.notification.sound", "SomeMessageSound");
+        bundle.putString("gcm.notification.sound2", "SomeMessageSound");
+        bundle.putString("gcm.notification.vibrate", "true");
+        bundle.putString("gcm.notification.icon", "SomeMessageIcon");
+        bundle.putString("gcm.notification.silent", "false");
+        bundle.putString("gcm.notification.category", "SomeMessageCategory");
+        bundle.putString("from", "SomeMessageFrom");
+        bundle.putLong("received_timestamp", 1234L);
+        bundle.putLong("seen_timestamp", 5678L);
+        bundle.putString("internalData", "{}");
+        bundle.putString("customPayload", "{}");
+        bundle.putString("destination", "SomeDestination");
+        bundle.putString("status", "SUCCESS");
+        bundle.putString("status_message", "SomeStatusMessage");
+
+        // When
+        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+
+        // Then
+        assertEquals("SomeMessageId", message.getMessageId());
+        assertEquals("SomeMessageTitle", message.getTitle());
+        assertEquals("SomeMessageBody", message.getBody());
+        assertEquals("SomeMessageSound", message.getSound());
+        assertEquals(true, message.isVibrate());
+        assertEquals("SomeMessageIcon", message.getIcon());
+        assertEquals(false, message.isSilent());
+        assertEquals("SomeMessageCategory", message.getCategory());
+        assertEquals("SomeMessageFrom", message.getFrom());
+        assertEquals(1234L, message.getReceivedTimestamp());
+        assertEquals(5678L, message.getSeenTimestamp());
+        assertEquals(0, message.getCustomPayload().length());
+        assertEquals("SomeDestination", message.getDestination());
+        assertEquals(Message.Status.SUCCESS, message.getStatus());
+        assertEquals("SomeStatusMessage", message.getStatusMessage());
+    }
 
     public void test_toBundle_success() throws Exception {
 
@@ -50,11 +93,11 @@ public class FCMMessageTest extends TestCase {
 
     public void test_customData() throws Exception {
         String customPayload =
-        "{" +
-            "\"key1\":\"value1\"," +
-            "\"key2\":\"value2\"," +
-            "\"key3\":\"value3\"" +
-        "}";
+                "{" +
+                        "\"key1\":\"value1\"," +
+                        "\"key2\":\"value2\"," +
+                        "\"key3\":\"value3\"" +
+                        "}";
 
         Bundle bundle = new Bundle();
         bundle.putString("customPayload", customPayload);
@@ -67,11 +110,11 @@ public class FCMMessageTest extends TestCase {
     public void test_customDataWithGcmKeys() throws Exception {
 
         String customPayload =
-        "{" +
-            "\"key1\":\"value1\"," +
-            "\"key2\":\"value2\"," +
-            "\"key3\":\"value3\"" +
-        "}";
+                "{" +
+                        "\"key1\":\"value1\"," +
+                        "\"key2\":\"value2\"," +
+                        "\"key3\":\"value3\"" +
+                        "}";
 
         Bundle bundle = new Bundle();
         bundle.putString("customPayload", customPayload);
@@ -91,15 +134,15 @@ public class FCMMessageTest extends TestCase {
     public void test_silentMessage_fromJson_withSilentData() throws Exception {
 
         String internalData =
-        "{" +
-            "\"silent\":" +
-            "{" +
-                "\"title\":\"silentTitle\"," +
-                "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"," +
-                "\"category\":\"silentCategory\"" +
-            "}" +
-        "}";
+                "{" +
+                        "\"silent\":" +
+                        "{" +
+                        "\"title\":\"silentTitle\"," +
+                        "\"body\":\"silentBody\"," +
+                        "\"sound\":\"silentSound\"," +
+                        "\"category\":\"silentCategory\"" +
+                        "}" +
+                        "}";
 
         Bundle bundle = new Bundle();
         bundle.putString("gcm.notification.e", "1");
@@ -139,15 +182,15 @@ public class FCMMessageTest extends TestCase {
     public void test_normalMessage_fromJson_withNormalData() throws Exception {
 
         String internalData =
-        "{" +
-            "\"silent\":" +
-            "{" +
-                "\"title\":\"silentTitle\"," +
-                "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"," +
-                "\"category\":\"silentCategory\"" +
-            "}" +
-        "}";
+                "{" +
+                        "\"silent\":" +
+                        "{" +
+                        "\"title\":\"silentTitle\"," +
+                        "\"body\":\"silentBody\"," +
+                        "\"sound\":\"silentSound\"," +
+                        "\"category\":\"silentCategory\"" +
+                        "}" +
+                        "}";
 
         Bundle bundle = new Bundle();
         bundle.putString("gcm.notification.e", "1");
@@ -171,15 +214,15 @@ public class FCMMessageTest extends TestCase {
     public void test_normalMessage_fromJson_withoutNormalData() throws Exception {
 
         String internalData =
-        "{" +
-            "\"silent\":" +
-            "{" +
-                "\"title\":\"silentTitle\"," +
-                "\"body\":\"silentBody\"," +
-                "\"sound\":\"silentSound\"," +
-                "\"category\":\"silentCategory\"" +
-            "}" +
-        "}";
+                "{" +
+                        "\"silent\":" +
+                        "{" +
+                        "\"title\":\"silentTitle\"," +
+                        "\"body\":\"silentBody\"," +
+                        "\"sound\":\"silentSound\"," +
+                        "\"category\":\"silentCategory\"" +
+                        "}" +
+                        "}";
 
         Bundle bundle = new Bundle();
         bundle.putString("gcm.notification.e", "1");
@@ -194,5 +237,49 @@ public class FCMMessageTest extends TestCase {
         assertNotEquals("silentBody", message.getBody());
         assertNotEquals("silentSound", message.getSound());
         assertNotEquals("silentCategory", message.getCategory());
+    }
+
+    public void test_bundleWithAttachments_intoMessageWithContentUrl() throws Exception {
+
+        String internalData =
+                "{" +
+                        "\"atts\" : [{" +
+                            "\"url\":\"someUrl\"" +
+                        "}]" +
+                        "}";
+
+        Bundle bundle = new Bundle();
+        bundle.putString("internalData", internalData);
+
+        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+
+        assertEquals("someUrl", message.getContentUrl());
+    }
+
+    public void test_firstAttachment_shouldMapIntoContentUrl_whenMultipleAttachments() throws Exception {
+
+        String internalData =
+                "{" +
+                    "\"atts\" : [" +
+                        "{" +
+                            "\"url\":\"someUrl1\"" +
+                        "}," +
+                        "{" +
+                            "\"url\":\"someUrl2\"," +
+                            "\"t\":\"someType2\"" +
+                        "}," +
+                        "{" +
+                            "\"url\":\"someUrl3\"," +
+                            "\"t\":\"someType3\"" +
+                        "}," +
+                    "]" +
+                "}";
+
+        Bundle bundle = new Bundle();
+        bundle.putString("internalData", internalData);
+
+        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+
+        assertEquals("someUrl1", message.getContentUrl());
     }
 }

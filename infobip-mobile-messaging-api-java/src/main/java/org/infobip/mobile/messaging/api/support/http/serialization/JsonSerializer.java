@@ -19,12 +19,4 @@ public class JsonSerializer {
     public <T> String serialize(T t) {
         return gson.toJson(t);
     }
-
-    public String getStringPropertyFromJson(String json, String property) {
-        try {
-            return new JsonParser().parse(json).getAsJsonObject().get(property).getAsString();
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
