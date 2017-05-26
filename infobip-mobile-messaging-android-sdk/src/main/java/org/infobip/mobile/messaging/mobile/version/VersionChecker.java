@@ -50,7 +50,7 @@ public class VersionChecker extends RetryableSynchronizer {
                     return;
                 }
 
-                String current = SoftwareInformation.getLibraryVersion();
+                String current = SoftwareInformation.getSDKVersion();
                 if (shouldUpdate(versionCheckResult.getVersion(), current)) {
                     MobileMessagingLogger.w(TAG, "Your library version is outdated, find latest release " + versionCheckResult.getVersion() +
                             " here: " + versionCheckResult.getUpdateUrl());

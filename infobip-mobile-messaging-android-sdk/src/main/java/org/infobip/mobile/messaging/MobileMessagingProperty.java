@@ -60,7 +60,9 @@ public enum MobileMessagingProperty {
     EXTRA_INTENT_FLAGS("org.infobip.mobile.messaging.infobip.EXTRA_INTENT_FLAGS"),
     EXTRA_CALLBACK_ACTIVITY("org.infobip.mobile.messaging.infobip.EXTRA_CALLBACK_ACTIVITY"),
 
-    GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false);
+    GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false),
+
+    SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX");
 
     private final String key;
     private final Object defaultValue;

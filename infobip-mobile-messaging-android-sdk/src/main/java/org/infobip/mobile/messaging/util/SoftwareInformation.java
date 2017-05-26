@@ -8,6 +8,7 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.BuildConfig;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -19,6 +20,8 @@ public class SoftwareInformation {
     private static String appVersion = null;
     private static String appName = null;
     private static Integer appIconResourceId = null;
+    private static String sdkVersionWithPostfixForSystemData = null;
+    private static String sdkVersionWithPostfixForUserAgent = null;
     private static NotificationManagerCompat notificationManagerCompat = null;
 
     public static String getAppVersion(Context context) {
@@ -65,7 +68,33 @@ public class SoftwareInformation {
         return appIconResourceId != null ? appIconResourceId : 0;
     }
 
-    public static String getLibraryVersion() {
+    public static String getSDKVersionWithPostfixForSystemData(Context context) {
+        if (sdkVersionWithPostfixForSystemData != null) {
+            return sdkVersionWithPostfixForSystemData;
+        }
+
+        sdkVersionWithPostfixForSystemData = getSDKVersion();
+        String versionPostfix = PreferenceHelper.findString(context, MobileMessagingProperty.SYSTEM_DATA_VERSION_POSTFIX);
+        if (versionPostfix != null) {
+            sdkVersionWithPostfixForSystemData += " (" + versionPostfix + ")";
+        }
+        return sdkVersionWithPostfixForSystemData;
+    }
+
+    public static String getSDKVersionWithPostfixForUserAgent(Context context) {
+        if (sdkVersionWithPostfixForUserAgent != null) {
+            return sdkVersionWithPostfixForUserAgent;
+        }
+
+        sdkVersionWithPostfixForUserAgent = getSDKVersion();
+        String versionPostfix = PreferenceHelper.findString(context, MobileMessagingProperty.SYSTEM_DATA_VERSION_POSTFIX);
+        if (versionPostfix != null) {
+            sdkVersionWithPostfixForUserAgent += "-" + versionPostfix.replace(" ", "-");
+        }
+        return sdkVersionWithPostfixForUserAgent;
+    }
+
+    public static String getSDKVersion() {
         return BuildConfig.VERSION_NAME;
     }
 

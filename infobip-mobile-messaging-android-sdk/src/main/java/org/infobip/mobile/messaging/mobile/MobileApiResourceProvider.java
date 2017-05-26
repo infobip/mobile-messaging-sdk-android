@@ -146,7 +146,7 @@ public enum MobileApiResourceProvider {
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
         properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
-        properties.put("library.version", SoftwareInformation.getLibraryVersion());
+        properties.put("library.version", SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context));
 
         generator = new Generator.Builder().
                 withBaseUrl(MobileMessagingCore.getInstance(context).getApiUri()).

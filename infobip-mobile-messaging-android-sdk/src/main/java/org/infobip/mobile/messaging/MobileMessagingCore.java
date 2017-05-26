@@ -658,7 +658,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
         boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
 
-        SystemData data = new SystemData(SoftwareInformation.getLibraryVersion(),
+        SystemData data = new SystemData(SoftwareInformation.getSDKVersionWithPostfixForSystemData(context),
                 reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
                 reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
