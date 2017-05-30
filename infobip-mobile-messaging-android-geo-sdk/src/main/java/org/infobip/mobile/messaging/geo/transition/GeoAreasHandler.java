@@ -16,6 +16,8 @@ import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReportHelper;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.report.GeoReportingResult;
+import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.Arrays;
@@ -38,9 +40,9 @@ public class GeoAreasHandler {
     private final GeofencingHelper geofencingHelper;
     private MobileMessagingCore mobileMessagingCore;
 
-    GeoAreasHandler(Context context, GeoBroadcaster broadcaster) {
-        this(context, new GeoNotificationHelper(context, broadcaster),
-                new GeoReporter(context, broadcaster, MobileMessagingCore.getInstance(context).getStats()),
+    GeoAreasHandler(Context context, GeoBroadcaster geoBroadcaster) {
+        this(context, new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), new NotificationHandlerImpl(context)),
+                new GeoReporter(context, geoBroadcaster, MobileMessagingCore.getInstance(context).getStats()),
                 new GeofencingHelper(context));
     }
 

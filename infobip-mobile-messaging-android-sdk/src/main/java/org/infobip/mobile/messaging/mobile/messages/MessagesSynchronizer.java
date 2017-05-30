@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
 import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -24,10 +25,10 @@ public class MessagesSynchronizer extends RetryableSynchronizer {
     private final Broadcaster broadcaster;
     private final MobileMessageHandler mobileMessageHandler;
 
-    public MessagesSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
+    public MessagesSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster, NotificationHandler notificationHandler) {
         super(context, stats, executor);
         this.broadcaster = broadcaster;
-        this.mobileMessageHandler = new MobileMessageHandler(broadcaster);
+        this.mobileMessageHandler = new MobileMessageHandler(broadcaster, notificationHandler);
     }
 
     @Override

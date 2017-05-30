@@ -28,7 +28,7 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, messageBroadcaster);
+        geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, messageBroadcaster, notificationHandler);
         geoMessageArgumentCaptor = ArgumentCaptor.forClass(GeoMessage.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
         geoEventTypeArgumentCaptor = ArgumentCaptor.forClass(GeoEventType.class);

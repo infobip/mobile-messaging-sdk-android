@@ -47,7 +47,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
 
         executor = Executors.newSingleThreadExecutor();
         systemDataReporter = new SystemDataReporter(context, stats, executor, broadcaster);
-        messagesSynchronizer = new MessagesSynchronizer(context, stats, executor, broadcaster);
+        messagesSynchronizer = new MessagesSynchronizer(context, stats, executor, broadcaster, notificationHandler);
         registrationSynchronizer = new RegistrationSynchronizer(context, stats, executor, broadcaster);
         userDataSynchronizer = new UserDataSynchronizer(context, mobileMessagingCore, executor, broadcaster);
 

@@ -23,6 +23,7 @@ import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.storage.TestMessageStore;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.platform.TimeProvider;
@@ -52,6 +53,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected TestTimeProvider time;
     protected MobileMessagingCore mobileMessagingCore;
     protected MobileMessaging mobileMessaging;
+    protected NotificationHandler notificationHandler;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -100,6 +102,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         time = new TestTimeProvider();
         Time.reset(time);
 
+        notificationHandler = Mockito.mock(NotificationHandler.class);
         messageBroadcaster = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
         mobileMessaging = mobileMessagingCore;

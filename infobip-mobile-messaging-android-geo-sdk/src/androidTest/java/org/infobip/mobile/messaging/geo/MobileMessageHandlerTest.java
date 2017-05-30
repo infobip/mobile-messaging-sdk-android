@@ -4,7 +4,6 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
-import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
 import org.infobip.mobile.messaging.geo.push.PushMessageHandler;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
@@ -40,7 +39,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
-        mobileMessageHandler = new MobileMessageHandler(messageBroadcaster);
+        mobileMessageHandler = new MobileMessageHandler(messageBroadcaster, notificationHandler);
         pushMessageHandler = new PushMessageHandler();
         commonStore = mobileMessaging.getMessageStore();
     }

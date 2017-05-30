@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.platform.TimeProvider;
@@ -46,6 +47,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected SqliteDatabaseProvider databaseProvider;
     protected Broadcaster broadcaster;
     protected TestTimeProvider time;
+    protected NotificationHandler notificationHandler;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -128,6 +130,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
+        notificationHandler = Mockito.mock(NotificationHandler.class);
         broadcaster = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster);
         mobileMessaging = mobileMessagingCore;

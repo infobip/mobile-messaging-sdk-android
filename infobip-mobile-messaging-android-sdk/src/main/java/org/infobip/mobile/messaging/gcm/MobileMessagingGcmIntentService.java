@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 /**
@@ -182,7 +183,7 @@ public class MobileMessagingGcmIntentService extends IntentService {
         }
 
         if (mobileMessageHandler == null) {
-            mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(this));
+            mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(this), new NotificationHandlerImpl(this));
         }
 
         switch (action) {

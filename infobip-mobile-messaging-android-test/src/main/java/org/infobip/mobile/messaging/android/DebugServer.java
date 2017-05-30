@@ -24,6 +24,7 @@ public class DebugServer extends NanoHTTPD {
     private String txt;
     private Method requestMethod;
     private String uri;
+    private InputStream inputStream;
 
     public DebugServer() {
         super(0);
@@ -39,6 +40,9 @@ public class DebugServer extends NanoHTTPD {
         headers = session.getHeaders();
         bodies.add(new Pair<String, String>(session.getUri(), readBody(session)));
 
+        if (inputStream != null) {
+            return new Response(status, mimeType, inputStream);
+        }
         return new Response(status, mimeType, txt);
     }
 
@@ -59,11 +63,19 @@ public class DebugServer extends NanoHTTPD {
         return null;
     }
 
+    public void respondWith(Response.Status status, String mimeType, InputStream inputStream) {
+        this.txt = null;
+        this.status = status;
+        this.mimeType = mimeType;
+        this.inputStream = inputStream;
+    }
+
     public void respondWith(Response.Status status, String json) {
         this.respondWith(status, "application/json", json);
     }
 
     public void respondWith(Response.Status status, String mimeType, String txt) {
+        this.inputStream = null;
         this.status = status;
         this.mimeType = mimeType;
         this.txt = txt;

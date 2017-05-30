@@ -21,10 +21,12 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class MobileMessageHandler {
 
-    private Broadcaster broadcaster;
+    private final Broadcaster broadcaster;
+    private final NotificationHandler notificationHandler;
 
-    public MobileMessageHandler(Broadcaster broadcaster) {
+    public MobileMessageHandler(Broadcaster broadcaster, NotificationHandler notificationHandler) {
         this.broadcaster = broadcaster;
+        this.notificationHandler = notificationHandler;
     }
 
     /**
@@ -67,7 +69,7 @@ public class MobileMessageHandler {
 
         MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
-            NotificationHandler.displayNotification(context, message);
+            notificationHandler.displayNotification(message);
         }
     }
 

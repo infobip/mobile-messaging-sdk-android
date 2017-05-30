@@ -50,7 +50,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         registrationSynchronizer = new RegistrationSynchronizer(context, stats, taskExecutor, messageBroadcaster);
         seenStatusReporter = new SeenStatusReporter(context, stats, taskExecutor, messageBroadcaster);
         geoReporter = new GeoReporter(context, geoBroadcaster, mobileMessagingCore.getStats());
-        messagesSynchronizer = new MessagesSynchronizer(context, stats, taskExecutor, messageBroadcaster);
+        messagesSynchronizer = new MessagesSynchronizer(context, stats, taskExecutor, messageBroadcaster, notificationHandler);
 
         captor = ArgumentCaptor.forClass(Boolean.class);
     }

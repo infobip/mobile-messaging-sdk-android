@@ -28,7 +28,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
 
         enableMessageStoreForReceivedMessages();
 
-        handler = new MobileMessageHandler(broadcaster);
+        handler = new MobileMessageHandler(broadcaster, notificationHandler);
         commonStore = MobileMessaging.getInstance(context).getMessageStore();
     }
 

@@ -18,6 +18,7 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
@@ -84,7 +85,7 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.messageSender = new MessageSender(broadcaster);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster, new NotificationHandlerImpl(context));
         this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.userDataSynchronizer = new UserDataSynchronizer(context, this, registrationAlignedExecutor, broadcaster);
         this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
