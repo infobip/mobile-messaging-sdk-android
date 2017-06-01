@@ -38,7 +38,7 @@ public class DebugServer extends NanoHTTPD {
         uri = session.getUri();
         queryParameters = session.getParms();
         headers = session.getHeaders();
-        bodies.add(new Pair<String, String>(session.getUri(), readBody(session)));
+        bodies.add(new Pair<>(session.getUri(), readBody(session)));
 
         if (inputStream != null) {
             return new Response(status, mimeType, inputStream);
@@ -111,6 +111,16 @@ public class DebugServer extends NanoHTTPD {
             }
         }
         return null;
+    }
+
+    public List<String> getBodiesForUri(String uri) {
+        List<String> filteredBodies = new ArrayList<>();
+        for (Pair<String, String> body : bodies) {
+            if (body.first.toLowerCase().contains(uri.toLowerCase())) {
+                filteredBodies.add(body.second);
+            }
+        }
+        return filteredBodies;
     }
 
     public String getHeader(String headerName) {

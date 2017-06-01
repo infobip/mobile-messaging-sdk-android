@@ -33,7 +33,7 @@ public class MessagesSynchronizer extends RetryableSynchronizer {
 
     @Override
     public void synchronize() {
-        new SyncMessagesTask(context) {
+        new SyncMessagesTask(context, broadcaster) {
             @Override
             protected void onPostExecute(SyncMessagesResult syncMessagesResult) {
                 if (syncMessagesResult.hasError()) {

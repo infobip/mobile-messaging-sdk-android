@@ -9,6 +9,7 @@ import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -20,9 +21,11 @@ import java.util.ArrayList;
 class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
 
     private final Context context;
+    private final Broadcaster broadcaster;
 
-    SyncMessagesTask(Context context) {
+    SyncMessagesTask(Context context, Broadcaster broadcaster) {
         this.context = context;
+        this.broadcaster = broadcaster;
     }
 
     @Override
@@ -33,16 +36,17 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
             return new SyncMessagesResult(new SyncMessagesResponse(new ArrayList<MessageResponse>()));
         }
 
-        try {
-            String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
-            String[] unreportedMessageIds = mobileMessagingCore.getUnreportedMessageIds();
+        String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
+        String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
 
+        try {
             SyncMessagesBody syncMessagesBody = new SyncMessagesBody(messageIds, unreportedMessageIds);
             SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(syncMessagesBody);
-            mobileMessagingCore.removeUnreportedMessageIds(unreportedMessageIds);
+            broadcaster.deliveryReported(messageIds);
             return new SyncMessagesResult(syncMessagesResponse);
 
         } catch (Exception e) {
+            mobileMessagingCore.addUnreportedMessageIds(unreportedMessageIds);
             mobileMessagingCore.setLastHttpException(e);
             MobileMessagingLogger.e("Error syncing messages!", e);
             cancel(true);

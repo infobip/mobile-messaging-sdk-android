@@ -8,8 +8,10 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -207,6 +209,18 @@ public abstract class PreferenceHelper {
             jsonArray.put(aValue);
         }
         sharedPreferences.edit().putString(key, jsonArray.toString()).apply();
+    }
+
+    public static String[] findAndRemoveStringArray(Context context, MobileMessagingProperty property) {
+        final List<String> strings = new ArrayList<>();
+        editSet(context, property.getKey(), new SetMutator() {
+            @Override
+            public void mutate(Set<String> set) {
+                strings.addAll(set);
+                set.clear();
+            }
+        });
+        return strings.toArray(new String[strings.size()]);
     }
 
     public static String[] findStringArray(Context context, MobileMessagingProperty property) {

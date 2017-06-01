@@ -28,8 +28,12 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         return foreground;
     }
 
-    private static synchronized void setForeground(boolean foreground) {
+    private static synchronized void setForeground(Context context, boolean foreground) {
+        boolean foregroundBefore = ActivityLifecycleMonitor.foreground;
         ActivityLifecycleMonitor.foreground = foreground;
+        if (!foregroundBefore && foreground) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(LocalEvent.APPLICATION_FOREGROUND.getKey()));
+        }
     }
 
     protected static Application getApplication(Context context) {
@@ -55,13 +59,12 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityResumed(Activity activity) {
-        setForeground(true);
-        LocalBroadcastManager.getInstance(activity).sendBroadcast(new Intent(LocalEvent.APPLICATION_FOREGROUND.getKey()));
+        setForeground(activity, true);
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
-        setForeground(false);
+        setForeground(activity, false);
     }
 
     @Override

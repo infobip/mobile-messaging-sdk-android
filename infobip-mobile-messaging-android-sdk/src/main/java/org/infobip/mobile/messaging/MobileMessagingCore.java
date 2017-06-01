@@ -3,7 +3,9 @@ package org.infobip.mobile.messaging;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -67,6 +69,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private final VersionChecker versionChecker;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
+    private final MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
@@ -91,6 +94,10 @@ public class MobileMessagingCore extends MobileMessaging {
         this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.versionChecker = new VersionChecker(context, stats);
         this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
+
+        LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
+                new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
     }
 
     /**
@@ -165,11 +172,11 @@ public class MobileMessagingCore extends MobileMessaging {
         return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
     }
 
-    public String[] getUnreportedMessageIds() {
-        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
+    public String[] getAndRemoveUnreportedMessageIds() {
+        return PreferenceHelper.findAndRemoveStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
 
-    private void addUnreportedMessageIds(String... messageIDs) {
+    public void addUnreportedMessageIds(String... messageIDs) {
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
@@ -209,10 +216,6 @@ public class MobileMessagingCore extends MobileMessaging {
         }
 
         return messageIdsToSync.toArray(new String[messageIdsToSync.size()]);
-    }
-
-    public void removeUnreportedMessageIds(final String... messageIDs) {
-        PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS, messageIDs);
     }
 
     public String[] getUnreportedSeenMessageIds() {

@@ -96,6 +96,5 @@ public class MobileMessageHandler {
         }
         MobileMessagingLogger.d("Sending DR: " + message.getMessageId());
         MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
-        broadcaster.deliveryReported(message.getMessageId());
     }
 }
