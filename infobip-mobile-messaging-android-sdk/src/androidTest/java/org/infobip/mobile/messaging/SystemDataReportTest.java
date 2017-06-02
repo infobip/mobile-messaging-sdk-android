@@ -45,6 +45,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         assertFalse(data.getDeviceModel().isEmpty());
         assertFalse(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
+        assertFalse(data.isDeviceSecure());
     }
 
     @Test
@@ -64,6 +65,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         assertTrue(data.getDeviceModel().isEmpty());
         assertTrue(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
+        assertFalse(data.isDeviceSecure());
     }
 
     @Test

@@ -18,8 +18,10 @@ public class SystemData {
     private String applicationVersion;
     private boolean geofencing;
     private boolean notificationsEnabled;
+    private boolean deviceSecure;
 
-    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion, boolean geofencing, boolean notificationsEnabled) {
+    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion,
+                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure) {
         this.sdkVersion = sdkVersion;
         this.osVersion = osVersion;
         this.deviceManufacturer = deviceManufacturer;
@@ -27,6 +29,7 @@ public class SystemData {
         this.applicationVersion = applicationVersion;
         this.geofencing = geofencing;
         this.notificationsEnabled = notificationsEnabled;
+        this.deviceSecure = deviceSecure;
     }
 
     public static SystemData fromJson(String json) {
@@ -65,6 +68,10 @@ public class SystemData {
         return notificationsEnabled;
     }
 
+    public boolean isDeviceSecure() {
+        return deviceSecure;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -76,6 +83,7 @@ public class SystemData {
         result = appendToHash(result, prime, applicationVersion);
         result = appendToHash(result, prime, geofencing);
         result = appendToHash(result, prime, notificationsEnabled);
+        result = appendToHash(result, prime, deviceSecure);
         return result;
     }
 
@@ -100,11 +108,13 @@ public class SystemData {
                 StringUtils.isEqual(this.deviceModel, other.deviceModel) &&
                 StringUtils.isEqual(this.applicationVersion, other.applicationVersion) &&
                 (this.geofencing == other.geofencing) &&
-                (this.notificationsEnabled == other.notificationsEnabled);
+                (this.notificationsEnabled == other.notificationsEnabled) &&
+                (this.deviceSecure == other.deviceSecure);
     }
 
     @Override
     public String toString() {
         return new JsonSerializer().serialize(this);
     }
+
 }

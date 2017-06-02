@@ -191,7 +191,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     @Test
     public void test_should_send_system_data() throws Exception {
         // Given
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true);
+        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true);
 
         // When
         broadcastSender.systemDataReported(systemData);

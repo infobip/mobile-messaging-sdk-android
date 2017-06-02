@@ -76,7 +76,8 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
                 mobileMessagingCore.isGeofencingActivated(),
-                SoftwareInformation.areNotificationsEnabled(context));
+                SoftwareInformation.areNotificationsEnabled(context),
+                DeviceInformation.isDeviceSecure(context));
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {

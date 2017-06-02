@@ -127,6 +127,7 @@ public class MobileApiDataTest {
         systemDataReport.setApplicationVersion("3.4.5.TEST");
         systemDataReport.setGeofencing(false);
         systemDataReport.setNotificationsEnabled(true);
+        systemDataReport.setDeviceSecure(true);
 
         // prepare server
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -151,7 +152,8 @@ public class MobileApiDataTest {
                     "'deviceModel':'TEST'," +
                     "'applicationVersion':'3.4.5.TEST'," +
                     "'geofencing':false," +
-                    "'notificationsEnabled':true" +
+                    "'notificationsEnabled':true," +
+                    "'deviceSecure':true" +
                 "}",
                 debugServer.getBody(), true);
     }

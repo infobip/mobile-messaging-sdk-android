@@ -37,7 +37,7 @@ public class SystemDataReporter extends RetryableSynchronizer {
 
         SystemDataReport report = new SystemDataReport(data.getSdkVersion(),
                 data.getOsVersion(), data.getDeviceManufacturer(), data.getDeviceModel(),
-                data.getApplicationVersion(), data.isGeofencing(), data.areNotificationsEnabled());
+                data.getApplicationVersion(), data.isGeofencing(), data.areNotificationsEnabled(), data.isDeviceSecure());
 
         new SystemDataReportTask(context) {
             @Override
