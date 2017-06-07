@@ -1,5 +1,6 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.mobile.messages;
 
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +16,7 @@ import static junit.framework.Assert.assertEquals;
  * @author sslavin
  * @since 22/07/16.
  */
-public class SendMOMessageTest extends MobileMessagingTestCase {
+public class MessageSenderTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<List<Message>> captor;
 

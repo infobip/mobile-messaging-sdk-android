@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
@@ -67,15 +68,7 @@ public class MessageSender {
             message.setStatusMessage(delivery.getStatus());
             message.setReceivedTimestamp(Time.now());
             message.setSeenTimestamp(Time.now());
-            messages.add(message);
-
-            String json = delivery.getCustomPayload() != null ? delivery.getCustomPayload().toString() : null;
-            try {
-                message.setCustomPayload(json != null ? new JSONObject(json) : null);
-            } catch (JSONException e) {
-                MobileMessagingLogger.w(TAG, Log.getStackTraceString(e));
-            }
-
+            message.setCustomPayload(delivery.getCustomPayload() != null ? new JSONObject(delivery.getCustomPayload()) : null);
             Message.Status status = Message.Status.UNKNOWN;
             int statusCode = delivery.getStatusCode();
             if (statusCode < Message.Status.values().length) {
@@ -84,6 +77,7 @@ public class MessageSender {
                 MobileMessagingLogger.e(TAG, "Unexpected status code: " + statusCode);
             }
             message.setStatus(status);
+            messages.add(message);
         }
 
         reportMessages(context, listener, messages);
