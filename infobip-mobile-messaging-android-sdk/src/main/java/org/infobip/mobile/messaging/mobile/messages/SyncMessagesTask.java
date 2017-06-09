@@ -40,7 +40,7 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
         String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
 
         try {
-            SyncMessagesBody syncMessagesBody = new SyncMessagesBody(messageIds, unreportedMessageIds);
+            SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(messageIds, unreportedMessageIds);
             SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(syncMessagesBody);
             broadcaster.deliveryReported(messageIds);
             return new SyncMessagesResult(syncMessagesResponse);

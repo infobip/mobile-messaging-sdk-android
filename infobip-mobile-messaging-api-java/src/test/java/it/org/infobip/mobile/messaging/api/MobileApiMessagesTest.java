@@ -191,7 +191,7 @@ public class MobileApiMessagesTest {
         String[] drIDs = new String[1];
         drIDs[0] = "test-message-id";
 
-        SyncMessagesBody syncMessagesBody = new SyncMessagesBody(mIDs, drIDs);
+        SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(mIDs, drIDs);
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context
@@ -199,6 +199,50 @@ public class MobileApiMessagesTest {
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);
+        assertThat(debugServer.getBody()).isNotEqualTo(null);
+
+        // inspect response
+        assertEquals(1, syncMessagesResponse.getPayloads().size());
+        MessageResponse messageResponse = syncMessagesResponse.getPayloads().get(0);
+        assertEquals("test-message-id", messageResponse.getMessageId());
+        assertEquals("this is title", messageResponse.getTitle());
+        assertEquals("body", messageResponse.getBody());
+        assertEquals("true", messageResponse.getSound());
+        assertEquals("true", messageResponse.getVibrate());
+        assertEquals("true", messageResponse.getSilent());
+        assertEquals("UNKNOWN", messageResponse.getCategory());
+    }
+
+    @Test
+    public void testThatNullBodyIsBeingSentInCaseOfEmptyMessageIDArrays() {
+        String serverResponse = "{\n" +
+                "  \"payloads\": [\n" +
+                "    {\n" +
+                "      \"gcm.notification.messageId\": \"test-message-id\",\n" +
+                "      \"gcm.notification.title\": \"this is title\",\n" +
+                "      \"gcm.notification.body\": \"body\",\n" +
+                "      \"gcm.notification.sound\": \"true\",\n" +
+                "      \"gcm.notification.vibrate\": \"true\",\n" +
+                "      \"gcm.notification.silent\": \"true\",\n" +
+                "      \"gcm.notification.category\": \"UNKNOWN\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
+
+        String[] mIDs = new String[0];
+        String[] drIDs = new String[0];
+
+        SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(mIDs, drIDs);
+        SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
+
+        // inspect http context
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages/");
+        assertThat(debugServer.getRequestCount()).isEqualTo(1);
+        assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
+        assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);
+        assertThat(debugServer.getBody()).isEqualTo(null);
 
         // inspect response
         assertEquals(1, syncMessagesResponse.getPayloads().size());
