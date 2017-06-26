@@ -1,15 +1,26 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
+import org.infobip.mobile.messaging.notification.NotificationHandler;
+import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -24,6 +35,31 @@ import static junit.framework.Assert.assertTrue;
 public class MessagesSynchronizerTest extends MobileMessagingTestCase {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
+
+    private MobileMessagingStats mobileMessagingStats;
+    private NotificationHandler notificationHandler;
+
+    private ArgumentCaptor<Message> messageArgumentCaptor;
+
+    private MessagesSynchronizer messagesSynchronizer;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        mobileMessagingStats = Mockito.mock(MobileMessagingStats.class);
+        notificationHandler = Mockito.mock(NotificationHandler.class);
+        messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+
+        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingStats, Executors.newSingleThreadExecutor(), broadcaster, notificationHandler);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+
+        Mockito.reset(mobileMessagingStats, notificationHandler);
+    }
 
     @Test
     public void should_find_all_messageIDs() {
@@ -71,6 +107,44 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         List<String> actualDLRs = getReportedDLRs();
         assertEquals(5, actualDLRs.size());
         assertTrue(actualDLRs.containsAll(Arrays.asList("1", "2", "3", "4", "5")));
+    }
+
+    @Test
+    public void should_deserialize_messages_with_appropriate_vibration_from_fetched_payload() {
+
+        // Given
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
+                "\"payloads\":[{" +
+                "   \"gcm.notification.messageId\":\"someMessageId1\"," +
+                "   \"gcm.notification.body\":\"someBody1\"" +
+                "}," +
+                "{" +
+                "   \"gcm.notification.messageId\":\"someMessageId2\"," +
+                "   \"gcm.notification.body\":\"someBody2\"," +
+                "   \"gcm.notification.vibrate\":\"true\"" +
+                "}," +
+                "{" +
+                "   \"gcm.notification.messageId\":\"someMessageId3\"," +
+                "   \"gcm.notification.body\":\"someBody3\"," +
+                "   \"gcm.notification.vibrate\":\"false\"" +
+                "}]" +
+            "}");
+
+        // When
+        messagesSynchronizer.synchronize();
+
+        // Then
+        Mockito.verify(notificationHandler, Mockito.after(1000).times(3)).displayNotification(messageArgumentCaptor.capture());
+        List<Message> actualMessages = messageArgumentCaptor.getAllValues();
+        assertEquals("someMessageId1", actualMessages.get(0).getMessageId());
+        assertEquals("someBody1", actualMessages.get(0).getBody());
+        assertEquals(true, actualMessages.get(0).isVibrate());
+        assertEquals("someMessageId2", actualMessages.get(1).getMessageId());
+        assertEquals("someBody2", actualMessages.get(1).getBody());
+        assertEquals(true, actualMessages.get(1).isVibrate());
+        assertEquals("someMessageId3", actualMessages.get(2).getMessageId());
+        assertEquals("someBody3", actualMessages.get(2).getBody());
+        assertEquals(false, actualMessages.get(2).isVibrate());
     }
 
     private List<String> getReportedDLRs() {

@@ -65,6 +65,7 @@ public class DebugServer extends NanoHTTPD {
 
     public void respondWith(Response.Status status, String mimeType, InputStream inputStream) {
         this.txt = null;
+        this.bodies.clear();
         this.status = status;
         this.mimeType = mimeType;
         this.inputStream = inputStream;
@@ -76,6 +77,7 @@ public class DebugServer extends NanoHTTPD {
 
     public void respondWith(Response.Status status, String mimeType, String txt) {
         this.inputStream = null;
+        this.bodies.clear();
         this.status = status;
         this.mimeType = mimeType;
         this.txt = txt;

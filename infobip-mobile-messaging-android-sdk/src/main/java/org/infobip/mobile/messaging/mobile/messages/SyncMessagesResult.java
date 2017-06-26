@@ -66,7 +66,7 @@ class SyncMessagesResult extends UnsuccessfulResult {
                 response.getTitle(),
                 response.getBody(),
                 response.getSound(),
-                "true".equals(response.getVibrate()),
+                !"false".equals(response.getVibrate()),
                 null,
                 "true".equals(response.getSilent()),
                 response.getCategory(),
