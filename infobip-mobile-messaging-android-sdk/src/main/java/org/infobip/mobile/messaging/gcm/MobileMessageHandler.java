@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.gcm;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -35,8 +34,9 @@ public class MobileMessageHandler {
      * @param intent intent that contains new message
      */
     public void handleMessage(Context context, Intent intent) {
-        Bundle data = intent.getExtras();
-        handleMessage(context, FCMMessageMapper.fromCloudBundle(data));
+        Message message = FCMMessageMapper.fromCloudBundle(intent.getExtras());
+        MobileMessagingLogger.v("RECEIVED MESSAGE FROM FCM", message);
+        handleMessage(context, message);
     }
 
     /**

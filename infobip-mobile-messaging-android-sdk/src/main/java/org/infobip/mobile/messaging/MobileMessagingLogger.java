@@ -4,9 +4,15 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
+import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
+import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
+
+import java.util.Arrays;
+
 public final class MobileMessagingLogger {
 
     public static final String TAG = "MobileMessaging";
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static Context context;
     private static boolean isEnforced = false;
 
@@ -18,12 +24,25 @@ public final class MobileMessagingLogger {
         isEnforced = true;
     }
 
+    public static boolean loggingEnabled() {
+        boolean isDebuggable = (context != null && 0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+        return isDebuggable || isEnforced;
+    }
+
     public static void v(String tag, String msg) {
         log(Log.VERBOSE, tag, msg, null);
     }
 
     public static void v(String msg) {
         v(TAG, msg);
+    }
+
+    public static void v(String msg, Object o) {
+        log(Log.VERBOSE, TAG, msg, o);
+    }
+
+    public static void v(String msg, Object o, Object...os) {
+        log(Log.VERBOSE, TAG, msg, Arrays.asList(o, os));
     }
 
     public static void v(String tag, String msg, Throwable tr) {
@@ -98,9 +117,24 @@ public final class MobileMessagingLogger {
         e(TAG, msg, tr);
     }
 
+    public static String objectToPrettyString(Object o) {
+        if (!loggingEnabled()) {
+            return "";
+        }
+
+        return gson.toJson(o);
+    }
+
+    private static void log(int logLevel, String tag, String msg, Object o) {
+        if (!loggingEnabled()) {
+            return;
+        }
+
+        log(logLevel, tag, msg + "\n" + objectToPrettyString(o), null);
+    }
+
     private static void log(int logLevel, String tag, String msg, Throwable tr) {
-        boolean isDebuggable = (context != null && 0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-        if (!isDebuggable && !isEnforced) {
+        if (!loggingEnabled()) {
             return;
         }
 

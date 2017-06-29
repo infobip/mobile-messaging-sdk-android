@@ -28,7 +28,9 @@ public class UpsertRegistrationTask extends AsyncTask<Boolean, Void, UpsertRegis
         try {
             String registrationId = mobileMessagingCore.getRegistrationId();
             Boolean pushRegistrationEnabled = params.length > 0 ? params[0] : null;
+            MobileMessagingLogger.v("REGISTRATION >>>", registrationId, pushRegistrationEnabled);
             RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(registrationId, pushRegistrationEnabled);
+            MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
             return new UpsertRegistrationResult(registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

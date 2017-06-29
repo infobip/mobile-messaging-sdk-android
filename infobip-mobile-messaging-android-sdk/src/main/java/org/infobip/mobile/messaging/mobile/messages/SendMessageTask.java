@@ -51,7 +51,10 @@ class SendMessageTask extends AsyncTask<Message, Void, SendMessageResult>{
                 moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getBody(), customPayloadMap));
             }
             moMessagesBody.setMessages(moMessages.toArray(new MoMessage[moMessages.size()]));
+
+            MobileMessagingLogger.v("SEND MO >>>", moMessagesBody);
             MoMessagesResponse moMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sendMO(moMessagesBody);
+            MobileMessagingLogger.v("SEND MO <<<", moMessagesResponse);
             return new SendMessageResult(moMessagesResponse.getMessages());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

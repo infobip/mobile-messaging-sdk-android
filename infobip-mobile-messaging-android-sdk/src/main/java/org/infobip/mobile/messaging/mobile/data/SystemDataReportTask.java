@@ -48,7 +48,9 @@ class SystemDataReportTask extends AsyncTask<SystemDataReport, Void, SystemDataR
         }
 
         try {
+            MobileMessagingLogger.v("SYSTEM DATA >>>", report);
             MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(report);
+            MobileMessagingLogger.v("SYSTEM DATA <<<");
             return new SystemDataReportResult(data);
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

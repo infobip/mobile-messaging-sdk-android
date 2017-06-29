@@ -38,7 +38,9 @@ class SyncUserDataTask extends AsyncTask<Void, Void, SyncUserDataResult> {
 
         try {
             UserDataReport request = UserDataMapper.toUserDataReport(userDataToReport.getPredefinedUserData(), userDataToReport.getCustomUserData());
+            MobileMessagingLogger.v("USER DATA >>>", request);
             UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(userDataToReport.getExternalUserId(), request);
+            MobileMessagingLogger.v("USER DATA <<<", response);
             return new SyncUserDataResult(response.getPredefinedUserData(), response.getCustomUserData());
         } catch (Exception e) {
             mobileMessagingCore.setLastHttpException(e);

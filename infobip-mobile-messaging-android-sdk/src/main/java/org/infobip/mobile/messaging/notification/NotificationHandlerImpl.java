@@ -60,6 +60,7 @@ public class NotificationHandlerImpl implements NotificationHandler {
         try {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = builder.build();
+            MobileMessagingLogger.v("NOTIFY FOR MESSAGE", message);
             notificationManager.notify(getNotificationId(message), notification);
         } catch (SecurityException se) {
             MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));

@@ -24,7 +24,9 @@ public class VersionCheckTask extends AsyncTask<Void, Void, VersionCheckResult> 
     protected VersionCheckResult doInBackground(Void... notUsed) {
 
         try {
+            MobileMessagingLogger.v("VERSION >>>");
             LatestReleaseResponse response = MobileApiResourceProvider.INSTANCE.getMobileApiVersion(context).getLatestRelease();
+            MobileMessagingLogger.v("VERSION <<<", response);
             return new VersionCheckResult(response);
         } catch (Exception e) {
             MobileMessagingCore.getInstance(context).setLastHttpException(e);

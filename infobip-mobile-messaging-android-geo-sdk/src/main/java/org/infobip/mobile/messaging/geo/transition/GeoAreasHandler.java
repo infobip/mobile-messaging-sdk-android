@@ -83,6 +83,7 @@ public class GeoAreasHandler {
      */
     @SuppressWarnings("WeakerAccess")
     public void handleTransition(GeoTransition transition) {
+        MobileMessagingLogger.v("GEO TRANSITION", transition);
         Map<Message, List<Area>> messagesAndAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, geoMessageStore, transition.getRequestIds(), transition.getEventType());
         if (messagesAndAreas.isEmpty()) {
             MobileMessagingLogger.d(TAG, "No messages for triggered areas");
@@ -203,7 +204,7 @@ public class GeoAreasHandler {
     private static void logGeofences(Collection<List<Area>> collection, @NonNull GeoEventType event) {
         for (List<Area> areas : collection) {
             for (Area a : areas) {
-                MobileMessagingLogger.i(TAG, event.name().toUpperCase() + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
+                MobileMessagingLogger.v(TAG, event.name().toUpperCase() + " (" + a.getTitle() + ") LAT:" + a.getLatitude() + " LON:" + a.getLongitude() + " RAD:" + a.getRadius());
             }
         }
     }

@@ -41,7 +41,9 @@ class SyncMessagesTask extends AsyncTask<Object, Void, SyncMessagesResult> {
 
         try {
             SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(messageIds, unreportedMessageIds);
+            MobileMessagingLogger.v("SYNC MESSAGES >>>", syncMessagesBody);
             SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(syncMessagesBody);
+            MobileMessagingLogger.v("SYNC MESSAGES <<<", syncMessagesResponse);
             broadcaster.deliveryReported(messageIds);
             return new SyncMessagesResult(syncMessagesResponse);
 

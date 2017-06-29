@@ -47,7 +47,9 @@ class GeoReportingTask extends AsyncTask<GeoReport, Void, GeoReportingResult> {
     @NonNull
     static GeoReportingResult executeSync(Context context, GeofencingHelper geofenceHelper, GeoReport geoReports[]) throws RuntimeException {
         EventReportBody eventReportBody = prepareEventReportBody(context, geofenceHelper.getMessageStoreForGeo(),  geoReports);
+        MobileMessagingLogger.v("GEO REPORT >>>", eventReportBody);
         EventReportResponse eventResponse = MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context).report(eventReportBody);
+        MobileMessagingLogger.v("GEO REPORT <<<", eventResponse);
         return new GeoReportingResult(eventResponse);
     }
 
