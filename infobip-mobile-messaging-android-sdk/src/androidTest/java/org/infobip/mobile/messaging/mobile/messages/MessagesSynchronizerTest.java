@@ -93,6 +93,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     @Test
     public void should_not_report_dlr_with_duplicate_messageIds() {
         // Given
+        mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
         // When
@@ -113,6 +114,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     public void should_deserialize_messages_with_appropriate_vibration_from_fetched_payload() {
 
         // Given
+        mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
                 "\"payloads\":[{" +
                 "   \"gcm.notification.messageId\":\"someMessageId1\"," +
