@@ -35,10 +35,10 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_shoud_broadcast_message_and_geo() throws Exception {
+    public void test_should_broadcast_message_and_geo() throws Exception {
 
         // Given
-        Geo geo = createGeo(1.0, 2.0, "SomeCampaignId", createArea("SomeAreaId", "SomeAreaTitle", 3.0, 4.0, 5));
+        Geo geo = createGeo(1.0, 2.0, "SomeCampaignId", null, createArea("SomeAreaId", "SomeAreaTitle", 3.0, 4.0, 5));
         final Message message = createMessage(context, "SomeMessageId", false, geo);
         Map<Message, GeoEventType> messages = new HashMap<>();
         messages.put(message, GeoEventType.entry);

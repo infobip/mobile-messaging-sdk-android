@@ -248,9 +248,9 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Area area = createArea("areaId1");
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Arrays.asList(
-                createMessage(context, "signalingMessageId1", "campaignId1", true, area),
-                createMessage(context, "signalingMessageId2", "campaignId2", true, area),
-                createMessage(context, "signalingMessageId3", "campaignId3", true, area)));
+                createMessage(context, "signalingMessageId1", "campaignId1", true, "some url", area),
+                createMessage(context, "signalingMessageId2", "campaignId2", true, "some url", area),
+                createMessage(context, "signalingMessageId3", "campaignId3", true, "some url", area)));
         EventReportResponse response = new EventReportResponse();
         response.setSuspendedCampaignIds(Sets.newSet("campaignId1"));
         response.setFinishedCampaignIds(Sets.newSet("campaignId2"));
@@ -267,6 +267,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         Geo geo = GeoDataMapper.geoFromInternalData(message.getInternalData());
         assertNotNull(geo);
         assertNotSame("signalingMessageId3", message.getMessageId());
+        assertEquals("some url", message.getContentUrl());
         assertTrue(StringUtils.isNotBlank(message.getMessageId()));
         assertEquals("campaignId3", geo.getCampaignId());
         assertEquals("areaId1", geo.getAreasList().get(0).getId());

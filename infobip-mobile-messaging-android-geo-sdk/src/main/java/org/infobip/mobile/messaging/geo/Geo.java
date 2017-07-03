@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.gson.annotations.SerializedName;
 
 import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
@@ -18,7 +19,7 @@ import java.util.List;
  * @author pandric
  * @since 14.06.2016.
  */
-public class Geo {
+public class Geo extends InternalDataMapper.InternalData {
 
     private Double triggeringLatitude;
     private Double triggeringLongitude;
@@ -33,7 +34,9 @@ public class Geo {
     @SerializedName("event")
     private List<GeoEventSettings> eventSettings = new ArrayList<>();
 
-    public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId, List<Area> areasList, List<GeoEventSettings> eventSettings) {
+    public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId,
+               List<Area> areasList, List<GeoEventSettings> eventSettings, String contentUrl) {
+        super(contentUrl);
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.deliveryTime = deliveryTime;
@@ -86,7 +89,7 @@ public class Geo {
     }
 
     /**
-     * Checks if this geo campaing is expired
+     * Checks if this geo campaign is expired
      *
      * @return true if geo campaign is expired
      */

@@ -57,7 +57,7 @@ public class GeoAreasHandler {
     /**
      * Handles geofencing transition intent and reports corresponding areas to server
      *
-     * @param intent intent from Google Locaiton Services
+     * @param intent intent from Google Location Services
      */
     void handleTransition(Intent intent) {
 
@@ -106,7 +106,7 @@ public class GeoAreasHandler {
     /**
      * Generates new geo messages based on events and result data and also provides broadcasts and notifications.
      *
-     * @param unreportedEvents events that occured and has been reported to the server.
+     * @param unreportedEvents events that occurred and has been reported to the server.
      * @param result           result of reporting that contains non-active campaign data and new message ids.
      */
     private void handleReportingResultWithNewMessagesAndNotifications(GeoReport[] unreportedEvents, GeoReportingResult result) {

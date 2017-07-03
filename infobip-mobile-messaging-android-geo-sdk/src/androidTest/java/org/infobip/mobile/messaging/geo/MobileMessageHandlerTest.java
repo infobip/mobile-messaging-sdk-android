@@ -127,8 +127,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
     }
 
     private void saveGeoMessageToDb(String messageId, String startTimeMillis, String expiryTimeMillis) {
-        Geo geo = createGeo(0.0, 0.0, expiryTimeMillis, startTimeMillis, "SomeCampaignId",
-                createArea("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
+        Geo geo = createGeo(0.0, 0.0, expiryTimeMillis, startTimeMillis, "SomeCampaignId", null, createArea("SomeAreaId", "SomeAreaTitle", 0.0, 0.0, 10));
         createMessage(context, messageId, true, geo);
     }
 }

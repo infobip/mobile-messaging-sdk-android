@@ -26,9 +26,18 @@ public class InternalDataMapper {
         String category;
     }
 
-    private static class InternalData<VibrateValueType> {
+    public static class InternalData<VibrateValueType> {
         Attachment atts[] = new Attachment[0];
         Silent<VibrateValueType> silent;
+
+        public InternalData() {
+        }
+
+        public InternalData(String contentUrl) {
+            if (contentUrl != null) {
+                this.atts = createAttachments(contentUrl);
+            }
+        }
     }
 
     private static class Attachment {
@@ -173,35 +182,54 @@ public class InternalDataMapper {
             internalData = serializer.deserialize(internalDataJson, InternalData.class);
         }
 
-        if (message.getContentUrl() != null) {
-            if (internalData == null) {
-                internalData = new InternalData<>();
-            }
-            internalData.atts = new Attachment[1];
-            internalData.atts[0] = new Attachment();
-            internalData.atts[0].url = message.getContentUrl();
-        }
-
-        if (message.isSilent()) {
-
-            if (internalData == null) {
-                internalData = new InternalData<>();
-            }
-
-            if (internalData.silent == null) {
-                internalData.silent = new Silent<>();
-            }
-            internalData.silent.title = message.getTitle();
-            internalData.silent.body = message.getBody();
-            internalData.silent.sound = message.getSound();
-            if (internalData.silent.vibrate instanceof Boolean) {
-                internalData.silent.vibrate = (VibrateValueType) Boolean.valueOf(message.isVibrate());
-            } else if (internalData.silent.vibrate instanceof String) {
-                internalData.silent.vibrate = (VibrateValueType) (message.isVibrate() ? "true" : "false");
-            }
-            internalData.silent.category = message.getCategory();
-        }
-
+        internalData = addContentUrlToInternalData(message, internalData);
+        internalData = addSilentToInternalData(message, internalData);
         return internalData != null ? serializer.serialize(internalData) : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <VibrateValueType> InternalData<VibrateValueType> addSilentToInternalData(Message message, InternalData<VibrateValueType> internalData) {
+        if (!message.isSilent()) {
+            return internalData;
+        }
+
+        if (internalData == null) {
+            internalData = new InternalData<>();
+        }
+
+        if (internalData.silent == null) {
+            internalData.silent = new Silent<>();
+        }
+        internalData.silent.title = message.getTitle();
+        internalData.silent.body = message.getBody();
+        internalData.silent.sound = message.getSound();
+        if (internalData.silent.vibrate instanceof Boolean) {
+            internalData.silent.vibrate = (VibrateValueType) Boolean.valueOf(message.isVibrate());
+        } else if (internalData.silent.vibrate instanceof String) {
+            internalData.silent.vibrate = (VibrateValueType) (message.isVibrate() ? "true" : "false");
+        }
+        internalData.silent.category = message.getCategory();
+        return internalData;
+    }
+
+    private static InternalData addContentUrlToInternalData(@NonNull Message message, InternalData internalData) {
+        if (message.getContentUrl() == null) {
+            return internalData;
+        }
+
+        if (internalData == null) {
+            internalData = new InternalData<>();
+        }
+
+        internalData.atts = createAttachments(message.getContentUrl());
+        return internalData;
+    }
+
+
+    private static Attachment[] createAttachments(@NonNull String contentUrl) {
+        Attachment atts[] = new Attachment[1];
+        atts[0] = new Attachment();
+        atts[0].url = contentUrl;
+        return atts;
     }
 }

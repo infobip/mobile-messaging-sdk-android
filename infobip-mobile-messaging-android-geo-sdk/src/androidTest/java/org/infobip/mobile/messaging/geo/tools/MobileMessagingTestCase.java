@@ -150,7 +150,22 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new message
      */
     protected static Message createMessage(Context context, String messageId, String campaignId, boolean saveToStorage, Area... areas) {
-        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>()));
+        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), null));
+    }
+
+    /**
+     * Generates messages with provided id
+     *
+     * @param saveToStorage set to true to save messages to message store
+     * @param messageId     message id for a message
+     * @param campaignId    id of a campaign for a message
+     * @param saveToStorage true if the message should be saved to storage
+     * @param contentUrl    URL for the rich data
+     * @param areas         list of areas to save to message
+     * @return new message
+     */
+    protected static Message createMessage(Context context, String messageId, String campaignId, boolean saveToStorage, String contentUrl, Area... areas) {
+        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl));
     }
 
     /**
@@ -249,8 +264,8 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @param areas               array of areas to include
      * @return new Geo object
      */
-    protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String campaignId, Area... areas) {
-        return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>());
+    protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String campaignId, String contentUrl, Area... areas) {
+        return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl);
     }
 
     /**
@@ -262,9 +277,10 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @param startTime           geo campaign start time
      * @param campaignId          campaign id
      * @param areas               array of areas to include
+     * @param contentUrl          URL for the rich data
      * @return new Geo object
      */
-    protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String expiryTime, String startTime, String campaignId, Area... areas) {
-        return new Geo(triggeringLatitude, triggeringLongitude, null, expiryTime, startTime, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>());
+    protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String expiryTime, String startTime, String campaignId, String contentUrl, Area... areas) {
+        return new Geo(triggeringLatitude, triggeringLongitude, null, expiryTime, startTime, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl);
     }
 }

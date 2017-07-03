@@ -163,15 +163,18 @@ public class GeoReportHelper {
                     originalMessageGeo.getStartTime(),
                     originalMessageGeo.getCampaignId(),
                     areas,
-                    originalMessageGeo.getEvents());
+                    originalMessageGeo.getEvents(),
+                    originalMessage.getContentUrl());
         } else {
             geo = new Geo(triggeringLocation.getLat(),
                     triggeringLocation.getLng(),
                     null, null, null, null,
                     areas,
-                    null);
+                    null,
+                    originalMessage.getContentUrl());
         }
 
+        String internalData = GeoDataMapper.geoToInternalData(geo);
         return new Message(
                 getMessageIdFromReport(report, reportingResult),
                 originalMessage.getTitle(),
@@ -185,7 +188,7 @@ public class GeoReportHelper {
                 Time.now(),
                 0,
                 originalMessage.getCustomPayload(),
-                GeoDataMapper.geoToInternalData(geo),
+                internalData,
                 originalMessage.getDestination(),
                 originalMessage.getStatus(),
                 originalMessage.getStatusMessage(),
@@ -317,16 +320,14 @@ public class GeoReportHelper {
      * Filters out overlapping areas for each campaign and returns only the smallest area
      *
      * @param messagesAndAreas all triggered areas for each message
-     * @return filteted areas
+     * @return filtered areas
      */
-    static private Map<Message, List<Area>> filterOverlappingAreas(Map<Message, List<Area>> messagesAndAreas) {
+    public static Map<Message, List<Area>> filterOverlappingAreas(Map<Message, List<Area>> messagesAndAreas) {
         Map<Message, List<Area>> filteredMessagesAndAreas = new ArrayMap<>(messagesAndAreas.size());
 
-        for (Message message : messagesAndAreas.keySet()) {
-            Geo geo = GeoDataMapper.geoFromInternalData(message.getInternalData());
-            if (geo == null) continue;
-
-            List<Area> areasList = geo.getAreasList();
+        for (Map.Entry<Message, List<Area>> entry : messagesAndAreas.entrySet()) {
+            Message message = entry.getKey();
+            List<Area> areasList = entry.getValue();
 
             if (areasList != null) {
                 //using only area that has the smallest radius

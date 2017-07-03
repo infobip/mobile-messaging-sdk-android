@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -161,5 +162,32 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertEquals(areasList.get(1).getRadius(), area1.getRadius());
         assertEquals(areasList.get(2).getId(), area3.getId());
         assertEquals(areasList.get(2).getRadius(), area3.getRadius());
+    }
+
+    @Test
+    public void test_should_filter_overlapping_triggered_areas() {
+        //given
+        HashMap<Message, List<Area>> messagesAndAreas = new HashMap<>();
+        Area area1 = createArea("areaId1", "", 1.0, 2.0, 700);
+        Area area2 = createArea("areaId2", "", 1.0, 2.0, 250);
+        Area area3 = createArea("areaId3", "", 1.0, 2.0, 1000);
+        Message message = createMessage(context, "messageId1", "campaignId1", true, area1, area2, area3);
+        List<Area> triggeredAreasList = Arrays.asList(area1, area3);
+
+        messagesAndAreas.put(message, triggeredAreasList);
+
+        //when
+        Map<Message, List<Area>> filteredOverlappingAreasForMessages = GeoReportHelper.filterOverlappingAreas(messagesAndAreas);
+        List<Area> filteredTriggeredAreasList = new ArrayList<>();
+        for (List<Area> areas : filteredOverlappingAreasForMessages.values()) {
+            filteredTriggeredAreasList.addAll(areas);
+        }
+
+        //then
+        assertEquals(1, filteredTriggeredAreasList.size());
+        assertEquals(area1.getRadius(), filteredTriggeredAreasList.get(0).getRadius());
+        assertEquals(area1, filteredTriggeredAreasList.get(0));
+        assertEquals(1, filteredOverlappingAreasForMessages.keySet().size());
+        assertEquals(true, filteredOverlappingAreasForMessages.containsKey(message));
     }
 }

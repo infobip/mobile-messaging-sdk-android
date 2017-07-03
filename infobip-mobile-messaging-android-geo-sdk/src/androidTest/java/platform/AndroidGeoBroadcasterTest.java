@@ -46,7 +46,7 @@ public class AndroidGeoBroadcasterTest extends MobileMessagingTestCase {
     @Test
     public void test_should_send_geo_event() {
         // Given
-        Geo geo = new Geo(0.0, 0.0, null, null, null, "SomeCampaignId", Collections.singletonList(createArea("areaId1")), new ArrayList<GeoEventSettings>());
+        Geo geo = new Geo(0.0, 0.0, null, null, null, "SomeCampaignId", Collections.singletonList(createArea("areaId1")), new ArrayList<GeoEventSettings>(), null);
         Message message = createMessage(context, "SomeMessageId", false, geo);
 
         // When

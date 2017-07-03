@@ -20,7 +20,7 @@ public class GeoEventsTest extends MobileMessagingTestCase {
 
     public class GeoTest extends Geo {
         public GeoTest() {
-            super(null, null, null, null, null, null, null, null);
+            super(null, null, null, null, null, null, null, null, null);
         }
 
         List<GeoEventSettings> getEventFilters() {
