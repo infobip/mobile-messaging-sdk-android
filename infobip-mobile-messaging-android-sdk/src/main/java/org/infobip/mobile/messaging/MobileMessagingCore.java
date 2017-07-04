@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessageSender;
@@ -573,6 +574,8 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+
+        MobileApiResourceProvider.INSTANCE.resetMobileApi();
     }
 
     @Override
