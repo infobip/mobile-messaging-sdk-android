@@ -82,7 +82,9 @@ public class InternalDataMapper {
         message.setTitle(internalData.silent.title);
         message.setBody(internalData.silent.body);
         message.setSound(internalData.silent.sound);
-        message.setVibrate(Boolean.valueOf(internalData.silent.vibrate.toString()));
+        if (internalData.silent.vibrate != null) {
+            message.setVibrate(Boolean.valueOf(internalData.silent.vibrate.toString()));
+        }
     }
 
 
