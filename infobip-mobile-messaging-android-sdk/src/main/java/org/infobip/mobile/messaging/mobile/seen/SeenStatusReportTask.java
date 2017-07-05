@@ -35,6 +35,10 @@ class SeenStatusReportTask extends AsyncTask<Object, Void, SeenStatusReportResul
 
         try {
             String messageIDs[] = mobileMessagingCore.getUnreportedSeenMessageIds();
+            if (messageIDs.length == 0) {
+                return new SeenStatusReportResult(messageIDs);
+            }
+
             SeenMessages seenMessages = SeenMessagesReport.fromMessageIds(messageIDs);
             MobileMessagingLogger.v("SEEN >>>", seenMessages);
             MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).reportSeen(seenMessages);
