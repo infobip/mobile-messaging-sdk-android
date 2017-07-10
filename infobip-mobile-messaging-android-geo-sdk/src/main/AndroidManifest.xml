@@ -26,6 +26,8 @@
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.DATE_CHANGED"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />

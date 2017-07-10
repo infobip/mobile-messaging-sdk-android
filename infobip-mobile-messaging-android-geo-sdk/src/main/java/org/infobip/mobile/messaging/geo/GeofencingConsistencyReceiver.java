@@ -61,9 +61,13 @@ public class GeofencingConsistencyReceiver extends WakefulBroadcastReceiver {
                 /*
                  * NETWORK_PROVIDER_ENABLED_ACTION - scheduled 15 seconds after NETWORK_PROVIDER is enabled. Starts monitoring geofences from storage if geo is enabled.
                  * SCHEDULED_GEO_REFRESH_ACTION - scheduled to start when campaign needs to be started and area monitored
+                 * Intent.ACTION_TIME_CHANGED - triggered when system time is changed, need to go over all campaigns in this case.
+                 * Intent.ACTION_DATE_CHANGED - triggered when system date is changed, need to go over all campaigns in this case.
                  */
                 case NETWORK_PROVIDER_ENABLED_ACTION:
                 case SCHEDULED_GEO_REFRESH_ACTION:
+                case Intent.ACTION_TIME_CHANGED:
+                case Intent.ACTION_DATE_CHANGED:
                     GeofencingHelper.setAllActiveGeoAreasMonitored(context, false);
 
                     if (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
