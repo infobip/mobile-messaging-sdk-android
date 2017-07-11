@@ -53,7 +53,6 @@ android {
 dependencies {
     compile project(':infobip-mobile-messaging-android-sdk')
     compile project(':infobip-mobile-messaging-api-java')
-    compile 'com.google.android.gms:play-services-location:9.0.1'
 
     androidTestCompile project(':infobip-mobile-messaging-android-test')
     testCompile project(':infobip-mobile-messaging-android-test')
