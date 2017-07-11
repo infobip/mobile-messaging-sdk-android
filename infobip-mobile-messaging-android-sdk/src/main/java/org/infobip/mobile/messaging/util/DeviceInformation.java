@@ -6,7 +6,7 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

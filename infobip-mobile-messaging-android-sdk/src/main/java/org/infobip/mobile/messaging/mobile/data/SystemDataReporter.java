@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.mobile.data;
 import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;

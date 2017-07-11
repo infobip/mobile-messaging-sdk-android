@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
 import org.infobip.mobile.messaging.util.DateTimeUtil;

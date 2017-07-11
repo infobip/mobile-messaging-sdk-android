@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;

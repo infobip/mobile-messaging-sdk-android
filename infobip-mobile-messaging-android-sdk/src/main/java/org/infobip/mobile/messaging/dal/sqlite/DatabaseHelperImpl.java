@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.DatabaseObject;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;

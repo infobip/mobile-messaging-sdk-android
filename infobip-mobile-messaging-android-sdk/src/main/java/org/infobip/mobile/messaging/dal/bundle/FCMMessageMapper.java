@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.json.JSONException;
 import org.json.JSONObject;

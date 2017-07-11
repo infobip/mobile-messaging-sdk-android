@@ -1,8 +1,7 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.logging;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
@@ -14,7 +13,9 @@ public final class MobileMessagingLogger {
     public static final String TAG = "MobileMessaging";
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private static Context context;
+    private static Writer writer = new LogcatWriter();
     private static boolean isEnforced = false;
+
 
     public static void init(Context context) {
         MobileMessagingLogger.context = context;
@@ -24,13 +25,20 @@ public final class MobileMessagingLogger {
         isEnforced = true;
     }
 
+    public static void setWriter(Writer logWriter) {
+        if (logWriter == null) {
+            throw new IllegalArgumentException("Log writer should not be null");
+        }
+        writer = logWriter;
+    }
+
     public static boolean loggingEnabled() {
         boolean isDebuggable = (context != null && 0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
         return isDebuggable || isEnforced;
     }
 
     public static void v(String tag, String msg) {
-        log(Log.VERBOSE, tag, msg, null);
+        log(Level.VERBOSE, tag, msg, null);
     }
 
     public static void v(String msg) {
@@ -38,15 +46,15 @@ public final class MobileMessagingLogger {
     }
 
     public static void v(String msg, Object o) {
-        log(Log.VERBOSE, TAG, msg, o);
+        log(Level.VERBOSE, TAG, msg, o);
     }
 
     public static void v(String msg, Object o, Object...os) {
-        log(Log.VERBOSE, TAG, msg, Arrays.asList(o, os));
+        log(Level.VERBOSE, TAG, msg, Arrays.asList(o, os));
     }
 
     public static void v(String tag, String msg, Throwable tr) {
-        log(Log.VERBOSE, tag, msg, tr);
+        log(Level.VERBOSE, tag, msg, tr);
     }
 
     public static void v(String msg, Throwable tr) {
@@ -54,7 +62,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void d(String tag, String msg) {
-        log(Log.DEBUG, tag, msg, null);
+        log(Level.DEBUG, tag, msg, null);
     }
 
     public static void d(String msg) {
@@ -62,7 +70,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void d(String tag, String msg, Throwable tr) {
-        log(Log.DEBUG, tag, msg, tr);
+        log(Level.DEBUG, tag, msg, tr);
     }
 
     public static void d(String msg, Throwable tr) {
@@ -70,7 +78,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void i(String tag, String msg) {
-        log(Log.INFO, tag, msg, null);
+        log(Level.INFO, tag, msg, null);
     }
 
     public static void i(String msg) {
@@ -78,7 +86,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void i(String tag, String msg, Throwable tr) {
-        log(Log.INFO, tag, msg, tr);
+        log(Level.INFO, tag, msg, tr);
     }
 
     public static void i(String msg, Throwable tr) {
@@ -86,7 +94,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void w(String tag, String msg) {
-        log(Log.WARN, tag, msg, null);
+        log(Level.WARN, tag, msg, null);
     }
 
     public static void w(String msg) {
@@ -94,7 +102,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void w(String tag, String msg, Throwable tr) {
-        log(Log.WARN, tag, msg, tr);
+        log(Level.WARN, tag, msg, tr);
     }
 
     public static void w(String msg, Throwable tr) {
@@ -102,7 +110,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void e(String tag, String msg) {
-        log(Log.ERROR, tag, msg, null);
+        log(Level.ERROR, tag, msg, null);
     }
 
     public static void e(String msg) {
@@ -110,7 +118,7 @@ public final class MobileMessagingLogger {
     }
 
     public static void e(String tag, String msg, Throwable tr) {
-        log(Log.ERROR, tag, msg, tr);
+        log(Level.ERROR, tag, msg, tr);
     }
 
     public static void e(String msg, Throwable tr) {
@@ -125,35 +133,19 @@ public final class MobileMessagingLogger {
         return gson.toJson(o);
     }
 
-    private static void log(int logLevel, String tag, String msg, Object o) {
+    private static void log(Level level, String tag, String msg, Object o) {
         if (!loggingEnabled()) {
             return;
         }
 
-        log(logLevel, tag, msg + "\n" + objectToPrettyString(o), null);
+        log(level, tag, msg + "\n" + objectToPrettyString(o), null);
     }
 
-    private static void log(int logLevel, String tag, String msg, Throwable tr) {
+    private static void log(Level level, String tag, String msg, Throwable tr) {
         if (!loggingEnabled()) {
             return;
         }
 
-        switch (logLevel) {
-            case Log.VERBOSE:
-                Log.v(tag, msg, tr);
-                break;
-            case Log.DEBUG:
-                Log.d(tag, msg, tr);
-                break;
-            case Log.INFO:
-                Log.i(tag, msg, tr);
-                break;
-            case Log.WARN:
-                Log.w(tag, msg, tr);
-                break;
-            case Log.ERROR:
-                Log.e(tag, msg, tr);
-                break;
-        }
+        writer.write(level, tag, msg, tr);
     }
 }

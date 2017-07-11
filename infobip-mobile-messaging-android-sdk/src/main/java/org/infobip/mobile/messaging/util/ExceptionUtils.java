@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.util;
 
 import android.util.Log;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

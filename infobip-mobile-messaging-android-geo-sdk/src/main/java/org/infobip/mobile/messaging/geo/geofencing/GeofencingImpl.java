@@ -24,7 +24,7 @@ import com.google.android.gms.location.LocationServices;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Area;

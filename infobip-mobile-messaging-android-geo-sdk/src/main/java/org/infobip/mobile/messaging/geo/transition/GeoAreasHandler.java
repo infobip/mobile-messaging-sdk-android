@@ -7,7 +7,7 @@ import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;

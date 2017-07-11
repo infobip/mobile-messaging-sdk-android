@@ -11,7 +11,7 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.google.android.gms.common.GoogleApiAvailability;
 
-import org.infobip.mobile.messaging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.platform.Time;
 
