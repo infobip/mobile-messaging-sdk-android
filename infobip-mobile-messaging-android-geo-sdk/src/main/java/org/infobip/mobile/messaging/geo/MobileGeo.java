@@ -36,4 +36,9 @@ public abstract class MobileGeo {
      * @return Current geofencing status.
      */
     public abstract boolean isGeofencingActivated();
+
+    /**
+     * Cleans up MobileGeo installation and removes all geofences and settings.
+     */
+    public abstract void cleanup();
 }
