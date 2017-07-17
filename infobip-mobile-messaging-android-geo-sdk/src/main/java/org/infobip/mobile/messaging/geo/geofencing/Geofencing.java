@@ -32,4 +32,6 @@ public abstract class Geofencing {
     public abstract void startGeoMonitoring();
 
     public abstract void stopGeoMonitoring();
+
+    public abstract void cleanup();
 }

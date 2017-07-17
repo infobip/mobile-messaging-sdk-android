@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.ActivityCompat;
+import android.util.Pair;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,8 +25,6 @@ import com.google.android.gms.location.LocationServices;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.BootReceiver;
@@ -35,6 +34,7 @@ import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
 import org.infobip.mobile.messaging.geo.push.PushMessageReceiver;
 import org.infobip.mobile.messaging.geo.storage.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.ArrayList;
@@ -137,12 +137,12 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     @VisibleForTesting
-    public Tuple<List<Geofence>, Tuple<Date, Date>> calculateGeofencesToMonitorDates(MessageStore messageStore) {
+    public Pair<List<Geofence>, Pair<Date, Date>> calculateGeofencesToMonitorDates(MessageStore messageStore) {
         return calculateGeofencesToMonitorAndNextCheckDates(messageStore);
     }
 
     @SuppressWarnings("WeakerAccess")
-    private Tuple<List<Geofence>, Tuple<Date, Date>> calculateGeofencesToMonitorAndNextCheckDates(MessageStore messageStore) {
+    private Pair<List<Geofence>, Pair<Date, Date>> calculateGeofencesToMonitorAndNextCheckDates(MessageStore messageStore) {
         Date nextCheckRefreshDate = null;
         Date nextCheckExpireDate = null;
         Map<String, Geofence> geofences = new HashMap<>();
@@ -183,7 +183,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         }
 
         List<Geofence> geofenceList = new ArrayList<>(geofences.values());
-        return new Tuple<>(geofenceList, new Tuple<>(nextCheckRefreshDate, nextCheckExpireDate));
+        return new Pair<>(geofenceList, new Pair<>(nextCheckRefreshDate, nextCheckExpireDate));
     }
 
     private static Date calculateNextCheckDateForGeoStart(Geo geo, Date oldCheckDate) {
@@ -249,14 +249,14 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
             return;
         }
 
-        Tuple<List<Geofence>, Tuple<Date, Date>> tuple = calculateGeofencesToMonitorAndNextCheckDates(messageStore);
-        Date nextRefreshDate = tuple.getRight().getLeft();
-        Date nextExpireDate = tuple.getRight().getRight();
+        Pair<List<Geofence>, Pair<Date, Date>> tuple = calculateGeofencesToMonitorAndNextCheckDates(messageStore);
+        Date nextRefreshDate = tuple.second.first;
+        Date nextExpireDate = tuple.second.second;
 
         scheduleRefresh(context, nextRefreshDate);
         scheduleExpiry(context, nextExpireDate);
 
-        geofences = tuple.getLeft();
+        geofences = tuple.first;
         if (geofences.isEmpty()) {
             return;
         }
@@ -301,6 +301,13 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
                         requestType = GoogleApiClientRequestType.NONE;
                     }
                 });
+    }
+
+    @Override
+    public void cleanup() {
+        setGeoComponentsEnabledSettings(context, false);
+        stopGeoMonitoring();
+        messageStore.deleteAll(context);
     }
 
     @Override

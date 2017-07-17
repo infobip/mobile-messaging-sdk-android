@@ -76,6 +76,8 @@ public class MobileGeoImpl extends MobileGeo {
     @Override
     public void cleanup() {
         deactivateGeofencing();
+        Geofencing.getInstance(context).cleanup();
+
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.ALL_ACTIVE_GEO_AREAS_MONITORED.getKey());
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.FINISHED_CAMPAIGN_IDS.getKey());
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.SUSPENDED_CAMPAIGN_IDS.getKey());

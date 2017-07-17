@@ -1,8 +1,9 @@
 package org.infobip.mobile.messaging.geo;
 
+import android.util.Pair;
+
 import com.google.android.gms.location.Geofence;
 
-import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.geo.geofencing.Geofencing;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingImpl;
@@ -91,15 +92,15 @@ public class GeofencingTest extends MobileMessagingTestCase {
         saveGeoMessageToDb(date15MinAfterNow, date30MinAfterNow);
 
         // When
-        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
+        Pair<List<Geofence>, Pair<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
-        assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNotNull(geofencesAndNextRefreshDate.getRight());
+        assertTrue(geofencesAndNextRefreshDate.first.isEmpty());
+        assertNotNull(geofencesAndNextRefreshDate.second);
 
-        Date refreshStartDate = geofencesAndNextRefreshDate.getRight().getLeft();
-        Date refreshExpiryDate = geofencesAndNextRefreshDate.getRight().getRight();
+        Date refreshStartDate = geofencesAndNextRefreshDate.second.first;
+        Date refreshExpiryDate = geofencesAndNextRefreshDate.second.second;
         assertEquals(millis15MinAfterNow, refreshStartDate.getTime(), 3000);
         assertEquals(millis30MinAfterNow, refreshExpiryDate.getTime(), 3000);
     }
@@ -115,12 +116,12 @@ public class GeofencingTest extends MobileMessagingTestCase {
         saveGeoMessageToDb(date30MinBeforeNow, date15MinBeforeNow);
 
         // When
-        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
+        Pair<List<Geofence>, Pair<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
-        assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
+        assertTrue(geofencesAndNextRefreshDate.first.isEmpty());
+        assertNull(geofencesAndNextRefreshDate.second.first);
     }
 
     @Test
@@ -134,13 +135,13 @@ public class GeofencingTest extends MobileMessagingTestCase {
         saveGeoMessageToDb(date30MinBeforeNow, date15MinBeforeNow);
 
         // When
-        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
+        Pair<List<Geofence>, Pair<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
-        assertTrue(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
-        assertEquals(now, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
+        assertTrue(geofencesAndNextRefreshDate.first.isEmpty());
+        assertNull(geofencesAndNextRefreshDate.second.first);
+        assertEquals(now, geofencesAndNextRefreshDate.second.second.getTime(), 3000);
     }
 
     @Test
@@ -154,12 +155,12 @@ public class GeofencingTest extends MobileMessagingTestCase {
         saveGeoMessageToDb(date15MinBeforeNow, date15MinAfterNow);
 
         // When
-        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
+        Pair<List<Geofence>, Pair<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
-        assertFalse(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
+        assertFalse(geofencesAndNextRefreshDate.first.isEmpty());
+        assertNull(geofencesAndNextRefreshDate.second.first);
     }
 
     @Test
@@ -173,13 +174,13 @@ public class GeofencingTest extends MobileMessagingTestCase {
         saveGeoMessageToDb(date15MinBeforeNow, date15MinAfterNow);
 
         // When
-        Tuple<List<Geofence>, Tuple<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
+        Pair<List<Geofence>, Pair<Date, Date>> geofencesAndNextRefreshDate = geofencingImpl.calculateGeofencesToMonitorDates(geoStore);
 
         // Then
         assertNotNull(geofencesAndNextRefreshDate);
-        assertFalse(geofencesAndNextRefreshDate.getLeft().isEmpty());
-        assertNull(geofencesAndNextRefreshDate.getRight().getLeft());
-        assertEquals(millis15MinAfterNow, geofencesAndNextRefreshDate.getRight().getRight().getTime(), 3000);
+        assertFalse(geofencesAndNextRefreshDate.first.isEmpty());
+        assertNull(geofencesAndNextRefreshDate.second.first);
+        assertEquals(millis15MinAfterNow, geofencesAndNextRefreshDate.second.second.getTime(), 3000);
     }
 
     private void saveGeoMessageToDb(String startTimeMillis, String expiryTimeMillis) {
