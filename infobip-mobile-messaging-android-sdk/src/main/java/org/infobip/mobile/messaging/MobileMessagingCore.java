@@ -557,11 +557,9 @@ public class MobileMessagingCore extends MobileMessaging {
     private static void cleanup(Context context) {
         applicationCode = null;
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
-        String gcmToken = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
 
         Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
         intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
-        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_TOKEN, gcmToken);
         context.startService(intent);
 
         PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);

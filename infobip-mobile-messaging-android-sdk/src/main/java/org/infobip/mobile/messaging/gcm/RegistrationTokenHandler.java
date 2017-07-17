@@ -79,12 +79,11 @@ class RegistrationTokenHandler {
      * Cleanup GCM token accosicated with a specific GCM sender ID.
      *
      * @param gcmSenderID GCM sender ID
-     * @param gcmToken    GCM token to delete
      */
-    void handleRegistrationTokenCleanup(Context context, String gcmSenderID, String gcmToken) {
+    void handleRegistrationTokenCleanup(Context context, String gcmSenderID) {
         try {
             InstanceID instanceID = InstanceID.getInstance(context);
-            instanceID.deleteToken(gcmSenderID, gcmToken);
+            instanceID.deleteToken(gcmSenderID, GoogleCloudMessaging.INSTANCE_ID_SCOPE);
         } catch (IOException e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_GCM_TOKEN_CLEANUP.get(), e);
         }

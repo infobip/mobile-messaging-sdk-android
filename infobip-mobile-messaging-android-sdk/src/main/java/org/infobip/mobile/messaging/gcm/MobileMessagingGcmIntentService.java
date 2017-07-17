@@ -192,7 +192,7 @@ public class MobileMessagingGcmIntentService extends IntentService {
                 break;
 
             case ACTION_TOKEN_CLEANUP:
-                registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID), intent.getStringExtra(EXTRA_GCM_TOKEN));
+                registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID));
                 break;
 
             case ACTION_ACQUIRE_INSTANCE_ID:
