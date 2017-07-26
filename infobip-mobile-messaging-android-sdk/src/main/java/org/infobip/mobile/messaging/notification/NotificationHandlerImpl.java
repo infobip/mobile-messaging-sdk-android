@@ -21,11 +21,12 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -34,6 +35,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
+import java.util.Set;
+
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_CATEGORY;
 
 /**
  * @author sslavin
@@ -53,7 +59,8 @@ public class NotificationHandlerImpl implements NotificationHandler {
      * {@inheritDoc}
      */
     public void displayNotification(Message message) {
-        NotificationCompat.Builder builder = notificationCompatBuilder(message);
+        int notificationId = getNotificationId(message);
+        NotificationCompat.Builder builder = notificationCompatBuilder(message, notificationId);
         if (builder == null) return;
 
         //issue: http://stackoverflow.com/questions/13602190/java-lang-securityexception-requires-vibrate-permission-on-jelly-bean-4-2
@@ -61,16 +68,19 @@ public class NotificationHandlerImpl implements NotificationHandler {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification notification = builder.build();
             MobileMessagingLogger.v("NOTIFY FOR MESSAGE", message);
-            notificationManager.notify(getNotificationId(message), notification);
+            notificationManager.notify(notificationId, notification);
         } catch (SecurityException se) {
             MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
             MobileMessagingLogger.d(Log.getStackTraceString(se));
         }
     }
 
-    private NotificationCompat.Builder notificationCompatBuilder(Message message) {
+    private NotificationCompat.Builder notificationCompatBuilder(Message message, int notificationId) {
         NotificationSettings notificationSettings = notificationSettings(message);
         if (notificationSettings == null) return null;
+
+        String category = message.getCategory();
+        InteractiveCategory triggeredInteractiveCategory = triggeredInteractiveCategory(category);
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
@@ -83,8 +93,43 @@ public class NotificationHandlerImpl implements NotificationHandler {
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
+        setNotificationActions(notificationBuilder, triggeredInteractiveCategory, notificationId);
 
         return notificationBuilder;
+    }
+
+    private void setNotificationActions(NotificationCompat.Builder notificationBuilder,
+                                        InteractiveCategory triggeredInteractiveCategory,
+                                        int notificationId) {
+        if (triggeredInteractiveCategory == null) {
+            return;
+        }
+
+        NotificationAction[] notificationActions = triggeredInteractiveCategory.getNotificationActions();
+        for (NotificationAction notificationAction : notificationActions) {
+            PendingIntent pendingIntent = createPendingIntent(triggeredInteractiveCategory, notificationAction.getId(), notificationId);
+            notificationBuilder.addAction(
+                    new NotificationCompat.Action(notificationAction.getIcon(), notificationAction.getTitle(), pendingIntent));
+        }
+    }
+
+    private InteractiveCategory triggeredInteractiveCategory(String category) {
+        if (StringUtils.isBlank(category)) {
+            return null;
+        }
+
+        Set<InteractiveCategory> storedInteractiveCategories = MobileMessagingCore.getInstance(context).getInteractiveNotificationCategories();
+        if (storedInteractiveCategories == MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
+            return null;
+        }
+
+        for (InteractiveCategory interactiveCategory : storedInteractiveCategories) {
+            if (category.equals(interactiveCategory.getCategoryId())) {
+                return interactiveCategory;
+            }
+        }
+
+        return null;
     }
 
     private void setNotificationStyle(NotificationCompat.Builder notificationBuilder, Message message, String title) {
@@ -147,6 +192,17 @@ public class NotificationHandlerImpl implements NotificationHandler {
         intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
         intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
         return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
+    }
+
+    @SuppressWarnings("WrongConstant")
+    @NonNull
+    private PendingIntent createPendingIntent(InteractiveCategory interactiveCategory, String triggeredActionId, int notificationId) {
+        Intent intent = new Intent(context, NotificationActionReceiver.class);
+        intent.setAction(triggeredActionId);
+        intent.putExtra(EXTRA_TRIGGERED_ACTION_ID, triggeredActionId);
+        intent.putExtra(EXTRA_TRIGGERED_CATEGORY, InteractiveCategoryBundleMapper.interactiveCategoryToBundle(interactiveCategory));
+        intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
+        return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private NotificationSettings notificationSettings(Message message) {

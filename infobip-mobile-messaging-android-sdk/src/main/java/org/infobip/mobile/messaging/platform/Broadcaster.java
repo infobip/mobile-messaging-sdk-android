@@ -4,6 +4,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.notification.InteractiveCategory;
 
 import java.util.List;
 
@@ -101,4 +102,12 @@ public interface Broadcaster {
      * @param systemData system data
      */
     void systemDataReported(SystemData systemData);
+
+    /**
+     * Sends broadcast with triggered action ID for interactive category.
+     *
+     * @param interactiveCategory triggered category
+     * @param actionId            triggered action ID
+     */
+    void notificationActionTriggered(InteractiveCategory interactiveCategory, String actionId);
 }
