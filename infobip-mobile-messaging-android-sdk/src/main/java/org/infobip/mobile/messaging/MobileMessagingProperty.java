@@ -50,6 +50,8 @@ public enum MobileMessagingProperty {
     FOREGROUND_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.FOREGROUND_NOTIFICATION_ENABLED", true),
     MULTIPLE_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MULTIPLE_NOTIFICATIONS_ENABLED", false),
 
+    INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
+
     BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 3000L),
     VERSION_CHECK_INTERVAL_DAYS("org.infobip.mobile.messaging.notification.VERSION_CHECK_INTERVAL_DAYS", 1),
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),

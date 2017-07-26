@@ -296,6 +296,10 @@ public abstract class PreferenceHelper {
         });
     }
 
+    public static void saveStringSet(Context context, MobileMessagingProperty property, final Set<String> set) {
+        saveStringSet(context, property.getKey(), set);
+    }
+
     public static void saveStringSet(Context context, String key, final Set<String> set) {
         SetMutator mutator = new SetMutator() {
             @Override

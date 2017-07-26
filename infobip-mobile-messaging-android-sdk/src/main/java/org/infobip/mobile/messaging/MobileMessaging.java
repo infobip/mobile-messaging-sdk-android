@@ -8,6 +8,8 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.notification.InteractiveCategory;
+import org.infobip.mobile.messaging.notification.NotificationAction;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -232,12 +234,18 @@ public abstract class MobileMessaging {
      * @see NotificationSettings.Builder
      * @see NotificationSettings
      * @see Builder#withGcmSenderId(String)
-     * @see Builder#withoutDisplayNotification()
-     * @see Builder#withMessageStore(Class)
      * @see Builder#withApiUri(String)
-     * @see Builder#withApplicationCode(String)
-     * @see Builder#withDisplayNotification(NotificationSettings)
+     * @see Builder#withMessageStore(Class)
      * @see Builder#withoutMessageStore()
+     * @see Builder#withApplicationCode(String)
+     * @see Builder#withoutStoringApplicationCode(ApplicationCodeProvider)
+     * @see Builder#withDisplayNotification(NotificationSettings)
+     * @see Builder#withoutDisplayNotification()
+     * @see Builder#withoutStoringUserData()
+     * @see Builder#withoutCarrierInfo()
+     * @see Builder#withoutSystemInfo()
+     * @see Builder#withoutMarkingSeenOnNotificationTap()
+     * @see Builder#withInteractiveNotificationCategories(InteractiveCategory...)
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -254,6 +262,7 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
+        private InteractiveCategory[] interactiveCategories = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -451,6 +460,42 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * It will configure interactive notification categories along with their actions. Maximum of three (3) actions are shown in the
+         * default notification layout. Actions are displayed in the order they've been set.
+         * <p>
+         * Handle action click event by registering broadcast to {@link Event#NOTIFICATION_ACTION_CLICKED} event or set a callback
+         * activity that will be triggered for actions that have {@link NotificationAction.Builder#withBringingAppToForeground(boolean)}
+         * configured.
+         * <pre>
+         *  NotificationAction action1 = new NotificationAction.Builder()
+         *      .withId("decline")
+         *      .withTitle(getString(R.string.decline))
+         *      .withIcon(R.drawable.decline)
+         *      .build();
+         *
+         * NotificationAction action2 = new NotificationAction.Builder()
+         *      .withId("accept")
+         *      .withTitle(getString(R.string.accept))
+         *      .withIcon(R.drawable.accept)
+         *      .withBringingAppToForeground(true)
+         *      .build();
+         *
+         * InteractiveCategory interactiveCategory = new InteractiveCategory("category_confirm", action1, action2);
+         * new MobileMessaging.Builder(application)
+         *       .withInteractiveNotificationCategories(interactiveCategory)
+         *       .build();
+         * </pre>
+         * <p/>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withInteractiveNotificationCategories(InteractiveCategory... interactiveCategories) {
+            validateWithParam(interactiveCategories);
+            this.interactiveCategories = interactiveCategories;
+            return this;
+        }
+
+        /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -547,6 +592,8 @@ public abstract class MobileMessaging {
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings);
+
+            mobileMessagingCoreBuilder.withInteractiveNotificationCategories(interactiveCategories);
 
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);

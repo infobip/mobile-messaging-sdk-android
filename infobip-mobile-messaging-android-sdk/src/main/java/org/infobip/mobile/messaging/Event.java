@@ -205,7 +205,19 @@ public enum Event {
      * }
      * </pre>
      */
-    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED");
+    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED"),
+
+    /**
+     * It is triggered when notification action button is clicked.
+     * <pre>
+     * {@code
+     * String actionId = intent.getStringExtra(BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID);
+     * Bundle categoryBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_TRIGGERED_CATEGORY);
+     * InteractiveCategory interactiveCategory = InteractiveCategory.createFrom(categoryBundle);
+     * }
+     * </pre>
+     */
+    NOTIFICATION_ACTION_CLICKED("org.infobip.mobile.messaging.NOTIFICATION_ACTION_CLICKED");
 
     private final String key;
 
