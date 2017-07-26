@@ -8,7 +8,7 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.notification.InteractiveCategory;
+import org.infobip.mobile.messaging.notification.NotificationCategory;
 import org.infobip.mobile.messaging.notification.NotificationAction;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -245,7 +245,7 @@ public abstract class MobileMessaging {
      * @see Builder#withoutCarrierInfo()
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
-     * @see Builder#withInteractiveNotificationCategories(InteractiveCategory...)
+     * @see Builder#withInteractiveNotificationCategories(NotificationCategory...)
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -262,7 +262,7 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
-        private InteractiveCategory[] interactiveCategories = null;
+        private NotificationCategory[] notificationCategories = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -480,18 +480,18 @@ public abstract class MobileMessaging {
          *      .withBringingAppToForeground(true)
          *      .build();
          *
-         * InteractiveCategory interactiveCategory = new InteractiveCategory("category_confirm", action1, action2);
+         * NotificationCategory notificationCategory = new NotificationCategory("category_confirm", action1, action2);
          * new MobileMessaging.Builder(application)
-         *       .withInteractiveNotificationCategories(interactiveCategory)
+         *       .withInteractiveNotificationCategories(notificationCategory)
          *       .build();
          * </pre>
          * <p/>
          *
          * @return {@link Builder}
          */
-        public Builder withInteractiveNotificationCategories(InteractiveCategory... interactiveCategories) {
-            validateWithParam(interactiveCategories);
-            this.interactiveCategories = interactiveCategories;
+        public Builder withInteractiveNotificationCategories(NotificationCategory... notificationCategories) {
+            validateWithParam(notificationCategories);
+            this.notificationCategories = notificationCategories;
             return this;
         }
 
@@ -593,7 +593,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings);
 
-            mobileMessagingCoreBuilder.withInteractiveNotificationCategories(interactiveCategories);
+            mobileMessagingCoreBuilder.withInteractiveNotificationCategories(notificationCategories);
 
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);

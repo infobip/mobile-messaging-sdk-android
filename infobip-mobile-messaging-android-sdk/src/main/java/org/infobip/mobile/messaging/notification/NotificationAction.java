@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.NotificationSettings;
 
-import static org.infobip.mobile.messaging.notification.InteractiveCategory.MM_INTERACTIVE_ID_PREFIX;
+import static org.infobip.mobile.messaging.notification.NotificationCategory.MM_INTERACTIVE_ID_PREFIX;
 
 /**
  * Notification action class
@@ -82,7 +82,7 @@ public class NotificationAction {
         }
 
         /**
-         * Brings app to foreground on action click. {@link InteractiveCategory} and action ID will be forwarded in intent to
+         * Brings app to foreground on action click. {@link NotificationCategory} and action ID will be forwarded in intent to
          * activity that's set up with {@link NotificationSettings.Builder#withCallbackActivity(Class)}
          *
          * @param bringAppToForeground Sets app to foreground with 'true' value

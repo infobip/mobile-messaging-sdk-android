@@ -9,7 +9,7 @@ import android.support.annotation.NonNull;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MockActivity;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -30,7 +30,7 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
 
     private Broadcaster broadcastSender;
     private NotificationManager notificationManagerMock;
-    private ArgumentCaptor<InteractiveCategory> interactiveCategoryArgumentCaptor;
+    private ArgumentCaptor<NotificationCategory> notificationCategoryArgumentCaptor;
     private ArgumentCaptor<Intent> intentArgumentCaptor;
     private NotificationActionReceiver notificationActionReceiver;
     private NotificationSettings notificationSettings;
@@ -42,7 +42,7 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
         broadcastSender = Mockito.mock(Broadcaster.class);
         notificationManagerMock = Mockito.mock(NotificationManager.class);
         MobileMessagingCore mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
-        interactiveCategoryArgumentCaptor = ArgumentCaptor.forClass(InteractiveCategory.class);
+        notificationCategoryArgumentCaptor = ArgumentCaptor.forClass(NotificationCategory.class);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         notificationActionReceiver = new NotificationActionReceiver(broadcastSender, mobileMessagingCore);
 
@@ -64,8 +64,8 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
         int givenNotificationId = 1234;
         NotificationAction notificationAction1 = givenNotificationAction("actionIdNotTriggered").build();
         NotificationAction notificationAction2 = givenNotificationAction(givenTriggeredActionId).build();
-        InteractiveCategory givenInteractiveCategory = new InteractiveCategory("categoryId", notificationAction1, notificationAction2);
-        Intent givenIntent = givenIntent(givenInteractiveCategory, givenTriggeredActionId, givenNotificationId, notificationSettings.getIntentFlags());
+        NotificationCategory givenNotificationCategory = new NotificationCategory("categoryId", notificationAction1, notificationAction2);
+        Intent givenIntent = givenIntent(givenNotificationCategory, givenTriggeredActionId, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
         notificationActionReceiver.onReceive(contextMock, givenIntent);
@@ -73,8 +73,8 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
         // Then
         Mockito.verify(notificationManagerMock, Mockito.times(1)).cancel(givenNotificationId);
         Mockito.verify(broadcastSender, Mockito.times(1))
-                .notificationActionTriggered(interactiveCategoryArgumentCaptor.capture(), eq(givenTriggeredActionId));
-        assertJEquals(givenInteractiveCategory, interactiveCategoryArgumentCaptor.getValue());
+                .notificationActionTriggered(notificationCategoryArgumentCaptor.capture(), eq(givenTriggeredActionId));
+        assertJEquals(givenNotificationCategory, notificationCategoryArgumentCaptor.getValue());
 
         Mockito.verify(contextMock, Mockito.never()).startActivity(any(Intent.class));
     }
@@ -89,8 +89,8 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
         NotificationAction notificationAction2 = givenNotificationAction(givenTriggeredActionId)
                 .withBringingAppToForeground(true)
                 .build();
-        InteractiveCategory givenInteractiveCategory = new InteractiveCategory("categoryId", notificationAction1, notificationAction2);
-        Intent givenIntent = givenIntent(givenInteractiveCategory, givenTriggeredActionId, givenNotificationId, notificationSettings.getIntentFlags());
+        NotificationCategory givenNotificationCategory = new NotificationCategory("categoryId", notificationAction1, notificationAction2);
+        Intent givenIntent = givenIntent(givenNotificationCategory, givenTriggeredActionId, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
         notificationActionReceiver.onReceive(contextMock, givenIntent);
@@ -98,19 +98,19 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
         // Then
         Mockito.verify(notificationManagerMock, Mockito.times(1)).cancel(givenNotificationId);
         Mockito.verify(broadcastSender, Mockito.times(1))
-                .notificationActionTriggered(interactiveCategoryArgumentCaptor.capture(), eq(givenTriggeredActionId));
-        assertJEquals(givenInteractiveCategory, interactiveCategoryArgumentCaptor.getValue());
+                .notificationActionTriggered(notificationCategoryArgumentCaptor.capture(), eq(givenTriggeredActionId));
+        assertJEquals(givenNotificationCategory, notificationCategoryArgumentCaptor.getValue());
 
         Mockito.verify(contextMock, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
         String actualTriggeredActionId = intent.getStringExtra(BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID);
         Bundle actualTriggeredCategoryBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_TRIGGERED_CATEGORY);
-        InteractiveCategory interactiveCategory = InteractiveCategory.createFrom(actualTriggeredCategoryBundle);
+        NotificationCategory notificationCategory = NotificationCategory.createFrom(actualTriggeredCategoryBundle);
 
         assertEquals(notificationSettings.getIntentFlags() | Intent.FLAG_ACTIVITY_NEW_TASK, intent.getFlags());
         assertEquals(givenTriggeredActionId, actualTriggeredActionId);
-        assertJEquals(givenInteractiveCategory, interactiveCategory);
+        assertJEquals(givenNotificationCategory, notificationCategory);
     }
 
     @NonNull
@@ -121,10 +121,10 @@ public class NotificationActionReceiverTest extends MobileMessagingTestCase {
                 .withTitle("btn title");
     }
 
-    private Intent givenIntent(InteractiveCategory interactiveCategory, String actionId, int notificationId, int flags) {
+    private Intent givenIntent(NotificationCategory notificationCategory, String actionId, int notificationId, int flags) {
         return new Intent(context, NotificationActionReceiver.class)
                 .putExtra(EXTRA_TRIGGERED_ACTION_ID, actionId)
-                .putExtra(EXTRA_TRIGGERED_CATEGORY, InteractiveCategoryBundleMapper.interactiveCategoryToBundle(interactiveCategory))
+                .putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory))
                 .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 .putExtra(EXTRA_INTENT_FLAGS.getKey(), flags);
     }

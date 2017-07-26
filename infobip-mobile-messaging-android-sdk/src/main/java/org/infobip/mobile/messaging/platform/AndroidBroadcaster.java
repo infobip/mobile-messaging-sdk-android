@@ -12,10 +12,10 @@ import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.notification.InteractiveCategory;
+import org.infobip.mobile.messaging.notification.NotificationCategory;
 
 import java.util.List;
 
@@ -147,10 +147,10 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void notificationActionTriggered(InteractiveCategory category, String actionId) {
+    public void notificationActionTriggered(NotificationCategory category, String actionId) {
         Intent actionTriggered = prepareIntent(Event.NOTIFICATION_ACTION_CLICKED);
         actionTriggered.putExtra(EXTRA_TRIGGERED_ACTION_ID, actionId);
-        actionTriggered.putExtra(EXTRA_TRIGGERED_CATEGORY, InteractiveCategoryBundleMapper.interactiveCategoryToBundle(category));
+        actionTriggered.putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
         context.sendBroadcast(actionTriggered);
         LocalBroadcastManager.getInstance(context).sendBroadcast(actionTriggered);
     }

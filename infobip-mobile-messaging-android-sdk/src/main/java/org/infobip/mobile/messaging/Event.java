@@ -213,7 +213,7 @@ public enum Event {
      * {@code
      * String actionId = intent.getStringExtra(BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID);
      * Bundle categoryBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_TRIGGERED_CATEGORY);
-     * InteractiveCategory interactiveCategory = InteractiveCategory.createFrom(categoryBundle);
+     * NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
      * }
      * </pre>
      */

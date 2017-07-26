@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -39,21 +39,21 @@ public class NotificationActionReceiver extends BroadcastReceiver {
         String actionId = intent.getStringExtra(EXTRA_TRIGGERED_ACTION_ID);
         Bundle categoryBundle = intent.getBundleExtra(EXTRA_TRIGGERED_CATEGORY);
         int notificationId = intent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
-        InteractiveCategory interactiveCategory = InteractiveCategory.createFrom(categoryBundle);
+        NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
 
         if (notificationId != -1) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(notificationId);
         }
 
-        broadcaster(context).notificationActionTriggered(interactiveCategory, actionId);
+        broadcaster(context).notificationActionTriggered(notificationCategory, actionId);
 
-        startCallbackActivity(context, intent, actionId, interactiveCategory);
+        startCallbackActivity(context, intent, actionId, notificationCategory);
     }
 
-    private void startCallbackActivity(Context context, Intent intent, String actionId, InteractiveCategory interactiveCategory) {
+    private void startCallbackActivity(Context context, Intent intent, String actionId, NotificationCategory notificationCategory) {
         boolean bringAppToForeground = false;
-        for (NotificationAction notificationAction : interactiveCategory.getNotificationActions()) {
+        for (NotificationAction notificationAction : notificationCategory.getNotificationActions()) {
             if (actionId.equals(notificationAction.getId())) {
                 bringAppToForeground = notificationAction.bringsAppToForeground();
                 break;
@@ -79,7 +79,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
 
         Intent callbackIntent = new Intent(context, callbackActivity);
         callbackIntent.putExtra(EXTRA_TRIGGERED_ACTION_ID, actionId);
-        callbackIntent.putExtra(EXTRA_TRIGGERED_CATEGORY, InteractiveCategoryBundleMapper.interactiveCategoryToBundle(interactiveCategory));
+        callbackIntent.putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
 
         // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
         callbackIntent.addFlags(intentFlags | Intent.FLAG_ACTIVITY_NEW_TASK);

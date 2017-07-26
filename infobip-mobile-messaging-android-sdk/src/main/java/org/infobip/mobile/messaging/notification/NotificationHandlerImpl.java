@@ -24,7 +24,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -80,7 +80,7 @@ public class NotificationHandlerImpl implements NotificationHandler {
         if (notificationSettings == null) return null;
 
         String category = message.getCategory();
-        InteractiveCategory triggeredInteractiveCategory = triggeredInteractiveCategory(category);
+        NotificationCategory triggeredNotificationCategory = triggeredNotificationCategory(category);
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
@@ -93,39 +93,39 @@ public class NotificationHandlerImpl implements NotificationHandler {
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
-        setNotificationActions(notificationBuilder, triggeredInteractiveCategory, notificationId);
+        setNotificationActions(notificationBuilder, triggeredNotificationCategory, notificationId);
 
         return notificationBuilder;
     }
 
     private void setNotificationActions(NotificationCompat.Builder notificationBuilder,
-                                        InteractiveCategory triggeredInteractiveCategory,
+                                        NotificationCategory triggeredNotificationCategory,
                                         int notificationId) {
-        if (triggeredInteractiveCategory == null) {
+        if (triggeredNotificationCategory == null) {
             return;
         }
 
-        NotificationAction[] notificationActions = triggeredInteractiveCategory.getNotificationActions();
+        NotificationAction[] notificationActions = triggeredNotificationCategory.getNotificationActions();
         for (NotificationAction notificationAction : notificationActions) {
-            PendingIntent pendingIntent = createPendingIntent(triggeredInteractiveCategory, notificationAction.getId(), notificationId);
+            PendingIntent pendingIntent = createPendingIntent(triggeredNotificationCategory, notificationAction.getId(), notificationId);
             notificationBuilder.addAction(
                     new NotificationCompat.Action(notificationAction.getIcon(), notificationAction.getTitle(), pendingIntent));
         }
     }
 
-    private InteractiveCategory triggeredInteractiveCategory(String category) {
+    private NotificationCategory triggeredNotificationCategory(String category) {
         if (StringUtils.isBlank(category)) {
             return null;
         }
 
-        Set<InteractiveCategory> storedInteractiveCategories = MobileMessagingCore.getInstance(context).getInteractiveNotificationCategories();
-        if (storedInteractiveCategories == MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
+        Set<NotificationCategory> storedNotificationCategories = MobileMessagingCore.getInstance(context).getInteractiveNotificationCategories();
+        if (storedNotificationCategories == MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
             return null;
         }
 
-        for (InteractiveCategory interactiveCategory : storedInteractiveCategories) {
-            if (category.equals(interactiveCategory.getCategoryId())) {
-                return interactiveCategory;
+        for (NotificationCategory notificationCategory : storedNotificationCategories) {
+            if (category.equals(notificationCategory.getCategoryId())) {
+                return notificationCategory;
             }
         }
 
@@ -196,11 +196,11 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
     @SuppressWarnings("WrongConstant")
     @NonNull
-    private PendingIntent createPendingIntent(InteractiveCategory interactiveCategory, String triggeredActionId, int notificationId) {
+    private PendingIntent createPendingIntent(NotificationCategory notificationCategory, String triggeredActionId, int notificationId) {
         Intent intent = new Intent(context, NotificationActionReceiver.class);
         intent.setAction(triggeredActionId);
         intent.putExtra(EXTRA_TRIGGERED_ACTION_ID, triggeredActionId);
-        intent.putExtra(EXTRA_TRIGGERED_CATEGORY, InteractiveCategoryBundleMapper.interactiveCategoryToBundle(interactiveCategory));
+        intent.putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
         intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
         return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }

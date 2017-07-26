@@ -6,9 +6,9 @@ import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
-import org.infobip.mobile.messaging.dal.bundle.InteractiveCategoryBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 
-public class InteractiveCategory {
+public class NotificationCategory {
 
     public static final String MM_INTERACTIVE_ID_PREFIX = "mm_";
 
@@ -21,21 +21,21 @@ public class InteractiveCategory {
      * @param categoryId          Category ID. "mm_" prefix is reserved for Mobile Messaging IDs and cannot be used as a prefix.
      * @param notificationActions Actions
      */
-    public InteractiveCategory(@NonNull String categoryId, @NonNull NotificationAction... notificationActions) {
+    public NotificationCategory(@NonNull String categoryId, @NonNull NotificationAction... notificationActions) {
         validateCategoryId(categoryId);
         this.categoryId = categoryId;
         this.notificationActions = notificationActions;
     }
 
-    private InteractiveCategory(String categoryString) {
+    private NotificationCategory(String categoryString) {
         Gson gson = new Gson();
-        InteractiveCategory data = gson.fromJson(categoryString, InteractiveCategory.class);
+        NotificationCategory data = gson.fromJson(categoryString, NotificationCategory.class);
         this.categoryId = data.categoryId;
         this.notificationActions = data.notificationActions;
     }
 
-    public static InteractiveCategory createFrom(Bundle bundle) {
-        return InteractiveCategoryBundleMapper.interactiveCategoryFromBundle(bundle);
+    public static NotificationCategory createFrom(Bundle bundle) {
+        return NotificationCategoryBundleMapper.notificationCategoryFromBundle(bundle);
     }
 
     private void validateCategoryId(String categoryId) {

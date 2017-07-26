@@ -23,7 +23,7 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
-import org.infobip.mobile.messaging.notification.InteractiveCategory;
+import org.infobip.mobile.messaging.notification.NotificationCategory;
 import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -80,7 +80,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
-    private Set<InteractiveCategory> interactiveCategories;
+    private Set<NotificationCategory> notificationCategories;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
@@ -401,37 +401,37 @@ public class MobileMessagingCore extends MobileMessaging {
         this.notificationSettings = notificationSettings;
     }
 
-    public Set<InteractiveCategory> getInteractiveNotificationCategories() {
+    public Set<NotificationCategory> getInteractiveNotificationCategories() {
         if (!isDisplayNotificationEnabled()) {
             return null;
         }
 
-        if (null != interactiveCategories) {
-            return interactiveCategories;
+        if (null != notificationCategories) {
+            return notificationCategories;
         }
 
-        Set<String> interactiveCategoriesStringSet = PreferenceHelper.findStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES);
-        Set<InteractiveCategory> interactiveCategoriesTemp = new HashSet<>();
-        for (String category : interactiveCategoriesStringSet) {
-            InteractiveCategory interactiveCategory = new JsonSerializer().deserialize(category, InteractiveCategory.class);
-            interactiveCategoriesTemp.add(interactiveCategory);
+        Set<String> notificationCategoriesStringSet = PreferenceHelper.findStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES);
+        Set<NotificationCategory> notificationCategoriesTemp = new HashSet<>();
+        for (String category : notificationCategoriesStringSet) {
+            NotificationCategory notificationCategory = new JsonSerializer().deserialize(category, NotificationCategory.class);
+            notificationCategoriesTemp.add(notificationCategory);
         }
 
-        this.interactiveCategories = interactiveCategoriesTemp;
-        return interactiveCategories;
+        this.notificationCategories = notificationCategoriesTemp;
+        return notificationCategories;
     }
 
-    private void setInteractiveNotificationCategories(InteractiveCategory[] interactiveCategories) {
-        if (interactiveCategories == null || interactiveCategories.length == 0) {
+    private void setInteractiveNotificationCategories(NotificationCategory[] notificationCategories) {
+        if (notificationCategories == null || notificationCategories.length == 0) {
             return;
         }
 
-        Set<String> interactiveCategoriesStringSet = new HashSet<>();
-        for (InteractiveCategory interactiveCategory : interactiveCategories) {
-            interactiveCategoriesStringSet.add(interactiveCategory.toString());
+        Set<String> notificationCategoriesStringSet = new HashSet<>();
+        for (NotificationCategory notificationCategory : notificationCategories) {
+            notificationCategoriesStringSet.add(notificationCategory.toString());
         }
-        PreferenceHelper.saveStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES, interactiveCategoriesStringSet);
-        this.interactiveCategories = new HashSet<>(Arrays.asList(interactiveCategories));
+        PreferenceHelper.saveStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES, notificationCategoriesStringSet);
+        this.notificationCategories = new HashSet<>(Arrays.asList(notificationCategories));
     }
 
     private boolean isDisplayNotificationEnabled() {
@@ -776,7 +776,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
         private final Application application;
         private NotificationSettings notificationSettings = null;
-        private InteractiveCategory[] interactiveCategories = null;
+        private NotificationCategory[] notificationCategories = null;
         private String applicationCode = null;
         private ApplicationCodeProvider applicationCodeProvider;
 
@@ -814,8 +814,8 @@ public class MobileMessagingCore extends MobileMessaging {
             return this;
         }
 
-        public Builder withInteractiveNotificationCategories(InteractiveCategory... interactiveCategories) {
-            this.interactiveCategories = interactiveCategories;
+        public Builder withInteractiveNotificationCategories(NotificationCategory... notificationCategories) {
+            this.notificationCategories = notificationCategories;
             return this;
         }
 
@@ -865,7 +865,7 @@ public class MobileMessagingCore extends MobileMessaging {
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             MobileMessagingCore.instance = mobileMessagingCore;
             mobileMessagingCore.setNotificationSettings(notificationSettings);
-            mobileMessagingCore.setInteractiveNotificationCategories(interactiveCategories);
+            mobileMessagingCore.setInteractiveNotificationCategories(notificationCategories);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
