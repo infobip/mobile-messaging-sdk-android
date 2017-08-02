@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -23,7 +24,6 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
-import org.infobip.mobile.messaging.notification.NotificationCategory;
 import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -80,7 +80,8 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
-    private Set<NotificationCategory> notificationCategories;
+    private Set<NotificationCategory> predefinedNotificationCategories;
+    private Set<NotificationCategory> customNotificationCategories;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
@@ -406,32 +407,60 @@ public class MobileMessagingCore extends MobileMessaging {
             return null;
         }
 
-        if (null != notificationCategories) {
-            return notificationCategories;
+        Set<NotificationCategory> notificationCategories = getPredefinedNotificationCategories();
+        Set<NotificationCategory> customNotificationCategories = getCustomNotificationCategories();
+        notificationCategories.addAll(customNotificationCategories);
+
+        return notificationCategories;
+    }
+
+    @NonNull
+    Set<NotificationCategory> getCustomNotificationCategories() {
+        if (null != customNotificationCategories) {
+            return customNotificationCategories;
         }
 
         Set<String> notificationCategoriesStringSet = PreferenceHelper.findStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES);
         Set<NotificationCategory> notificationCategoriesTemp = new HashSet<>();
-        for (String category : notificationCategoriesStringSet) {
-            NotificationCategory notificationCategory = new JsonSerializer().deserialize(category, NotificationCategory.class);
-            notificationCategoriesTemp.add(notificationCategory);
+        if (notificationCategoriesStringSet != MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
+            for (String category : notificationCategoriesStringSet) {
+                NotificationCategory notificationCategory = new JsonSerializer().deserialize(category, NotificationCategory.class);
+                notificationCategoriesTemp.add(notificationCategory);
+            }
         }
+        this.customNotificationCategories = notificationCategoriesTemp;
 
-        this.notificationCategories = notificationCategoriesTemp;
-        return notificationCategories;
+        return customNotificationCategories;
     }
 
-    private void setInteractiveNotificationCategories(NotificationCategory[] notificationCategories) {
+    Set<NotificationCategory> getPredefinedNotificationCategories() {
+        if (null != predefinedNotificationCategories) {
+            return predefinedNotificationCategories;
+        }
+
+        return PredefinedNotificationCategories.load();
+    }
+
+    private void setPredefinedNotificationCategories(Set<NotificationCategory> notificationCategories) {
+        if (notificationCategories == null) {
+            return;
+        }
+
+        this.predefinedNotificationCategories = notificationCategories;
+    }
+
+    void setCustomNotificationCategories(NotificationCategory[] notificationCategories) {
         if (notificationCategories == null || notificationCategories.length == 0) {
             return;
         }
 
-        Set<String> notificationCategoriesStringSet = new HashSet<>();
-        for (NotificationCategory notificationCategory : notificationCategories) {
-            notificationCategoriesStringSet.add(notificationCategory.toString());
+        final Set<String> customNotificationCategoriesStringSet = new HashSet<>();
+        for (NotificationCategory customNotificationCategory : notificationCategories) {
+            customNotificationCategoriesStringSet.add(customNotificationCategory.toString());
         }
-        PreferenceHelper.saveStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES, notificationCategoriesStringSet);
-        this.notificationCategories = new HashSet<>(Arrays.asList(notificationCategories));
+        PreferenceHelper.saveStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES, customNotificationCategoriesStringSet);
+
+        this.customNotificationCategories = new HashSet<>(Arrays.asList(notificationCategories));
     }
 
     private boolean isDisplayNotificationEnabled() {
@@ -776,7 +805,8 @@ public class MobileMessagingCore extends MobileMessaging {
 
         private final Application application;
         private NotificationSettings notificationSettings = null;
-        private NotificationCategory[] notificationCategories = null;
+        private NotificationCategory[] customNotificationCategories = null;
+        private Set<NotificationCategory> predefinedNotificationCategories = null;
         private String applicationCode = null;
         private ApplicationCodeProvider applicationCodeProvider;
 
@@ -814,8 +844,9 @@ public class MobileMessagingCore extends MobileMessaging {
             return this;
         }
 
-        public Builder withInteractiveNotificationCategories(NotificationCategory... notificationCategories) {
-            this.notificationCategories = notificationCategories;
+        public Builder withInteractiveNotificationCategories(Set<NotificationCategory> predefinedNotificationCategories, NotificationCategory... customNotificationCategories) {
+            this.predefinedNotificationCategories = predefinedNotificationCategories;
+            this.customNotificationCategories = customNotificationCategories;
             return this;
         }
 
@@ -865,7 +896,8 @@ public class MobileMessagingCore extends MobileMessaging {
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             MobileMessagingCore.instance = mobileMessagingCore;
             mobileMessagingCore.setNotificationSettings(notificationSettings);
-            mobileMessagingCore.setInteractiveNotificationCategories(notificationCategories);
+            mobileMessagingCore.setPredefinedNotificationCategories(predefinedNotificationCategories);
+            mobileMessagingCore.setCustomNotificationCategories(customNotificationCategories);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());

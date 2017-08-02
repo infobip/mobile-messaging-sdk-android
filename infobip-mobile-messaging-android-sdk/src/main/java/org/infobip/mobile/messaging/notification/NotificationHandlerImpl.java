@@ -17,15 +17,16 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.NotificationAction;
+import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -37,9 +38,10 @@ import java.net.URL;
 import java.util.Random;
 import java.util.Set;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_CATEGORY;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 /**
  * @author sslavin
@@ -87,18 +89,19 @@ public class NotificationHandlerImpl implements NotificationHandler {
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
-                .setContentIntent(createPendingIntent(notificationSettings, message))
+                .setContentIntent(createTapPendingIntent(notificationSettings, message))
                 .setWhen(message.getReceivedTimestamp());
 
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
-        setNotificationActions(notificationBuilder, triggeredNotificationCategory, notificationId);
+        setNotificationActions(notificationBuilder, message, triggeredNotificationCategory, notificationId);
 
         return notificationBuilder;
     }
 
     private void setNotificationActions(NotificationCompat.Builder notificationBuilder,
+                                        Message message,
                                         NotificationCategory triggeredNotificationCategory,
                                         int notificationId) {
         if (triggeredNotificationCategory == null) {
@@ -107,9 +110,9 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
         NotificationAction[] notificationActions = triggeredNotificationCategory.getNotificationActions();
         for (NotificationAction notificationAction : notificationActions) {
-            PendingIntent pendingIntent = createPendingIntent(triggeredNotificationCategory, notificationAction.getId(), notificationId);
-            notificationBuilder.addAction(
-                    new NotificationCompat.Action(notificationAction.getIcon(), notificationAction.getTitle(), pendingIntent));
+            PendingIntent pendingIntent = createActionTapPendingIntent(message, triggeredNotificationCategory, notificationAction.getId(), notificationId);
+            notificationBuilder.addAction(new NotificationCompat.Action(
+                    notificationAction.getIcon(), context.getString(notificationAction.getTitleResourceId()), pendingIntent));
         }
     }
 
@@ -187,20 +190,21 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
     @SuppressWarnings("WrongConstant")
     @NonNull
-    private PendingIntent createPendingIntent(NotificationSettings notificationSettings, Message message) {
+    private PendingIntent createTapPendingIntent(NotificationSettings notificationSettings, Message message) {
         Intent intent = new Intent(context, NotificationTapReceiver.class);
-        intent.putExtra(BroadcastParameter.EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
+        intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
         intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
         return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
     }
 
     @SuppressWarnings("WrongConstant")
     @NonNull
-    private PendingIntent createPendingIntent(NotificationCategory notificationCategory, String triggeredActionId, int notificationId) {
-        Intent intent = new Intent(context, NotificationActionReceiver.class);
-        intent.setAction(triggeredActionId);
-        intent.putExtra(EXTRA_TRIGGERED_ACTION_ID, triggeredActionId);
-        intent.putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
+    private PendingIntent createActionTapPendingIntent(Message message, NotificationCategory notificationCategory, String tappedActionId, int notificationId) {
+        Intent intent = new Intent(context, NotificationActionTapReceiver.class);
+        intent.setAction(tappedActionId);
+        intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
+        intent.putExtra(EXTRA_TAPPED_ACTION_ID, tappedActionId);
+        intent.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
         intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
         return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }

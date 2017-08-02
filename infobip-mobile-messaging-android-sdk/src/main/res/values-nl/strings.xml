@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_button_accept">Accepteer</string>
+    <string name="mm_button_decline">Wijs af</string>
+</resources>

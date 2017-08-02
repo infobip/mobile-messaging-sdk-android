@@ -1,10 +1,10 @@
 package org.infobip.mobile.messaging.platform;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.notification.NotificationCategory;
 
 import java.util.List;
 
@@ -104,10 +104,11 @@ public interface Broadcaster {
     void systemDataReported(SystemData systemData);
 
     /**
-     * Sends broadcast with triggered action ID for interactive category.
+     * Sends broadcast with tapped action ID for interactive category set on message.
      *
-     * @param notificationCategory triggered category
-     * @param actionId            triggered action ID
+     * @param message              received message
+     * @param notificationCategory tapped category
+     * @param actionId             tapped action ID
      */
-    void notificationActionTriggered(NotificationCategory notificationCategory, String actionId);
+    void notificationActionTapped(Message message, NotificationCategory notificationCategory, String actionId);
 }

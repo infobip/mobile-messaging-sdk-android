@@ -10,17 +10,17 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.notification.NotificationCategory;
 
 import java.util.List;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_ACTION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TRIGGERED_CATEGORY;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 /**
  * @author sslavin
@@ -147,12 +147,13 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void notificationActionTriggered(NotificationCategory category, String actionId) {
-        Intent actionTriggered = prepareIntent(Event.NOTIFICATION_ACTION_CLICKED);
-        actionTriggered.putExtra(EXTRA_TRIGGERED_ACTION_ID, actionId);
-        actionTriggered.putExtra(EXTRA_TRIGGERED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
-        context.sendBroadcast(actionTriggered);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(actionTriggered);
+    public void notificationActionTapped(Message message, NotificationCategory category, String actionId) {
+        Intent actionTapped = prepareIntent(Event.NOTIFICATION_ACTION_TAPPED);
+        actionTapped.putExtras(MessageBundleMapper.messageToBundle(message));
+        actionTapped.putExtra(EXTRA_TAPPED_ACTION_ID, actionId);
+        actionTapped.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
+        context.sendBroadcast(actionTapped);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(actionTapped);
     }
 
     private Intent prepareIntent(Event event) {

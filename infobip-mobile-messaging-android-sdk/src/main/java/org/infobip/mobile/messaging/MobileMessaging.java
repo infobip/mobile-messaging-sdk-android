@@ -8,11 +8,11 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.notification.NotificationCategory;
-import org.infobip.mobile.messaging.notification.NotificationAction;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.util.Set;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
@@ -262,7 +262,8 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
-        private NotificationCategory[] notificationCategories = null;
+        private NotificationCategory[] customNotificationCategories = null;
+        private Set<NotificationCategory> predefinedNotificationCategories = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -463,19 +464,19 @@ public abstract class MobileMessaging {
          * It will configure interactive notification categories along with their actions. Maximum of three (3) actions are shown in the
          * default notification layout. Actions are displayed in the order they've been set.
          * <p>
-         * Handle action click event by registering broadcast to {@link Event#NOTIFICATION_ACTION_CLICKED} event or set a callback
+         * Handle action click event by registering broadcast for {@link Event#NOTIFICATION_ACTION_TAPPED} event or set a callback
          * activity that will be triggered for actions that have {@link NotificationAction.Builder#withBringingAppToForeground(boolean)}
          * configured.
          * <pre>
          *  NotificationAction action1 = new NotificationAction.Builder()
          *      .withId("decline")
-         *      .withTitle(getString(R.string.decline))
+         *      .withTitleResourceId(R.string.decline)
          *      .withIcon(R.drawable.decline)
          *      .build();
          *
          * NotificationAction action2 = new NotificationAction.Builder()
          *      .withId("accept")
-         *      .withTitle(getString(R.string.accept))
+         *      .withTitleResourceId(R.string.accept)
          *      .withIcon(R.drawable.accept)
          *      .withBringingAppToForeground(true)
          *      .build();
@@ -491,7 +492,7 @@ public abstract class MobileMessaging {
          */
         public Builder withInteractiveNotificationCategories(NotificationCategory... notificationCategories) {
             validateWithParam(notificationCategories);
-            this.notificationCategories = notificationCategories;
+            this.customNotificationCategories = notificationCategories;
             return this;
         }
 
@@ -591,9 +592,8 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
-                    .withDisplayNotification(notificationSettings);
-
-            mobileMessagingCoreBuilder.withInteractiveNotificationCategories(notificationCategories);
+                    .withDisplayNotification(notificationSettings)
+                    .withInteractiveNotificationCategories(predefinedNotificationCategories, customNotificationCategories);
 
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);

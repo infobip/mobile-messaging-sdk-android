@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.infobip.mobile.messaging.notification.NotificationCategory;
+import org.infobip.mobile.messaging.NotificationCategory;
 
 
 public class NotificationCategoryBundleMapper extends BundleMapper {

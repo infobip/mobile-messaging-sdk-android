@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.notification;
+package org.infobip.mobile.messaging;
 
 
 import android.os.Bundle;
@@ -23,6 +23,14 @@ public class NotificationCategory {
      */
     public NotificationCategory(@NonNull String categoryId, @NonNull NotificationAction... notificationActions) {
         validateCategoryId(categoryId);
+        this.categoryId = categoryId;
+        this.notificationActions = notificationActions;
+    }
+
+    protected NotificationCategory(boolean predefined, @NonNull String categoryId, @NonNull NotificationAction... notificationActions) {
+        if (!predefined) {
+            validateCategoryId(categoryId);
+        }
         this.categoryId = categoryId;
         this.notificationActions = notificationActions;
     }

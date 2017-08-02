@@ -35,7 +35,7 @@
         </service>
 
         <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
-        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationActionReceiver" />
+        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationActionTapReceiver" />
 
     </application>
 </manifest>

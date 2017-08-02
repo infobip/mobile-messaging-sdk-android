@@ -1,23 +1,19 @@
-package org.infobip.mobile.messaging.notification;
+package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
-
-import org.infobip.mobile.messaging.NotificationSettings;
-
-import static org.infobip.mobile.messaging.notification.NotificationCategory.MM_INTERACTIVE_ID_PREFIX;
 
 /**
  * Notification action class
  */
 public class NotificationAction {
     private String id;
-    private String title;
+    private int titleResourceId;
     private int icon;
     private boolean bringsAppToForeground;
 
-    private NotificationAction(String id, String title, int icon, boolean bringsAppToForeground) {
+    private NotificationAction(String id, int titleResourceId, int icon, boolean bringsAppToForeground) {
         this.id = id;
-        this.title = title;
+        this.titleResourceId = titleResourceId;
         this.icon = icon;
         this.bringsAppToForeground = bringsAppToForeground;
     }
@@ -26,8 +22,8 @@ public class NotificationAction {
         return id;
     }
 
-    public String getTitle() {
-        return title;
+    public int getTitleResourceId() {
+        return titleResourceId;
     }
 
     public int getIcon() {
@@ -39,10 +35,19 @@ public class NotificationAction {
     }
 
     public static final class Builder {
+        private boolean predefined;
         private String id;
-        private String title;
+        private int titleResourceId;
         private int icon;
         private boolean bringsAppToForeground;
+
+        public Builder() {
+            this.predefined = false;
+        }
+
+        protected Builder(boolean predefined) {
+            this.predefined = predefined;
+        }
 
         /**
          * Id of an action.
@@ -51,8 +56,8 @@ public class NotificationAction {
          */
         public Builder withId(@NonNull String id) {
             validateWithParam(id);
-            if (id.startsWith(MM_INTERACTIVE_ID_PREFIX)) {
-                throw new IllegalArgumentException(String.format("'%s' prefix is reserved for Mobile Messaging library", MM_INTERACTIVE_ID_PREFIX));
+            if (!predefined && id.startsWith(NotificationCategory.MM_INTERACTIVE_ID_PREFIX)) {
+                throw new IllegalArgumentException(String.format("'%s' prefix is reserved for Mobile Messaging library", NotificationCategory.MM_INTERACTIVE_ID_PREFIX));
             }
 
             this.id = id;
@@ -62,11 +67,10 @@ public class NotificationAction {
         /**
          * Title of the action button.
          *
-         * @param title Text displayed on notification action button.
+         * @param titleResourceId Resource ID of the text displayed on notification action button. Example: R.string.yes
          */
-        public Builder withTitle(@NonNull String title) {
-            validateWithParam(title);
-            this.title = title;
+        public Builder withTitleResourceId(int titleResourceId) {
+            this.titleResourceId = titleResourceId;
             return this;
         }
 
@@ -93,7 +97,7 @@ public class NotificationAction {
         }
 
         public NotificationAction build() {
-            return new NotificationAction(id, title, icon, bringsAppToForeground);
+            return new NotificationAction(id, titleResourceId, icon, bringsAppToForeground);
         }
 
         private void validateWithParam(Object o) {

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_button_accept">Aceitar</string>
+    <string name="mm_button_decline">Declinar</string>
+</resources>
