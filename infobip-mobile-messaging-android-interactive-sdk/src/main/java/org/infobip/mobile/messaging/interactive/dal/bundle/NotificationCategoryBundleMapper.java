@@ -1,11 +1,12 @@
-package org.infobip.mobile.messaging.dal.bundle;
+package org.infobip.mobile.messaging.interactive.dal.bundle;
 
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.infobip.mobile.messaging.NotificationCategory;
+import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 
 
 public class NotificationCategoryBundleMapper extends BundleMapper {

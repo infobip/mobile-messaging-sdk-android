@@ -1,6 +1,10 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.interactive;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+
+import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 
 /**
  * Notification action class
@@ -16,6 +20,10 @@ public class NotificationAction {
         this.titleResourceId = titleResourceId;
         this.icon = icon;
         this.bringsAppToForeground = bringsAppToForeground;
+    }
+
+    public static NotificationAction createFrom(Bundle bundle) {
+        return NotificationActionBundleMapper.notificationActionFromBundle(bundle);
     }
 
     public String getId() {

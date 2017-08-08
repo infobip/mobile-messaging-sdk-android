@@ -7,7 +7,6 @@ import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
@@ -16,7 +15,7 @@ import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReportHelper;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.report.GeoReportingResult;
-import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
@@ -41,7 +40,8 @@ public class GeoAreasHandler {
     private MobileMessagingCore mobileMessagingCore;
 
     GeoAreasHandler(Context context, GeoBroadcaster geoBroadcaster) {
-        this(context, new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), new NotificationHandlerImpl(context)),
+        this(context,
+                new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), MobileMessagingCore.resolveNotificationHandler(context)),
                 new GeoReporter(context, geoBroadcaster, MobileMessagingCore.getInstance(context).getStats()),
                 new GeofencingHelper(context));
     }

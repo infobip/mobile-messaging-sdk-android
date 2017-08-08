@@ -1,7 +1,7 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.interactive;
 
 
-import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,6 +13,14 @@ import static junit.framework.Assert.assertTrue;
 
 public class NotificationCategoriesTest extends MobileMessagingTestCase {
 
+    private MobileInteractiveImpl mobileInteractive;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        mobileInteractive = MobileInteractiveImpl.getInstance(context);
+    }
+
     @Test
     public void shouldReturnCustomWithPredefinedCategories_whenGettingInteractiveCategories() throws Exception {
         //given
@@ -23,10 +31,10 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
         givenInteractiveCategories.addAll(predefinedNotificationCategories);
         givenInteractiveCategories.addAll(Arrays.asList(givenCustomNotificationCategories));
 
-        mobileMessagingCore.setCustomNotificationCategories(givenCustomNotificationCategories);
+        mobileInteractive.setCustomNotificationCategories(givenCustomNotificationCategories);
 
         //when
-        Set<NotificationCategory> interactiveNotificationCategories = mobileMessagingCore.getInteractiveNotificationCategories();
+        Set<NotificationCategory> interactiveNotificationCategories = mobileInteractive.getNotificationCategories();
 
         //then
         assertEquals(givenInteractiveCategories.size(), interactiveNotificationCategories.size());
@@ -37,10 +45,10 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
     public void shouldReturnOnlyPredefinedCategories_whenGettingInteractiveCategoriesWithoutCustomCategories() throws Exception {
         //given
         Set<NotificationCategory> predefinedNotificationCategories = PredefinedNotificationCategories.load();
-        mobileMessagingCore.setCustomNotificationCategories(null);
+        mobileInteractive.setCustomNotificationCategories(new NotificationCategory[0]);
 
         //when
-        Set<NotificationCategory> interactiveNotificationCategories = mobileMessagingCore.getInteractiveNotificationCategories();
+        Set<NotificationCategory> interactiveNotificationCategories = mobileInteractive.getNotificationCategories();
 
         //then
         int expectedInteractiveCategoriesSize = predefinedNotificationCategories.size();

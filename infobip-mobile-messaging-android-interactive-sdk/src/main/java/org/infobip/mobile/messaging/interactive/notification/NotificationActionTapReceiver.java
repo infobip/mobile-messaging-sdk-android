@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.notification;
+package org.infobip.mobile.messaging.interactive.notification;
 
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -11,50 +11,51 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.NotificationAction;
-import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
+import org.infobip.mobile.messaging.interactive.InteractiveEvent;
+import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
+import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroadcaster;
+import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
-import org.infobip.mobile.messaging.platform.Broadcaster;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 
 public class NotificationActionTapReceiver extends BroadcastReceiver {
 
-    private Broadcaster broadcaster;
+    private InteractiveBroadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
 
     public NotificationActionTapReceiver() {
     }
 
     @VisibleForTesting
-    public NotificationActionTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore) {
+    public NotificationActionTapReceiver(InteractiveBroadcaster broadcaster, MobileMessagingCore mobileMessagingCore) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String actionId = intent.getStringExtra(EXTRA_TAPPED_ACTION_ID);
+        Bundle actionBundle = intent.getBundleExtra(EXTRA_TAPPED_ACTION);
         Bundle categoryBundle = intent.getBundleExtra(EXTRA_TAPPED_CATEGORY);
         int notificationId = intent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
         Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
 
         Message message = Message.createFrom(messageBundle);
         NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
+        NotificationAction notificationAction = NotificationAction.createFrom(actionBundle);
         cancelNotification(context, notificationId);
 
         if (message == null) {
             MobileMessagingLogger.e("Received no message in NotificationActionTapReceiver");
             return;
         }
-        if (actionId == null) {
-            MobileMessagingLogger.e("Received no action ID in NotificationActionTapReceiver");
+        if (notificationAction == null) {
+            MobileMessagingLogger.e("Received no action in NotificationActionTapReceiver");
             return;
         }
         if (notificationCategory == null) {
@@ -62,10 +63,10 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
             return;
         }
 
-        broadcaster(context).notificationActionTapped(message, notificationCategory, actionId);
+        broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
 
         markAsSeen(context, message);
-        startCallbackActivity(context, intent, messageBundle, actionId, notificationCategory);
+        startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
     }
 
     private void markAsSeen(Context context, Message message) {
@@ -85,15 +86,15 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         }
     }
 
-    private void startCallbackActivity(Context context, Intent intent, Bundle messageBundle, String actionId, NotificationCategory notificationCategory) {
+    private void startCallbackActivity(Context context, Intent intent, Bundle messageBundle, Bundle actionBundle, Bundle categoryBundle) {
         boolean bringAppToForeground = false;
-        for (NotificationAction notificationAction : notificationCategory.getNotificationActions()) {
-            if (actionId.equals(notificationAction.getId())) {
-                bringAppToForeground = notificationAction.bringsAppToForeground();
-                break;
-            }
+
+        NotificationAction notificationAction = NotificationActionBundleMapper.notificationActionFromBundle(actionBundle);
+        if (notificationAction == null) {
+            return;
         }
 
+        bringAppToForeground = notificationAction.bringsAppToForeground();
         if (!bringAppToForeground) {
             return;
         }
@@ -112,18 +113,19 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
                 (Integer) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue());
 
         Intent callbackIntent = new Intent(context, callbackActivity);
-        callbackIntent.putExtra(EXTRA_MESSAGE, messageBundle);
-        callbackIntent.putExtra(EXTRA_TAPPED_ACTION_ID, actionId);
-        callbackIntent.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
+        callbackIntent.setAction(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey());
+        callbackIntent.putExtras(messageBundle);
+        callbackIntent.putExtras(actionBundle);
+        callbackIntent.putExtras(categoryBundle);
 
         // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
         callbackIntent.addFlags(intentFlags | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(callbackIntent);
     }
 
-    private Broadcaster broadcaster(Context context) {
+    private InteractiveBroadcaster broadcaster(Context context) {
         if (broadcaster == null) {
-            broadcaster = new AndroidBroadcaster(context);
+            broadcaster = new AndroidInteractiveBroadcaster(context);
         }
         return broadcaster;
     }

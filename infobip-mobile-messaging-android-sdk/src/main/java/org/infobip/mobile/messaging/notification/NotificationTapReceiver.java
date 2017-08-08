@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -63,6 +64,7 @@ public class NotificationTapReceiver extends BroadcastReceiver {
                 (Integer) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue());
 
         Intent callbackIntent = new Intent(context, callbackActivity);
+        callbackIntent.setAction(Event.NOTIFICATION_TAPPED.getKey());
         callbackIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, messageBundle);
         // FLAG_ACTIVITY_NEW_TASK has to be here
         // because we're starting activity outside of activity context

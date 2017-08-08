@@ -19,11 +19,11 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_INFOBIP_ID;
 public class MobileMessagingBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(Event.REGISTRATION_ACQUIRED.getKey())) {
+        if (Event.REGISTRATION_ACQUIRED.getKey().equals(intent.getAction())) {
             onRegistrationAcquired(context, intent);
-        } else if (intent.getAction().equals(Event.REGISTRATION_CREATED.getKey())) {
+        } else if (Event.REGISTRATION_CREATED.getKey().equals(intent.getAction())) {
             onRegistrationCreated(context, intent);
-        } else if (intent.getAction().equals(Event.API_COMMUNICATION_ERROR.getKey())) {
+        } else if (Event.API_COMMUNICATION_ERROR.getKey().equals(intent.getAction())) {
             onApiCommunicationError(context, intent);
         }
     }

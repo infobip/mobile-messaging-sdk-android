@@ -18,7 +18,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_MESSAGES = "org.infobip.mobile.messaging.messages";
     public static final String EXTRA_PLAY_SERVICES_ERROR_CODE = "org.infobip.mobile.messaging.play.services";
     public static final String EXTRA_PUSH_REGISTRATION_ENABLED = "org.infobip.mobile.messaging.push.registration.enabled";
-    public static final String EXTRA_TAPPED_ACTION_ID = "org.infobip.mobile.messaging.notification.action.id.tapped";
+    public static final String EXTRA_TAPPED_ACTION = "org.infobip.mobile.messaging.notification.action.tapped";
     public static final String EXTRA_TAPPED_CATEGORY = "org.infobip.mobile.messaging.notification.category.tapped";
     public static final String EXTRA_NOTIFICATION_ID = "org.infobip.mobile.messaging.notification.id";
 

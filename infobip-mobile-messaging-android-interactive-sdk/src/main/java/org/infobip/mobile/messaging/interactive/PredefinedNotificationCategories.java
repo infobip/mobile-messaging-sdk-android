@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.interactive;
 
 
 import android.support.annotation.NonNull;
@@ -6,9 +6,9 @@ import android.support.annotation.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
-class PredefinedNotificationCategories {
+public class PredefinedNotificationCategories {
 
-    static Set<NotificationCategory> load() {
+    public static Set<NotificationCategory> load() {
         final NotificationCategory mmAcceptDecline = mmAcceptDecline();
 
         final Set<NotificationCategory> predefinedCategories = new HashSet<>();

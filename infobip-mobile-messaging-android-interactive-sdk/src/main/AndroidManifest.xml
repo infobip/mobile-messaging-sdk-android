@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.infobip.mobile.messaging.interactive">
+
+    <application>
+
+        <receiver android:name="org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver" />
+
+    </application>
+
+</manifest>

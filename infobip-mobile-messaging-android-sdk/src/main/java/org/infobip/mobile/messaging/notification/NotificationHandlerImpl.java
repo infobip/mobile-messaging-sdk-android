@@ -21,12 +21,9 @@ import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.NotificationAction;
-import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -35,13 +32,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Random;
-import java.util.Set;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 /**
  * @author sslavin
@@ -57,12 +49,24 @@ public class NotificationHandlerImpl implements NotificationHandler {
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void displayNotification(Message message) {
+        NotificationCompat.Builder builder = notificationCompatBuilder(message);
         int notificationId = getNotificationId(message);
-        NotificationCompat.Builder builder = notificationCompatBuilder(message, notificationId);
+
+        displayNotification(builder, message, notificationId);
+    }
+
+    /**
+     * Displays native android notification with builder settings for the provided notificationId.
+     * @param builder Android NotificationCompat.Builder with settings for notification building.
+     * @param message Message object used for notification building.
+     * @param notificationId Id of notification to be displayed
+     *
+     * @see #notificationCompatBuilder(Message)
+     * @see #getNotificationId(Message)
+     */
+    public void displayNotification(NotificationCompat.Builder builder, Message message, int notificationId) {
         if (builder == null) return;
 
         //issue: http://stackoverflow.com/questions/13602190/java-lang-securityexception-requires-vibrate-permission-on-jelly-bean-4-2
@@ -77,12 +81,15 @@ public class NotificationHandlerImpl implements NotificationHandler {
         }
     }
 
-    private NotificationCompat.Builder notificationCompatBuilder(Message message, int notificationId) {
+    /**
+     * Gets notification builder for Message.
+     * @param message message to display notification for.
+     *
+     * @return builder
+     */
+    public NotificationCompat.Builder notificationCompatBuilder(Message message) {
         NotificationSettings notificationSettings = notificationSettings(message);
         if (notificationSettings == null) return null;
-
-        String category = message.getCategory();
-        NotificationCategory triggeredNotificationCategory = triggeredNotificationCategory(category);
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
@@ -95,44 +102,8 @@ public class NotificationHandlerImpl implements NotificationHandler {
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
-        setNotificationActions(notificationBuilder, message, triggeredNotificationCategory, notificationId);
 
         return notificationBuilder;
-    }
-
-    private void setNotificationActions(NotificationCompat.Builder notificationBuilder,
-                                        Message message,
-                                        NotificationCategory triggeredNotificationCategory,
-                                        int notificationId) {
-        if (triggeredNotificationCategory == null) {
-            return;
-        }
-
-        NotificationAction[] notificationActions = triggeredNotificationCategory.getNotificationActions();
-        for (NotificationAction notificationAction : notificationActions) {
-            PendingIntent pendingIntent = createActionTapPendingIntent(message, triggeredNotificationCategory, notificationAction.getId(), notificationId);
-            notificationBuilder.addAction(new NotificationCompat.Action(
-                    notificationAction.getIcon(), context.getString(notificationAction.getTitleResourceId()), pendingIntent));
-        }
-    }
-
-    private NotificationCategory triggeredNotificationCategory(String category) {
-        if (StringUtils.isBlank(category)) {
-            return null;
-        }
-
-        Set<NotificationCategory> storedNotificationCategories = MobileMessagingCore.getInstance(context).getInteractiveNotificationCategories();
-        if (storedNotificationCategories == MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
-            return null;
-        }
-
-        for (NotificationCategory notificationCategory : storedNotificationCategories) {
-            if (category.equals(notificationCategory.getCategoryId())) {
-                return notificationCategory;
-            }
-        }
-
-        return null;
     }
 
     private void setNotificationStyle(NotificationCompat.Builder notificationBuilder, Message message, String title) {
@@ -197,18 +168,6 @@ public class NotificationHandlerImpl implements NotificationHandler {
         return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
     }
 
-    @SuppressWarnings("WrongConstant")
-    @NonNull
-    private PendingIntent createActionTapPendingIntent(Message message, NotificationCategory notificationCategory, String tappedActionId, int notificationId) {
-        Intent intent = new Intent(context, NotificationActionTapReceiver.class);
-        intent.setAction(tappedActionId);
-        intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
-        intent.putExtra(EXTRA_TAPPED_ACTION_ID, tappedActionId);
-        intent.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
-        intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
-        return PendingIntent.getBroadcast(context, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-    }
-
     private NotificationSettings notificationSettings(Message message) {
         NotificationSettings notificationSettings = MobileMessagingCore.getInstance(context).getNotificationSettings();
         if (null == notificationSettings) {
@@ -271,13 +230,19 @@ public class NotificationHandlerImpl implements NotificationHandler {
         notificationBuilder.setSound(soundUri);
     }
 
-    private int getNotificationId(Message message) {
+    /**
+     * Gets notification ID for the given message
+     * @param message Message object used for setting notification ID
+     *
+     * @return notification ID
+     */
+    public int getNotificationId(Message message) {
         NotificationSettings settings = notificationSettings(message);
         if (settings == null) {
             return DEFAULT_NOTIFICATION_ID;
         }
 
         boolean areMultipleNotificationsEnabled = settings.areMultipleNotificationsEnabled();
-        return areMultipleNotificationsEnabled ? new Random().nextInt() : DEFAULT_NOTIFICATION_ID;
+        return areMultipleNotificationsEnabled ? message.getMessageId().hashCode() : DEFAULT_NOTIFICATION_ID;
     }
 }

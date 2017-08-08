@@ -59,6 +59,7 @@
     <string name="toast_message_userdata_set">User data is set</string>
     <string name="toast_message_received">"Message received: %s"</string>
     <string name="toast_notification_tapped">"Notification tapped: %s"</string>
+    <string name="toast_notification_action_tapped">"Notification action tapped: %s"</string>
 
     <!-- Strings related to Reply -->
     <string name="reply_close_label">Close</string>
@@ -76,4 +77,5 @@
     <string name="gps_dialog_dismiss">Dismiss</string>
 
     <string name="saved_to_clipboard">Text saved to clipboard</string>
+
 </resources>

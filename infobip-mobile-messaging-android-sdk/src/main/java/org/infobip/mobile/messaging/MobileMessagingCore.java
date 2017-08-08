@@ -4,11 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
@@ -24,6 +22,7 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -40,6 +39,7 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,11 +59,13 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    private static final String INTERACTIVE_NOTIFICATION_HANDLER_CLASSNAME = "org.infobip.mobile.messaging.interactive.notification.NotificationInteractiveHandlerImpl";
 
     protected static MobileMessagingCore instance;
     static String applicationCode;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
+    private static NotificationHandler notificationHandler;
     private final RegistrationSynchronizer registrationSynchronizer;
     private final MessagesSynchronizer messagesSynchronizer;
     private final SeenStatusReporter seenStatusReporter;
@@ -80,8 +82,6 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private Context context;
-    private Set<NotificationCategory> predefinedNotificationCategories;
-    private Set<NotificationCategory> customNotificationCategories;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
@@ -94,7 +94,7 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.messageSender = new MessageSender(broadcaster);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster, new NotificationHandlerImpl(context));
+        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster, resolveNotificationHandler(context));
         this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
         this.userDataSynchronizer = new UserDataSynchronizer(context, this, registrationAlignedExecutor, broadcaster);
         this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
@@ -147,6 +147,29 @@ public class MobileMessagingCore extends MobileMessaging {
         if (isPushRegistrationEnabled()) {
             messagesSynchronizer.synchronize();
         }
+    }
+
+    public static NotificationHandler resolveNotificationHandler(Context context) {
+        if (null != notificationHandler) {
+            return notificationHandler;
+        }
+
+        return setNotificationHandler(context);
+    }
+
+    private static NotificationHandler setNotificationHandler(Context context) {
+
+        try {
+            Class<?> c = Class.forName(INTERACTIVE_NOTIFICATION_HANDLER_CLASSNAME);
+            Constructor<?> constructor = c.getConstructor(Context.class);
+            Object resolvedInteractiveNotificationHandler = constructor.newInstance(context);
+            notificationHandler = (NotificationHandler) resolvedInteractiveNotificationHandler;
+
+        } catch (Exception e) {
+            notificationHandler = new NotificationHandlerImpl(context);
+        }
+
+        return notificationHandler;
     }
 
     @Override
@@ -400,67 +423,6 @@ public class MobileMessagingCore extends MobileMessaging {
     private void setNotificationSettings(NotificationSettings notificationSettings) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, null != notificationSettings);
         this.notificationSettings = notificationSettings;
-    }
-
-    public Set<NotificationCategory> getInteractiveNotificationCategories() {
-        if (!isDisplayNotificationEnabled()) {
-            return null;
-        }
-
-        Set<NotificationCategory> notificationCategories = getPredefinedNotificationCategories();
-        Set<NotificationCategory> customNotificationCategories = getCustomNotificationCategories();
-        notificationCategories.addAll(customNotificationCategories);
-
-        return notificationCategories;
-    }
-
-    @NonNull
-    Set<NotificationCategory> getCustomNotificationCategories() {
-        if (null != customNotificationCategories) {
-            return customNotificationCategories;
-        }
-
-        Set<String> notificationCategoriesStringSet = PreferenceHelper.findStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES);
-        Set<NotificationCategory> notificationCategoriesTemp = new HashSet<>();
-        if (notificationCategoriesStringSet != MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
-            for (String category : notificationCategoriesStringSet) {
-                NotificationCategory notificationCategory = new JsonSerializer().deserialize(category, NotificationCategory.class);
-                notificationCategoriesTemp.add(notificationCategory);
-            }
-        }
-        this.customNotificationCategories = notificationCategoriesTemp;
-
-        return customNotificationCategories;
-    }
-
-    Set<NotificationCategory> getPredefinedNotificationCategories() {
-        if (null != predefinedNotificationCategories) {
-            return predefinedNotificationCategories;
-        }
-
-        return PredefinedNotificationCategories.load();
-    }
-
-    private void setPredefinedNotificationCategories(Set<NotificationCategory> notificationCategories) {
-        if (notificationCategories == null) {
-            return;
-        }
-
-        this.predefinedNotificationCategories = notificationCategories;
-    }
-
-    void setCustomNotificationCategories(NotificationCategory[] notificationCategories) {
-        if (notificationCategories == null || notificationCategories.length == 0) {
-            return;
-        }
-
-        final Set<String> customNotificationCategoriesStringSet = new HashSet<>();
-        for (NotificationCategory customNotificationCategory : notificationCategories) {
-            customNotificationCategoriesStringSet.add(customNotificationCategory.toString());
-        }
-        PreferenceHelper.saveStringSet(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES, customNotificationCategoriesStringSet);
-
-        this.customNotificationCategories = new HashSet<>(Arrays.asList(notificationCategories));
     }
 
     private boolean isDisplayNotificationEnabled() {
@@ -805,8 +767,6 @@ public class MobileMessagingCore extends MobileMessaging {
 
         private final Application application;
         private NotificationSettings notificationSettings = null;
-        private NotificationCategory[] customNotificationCategories = null;
-        private Set<NotificationCategory> predefinedNotificationCategories = null;
         private String applicationCode = null;
         private ApplicationCodeProvider applicationCodeProvider;
 
@@ -841,12 +801,6 @@ public class MobileMessagingCore extends MobileMessaging {
          */
         public Builder withDisplayNotification(NotificationSettings notificationSettings) {
             this.notificationSettings = notificationSettings;
-            return this;
-        }
-
-        public Builder withInteractiveNotificationCategories(Set<NotificationCategory> predefinedNotificationCategories, NotificationCategory... customNotificationCategories) {
-            this.predefinedNotificationCategories = predefinedNotificationCategories;
-            this.customNotificationCategories = customNotificationCategories;
             return this;
         }
 
@@ -895,9 +849,8 @@ public class MobileMessagingCore extends MobileMessaging {
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             MobileMessagingCore.instance = mobileMessagingCore;
+            MobileMessagingCore.notificationHandler = setNotificationHandler(application.getApplicationContext());
             mobileMessagingCore.setNotificationSettings(notificationSettings);
-            mobileMessagingCore.setPredefinedNotificationCategories(predefinedNotificationCategories);
-            mobileMessagingCore.setCustomNotificationCategories(customNotificationCategories);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());

@@ -1,18 +1,26 @@
-package org.infobip.mobile.messaging.tools;
+package org.infobip.mobile.messaging.interactive.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
+import org.infobip.mobile.messaging.interactive.InteractiveEvent;
+import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
+import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
+import org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
@@ -32,21 +40,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author sslavin
- * @since 10/03/2017.
- */
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
+import static org.infobip.mobile.messaging.MobileMessagingProperty.EXTRA_INTENT_FLAGS;
 
+/**
+ * @author tjuric
+ * @since 07/08/2017.
+ */
 @RunWith(AndroidJUnit4.class)
 public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCase {
 
-    protected MobileMessaging mobileMessaging;
-    protected MobileMessagingTestable mobileMessagingCore;
-    protected MessageStore geoStore;
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
-    protected Broadcaster broadcaster;
+    protected Broadcaster messageBroadcaster;
     protected TestTimeProvider time;
+    protected MobileMessagingCore mobileMessagingCore;
+    protected MobileMessaging mobileMessaging;
     protected NotificationHandler notificationHandler;
 
     protected static class TestTimeProvider implements TimeProvider {
@@ -82,7 +94,49 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressLint("ApplySharedPref")
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        MobileMessagingLogger.enforce();
+
+        time = new TestTimeProvider();
+        Time.reset(time);
+
+        notificationHandler = Mockito.mock(NotificationHandler.class);
+        messageBroadcaster = Mockito.mock(Broadcaster.class);
+        mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
+        mobileMessaging = mobileMessagingCore;
+
+        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
+
+        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
+
+        MobileApiResourceProvider.INSTANCE.resetMobileApi();
+
+        databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
+        databaseProvider = MobileMessagingCore.getDatabaseProvider(context);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+
+        time.reset();
+        if (null != debugServer) {
+            try {
+                debugServer.stop();
+            } catch (Exception ignored) {
+            }
+        }
+        databaseProvider.deleteDatabase();
+    }
+
     public static class TestMessageStore implements MessageStore {
 
         Map<String, Message> messages = new HashMap<>();
@@ -110,52 +164,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         }
     }
 
-    @SuppressLint("ApplySharedPref")
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        MobileMessagingLogger.enforce();
-
-        time = new TestTimeProvider();
-        Time.reset(time);
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
-
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
-
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
-
-        notificationHandler = Mockito.mock(NotificationHandler.class);
-        broadcaster = Mockito.mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster);
-        mobileMessaging = mobileMessagingCore;
-
-        databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
-        databaseProvider = MobileMessagingCore.getDatabaseProvider(context);
-    }
-
     protected void enableMessageStoreForReceivedMessages() {
         PreferenceHelper.saveClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS, TestMessageStore.class);
     }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-        time.reset();
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception ignored) {
-            }
-        }
-        databaseProvider.deleteDatabase();
-    }
-
 
     /**
      * Generates messages with provided ids and geo campaign object
@@ -172,4 +183,23 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         }
         return message;
     }
+
+    @NonNull
+    protected NotificationAction.Builder givenNotificationAction(String givenTappedActionId) {
+        return new NotificationAction.Builder()
+                .withId(givenTappedActionId)
+                .withIcon(android.R.drawable.btn_default)
+                .withTitleResourceId(android.R.string.ok);
+    }
+
+    protected Intent givenIntent(Message message, NotificationCategory notificationCategory, NotificationAction action, int notificationId, int flags) {
+        return new Intent(context, NotificationActionTapReceiver.class)
+                .setAction(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey())
+                .putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message))
+                .putExtra(EXTRA_TAPPED_ACTION, NotificationActionBundleMapper.notificationActionToBundle(action))
+                .putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory))
+                .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+                .putExtra(EXTRA_INTENT_FLAGS.getKey(), flags);
+    }
+
 }

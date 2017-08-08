@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.interactive;
 
 
 import android.os.Bundle;
@@ -6,11 +6,11 @@ import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
 import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
+import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
 
 public class NotificationCategory {
 
-    public static final String MM_INTERACTIVE_ID_PREFIX = "mm_";
+    static final String MM_INTERACTIVE_ID_PREFIX = "mm_";
 
     private String categoryId;
     private NotificationAction[] notificationActions;

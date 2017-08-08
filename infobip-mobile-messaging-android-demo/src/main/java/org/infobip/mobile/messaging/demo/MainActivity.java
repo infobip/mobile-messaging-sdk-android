@@ -39,10 +39,12 @@ import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEvent;
 import org.infobip.mobile.messaging.geo.GeoMessage;
 import org.infobip.mobile.messaging.geo.MobileGeo;
+import org.infobip.mobile.messaging.interactive.InteractiveEvent;
+import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -111,19 +113,15 @@ public class MainActivity extends AppCompatActivity {
             updateCount();
         }
     };
-    private final BroadcastReceiver notificationTapped = new BroadcastReceiver() {
+    private final BroadcastReceiver notificationTappedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Message message = Message.createFrom(intent.getExtras());
             String body = message.getBody();
-            String url = null;
+            JSONObject customPayload = message.getCustomPayload();
+            String url = customPayload != null ? customPayload.optString("url") : "";
 
-            try {
-                url = message.getCustomPayload().getString("url");
-            } catch (JSONException ignored) {
-            }
-
-            if (url != null) {
+            if (!url.isEmpty()) {
                 openWebView(url);
             }
 
@@ -131,6 +129,22 @@ public class MainActivity extends AppCompatActivity {
             updateCount();
         }
     };
+    private final BroadcastReceiver notificationActionTappedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onNotificationActionTapped(intent);
+        }
+    };
+
+    private void onNotificationActionTapped(Intent intent) {
+        NotificationAction action = NotificationAction.createFrom(intent.getExtras());
+
+        if (action == null) return;
+        String actionTappedText = String.format(Locale.getDefault(), getString(R.string.toast_notification_action_tapped), action.getId());
+        Toast.makeText(MainActivity.this, actionTappedText, Toast.LENGTH_LONG).show();
+        updateCount();
+    }
+
     private boolean receiversRegistered = false;
     private ExpandableListAdapter.OnMessageExpandedListener onMessageExpandedListener = new ExpandableListAdapter.OnMessageExpandedListener() {
         @Override
@@ -262,6 +276,12 @@ public class MainActivity extends AppCompatActivity {
         registerReceivers();
         registerPreferenceChangeListener();
         clearNotifications();
+
+        //handle event started from SDK from background
+        Intent intent = getIntent();
+        if (InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey().equals(intent.getAction())) {
+            onNotificationActionTapped(intent);
+        }
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             String permissions[] = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -400,7 +420,7 @@ public class MainActivity extends AppCompatActivity {
                     new IntentFilter(Event.USER_DATA_REPORTED.getKey()));
             localBroadcastManager.registerReceiver(messageReceiver,
                     new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
-            localBroadcastManager.registerReceiver(notificationTapped,
+            localBroadcastManager.registerReceiver(notificationTappedReceiver,
                     new IntentFilter(Event.NOTIFICATION_TAPPED.getKey()));
             localBroadcastManager.registerReceiver(playServicesErrorReceiver,
                     new IntentFilter(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey()));
@@ -408,6 +428,8 @@ public class MainActivity extends AppCompatActivity {
                     new IntentFilter(GeoEvent.GEOFENCE_AREA_ENTERED.getKey()));
             localBroadcastManager.registerReceiver(pushRegistrationEnabledReceiver,
                     new IntentFilter(Event.PUSH_REGISTRATION_ENABLED.getKey()));
+            localBroadcastManager.registerReceiver(notificationActionTappedReceiver,
+                    new IntentFilter(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey()));
             receiversRegistered = true;
         }
     }
@@ -418,8 +440,10 @@ public class MainActivity extends AppCompatActivity {
             localBroadcastManager.unregisterReceiver(errorReceiver);
             localBroadcastManager.unregisterReceiver(userDataReceiver);
             localBroadcastManager.unregisterReceiver(messageReceiver);
+            localBroadcastManager.unregisterReceiver(notificationTappedReceiver);
             localBroadcastManager.unregisterReceiver(playServicesErrorReceiver);
             localBroadcastManager.unregisterReceiver(pushRegistrationEnabledReceiver);
+            localBroadcastManager.unregisterReceiver(notificationActionTappedReceiver);
             receiversRegistered = false;
         }
     }

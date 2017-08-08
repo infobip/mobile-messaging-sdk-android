@@ -10,17 +10,12 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.NotificationCategory;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
-import org.infobip.mobile.messaging.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
 import java.util.List;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION_ID;
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 /**
  * @author sslavin
@@ -144,16 +139,6 @@ public class AndroidBroadcaster implements Broadcaster {
         dataReported.putExtra(BroadcastParameter.EXTRA_SYSTEM_DATA, systemData.toString());
         context.sendBroadcast(dataReported);
         LocalBroadcastManager.getInstance(context).sendBroadcast(dataReported);
-    }
-
-    @Override
-    public void notificationActionTapped(Message message, NotificationCategory category, String actionId) {
-        Intent actionTapped = prepareIntent(Event.NOTIFICATION_ACTION_TAPPED);
-        actionTapped.putExtras(MessageBundleMapper.messageToBundle(message));
-        actionTapped.putExtra(EXTRA_TAPPED_ACTION_ID, actionId);
-        actionTapped.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
-        context.sendBroadcast(actionTapped);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(actionTapped);
     }
 
     private Intent prepareIntent(Event event) {
