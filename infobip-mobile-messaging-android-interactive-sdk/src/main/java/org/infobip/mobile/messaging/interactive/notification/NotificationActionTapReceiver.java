@@ -66,6 +66,7 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
 
         markAsSeen(context, message);
+        sendMo(context, notificationCategory, notificationAction);
         startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
     }
 
@@ -79,6 +80,20 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         }
     }
 
+    private void sendMo(Context context, NotificationCategory category, NotificationAction action) {
+        if (!action.sendsMoMessage()) {
+            return;
+        }
+
+        mobileMessagingCore(context).sendMessages(messageFor(category, action));
+    }
+
+    private Message messageFor(final NotificationCategory category, final NotificationAction action) {
+        return new Message() {{
+            setBody(category.getCategoryId() + " " + action.getId());
+        }};
+    }
+
     private void cancelNotification(Context context, int notificationId) {
         if (notificationId != -1) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -87,15 +102,12 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
     }
 
     private void startCallbackActivity(Context context, Intent intent, Bundle messageBundle, Bundle actionBundle, Bundle categoryBundle) {
-        boolean bringAppToForeground = false;
-
         NotificationAction notificationAction = NotificationActionBundleMapper.notificationActionFromBundle(actionBundle);
         if (notificationAction == null) {
             return;
         }
 
-        bringAppToForeground = notificationAction.bringsAppToForeground();
-        if (!bringAppToForeground) {
+        if (!notificationAction.bringsAppToForeground()) {
             return;
         }
 

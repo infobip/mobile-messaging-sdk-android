@@ -14,12 +14,14 @@ public class NotificationAction {
     private int titleResourceId;
     private int icon;
     private boolean bringsAppToForeground;
+    private boolean sendsMoMessage;
 
-    private NotificationAction(String id, int titleResourceId, int icon, boolean bringsAppToForeground) {
+    private NotificationAction(String id, int titleResourceId, int icon, boolean bringsAppToForeground, boolean sendsMoMessage) {
         this.id = id;
         this.titleResourceId = titleResourceId;
         this.icon = icon;
         this.bringsAppToForeground = bringsAppToForeground;
+        this.sendsMoMessage = sendsMoMessage;
     }
 
     public static NotificationAction createFrom(Bundle bundle) {
@@ -42,12 +44,17 @@ public class NotificationAction {
         return bringsAppToForeground;
     }
 
+    public boolean sendsMoMessage() {
+        return sendsMoMessage;
+    }
+
     public static final class Builder {
         private boolean predefined;
         private String id;
         private int titleResourceId;
         private int icon;
         private boolean bringsAppToForeground;
+        private boolean sendsMoMessage;
 
         public Builder() {
             this.predefined = false;
@@ -104,8 +111,16 @@ public class NotificationAction {
             return this;
         }
 
+        /**
+         * Sends a speсific mobile originated message to the server when this notification action is triggered.
+         */
+        public Builder withMoMessage() {
+            this.sendsMoMessage = true;
+            return this;
+        }
+
         public NotificationAction build() {
-            return new NotificationAction(id, titleResourceId, icon, bringsAppToForeground);
+            return new NotificationAction(id, titleResourceId, icon, bringsAppToForeground, sendsMoMessage);
         }
 
         private void validateWithParam(Object o) {

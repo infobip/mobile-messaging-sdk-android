@@ -12,6 +12,8 @@ public class NotificationCategory {
 
     static final String MM_INTERACTIVE_ID_PREFIX = "mm_";
 
+    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+
     private String categoryId;
     private NotificationAction[] notificationActions;
 
@@ -36,7 +38,6 @@ public class NotificationCategory {
     }
 
     private NotificationCategory(String categoryString) {
-        Gson gson = new Gson();
         NotificationCategory data = gson.fromJson(categoryString, NotificationCategory.class);
         this.categoryId = data.categoryId;
         this.notificationActions = data.notificationActions;
@@ -75,7 +76,6 @@ public class NotificationCategory {
 
     @Override
     public String toString() {
-        Gson gson = new GsonBuilder().serializeNulls().create();
         return gson.toJson(this);
     }
 }

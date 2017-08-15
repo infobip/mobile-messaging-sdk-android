@@ -92,7 +92,7 @@ public class NotificationInteractiveHandlerImpl implements NotificationHandler {
     @NonNull
     private PendingIntent createActionTapPendingIntent(Message message, NotificationCategory notificationCategory, NotificationAction notificationAction, int notificationId) {
         Intent intent = new Intent(context, NotificationActionTapReceiver.class);
-        intent.setAction(notificationAction.getId());
+        intent.setAction(message.getMessageId() + notificationAction.getId());
         intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
         intent.putExtra(EXTRA_TAPPED_ACTION, NotificationActionBundleMapper.notificationActionToBundle(notificationAction));
         intent.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));

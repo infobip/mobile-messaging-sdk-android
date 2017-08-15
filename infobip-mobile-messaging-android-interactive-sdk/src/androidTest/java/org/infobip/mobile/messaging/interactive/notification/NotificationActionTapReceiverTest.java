@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.interactive.notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -61,9 +62,8 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
         int givenNotificationId = 1234;
-        NotificationAction notificationAction = givenNotificationAction("actionIdNotTapped").build();
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId").build();
-        NotificationCategory givenNotificationCategory = new NotificationCategory("categoryId", notificationAction, givenTappedNotificationAction);
+        NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
@@ -89,11 +89,10 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         // Given
         Message givenMessage = createMessage(context, "SomeMessageId", false);
         int givenNotificationId = 1234;
-        NotificationAction notificationAction = givenNotificationAction("actionIdNotTapped").build();
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
                 .withBringingAppToForeground(true)
                 .build();
-        NotificationCategory givenNotificationCategory = new NotificationCategory("categoryId", notificationAction, givenTappedNotificationAction);
+        NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
@@ -122,5 +121,33 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         assertJEquals(givenTappedNotificationAction, actualTappedAction);
         assertJEquals(givenNotificationCategory, actualTappedCategory);
         assertJEquals(givenMessage, actualTappedMessage);
+    }
+
+    @Test
+    public void test_should_send_mo_when_clicked_on_action_button() throws Exception {
+
+        // Given
+        Message givenMessage = createMessage(context, "SomeMessageId", false);
+        NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
+                .withMoMessage()
+                .build();
+        NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
+        Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, 1234, notificationSettings.getIntentFlags());
+
+        // When
+        notificationActionTapReceiver.onReceive(contextMock, givenIntent);
+
+        // Then
+        Mockito.verify(mobileMessagingCore, Mockito.times(1)).sendMessages(messageArgumentCaptor.capture());
+        Message actualMessage = messageArgumentCaptor.getValue();
+        assertEquals(givenNotificationCategory.getCategoryId() + " " + givenTappedNotificationAction.getId(), actualMessage.getBody());
+    }
+
+    @NonNull
+    private NotificationCategory givenNotificationCategory(NotificationAction tappedAction) {
+        return new NotificationCategory(
+                "categoryId",
+                tappedAction,
+                givenNotificationAction("actionIdNotTapped").build());
     }
 }
