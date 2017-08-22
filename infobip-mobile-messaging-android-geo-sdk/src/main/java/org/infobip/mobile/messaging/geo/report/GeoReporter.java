@@ -3,59 +3,84 @@ package org.infobip.mobile.messaging.geo.report;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.api.geo.EventReport;
+import org.infobip.mobile.messaging.api.geo.EventReportBody;
+import org.infobip.mobile.messaging.api.geo.EventReportResponse;
+import org.infobip.mobile.messaging.api.geo.EventType;
+import org.infobip.mobile.messaging.api.geo.MessagePayload;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.transition.GeoAreasHandler;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
-import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
+import org.infobip.mobile.messaging.storage.MessageStore;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author sslavin
  * @since 20/10/2016.
  */
 
-public class GeoReporter extends RetryableSynchronizer {
+public class GeoReporter {
 
-    private GeoBroadcaster broadcaster;
-    private GeofencingHelper geofenceHelper;
+    private final Context context;
+    private final MobileMessagingCore mobileMessagingCore;
+    private final MobileMessagingStats stats;
+    private final GeoBroadcaster broadcaster;
+    private final GeofencingHelper geofenceHelper;
+    private final MRetryPolicy retryPolicy;
 
-    public GeoReporter(Context context, GeoBroadcaster broadcaster, MobileMessagingStats stats) {
-        super(context, stats);
+    public GeoReporter(Context context, MobileMessagingCore mobileMessagingCore, GeoBroadcaster broadcaster, MobileMessagingStats stats) {
+        this.context = context;
+        this.mobileMessagingCore = mobileMessagingCore;
+        this.stats = stats;
         this.broadcaster = broadcaster;
         this.geofenceHelper = new GeofencingHelper(context);
+        this.retryPolicy = DefaultRetryPolicy.create(context);
     }
 
-    @Override
     public void synchronize() {
         final GeoReport reports[] = geofenceHelper.removeUnreportedGeoEvents();
-        if (reports.length == 0 || !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+        if (reports.length == 0 || !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
 
-        new GeoReportingTask(context, geofenceHelper) {
-
-            protected void onPostExecute(GeoReportingResult result) {
-                handleSuccess(context, reports, result);
-                GeoAreasHandler.handleGeoReportingResult(context, result);
-                if (result.hasError()) {
-                    retry(result);
-                }
+        new MRetryableTask<GeoReport, GeoReportingResult>() {
+            @Override
+            public GeoReportingResult run(GeoReport[] reports) {
+                return reportSync(reports);
             }
 
-            protected void onCancelled(GeoReportingResult result) {
-                handleError(context, result.getError(), reports);
-                GeoAreasHandler.handleGeoReportingResult(context, result);
-                retry(result);
+            @Override
+            public void after(GeoReportingResult geoReportingResult) {
+                handleSuccess(context, reports, geoReportingResult);
+                GeoAreasHandler.handleGeoReportingResult(context, geoReportingResult);
             }
-        }.execute(reports);
+
+            @Override
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("Error reporting geo areas!", error);
+                handleError(context, error, reports);
+                GeoAreasHandler.handleGeoReportingResult(context, new GeoReportingResult(error));
+            }
+        }
+        .retryWith(retryPolicy)
+        .execute(reports);
     }
 
     /**
@@ -65,15 +90,14 @@ public class GeoReporter extends RetryableSynchronizer {
      * @return result that will contain lists of campaign ids and mappings between library generated message ids and IPCore ids
      */
     @NonNull
-    public GeoReportingResult reportSync(@NonNull Context context, @NonNull GeoReport geoReports[]) {
-        try {
-            GeoReportingResult result = GeoReportingTask.executeSync(context, geofenceHelper, geoReports);
-            handleSuccess(context, geoReports, result);
-            return result;
-        } catch (Exception e) {
-            handleError(context, e, geoReports);
-            return new GeoReportingResult(e);
-        }
+    public GeoReportingResult reportSync(@NonNull GeoReport geoReports[]) {
+        EventReportBody eventReportBody = prepareEventReportBody(context, geofenceHelper.getMessageStoreForGeo(), geoReports);
+        MobileMessagingLogger.v("GEO REPORT >>>", eventReportBody);
+        EventReportResponse eventResponse = MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context).report(eventReportBody);
+        MobileMessagingLogger.v("GEO REPORT <<<", eventResponse);
+        GeoReportingResult result = new GeoReportingResult(eventResponse);
+        handleSuccess(context, geoReports, result);
+        return result;
     }
 
     /**
@@ -102,8 +126,54 @@ public class GeoReporter extends RetryableSynchronizer {
         broadcaster.error(MobileMessagingError.createFrom(error));
     }
 
-    @Override
-    public Task getTask() {
-        return Task.GEO_REPORT;
+    /**
+     * Creates event report request body based on provided geofencing report.
+     *
+     * @param geoMessageStore
+     * @param geoReports      map that contains original signaling messages as keys and related geo reports as values.
+     * @return request body for geo reporting.
+     */
+    @NonNull
+    private static EventReportBody prepareEventReportBody(Context context, MessageStore geoMessageStore, @NonNull GeoReport geoReports[]) {
+        Set<MessagePayload> messagePayloads = new HashSet<>();
+        Set<EventReport> eventReports = new HashSet<>();
+
+        List<Message> messages = geoMessageStore.findAll(context);
+
+        for (GeoReport r : geoReports) {
+
+            Message m = GeoReportHelper.getSignalingMessageForReport(messages, r);
+            if (m == null) {
+                MobileMessagingLogger.e("Cannot find signaling message for id: " + r.getSignalingMessageId());
+                continue;
+            }
+
+            messagePayloads.add(new MessagePayload(
+                    m.getMessageId(),
+                    m.getTitle(),
+                    m.getBody(),
+                    m.getSound(),
+                    m.isVibrate(),
+                    m.getCategory(),
+                    m.isSilent(),
+                    m.getCustomPayload() != null ? m.getCustomPayload().toString() : null,
+                    InternalDataMapper.createInternalDataBasedOnMessageContents(m)
+            ));
+
+            Long timestampDelta = Time.now() - r.getTimestampOccurred();
+            Long timestampDeltaSeconds = TimeUnit.MILLISECONDS.toSeconds(timestampDelta);
+
+            eventReports.add(new EventReport(
+                    EventType.valueOf(r.getEvent().name()),
+                    r.getArea().getId(),
+                    r.getCampaignId(),
+                    r.getSignalingMessageId(),
+                    r.getMessageId(),
+                    timestampDeltaSeconds
+            ));
+        }
+
+        String deviceInstanceId = MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId();
+        return new EventReportBody(messagePayloads, eventReports, deviceInstanceId);
     }
 }

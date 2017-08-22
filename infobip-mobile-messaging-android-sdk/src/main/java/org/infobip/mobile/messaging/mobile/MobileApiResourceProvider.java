@@ -149,7 +149,7 @@ public enum MobileApiResourceProvider {
         properties.put("library.version", SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context));
 
         generator = new Generator.Builder().
-                withBaseUrl(MobileMessagingCore.getInstance(context).getApiUri()).
+                withBaseUrl(MobileMessagingCore.getApiUri(context)).
                 withProperties(properties).
                 withUserAgentAdditions(getUserAgentAdditions(context)).
                 withDynamicHeaderProvider(mobileMessagingDynamicHeaderProvider(context)).

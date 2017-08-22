@@ -17,7 +17,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.UUID;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -191,7 +190,7 @@ public class MobileApiMessagesTest {
         String[] drIDs = new String[1];
         drIDs[0] = "test-message-id";
 
-        SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(mIDs, drIDs);
+        SyncMessagesBody syncMessagesBody = SyncMessagesBody.make(mIDs, drIDs);
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context
@@ -234,7 +233,7 @@ public class MobileApiMessagesTest {
         String[] mIDs = new String[0];
         String[] drIDs = new String[0];
 
-        SyncMessagesBody syncMessagesBody = SyncMessagesBody.makeNullableBody(mIDs, drIDs);
+        SyncMessagesBody syncMessagesBody = SyncMessagesBody.make(mIDs, drIDs);
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context

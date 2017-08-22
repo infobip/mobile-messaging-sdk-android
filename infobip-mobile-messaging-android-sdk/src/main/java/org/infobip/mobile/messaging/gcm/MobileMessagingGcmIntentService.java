@@ -163,7 +163,6 @@ public class MobileMessagingGcmIntentService extends IntentService {
     public static final String ACTION_ACQUIRE_INSTANCE_ID = "org.infobip.mobile.messaging.gcm.INSTANCE_ID";
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
-    public static final String EXTRA_GCM_TOKEN = "org.infobip.mobile.messaging.gcm.GCM_TOKEN";
 
     private MobileMessageHandler mobileMessageHandler;
     private RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();

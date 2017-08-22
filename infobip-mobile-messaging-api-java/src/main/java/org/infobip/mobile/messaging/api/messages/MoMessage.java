@@ -17,5 +17,5 @@ public class MoMessage {
     String messageId;
     String destination;
     String text;
-    Map<String, Object> customPayload;
+    Map customPayload;
 }

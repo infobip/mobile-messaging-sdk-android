@@ -85,13 +85,13 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
             return;
         }
 
-        mobileMessagingCore(context).sendMessages(messageFor(category, action));
+        mobileMessagingCore(context).sendMessagesWithRetry(messageFor(category, action));
     }
 
     private Message messageFor(final NotificationCategory category, final NotificationAction action) {
-        return new Message() {{
-            setBody(category.getCategoryId() + " " + action.getId());
-        }};
+        Message message = new Message();
+        message.setBody(category.getCategoryId() + " " + action.getId());
+        return message;
     }
 
     private void cancelNotification(Context context, int notificationId) {

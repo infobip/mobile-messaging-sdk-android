@@ -11,7 +11,8 @@ class GeoReportSynchronization {
     private final GeoReporter geoReporter;
 
     GeoReportSynchronization(Context context) {
-        this.geoReporter = new GeoReporter(context, new AndroidGeoBroadcaster(context), MobileMessagingCore.getInstance(context).getStats());
+        MobileMessagingCore core = MobileMessagingCore.getInstance(context);
+        this.geoReporter = new GeoReporter(context, core, new AndroidGeoBroadcaster(context), core.getStats());
     }
 
     void synchronize() {

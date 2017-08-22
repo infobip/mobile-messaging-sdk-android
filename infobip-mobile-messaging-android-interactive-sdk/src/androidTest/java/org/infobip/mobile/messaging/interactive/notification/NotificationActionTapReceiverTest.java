@@ -138,7 +138,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         notificationActionTapReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        Mockito.verify(mobileMessagingCore, Mockito.times(1)).sendMessages(messageArgumentCaptor.capture());
+        Mockito.verify(mobileMessagingCore, Mockito.times(1)).sendMessagesWithRetry(messageArgumentCaptor.capture());
         Message actualMessage = messageArgumentCaptor.getValue();
         assertEquals(givenNotificationCategory.getCategoryId() + " " + givenTappedNotificationAction.getId(), actualMessage.getBody());
     }

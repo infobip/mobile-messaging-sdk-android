@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -22,6 +21,7 @@ import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
 import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.storage.TestMessageStore;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -49,7 +49,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
     protected GeoBroadcaster geoBroadcaster;
-    protected Broadcaster messageBroadcaster;
+    protected Broadcaster coreBroadcaster;
     protected TestTimeProvider time;
     protected MobileMessagingCore mobileMessagingCore;
     protected MobileMessaging mobileMessaging;
@@ -97,17 +97,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
-        MobileMessagingLogger.enforce();
-
-        time = new TestTimeProvider();
-        Time.reset(time);
-
-        notificationHandler = Mockito.mock(NotificationHandler.class);
-        messageBroadcaster = Mockito.mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
-        mobileMessaging = mobileMessagingCore;
-        geofencingHelper = new GeofencingHelper(context);
-
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
@@ -115,6 +104,17 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
         PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
+
+        MobileMessagingLogger.enforce();
+
+        time = new TestTimeProvider();
+        Time.reset(time);
+
+        notificationHandler = Mockito.mock(NotificationHandler.class);
+        coreBroadcaster = Mockito.mock(Broadcaster.class);
+        mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster);
+        mobileMessaging = mobileMessagingCore;
+        geofencingHelper = new GeofencingHelper(context);
 
         MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
@@ -131,12 +131,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         super.tearDown();
 
         time.reset();
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception ignored) {
-            }
-        }
         databaseProvider.deleteDatabase();
     }
 

@@ -115,11 +115,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
-        MobileMessagingLogger.enforce();
-
-        time = new TestTimeProvider();
-        Time.reset(time);
-
         PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
@@ -127,6 +122,11 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
         PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
+
+        MobileMessagingLogger.enforce();
+
+        time = new TestTimeProvider();
+        Time.reset(time);
 
         MobileApiResourceProvider.INSTANCE.resetMobileApi();
 

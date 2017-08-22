@@ -56,7 +56,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         geoNotificationHelper = Mockito.mock(GeoNotificationHelper.class);
         geoReporter = Mockito.mock(GeoReporter.class);
         messageStore = Mockito.mock(MessageStore.class);
-        geoAreasHandler = new GeoAreasHandler(contextMock, geoNotificationHelper, geoReporter, new GeofencingHelper(context));
+        geoAreasHandler = new GeoAreasHandler(contextMock, mobileMessagingCore, geoNotificationHelper, geoReporter, new GeofencingHelper(context));
         geoReportCaptor = ArgumentCaptor.forClass(GeoReport[].class);
         geoNotificationCaptor = new ArgumentCaptor<>();
     }
@@ -66,7 +66,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Collections.singletonList(m));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
         GeoTransition transition = GeoHelper.createTransition(123.0, 456.0, "SomeAreaId");
         time.set(789);
 
@@ -74,7 +74,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         geoAreasHandler.handleTransition(transition);
 
         // Then
-        Mockito.verify(geoReporter, Mockito.times(1)).reportSync(Mockito.any(Context.class), geoReportCaptor.capture());
+        Mockito.verify(geoReporter, Mockito.times(1)).reportSync(geoReportCaptor.capture());
         GeoReport report = geoReportCaptor.getValue()[0];
         assertEquals("SomeAreaId", report.getArea().getId());
         assertEquals("SomeCampaignId", report.getCampaignId());
@@ -91,7 +91,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Collections.singletonList(m));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
         GeoTransition transition = GeoHelper.createTransition(123.0, 456.0, "SomeAreaId");
         time.set(789);
 
@@ -119,10 +119,10 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Collections.singletonList(m));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
             @Override
             public GeoReportingResult answer(InvocationOnMock invocation) throws Throwable {
-                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[1];
+                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[0];
                 EventReportResponse eventReportResponse = new EventReportResponse();
                 eventReportResponse.setMessageIds(new HashMap<String, String>() {{
                     put(reports[0].getMessageId(), "SomeServerMessageId");
@@ -156,7 +156,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Collections.singletonList(m));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(new Exception()));
         GeoTransition transition = GeoHelper.createTransition(123.0, 456.0, "SomeAreaId");
         time.set(789);
 
@@ -180,10 +180,10 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         // Given
         Message m = createMessage(context, "SomeSignalingMessageId", "SomeCampaignId", true, createArea("SomeAreaId"));
         Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Collections.singletonList(m));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
             @Override
             public GeoReportingResult answer(InvocationOnMock invocation) throws Throwable {
-                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[1];
+                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[0];
                 EventReportResponse eventReportResponse = new EventReportResponse();
                 eventReportResponse.setMessageIds(new HashMap<String, String>() {{
                     put(reports[0].getMessageId(), "SomeServerMessageId");
@@ -221,7 +221,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         EventReportResponse response = new EventReportResponse();
         response.setSuspendedCampaignIds(Sets.newSet("campaignId1"));
         response.setFinishedCampaignIds(Sets.newSet("campaignId2"));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(response));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(response));
         GeoTransition transition = GeoHelper.createTransition("areaId1");
 
         // When
@@ -254,7 +254,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         EventReportResponse response = new EventReportResponse();
         response.setSuspendedCampaignIds(Sets.newSet("campaignId1"));
         response.setFinishedCampaignIds(Sets.newSet("campaignId2"));
-        Mockito.when(geoReporter.reportSync(Mockito.any(Context.class), Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(response));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenReturn(new GeoReportingResult(response));
         GeoTransition transition = GeoHelper.createTransition("areaId1");
 
         // When

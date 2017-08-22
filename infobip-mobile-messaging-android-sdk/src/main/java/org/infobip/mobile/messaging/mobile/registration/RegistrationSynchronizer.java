@@ -1,17 +1,16 @@
 package org.infobip.mobile.messaging.mobile.registration;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
-import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
+import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -24,123 +23,118 @@ import java.util.concurrent.Executor;
  * @author mstipanov
  * @since 07.04.2016.
  */
-public class RegistrationSynchronizer extends RetryableSynchronizer {
+public class RegistrationSynchronizer {
 
-    private Broadcaster broadcaster;
+    private final Context context;
+    private final MobileMessagingCore mobileMessagingCore;
+    private final MobileMessagingStats stats;
+    private final Executor executor;
+    private final Broadcaster broadcaster;
+    private final MRetryPolicy retryPolicy;
 
-    public RegistrationSynchronizer(Context context, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
-        super(context, stats, executor);
+    public RegistrationSynchronizer(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy) {
+        this.context = context;
+        this.mobileMessagingCore = mobileMessagingCore;
+        this.stats = stats;
+        this.executor = executor;
         this.broadcaster = broadcaster;
+        this.retryPolicy = retryPolicy;
     }
 
-    @Override
-    public void updatePushRegistrationStatus(final Boolean enabled) {
-        final String registrationId = MobileMessagingCore.getInstance(context).getRegistrationId();
-        if (StringUtils.isBlank(registrationId)) {
-            return;
-        }
-
-        new UpsertRegistrationTask(context) {
+    public void updateStatus(final Boolean enabled) {
+        new MAsyncTask<Boolean, Registration>() {
             @Override
-            protected void onPostExecute(UpsertRegistrationResult result) {
-                if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
-                    MobileMessagingLogger.e("MobileMessaging API returned error (push registration status update)!");
-                    stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
+            public Registration run(Boolean[] params) {
+                String cloudToken = mobileMessagingCore.getCloudToken();
+                Boolean pushRegistrationEnabled = params.length > 0 ? params[0] : null;
+                MobileMessagingLogger.v("REGISTRATION >>>", cloudToken, pushRegistrationEnabled);
+                RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(cloudToken, pushRegistrationEnabled);
+                MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
+                return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
+            }
 
-                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
-                    context.sendBroadcast(registrationSaveError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
-                    return;
-                }
-
-                setPushRegistrationEnabled(context, result.getPushRegistrationEnabled());
-                setDeviceApplicationInstanceId(context, result.getDeviceInstanceId());
+            @Override
+            public void after(Registration registration) {
+                setPushRegistrationEnabled(context, registration.enabled);
+                setDeviceApplicationInstanceId(context, registration.registrationId);
                 setRegistrationIdReported(context, true);
 
-                broadcaster.registrationEnabled(registrationId, result.getDeviceInstanceId(), result.getPushRegistrationEnabled());
+                broadcaster.registrationEnabled(registration.cloudToken, registration.registrationId, registration.enabled);
             }
 
             @Override
-            protected void onCancelled(UpsertRegistrationResult upsertRegistrationResult) {
-                MobileMessagingLogger.e("Error updating registration!");
-                setRegistrationIdReported(context, false);
-                setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
-
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("MobileMessaging API returned error (push registration status update)!");
+                mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
-                broadcaster.error(MobileMessagingError.createFrom(upsertRegistrationResult.getError()));
+                broadcaster.error(MobileMessagingError.createFrom(error));
             }
-        }.executeOnExecutor(executor, enabled);
-    }
-
-    @Override
-    public Task getTask() {
-        return Task.UPDATE_REGISTRATION_STATUS;
-    }
-
-    @Override
-    public void synchronize() {
-        String deviceApplicationInstanceId = MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId();
-        if (null != deviceApplicationInstanceId && isRegistrationIdReported(context)) {
-            return;
         }
-        String registrationId = MobileMessagingCore.getInstance(context).getRegistrationId();
-        reportRegistration(registrationId);
+        .execute(executor, enabled);
     }
 
-    private void reportRegistration(final String registrationId) {
-        if (StringUtils.isBlank(registrationId)) {
+    public void sync() {
+        reportCloudToken(mobileMessagingCore.getCloudToken());
+    }
+
+    private void reportCloudToken(final String cloudToken) {
+        if (StringUtils.isBlank(cloudToken)) {
             return;
         }
 
-        new UpsertRegistrationTask(context) {
+        new MRetryableTask<String, Registration>() {
             @Override
-            protected void onPostExecute(UpsertRegistrationResult result) {
-                if (result.hasError() || StringUtils.isBlank(result.getDeviceInstanceId())) {
-                    MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
-                    stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
-                    retry(result);
+            public Registration run(String[] params) {
+                String cloudToken = params.length > 0 ? params[0] : null;
+                MobileMessagingLogger.v("REGISTRATION >>>", cloudToken);
+                RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(cloudToken, null);
+                MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
+                return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
+            }
 
-                    Intent registrationSaveError = new Intent(Event.API_COMMUNICATION_ERROR.getKey());
-                    registrationSaveError.putExtra(BroadcastParameter.EXTRA_EXCEPTION, MobileMessagingError.createFrom(result.getError()));
-                    context.sendBroadcast(registrationSaveError);
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(registrationSaveError);
-                    return;
-                }
-
-                setPushRegistrationEnabled(context, result.getPushRegistrationEnabled());
-                setDeviceApplicationInstanceId(context, result.getDeviceInstanceId());
+            @Override
+            public void after(Registration registration) {
+                setPushRegistrationEnabled(context, registration.enabled);
+                setDeviceApplicationInstanceId(context, registration.registrationId);
                 setRegistrationIdReported(context, true);
 
                 MobileMessagingCore.getInstance(context).reportSystemData();
 
-                broadcaster.registrationCreated(registrationId, result.getDeviceInstanceId());
+                broadcaster.registrationCreated(registration.cloudToken, registration.registrationId);
             }
 
             @Override
-            protected void onCancelled(UpsertRegistrationResult result) {
-                MobileMessagingLogger.e("Error creating registration!");
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
                 setRegistrationIdReported(context, false);
-                setPushRegistrationEnabled(context, !MobileMessagingCore.getInstance(context).isPushRegistrationEnabled());
 
-                retry(result);
-
-                stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
-                broadcaster.error(MobileMessagingError.createFrom(result.getError()));
+                mobileMessagingCore.setLastHttpException(error);
+                stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
+                broadcaster.error(MobileMessagingError.createFrom(error));
             }
-        }.executeOnExecutor(executor);
+        }
+        .retryWith(retryPolicy)
+        .execute(executor, cloudToken);
     }
 
     private void setPushRegistrationEnabled(Context context, Boolean pushRegistrationEnabled) {
+        if (pushRegistrationEnabled == null) {
+            return;
+        }
+
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, pushRegistrationEnabled);
     }
 
     private void setDeviceApplicationInstanceId(Context context, String registrationId) {
+        if (registrationId == null) {
+            return;
+        }
+
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
     }
 
-    public void setRegistrationIdReported(Context context, boolean registrationIdSaved) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, registrationIdSaved);
+    public void setRegistrationIdReported(Context context, boolean reported) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, reported);
     }
 
     public boolean isRegistrationIdReported(Context context) {

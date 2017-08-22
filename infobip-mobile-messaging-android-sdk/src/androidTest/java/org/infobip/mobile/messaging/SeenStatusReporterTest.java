@@ -27,7 +27,7 @@ public class SeenStatusReporterTest extends MobileMessagingTestCase {
 
         executor = Executors.newSingleThreadExecutor();
         MobileMessagingStats stats = mobileMessagingCore.getStats();
-        seenStatusReporter = new SeenStatusReporter(context, stats, executor, broadcaster);
+        seenStatusReporter = new SeenStatusReporter(context, mobileMessagingCore, stats, executor, broadcaster);
         executor = Mockito.mock(Executor.class);
     }
 
@@ -37,7 +37,7 @@ public class SeenStatusReporterTest extends MobileMessagingTestCase {
         String messageIds[] = {"1", "2", "3", "4", "5"};
         for (String messageId : messageIds) {
             mobileMessagingCore.setMessagesSeen(messageId);
-            seenStatusReporter.synchronize();
+            seenStatusReporter.sync();
         }
 
         Mockito.verify(executor, Mockito.after(50).never()).execute(Mockito.any(Runnable.class));

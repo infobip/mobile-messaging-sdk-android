@@ -37,17 +37,20 @@ public class GeoAreasHandler {
     private final GeoReporter geoReporter;
     private final Context context;
     private final GeofencingHelper geofencingHelper;
-    private MobileMessagingCore mobileMessagingCore;
+    private final MobileMessagingCore mobileMessagingCore;
 
     GeoAreasHandler(Context context, GeoBroadcaster geoBroadcaster) {
-        this(context,
-                new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), MobileMessagingCore.resolveNotificationHandler(context)),
-                new GeoReporter(context, geoBroadcaster, MobileMessagingCore.getInstance(context).getStats()),
-                new GeofencingHelper(context));
+        this.context = context;
+        this.mobileMessagingCore = MobileMessagingCore.getInstance(context);
+        this.geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), MobileMessagingCore.resolveNotificationHandler(context));
+        this.geoReporter = new GeoReporter(context, MobileMessagingCore.getInstance(context), geoBroadcaster, MobileMessagingCore.getInstance(context).getStats());
+        this.geofencingHelper = new GeofencingHelper(context);
+        this.geoMessageStore = geofencingHelper.getMessageStoreForGeo();
     }
 
-    public GeoAreasHandler(Context context, GeoNotificationHelper geoNotificationHelper, GeoReporter geoReporter, GeofencingHelper geofencingHelper) {
+    public GeoAreasHandler(Context context, MobileMessagingCore mobileMessagingCore, GeoNotificationHelper geoNotificationHelper, GeoReporter geoReporter, GeofencingHelper geofencingHelper) {
         this.context = context;
+        this.mobileMessagingCore = mobileMessagingCore;
         this.geoNotificationHelper = geoNotificationHelper;
         this.geoReporter = geoReporter;
         this.geofencingHelper = geofencingHelper;
@@ -99,7 +102,7 @@ public class GeoAreasHandler {
             return;
         }
 
-        GeoReportingResult result = geoReporter.reportSync(context, unreportedEvents);
+        GeoReportingResult result = geoReporter.reportSync(unreportedEvents);
         handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
     }
 
@@ -123,7 +126,6 @@ public class GeoAreasHandler {
      * @param generatedMessages generated messages to save to message store.
      */
     private void saveMessages(Collection<Message> generatedMessages) {
-        mobileMessagingCore = MobileMessagingCore.getInstance(context);
         if (!mobileMessagingCore.isMessageStoreEnabled()) {
             return;
         }

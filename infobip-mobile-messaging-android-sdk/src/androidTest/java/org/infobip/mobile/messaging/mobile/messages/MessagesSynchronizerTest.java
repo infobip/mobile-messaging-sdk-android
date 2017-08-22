@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.mobile.messages;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
+import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -33,6 +35,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     private MobileMessagingStats mobileMessagingStats;
     private ArgumentCaptor<Message> messageArgumentCaptor;
     private MessagesSynchronizer messagesSynchronizer;
+    private MRetryPolicy retryPolicy;
 
     @Override
     public void setUp() throws Exception {
@@ -42,7 +45,9 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         notificationHandler = Mockito.mock(NotificationHandlerImpl.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
 
-        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingStats, Executors.newSingleThreadExecutor(), broadcaster, notificationHandler);
+        retryPolicy = DefaultRetryPolicy.create(context);
+
+        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingCore, mobileMessagingStats, Executors.newSingleThreadExecutor(), broadcaster, retryPolicy, notificationHandler);
     }
 
     @Override
@@ -124,7 +129,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
             "}");
 
         // When
-        messagesSynchronizer.synchronize();
+        messagesSynchronizer.sync();
 
         // Then
         Mockito.verify(notificationHandler, Mockito.after(1000).times(3)).displayNotification(messageArgumentCaptor.capture());
@@ -145,6 +150,10 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         List<String> bodies = debugServer.getBodiesForUri("/mobile/5/messages");
         List<String> ids = new ArrayList<>();
         for (String body : bodies) {
+            if (body == null) {
+                continue;
+            }
+
             SyncMessagesBody requestBody = gson.fromJson(body, SyncMessagesBody.class);
             if (requestBody.getDrIDs() != null) {
                 ids.addAll(Arrays.asList(requestBody.getDrIDs()));

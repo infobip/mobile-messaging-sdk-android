@@ -8,6 +8,8 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
@@ -34,6 +36,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     private SeenStatusReporter seenStatusReporter;
     private RegistrationSynchronizer registrationSynchronizer;
     private MessagesSynchronizer messagesSynchronizer;
+    private MRetryPolicy retryPolicy;
 
     private ArgumentCaptor<Boolean> captor;
 
@@ -47,10 +50,11 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
-        registrationSynchronizer = new RegistrationSynchronizer(context, stats, taskExecutor, messageBroadcaster);
-        seenStatusReporter = new SeenStatusReporter(context, stats, taskExecutor, messageBroadcaster);
-        geoReporter = new GeoReporter(context, geoBroadcaster, mobileMessagingCore.getStats());
-        messagesSynchronizer = new MessagesSynchronizer(context, stats, taskExecutor, messageBroadcaster, notificationHandler);
+        retryPolicy = DefaultRetryPolicy.create(context);
+        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy);
+        seenStatusReporter = new SeenStatusReporter(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster);
+        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats());
+        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, notificationHandler);
 
         captor = ArgumentCaptor.forClass(Boolean.class);
     }
@@ -103,8 +107,8 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
         mobileMessagingCore.disablePushRegistration(); // this method shall trigger pushRegistrationEnabledReceiver only once
 
-        registrationSynchronizer.synchronize();
-        Mockito.verify(messageBroadcaster, Mockito.after(1000).times(1)).registrationEnabled(Mockito.anyString(), Mockito.anyString(), Mockito.eq(true));
+        registrationSynchronizer.sync();
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).times(1)).registrationEnabled(Mockito.anyString(), Mockito.anyString(), Mockito.eq(true));
         assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
     }
 
@@ -126,17 +130,17 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
                 "}";
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
-        messagesSynchronizer.synchronize();
+        messagesSynchronizer.sync();
 
-        Mockito.verify(messageBroadcaster, verificationMode).messageReceived(Mockito.any(Message.class));
+        Mockito.verify(coreBroadcaster, verificationMode).messageReceived(Mockito.any(Message.class));
     }
 
     private void verifySeenStatusReporter(VerificationMode verificationMode) throws InterruptedException {
         String messageIds[] = {"1"};
         mobileMessagingCore.setMessagesSeen(messageIds);
-        seenStatusReporter.synchronize();
+        seenStatusReporter.sync();
 
-        Mockito.verify(messageBroadcaster, verificationMode).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, verificationMode).seenStatusReported(Mockito.any(String[].class));
     }
 
     private void verifyGeoReporting(VerificationMode verificationMode) throws InterruptedException {
@@ -157,7 +161,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     }
 
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
-        registrationSynchronizer.updatePushRegistrationStatus(enable);
-        Mockito.verify(messageBroadcaster, verificationMode).registrationEnabled(Mockito.anyString(), Mockito.anyString(), captor.capture());
+        registrationSynchronizer.updateStatus(enable);
+        Mockito.verify(coreBroadcaster, verificationMode).registrationEnabled(Mockito.anyString(), Mockito.anyString(), captor.capture());
     }
 }

@@ -3,49 +3,44 @@ package org.infobip.mobile.messaging.mobile;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.ApiIOException;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendBaseException;
 
 import java.io.Serializable;
 import java.util.Locale;
 
 public class MobileMessagingError implements Serializable {
 
-    private final String code;
-    private final String message;
-    private final Type type;
-    private final Throwable tr;
+    private String code;
+    private String message;
+    private Type type;
+    private Throwable tr;
 
     public static MobileMessagingError createFrom(Throwable e) {
+        if (e instanceof BackendBaseException) {
+            return ((BackendBaseException) e).getError();
+        } else if (e instanceof ApiIOException) {
+            return new MobileMessagingError((ApiIOException) e);
+        }
         return new MobileMessagingError(e);
     }
 
     public MobileMessagingError(String code, String message) {
-        this.code = code;
-        this.message = message;
-        this.type = Type.SDK_ERROR;
-        this.tr = new Throwable(message);
+        this(code, message, Type.SDK_ERROR, new Throwable(message));
     }
 
-    public MobileMessagingError(String code, String message, Throwable tr) {
-        this.code = code;
-        this.message = message;
-        this.type = Type.SDK_ERROR;
-        this.tr = tr;
+    private MobileMessagingError(ApiIOException apiException) {
+        this(apiException.getCode(), apiException.getMessage(), Type.SERVER_ERROR, new Throwable(apiException.getMessage()));
     }
 
     private MobileMessagingError(Throwable e) {
-        if (e != null && e instanceof ApiIOException) {
-            ApiIOException apiIOException = (ApiIOException) e;
-            this.code = apiIOException.getCode();
-            this.message = apiIOException.getMessage();
-            this.type = Type.SERVER_ERROR;
-            this.tr = new Throwable(message);
+        this("-10", e != null ? e.getMessage() : "Something went wrong", Type.UNKNOWN_ERROR, new Throwable(e != null ? e.getMessage() : "Something went wrong"));
+    }
 
-        } else {
-            this.code = "-10";
-            this.message = e != null ? e.getMessage() : "Something went wrong";
-            this.type = Type.UNKNOWN_ERROR;
-            this.tr = new Throwable(message);
-        }
+    private MobileMessagingError(String code, String message, Type type, Throwable tr) {
+        this.code = code;
+        this.message = message;
+        this.type = type;
+        this.tr = tr;
     }
 
     public String getCode() {

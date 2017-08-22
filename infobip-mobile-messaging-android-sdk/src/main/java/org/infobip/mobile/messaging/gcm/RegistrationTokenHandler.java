@@ -22,9 +22,14 @@ class RegistrationTokenHandler {
     private static final String[] TOPICS = {"global"};
 
     void handleRegistrationTokenUpdate(Context context) {
+        String senderId = MobileMessagingCore.getGcmSenderId(context);
+        if (StringUtils.isBlank(senderId)) {
+            return;
+        }
+
         try {
             InstanceID instanceID = InstanceID.getInstance(context);
-            String token = instanceID.getToken(MobileMessagingCore.getInstance(context).getGcmSenderId(), GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             MobileMessagingLogger.v(MobileMessagingLogger.TAG, "RECEIVED TOKEN", token);
             new AndroidBroadcaster(context).registrationAcquired(token);
             sendRegistrationToServer(context, token);
@@ -51,8 +56,8 @@ class RegistrationTokenHandler {
         String infobipRegistrationId = mobileMessagingCore.getDeviceApplicationInstanceId();
 
         boolean saveNeeded = null == infobipRegistrationId ||
-                null == mobileMessagingCore.getRegistrationId() ||
-                !token.equals(mobileMessagingCore.getRegistrationId()) ||
+                null == mobileMessagingCore.getCloudToken() ||
+                !token.equals(mobileMessagingCore.getCloudToken()) ||
                 !mobileMessagingCore.isRegistrationIdReported();
 
         if (saveNeeded) {

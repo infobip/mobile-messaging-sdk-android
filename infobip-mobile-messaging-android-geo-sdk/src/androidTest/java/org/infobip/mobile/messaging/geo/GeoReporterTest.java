@@ -52,7 +52,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         enableMessageStoreForReceivedMessages();
 
         messageStore = MobileMessaging.getInstance(context).getMessageStore();
-        geoReporter = new GeoReporter(context, geoBroadcaster, mobileMessagingCore.getStats());
+        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats());
         geoReportCaptor = new ArgumentCaptor<>();
     }
 
@@ -110,7 +110,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         String stringBody = debugServer.getBody("geo/event");
 
         EventReportBody body = new JsonSerializer().deserialize(stringBody, EventReportBody.class);
-        assertEquals(body.getReports().size(), 3);
+        assertEquals(3, body.getReports().size() );
 
         EventReport r[] = body.getReports().toArray(new EventReport[body.getReports().size()]);
         assertNotSame(r[0].getTimestampDelta(), r[1].getTimestampDelta());
@@ -272,7 +272,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Mockito.verify(messageBroadcaster, Mockito.after(3000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
     }
 
     @Test
@@ -291,7 +291,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Mockito.verify(messageBroadcaster, Mockito.after(3000).never()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).never()).seenStatusReported(Mockito.any(String[].class));
     }
 
     @Test
@@ -309,6 +309,6 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         geoReporter.synchronize();
 
         // Then
-        Mockito.verify(messageBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
     }
 }

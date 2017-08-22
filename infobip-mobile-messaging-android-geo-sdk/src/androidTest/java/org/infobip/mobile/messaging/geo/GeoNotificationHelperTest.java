@@ -28,7 +28,7 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, messageBroadcaster, notificationHandler);
+        geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, coreBroadcaster, notificationHandler);
         geoMessageArgumentCaptor = ArgumentCaptor.forClass(GeoMessage.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
         geoEventTypeArgumentCaptor = ArgumentCaptor.forClass(GeoEventType.class);
@@ -48,7 +48,7 @@ public class GeoNotificationHelperTest extends MobileMessagingTestCase {
 
         // Then
         Mockito.verify(geoBroadcaster, Mockito.times(1)).geoEvent(geoEventTypeArgumentCaptor.capture(), geoMessageArgumentCaptor.capture());
-        Mockito.verify(messageBroadcaster, Mockito.times(1)).messageReceived(messageArgumentCaptor.capture());
+        Mockito.verify(coreBroadcaster, Mockito.times(1)).messageReceived(messageArgumentCaptor.capture());
 
 
         assertEquals(GeoEventType.entry, geoEventTypeArgumentCaptor.getValue());

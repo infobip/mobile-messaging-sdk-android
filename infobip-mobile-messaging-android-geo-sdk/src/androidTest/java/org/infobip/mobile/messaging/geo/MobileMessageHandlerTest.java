@@ -39,7 +39,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
-        mobileMessageHandler = new MobileMessageHandler(messageBroadcaster, notificationHandler);
+        mobileMessageHandler = new MobileMessageHandler(coreBroadcaster, notificationHandler);
         pushMessageHandler = new PushMessageHandler();
         commonStore = mobileMessaging.getMessageStore();
     }

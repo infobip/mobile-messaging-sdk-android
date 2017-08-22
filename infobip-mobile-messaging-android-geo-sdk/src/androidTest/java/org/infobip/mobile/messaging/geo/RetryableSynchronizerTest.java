@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 
 import fi.iki.elonen.NanoHTTPD;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author pandric on 08/03/2017.
  */
@@ -35,7 +37,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
         executor = Executors.newSingleThreadExecutor();
-        geoReporter = new GeoReporter(context, geoBroadcaster, mobileMessagingCore.getStats());
+        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats());
 
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, "{\n" +
                 "  \"code\": \"500\",\n" +
@@ -55,6 +57,7 @@ public class RetryableSynchronizerTest extends MobileMessagingTestCase {
         geoReporter.synchronize();
 
         // Then
-        Mockito.verify(geoBroadcaster, Mockito.after(8000).atLeast(4)).error(Mockito.any(MobileMessagingError.class));
+        Mockito.verify(geoBroadcaster, Mockito.after(8000).times(1)).error(Mockito.any(MobileMessagingError.class));
+        assertEquals(4, debugServer.getBodiesForUri("geo/event").size());
     }
 }

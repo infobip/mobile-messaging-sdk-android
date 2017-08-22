@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
@@ -15,10 +16,12 @@ import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
-import org.infobip.mobile.messaging.mobile.data.UserDataSynchronizer;
-import org.infobip.mobile.messaging.mobile.messages.MessageSender;
+import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
+import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
@@ -69,13 +72,15 @@ public class MobileMessagingCore extends MobileMessaging {
     private final RegistrationSynchronizer registrationSynchronizer;
     private final MessagesSynchronizer messagesSynchronizer;
     private final SeenStatusReporter seenStatusReporter;
-    private final UserDataSynchronizer userDataSynchronizer;
-    private final MessageSender messageSender;
+    private final UserDataReporter userDataReporter;
     private final SystemDataReporter systemDataReporter;
     private final VersionChecker versionChecker;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
     private final MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
+    private final MRetryPolicy defaultRetryPolicy;
+    private final Broadcaster broadcaster;
+    private MoMessageSender moMessageSender;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
@@ -91,15 +96,16 @@ public class MobileMessagingCore extends MobileMessaging {
         MobileMessagingLogger.init(context);
 
         this.context = context;
+        this.broadcaster = broadcaster;
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
-        this.messageSender = new MessageSender(broadcaster);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, stats, registrationAlignedExecutor, broadcaster, resolveNotificationHandler(context));
-        this.seenStatusReporter = new SeenStatusReporter(context, stats, registrationAlignedExecutor, broadcaster);
-        this.userDataSynchronizer = new UserDataSynchronizer(context, this, registrationAlignedExecutor, broadcaster);
-        this.systemDataReporter = new SystemDataReporter(context, stats, registrationAlignedExecutor, broadcaster);
-        this.versionChecker = new VersionChecker(context, stats);
-        this.registrationSynchronizer = new RegistrationSynchronizer(context, stats, registrationAlignedExecutor, broadcaster);
+        this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
+        this.messagesSynchronizer = new MessagesSynchronizer(context, this, stats, registrationAlignedExecutor, broadcaster, defaultRetryPolicy, resolveNotificationHandler(context));
+        this.seenStatusReporter = new SeenStatusReporter(context, this, stats, registrationAlignedExecutor, broadcaster);
+        this.userDataReporter = new UserDataReporter(context, this, registrationAlignedExecutor, broadcaster, defaultRetryPolicy, stats);
+        this.systemDataReporter = new SystemDataReporter(context, this, stats, defaultRetryPolicy,registrationAlignedExecutor, broadcaster);
+        this.versionChecker = new VersionChecker(context, this, stats);
+        this.registrationSynchronizer = new RegistrationSynchronizer(context, this, stats, registrationAlignedExecutor, broadcaster, defaultRetryPolicy);
         this.mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
@@ -137,15 +143,16 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public void sync() {
-        registrationSynchronizer.synchronize();
-        userDataSynchronizer.synchronize(null, getUnreportedUserData());
-        seenStatusReporter.synchronize();
-        versionChecker.synchronize();
+        registrationSynchronizer.sync();
+        userDataReporter.sync(null, getUnreportedUserData());
+        seenStatusReporter.sync();
+        moMessageSender().sync();
+        versionChecker.sync();
 
         reportSystemData();
 
         if (isPushRegistrationEnabled()) {
-            messagesSynchronizer.synchronize();
+            messagesSynchronizer.sync();
         }
     }
 
@@ -175,20 +182,20 @@ public class MobileMessagingCore extends MobileMessaging {
     @Override
     public void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        registrationSynchronizer.updatePushRegistrationStatus(true);
+        registrationSynchronizer.updateStatus(true);
     }
 
     @Override
     public void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        registrationSynchronizer.updatePushRegistrationStatus(false);
+        registrationSynchronizer.updateStatus(false);
     }
 
     public boolean isPushRegistrationEnabled() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
     }
 
-    public String getRegistrationId() {
+    public String getCloudToken() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
     }
 
@@ -436,7 +443,7 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_SENDER_ID, gcmSenderId);
     }
 
-    public String getGcmSenderId() {
+    public static String getGcmSenderId(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
     }
 
@@ -522,7 +529,7 @@ public class MobileMessagingCore extends MobileMessaging {
             return applicationCode;
         }
 
-        String appCodeProviderCanonicalClassName = getInstance(context).getApplicationCodeProviderClassName();
+        String appCodeProviderCanonicalClassName = getApplicationCodeProviderClassName(context);
 
         try {
             Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
@@ -544,7 +551,7 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
     }
 
-    public String getApiUri() {
+    public static String getApiUri(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
     }
 
@@ -632,7 +639,7 @@ public class MobileMessagingCore extends MobileMessaging {
             }
         }
 
-        userDataSynchronizer.synchronize(listener, userDataToReport);
+        userDataReporter.sync(listener, userDataToReport);
     }
 
     @Override
@@ -684,7 +691,11 @@ public class MobileMessagingCore extends MobileMessaging {
         if (isMessageStoreEnabled()) {
             getMessageStore().save(context, messages);
         }
-        messageSender.send(context, getStats(), registrationAlignedExecutor, listener, messages);
+        moMessageSender().send(listener, messages);
+    }
+
+    public void sendMessagesWithRetry(Message... messages) {
+        moMessageSender().sendWithRetry(messages);
     }
 
     public void reportSystemData() {
@@ -735,7 +746,7 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.saveString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME, applicationCodeProvider.getClass().getCanonicalName());
     }
 
-    private String getApplicationCodeProviderClassName() {
+    private static String getApplicationCodeProviderClassName(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME);
     }
 
@@ -751,6 +762,14 @@ public class MobileMessagingCore extends MobileMessaging {
             MobileMessagingLogger.e(e.getMessage());
             return false;
         }
+    }
+
+    @NonNull
+    private MoMessageSender moMessageSender() {
+        if (moMessageSender == null) {
+            moMessageSender = new MoMessageSender(context, this, broadcaster, registrationAlignedExecutor, stats, defaultRetryPolicy, MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context));
+        }
+        return moMessageSender;
     }
 
     /**

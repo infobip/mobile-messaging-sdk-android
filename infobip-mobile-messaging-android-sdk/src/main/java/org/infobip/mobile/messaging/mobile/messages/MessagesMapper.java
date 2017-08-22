@@ -2,56 +2,36 @@ package org.infobip.mobile.messaging.mobile.messages;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
-import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
-import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author pandric
  * @since 09/09/16.
  */
-class SyncMessagesResult extends UnsuccessfulResult {
+class MessagesMapper {
 
-    private List<Message> messages;
+    static List<Message> mapResponseToMessages(List<MessageResponse> payloads) {
+        if (payloads == null) return Collections.emptyList();
 
-    SyncMessagesResult(Throwable exception) {
-        super(exception);
-    }
-
-    SyncMessagesResult(SyncMessagesResponse syncMessagesResponse) {
-        super(null);
-
-        if (syncMessagesResponse == null) {
-            return;
-        }
-
-        List<MessageResponse> payloads = syncMessagesResponse.getPayloads();
-        mapResponseToMessage(payloads);
-    }
-
-    private void mapResponseToMessage(List<MessageResponse> payloads) {
-        if (payloads == null) return;
-
-        this.messages = new ArrayList<>(payloads.size());
-        for (MessageResponse messageResponse : payloads) {
-            if (messageResponse == null) {
+        List<Message> messages = new ArrayList<>(payloads.size());
+        for (MessageResponse payload : payloads) {
+            if (payload == null) {
                 continue;
             }
 
-            Message message = responseToMessage(messageResponse);
-            this.messages.add(message);
+            Message message = responseToMessage(payload);
+            messages.add(message);
         }
-    }
-
-    public List<Message> getMessages() {
         return messages;
     }
+
 
     private static Message responseToMessage(MessageResponse response) {
         JSONObject customPayload = null;

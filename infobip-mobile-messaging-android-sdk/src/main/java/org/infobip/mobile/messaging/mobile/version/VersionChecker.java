@@ -2,10 +2,12 @@ package org.infobip.mobile.messaging.mobile.version;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.mobile.synchronizer.RetryableSynchronizer;
-import org.infobip.mobile.messaging.mobile.synchronizer.Task;
+import org.infobip.mobile.messaging.api.version.LatestReleaseResponse;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -20,16 +22,21 @@ import java.util.concurrent.TimeUnit;
  * @since 04/10/2016.
  */
 
-public class VersionChecker extends RetryableSynchronizer {
+public class VersionChecker {
 
-    private static final String TAG = "VersionChecker";
+    private static final String TAG = VersionChecker.class.getSimpleName();
 
-    public VersionChecker(Context context, MobileMessagingStats stats) {
-        super(context, stats);
+    private final Context context;
+    private final MobileMessagingCore mobileMessagingCore;
+    private final MobileMessagingStats stats;
+
+    public VersionChecker(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats) {
+        this.context = context;
+        this.mobileMessagingCore = mobileMessagingCore;
+        this.stats = stats;
     }
 
-    @Override
-    public void synchronize() {
+    public void sync() {
         if (!SoftwareInformation.isDebuggableApplicationBuild(context)) {
             return;
         }
@@ -40,13 +47,20 @@ public class VersionChecker extends RetryableSynchronizer {
             return;
         }
 
-        new VersionCheckTask(context) {
+        new MRetryableTask<Void, VersionCheckResult>() {
             @Override
-            protected void onPostExecute(VersionCheckResult versionCheckResult) {
+            public VersionCheckResult run(Void[] voids) {
+                MobileMessagingLogger.v("VERSION >>>");
+                LatestReleaseResponse response = MobileApiResourceProvider.INSTANCE.getMobileApiVersion(context).getLatestRelease();
+                MobileMessagingLogger.v("VERSION <<<", response);
+                return new VersionCheckResult(response);
+            }
+
+            @Override
+            public void after(VersionCheckResult versionCheckResult) {
                 if (versionCheckResult.hasError()) {
                     MobileMessagingLogger.e("MobileMessaging API returned error (version check)!");
                     stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
-                    retry(versionCheckResult);
                     return;
                 }
 
@@ -60,17 +74,12 @@ public class VersionChecker extends RetryableSynchronizer {
             }
 
             @Override
-            protected void onCancelled(VersionCheckResult versionCheckResult) {
+            public void error(Throwable error) {
+                mobileMessagingCore.setLastHttpException(error);
                 MobileMessagingLogger.e("Error while checking version!");
                 stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
-                retry(versionCheckResult);
             }
-        }.execute();
-    }
-
-    @Override
-    public Task getTask() {
-        return Task.VERSION_CHECK;
+        };
     }
 
     private boolean shouldUpdate(String latest, String current) {

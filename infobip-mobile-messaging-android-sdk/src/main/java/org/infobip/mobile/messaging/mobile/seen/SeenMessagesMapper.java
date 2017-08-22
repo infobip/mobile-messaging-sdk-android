@@ -11,7 +11,7 @@ import java.util.List;
  * @author sslavin
  * @since 25/04/16.
  */
-class SeenMessagesReport extends SeenMessages {
+class SeenMessagesMapper extends SeenMessages {
 
     static SeenMessages fromMessageIds(String messageIds[]) {
         List<Message> messages = new ArrayList<>();

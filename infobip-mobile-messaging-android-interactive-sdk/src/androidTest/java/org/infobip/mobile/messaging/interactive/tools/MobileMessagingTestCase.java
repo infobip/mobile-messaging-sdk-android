@@ -99,6 +99,14 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
+        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
+
+        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
+        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
+
         MobileMessagingLogger.enforce();
 
         time = new TestTimeProvider();
@@ -108,14 +116,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         messageBroadcaster = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
         mobileMessaging = mobileMessagingCore;
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
-
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, "TestRegistrationId");
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, true);
 
         MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
