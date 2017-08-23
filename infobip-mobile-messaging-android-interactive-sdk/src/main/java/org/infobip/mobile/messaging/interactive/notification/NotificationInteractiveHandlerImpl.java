@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.RemoteInput;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
@@ -64,9 +65,26 @@ public class NotificationInteractiveHandlerImpl implements NotificationHandler {
         NotificationAction[] notificationActions = triggeredNotificationCategory.getNotificationActions();
         for (NotificationAction notificationAction : notificationActions) {
             PendingIntent pendingIntent = createActionTapPendingIntent(message, triggeredNotificationCategory, notificationAction, notificationId);
-            notificationBuilder.addAction(new NotificationCompat.Action(
-                    notificationAction.getIcon(), context.getString(notificationAction.getTitleResourceId()), pendingIntent));
+            notificationBuilder.addAction(createAndroidNotificationAction(notificationAction, pendingIntent));
         }
+    }
+
+    @NonNull
+    private NotificationCompat.Action createAndroidNotificationAction(NotificationAction notificationAction, PendingIntent pendingIntent) {
+        NotificationCompat.Action.Builder builder = new NotificationCompat.Action.Builder(
+                notificationAction.getIcon(),
+                context.getString(notificationAction.getTitleResourceId()),
+                pendingIntent);
+
+        if (notificationAction.hasInput()) {
+            RemoteInput.Builder inputBuilder = new RemoteInput.Builder(notificationAction.getId());
+            if (notificationAction.getInputLabelResourceId() > 0) {
+                inputBuilder.setLabel(context.getString(notificationAction.getInputLabelResourceId()));
+            }
+            builder.addRemoteInput(inputBuilder.build());
+        }
+
+        return builder.build();
     }
 
     private NotificationCategory triggeredNotificationCategory(String category) {

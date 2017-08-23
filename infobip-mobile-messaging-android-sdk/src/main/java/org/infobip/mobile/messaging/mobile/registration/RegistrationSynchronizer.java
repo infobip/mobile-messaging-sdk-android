@@ -55,9 +55,9 @@ public class RegistrationSynchronizer {
 
             @Override
             public void after(Registration registration) {
-                setPushRegistrationEnabled(context, registration.enabled);
-                setDeviceApplicationInstanceId(context, registration.registrationId);
-                setRegistrationIdReported(context, true);
+                setPushRegistrationEnabled(registration.enabled);
+                setDeviceApplicationInstanceId(registration.registrationId);
+                setRegistrationIdReported(true);
 
                 broadcaster.registrationEnabled(registration.cloudToken, registration.registrationId, registration.enabled);
             }
@@ -74,6 +74,10 @@ public class RegistrationSynchronizer {
     }
 
     public void sync() {
+        if (isRegistrationIdReported()) {
+            return;
+        }
+
         reportCloudToken(mobileMessagingCore.getCloudToken());
     }
 
@@ -94,9 +98,9 @@ public class RegistrationSynchronizer {
 
             @Override
             public void after(Registration registration) {
-                setPushRegistrationEnabled(context, registration.enabled);
-                setDeviceApplicationInstanceId(context, registration.registrationId);
-                setRegistrationIdReported(context, true);
+                setPushRegistrationEnabled(registration.enabled);
+                setDeviceApplicationInstanceId(registration.registrationId);
+                setRegistrationIdReported(true);
 
                 MobileMessagingCore.getInstance(context).reportSystemData();
 
@@ -106,7 +110,7 @@ public class RegistrationSynchronizer {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.e("MobileMessaging API returned error (registration)!");
-                setRegistrationIdReported(context, false);
+                setRegistrationIdReported(false);
 
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.PUSH_REGISTRATION_STATUS_UPDATE_ERROR);
@@ -117,7 +121,7 @@ public class RegistrationSynchronizer {
         .execute(executor, cloudToken);
     }
 
-    private void setPushRegistrationEnabled(Context context, Boolean pushRegistrationEnabled) {
+    private void setPushRegistrationEnabled(Boolean pushRegistrationEnabled) {
         if (pushRegistrationEnabled == null) {
             return;
         }
@@ -125,7 +129,7 @@ public class RegistrationSynchronizer {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, pushRegistrationEnabled);
     }
 
-    private void setDeviceApplicationInstanceId(Context context, String registrationId) {
+    private void setDeviceApplicationInstanceId(String registrationId) {
         if (registrationId == null) {
             return;
         }
@@ -133,11 +137,11 @@ public class RegistrationSynchronizer {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
     }
 
-    public void setRegistrationIdReported(Context context, boolean reported) {
+    public void setRegistrationIdReported(boolean reported) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, reported);
     }
 
-    public boolean isRegistrationIdReported(Context context) {
+    public boolean isRegistrationIdReported() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED);
     }
 }

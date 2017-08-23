@@ -448,11 +448,11 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public boolean isRegistrationIdReported() {
-        return registrationSynchronizer.isRegistrationIdReported(context);
+        return registrationSynchronizer.isRegistrationIdReported();
     }
 
     private void setRegistrationIdReported(boolean registrationIdReported) {
-        registrationSynchronizer.setRegistrationIdReported(context, registrationIdReported);
+        registrationSynchronizer.setRegistrationIdReported(registrationIdReported);
     }
 
     public static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {

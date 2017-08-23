@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.app.RemoteInput;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
@@ -48,6 +49,7 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         Message message = Message.createFrom(messageBundle);
         NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
         NotificationAction notificationAction = NotificationAction.createFrom(actionBundle);
+        String inputText = getInputTextFromIntent(intent, notificationAction);
         cancelNotification(context, notificationId);
 
         if (message == null) {
@@ -63,11 +65,25 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
             return;
         }
 
+        if (inputText != null) {
+            notificationAction.setInputText(inputText);
+        }
+
         broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
 
         markAsSeen(context, message);
         sendMo(context, notificationCategory, notificationAction);
         startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
+    }
+
+    private String getInputTextFromIntent(Intent intent, NotificationAction notificationAction) {
+        if (notificationAction == null || !notificationAction.hasInput()) {
+            return null;
+        }
+
+        Bundle input = RemoteInput.getResultsFromIntent(intent);
+        CharSequence sequence = input.getCharSequence(notificationAction.getId());
+        return sequence != null ? sequence.toString() : "";
     }
 
     private void markAsSeen(Context context, Message message) {
