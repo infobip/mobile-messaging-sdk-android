@@ -89,7 +89,10 @@ public class MessagesSynchronizer {
 
                 MobileMessagingLogger.e("MobileMessaging API returned error (synchronizing messages)! ", error);
                 stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
-                broadcaster.error(MobileMessagingError.createFrom(error));
+
+                if (!(error instanceof InternalSdkError.InternalSdkException)) {
+                    broadcaster.error(MobileMessagingError.createFrom(error));
+                }
             }
         }
         .retryWith(retryPolicy)

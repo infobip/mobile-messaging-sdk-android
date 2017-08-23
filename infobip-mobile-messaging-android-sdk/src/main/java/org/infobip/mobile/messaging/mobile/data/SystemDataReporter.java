@@ -81,7 +81,10 @@ public class SystemDataReporter {
                 MobileMessagingLogger.w("Error reporting system data: " + error);
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.SYSTEM_DATA_REPORT_ERROR);
-                broadcaster.error(MobileMessagingError.createFrom(error));
+
+                if (!(error instanceof InternalSdkError.InternalSdkException)) {
+                    broadcaster.error(MobileMessagingError.createFrom(error));
+                }
             }
         }
         .retryWith(policy)
