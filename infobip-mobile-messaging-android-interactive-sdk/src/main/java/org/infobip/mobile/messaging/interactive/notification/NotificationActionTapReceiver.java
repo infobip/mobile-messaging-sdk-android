@@ -82,6 +82,10 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         }
 
         Bundle input = RemoteInput.getResultsFromIntent(intent);
+        if (input == null) {
+            return null;
+        }
+
         CharSequence sequence = input.getCharSequence(notificationAction.getId());
         return sequence != null ? sequence.toString() : "";
     }

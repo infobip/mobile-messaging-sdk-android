@@ -90,7 +90,9 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     private static void scheduleRefresh(Context context, Date when) {
-        MobileMessagingLogger.i(TAG, "Next refresh in: " + when);
+        if (when != null) {
+            MobileMessagingLogger.i(TAG, "Next refresh in " + when);
+        }
 
         GeofencingConsistencyReceiver.scheduleConsistencyAlarm(context, AlarmManager.RTC_WAKEUP, when,
                 GeofencingConsistencyReceiver.SCHEDULED_GEO_REFRESH_ACTION, 0);
