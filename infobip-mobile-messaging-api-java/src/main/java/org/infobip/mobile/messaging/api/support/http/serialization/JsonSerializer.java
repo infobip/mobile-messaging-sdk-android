@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.api.support.http.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 
 /**
  * @author mstipanov
@@ -10,7 +9,19 @@ import com.google.gson.JsonParser;
  */
 public class JsonSerializer {
 
-    private Gson gson = new GsonBuilder().serializeNulls().create();
+    public JsonSerializer() {
+        gson = new GsonBuilder().serializeNulls().create();
+    }
+
+    public JsonSerializer(boolean serializeNulls) {
+        if (serializeNulls) {
+            gson = new GsonBuilder().serializeNulls().create();
+        } else {
+            gson = new Gson();
+        }
+    }
+
+    private final Gson gson;
 
     public <T> T deserialize(String s, Class<T> type) {
         return gson.fromJson(s, type);

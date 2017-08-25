@@ -19,7 +19,7 @@ public class MessageBundleMapper extends BundleMapper {
 
     private static final String BUNDLED_MESSAGE_TAG = MessageBundleMapper.class.getName() + ".message";
 
-    private static final JsonSerializer serializer = new JsonSerializer();
+    private static final JsonSerializer serializer = new JsonSerializer(false);
 
     /**
      * De-serializes message object from bundle

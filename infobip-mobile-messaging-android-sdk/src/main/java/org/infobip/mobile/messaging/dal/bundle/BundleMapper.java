@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class BundleMapper {
 
-    protected static final JsonSerializer serializer = new JsonSerializer();
+    protected static final JsonSerializer serializer = new JsonSerializer(false);
 
     /**
      * De-serializes generic object from bundle.

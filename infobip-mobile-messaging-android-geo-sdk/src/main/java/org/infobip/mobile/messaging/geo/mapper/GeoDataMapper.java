@@ -8,6 +8,8 @@ import org.infobip.mobile.messaging.geo.Geo;
 
 public final class GeoDataMapper {
 
+    private static final JsonSerializer serializer = new JsonSerializer(false);
+
     /**
      * Serializes json data to Geo object
      *
@@ -16,7 +18,7 @@ public final class GeoDataMapper {
      */
     @Nullable
     public static Geo geoFromInternalData(String internalDataJson) {
-        return internalDataJson != null ? new JsonSerializer().deserialize(internalDataJson, Geo.class) : null;
+        return internalDataJson != null ? serializer.deserialize(internalDataJson, Geo.class) : null;
     }
 
     /**
@@ -27,6 +29,6 @@ public final class GeoDataMapper {
      */
     @Nullable
     public static String geoToInternalData(Geo geo) {
-        return geo != null ? new JsonSerializer().serialize(geo) : null;
+        return geo != null ? serializer.serialize(geo) : null;
     }
 }

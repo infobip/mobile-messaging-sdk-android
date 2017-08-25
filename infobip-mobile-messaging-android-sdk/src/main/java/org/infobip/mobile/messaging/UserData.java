@@ -3,8 +3,7 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
-import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +20,9 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
  * @since 15/07/16.
  */
 public class UserData {
+
+    private static final JsonSerializer serializer = new JsonSerializer();
+
     private String externalUserId;
     private Map<String, Object> predefinedUserData;
     private Map<String, CustomUserDataValue> customUserData;
@@ -32,8 +34,7 @@ public class UserData {
     }
 
     public UserData(String userData) {
-        Gson gson = new Gson();
-        UserData data = gson.fromJson(userData, UserData.class);
+        UserData data = serializer.deserialize(userData, UserData.class);
         this.externalUserId = data.externalUserId;
         this.predefinedUserData = data.predefinedUserData;
         this.customUserData = data.customUserData;
@@ -79,8 +80,7 @@ public class UserData {
 
     @Override
     public String toString() {
-        Gson gson = new GsonBuilder().serializeNulls().create();
-        return gson.toJson(this);
+        return serializer.serialize(this);
     }
 
     public Map<String, Object> getPredefinedUserData() {

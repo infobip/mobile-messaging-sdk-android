@@ -13,7 +13,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.skyscreamer.jsonassert.ValueMatcher;
+import org.skyscreamer.jsonassert.comparator.CustomComparator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -85,6 +92,27 @@ public abstract class MobileMessagingBaseTestCase {
      */
     protected <T> void assertJEquals(T expected, T actual) throws Exception {
         JSONAssert.assertEquals(gson.toJson(expected), gson.toJson(actual), true);
+    }
+
+    /**
+     * Asserts that two objects are strictly the same using JSONAssert and JSON serialization
+     *
+     * @param expected expected object
+     * @param actual   actual object
+     * @param ignoreFields array of fields to ignore when doing comparison
+     * @throws Exception if serialization or assertion fails
+     */
+    protected <T> void assertJEquals(T expected, T actual, String... ignoreFields) throws Exception {
+        List<Customization> customizations = new ArrayList<>(ignoreFields.length);
+        for (String ignoreField : ignoreFields) {
+            customizations.add(new Customization(ignoreField, new ValueMatcher<Object>() {
+                @Override
+                public boolean equal(Object o1, Object o2) {
+                    return true;
+                }
+            }));
+        }
+        JSONAssert.assertEquals(gson.toJson(expected), gson.toJson(actual), new CustomComparator(JSONCompareMode.STRICT, customizations.toArray(new Customization[customizations.size()])));
     }
 
     /**

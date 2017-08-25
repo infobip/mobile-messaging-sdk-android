@@ -9,6 +9,7 @@ import org.infobip.mobile.messaging.geo.report.GeoReportingResult;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.internal.util.collections.Sets;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,7 +61,9 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         Map<Message, List<Area>> messageAreas = GeoReportHelper.findSignalingMessagesAndAreas(context, geoStore, Sets.newSet("areaId1"), GeoEventType.entry);
 
         // Then
-        assertJEquals(message, messageAreas.keySet().iterator().next());
+        // internalData is String, so has to be compared as JSON separately
+        assertJEquals(message, messageAreas.keySet().iterator().next(), "internalData");
+        JSONAssert.assertEquals(message.getInternalData(), messageAreas.keySet().iterator().next().getInternalData(), true);
         assertJEquals(area, messageAreas.values().iterator().next().get(0));
     }
 

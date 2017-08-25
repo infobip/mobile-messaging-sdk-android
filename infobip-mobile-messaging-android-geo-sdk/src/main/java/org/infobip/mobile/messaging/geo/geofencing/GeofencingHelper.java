@@ -20,6 +20,7 @@ public class GeofencingHelper {
 
     private final Context context;
     private GeoSQLiteMessageStore internalStoreForGeo;
+    private JsonSerializer serializer = new JsonSerializer(false);
 
     public GeofencingHelper(Context context) {
         this.context = context;
@@ -37,7 +38,6 @@ public class GeofencingHelper {
         return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
             @Override
             public GeoReport[] run() {
-                JsonSerializer serializer = new JsonSerializer();
                 String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey(), new String[0]);
                 Set<GeoReport> reports = new HashSet<>();
                 for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
@@ -57,7 +57,6 @@ public class GeofencingHelper {
         PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Void>() {
             @Override
             public Void run() {
-                JsonSerializer serializer = new JsonSerializer();
                 for (GeoReport report : reports) {
                     PreferenceHelper.appendToStringArray(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey(), serializer.serialize(report));
                 }

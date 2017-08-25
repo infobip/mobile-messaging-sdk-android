@@ -48,7 +48,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
 
         JsonObject internalData = new JsonObject();
         internalData.add("atts", attachments);
-        internalData.add("silent", null);
+        internalData.add("silent", new JsonObject());
 
         for (int i = 0; i < numberOfMessages; i++) {
             sharedPreferencesMessageStore.save(context, new Message(

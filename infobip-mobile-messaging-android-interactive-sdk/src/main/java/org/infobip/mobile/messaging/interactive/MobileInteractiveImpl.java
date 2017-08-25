@@ -20,6 +20,7 @@ public class MobileInteractiveImpl extends MobileInteractive {
 
     private static MobileInteractiveImpl instance;
     private final Context context;
+    private final JsonSerializer serializer = new JsonSerializer(false);
     private Set<NotificationCategory> customNotificationCategories;
     private Set<NotificationCategory> predefinedNotificationCategories;
 
@@ -92,7 +93,7 @@ public class MobileInteractiveImpl extends MobileInteractive {
         Set<NotificationCategory> notificationCategoriesTemp = new HashSet<>();
         if (notificationCategoriesStringSet != MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
             for (String category : notificationCategoriesStringSet) {
-                NotificationCategory notificationCategory = new JsonSerializer().deserialize(category, NotificationCategory.class);
+                NotificationCategory notificationCategory = serializer.deserialize(category, NotificationCategory.class);
                 notificationCategoriesTemp.add(notificationCategory);
             }
         }

@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author sslavin
  * @since 03/02/2017.
@@ -13,7 +16,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 
 public class InternalDataMapper {
 
-    private static final JsonSerializer serializer = new JsonSerializer();
+    private static final JsonSerializer serializer = new JsonSerializer(false);
 
     /**
      * @param <VibrateValueType> vibrate comes as String from FCM and as Boolean from Infobip Services
@@ -98,7 +101,7 @@ public class InternalDataMapper {
      */
     public static String getInternalDataTitle(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).silent.title;
+            return serializer.deserialize(json, InternalData.class).silent.title;
         } catch (Exception e) {
             return null;
         }
@@ -112,7 +115,7 @@ public class InternalDataMapper {
      */
     public static String getInternalDataBody(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).silent.body;
+            return serializer.deserialize(json, InternalData.class).silent.body;
         } catch (Exception e) {
             return null;
         }
@@ -126,7 +129,7 @@ public class InternalDataMapper {
      */
     public static String getInternalDataSound(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).silent.sound;
+            return serializer.deserialize(json, InternalData.class).silent.sound;
         } catch (Exception e) {
             return null;
         }
@@ -141,7 +144,7 @@ public class InternalDataMapper {
      */
     public static boolean getInternalDataVibrate(String json, boolean defaultVibrate) {
         try {
-            Object vibrate = new JsonSerializer().deserialize(json, InternalData.class).silent.vibrate;
+            Object vibrate = serializer.deserialize(json, InternalData.class).silent.vibrate;
             return Boolean.valueOf(vibrate.toString());
         } catch (Exception e) {
             return defaultVibrate;
@@ -156,7 +159,7 @@ public class InternalDataMapper {
      */
     public static String getInternalDataCategory(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).silent.category;
+            return serializer.deserialize(json, InternalData.class).silent.category;
         } catch (Exception e) {
             return null;
         }
@@ -170,7 +173,7 @@ public class InternalDataMapper {
      */
     public static String getInternalDataContentUrl(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).atts[0].url;
+            return serializer.deserialize(json, InternalData.class).atts[0].url;
         } catch (Exception e) {
             return null;
         }
@@ -184,7 +187,7 @@ public class InternalDataMapper {
      */
     public static long getInternalDataSendDateTime(String json) {
         try {
-            return new JsonSerializer().deserialize(json, InternalData.class).sendDateTime;
+            return serializer.deserialize(json, InternalData.class).sendDateTime;
         } catch (Exception e) {
             return 0;
         }
@@ -193,17 +196,29 @@ public class InternalDataMapper {
     @SuppressWarnings("unchecked")
     @Nullable
     private static <VibrateValueType> String createInternalDataForMessage(Message message) {
-        InternalData<VibrateValueType> internalData = null;
-
-        String internalDataJson = message.getInternalData();
-        if (internalDataJson != null) {
-            internalData = serializer.deserialize(internalDataJson, InternalData.class);
-        }
-
+        InternalData<VibrateValueType> internalData = serializer.deserialize(message.getInternalData(), InternalData.class);
         internalData = addContentUrlToInternalData(message, internalData);
         internalData = addSilentToInternalData(message, internalData);
         internalData = addSendDateTimeToInternalData(message, internalData);
-        return internalData != null ? serializer.serialize(internalData) : null;
+        return mergeExistingInternalDataWithAnythingToJson(message.getInternalData(), internalData);
+    }
+
+    @Nullable
+    private static String mergeExistingInternalDataWithAnythingToJson(@Nullable String internalDataJson, @Nullable Object object) {
+        if (internalDataJson == null && object == null) {
+            return null;
+        }
+
+        if (internalDataJson == null || object == null) {
+            return internalDataJson != null ? internalDataJson : serializer.serialize(object);
+        }
+
+        Map resultingMap = serializer.deserialize(internalDataJson, HashMap.class);
+        String objectJson = serializer.serialize(object);
+        Map objectMap = serializer.deserialize(objectJson, HashMap.class);
+        //noinspection unchecked
+        resultingMap.putAll(objectMap);
+        return serializer.serialize(resultingMap);
     }
 
     @SuppressWarnings("unchecked")

@@ -73,7 +73,7 @@ public class MoMessageSender {
         this.stats = stats;
         this.retryPolicy = retryPolicy;
         this.mobileApiMessages = mobileApiMessages;
-        this.jsonSerializer = new JsonSerializer();
+        this.jsonSerializer = new JsonSerializer(false);
         this.noRetryPolicy = new MRetryPolicy.Builder()
                 .withMaxRetries(0)
                 .build();

@@ -20,6 +20,9 @@ import java.util.Map;
  */
 
 public class MoMessageMapper {
+
+    private static final JsonSerializer serializer = new JsonSerializer(false);
+
     static Message[] messages(MoMessagesResponse response) {
 
         if (response == null || response.getMessages() == null || response.getMessages().length == 0) {
@@ -54,7 +57,7 @@ public class MoMessageMapper {
         List<MoMessage> moMessages = new ArrayList<>();
         for (Message message : messages) {
             String customPayloadString = message.getCustomPayload() != null ? message.getCustomPayload().toString() : null;
-            Map customPayloadMap = new JsonSerializer().deserialize(customPayloadString, Map.class);
+            Map customPayloadMap = serializer.deserialize(customPayloadString, Map.class);
             moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getBody(), customPayloadMap));
         }
 

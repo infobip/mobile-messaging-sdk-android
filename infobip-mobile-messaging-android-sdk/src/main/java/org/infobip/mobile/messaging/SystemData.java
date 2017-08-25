@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class SystemData {
 
+    private static final JsonSerializer serializer = new JsonSerializer(false);
+
     private String sdkVersion;
     private String osVersion;
     private String deviceManufacturer;
@@ -33,11 +35,11 @@ public class SystemData {
     }
 
     public static SystemData fromJson(String json) {
-        return new JsonSerializer().deserialize(json, SystemData.class);
+        return serializer.deserialize(json, SystemData.class);
     }
 
     public static SystemData createFrom(Bundle bundle) {
-        return new JsonSerializer().deserialize(bundle.getString(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
+        return serializer.deserialize(bundle.getString(BroadcastParameter.EXTRA_SYSTEM_DATA), SystemData.class);
     }
 
     public String getSdkVersion() {
@@ -114,7 +116,7 @@ public class SystemData {
 
     @Override
     public String toString() {
-        return new JsonSerializer().serialize(this);
+        return serializer.serialize(this);
     }
 
 }
