@@ -144,7 +144,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new message
      */
     protected static Message createMessage(Context context, String messageId, String campaignId, boolean saveToStorage, Area... areas) {
-        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), null));
+        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), 0, null));
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new message
      */
     protected static Message createMessage(Context context, String messageId, String campaignId, boolean saveToStorage, String contentUrl, Area... areas) {
-        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl));
+        return createMessage(context, messageId, saveToStorage, new Geo(0.0, 0.0, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), 0, contentUrl));
     }
 
     /**
@@ -173,6 +173,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected static Message createMessage(Context context, String messageId, boolean saveToStorage, Geo... geo) {
         Message message = new Message();
         message.setMessageId(messageId);
+        message.setSentTimestamp(0);
 
         boolean isGeo = geo.length > 0 && geo[0] != null && geo[0].getAreasList() != null && !geo[0].getAreasList().isEmpty();
         if (isGeo) {
@@ -259,7 +260,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new Geo object
      */
     protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String campaignId, String contentUrl, Area... areas) {
-        return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl);
+        return new Geo(triggeringLatitude, triggeringLongitude, null, null, null, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), 0, contentUrl);
     }
 
     /**
@@ -275,6 +276,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new Geo object
      */
     protected static Geo createGeo(Double triggeringLatitude, Double triggeringLongitude, String expiryTime, String startTime, String campaignId, String contentUrl, Area... areas) {
-        return new Geo(triggeringLatitude, triggeringLongitude, null, expiryTime, startTime, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), contentUrl);
+        return new Geo(triggeringLatitude, triggeringLongitude, null, expiryTime, startTime, campaignId, Arrays.asList(areas), new ArrayList<GeoEventSettings>(), 0, contentUrl);
     }
 }

@@ -28,12 +28,14 @@ public class InternalDataMapper {
 
     public static class InternalData<VibrateValueType> {
         Attachment atts[] = new Attachment[0];
+        long sendDateTime;
         Silent<VibrateValueType> silent;
 
         public InternalData() {
         }
 
-        public InternalData(String contentUrl) {
+        public InternalData(long sendDateTime, String contentUrl) {
+            this.sendDateTime = sendDateTime;
             if (contentUrl != null) {
                 this.atts = createAttachments(contentUrl);
             }
@@ -174,6 +176,20 @@ public class InternalDataMapper {
         }
     }
 
+    /**
+     * Returns send date time from internal data
+     *
+     * @param json internal data json
+     * @return timestamp if present or 0 otherwise
+     */
+    public static long getInternalDataSendDateTime(String json) {
+        try {
+            return new JsonSerializer().deserialize(json, InternalData.class).sendDateTime;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Nullable
     private static <VibrateValueType> String createInternalDataForMessage(Message message) {
@@ -186,6 +202,7 @@ public class InternalDataMapper {
 
         internalData = addContentUrlToInternalData(message, internalData);
         internalData = addSilentToInternalData(message, internalData);
+        internalData = addSendDateTimeToInternalData(message, internalData);
         return internalData != null ? serializer.serialize(internalData) : null;
     }
 
@@ -227,6 +244,18 @@ public class InternalDataMapper {
         return internalData;
     }
 
+    private static InternalData addSendDateTimeToInternalData(@NonNull Message message, InternalData internalData) {
+        if (message.getSentTimestamp() == 0) {
+            return internalData;
+        }
+
+        if (internalData == null) {
+            internalData = new InternalData<>();
+        }
+
+        internalData.sendDateTime = message.getSentTimestamp();
+        return internalData;
+    }
 
     private static Attachment[] createAttachments(@NonNull String contentUrl) {
         Attachment atts[] = new Attachment[1];

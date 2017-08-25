@@ -31,6 +31,7 @@ public class Message implements Comparable<Message> {
     private String from;
     private long receivedTimestamp;
     private long seenTimestamp;
+    private long sentTimestamp;
     private JSONObject customPayload;
     private String internalData;
     private String contentUrl;
@@ -55,7 +56,7 @@ public class Message implements Comparable<Message> {
 
     public Message(String messageId, String title, String body, String sound,
                    boolean vibrate, String icon, boolean silent, String category,
-                   String from, long receivedTimestamp, long seenTimestamp,
+                   String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage, String contentUrl) {
         this.messageId = messageId;
@@ -69,6 +70,7 @@ public class Message implements Comparable<Message> {
         this.from = from;
         this.receivedTimestamp = receivedTimestamp;
         this.seenTimestamp = seenTimestamp;
+        this.sentTimestamp = sentTimestamp;
         this.customPayload = customPayload;
         this.internalData = internalData;
         this.destination = destination;
@@ -79,13 +81,14 @@ public class Message implements Comparable<Message> {
 
     public Message() {
         this.messageId = UUID.randomUUID().toString();
+        this.sentTimestamp = Time.now();
         this.receivedTimestamp = Time.now();
         this.status = Status.UNKNOWN;
     }
 
     @Override
     public int compareTo(@NonNull Message another) {
-        return (int) Math.signum(another.receivedTimestamp - receivedTimestamp);
+        return (int) Math.signum(another.sentTimestamp - sentTimestamp);
     }
 
     public String getContentUrl() {
@@ -194,6 +197,14 @@ public class Message implements Comparable<Message> {
 
     public void setSeenTimestamp(long seenTimestamp) {
         this.seenTimestamp = seenTimestamp;
+    }
+
+    public long getSentTimestamp() {
+        return sentTimestamp;
+    }
+
+    public void setSentTimestamp(long sentTimestamp) {
+        this.sentTimestamp = sentTimestamp;
     }
 
     public JSONObject getCustomPayload() {

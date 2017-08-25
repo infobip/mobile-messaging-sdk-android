@@ -56,7 +56,7 @@ public class MobileInteractiveImpl extends MobileInteractive {
         return notificationCategories;
     }
 
-    Set<NotificationCategory> getPredefinedNotificationCategories() {
+    private Set<NotificationCategory> getPredefinedNotificationCategories() {
         if (null != predefinedNotificationCategories) {
             return predefinedNotificationCategories;
         }
@@ -83,7 +83,7 @@ public class MobileInteractiveImpl extends MobileInteractive {
     }
 
     @NonNull
-    Set<NotificationCategory> getCustomNotificationCategories() {
+    private Set<NotificationCategory> getCustomNotificationCategories() {
         if (null != customNotificationCategories) {
             return customNotificationCategories;
         }

@@ -3,8 +3,6 @@ package org.infobip.mobile.messaging.geo;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.gson.annotations.SerializedName;
-
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
@@ -27,24 +25,20 @@ public class Geo extends InternalDataMapper.InternalData {
     private String expiryTime;
     private String startTime;
     private String campaignId;
-
-    @SerializedName("geo")
-    private List<Area> areasList = new ArrayList<>();
-
-    @SerializedName("event")
-    private List<GeoEventSettings> eventSettings = new ArrayList<>();
+    private List<Area> geo = new ArrayList<>();
+    private List<GeoEventSettings> event = new ArrayList<>();
 
     public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId,
-               List<Area> areasList, List<GeoEventSettings> eventSettings, String contentUrl) {
-        super(contentUrl);
+               List<Area> areasList, List<GeoEventSettings> eventSettings, long sentDateTime, String contentUrl) {
+        super(sentDateTime, contentUrl);
         this.triggeringLatitude = triggeringLatitude;
         this.triggeringLongitude = triggeringLongitude;
         this.deliveryTime = deliveryTime;
         this.expiryTime = expiryTime;
         this.startTime = startTime;
         this.campaignId = campaignId;
-        this.areasList = areasList;
-        this.eventSettings = eventSettings;
+        this.geo = areasList;
+        this.event = eventSettings;
     }
 
     public static Geo createFrom(Bundle bundle) {
@@ -60,11 +54,11 @@ public class Geo extends InternalDataMapper.InternalData {
     }
 
     public List<Area> getAreasList() {
-        return areasList;
+        return geo;
     }
 
     public List<GeoEventSettings> getEvents() {
-        return eventSettings;
+        return event;
     }
 
     public Date getExpiryDate() {

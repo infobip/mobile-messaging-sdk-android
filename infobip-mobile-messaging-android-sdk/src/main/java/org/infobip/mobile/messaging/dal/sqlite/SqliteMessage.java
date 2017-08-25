@@ -17,7 +17,7 @@ import org.json.JSONObject;
 public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
     public SqliteMessage() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, null, null, null, Status.UNKNOWN, null, null);
+        super(null, null, null, null, true, null, false, null, null, 0, 0, 0, null, null, null, Status.UNKNOWN, null, null);
     }
 
     public SqliteMessage(Message m) {
@@ -33,6 +33,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getFrom(),
                 m.getReceivedTimestamp(),
                 m.getSeenTimestamp(),
+                m.getSentTimestamp(),
                 m.getCustomPayload(),
                 m.getInternalData(),
                 m.getDestination(),
@@ -70,12 +71,13 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setReceivedTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.RECEIVED_TIMESTAMP)));
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
 
-        String internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
-        setInternalData(internalDataJson);
-        setContentUrl(InternalDataMapper.getInternalDataContentUrl(internalDataJson));
+        String dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
+        setInternalData(dataJson);
+        setContentUrl(InternalDataMapper.getInternalDataContentUrl(dataJson));
+        setSentTimestamp(InternalDataMapper.getInternalDataSendDateTime(dataJson));
 
-        internalDataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
-        setCustomPayload(internalDataJson == null ? null : new JSONObject(internalDataJson));
+        dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
+        setCustomPayload(dataJson == null ? null : new JSONObject(dataJson));
 
         setDestination(cursor.getString(cursor.getColumnIndex(MessageColumns.DESTINATION)));
         String statusName = cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS));
@@ -97,7 +99,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.FROM, getFrom());
         contentValues.put(MessageColumns.RECEIVED_TIMESTAMP, getReceivedTimestamp());
         contentValues.put(MessageColumns.SEEN_TIMESTAMP, getSeenTimestamp());
-        contentValues.put(MessageColumns.INTERNAL_DATA, getInternalData());
+        contentValues.put(MessageColumns.INTERNAL_DATA, InternalDataMapper.createInternalDataBasedOnMessageContents(this));
         contentValues.put(MessageColumns.CUSTOM_PAYLOAD, getCustomPayload() != null ? getCustomPayload().toString() : null);
         contentValues.put(MessageColumns.DESTINATION, getDestination());
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);

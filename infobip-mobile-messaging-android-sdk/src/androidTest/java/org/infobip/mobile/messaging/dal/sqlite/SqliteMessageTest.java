@@ -36,6 +36,7 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
                 "SomeFrom",
                 1234L,
                 5678L,
+                9012L,
                 new JSONObject() {{
                     put("stringValue", "StringValue2");
                     put("numberValue", 2);
@@ -63,6 +64,7 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
         assertEquals("SomeIcon", m.getIcon());
         assertEquals(1234L, m.getReceivedTimestamp());
         assertEquals(5678L, m.getSeenTimestamp());
+        assertEquals(9012L, m.getSentTimestamp());
         JSONAssert.assertEquals("{" +
                 "'stringValue': 'StringValue2'," +
                 "'numberValue': 2," +

@@ -164,6 +164,7 @@ public class GeoReportHelper {
                     originalMessageGeo.getCampaignId(),
                     areas,
                     originalMessageGeo.getEvents(),
+                    originalMessage.getSentTimestamp(),
                     originalMessage.getContentUrl());
         } else {
             geo = new Geo(triggeringLocation.getLat(),
@@ -171,6 +172,7 @@ public class GeoReportHelper {
                     null, null, null, null,
                     areas,
                     null,
+                    Time.now(),
                     originalMessage.getContentUrl());
         }
 
@@ -187,6 +189,7 @@ public class GeoReportHelper {
                 originalMessage.getFrom(),
                 Time.now(),
                 0,
+                originalMessage.getSentTimestamp(),
                 originalMessage.getCustomPayload(),
                 internalData,
                 originalMessage.getDestination(),

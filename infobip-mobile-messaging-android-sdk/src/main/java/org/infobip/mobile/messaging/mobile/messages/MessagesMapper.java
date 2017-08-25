@@ -53,6 +53,7 @@ class MessagesMapper {
                 null,
                 Time.now(),
                 0,
+                InternalDataMapper.getInternalDataSendDateTime(response.getInternalData()),
                 customPayload,
                 response.getInternalData(),
                 null,

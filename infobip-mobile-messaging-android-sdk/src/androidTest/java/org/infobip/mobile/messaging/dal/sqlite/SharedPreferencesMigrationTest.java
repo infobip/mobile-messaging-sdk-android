@@ -1,9 +1,8 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.api.shaded.google.gson.JsonArray;
+import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
@@ -62,6 +61,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     false,
                     "SomeCategory" + i,
                     "SomeFrom" + i,
+                    0,
                     0,
                     0,
                     null,
