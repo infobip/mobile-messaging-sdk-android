@@ -38,11 +38,17 @@
                 android:value=".MainActivity" />
         </activity>
 
-        <receiver android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver">
+        <receiver android:name=".MobileMessagingBroadcastReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="org.infobip.mobile.messaging.REGISTRATION_ACQUIRED" />
                 <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
                 <action android:name="org.infobip.mobile.messaging.API_COMMUNICATION_ERROR" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".WebContentReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED" />
             </intent-filter>
         </receiver>
 

@@ -70,10 +70,10 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setFrom(cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.FROM)));
         setReceivedTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.RECEIVED_TIMESTAMP)));
         setSeenTimestamp(cursor.getLong(cursor.getColumnIndexOrThrow(MessageColumns.SEEN_TIMESTAMP)));
+        setContentUrl(cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CONTENT_URL)));
 
         String dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.INTERNAL_DATA));
         setInternalData(dataJson);
-        setContentUrl(InternalDataMapper.getInternalDataContentUrl(dataJson));
         setSentTimestamp(InternalDataMapper.getInternalDataSendDateTime(dataJson));
 
         dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));

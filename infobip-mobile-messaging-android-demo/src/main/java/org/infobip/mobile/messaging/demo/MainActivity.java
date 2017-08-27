@@ -44,7 +44,6 @@ import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -118,13 +117,6 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Message message = Message.createFrom(intent.getExtras());
             String body = message.getBody();
-            JSONObject customPayload = message.getCustomPayload();
-            String url = customPayload != null ? customPayload.optString("url") : "";
-
-            if (!url.isEmpty()) {
-                openWebView(url);
-            }
-
             Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), getString(R.string.toast_notification_tapped), body), Toast.LENGTH_LONG).show();
             updateCount();
         }
@@ -458,12 +450,5 @@ public class MainActivity extends AppCompatActivity {
                 .edit()
                 .putString(ApplicationPreferences.MSISDN, "" + userData.getMsisdn())
                 .apply();
-    }
-
-    private void openWebView(String url) {
-        Intent webViewIntent = new Intent(this, WebViewActivity.class);
-        webViewIntent.putExtra(WebViewActivity.EXTRA_URL, url);
-
-        startActivity(webViewIntent);
     }
 }

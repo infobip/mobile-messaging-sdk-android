@@ -177,19 +177,47 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
         // Read existing data from database
         class Message {
             private String id;
-            private Long receivedTimestamp;
+            private String title;
+            private String body;
+            private String sound;
+            private int vibrate;
+            private String icon;
+            private short silent;
+            private String category;
+            private String from;
+            private long receivedTimestamp;
+            private long seenTimestamp;
+            private String customPayload;
             private String internalData;
+            private String contentUrl;
+            private String destination;
+            private String status;
+            private String statusMessage;
         }
 
-        Cursor cursor = db.rawQuery("SELECT id, received_timestamp, internal_data FROM messages", new String[0]);
+        Cursor cursor = db.rawQuery("SELECT * FROM messages", new String[0]);
         List<Message> messages = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
                 try {
                     Message message = new Message();
                     message.id = cursor.getString(cursor.getColumnIndexOrThrow("id"));
+                    message.title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                    message.body = cursor.getString(cursor.getColumnIndexOrThrow("body"));
+                    message.sound = cursor.getString(cursor.getColumnIndexOrThrow("sound"));
+                    message.vibrate = cursor.getInt(cursor.getColumnIndexOrThrow("vibrate"));
+                    message.icon = cursor.getString(cursor.getColumnIndexOrThrow("icon"));
+                    message.silent = cursor.getShort(cursor.getColumnIndexOrThrow("silent"));
+                    message.category = cursor.getString(cursor.getColumnIndexOrThrow("category"));
+                    message.from = cursor.getString(cursor.getColumnIndexOrThrow("_from"));
                     message.receivedTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow("received_timestamp"));
+                    message.seenTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow("seen_timestamp"));
+                    message.customPayload = cursor.getString(cursor.getColumnIndexOrThrow("custom_payload"));
                     message.internalData = cursor.getString(cursor.getColumnIndexOrThrow("internal_data"));
+                    message.contentUrl = cursor.getString(cursor.getColumnIndexOrThrow("content_url"));
+                    message.destination = cursor.getString(cursor.getColumnIndexOrThrow("destination"));
+                    message.status = cursor.getString(cursor.getColumnIndexOrThrow("status"));
+                    message.statusMessage = cursor.getString(cursor.getColumnIndexOrThrow("status_message"));
                     messages.add(message);
                 } catch (Exception e) {
                     MobileMessagingLogger.e(Log.getStackTraceString(e));
@@ -215,7 +243,22 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             // Save new data to database
             ContentValues contentValues = new ContentValues();
             contentValues.put("id", m.id);
+            contentValues.put("title", m.title);
+            contentValues.put("body", m.body);
+            contentValues.put("sound", m.sound);
+            contentValues.put("vibrate", m.vibrate);
+            contentValues.put("icon", m.icon);
+            contentValues.put("silent", m.silent);
+            contentValues.put("category", m.category);
+            contentValues.put("_from", m.from);
+            contentValues.put("received_timestamp", m.receivedTimestamp);
+            contentValues.put("seen_timestamp", m.seenTimestamp);
+            contentValues.put("custom_payload", m.customPayload);
             contentValues.put("internal_data", m.internalData);
+            contentValues.put("content_url", m.contentUrl);
+            contentValues.put("destination", m.destination);
+            contentValues.put("status", m.status);
+            contentValues.put("status_message", m.statusMessage);
             db.insertWithOnConflict("messages", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
         }
 
