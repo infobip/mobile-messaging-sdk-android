@@ -9,6 +9,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.geo.Area;
@@ -177,7 +179,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         boolean isGeo = geo.length > 0 && geo[0] != null && geo[0].getAreasList() != null && !geo[0].getAreasList().isEmpty();
         if (isGeo) {
+            JsonSerializer serializer = new JsonSerializer();
             message.setInternalData(GeoDataMapper.geoToInternalData(geo[0]));
+            message.setContentUrl(InternalDataMapper.getInternalDataContentUrl(serializer.serialize(geo[0])));
         }
 
         if (saveToStorage) {
