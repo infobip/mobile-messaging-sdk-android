@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -8,10 +9,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.DatabaseObject;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.Tables;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +32,8 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
     static final int VER_2017_JAN_12 = 1; // Initial version
     static final int VER_2017_FEB_14 = 2; // Added separate table for geo messages
     static final int VER_2017_MAY_15 = 3; // Added "content_url" column to messages/geo_messages table
-    private static final int VER_CURRENT = VER_2017_MAY_15;
+    static final int VER_2017_AUG_25 = 4; // Added "sendDateTime" to internal data (must be present for all messages)
+    private static final int VER_CURRENT = VER_2017_AUG_25;
 
     @SuppressWarnings("WeakerAccess")
     static final String DATABASE_NAME = "mm_infobip_database.db";
@@ -160,9 +163,62 @@ public class DatabaseHelperImpl extends SQLiteOpenHelper implements DatabaseHelp
             version = VER_2017_MAY_15;
         }
 
+        if (version <= VER_2017_MAY_15) {
+            setSendDateTimeToReceivedTImeIfAbsent(db);
+            version = VER_2017_AUG_25;
+        }
+
         if (version != VER_CURRENT) {
             MobileMessagingLogger.e("SQLite DB version is not what expected: " + VER_CURRENT);
         }
+    }
+
+    private void setSendDateTimeToReceivedTImeIfAbsent(SQLiteDatabase db) {
+        // Read existing data from database
+        class Message {
+            private String id;
+            private Long receivedTimestamp;
+            private String internalData;
+        }
+
+        Cursor cursor = db.rawQuery("SELECT id, received_timestamp, internal_data FROM messages", new String[0]);
+        List<Message> messages = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            do {
+                try {
+                    Message message = new Message();
+                    message.id = cursor.getString(cursor.getColumnIndexOrThrow("id"));
+                    message.receivedTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow("received_timestamp"));
+                    message.internalData = cursor.getString(cursor.getColumnIndexOrThrow("internal_data"));
+                    messages.add(message);
+                } catch (Exception e) {
+                    MobileMessagingLogger.e(Log.getStackTraceString(e));
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        JsonSerializer serializer = new JsonSerializer(false);
+        for (Message m : messages) {
+
+            // Set sendDateTime in internalData if absent
+            Map internalDataMap = serializer.deserialize(m.internalData, HashMap.class);
+            if (internalDataMap == null) {
+                internalDataMap = new HashMap();
+            }
+            if (!internalDataMap.containsKey("sendDateTime")) {
+                //noinspection unchecked
+                internalDataMap.put("sendDateTime", m.receivedTimestamp);
+            }
+            m.internalData = serializer.serialize(internalDataMap);
+
+            // Save new data to database
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("id", m.id);
+            contentValues.put("internal_data", m.internalData);
+            db.insertWithOnConflict("messages", null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+
     }
 
     private DatabaseObject emptyDatabaseObject(Class<? extends DatabaseObject> cls) {

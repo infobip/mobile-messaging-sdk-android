@@ -1,11 +1,17 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+
+import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -104,5 +110,41 @@ public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
         Cursor cursor = database.rawQuery("SELECT * FROM messages", null);
         assertNotEquals(-1, cursor.getColumnIndex("content_url"));
         cursor.close();
+    }
+
+    @Test
+    public void test_shouldAddSendDateTimeToInternalData() throws Exception {
+        // Create SQLiteOpenHelper directly to perform raw operations on database
+        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, DatabaseHelperImpl.DATABASE_NAME, null, DatabaseHelperImpl.VER_2017_MAY_15) {
+            @Override
+            public void onCreate(SQLiteDatabase db) {
+                db.execSQL(SQL_CREATE_OLD_MESSAGES_TABLE);
+                db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
+            }
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+            }
+        };
+
+        SQLiteDatabase db = sqLiteOpenHelper.getWritableDatabase();
+        // Save new data to database
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("id", "SomeMessageId");
+        contentValues.put("received_timestamp", 1234L);
+        contentValues.put("internal_data", "{\"key1\":\"value1\"}");
+        db.insertWithOnConflict(DatabaseContract.Tables.MESSAGES, null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+        db.close();
+        sqLiteOpenHelper.close();
+
+        // Check that sent timestamp was added
+        SQLiteMessageStore messageStore = new SQLiteMessageStore();
+        List<Message> messages = messageStore.findAll(context);
+        assertEquals(1, messages.size());
+        assertEquals("SomeMessageId", messages.get(0).getMessageId());
+        assertEquals(1234L, messages.get(0).getSentTimestamp());
+        JSONAssert.assertEquals("{\"key1\" : \"value1\", \"sendDateTime\":1234}",
+                messages.get(0).getInternalData(), true);
     }
 }
