@@ -88,7 +88,10 @@ public class Message implements Comparable<Message> {
 
     @Override
     public int compareTo(@NonNull Message another) {
-        return (int) Math.signum(another.sentTimestamp - sentTimestamp);
+        if (another.sentTimestamp != 0 && sentTimestamp != 0) {
+            return (int) Math.signum(another.sentTimestamp - sentTimestamp);
+        }
+        return (int) Math.signum(another.receivedTimestamp - receivedTimestamp);
     }
 
     public String getContentUrl() {
