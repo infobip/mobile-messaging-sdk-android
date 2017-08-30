@@ -11,8 +11,6 @@ import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +37,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
 
     private ArgumentCaptor<Message> messageArgumentCaptor;
+    private ArgumentCaptor<SyncMessagesBody> syncBodyCaptor;
     private MessagesSynchronizer messagesSynchronizer;
     private MRetryPolicy retryPolicy;
     private MobileMessageHandler mobileMessageHandler;
@@ -49,6 +48,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
 
         mobileMessageHandler = mock(MobileMessageHandler.class);
         messageArgumentCaptor = forClass(Message.class);
+        syncBodyCaptor = forClass(SyncMessagesBody.class);
 
         retryPolicy = DefaultRetryPolicy.create(context);
 
@@ -95,16 +95,8 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     public void should_not_report_dlr_with_duplicate_messageIds() {
         // Given
         mobileMessagingCore.getAndRemoveUnreportedMessageIds();
-        // Workaround due to mockito/captor issues
-        final List<String> drIds = new ArrayList<>();
-        given(mobileApiMessages.sync(any(SyncMessagesBody.class)))
-                .willAnswer(new Answer<SyncMessagesResponse>() {
-                    @Override
-                    public SyncMessagesResponse answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        drIds.addAll(asList(invocationOnMock.getArgumentAt(0, SyncMessagesBody.class).getDrIDs()));
-                        return new SyncMessagesResponse();
-                    }
-                });
+        given(mobileApiMessages.sync(syncBodyCaptor.capture()))
+                .willReturn(new SyncMessagesResponse());
 
         // When
         mobileMessagingCore.setMessagesDelivered("1");
@@ -114,9 +106,11 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         mobileMessagingCore.setMessagesDelivered("5");
 
         // Then
-        verify(mobileApiMessages, after(1000).atMost(5)).sync(any(SyncMessagesBody.class));
-        assertEquals(5, drIds.size());
-        assertTrue(drIds.containsAll(asList("1", "2", "3", "4", "5")));
+        verify(mobileApiMessages, after(500).atMost(5)).sync(any(SyncMessagesBody.class));
+        assertEquals(5, syncBodyCaptor.getAllValues().size());
+        List<String> reportedDlrs = getReportedDLRs(syncBodyCaptor.getAllValues());
+        assertEquals(5, reportedDlrs.size());
+        assertTrue(reportedDlrs.containsAll(asList("1", "2", "3", "4", "5")));
     }
 
     @Test
