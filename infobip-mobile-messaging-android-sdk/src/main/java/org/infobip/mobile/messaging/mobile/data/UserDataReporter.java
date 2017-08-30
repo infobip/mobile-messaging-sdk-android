@@ -1,15 +1,12 @@
 package org.infobip.mobile.messaging.mobile.data;
 
-import android.content.Context;
-
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -17,7 +14,6 @@ import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParam
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
@@ -29,20 +25,20 @@ import java.util.concurrent.Executor;
 @SuppressWarnings("unchecked")
 public class UserDataReporter {
 
-    private final Context context;
     private final Executor executor;
     private final Broadcaster broadcaster;
     private final MobileMessagingCore mobileMessagingCore;
     private final MRetryPolicy retryPolicy;
     private final MRetryPolicy noRetryPolicy;
     private final MobileMessagingStats stats;
+    private final MobileApiData mobileApiData;
 
-    public UserDataReporter(Context context, MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy, MobileMessagingStats stats) {
-        this.context = context;
+    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy, MobileMessagingStats stats, MobileApiData mobileApiData) {
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
+        this.mobileApiData = mobileApiData;
         this.retryPolicy = retryPolicy;
         this.noRetryPolicy = new MRetryPolicy.Builder()
                 .withMaxRetries(0)
@@ -54,10 +50,7 @@ public class UserDataReporter {
             return;
         }
 
-        if (mobileMessagingCore.shouldSaveUserData()) {
-            PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
-            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userData.toString());
-        }
+        mobileMessagingCore.saveUnreportedUserData(userData);
 
         new MRetryableTask<UserData, UserData>() {
             @Override
@@ -70,7 +63,7 @@ public class UserDataReporter {
 
                 UserDataReport request = UserDataMapper.toUserDataReport(userData[0].getPredefinedUserData(), userData[0].getCustomUserData());
                 MobileMessagingLogger.v("USER DATA >>>", request);
-                UserDataReport response = MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportUserData(userData[0].getExternalUserId(), request);
+                UserDataReport response = mobileApiData.reportUserData(userData[0].getExternalUserId(), request);
                 MobileMessagingLogger.v("USER DATA <<<", response);
 
                 return UserDataMapper.fromUserDataReport(userData[0].getExternalUserId(), response.getPredefinedUserData(), response.getCustomUserData());
@@ -111,11 +104,11 @@ public class UserDataReporter {
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
-        .retryWith(retryPolicy(listener != null))
+        .retryWith(retryPolicy(listener))
         .execute(executor, userData);
     }
 
-    private MRetryPolicy retryPolicy(boolean hasCallback) {
-        return hasCallback ? noRetryPolicy : retryPolicy;
+    private MRetryPolicy retryPolicy(MobileMessaging.ResultListener listener) {
+        return listener == null && mobileMessagingCore.shouldSaveUserData() ? retryPolicy : noRetryPolicy;
     }
 }

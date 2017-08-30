@@ -1,16 +1,20 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.Date;
 
-import fi.iki.elonen.NanoHTTPD;
-
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author sslavin
@@ -19,24 +23,27 @@ import static junit.framework.Assert.assertTrue;
 
 public class UserDataSyncTest extends MobileMessagingTestCase {
 
-    private ArgumentCaptor<UserData> captor;
+    private ArgumentCaptor<UserDataReport> reportCaptor;
+    private ArgumentCaptor<UserData> dataCaptor;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        captor = ArgumentCaptor.forClass(UserData.class);
+        reportCaptor = forClass(UserDataReport.class);
+        dataCaptor = forClass(UserData.class);
+        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class)))
+                .willReturn(new UserDataReport());
     }
 
     @Test
     public void test_empty_user_data() throws Exception {
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
         mobileMessaging.fetchUserData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
+        verify(broadcaster, after(1000).atLeastOnce()).userDataReported(dataCaptor.capture());
 
-        UserData userData = captor.getValue();
+        UserData userData = dataCaptor.getValue();
         assertTrue(userData.getPredefinedUserData() == null || userData.getPredefinedUserData().isEmpty());
         assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
     }
@@ -53,19 +60,13 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         userData.removeCustomUserDataElement("myKey2");
         userData.removeCustomUserDataElement("myKey3");
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
-
         mobileMessaging.syncUserData(userData);
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
+        verify(mobileApiData, after(1000).times(1)).reportUserData(anyString(), reportCaptor.capture());
 
-        JSONAssert.assertEquals(
-                "{"  +
-                        "\"customUserData\": {" +
-                            "\"myKey1\":null," +
-                            "\"myKey2\":null," +
-                            "\"myKey3\":null"  +
-                        "}" +
-                "}", debugServer.getBody(), false);
+        UserDataReport report = reportCaptor.getValue();
+        assertEquals(null, report.getCustomUserData().get("myKey1"));
+        assertEquals(null, report.getCustomUserData().get("myKey2"));
+        assertEquals(null, report.getCustomUserData().get("myKey3"));
     }
 }

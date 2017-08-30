@@ -7,9 +7,11 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
@@ -164,8 +166,8 @@ public class MobileMessagingGcmIntentService extends IntentService {
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
 
+    private final RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
     private MobileMessageHandler mobileMessageHandler;
-    private RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
 
     public MobileMessagingGcmIntentService() {
         super(MobileMessagingLogger.TAG + "-" + MobileMessagingGcmIntentService.class.getSimpleName());
@@ -182,14 +184,11 @@ public class MobileMessagingGcmIntentService extends IntentService {
             return;
         }
 
-        if (mobileMessageHandler == null) {
-            NotificationHandler notificationHandler = MobileMessagingCore.resolveNotificationHandler(this);
-            mobileMessageHandler = new MobileMessageHandler(new AndroidBroadcaster(this), notificationHandler);
-        }
-
         switch (action) {
             case ACTION_GCM_MESSAGE_RECEIVE:
-                mobileMessageHandler.handleMessage(this, intent);
+                Message message = FCMMessageMapper.fromCloudBundle(intent.getExtras());
+                MobileMessagingLogger.v("RECEIVED MESSAGE FROM FCM", message);
+                mobileMessageHandler().handleMessage(message);
                 break;
 
             case ACTION_TOKEN_CLEANUP:
@@ -200,5 +199,18 @@ public class MobileMessagingGcmIntentService extends IntentService {
                 registrationTokenHandler.handleRegistrationTokenUpdate(this);
                 break;
         }
+    }
+
+    private MobileMessageHandler mobileMessageHandler() {
+        if (mobileMessageHandler == null) {
+            NotificationHandler notificationHandler = MobileMessagingCore.resolveNotificationHandler(this);
+            MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(this);
+            mobileMessageHandler = new MobileMessageHandler(
+                    mobileMessagingCore,
+                    new AndroidBroadcaster(this),
+                    notificationHandler,
+                    mobileMessagingCore.getMessageStoreWrapper());
+        }
+        return mobileMessageHandler;
     }
 }

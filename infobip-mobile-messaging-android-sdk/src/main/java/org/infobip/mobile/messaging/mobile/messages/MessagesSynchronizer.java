@@ -1,19 +1,16 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
-import android.content.Context;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
-import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -28,29 +25,39 @@ import java.util.concurrent.Executor;
  */
 public class MessagesSynchronizer {
 
-    private final Context context;
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
     private final Executor executor;
     private final Broadcaster broadcaster;
     private final MobileMessageHandler mobileMessageHandler;
     private final MRetryPolicy retryPolicy;
+    private final MobileApiMessages mobileApiMessages;
 
-    public MessagesSynchronizer(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy, NotificationHandler notificationHandler) {
-        this.context = context;
+    public MessagesSynchronizer(
+            MobileMessagingCore mobileMessagingCore,
+            MobileMessagingStats stats,
+            Executor executor,
+            Broadcaster broadcaster,
+            MRetryPolicy retryPolicy,
+            MobileMessageHandler mobileMessageHandler,
+            MobileApiMessages mobileApiMessages) {
+
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.executor = executor;
         this.broadcaster = broadcaster;
-        this.mobileMessageHandler = new MobileMessageHandler(broadcaster, notificationHandler);
         this.retryPolicy = retryPolicy;
+        this.mobileApiMessages = mobileApiMessages;
+        this.mobileMessageHandler = mobileMessageHandler;
     }
 
     public void sync() {
-        sync(new String[0]);
-    }
+        if (!mobileMessagingCore.isPushRegistrationEnabled()) {
+            return;
+        }
 
-    public void sync(final String unreportedMessageIds[]) {
+
+        final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
             public List<Message> run(Void[] objects) {
@@ -61,11 +68,10 @@ public class MessagesSynchronizer {
                 }
 
                 String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
-                String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
 
                 SyncMessagesBody syncMessagesBody = SyncMessagesBody.make(messageIds, unreportedMessageIds);
                 MobileMessagingLogger.v("SYNC MESSAGES >>>", syncMessagesBody);
-                SyncMessagesResponse syncMessagesResponse = MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).sync(syncMessagesBody);
+                SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
                 MobileMessagingLogger.v("SYNC MESSAGES <<<", syncMessagesResponse);
                 return MessagesMapper.mapResponseToMessages(syncMessagesResponse.getPayloads());
             }
@@ -78,7 +84,7 @@ public class MessagesSynchronizer {
                 }
 
                 for (Message message : messages) {
-                    mobileMessageHandler.handleMessage(context, message);
+                    mobileMessageHandler.handleMessage(message);
                 }
             }
 

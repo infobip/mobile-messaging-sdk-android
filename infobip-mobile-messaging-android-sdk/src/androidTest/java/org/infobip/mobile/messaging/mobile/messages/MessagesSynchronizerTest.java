@@ -1,28 +1,34 @@
 package org.infobip.mobile.messaging.mobile.messages;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
-import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
-import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
-import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 
-import fi.iki.elonen.NanoHTTPD;
-
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author pandric
@@ -32,29 +38,28 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
 
-    private MobileMessagingStats mobileMessagingStats;
     private ArgumentCaptor<Message> messageArgumentCaptor;
     private MessagesSynchronizer messagesSynchronizer;
     private MRetryPolicy retryPolicy;
+    private MobileMessageHandler mobileMessageHandler;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        mobileMessagingStats = Mockito.mock(MobileMessagingStats.class);
-        notificationHandler = Mockito.mock(NotificationHandlerImpl.class);
-        messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        mobileMessageHandler = mock(MobileMessageHandler.class);
+        messageArgumentCaptor = forClass(Message.class);
 
         retryPolicy = DefaultRetryPolicy.create(context);
 
-        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingCore, mobileMessagingStats, Executors.newSingleThreadExecutor(), broadcaster, retryPolicy, notificationHandler);
+        messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, mobileMessagingCore.getStats(),
+                Executors.newSingleThreadExecutor(), broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
     }
 
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
-
-        Mockito.reset(mobileMessagingStats, notificationHandler);
+        Mockito.reset(mobileMessageHandler);
     }
 
     @Test
@@ -90,20 +95,28 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     public void should_not_report_dlr_with_duplicate_messageIds() {
         // Given
         mobileMessagingCore.getAndRemoveUnreportedMessageIds();
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
+        // Workaround due to mockito/captor issues
+        final List<String> drIds = new ArrayList<>();
+        given(mobileApiMessages.sync(any(SyncMessagesBody.class)))
+                .willAnswer(new Answer<SyncMessagesResponse>() {
+                    @Override
+                    public SyncMessagesResponse answer(InvocationOnMock invocationOnMock) throws Throwable {
+                        drIds.addAll(asList(invocationOnMock.getArgumentAt(0, SyncMessagesBody.class).getDrIDs()));
+                        return new SyncMessagesResponse();
+                    }
+                });
 
         // When
-        mobileMessaging.setMessagesDelivered("1");
-        mobileMessaging.setMessagesDelivered("2");
-        mobileMessaging.setMessagesDelivered("3");
-        mobileMessaging.setMessagesDelivered("4");
-        mobileMessaging.setMessagesDelivered("5");
+        mobileMessagingCore.setMessagesDelivered("1");
+        mobileMessagingCore.setMessagesDelivered("2");
+        mobileMessagingCore.setMessagesDelivered("3");
+        mobileMessagingCore.setMessagesDelivered("4");
+        mobileMessagingCore.setMessagesDelivered("5");
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).deliveryReported(Mockito.<String>anyVararg());
-        List<String> actualDLRs = getReportedDLRs();
-        assertEquals(5, actualDLRs.size());
-        assertTrue(actualDLRs.containsAll(Arrays.asList("1", "2", "3", "4", "5")));
+        verify(mobileApiMessages, after(1000).atMost(5)).sync(any(SyncMessagesBody.class));
+        assertEquals(5, drIds.size());
+        assertTrue(drIds.containsAll(asList("1", "2", "3", "4", "5")));
     }
 
     @Test
@@ -111,28 +124,29 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
 
         // Given
         mobileMessagingCore.getAndRemoveUnreportedMessageIds();
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
-                "\"payloads\":[{" +
-                "   \"gcm.notification.messageId\":\"someMessageId1\"," +
-                "   \"gcm.notification.body\":\"someBody1\"" +
-                "}," +
-                "{" +
-                "   \"gcm.notification.messageId\":\"someMessageId2\"," +
-                "   \"gcm.notification.body\":\"someBody2\"," +
-                "   \"gcm.notification.vibrate\":\"true\"" +
-                "}," +
-                "{" +
-                "   \"gcm.notification.messageId\":\"someMessageId3\"," +
-                "   \"gcm.notification.body\":\"someBody3\"," +
-                "   \"gcm.notification.vibrate\":\"false\"" +
-                "}]" +
-            "}");
+        given(mobileApiMessages.sync(any(SyncMessagesBody.class)))
+                .willReturn(new SyncMessagesResponse(asList(
+                        new MessageResponse() {{
+                            setMessageId("someMessageId1");
+                            setBody("someBody1");
+                        }},
+                        new MessageResponse() {{
+                            setMessageId("someMessageId2");
+                            setBody("someBody2");
+                            setVibrate("true");
+                        }},
+                        new MessageResponse() {{
+                            setMessageId("someMessageId3");
+                            setBody("someBody3");
+                            setVibrate("false");
+                        }}
+                )));
 
         // When
         messagesSynchronizer.sync();
 
         // Then
-        Mockito.verify(notificationHandler, Mockito.after(1000).times(3)).displayNotification(messageArgumentCaptor.capture());
+        verify(mobileMessageHandler, after(1000).times(3)).handleMessage(messageArgumentCaptor.capture());
         List<Message> actualMessages = messageArgumentCaptor.getAllValues();
         assertEquals("someMessageId1", actualMessages.get(0).getMessageId());
         assertEquals("someBody1", actualMessages.get(0).getBody());
@@ -145,18 +159,11 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(false, actualMessages.get(2).isVibrate());
     }
 
-    private List<String> getReportedDLRs() {
-        Gson gson = new Gson();
-        List<String> bodies = debugServer.getBodiesForUri("/mobile/5/messages");
+    private static List<String> getReportedDLRs(List<SyncMessagesBody> bodies) {
         List<String> ids = new ArrayList<>();
-        for (String body : bodies) {
-            if (body == null) {
-                continue;
-            }
-
-            SyncMessagesBody requestBody = gson.fromJson(body, SyncMessagesBody.class);
-            if (requestBody.getDrIDs() != null) {
-                ids.addAll(Arrays.asList(requestBody.getDrIDs()));
+        for (SyncMessagesBody body : bodies) {
+            if (body.getDrIDs() != null) {
+                ids.addAll(asList(body.getDrIDs()));
             }
         }
         return ids;

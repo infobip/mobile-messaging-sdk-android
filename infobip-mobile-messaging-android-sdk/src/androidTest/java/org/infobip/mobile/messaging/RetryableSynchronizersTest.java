@@ -2,9 +2,18 @@ package org.infobip.mobile.messaging;
 
 import android.annotation.SuppressLint;
 
+import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.data.SystemDataReport;
+import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
+import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
+import org.infobip.mobile.messaging.api.support.ApiIOException;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -16,14 +25,19 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import fi.iki.elonen.NanoHTTPD;
-
-import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author pandric on 08/03/2017.
@@ -39,6 +53,12 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
     private UserDataReporter userDataReporter;
     private MRetryPolicy retryPolicy;
 
+    private MobileMessageHandler mobileMessageHandler;
+
+    private MobileApiData mobileApiData;
+    private MobileApiMessages mobileApiMessages;
+    private MobileApiRegistration mobileApiRegistration;
+
     @SuppressLint("CommitPrefEdits")
     @Override
     public void setUp() throws Exception {
@@ -50,17 +70,22 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_EXP_BACKOFF_MULTIPLIER, 0);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
+        mobileMessageHandler = mock(MobileMessageHandler.class);
+        mobileApiData = mock(MobileApiData.class);
+        mobileApiMessages = mock(MobileApiMessages.class);
+        mobileApiRegistration = mock(MobileApiRegistration.class);
+
+        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
+        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiData).reportSystemData(any(SystemDataReport.class));
+        given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean())).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
+
         retryPolicy = DefaultRetryPolicy.create(context);
         executor = Executors.newSingleThreadExecutor();
-        systemDataReporter = new SystemDataReporter(context, mobileMessagingCore, stats, retryPolicy, executor, broadcaster);
-        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, notificationHandler);
-        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy);
-        userDataReporter = new UserDataReporter(context, mobileMessagingCore, executor, broadcaster, retryPolicy, stats);
-
-        debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, "{\n" +
-                "  \"code\": \"500\",\n" +
-                "  \"message\": \"Internal server error\"\n" +
-                "}");
+        systemDataReporter = new SystemDataReporter(mobileMessagingCore, stats, retryPolicy, executor, broadcaster, mobileApiData);
+        messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
+        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileApiRegistration);
+        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicy, stats, mobileApiData);
     }
 
     @Test
@@ -73,8 +98,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         systemDataReporter.synchronize();
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(3000).times(1)).error(Mockito.any(MobileMessagingError.class));
-        assertEquals(1 + retryPolicy.getMaxRetries(), debugServer.getBodiesForUri("/mobile/2/data/system").size());
+        verify(broadcaster, after(3000).times(1)).error(any(MobileMessagingError.class));
+        verify(mobileApiData, times(1 + retryPolicy.getMaxRetries())).reportSystemData(any(SystemDataReport.class));
     }
 
     private void prepareSystemData() {
@@ -102,8 +127,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         messagesSynchronizer.sync();
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(3000).atLeast(1)).error(Mockito.any(MobileMessagingError.class));
-        assertEquals(1 + retryPolicy.getMaxRetries(), debugServer.getBodiesForUri("/mobile/5/messages").size());
+        verify(broadcaster, after(3000).atLeast(1)).error(any(MobileMessagingError.class));
+        verify(mobileApiMessages, times(1 + retryPolicy.getMaxRetries())).sync(any(SyncMessagesBody.class));
     }
 
     @Test
@@ -116,8 +141,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         registrationSynchronizer.sync();
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(3000).times(1)).error(Mockito.any(MobileMessagingError.class));
-        assertEquals(1 + retryPolicy.getMaxRetries(), debugServer.getBodiesForUri("/mobile/4/registration").size());
+        verify(broadcaster, after(3000).times(1)).error(any(MobileMessagingError.class));
+        verify(mobileApiRegistration, times(1 + retryPolicy.getMaxRetries())).upsert(anyString(), anyBoolean());
     }
 
     @Test
@@ -132,8 +157,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         userDataReporter.sync(null, userData);
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(3000).atLeast(1)).error(Mockito.any(MobileMessagingError.class));
-        assertEquals(1 + retryPolicy.getMaxRetries(), debugServer.getBodiesForUri("/mobile/4/data/user").size());
+        verify(broadcaster, after(3000).atLeast(1)).error(any(MobileMessagingError.class));
+        verify(mobileApiData, times(1 + retryPolicy.getMaxRetries())).reportUserData(anyString(), any(UserDataReport.class));
     }
 
     @Test
@@ -150,7 +175,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         userDataReporter.sync(null, userData);
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(4000).times(1)).error(Mockito.any(MobileMessagingError.class));
+        verify(broadcaster, after(4000).times(1)).error(any(MobileMessagingError.class));
+        verify(mobileApiData, times(1)).reportUserData(anyString(), any(UserDataReport.class));
     }
 
     private void withoutStoringUserData() {

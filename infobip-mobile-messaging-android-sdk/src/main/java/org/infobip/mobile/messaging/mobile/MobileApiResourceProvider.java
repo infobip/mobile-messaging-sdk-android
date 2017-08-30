@@ -31,8 +31,7 @@ import java.util.Properties;
  * @author mstipanov
  * @since 21.03.2016.
  */
-public enum MobileApiResourceProvider {
-    INSTANCE;
+public class MobileApiResourceProvider {
 
     public static class MobileMessagingHeaderProvider implements Generator.CommonHeaderProvider {
 
@@ -163,14 +162,5 @@ public enum MobileApiResourceProvider {
             mobileMessagingDynamicHeaderProvider = new MobileMessagingHeaderProvider(context);
         }
         return mobileMessagingDynamicHeaderProvider;
-    }
-
-    public void resetMobileApi() {
-        generator = null;
-        mobileApiRegistration = null;
-        mobileApiMessages = null;
-        mobileApiData = null;
-        mobileApiVersion = null;
-        mobileApiGeo = null;
     }
 }

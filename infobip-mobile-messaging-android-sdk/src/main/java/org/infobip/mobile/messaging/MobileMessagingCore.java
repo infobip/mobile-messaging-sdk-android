@@ -12,9 +12,11 @@ import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
@@ -32,6 +34,8 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
+import org.infobip.mobile.messaging.storage.MessageStoreWrapperImpl;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
@@ -65,27 +69,29 @@ public class MobileMessagingCore extends MobileMessaging {
     private static final String INTERACTIVE_NOTIFICATION_HANDLER_CLASSNAME = "org.infobip.mobile.messaging.interactive.notification.NotificationInteractiveHandlerImpl";
 
     protected static MobileMessagingCore instance;
+    protected static MobileApiResourceProvider mobileApiResourceProvider;
     static String applicationCode;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private static NotificationHandler notificationHandler;
-    private final RegistrationSynchronizer registrationSynchronizer;
-    private final MessagesSynchronizer messagesSynchronizer;
-    private final SeenStatusReporter seenStatusReporter;
-    private final UserDataReporter userDataReporter;
-    private final SystemDataReporter systemDataReporter;
-    private final VersionChecker versionChecker;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
     private final MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private final MRetryPolicy defaultRetryPolicy;
     private final Broadcaster broadcaster;
+    private RegistrationSynchronizer registrationSynchronizer;
+    private MessagesSynchronizer messagesSynchronizer;
+    private UserDataReporter userDataReporter;
+    private SystemDataReporter systemDataReporter;
     private MoMessageSender moMessageSender;
+    private SeenStatusReporter seenStatusReporter;
+    private VersionChecker versionChecker;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     private MobileNetworkStateListener mobileNetworkStateListener;
     private PlayServicesSupport playServicesSupport;
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
+    private MessageStoreWrapper messageStoreWrapper;
     private Context context;
 
     protected MobileMessagingCore(Context context) {
@@ -100,12 +106,6 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
-        this.messagesSynchronizer = new MessagesSynchronizer(context, this, stats, registrationAlignedExecutor, broadcaster, defaultRetryPolicy, resolveNotificationHandler(context));
-        this.seenStatusReporter = new SeenStatusReporter(context, this, stats, registrationAlignedExecutor, broadcaster);
-        this.userDataReporter = new UserDataReporter(context, this, registrationAlignedExecutor, broadcaster, defaultRetryPolicy, stats);
-        this.systemDataReporter = new SystemDataReporter(context, this, stats, defaultRetryPolicy,registrationAlignedExecutor, broadcaster);
-        this.versionChecker = new VersionChecker(context, this, stats);
-        this.registrationSynchronizer = new RegistrationSynchronizer(context, this, stats, registrationAlignedExecutor, broadcaster, defaultRetryPolicy);
         this.mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
@@ -143,16 +143,16 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public void sync() {
-        registrationSynchronizer.sync();
-        userDataReporter.sync(null, getUnreportedUserData());
-        seenStatusReporter.sync();
+        registrationSynchronizer().sync();
+        userDataReporter().sync(null, getUnreportedUserData());
+        seenStatusReporter().sync();
         moMessageSender().sync();
-        versionChecker.sync();
+        versionChecker().sync();
 
         reportSystemData();
 
         if (isPushRegistrationEnabled()) {
-            messagesSynchronizer.sync();
+            messagesSynchronizer().sync();
         }
     }
 
@@ -182,13 +182,13 @@ public class MobileMessagingCore extends MobileMessaging {
     @Override
     public void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        registrationSynchronizer.updateStatus(true);
+        registrationSynchronizer().updateStatus(true);
     }
 
     @Override
     public void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        registrationSynchronizer.updateStatus(false);
+        registrationSynchronizer().updateStatus(false);
     }
 
     public boolean isPushRegistrationEnabled() {
@@ -448,11 +448,11 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public boolean isRegistrationIdReported() {
-        return registrationSynchronizer.isRegistrationIdReported();
+        return registrationSynchronizer().isRegistrationIdReported();
     }
 
     private void setRegistrationIdReported(boolean registrationIdReported) {
-        registrationSynchronizer.setRegistrationIdReported(registrationIdReported);
+        registrationSynchronizer().setRegistrationIdReported(registrationIdReported);
     }
 
     public static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
@@ -486,6 +486,13 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public boolean isMessageStoreEnabled() {
         return null != getMessageStoreClass();
+    }
+
+    public MessageStoreWrapper getMessageStoreWrapper() {
+        if (messageStoreWrapper == null) {
+            messageStoreWrapper = new MessageStoreWrapperImpl(context, getMessageStore());
+        }
+        return messageStoreWrapper;
     }
 
     public MobileMessagingStats getStats() {
@@ -590,6 +597,8 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static void cleanup(Context context) {
         applicationCode = null;
+        resetMobileApi();
+
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
 
         Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
@@ -608,7 +617,10 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
+    }
+
+    public static void resetMobileApi() {
+        mobileApiResourceProvider = null;
     }
 
     @Override
@@ -639,7 +651,7 @@ public class MobileMessagingCore extends MobileMessaging {
             }
         }
 
-        userDataReporter.sync(listener, userDataToReport);
+        userDataReporter().sync(listener, userDataToReport);
     }
 
     @Override
@@ -716,7 +728,7 @@ public class MobileMessagingCore extends MobileMessaging {
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
         }
 
-        systemDataReporter.synchronize();
+        systemDataReporter().synchronize();
     }
 
     boolean isGeofencingActivated() {
@@ -764,12 +776,81 @@ public class MobileMessagingCore extends MobileMessaging {
         }
     }
 
+    public void saveUnreportedUserData(UserData userData) {
+        if (shouldSaveUserData()) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userData.toString());
+        }
+    }
+
+    @NonNull
+    private MobileApiResourceProvider mobileApiResourceProvider() {
+        if (mobileApiResourceProvider == null) {
+            mobileApiResourceProvider = new MobileApiResourceProvider();
+        }
+        return mobileApiResourceProvider;
+    }
+
     @NonNull
     private MoMessageSender moMessageSender() {
         if (moMessageSender == null) {
-            moMessageSender = new MoMessageSender(context, this, broadcaster, registrationAlignedExecutor, stats, defaultRetryPolicy, MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context));
+            moMessageSender = new MoMessageSender(context, this, broadcaster,
+                    registrationAlignedExecutor, stats, defaultRetryPolicy, mobileApiResourceProvider().getMobileApiMessages(context), getMessageStoreWrapper());
         }
         return moMessageSender;
+    }
+
+    @NonNull
+    private UserDataReporter userDataReporter() {
+        if (userDataReporter == null) {
+            userDataReporter = new UserDataReporter(this, registrationAlignedExecutor,
+                    broadcaster, defaultRetryPolicy, stats, mobileApiResourceProvider().getMobileApiData(context));
+        }
+        return userDataReporter;
+    }
+
+    @NonNull
+    private SystemDataReporter systemDataReporter() {
+        if (systemDataReporter == null) {
+            systemDataReporter = new SystemDataReporter(this, stats, defaultRetryPolicy, registrationAlignedExecutor,
+                    broadcaster, mobileApiResourceProvider().getMobileApiData(context));
+        }
+        return systemDataReporter;
+    }
+
+    @NonNull
+    private MessagesSynchronizer messagesSynchronizer() {
+        if (messagesSynchronizer == null) {
+            MobileMessageHandler mobileMessageHandler = new MobileMessageHandler(this, broadcaster, resolveNotificationHandler(context), getMessageStoreWrapper());
+            messagesSynchronizer = new MessagesSynchronizer(this, stats, registrationAlignedExecutor,
+                    broadcaster, defaultRetryPolicy, mobileMessageHandler, mobileApiResourceProvider().getMobileApiMessages(context));
+        }
+        return messagesSynchronizer;
+    }
+
+    @NonNull
+    private RegistrationSynchronizer registrationSynchronizer() {
+        if (registrationSynchronizer == null) {
+            registrationSynchronizer = new RegistrationSynchronizer(context, this, stats,
+                    registrationAlignedExecutor, broadcaster, defaultRetryPolicy, mobileApiResourceProvider().getMobileApiRegistration(context));
+        }
+        return registrationSynchronizer;
+    }
+
+    @NonNull
+    private SeenStatusReporter seenStatusReporter() {
+        if (seenStatusReporter == null) {
+            seenStatusReporter = new SeenStatusReporter(this, stats, registrationAlignedExecutor, broadcaster,
+                    mobileApiResourceProvider().getMobileApiMessages(context), new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)));
+        }
+        return seenStatusReporter;
+    }
+
+    @NonNull VersionChecker versionChecker() {
+        if (versionChecker == null) {
+            versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context));
+        }
+        return versionChecker;
     }
 
     /**

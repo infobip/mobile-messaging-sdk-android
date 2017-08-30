@@ -4,9 +4,9 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
@@ -31,14 +31,24 @@ public class RegistrationSynchronizer {
     private final Executor executor;
     private final Broadcaster broadcaster;
     private final MRetryPolicy retryPolicy;
+    private final MobileApiRegistration mobileApiRegistration;
 
-    public RegistrationSynchronizer(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy) {
+    public RegistrationSynchronizer(
+            Context context,
+            MobileMessagingCore mobileMessagingCore,
+            MobileMessagingStats stats,
+            Executor executor,
+            Broadcaster broadcaster,
+            MRetryPolicy retryPolicy,
+            MobileApiRegistration mobileApiRegistration) {
+
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.retryPolicy = retryPolicy;
+        this.mobileApiRegistration = mobileApiRegistration;
     }
 
     public void updateStatus(final Boolean enabled) {
@@ -48,7 +58,7 @@ public class RegistrationSynchronizer {
                 String cloudToken = mobileMessagingCore.getCloudToken();
                 Boolean pushRegistrationEnabled = params.length > 0 ? params[0] : null;
                 MobileMessagingLogger.v("REGISTRATION >>>", cloudToken, pushRegistrationEnabled);
-                RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(cloudToken, pushRegistrationEnabled);
+                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, pushRegistrationEnabled);
                 MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
                 return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
             }
@@ -91,7 +101,7 @@ public class RegistrationSynchronizer {
             public Registration run(String[] params) {
                 String cloudToken = params.length > 0 ? params[0] : null;
                 MobileMessagingLogger.v("REGISTRATION >>>", cloudToken);
-                RegistrationResponse registrationResponse = MobileApiResourceProvider.INSTANCE.getMobileApiRegistration(context).upsert(cloudToken, null);
+                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, null);
                 MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
                 return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
             }

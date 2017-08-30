@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -24,13 +26,16 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author sslavin
@@ -48,6 +53,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected Broadcaster broadcaster;
     protected TestTimeProvider time;
     protected NotificationHandler notificationHandler;
+
+    protected MobileApiMessages mobileApiMessages;
+    protected MobileApiData mobileApiData;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -128,11 +136,16 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         time = new TestTimeProvider();
         Time.reset(time);
 
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
+        MobileApiResourceProvider mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
+        mobileApiMessages = mock(MobileApiMessages.class);
+        mobileApiData = mock(MobileApiData.class);
 
-        notificationHandler = Mockito.mock(NotificationHandler.class);
-        broadcaster = Mockito.mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster);
+        given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
+        given(mobileApiResourceProvider.getMobileApiData(any(Context.class))).willReturn(mobileApiData);
+
+        notificationHandler = mock(NotificationHandler.class);
+        broadcaster = mock(Broadcaster.class);
+        mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster, mobileApiResourceProvider);
         mobileMessaging = mobileMessagingCore;
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);

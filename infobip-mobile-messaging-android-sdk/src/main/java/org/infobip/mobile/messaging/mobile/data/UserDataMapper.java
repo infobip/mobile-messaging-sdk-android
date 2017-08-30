@@ -14,7 +14,7 @@ import java.util.Map;
  * @since sdk v1.3.14
  */
 
-class UserDataMapper extends UserData {
+public class UserDataMapper extends UserData {
 
     private static class CustomValueMapper extends CustomUserDataValue {
 
@@ -31,7 +31,7 @@ class UserDataMapper extends UserData {
         super(externalUserId, predefinedUserData, customUserData);
     }
 
-    static UserData fromUserDataReport(String externalUserId, Map<String, Object> predefinedUserData, Map<String, CustomUserDataValueReport> customUserDataReport) {
+    public static UserData fromUserDataReport(String externalUserId, Map<String, Object> predefinedUserData, Map<String, CustomUserDataValueReport> customUserDataReport) {
         return new UserDataMapper(externalUserId, predefinedUserData, mapFromCustomUserDataReport(customUserDataReport));
     }
 

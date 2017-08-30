@@ -1,10 +1,5 @@
 package org.infobip.mobile.messaging.mobile;
 
-import android.content.Context;
-
-import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,8 +13,8 @@ public class BatchReporter {
     private Timer timer = new Timer();
     private TimerTask timerTask;
 
-    public BatchReporter(Context context) {
-        delay = PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY);
+    public BatchReporter(Long batchReportingDelay) {
+        this.delay = batchReportingDelay;
     }
 
     public synchronized void put(final Runnable task) {

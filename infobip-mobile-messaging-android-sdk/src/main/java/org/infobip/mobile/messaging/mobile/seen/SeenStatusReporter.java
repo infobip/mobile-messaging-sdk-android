@@ -1,13 +1,11 @@
 package org.infobip.mobile.messaging.mobile.seen;
 
-import android.content.Context;
-
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SeenMessages;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -23,19 +21,27 @@ import java.util.concurrent.Executor;
  */
 public class SeenStatusReporter {
 
-    private final Context context;
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
     private final Executor executor;
     private final Broadcaster broadcaster;
-    private BatchReporter batchReporter;
+    private final MobileApiMessages mobileApiMessages;
+    private final BatchReporter batchReporter;
 
-    public SeenStatusReporter(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, Executor executor, Broadcaster broadcaster) {
-        this.context = context;
+    public SeenStatusReporter(
+            MobileMessagingCore mobileMessagingCore,
+            MobileMessagingStats stats,
+            Executor executor,
+            Broadcaster broadcaster,
+            MobileApiMessages mobileApiMessages,
+            BatchReporter batchReporter) {
+
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.executor = executor;
         this.broadcaster = broadcaster;
+        this.mobileApiMessages = mobileApiMessages;
+        this.batchReporter = batchReporter;
     }
 
     public void sync() {
@@ -44,7 +50,7 @@ public class SeenStatusReporter {
             return;
         }
 
-        batchReporter().put(new Runnable() {
+        batchReporter.put(new Runnable() {
             @Override
             public void run() {
                 new MAsyncTask<Void, String[]>() {
@@ -63,7 +69,7 @@ public class SeenStatusReporter {
 
                         SeenMessages seenMessages = SeenMessagesMapper.fromMessageIds(messageIDs);
                         MobileMessagingLogger.v("SEEN >>>", seenMessages);
-                        MobileApiResourceProvider.INSTANCE.getMobileApiMessages(context).reportSeen(seenMessages);
+                        mobileApiMessages.reportSeen(seenMessages);
                         MobileMessagingLogger.v("SEEN <<<");
                         mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
                         return messageIDs;
@@ -86,12 +92,5 @@ public class SeenStatusReporter {
                 .execute(executor);
             }
         });
-    }
-
-    private BatchReporter batchReporter() {
-        if (batchReporter == null) {
-            batchReporter = new BatchReporter(context);
-        }
-        return batchReporter;
     }
 }

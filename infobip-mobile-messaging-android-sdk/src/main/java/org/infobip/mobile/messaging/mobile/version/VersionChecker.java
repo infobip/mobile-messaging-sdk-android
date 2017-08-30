@@ -5,8 +5,8 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.version.LatestReleaseResponse;
+import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -29,11 +29,13 @@ public class VersionChecker {
     private final Context context;
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
+    private final MobileApiVersion mobileApiVersion;
 
-    public VersionChecker(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats) {
+    public VersionChecker(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, MobileApiVersion mobileApiVersion) {
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
+        this.mobileApiVersion = mobileApiVersion;
     }
 
     public void sync() {
@@ -51,7 +53,7 @@ public class VersionChecker {
             @Override
             public VersionCheckResult run(Void[] voids) {
                 MobileMessagingLogger.v("VERSION >>>");
-                LatestReleaseResponse response = MobileApiResourceProvider.INSTANCE.getMobileApiVersion(context).getLatestRelease();
+                LatestReleaseResponse response = mobileApiVersion.getLatestRelease();
                 MobileMessagingLogger.v("VERSION <<<", response);
                 return new VersionCheckResult(response);
             }

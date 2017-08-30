@@ -1,5 +1,8 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.api.data.CustomUserDataValueReport;
+import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.mobile.data.UserDataMapper;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -12,9 +15,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
-
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 
 public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
@@ -28,24 +32,13 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
     private final int SOME_NUMBER_VALUE = 1111;
     private final Date SOME_DATE_VALUE = new Date();
 
-    private String serverResponse = "{\n" +
-            "  \"customUserData\": {\n" +
-            "    \"" + KEY_FOR_DATE + "\": {\n" +
-            "      \"type\": \"Date\",\n" +
-            "      \"value\": \"" + new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault()).format(SOME_DATE_VALUE) + "\"\n" +
-            "    },\n" +
-            "    \"" + KEY_FOR_NUMBER + "\": {\n" +
-            "      \"type\": \"Number\",\n" +
-            "      \"value\": 1111\n" +
-            "    },\n" +
-            "    \"" + KEY_FOR_STRING + "\": {\n" +
-            "      \"type\": \"String\",\n" +
-            "      \"value\": \"bla\"\n" +
-            "    }\n" +
-            "  },\n" +
-            "  \"externalUserId\": null,\n" +
-            "  \"predefinedUserData\": {}\n" +
-            "}";
+    private UserDataReport serverResponse = new UserDataReport(
+            new HashMap<String, Object>(),
+            new HashMap<String, CustomUserDataValueReport>() {{
+                put(KEY_FOR_DATE, new CustomUserDataValueReport(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault()).format(SOME_DATE_VALUE), "Date"));
+                put(KEY_FOR_NUMBER, new CustomUserDataValueReport(1111, "Number"));
+                put(KEY_FOR_STRING, new CustomUserDataValueReport("bla", "String"));
+            }});
 
     @Override
     public void setUp() throws Exception {
@@ -56,7 +49,8 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
     @Test
     public void test_sync_user_data() {
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
+        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class)))
+                .willReturn(serverResponse);
 
         UserData userData = new UserData();
         userData.setCustomUserDataElement(KEY_FOR_STRING, new CustomUserDataValue(SOME_STRING_VALUE));
@@ -76,7 +70,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
     @Test
     public void test_get_custom_user_data_value_from_json_string() throws ParseException {
-        UserData userData = new UserData(serverResponse);
+        UserData userData = UserDataMapper.fromUserDataReport(null, serverResponse.getPredefinedUserData(), serverResponse.getCustomUserData());
         String keyForString = userData.getCustomUserDataValue(KEY_FOR_STRING).stringValue();
         Number keyForNumber = userData.getCustomUserDataValue(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = userData.getCustomUserDataValue(KEY_FOR_DATE).dateValue();

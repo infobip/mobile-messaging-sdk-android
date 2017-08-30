@@ -7,7 +7,10 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.geo.EventReport;
 import org.infobip.mobile.messaging.api.geo.EventReportBody;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.geo.EventReportResponse;
+import org.infobip.mobile.messaging.api.geo.EventType;
+import org.infobip.mobile.messaging.api.geo.MessagePayload;
+import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
@@ -17,20 +20,22 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import fi.iki.elonen.NanoHTTPD;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.internal.util.collections.Sets.newSet;
 
 /**
  * @author sslavin
@@ -41,8 +46,10 @@ public class GeoReporterTest extends MobileMessagingTestCase {
 
     private MessageStore messageStore;
     private GeoReporter geoReporter;
+    private MobileApiGeo mobileApiGeo;
 
     private ArgumentCaptor<List<GeoReport>> geoReportCaptor;
+    private ArgumentCaptor<EventReportBody> reportBodyCaptor;
 
     @Override
     public void setUp() throws Exception {
@@ -52,8 +59,13 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         enableMessageStoreForReceivedMessages();
 
         messageStore = MobileMessaging.getInstance(context).getMessageStore();
-        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats());
+        mobileApiGeo = mock(MobileApiGeo.class);
+        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats(), mobileApiGeo);
         geoReportCaptor = new ArgumentCaptor<>();
+        reportBodyCaptor = ArgumentCaptor.forClass(EventReportBody.class);
+
+        given(mobileApiGeo.report(reportBodyCaptor.capture()))
+                .willReturn(new EventReportResponse());
     }
 
     @Test
@@ -68,7 +80,6 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
         createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
         createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
 
         // When
         geoReporter.synchronize();
@@ -78,83 +89,88 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         Mockito.verify(geoBroadcaster, Mockito.after(5000).atLeastOnce()).geoReported(geoReportCaptor.capture());
 
         List<GeoReport> broadcastedReports = geoReportCaptor.getValue();
-        assertEquals(broadcastedReports.size(), 3);
-
-        Map<String, GeoReport> reportMap = new HashMap<>();
+        assertEquals(3, broadcastedReports.size());
         for (GeoReport r : broadcastedReports) {
-            reportMap.put(r.getMessageId(), r);
+            switch (r.getMessageId()) {
+                case "messageId1":
+                    assertEquals(GeoEventType.entry, r.getEvent());
+                    assertEquals("campaignId1", r.getCampaignId());
+                    assertEquals("signalingMessageId1", r.getSignalingMessageId());
+                    assertEquals(r.getMessageId(), "messageId1");
+                    assertEquals(r.getArea().getId(), "areaId1");
+                    break;
+
+                case "messageId2":
+                    assertEquals(GeoEventType.entry, r.getEvent());
+                    assertEquals("campaignId1", r.getCampaignId());
+                    assertEquals("signalingMessageId1", r.getSignalingMessageId());
+                    assertEquals("messageId2", r.getMessageId());
+                    assertEquals("areaId2", r.getArea().getId());
+                    break;
+
+                case "messageId3":
+                    assertEquals(GeoEventType.entry, r.getEvent());
+                    assertEquals("campaignId3", r.getCampaignId());
+                    assertEquals("signalingMessageId2", r.getSignalingMessageId());
+                    assertEquals("messageId3", r.getMessageId());
+                    assertEquals("areaId3", r.getArea().getId());
+                    break;
+
+                default:
+                    assertTrue("Unexpected message id " + r.getMessageId(), false);
+                    break;
+            }
         }
 
-        GeoReport geoReport1 = reportMap.get("messageId1");
-        assertEquals(GeoEventType.entry, geoReport1.getEvent());
-        assertEquals("campaignId1", geoReport1.getCampaignId());
-        assertEquals("signalingMessageId1", geoReport1.getSignalingMessageId());
-        assertEquals(geoReport1.getMessageId(), "messageId1");
-        assertEquals(geoReport1.getArea().getId(), "areaId1");
-
-        GeoReport geoReport2 = reportMap.get("messageId2");
-        assertEquals(GeoEventType.entry, geoReport2.getEvent());
-        assertEquals("campaignId1", geoReport2.getCampaignId());
-        assertEquals("signalingMessageId1", geoReport2.getSignalingMessageId());
-        assertEquals("messageId2", geoReport2.getMessageId());
-        assertEquals("areaId2", geoReport2.getArea().getId());
-
-        GeoReport geoReport3 = reportMap.get("messageId3");
-        assertEquals(GeoEventType.entry, geoReport3.getEvent());
-        assertEquals("campaignId3", geoReport3.getCampaignId());
-        assertEquals("signalingMessageId2", geoReport3.getSignalingMessageId());
-        assertEquals("messageId3", geoReport3.getMessageId());
-        assertEquals("areaId3", geoReport3.getArea().getId());
-
         // Examine HTTP request body
-        String stringBody = debugServer.getBody("geo/event");
+        final EventReportBody body = reportBodyCaptor.getValue();
+        assertEquals(2, body.getMessages().size());
+        Set<String> messageIds = new HashSet<String>() {{
+            List<MessagePayload> ps = new ArrayList<>(body.getMessages());
+            add(ps.get(0).getMessageId());
+            add(ps.get(1).getMessageId());
+        }};
+        assertTrue(messageIds.contains("signalingMessageId1"));
+        assertTrue(messageIds.contains("signalingMessageId2"));
 
-        EventReportBody body = new JsonSerializer().deserialize(stringBody, EventReportBody.class);
-        assertEquals(3, body.getReports().size() );
+        assertEquals(3, body.getReports().size());
+        EventReport reports[] = body.getReports().toArray(new EventReport[body.getReports().size()]);
+        assertNotSame(reports[0].getTimestampDelta(), reports[1].getTimestampDelta());
+        assertNotSame(reports[0].getTimestampDelta(), reports[2].getTimestampDelta());
+        assertNotSame(reports[1].getTimestampDelta(), reports[2].getTimestampDelta());
 
-        EventReport r[] = body.getReports().toArray(new EventReport[body.getReports().size()]);
-        assertNotSame(r[0].getTimestampDelta(), r[1].getTimestampDelta());
-        assertNotSame(r[0].getTimestampDelta(), r[2].getTimestampDelta());
-        assertNotSame(r[1].getTimestampDelta(), r[2].getTimestampDelta());
+        assertEquals(3, reports.length);
+        for (EventReport report : reports) {
+            switch (report.getSdkMessageId()) {
+                case "messageId1":
+                    assertEquals(EventType.entry, report.getEvent());
+                    assertEquals("areaId1", report.getGeoAreaId());
+                    assertEquals("signalingMessageId1", report.getMessageId());
+                    assertEquals("campaignId1", report.getCampaignId());
+                    assertNotNull(report.getTimestampDelta());
+                    break;
 
-        JSONAssert.assertEquals(
-                "{" +
-                        "\"messages\": [" +
-                        "{" +
-                        "\"messageId\":\"signalingMessageId1\"" +
-                        "}," +
-                        "{" +
-                        "\"messageId\":\"signalingMessageId2\"" +
-                        "}" +
-                        "]," +
-                        "\"reports\": [" +
-                        "{" +
-                        "\"event\":\"entry\"," +
-                        "\"geoAreaId\":\"areaId1\"," +
-                        "\"messageId\":\"signalingMessageId1\"," +
-                        "\"sdkMessageId\":\"messageId1\"," +
-                        "\"campaignId\":\"campaignId1\"," +
-                        "\"timestampDelta\":" + r[0].getTimestampDelta() +
-                        "}," +
-                        "{" +
-                        "\"event\":\"entry\"," +
-                        "\"geoAreaId\":\"areaId2\"," +
-                        "\"messageId\":\"signalingMessageId1\"," +
-                        "\"sdkMessageId\":\"messageId2\"," +
-                        "\"campaignId\":\"campaignId1\"," +
-                        "\"timestampDelta\":" + r[1].getTimestampDelta() +
-                        "}," +
-                        "{" +
-                        "\"event\":\"entry\"," +
-                        "\"geoAreaId\":\"areaId3\"," +
-                        "\"messageId\":\"signalingMessageId2\"," +
-                        "\"sdkMessageId\":\"messageId3\"," +
-                        "\"campaignId\":\"campaignId3\"," +
-                        "\"timestampDelta\":" + r[2].getTimestampDelta() +
-                        "}" +
-                        "]" +
-                        "}"
-                , stringBody, JSONCompareMode.LENIENT);
+                case "messageId2":
+                    assertEquals(EventType.entry, report.getEvent());
+                    assertEquals("areaId2", report.getGeoAreaId());
+                    assertEquals("signalingMessageId1", report.getMessageId());
+                    assertEquals("campaignId1", report.getCampaignId());
+                    assertNotNull(report.getTimestampDelta());
+                    break;
+
+                case "messageId3":
+                    assertEquals(EventType.entry, report.getEvent());
+                    assertEquals("areaId3", report.getGeoAreaId());
+                    assertEquals("signalingMessageId2", report.getMessageId());
+                    assertEquals("campaignId3", report.getCampaignId());
+                    assertNotNull(report.getTimestampDelta());
+                    break;
+
+                default:
+                    assertTrue("Unexpected message id " + report.getMessageId(), false);
+                    break;
+            }
+        }
     }
 
     @Test
@@ -169,10 +185,10 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         createReport(context, "signalingMessageId1", "campaignId1", "messageId1", true, area1);
         createReport(context, "signalingMessageId1", "campaignId1", "messageId2", true, area2);
         createReport(context, "signalingMessageId2", "campaignId3", "messageId3", true, area3);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{\n" +
-                "  \"finishedCampaignIds\":[\"campaignId1\"],\n" +
-                "  \"suspendedCampaignIds\":[\"campaignId2\"]\n" +
-                "}");
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse() {{
+            setFinishedCampaignIds(newSet("campaignId1"));
+            setSuspendedCampaignIds(newSet("campaignId2"));
+        }});
 
         // When
         geoReporter.synchronize();
@@ -216,13 +232,14 @@ public class GeoReporterTest extends MobileMessagingTestCase {
                 createMessage(context, "messageId1", "campaignId1", false, area1),
                 createMessage(context, "messageId2", "campaignId1", false, area2),
                 createMessage(context, "messageId3", "campaignId2", false, area3));
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{" +
-                "'messageIds': {" +
-                "   'messageId1':'ipCoreMessageId1'," +
-                "   'messageId2':'ipCoreMessageId2'," +
-                "   'messageId3':'ipCoreMessageId3'" +
-                "}" +
-                "}");
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse() {{
+            setMessageIds(new HashMap<String, String>() {{
+                put("messageId1", "ipCoreMessageId1");
+                put("messageId2", "ipCoreMessageId2");
+                put("messageId3", "ipCoreMessageId3");
+            }});
+        }});
+
 
         // When
         geoReporter.synchronize();
@@ -266,13 +283,13 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         createMessage(context, "generatedMessageId1", true);
         createReport(context, "signalingMessageId1", "campaignId1", "generatedMessageId2", true);
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 10L);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse());
 
         // When
         mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(any(String[].class));
     }
 
     @Test
@@ -285,13 +302,13 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         mobileMessagingCore.addGeneratedMessageIds(report.getMessageId());
 
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 10L);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse());
 
         // When
         mobileMessaging.setMessagesSeen("generatedMessageId1");
 
         // Then
-        Mockito.verify(coreBroadcaster, Mockito.after(1000).never()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).never()).seenStatusReported(any(String[].class));
     }
 
     @Test
@@ -302,13 +319,13 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         createMessage(context, "generatedMessageId1", "campaignId1", true);
         createReport(context, "signalingMessageId1", "campaignId1", "generatedMessageId1", true);
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 10L);
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse());
 
         // When
         mobileMessaging.setMessagesSeen("generatedMessageId1");
         geoReporter.synchronize();
 
         // Then
-        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(Mockito.any(String[].class));
+        Mockito.verify(coreBroadcaster, Mockito.after(1000).atLeastOnce()).seenStatusReported(any(String[].class));
     }
 }

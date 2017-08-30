@@ -28,7 +28,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
 
         enableMessageStoreForReceivedMessages();
 
-        handler = new MobileMessageHandler(broadcaster, notificationHandler);
+        handler = new MobileMessageHandler(mobileMessagingCore, broadcaster, notificationHandler, mobileMessagingCore.getMessageStoreWrapper());
         commonStore = MobileMessaging.getInstance(context).getMessageStore();
     }
 
@@ -39,7 +39,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Message m = createMessage(context, "SomeMessageId", false);
 
         // When
-        handler.handleMessage(context, m);
+        handler.handleMessage(m);
 
         // Then
         List<Message> messages = commonStore.findAll(context);
@@ -54,7 +54,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Message m = createMessage(context, "SomeMessageId", false);
 
         // When
-        handler.handleMessage(context, m);
+        handler.handleMessage(m);
 
         // Then
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).messageReceived(Mockito.any(Message.class));
@@ -85,7 +85,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Message m = new JsonSerializer().deserialize(messageJson, Message.class);
 
         // When
-        handler.handleMessage(context, m);
+        handler.handleMessage(m);
 
         // Then
         Mockito.verify(broadcaster, Mockito.after(1000).times(1)).geoMessageReceived(Mockito.any(Message.class));

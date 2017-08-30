@@ -10,12 +10,12 @@ import org.infobip.mobile.messaging.api.geo.EventReportBody;
 import org.infobip.mobile.messaging.api.geo.EventReportResponse;
 import org.infobip.mobile.messaging.api.geo.EventType;
 import org.infobip.mobile.messaging.api.geo.MessagePayload;
+import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.transition.GeoAreasHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
@@ -43,14 +43,16 @@ public class GeoReporter {
     private final MobileMessagingStats stats;
     private final GeoBroadcaster broadcaster;
     private final GeofencingHelper geofenceHelper;
+    private final MobileApiGeo mobileApiGeo;
     private final MRetryPolicy retryPolicy;
 
-    public GeoReporter(Context context, MobileMessagingCore mobileMessagingCore, GeoBroadcaster broadcaster, MobileMessagingStats stats) {
+    public GeoReporter(Context context, MobileMessagingCore mobileMessagingCore, GeoBroadcaster broadcaster, MobileMessagingStats stats, MobileApiGeo mobileApiGeo) {
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.broadcaster = broadcaster;
         this.geofenceHelper = new GeofencingHelper(context);
+        this.mobileApiGeo = mobileApiGeo;
         this.retryPolicy = DefaultRetryPolicy.create(context);
     }
 
@@ -93,7 +95,7 @@ public class GeoReporter {
     public GeoReportingResult reportSync(@NonNull GeoReport geoReports[]) {
         EventReportBody eventReportBody = prepareEventReportBody(context, geofenceHelper.getMessageStoreForGeo(), geoReports);
         MobileMessagingLogger.v("GEO REPORT >>>", eventReportBody);
-        EventReportResponse eventResponse = MobileApiResourceProvider.INSTANCE.getMobileApiGeo(context).report(eventReportBody);
+        EventReportResponse eventResponse = mobileApiGeo.report(eventReportBody);
         MobileMessagingLogger.v("GEO REPORT <<<", eventResponse);
         GeoReportingResult result = new GeoReportingResult(eventResponse);
         handleSuccess(context, geoReports, result);
