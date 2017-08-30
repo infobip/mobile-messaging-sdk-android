@@ -2,12 +2,21 @@ package org.infobip.mobile.messaging.geo;
 
 import android.annotation.SuppressLint;
 
-import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.api.geo.EventReportBody;
+import org.infobip.mobile.messaging.api.geo.EventReportResponse;
+import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
+import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
+import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -17,17 +26,25 @@ import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.verification.VerificationMode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import fi.iki.elonen.NanoHTTPD;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 public class PushUnregisteredTest extends MobileMessagingTestCase {
@@ -37,6 +54,11 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     private RegistrationSynchronizer registrationSynchronizer;
     private MessagesSynchronizer messagesSynchronizer;
     private MRetryPolicy retryPolicy;
+
+    private MobileApiMessages mobileApiMessages;
+    private MobileApiGeo mobileApiGeo;
+
+    private MobileMessageHandler mobileMessageHandler;
 
     private ArgumentCaptor<Boolean> captor;
 
@@ -50,89 +72,99 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
+        mobileApiMessages = mock(MobileApiMessages.class);
+        mobileApiGeo = mock(MobileApiGeo.class);
+        mobileMessageHandler = mock(MobileMessageHandler.class);
+
         retryPolicy = DefaultRetryPolicy.create(context);
-        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy);
-        seenStatusReporter = new SeenStatusReporter(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster);
-        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats());
-        messagesSynchronizer = new MessagesSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, notificationHandler);
+        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, mobileApiRegistration);
+        seenStatusReporter = new SeenStatusReporter(mobileMessagingCore, stats, taskExecutor, coreBroadcaster, mobileApiMessages, new BatchReporter(100L));
+        geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats(), mobileApiGeo);
+        messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
 
         captor = ArgumentCaptor.forClass(Boolean.class);
     }
 
     @Test
     public void test_push_registration_disabled() throws Exception {
-        String response =
-                "{\n" +
-                        "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
-                        "  \"pushRegistrationEnabled\": false\n" +
-                        "}";
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
+        // Given
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+                .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", false));
 
-        verifyRegistrationStatusUpdate(Mockito.after(1000).atLeastOnce(), false);
+        // Then
+        verifyRegistrationStatusUpdate(after(1000).atLeastOnce(), false);
         boolean isPushRegistrationEnabled = captor.getValue();
         assertFalse(isPushRegistrationEnabled);
 
-        verifySeenStatusReporter(Mockito.after(1000).atLeastOnce());
+        verifySeenStatusReporter(after(1000).atLeastOnce());
 
         // reports should NOT be called if push is disabled
-        verifyGeoReporting(Mockito.after(1000).never());
-        verifyMessagesSynchronizer(Mockito.after(1000).never());
+        verifyGeoReporting(after(1000).never());
+        verifyMessagesSynchronizer(after(1000).never());
     }
 
     @Test
     public void test_push_registration_enabled() throws Exception {
-        String response = "{\n" +
-                "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
-                "  \"pushRegistrationEnabled\": true" +
-                "}";
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
+        // Given
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+                .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", true));
 
-        verifyRegistrationStatusUpdate(Mockito.after(1000).atLeastOnce(), true);
+        verifyRegistrationStatusUpdate(after(1000).atLeastOnce(), true);
         boolean isPushRegistrationEnabled = captor.getValue();
         assertTrue(isPushRegistrationEnabled);
-        verifySeenStatusReporter(Mockito.after(1000).atLeastOnce());
+        verifySeenStatusReporter(after(1000).atLeastOnce());
 
         // reports should BE called if push is enabled
-        verifyGeoReporting(Mockito.after(1000).atLeastOnce());
-        verifyMessagesSynchronizer(Mockito.after(1000).atLeastOnce());
+        verifyGeoReporting(after(1000).atLeastOnce());
+        verifyMessagesSynchronizer(after(1000).atLeastOnce());
     }
 
     @Test
     public void test_push_registration_default_status() throws Exception {
-        String response = "{\n" +
-                "  \"deviceApplicationInstanceId\": \"testDeviceApplicationInstanceId\",\n" +
-                "  \"pushRegistrationEnabled\": true" +
-                "}";
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
-        mobileMessagingCore.disablePushRegistration(); // this method shall trigger pushRegistrationEnabledReceiver only once
 
+        // Verify disable
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+                .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", false));
+
+        mobileMessagingCore.disablePushRegistration();
+        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean());
+        verify(coreBroadcaster, times(1)).registrationEnabled(anyString(), eq("testDeviceApplicationInstanceId"), eq(false));
+
+
+        // Verify resync
+        reset(mobileApiRegistration);
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+                .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", true));
+
+        registrationSynchronizer.setRegistrationIdReported(false);
         registrationSynchronizer.sync();
-        Mockito.verify(coreBroadcaster, Mockito.after(1000).times(1)).registrationEnabled(Mockito.anyString(), Mockito.anyString(), Mockito.eq(true));
+        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean());
+        verify(coreBroadcaster, times(1)).registrationCreated(anyString(), eq("testDeviceApplicationInstanceId"));
+
+        // Verify final value of 'enabled'
         assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
     }
 
 
     private void verifyMessagesSynchronizer(VerificationMode verificationMode) throws InterruptedException {
         mobileMessagingCore.addSyncMessagesIds("test-message-id");
-        String response = "{\n" +
-                "  \"payloads\": [\n" +
-                "    {\n" +
-                "      \"gcm.notification.messageId\": \"test-message-id\",\n" +
-                "      \"gcm.notification.title\": \"this is title\",\n" +
-                "      \"gcm.notification.body\": \"body\",\n" +
-                "      \"gcm.notification.sound\": \"true\",\n" +
-                "      \"gcm.notification.vibrate\": \"true\",\n" +
-                "      \"gcm.notification.silent\": \"true\",\n" +
-                "      \"gcm.notification.category\": \"UNKNOWN\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, response);
+        given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willReturn(new SyncMessagesResponse(new ArrayList<MessageResponse>() {{
+            add(new MessageResponse(
+                    "test-message-id",
+                    "this is title",
+                    "body",
+                    "sound",
+                    "true",
+                    "false",
+                    "UNKNOWN",
+                    "{}",
+                    "{}"
+            ));
+        }}));
         messagesSynchronizer.sync();
 
-        Mockito.verify(coreBroadcaster, verificationMode).messageReceived(Mockito.any(Message.class));
+        verify(mobileApiMessages, verificationMode).sync(any(SyncMessagesBody.class));
     }
 
     private void verifySeenStatusReporter(VerificationMode verificationMode) throws InterruptedException {
@@ -140,7 +172,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         mobileMessagingCore.setMessagesSeen(messageIds);
         seenStatusReporter.sync();
 
-        Mockito.verify(coreBroadcaster, verificationMode).seenStatusReported(Mockito.any(String[].class));
+        verify(coreBroadcaster, verificationMode).seenStatusReported(any(String[].class));
     }
 
     private void verifyGeoReporting(VerificationMode verificationMode) throws InterruptedException {
@@ -151,17 +183,18 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         GeoReport report3 = createReport(context, "signalingMessageId3", "campaignId3", "messageId3", true, createArea("areaId3"));
         createMessage(context, "signalingMessageId1", "campaignId1", true, report1.getArea(), report2.getArea());
         createMessage(context, "signalingMessageId2", "campaignId2", true, report3.getArea());
+        given(mobileApiGeo.report(any(EventReportBody.class))).willReturn(new EventReportResponse());
 
         // When
         geoReporter.synchronize();
 
         // Then
         //noinspection unchecked
-        Mockito.verify(geoBroadcaster, verificationMode).geoReported(Mockito.any(List.class));
+        verify(geoBroadcaster, verificationMode).geoReported(any(List.class));
     }
 
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
         registrationSynchronizer.updateStatus(enable);
-        Mockito.verify(coreBroadcaster, verificationMode).registrationEnabled(Mockito.anyString(), Mockito.anyString(), captor.capture());
+        verify(mobileApiRegistration, verificationMode).upsert(anyString(), captor.capture());
     }
 }

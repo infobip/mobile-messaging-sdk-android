@@ -1,14 +1,17 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+
+import static java.util.concurrent.Executors.newSingleThreadExecutor;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author sslavin
@@ -16,19 +19,22 @@ import java.util.concurrent.Executors;
  */
 public class SeenStatusReporterTest extends MobileMessagingTestCase {
 
-    SeenStatusReporter seenStatusReporter;
-    Executor executor;
+    private SeenStatusReporter seenStatusReporter;
+    private Executor executor;
+    private MobileApiMessages mobileApiMessages;
+    private BatchReporter batchReporter;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 100L);
+        batchReporter = new BatchReporter(100L);
+        mobileApiMessages = mock(MobileApiMessages.class);
 
-        executor = Executors.newSingleThreadExecutor();
+        executor = newSingleThreadExecutor();
         MobileMessagingStats stats = mobileMessagingCore.getStats();
-        seenStatusReporter = new SeenStatusReporter(context, mobileMessagingCore, stats, executor, broadcaster);
-        executor = Mockito.mock(Executor.class);
+        executor = mock(Executor.class);
+        seenStatusReporter = new SeenStatusReporter(mobileMessagingCore, stats, executor, broadcaster, mobileApiMessages, batchReporter);
     }
 
     @Test

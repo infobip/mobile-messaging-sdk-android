@@ -2,29 +2,29 @@ package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
 
+import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import fi.iki.elonen.NanoHTTPD;
-
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 
 public class UserDataStoreTest extends MobileMessagingTestCase {
 
-    private MobileMessagingCore core;
     private ArgumentCaptor<UserData> captor;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        core = new MobileMessagingCore(contextMock);
         captor = ArgumentCaptor.forClass(UserData.class);
-
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "{}");
+        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class)))
+                .willReturn(new UserDataReport());
     }
 
     @Test
@@ -34,12 +34,12 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         UserData givenUserData = userData();
 
         // When
-        core.setUserDataReported(givenUserData);
+        mobileMessagingCore.setUserDataReported(givenUserData);
 
         // Then
-        UserData userData = core.getUserData();
+        UserData userData = mobileMessagingCore.getUserData();
         assertJEquals(givenUserData, userData);
-        assertNull(core.getUnreportedUserData());
+        assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
     @Test
@@ -50,12 +50,12 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         UserData givenUserData = userData();
 
         // When
-        core.setUserDataReported(givenUserData);
+        mobileMessagingCore.setUserDataReported(givenUserData);
 
         // Then
-        UserData userData = core.getUserData();
+        UserData userData = mobileMessagingCore.getUserData();
         assertNull(userData);
-        assertNull(core.getUnreportedUserData());
+        assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
     @Test

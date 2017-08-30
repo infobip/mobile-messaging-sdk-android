@@ -18,7 +18,7 @@ import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
-import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -45,6 +45,7 @@ public class MoMessageSender {
     private final MRetryPolicy retryPolicy;
     private final MRetryPolicy noRetryPolicy;
     private final MobileApiMessages mobileApiMessages;
+    private final MessageStoreWrapper messageStoreWrapper;
     private final JsonSerializer jsonSerializer;
 
     abstract class Task extends MRetryableTask<Message, Message[]> {
@@ -65,7 +66,7 @@ public class MoMessageSender {
         }
     }
 
-    public MoMessageSender(Context context, MobileMessagingCore mobileMessagingCore, Broadcaster broadcaster, Executor executor, MobileMessagingStats stats, MRetryPolicy retryPolicy, MobileApiMessages mobileApiMessages) {
+    public MoMessageSender(Context context, MobileMessagingCore mobileMessagingCore, Broadcaster broadcaster, Executor executor, MobileMessagingStats stats, MRetryPolicy retryPolicy, MobileApiMessages mobileApiMessages, MessageStoreWrapper messageStoreWrapper) {
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
@@ -74,6 +75,7 @@ public class MoMessageSender {
         this.retryPolicy = retryPolicy;
         this.mobileApiMessages = mobileApiMessages;
         this.jsonSerializer = new JsonSerializer(false);
+        this.messageStoreWrapper = messageStoreWrapper;
         this.noRetryPolicy = new MRetryPolicy.Builder()
                 .withMaxRetries(0)
                 .build();
@@ -83,13 +85,8 @@ public class MoMessageSender {
         new Task() {
             @Override
             public void after(Message[] messages) {
-                MessageStore messageStore = mobileMessagingCore.getMessageStore();
-                if (messageStore != null) {
-                    messageStore.save(context, messages);
-                }
-
+                messageStoreWrapper.upsert(messages);
                 broadcaster.messagesSent(Arrays.asList(messages));
-
                 if (listener != null) {
                     listener.onResult(messages);
                 }

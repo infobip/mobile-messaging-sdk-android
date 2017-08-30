@@ -9,6 +9,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -33,11 +35,14 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author sslavin
@@ -56,6 +61,10 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileMessagingCore mobileMessagingCore;
     protected MobileMessaging mobileMessaging;
     protected NotificationHandler notificationHandler;
+
+    protected MobileApiResourceProvider mobileApiResourceProvider;
+    protected MobileApiMessages mobileApiMessages;
+    protected MobileApiRegistration mobileApiRegistration;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -112,15 +121,18 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         time = new TestTimeProvider();
         Time.reset(time);
 
-        notificationHandler = Mockito.mock(NotificationHandler.class);
-        coreBroadcaster = Mockito.mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster);
+        notificationHandler = mock(NotificationHandler.class);
+        coreBroadcaster = mock(Broadcaster.class);
+        mobileApiMessages = mock(MobileApiMessages.class);
+        mobileApiRegistration = mock(MobileApiRegistration.class);
+        mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
+        given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
+        given(mobileApiResourceProvider.getMobileApiRegistration(any(Context.class))).willReturn(mobileApiRegistration);
+        mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster, mobileApiResourceProvider);
         mobileMessaging = mobileMessagingCore;
         geofencingHelper = new GeofencingHelper(context);
 
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
-
-        geoBroadcaster = Mockito.mock(GeoBroadcaster.class);
+        geoBroadcaster = mock(GeoBroadcaster.class);
         geofencingHelper.removeUnreportedGeoEvents();
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);

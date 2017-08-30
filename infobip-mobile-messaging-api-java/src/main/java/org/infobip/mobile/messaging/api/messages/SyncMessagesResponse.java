@@ -14,8 +14,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SyncMessagesResponse {
     List<MessageResponse> payloads;
-
-    public List<MessageResponse> getPayloads() {
-        return payloads;
-    }
 }

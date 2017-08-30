@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -24,11 +25,14 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -39,8 +43,10 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
 
     private MoMessageSender moMessageSender;
     private ArgumentCaptor<List<Message>> captor;
+    private ArgumentCaptor<Message[]> messageCaptor;
     private ArgumentCaptor<MoMessagesBody> bodyCaptor;
     private MobileApiMessages apiMock;
+    private MessageStoreWrapper messageStoreWrapperMock;
     private final JsonSerializer jsonSerializer = new JsonSerializer();
 
     @Override
@@ -49,7 +55,9 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
 
         MRetryPolicy policy = new MRetryPolicy.Builder().withMaxRetries(0).build();
         captor = new ArgumentCaptor<>();
-        bodyCaptor = ArgumentCaptor.forClass(MoMessagesBody.class);
+        bodyCaptor = forClass(MoMessagesBody.class);
+        messageCaptor = forClass(Message[].class);
+        messageStoreWrapperMock = mock(MessageStoreWrapper.class);
         apiMock = mock(MobileApiMessages.class);
 
         moMessageSender = new MoMessageSender(
@@ -59,7 +67,8 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
                 Executors.newSingleThreadExecutor(),
                 mobileMessagingCore.getStats(),
                 policy,
-                apiMock);
+                apiMock,
+                messageStoreWrapperMock);
     }
 
     @Test
@@ -180,9 +189,18 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
 
         // Then
         verify(apiMock, after(200).atLeast(1)).sendMO(any(MoMessagesBody.class));
-        List<Message> storedMessages = mobileMessaging.getMessageStore().findAll(context);
+        verify(messageStoreWrapperMock, times(1)).upsert(messageCaptor.capture());
+        List<Message> storedMessages = getAllMessages(messageCaptor.getAllValues());
         assertEquals(1, storedMessages.size());
         assertEquals(givenMessage1.getMessageId(), storedMessages.get(0).getMessageId());
+    }
+
+    private List<Message> getAllMessages(List<Message[]> messagesLists) {
+        List<Message> messages = new ArrayList<>();
+        for (Message[] arr : messagesLists) {
+            messages.addAll(asList(arr));
+        }
+        return messages;
     }
 
     @NonNull

@@ -39,7 +39,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
-        mobileMessageHandler = new MobileMessageHandler(coreBroadcaster, notificationHandler);
+        mobileMessageHandler = new MobileMessageHandler(mobileMessagingCore, coreBroadcaster, notificationHandler, mobileMessagingCore.getMessageStoreWrapper());
         pushMessageHandler = new PushMessageHandler();
         commonStore = mobileMessaging.getMessageStore();
     }
@@ -71,7 +71,7 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Message message = createMessage(context, "SomeMessageId", null, false);
 
         // When
-        mobileMessageHandler.handleMessage(context, message);
+        mobileMessageHandler.handleMessage(message);
 
         // Then
         List<Message> messages = commonStore.findAll(context);
@@ -87,8 +87,8 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
         Message message2 = createMessage(context, "SomeMessageId2", "SomeCampaignId2", false, createArea("SomeAreaId1"));
 
         // When
-        mobileMessageHandler.handleMessage(context, message1);
-        mobileMessageHandler.handleMessage(context, message2);
+        mobileMessageHandler.handleMessage(message1);
+        mobileMessageHandler.handleMessage(message2);
 
         // Then
         List<Message> messages = commonStore.findAll(context);

@@ -1,16 +1,20 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import fi.iki.elonen.NanoHTTPD;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author sslavin
@@ -33,11 +37,9 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     @Test
     public void test_reportSystemData() {
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
-
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).systemDataReported(captor.capture());
+        verify(broadcaster, after(1000).atLeastOnce()).systemDataReported(captor.capture());
         SystemData data = captor.getValue();
         // application version is null in test
         //assertFalse(data.getApplicationVersion().isEmpty());
@@ -51,13 +53,11 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     @Test
     public void test_reportSystemData_withSettingDisabled() {
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
-
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO, false);
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).systemDataReported(captor.capture());
+        verify(broadcaster, after(1000).atLeastOnce()).systemDataReported(captor.capture());
         SystemData data = captor.getValue();
         // application version is null in test
         //assertTrue(data.getApplicationVersion().isEmpty());
@@ -71,49 +71,45 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     @Test
     public void test_reportSystemData_noDoubleReports() {
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+        mobileMessagingCore.reportSystemData();
+
+        verify(broadcaster, after(1000).times(1)).systemDataReported(any(SystemData.class));
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
-
-        mobileMessagingCore.reportSystemData();
-
-        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
+        verify(broadcaster, after(1000).times(1)).systemDataReported(any(SystemData.class));
     }
 
     @Test
     public void test_reportSystemData_repeatAfterError() {
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
+        doThrow(new RuntimeException()).when(mobileApiData).reportSystemData(any(SystemDataReport.class));
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).never()).systemDataReported(Mockito.any(SystemData.class));
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).error(Mockito.any(MobileMessagingError.class));
+        verify(broadcaster, after(1000).never()).systemDataReported(any(SystemData.class));
+        verify(broadcaster, atLeastOnce()).error(any(MobileMessagingError.class));
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+        reset(mobileApiData);
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).atMost(1)).systemDataReported(Mockito.any(SystemData.class));
+        verify(broadcaster, after(1000).atMost(1)).systemDataReported(any(SystemData.class));
     }
 
     @Test
     public void test_shouldReport_whenRegistrationIDAvailable() {
 
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
-
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).never()).systemDataReported(Mockito.any(SystemData.class));
+        verify(broadcaster, after(1000).never()).systemDataReported(any(SystemData.class));
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 
         mobileMessagingCore.reportSystemData();
 
-        Mockito.verify(broadcaster, Mockito.after(1000).times(1)).systemDataReported(Mockito.any(SystemData.class));
+        verify(broadcaster, after(1000).times(1)).systemDataReported(any(SystemData.class));
     }
 }

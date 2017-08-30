@@ -22,7 +22,6 @@ import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBun
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
@@ -116,8 +115,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         messageBroadcaster = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
         mobileMessaging = mobileMessagingCore;
-
-        MobileApiResourceProvider.INSTANCE.resetMobileApi();
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);
         databaseProvider = MobileMessagingCore.getDatabaseProvider(context);

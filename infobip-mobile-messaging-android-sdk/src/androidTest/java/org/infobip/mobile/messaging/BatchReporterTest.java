@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -19,9 +18,7 @@ public class BatchReporterTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY, 50L);
-
-        batchReporter = new BatchReporter(context);
+        batchReporter = new BatchReporter(50L);
         runnable = Mockito.mock(Runnable.class);
     }
 

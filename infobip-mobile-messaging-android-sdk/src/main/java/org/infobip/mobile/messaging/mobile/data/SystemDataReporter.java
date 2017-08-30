@@ -1,14 +1,13 @@
 package org.infobip.mobile.messaging.mobile.data;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.SystemData;
+import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.data.SystemDataReport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -25,20 +24,20 @@ import java.util.concurrent.Executor;
  */
 public class SystemDataReporter {
 
-    private Context context;
-    private MobileMessagingCore mobileMessagingCore;
-    private Broadcaster broadcaster;
-    private MobileMessagingStats stats;
-    private Executor executor;
-    private MRetryPolicy policy;
+    private final MobileMessagingCore mobileMessagingCore;
+    private final Broadcaster broadcaster;
+    private final MobileMessagingStats stats;
+    private final Executor executor;
+    private final MRetryPolicy policy;
+    private final MobileApiData mobileApiData;
 
-    public SystemDataReporter(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, MRetryPolicy policy, Executor executor, Broadcaster broadcaster) {
-        this.context = context;
+    public SystemDataReporter(MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, MRetryPolicy policy, Executor executor, Broadcaster broadcaster, MobileApiData mobileApiData) {
         this.stats = stats;
         this.executor = executor;
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
         this.policy = policy;
+        this.mobileApiData = mobileApiData;
     }
 
     public void synchronize() {
@@ -65,7 +64,7 @@ public class SystemDataReporter {
                 SystemData data = systemDatas[0];
                 SystemDataReport report = from(data);
                 MobileMessagingLogger.v("SYSTEM DATA >>>", report);
-                MobileApiResourceProvider.INSTANCE.getMobileApiData(context).reportSystemData(report);
+                mobileApiData.reportSystemData(report);
                 MobileMessagingLogger.v("SYSTEM DATA <<<");
                 return data;
             }

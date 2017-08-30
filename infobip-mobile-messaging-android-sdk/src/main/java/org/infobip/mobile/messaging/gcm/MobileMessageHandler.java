@@ -1,17 +1,13 @@
 package org.infobip.mobile.messaging.gcm;
 
-import android.content.Context;
-import android.content.Intent;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
-import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -20,23 +16,16 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 public class MobileMessageHandler {
 
-    private final Broadcaster broadcaster;
-    private final NotificationHandler notificationHandler;
+    private Broadcaster broadcaster;
+    private NotificationHandler notificationHandler;
+    private MessageStoreWrapper messageStoreWrapper;
+    private MobileMessagingCore mobileMessagingCore;
 
-    public MobileMessageHandler(Broadcaster broadcaster, NotificationHandler notificationHandler) {
+    public MobileMessageHandler(MobileMessagingCore mobileMessagingCore, Broadcaster broadcaster, NotificationHandler notificationHandler, MessageStoreWrapper messageStoreWrapper) {
         this.broadcaster = broadcaster;
         this.notificationHandler = notificationHandler;
-    }
-
-    /**
-     * Handles GCM/FCM new push message intent
-     *
-     * @param intent intent that contains new message
-     */
-    public void handleMessage(Context context, Intent intent) {
-        Message message = FCMMessageMapper.fromCloudBundle(intent.getExtras());
-        MobileMessagingLogger.v("RECEIVED MESSAGE FROM FCM", message);
-        handleMessage(context, message);
+        this.messageStoreWrapper = messageStoreWrapper;
+        this.mobileMessagingCore = mobileMessagingCore;
     }
 
     /**
@@ -44,9 +33,8 @@ public class MobileMessageHandler {
      *
      * @param message new message
      */
-    public void handleMessage(Context context, Message message) {
-
-        if (!MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+    public void handleMessage(Message message) {
+        if (!mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
 
@@ -57,10 +45,10 @@ public class MobileMessageHandler {
 
         message.setReceivedTimestamp(Time.now());
 
-        sendDeliveryReport(context, message);
+        sendDeliveryReport(message);
 
         if (!MobileMessagingCore.hasGeo(message)) {
-            saveMessage(context, message);
+            saveMessage(message);
             broadcaster.messageReceived(message);
         } else {
             // not saving geo messages, just dispatch them
@@ -73,28 +61,21 @@ public class MobileMessageHandler {
         }
     }
 
-    private void saveMessage(Context context, Message message) {
-        MessageStore messageStore = MobileMessagingCore.getInstance(context).getMessageStore();
-        if (messageStore == null) {
-            MobileMessagingLogger.d("Skipping save message: " + message.getMessageId());
-            return;
-        }
-
+    private void saveMessage(Message message) {
         MobileMessagingLogger.d("Saving message: " + message.getMessageId());
         try {
-            messageStore.save(context, message);
-
+            messageStoreWrapper.upsert(message);
         } catch (Exception e) {
             MobileMessagingLogger.e(InternalSdkError.ERROR_SAVING_MESSAGE.get(), e);
         }
     }
 
-    private void sendDeliveryReport(Context context, Message message) {
+    private void sendDeliveryReport(Message message) {
         if (StringUtils.isBlank(message.getMessageId())) {
             MobileMessagingLogger.e("No ID received for message: " + message);
             return;
         }
         MobileMessagingLogger.d("Sending DR: " + message.getMessageId());
-        MobileMessagingCore.getInstance(context).setMessagesDelivered(message.getMessageId());
+        mobileMessagingCore.setMessagesDelivered(message.getMessageId());
     }
 }
