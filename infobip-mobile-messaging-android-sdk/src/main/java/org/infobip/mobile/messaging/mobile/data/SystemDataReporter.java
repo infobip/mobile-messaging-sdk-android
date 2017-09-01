@@ -56,7 +56,7 @@ public class SystemDataReporter {
                     throw InternalSdkError.ERROR_EMPTY_SYSTEM_DATA.getException();
                 }
 
-                if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
+                if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
                     MobileMessagingLogger.w("Can't report system data without valid registration");
                     throw InternalSdkError.NO_VALID_REGISTRATION.getException();
                 }

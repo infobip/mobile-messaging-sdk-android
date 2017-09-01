@@ -57,7 +57,7 @@ public class SeenStatusReporter {
                     @Override
                     public String[] run(Void[] voids) {
 
-                        if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
+                        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
                             MobileMessagingLogger.w("Can't report seen status without valid registration");
                             throw InternalSdkError.NO_VALID_REGISTRATION.getException();
                         }

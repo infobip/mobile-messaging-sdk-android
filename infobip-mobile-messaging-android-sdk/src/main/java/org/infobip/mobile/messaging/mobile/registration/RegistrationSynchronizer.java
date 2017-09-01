@@ -66,7 +66,7 @@ public class RegistrationSynchronizer {
             @Override
             public void after(Registration registration) {
                 setPushRegistrationEnabled(registration.enabled);
-                setDeviceApplicationInstanceId(registration.registrationId);
+                setPushRegistrationId(registration.registrationId);
                 setRegistrationIdReported(true);
 
                 broadcaster.registrationEnabled(registration.cloudToken, registration.registrationId, registration.enabled);
@@ -109,7 +109,7 @@ public class RegistrationSynchronizer {
             @Override
             public void after(Registration registration) {
                 setPushRegistrationEnabled(registration.enabled);
-                setDeviceApplicationInstanceId(registration.registrationId);
+                setPushRegistrationId(registration.registrationId);
                 setRegistrationIdReported(true);
 
                 MobileMessagingCore.getInstance(context).reportSystemData();
@@ -139,7 +139,7 @@ public class RegistrationSynchronizer {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, pushRegistrationEnabled);
     }
 
-    private void setDeviceApplicationInstanceId(String registrationId) {
+    private void setPushRegistrationId(String registrationId) {
         if (registrationId == null) {
             return;
         }

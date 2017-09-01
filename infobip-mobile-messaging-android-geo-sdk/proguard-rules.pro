@@ -81,7 +81,11 @@
 #-keep class com.google.gson.stream.** { *; }
 
 # Application classes that will be serialized/deserialized over Gson
--keep class com.google.gson.examples.android.model.** { *; }
+-keep class org.infobip.mobile.messaging.geo.Geo { *; }
+-keep class org.infobip.mobile.messaging.geo.DeliveryTime { *; }
+-keep class org.infobip.mobile.messaging.geo.Area { *; }
+-keep class org.infobip.mobile.messaging.geo.GeoEventType { *; }
+-keep class org.infobip.mobile.messaging.geo.GeoEventSettings { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)

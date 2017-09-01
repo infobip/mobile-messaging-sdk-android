@@ -71,10 +71,10 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void registrationCreated(String cloudToken, String deviceApplicationInstanceId) {
+    public void registrationCreated(String cloudToken, String pushRegistrationId) {
         Intent registrationCreated = prepareIntent(Event.REGISTRATION_CREATED);
         registrationCreated.putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken);
-        registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, deviceApplicationInstanceId);
+        registrationCreated.putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, pushRegistrationId);
         context.sendBroadcast(registrationCreated);
         LocalBroadcastManager.getInstance(context).sendBroadcast(registrationCreated);
     }

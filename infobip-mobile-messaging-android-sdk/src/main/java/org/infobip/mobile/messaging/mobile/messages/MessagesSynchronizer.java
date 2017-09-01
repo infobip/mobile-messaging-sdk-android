@@ -62,7 +62,7 @@ public class MessagesSynchronizer {
             @Override
             public List<Message> run(Void[] objects) {
 
-                if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
+                if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
                     MobileMessagingLogger.w("Can't sync messages without valid registration");
                     throw InternalSdkError.NO_VALID_REGISTRATION.getException();
                 }

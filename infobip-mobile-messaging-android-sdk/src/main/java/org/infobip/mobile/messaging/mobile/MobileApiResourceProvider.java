@@ -45,7 +45,7 @@ public class MobileApiResourceProvider {
         public Map<String, Collection<Object>> get() {
             return new HashMap<String, Collection<Object>>() {{
                 put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
-                put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId()));
+                put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getPushRegistrationId()));
             }};
         }
     }

@@ -85,7 +85,7 @@ public enum Event {
      * <pre>
      * {@code
      * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_GCM_TOKEN});
-     * String deviceApplicationInstanceId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
      * }
      * </pre>
      */

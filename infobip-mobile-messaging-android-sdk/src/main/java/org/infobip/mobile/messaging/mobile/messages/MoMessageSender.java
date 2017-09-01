@@ -51,12 +51,12 @@ public class MoMessageSender {
     abstract class Task extends MRetryableTask<Message, Message[]> {
         @Override
         public Message[] run(Message[] messages) {
-            if (StringUtils.isBlank(mobileMessagingCore.getDeviceApplicationInstanceId())) {
+            if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
                 MobileMessagingLogger.w("Can't send messages without valid registration");
                 throw InternalSdkError.NO_VALID_REGISTRATION.getException();
             }
 
-            MoMessagesBody moMessagesBody = MoMessageMapper.body(mobileMessagingCore.getDeviceApplicationInstanceId(), messages);
+            MoMessagesBody moMessagesBody = MoMessageMapper.body(mobileMessagingCore.getPushRegistrationId(), messages);
 
             MobileMessagingLogger.v("SEND MO >>>", moMessagesBody);
             MoMessagesResponse moMessagesResponse = mobileApiMessages.sendMO(moMessagesBody);

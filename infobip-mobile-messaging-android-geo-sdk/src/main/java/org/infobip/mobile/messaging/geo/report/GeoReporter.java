@@ -175,7 +175,7 @@ public class GeoReporter {
             ));
         }
 
-        String deviceInstanceId = MobileMessagingCore.getInstance(context).getDeviceApplicationInstanceId();
+        String deviceInstanceId = MobileMessagingCore.getInstance(context).getPushRegistrationId();
         return new EventReportBody(messagePayloads, eventReports, deviceInstanceId);
     }
 }

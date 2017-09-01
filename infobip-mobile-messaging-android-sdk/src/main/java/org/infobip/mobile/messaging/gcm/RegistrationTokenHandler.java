@@ -53,7 +53,7 @@ class RegistrationTokenHandler {
         }
 
         MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        String infobipRegistrationId = mobileMessagingCore.getDeviceApplicationInstanceId();
+        String infobipRegistrationId = mobileMessagingCore.getPushRegistrationId();
 
         boolean saveNeeded = null == infobipRegistrationId ||
                 null == mobileMessagingCore.getCloudToken() ||

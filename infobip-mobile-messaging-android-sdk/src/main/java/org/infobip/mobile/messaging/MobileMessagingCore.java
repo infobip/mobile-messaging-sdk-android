@@ -191,6 +191,11 @@ public class MobileMessagingCore extends MobileMessaging {
         registrationSynchronizer().updateStatus(false);
     }
 
+    @Override
+    public String getPushRegistrationId() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+    }
+
     public boolean isPushRegistrationEnabled() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
     }
@@ -202,10 +207,6 @@ public class MobileMessagingCore extends MobileMessaging {
     public void setRegistrationId(String registrationId) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, registrationId);
         setRegistrationIdReported(false);
-    }
-
-    public String getDeviceApplicationInstanceId() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
     }
 
     public String[] getAndRemoveUnreportedMessageIds() {

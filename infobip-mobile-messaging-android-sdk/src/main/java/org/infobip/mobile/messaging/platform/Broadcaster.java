@@ -53,10 +53,10 @@ public interface Broadcaster {
     /**
      * Sends broadcast about new registration data
      *
-     * @param cloudToken                  GCM/FCM cloud token
-     * @param deviceApplicationInstanceId Infobip registraiton id
+     * @param cloudToken         GCM/FCM cloud token
+     * @param pushRegistrationId Infobip registraiton id
      */
-    void registrationCreated(String cloudToken, String deviceApplicationInstanceId);
+    void registrationCreated(String cloudToken, String pushRegistrationId);
 
     /**
      * Sends broadcast when push registration enabled is available
