@@ -29,12 +29,19 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />
-                <!-- Intent filter below is for pre-4.4 KitKat devices -->
+                <!-- Intent filter is for pre-4.4 KitKat devices -->
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
             </intent-filter>
         </service>
 
         <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
+        <receiver android:name="org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver"
+            android:exported="false">
+            <intent-filter>
+                <!-- Intent filter is for pre-7.0 Nougat devices -->
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>

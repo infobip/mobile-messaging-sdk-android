@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -70,13 +72,13 @@ public class MobileMessagingCore extends MobileMessaging {
 
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
+    private static MobileMessagingConnectivityReceiver mobileMessagingConnectivityReceiver;
     static String applicationCode;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private static NotificationHandler notificationHandler;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
-    private final MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private final MRetryPolicy defaultRetryPolicy;
     private final Broadcaster broadcaster;
     private RegistrationSynchronizer registrationSynchronizer;
@@ -92,6 +94,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private MessageStoreWrapper messageStoreWrapper;
+    private Boolean internetConnected;
     private Context context;
 
     protected MobileMessagingCore(Context context) {
@@ -106,10 +109,16 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
-        this.mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
+        MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
                 new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && null == mobileMessagingConnectivityReceiver) {
+            mobileMessagingConnectivityReceiver = new MobileMessagingConnectivityReceiver();
+            context.getApplicationContext().registerReceiver(mobileMessagingConnectivityReceiver,
+                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
     }
 
     /**
@@ -144,16 +153,29 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public void sync() {
         registrationSynchronizer().sync();
-        userDataReporter().sync(null, getUnreportedUserData());
-        seenStatusReporter().sync();
+        messagesSynchronizer().sync();
         moMessageSender().sync();
+        seenStatusReporter().sync();
+        userDataReporter().sync(null, getUnreportedUserData());
         versionChecker().sync();
 
         reportSystemData();
+    }
 
-        if (isPushRegistrationEnabled()) {
-            messagesSynchronizer().sync();
-        }
+    public void retrySync() {
+        messagesSynchronizer().sync();
+        moMessageSender().sync();
+        seenStatusReporter().sync();
+        userDataReporter().sync(null, getUnreportedUserData());
+        reportSystemData();
+    }
+
+    public void setInternetConnected(boolean connected) {
+        internetConnected = connected;
+    }
+
+    public Boolean getInternetConnected() {
+        return internetConnected;
     }
 
     public static NotificationHandler resolveNotificationHandler(Context context) {
@@ -847,7 +869,8 @@ public class MobileMessagingCore extends MobileMessaging {
         return seenStatusReporter;
     }
 
-    @NonNull VersionChecker versionChecker() {
+    @NonNull
+    VersionChecker versionChecker() {
         if (versionChecker == null) {
             versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context));
         }
