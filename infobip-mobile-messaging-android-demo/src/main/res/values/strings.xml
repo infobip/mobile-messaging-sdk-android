@@ -77,5 +77,6 @@
     <string name="gps_dialog_dismiss">Dismiss</string>
 
     <string name="saved_to_clipboard">Text saved to clipboard</string>
+    <string name="no_message_provided">No message provided</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.demo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -44,11 +46,13 @@ import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_EXCEPTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
+import static org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper.messageToBundle;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -117,6 +121,17 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             Message message = Message.createFrom(intent.getExtras());
             String body = message.getBody();
+            JSONObject customPayload = message.getCustomPayload();
+
+            String url = customPayload != null ? customPayload.optString("url") : "";
+            String deepLink = customPayload != null ? customPayload.optString("deeplink") : "";
+
+            if (!deepLink.isEmpty()) {
+                openDeepLink(deepLink, message);
+            } else if (!url.isEmpty()) {
+                openWebView(url);
+            }
+
             Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), getString(R.string.toast_notification_tapped), body), Toast.LENGTH_LONG).show();
             updateCount();
         }
@@ -246,6 +261,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        activateGeofencing();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void activateGeofencing() {
         MobileGeo.getInstance(this).activateGeofencing();
     }
 
@@ -280,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
             return;
         }
-        MobileGeo.getInstance(this).activateGeofencing();
+        activateGeofencing();
     }
 
     @Override
@@ -450,5 +470,19 @@ public class MainActivity extends AppCompatActivity {
                 .edit()
                 .putString(ApplicationPreferences.MSISDN, "" + userData.getMsisdn())
                 .apply();
+    }
+
+    private void openDeepLink(String deepLink, Message message) {
+        Intent deepLinkIntent = new Intent(Intent.ACTION_VIEW);
+        deepLinkIntent.setData(Uri.parse(deepLink));
+        deepLinkIntent.putExtras(messageToBundle(message));
+
+        startActivity(deepLinkIntent);
+    }
+    private void openWebView(String url) {
+        Intent webViewIntent = new Intent(this, WebViewActivity.class);
+        webViewIntent.putExtra(WebViewActivity.EXTRA_URL, url);
+
+        startActivity(webViewIntent);
     }
 }
