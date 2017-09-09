@@ -38,6 +38,8 @@ public class MobileMessagingGcmReceiver extends GcmReceiver {
         service.putExtras(intent);
         context.startService(service);
 
-        abortBroadcast();
+        if (isOrderedBroadcast()) {
+            abortBroadcast();
+        }
     }
 }
