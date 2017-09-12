@@ -1,11 +1,14 @@
 package org.infobip.mobile.messaging;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.content.ContextCompat;
 
 /**
  * @author tjuric
@@ -30,7 +33,10 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
         }
 
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = null;
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED) {
+            networkInfo = manager.getActiveNetworkInfo();
+        }
 
         Boolean internetConnectedBefore = mobileMessagingCore(context).getInternetConnected();
         boolean internetConnected =
@@ -46,7 +52,7 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
 
     private MobileMessagingCore mobileMessagingCore(Context context) {
         if (mobileMessagingCore == null) {
-            mobileMessagingCore = MobileMessagingCore.getInstance(context.getApplicationContext());
+            mobileMessagingCore = MobileMessagingCore.getInstance(context);
         }
         return mobileMessagingCore;
     }

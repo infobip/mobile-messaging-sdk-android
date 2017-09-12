@@ -4,8 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -72,7 +70,6 @@ public class MobileMessagingCore extends MobileMessaging {
 
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
-    private static MobileMessagingConnectivityReceiver mobileMessagingConnectivityReceiver;
     static String applicationCode;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
@@ -113,12 +110,6 @@ public class MobileMessagingCore extends MobileMessaging {
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
                 new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && null == mobileMessagingConnectivityReceiver) {
-            mobileMessagingConnectivityReceiver = new MobileMessagingConnectivityReceiver();
-            context.getApplicationContext().registerReceiver(mobileMessagingConnectivityReceiver,
-                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        }
     }
 
     /**
