@@ -198,7 +198,7 @@ public abstract class MobileMessaging {
     public abstract void cleanup();
 
     /**
-     * Retrieves unique push registration identifier issued by Infobip. This identifier matches 1:1 with FCM(GCM) cloud token
+     * Retrieves unique push registration identifier issued by server. This identifier matches one to one with FCM(GCM) cloud token
      * of the particular application installation. This identifier is only available after {@link Event#REGISTRATION_CREATED}
      * and does not change for the whole lifetime of the application installation.
      *
