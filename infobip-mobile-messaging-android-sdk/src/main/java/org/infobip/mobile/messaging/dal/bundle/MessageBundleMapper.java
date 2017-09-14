@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,6 @@ import java.util.List;
 public class MessageBundleMapper extends BundleMapper {
 
     private static final String BUNDLED_MESSAGE_TAG = MessageBundleMapper.class.getName() + ".message";
-
-    private static final JsonSerializer serializer = new JsonSerializer(false);
 
     /**
      * De-serializes message object from bundle

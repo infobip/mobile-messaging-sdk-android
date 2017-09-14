@@ -6,13 +6,78 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BundleMapper {
 
-    protected static final JsonSerializer serializer = new JsonSerializer(false);
+    static class JSONObjectAdapter implements JsonSerializer.ObjectAdapter<JSONObject> {
+        @Override
+        public Class<JSONObject> getCls() {
+            return JSONObject.class;
+        }
+
+        @Override
+        public JSONObject deserialize(String value) {
+            if (value == null) {
+                return null;
+            }
+
+            try {
+                return new JSONObject(value);
+            } catch (JSONException e) {
+                MobileMessagingLogger.e("Error parsing JSONObject from " + value, e);
+                return null;
+            }
+        }
+
+        @Override
+        public String serialize(JSONObject value) {
+            if (value == null) {
+                return null;
+            }
+
+            return value.toString();
+        }
+    }
+
+    static class JSONArrayAdapter implements JsonSerializer.ObjectAdapter<JSONArray> {
+
+        @Override
+        public Class<JSONArray> getCls() {
+            return JSONArray.class;
+        }
+
+        @Override
+        public JSONArray deserialize(String value) {
+            if (value == null) {
+                return null;
+            }
+
+            try {
+                return new JSONArray(value);
+            } catch (JSONException e) {
+                MobileMessagingLogger.e("Error parsing JSONArray from " + value, e);
+                return null;
+            }
+        }
+
+        @Override
+        public String serialize(JSONArray value) {
+            if (value == null) {
+                return null;
+            }
+
+            return value.toString();
+        }
+    }
+
+    protected static final JsonSerializer serializer = new JsonSerializer(false, new JSONObjectAdapter(), new JSONArrayAdapter());
 
     /**
      * De-serializes generic object from bundle.

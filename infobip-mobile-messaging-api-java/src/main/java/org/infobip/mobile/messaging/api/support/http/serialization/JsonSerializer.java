@@ -2,6 +2,13 @@ package org.infobip.mobile.messaging.api.support.http.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+import java.io.IOException;
 
 /**
  * @author mstipanov
@@ -9,16 +16,48 @@ import com.google.gson.GsonBuilder;
  */
 public class JsonSerializer {
 
+    public interface ObjectAdapter<T> {
+        Class<T> getCls();
+        T deserialize(String value);
+        String serialize(T value);
+    }
+
+    private class CustomTypeAdapter extends TypeAdapter<Object> {
+
+        private final ObjectAdapter adapter;
+
+        CustomTypeAdapter(ObjectAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        @Override
+        public void write(JsonWriter out, Object value) throws IOException {
+            //noinspection unchecked
+            out.jsonValue(adapter.serialize(value));
+        }
+
+        @Override
+        public Object read(JsonReader in) throws IOException {
+            JsonElement element = new JsonParser().parse(in);
+            return adapter.deserialize(element.toString());
+        }
+    }
+
     public JsonSerializer() {
         gson = new GsonBuilder().serializeNulls().create();
     }
 
-    public JsonSerializer(boolean serializeNulls) {
+    public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {
+        GsonBuilder builder = new GsonBuilder();
         if (serializeNulls) {
-            gson = new GsonBuilder().serializeNulls().create();
-        } else {
-            gson = new Gson();
+            builder = builder.serializeNulls();
         }
+        if (adapters.length > 0) {
+            for (ObjectAdapter adapter : adapters) {
+                builder.registerTypeHierarchyAdapter(adapter.getCls(), new CustomTypeAdapter(adapter));
+            }
+        }
+        gson = builder.create();
     }
 
     private final Gson gson;
