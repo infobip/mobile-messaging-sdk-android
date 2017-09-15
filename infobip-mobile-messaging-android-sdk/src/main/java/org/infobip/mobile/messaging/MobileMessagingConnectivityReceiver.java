@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 /**
  * @author tjuric
@@ -28,6 +29,10 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
+            return;
+        }
+
         if (intent == null || !ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             return;
         }

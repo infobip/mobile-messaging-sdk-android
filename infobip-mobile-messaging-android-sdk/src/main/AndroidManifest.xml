@@ -37,7 +37,8 @@
 
         <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
         <receiver android:name="org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver"
-            android:exported="false">
+            android:exported="false"
+            android:enabled="false">
             <intent-filter>
                 <!-- Intent filter is for pre-7.0 Nougat devices -->
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />

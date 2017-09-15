@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -37,6 +38,7 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapperImpl;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
+import org.infobip.mobile.messaging.util.ComponentUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -110,6 +112,10 @@ public class MobileMessagingCore extends MobileMessaging {
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
                 new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            ComponentUtil.setState(context, true, MobileMessagingConnectivityReceiver.class);
+        }
     }
 
     /**
@@ -963,7 +969,6 @@ public class MobileMessagingCore extends MobileMessaging {
             }
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
-            MobileMessagingCore.instance = mobileMessagingCore;
             MobileMessagingCore.notificationHandler = setNotificationHandler(application.getApplicationContext());
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
@@ -972,6 +977,7 @@ public class MobileMessagingCore extends MobileMessaging {
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
+            MobileMessagingCore.instance = mobileMessagingCore;
             return mobileMessagingCore;
         }
     }

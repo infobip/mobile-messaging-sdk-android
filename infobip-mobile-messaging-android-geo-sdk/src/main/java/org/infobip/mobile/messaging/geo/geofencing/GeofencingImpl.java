@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.geo.geofencing;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +35,7 @@ import org.infobip.mobile.messaging.geo.storage.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.util.ComponentUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -314,21 +314,10 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
 
     @Override
     public void setGeoComponentsEnabledSettings(Context context, boolean componentsStateEnabled) {
-        int state = componentsStateEnabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-
-        setComponentEnabledSetting(context, state, GeofenceTransitionsIntentService.class);
-        setComponentEnabledSetting(context, state, GeofencingConsistencyReceiver.class);
-        setComponentEnabledSetting(context, state, PushMessageReceiver.class);
-        setComponentEnabledSetting(context, state, BootReceiver.class);
-    }
-
-    private void setComponentEnabledSetting(Context context, int state, Class componentClass) {
-        ComponentName componentName = new ComponentName(context, componentClass);
-        try {
-            context.getPackageManager().setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP);
-        } catch (Exception e) {
-            throw new ConfigurationException(Reason.MISSING_REQUIRED_COMPONENT, componentClass.getCanonicalName());
-        }
+        ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsIntentService.class);
+        ComponentUtil.setState(context, componentsStateEnabled, GeofencingConsistencyReceiver.class);
+        ComponentUtil.setState(context, componentsStateEnabled, PushMessageReceiver.class);
+        ComponentUtil.setState(context, componentsStateEnabled, BootReceiver.class);
     }
 
     private boolean checkRequiredPermissions() {
