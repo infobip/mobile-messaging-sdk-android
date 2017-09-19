@@ -32,6 +32,7 @@ import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -41,6 +42,7 @@ import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ComponentUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
+import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -93,8 +95,8 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private MessageStoreWrapper messageStoreWrapper;
-    private Boolean internetConnected;
     private Context context;
+    private volatile boolean didSyncAtLeastOnce;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
@@ -115,31 +117,30 @@ public class MobileMessagingCore extends MobileMessaging {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             ComponentUtil.setState(context, true, MobileMessagingConnectivityReceiver.class);
+        } else {
+            ComponentUtil.setState(context, true, MobileMessagingJobService.class);
         }
     }
 
     /**
      * Gets an instance of MobileMessagingCore after it is initialized via {@link MobileMessagingCore.Builder}.
      * </p>
-     * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
-     * Only the Builder can set static instance, because there it is initialized from Application object.
-     * It is needed in order to not hold possible references to Activity(Context) and to avoid memory leaks.
+     * {@link MobileMessagingCore} is initialized here from application context to minimize possibility of memory leaks.
      *
      * @param context android context object.
      * @return instance of MobileMessagingCore.
      * @see MobileMessagingCore.Builder
      */
     public static MobileMessagingCore getInstance(Context context) {
-        if (null != instance) {
-            return instance;
+        if (instance == null) {
+            instance = new MobileMessagingCore(context.getApplicationContext());
         }
-
-        return new MobileMessagingCore(context);
+        return instance;
     }
 
     public static DatabaseHelper getDatabaseHelper(Context context) {
         if (null == databaseHelper) {
-            databaseHelper = new DatabaseHelperImpl(context);
+            databaseHelper = new DatabaseHelperImpl(context.getApplicationContext());
         }
         return databaseHelper;
     }
@@ -149,6 +150,12 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public void sync() {
+        didSyncAtLeastOnce = true;
+        if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
+            registerForNetworkAvailability();
+            return;
+        }
+
         registrationSynchronizer().sync();
         messagesSynchronizer().sync();
         moMessageSender().sync();
@@ -160,6 +167,10 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public void retrySync() {
+        if (!didSyncAtLeastOnce) {
+            return;
+        }
+
         messagesSynchronizer().sync();
         moMessageSender().sync();
         seenStatusReporter().sync();
@@ -167,12 +178,10 @@ public class MobileMessagingCore extends MobileMessaging {
         reportSystemData();
     }
 
-    public void setInternetConnected(boolean connected) {
-        internetConnected = connected;
-    }
-
-    public Boolean getInternetConnected() {
-        return internetConnected;
+    public void registerForNetworkAvailability() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            MobileMessagingJobService.registerJobForConnectivityUpdates(context);
+        }
     }
 
     public static NotificationHandler resolveNotificationHandler(Context context) {
@@ -192,7 +201,7 @@ public class MobileMessagingCore extends MobileMessaging {
             notificationHandler = (NotificationHandler) resolvedInteractiveNotificationHandler;
 
         } catch (Exception e) {
-            notificationHandler = new NotificationHandlerImpl(context);
+            notificationHandler = new NotificationHandlerImpl(context.getApplicationContext());
         }
 
         return notificationHandler;
@@ -569,6 +578,10 @@ public class MobileMessagingCore extends MobileMessaging {
         }
 
         return applicationCode;
+    }
+
+    public String getApplicationCode() {
+        return getApplicationCode(context);
     }
 
     static void setApiUri(Context context, String apiUri) {

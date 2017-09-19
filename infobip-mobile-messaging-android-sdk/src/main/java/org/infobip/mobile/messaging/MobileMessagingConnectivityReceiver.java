@@ -1,15 +1,13 @@
 package org.infobip.mobile.messaging;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+
+import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 
 /**
  * @author tjuric
@@ -29,7 +27,7 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
+        if (TextUtils.isEmpty(mobileMessagingCore(context).getApplicationCode())) {
             return;
         }
 
@@ -37,22 +35,16 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
             return;
         }
 
-        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = null;
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) == PackageManager.PERMISSION_GRANTED) {
-            networkInfo = manager.getActiveNetworkInfo();
-        }
-
-        Boolean internetConnectedBefore = mobileMessagingCore(context).getInternetConnected();
-        boolean internetConnected =
-                (networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED) ||
-                (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)
-                && !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false));
-        mobileMessagingCore(context).setInternetConnected(internetConnected);
-
-        if (null != internetConnectedBefore && !internetConnectedBefore && internetConnected) {
+        if (isInternetConnected(intent, context)) {
             mobileMessagingCore(context).retrySync();
         }
+    }
+
+    private boolean isInternetConnected(Intent intent, Context context) {
+        Boolean isNetworkAvailable = MobileNetworkInformation.isNetworkAvailable(context);
+        return (isNetworkAvailable != null && isNetworkAvailable) ||
+                (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)
+                        && !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false));
     }
 
     private MobileMessagingCore mobileMessagingCore(Context context) {

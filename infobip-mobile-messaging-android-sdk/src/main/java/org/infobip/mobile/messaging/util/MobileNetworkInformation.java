@@ -1,6 +1,11 @@
 package org.infobip.mobile.messaging.util;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 
 /**
@@ -71,5 +76,21 @@ public class MobileNetworkInformation {
             return operator.substring(3);
         }
         return "unknown";
+    }
+
+    public static boolean isNetworkAvailableSafely(Context context) {
+        Boolean isNetworkAvailable = isNetworkAvailable(context);
+        return isNetworkAvailable == null || isNetworkAvailable;
+    }
+
+    public static Boolean isNetworkAvailable(Context context) {
+        ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED ||
+                manager == null) {
+            return null;
+        }
+
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        return networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED;
     }
 }

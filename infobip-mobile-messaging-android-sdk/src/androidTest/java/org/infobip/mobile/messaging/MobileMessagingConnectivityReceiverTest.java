@@ -3,38 +3,40 @@ package org.infobip.mobile.messaging;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.support.test.runner.AndroidJUnit4;
 
-import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author tjuric
  * @since 31/08/2017.
  */
-public class MobileMessagingConnectivityReceiverTest extends MobileMessagingTestCase {
+@RunWith(AndroidJUnit4.class)
+public class MobileMessagingConnectivityReceiverTest {
 
+    private MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
+    private Context contextMock = mock(Context.class);
+    private ConnectivityManager connectivityManagerMock = mock(ConnectivityManager.class);
     private MobileMessagingConnectivityReceiver mobileMessagingConnectivityReceiver;
-    private MobileMessagingCore core;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        core = mock(MobileMessagingCore.class);
-        ConnectivityManager connectivityManagerMock = Mockito.mock(ConnectivityManager.class);
+        reset(mmcMock, contextMock, connectivityManagerMock);
 
         //noinspection WrongConstant
-        Mockito.when(contextMock.getSystemService(Mockito.eq(Context.CONNECTIVITY_SERVICE))).thenReturn(connectivityManagerMock);
-        given(core.getInternetConnected()).willReturn(false);
-
-        mobileMessagingConnectivityReceiver = new MobileMessagingConnectivityReceiver(core);
+        when(mmcMock.getApplicationCode()).thenReturn("someApplicationCode");
+        when(contextMock.getSystemService(Mockito.eq(Context.CONNECTIVITY_SERVICE))).thenReturn(connectivityManagerMock);
+        mobileMessagingConnectivityReceiver = new MobileMessagingConnectivityReceiver(mmcMock);
     }
 
     @Test
@@ -47,7 +49,7 @@ public class MobileMessagingConnectivityReceiverTest extends MobileMessagingTest
         mobileMessagingConnectivityReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        verify(core, times(1)).retrySync();
+        verify(mmcMock, times(1)).retrySync();
     }
 
     @Test
@@ -60,6 +62,6 @@ public class MobileMessagingConnectivityReceiverTest extends MobileMessagingTest
         mobileMessagingConnectivityReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        verify(core, never()).retrySync();
+        verify(mmcMock, never()).retrySync();
     }
 }

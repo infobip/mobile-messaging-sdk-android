@@ -25,6 +25,7 @@
         <service
             android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
             android:exported="false" />
+
         <service
             android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
             android:exported="false">
@@ -35,10 +36,17 @@
             </intent-filter>
         </service>
 
-        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
-        <receiver android:name="org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver"
+        <service
+            android:name="org.infobip.mobile.messaging.platform.MobileMessagingJobService"
+            android:enabled="false"
             android:exported="false"
-            android:enabled="false">
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
+        <receiver
+            android:name="org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver"
+            android:enabled="false"
+            android:exported="false">
             <intent-filter>
                 <!-- Intent filter is for pre-7.0 Nougat devices -->
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
