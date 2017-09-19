@@ -118,13 +118,13 @@ public class MobileApiMessagesTest {
 
         MoMessage moMessages[] =
         {
-            new MoMessage("myMessageId", "myDestination", "myText", new HashMap<String, Object>()
+            new MoMessage("myMessageId", "myDestination", "myText", "myInitialMessageId", "myBulkId", new HashMap<String, Object>()
                 {{
                     put("myStringKey", "string1");
                     put("myNubmberKey", 1);
                     put("myBooleanKey", true);
                 }}),
-            new MoMessage("myMessageId2", "myDestination2", "myText2", new HashMap<String, Object>()
+            new MoMessage("myMessageId2", "myDestination2", "myText2", null, "myBulkId2", new HashMap<String, Object>()
                 {{
                     put("myStringKey", "string2");
                     put("myNubmberKey", 2);

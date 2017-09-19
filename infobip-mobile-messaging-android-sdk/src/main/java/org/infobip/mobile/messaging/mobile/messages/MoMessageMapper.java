@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.api.messages.MoMessageDelivery;
 import org.infobip.mobile.messaging.api.messages.MoMessagesBody;
 import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
@@ -58,7 +59,8 @@ public class MoMessageMapper {
         for (Message message : messages) {
             String customPayloadString = message.getCustomPayload() != null ? message.getCustomPayload().toString() : null;
             Map customPayloadMap = serializer.deserialize(customPayloadString, Map.class);
-            moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getBody(), customPayloadMap));
+            String internalData = message.getInternalData();
+            moMessages.add(new MoMessage(message.getMessageId(), message.getDestination(), message.getBody(), InternalDataMapper.getInternalDataInitialMessageId(internalData), InternalDataMapper.getInternalDataBulkId(internalData), customPayloadMap));
         }
 
         MoMessagesBody moMessagesBody = new MoMessagesBody();

@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.interactive.InteractiveEvent;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -20,6 +21,8 @@ import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBun
 import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import java.util.HashMap;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
@@ -72,7 +75,7 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
 
         markAsSeen(context, message);
-        sendMo(context, notificationCategory, notificationAction);
+        sendMo(context, notificationCategory, notificationAction, message);
         startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
     }
 
@@ -100,17 +103,20 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         }
     }
 
-    private void sendMo(Context context, NotificationCategory category, NotificationAction action) {
+    private void sendMo(Context context, NotificationCategory category, NotificationAction action, Message initialMessage) {
         if (!action.sendsMoMessage()) {
             return;
         }
 
-        mobileMessagingCore(context).sendMessagesWithRetry(messageFor(category, action));
+        mobileMessagingCore(context).sendMessagesWithRetry(messageFor(category, action, initialMessage));
     }
 
-    private Message messageFor(final NotificationCategory category, final NotificationAction action) {
+    private Message messageFor(final NotificationCategory category, final NotificationAction action, final Message initialMessage) {
         Message message = new Message();
         message.setBody(category.getCategoryId() + " " + action.getId());
+        HashMap<String, String> map = new HashMap<>();
+        map.put("initialMessageId", initialMessage.getMessageId());
+        message.setInternalData(InternalDataMapper.mergeExistingInternalDataWithAnythingToJson(initialMessage.getInternalData(), map));
         return message;
     }
 

@@ -33,6 +33,8 @@ public class InternalDataMapper {
         Attachment atts[] = new Attachment[0];
         long sendDateTime;
         Silent<VibrateValueType> silent;
+        String bulkId;
+        String initialMessageId;
 
         public InternalData() {
         }
@@ -193,6 +195,34 @@ public class InternalDataMapper {
         }
     }
 
+    /**
+     * Returns bulkId from internal data
+     *
+     * @param json internal data json
+     * @return bulkId if present or null otherwise
+     */
+    public static String getInternalDataBulkId(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).bulkId;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns initialMessageId from internal data
+     *
+     * @param json internal data json
+     * @return initialMessageId if present or null otherwise
+     */
+    public static String getInternalDataInitialMessageId(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).initialMessageId;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Nullable
     private static <VibrateValueType> String createInternalDataForMessage(Message message) {
@@ -204,7 +234,7 @@ public class InternalDataMapper {
     }
 
     @Nullable
-    private static String mergeExistingInternalDataWithAnythingToJson(@Nullable String internalDataJson, @Nullable Object object) {
+    public static String mergeExistingInternalDataWithAnythingToJson(@Nullable String internalDataJson, @Nullable Object object) {
         if (internalDataJson == null && object == null) {
             return null;
         }
