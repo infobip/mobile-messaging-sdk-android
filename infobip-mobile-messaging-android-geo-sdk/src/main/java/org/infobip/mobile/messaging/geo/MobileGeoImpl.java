@@ -1,31 +1,29 @@
 package org.infobip.mobile.messaging.geo;
 
 import android.content.Context;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.LocalEvent;
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.geo.geofencing.Geofencing;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
+import org.infobip.mobile.messaging.geo.push.PushMessageHandler;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-public class MobileGeoImpl extends MobileGeo {
+public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
     private static MobileGeoImpl instance;
-    private final Context context;
-    private final GeoReportSynchronizationReceiver geoReportSynchronizationReceiver;
+    private Context context;
     private Geofencing geofencing;
 
     public static MobileGeoImpl getInstance(Context context) {
         if (instance == null) {
-            instance = new MobileGeoImpl(context);
+            instance = MobileMessagingCore.getInstance(context).getGeoMessageHandlerModule();
         }
         return instance;
     }
 
-    private MobileGeoImpl(Context context) {
-        this.context = context;
-        geoReportSynchronizationReceiver = new GeoReportSynchronizationReceiver();
+    public MobileGeoImpl() {
     }
 
     @Override
@@ -40,7 +38,6 @@ public class MobileGeoImpl extends MobileGeo {
         GeofencingHelper.setActivated(context, true);
         geofencing.setGeoComponentsEnabledSettings(context, true);
         geofencing.startGeoMonitoring();
-        enableGeoReportSynchronization(true);
     }
 
     @Override
@@ -57,15 +54,6 @@ public class MobileGeoImpl extends MobileGeo {
         GeofencingHelper.setActivated(context, false);
         geofencing.setGeoComponentsEnabledSettings(context, false);
         geofencing.stopGeoMonitoring();
-        enableGeoReportSynchronization(false);
-    }
-
-    private void enableGeoReportSynchronization(boolean enable) {
-        if (enable) {
-            LocalBroadcastManager.getInstance(context).registerReceiver(geoReportSynchronizationReceiver, new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
-        } else {
-            LocalBroadcastManager.getInstance(context).unregisterReceiver(geoReportSynchronizationReceiver);
-        }
     }
 
     @Override
@@ -83,5 +71,24 @@ public class MobileGeoImpl extends MobileGeo {
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.SUSPENDED_CAMPAIGN_IDS.getKey());
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.GEOFENCING_ACTIVATED.getKey());
         PreferenceHelper.remove(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey());
+    }
+
+    @Override
+    public void setContext(Context appContext) {
+        this.context = appContext;
+    }
+
+    @Override
+    public void messageReceived(Message message) {
+        if (MobileMessagingCore.hasGeo(message)) {
+            PushMessageHandler pushMessageHandler = new PushMessageHandler();
+            pushMessageHandler.handleGeoMessage(context, message);
+        }
+    }
+
+    @Override
+    public void applicationInForeground() {
+        GeoReportSynchronization geoReportSynchronization = new GeoReportSynchronization(context);
+        geoReportSynchronization.synchronize();
     }
 }

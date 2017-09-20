@@ -23,13 +23,6 @@ public interface Broadcaster {
     void messageReceived(Message message);
 
     /**
-     * Sends broadcast that geo message is received
-     *
-     * @param message received message
-     */
-    void geoMessageReceived(Message message);
-
-    /**
      * Sends broadcast that notification is tapped
      *
      * @param message received message

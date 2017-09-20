@@ -8,7 +8,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.RemoteInput;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
@@ -16,10 +15,7 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
-import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
-import org.infobip.mobile.messaging.util.StringUtils;
-
-import java.util.Set;
+import org.infobip.mobile.messaging.notification.CoreNotificationHandler;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
@@ -27,28 +23,37 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTIO
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
 
 
-public class NotificationInteractiveHandlerImpl implements NotificationHandler {
+public class InteractiveNotificationHandler implements NotificationHandler {
 
-    private final Context context;
+    private Context context;
 
-    public NotificationInteractiveHandlerImpl(Context context) {
+    public InteractiveNotificationHandler() {
+
+    }
+
+    @Override
+    public void setContext(Context context) {
         this.context = context;
     }
 
     @Override
     public void displayNotification(Message message) {
-        NotificationHandlerImpl notificationHandler = new NotificationHandlerImpl(context);
+        if (context == null) return;
+
+        CoreNotificationHandler notificationHandler = new CoreNotificationHandler();
+        notificationHandler.setContext(context);
         int notificationId = notificationHandler.getNotificationId(message);
         NotificationCompat.Builder builder = getNotificationBuilder(message, notificationHandler, notificationId);
 
         notificationHandler.displayNotification(builder, message, notificationId);
     }
 
-    private NotificationCompat.Builder getNotificationBuilder(Message message, NotificationHandlerImpl notificationHandler, int notificationId) {
+    private NotificationCompat.Builder getNotificationBuilder(Message message, CoreNotificationHandler notificationHandler, int notificationId) {
         NotificationCompat.Builder builder = notificationHandler.notificationCompatBuilder(message);
-        String category = message.getCategory();
-        NotificationCategory triggeredNotificationCategory = triggeredNotificationCategory(category);
+        if (builder == null) return null;
 
+        String category = message.getCategory();
+        NotificationCategory triggeredNotificationCategory = MobileInteractiveImpl.getInstance(context).getNotificationCategory(category);
         setNotificationActions(builder, message, triggeredNotificationCategory, notificationId);
 
         return builder;
@@ -85,25 +90,6 @@ public class NotificationInteractiveHandlerImpl implements NotificationHandler {
         }
 
         return builder.build();
-    }
-
-    private NotificationCategory triggeredNotificationCategory(String category) {
-        if (StringUtils.isBlank(category)) {
-            return null;
-        }
-
-        Set<NotificationCategory> storedNotificationCategories = MobileInteractiveImpl.getInstance(context).getNotificationCategories();
-        if (storedNotificationCategories == MobileMessagingProperty.INTERACTIVE_CATEGORIES.getDefaultValue()) {
-            return null;
-        }
-
-        for (NotificationCategory notificationCategory : storedNotificationCategories) {
-            if (category.equals(notificationCategory.getCategoryId())) {
-                return notificationCategory;
-            }
-        }
-
-        return null;
     }
 
     @SuppressWarnings("WrongConstant")

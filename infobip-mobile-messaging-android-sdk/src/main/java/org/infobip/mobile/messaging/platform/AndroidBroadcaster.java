@@ -8,7 +8,6 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
@@ -33,14 +32,6 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void messageReceived(@NonNull Message message) {
         Intent messageReceived = prepareIntent(Event.MESSAGE_RECEIVED);
-        messageReceived.putExtras(MessageBundleMapper.messageToBundle(message));
-        LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
-        context.sendBroadcast(messageReceived);
-    }
-
-    @Override
-    public void geoMessageReceived(Message message) {
-        Intent messageReceived = prepareIntent(LocalEvent.GEO_MESSAGE_RECEIVED.getKey());
         messageReceived.putExtras(MessageBundleMapper.messageToBundle(message));
         LocalBroadcastManager.getInstance(context).sendBroadcast(messageReceived);
         context.sendBroadcast(messageReceived);

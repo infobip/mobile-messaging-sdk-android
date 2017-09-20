@@ -29,17 +29,18 @@ import static junit.framework.Assert.assertEquals;
  * @since 30/12/2016.
  */
 
-public class NotificationHandlerImplTest extends MobileMessagingTestCase {
+public class CoreNotificationHandlerTest extends MobileMessagingTestCase {
 
     private NotificationManager notificationManagerMock;
     private ArgumentCaptor<Integer> notificationCaptor;
-    private NotificationHandlerImpl notificationHandlerImpl;
+    private CoreNotificationHandler coreNotificationHandler;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        notificationHandlerImpl = new NotificationHandlerImpl(contextMock);
+        coreNotificationHandler = new CoreNotificationHandler();
+        coreNotificationHandler.setContext(contextMock);
         notificationCaptor = ArgumentCaptor.forClass(Integer.class);
         notificationManagerMock = Mockito.mock(NotificationManager.class);
 
@@ -54,7 +55,7 @@ public class NotificationHandlerImplTest extends MobileMessagingTestCase {
         Message givenMessage = createMessage(context, "SomeMessageId", false);
 
         // When
-        notificationHandlerImpl.displayNotification(givenMessage);
+        coreNotificationHandler.displayNotification(givenMessage);
 
         // Then
         Mockito.verify(notificationManagerMock, Mockito.never()).notify(Mockito.anyInt(), Mockito.any(Notification.class));
@@ -71,7 +72,7 @@ public class NotificationHandlerImplTest extends MobileMessagingTestCase {
         for (int i = 0; i < 10; i++) {
             Message message = new Message();
             message.setBody("SomeText");
-            notificationHandlerImpl.displayNotification(message);
+            coreNotificationHandler.displayNotification(message);
         }
 
         // Then
@@ -89,7 +90,7 @@ public class NotificationHandlerImplTest extends MobileMessagingTestCase {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
 
         // When
-        notificationHandlerImpl.fetchNotificationPicture(givenInvalidPictureUrl);
+        coreNotificationHandler.fetchNotificationPicture(givenInvalidPictureUrl);
 
         // Then
         assertEquals(givenMaxRetryCount, debugServer.getRequestCount());
@@ -101,7 +102,7 @@ public class NotificationHandlerImplTest extends MobileMessagingTestCase {
         String givenPictureUrl = prepareBitmapUrl();
 
         // When
-        notificationHandlerImpl.fetchNotificationPicture(givenPictureUrl);
+        coreNotificationHandler.fetchNotificationPicture(givenPictureUrl);
 
         // Then
         assertEquals(1, debugServer.getRequestCount());

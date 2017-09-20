@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.gcm;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
@@ -9,6 +10,8 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.util.Set;
 
 /**
  * @author mstipanov
@@ -46,18 +49,29 @@ public class MobileMessageHandler {
         message.setReceivedTimestamp(Time.now());
 
         sendDeliveryReport(message);
+        dispatchMessageReceivedEvent(message);
 
         if (!MobileMessagingCore.hasGeo(message)) {
             saveMessage(message);
             broadcaster.messageReceived(message);
-        } else {
-            // not saving geo messages, just dispatch them
-            broadcaster.geoMessageReceived(message);
         }
 
         MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
             notificationHandler.displayNotification(message);
+        }
+    }
+
+    private void dispatchMessageReceivedEvent(Message message) {
+        Set<MessageHandlerModule> messageHandlerModules = mobileMessagingCore.getMessageHandlerModules();
+        if (messageHandlerModules == null) {
+            return;
+        }
+
+        for (MessageHandlerModule module : messageHandlerModules) {
+            if (module != null) {
+                module.messageReceived(message);
+            }
         }
     }
 

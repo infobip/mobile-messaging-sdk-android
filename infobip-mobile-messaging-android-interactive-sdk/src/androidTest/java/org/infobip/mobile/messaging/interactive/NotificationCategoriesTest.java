@@ -1,8 +1,15 @@
 package org.infobip.mobile.messaging.interactive;
 
 
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
+import org.infobip.mobile.messaging.interactive.platform.MockActivity;
 import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,15 +17,28 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class NotificationCategoriesTest extends MobileMessagingTestCase {
 
     private MobileInteractiveImpl mobileInteractive;
+    private MobileMessagingCore mmcMock;
+    private ArgumentCaptor<Message> messageArgumentCaptor;
+    private ArgumentCaptor<String> messageIdArgumentCaptor;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mobileInteractive = MobileInteractiveImpl.getInstance(context);
+        mmcMock = mock(MobileMessagingCore.class);
+        mobileInteractive = new MobileInteractiveImpl(contextMock, mmcMock);
+        messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
+        messageIdArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+        NotificationSettings notificationSettings = new NotificationSettings.Builder(context)
+                .withDefaultIcon(android.R.drawable.ic_dialog_alert) // if not set throws -> IllegalArgumentException("defaultIcon doesn't exist");
+                .withCallbackActivity(MockActivity.class)
+                .build();
+        Mockito.when(mmcMock.getNotificationSettings()).thenReturn(notificationSettings);
     }
 
     @Test
@@ -55,6 +75,28 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
 
         assertEquals(expectedInteractiveCategoriesSize, interactiveNotificationCategories.size());
         assertJEquals(predefinedNotificationCategories, interactiveNotificationCategories);
+    }
+
+    @Test
+    public void shouldPerformSendMoAndMarkMessagesSeen_whenTriggeringSdkActions() throws Exception {
+        //given
+        Message givenMessage = createMessage(context, "SomeMessageId", false);
+        NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
+                .withMoMessage()
+                .build();
+        NotificationCategory givenCategory = givenNotificationCategory(givenTappedNotificationAction);
+
+        //when
+        mobileInteractive.triggerSdkActionsFor(givenCategory.getCategoryId(), givenTappedNotificationAction, givenMessage);
+
+        //then
+        Mockito.verify(mmcMock, Mockito.times(1)).setMessagesSeen(messageIdArgumentCaptor.capture());
+        Mockito.verify(mmcMock, Mockito.times(1)).sendMessagesWithRetry(messageArgumentCaptor.capture());
+
+        Message actualMessage = messageArgumentCaptor.getValue();
+        assertEquals(givenCategory.getCategoryId() + " " + givenTappedNotificationAction.getId(), actualMessage.getBody());
+        assertEquals(givenMessage.getMessageId(), InternalDataMapper.getInternalDataInitialMessageId(actualMessage.getInternalData()));
+        assertEquals(givenMessage.getMessageId(), messageIdArgumentCaptor.getValue());
     }
 
     private NotificationCategory givenCategory(String actionId1, String actionId2, String categoryId) {

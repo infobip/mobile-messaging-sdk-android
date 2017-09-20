@@ -43,7 +43,7 @@ public class GeoAreasHandler {
     GeoAreasHandler(Context context, GeoBroadcaster geoBroadcaster) {
         this.context = context;
         this.mobileMessagingCore = MobileMessagingCore.getInstance(context);
-        this.geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), MobileMessagingCore.resolveNotificationHandler(context));
+        this.geoNotificationHelper = new GeoNotificationHelper(context, geoBroadcaster, new AndroidBroadcaster(context), mobileMessagingCore.getNotificationHandler());
         this.geoReporter = new GeoReporter(context, MobileMessagingCore.getInstance(context), geoBroadcaster,
                 MobileMessagingCore.getInstance(context).getStats(), new MobileApiResourceProvider().getMobileApiGeo(context));
         this.geofencingHelper = new GeofencingHelper(context);

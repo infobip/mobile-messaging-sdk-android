@@ -28,8 +28,8 @@ import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.notification.CoreNotificationHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
-import org.infobip.mobile.messaging.notification.NotificationHandlerImpl;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
@@ -44,13 +44,13 @@ import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +70,6 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
-    private static final String INTERACTIVE_NOTIFICATION_HANDLER_CLASSNAME = "org.infobip.mobile.messaging.interactive.notification.NotificationInteractiveHandlerImpl";
 
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
@@ -78,10 +77,15 @@ public class MobileMessagingCore extends MobileMessaging {
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private static NotificationHandler notificationHandler;
+    private static Set<MessageHandlerModule> messageHandlerModules;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
     private final MRetryPolicy defaultRetryPolicy;
     private final Broadcaster broadcaster;
+    private static String interactiveModuleClassName;
+    private static String geoModuleClassName;
+    private static MessageHandlerModule geoModule;
+    private static MessageHandlerModule interactiveModule;
     private RegistrationSynchronizer registrationSynchronizer;
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
@@ -110,6 +114,20 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
+
+        notificationHandler = getNotificationHandler();
+
+        interactiveModuleClassName = ResourceLoader.loadStringResourceByName(context, "mm_module_interactive__class_name");
+        geoModuleClassName = ResourceLoader.loadStringResourceByName(context, "mm_module_geo__class_name");
+        messageHandlerModules = getMessageHandlerModules();
+        if (messageHandlerModules != null) {
+            for (MessageHandlerModule module : messageHandlerModules) {
+                if (module != null) {
+                    module.setContext(context);
+                }
+            }
+        }
+
         MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
 
         LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
@@ -136,6 +154,57 @@ public class MobileMessagingCore extends MobileMessaging {
             instance = new MobileMessagingCore(context.getApplicationContext());
         }
         return instance;
+    }
+
+    public Set<MessageHandlerModule> getMessageHandlerModules() {
+        if (messageHandlerModules == null) {
+            messageHandlerModules = new HashSet<>();
+            MessageHandlerModule interactiveMessageHandlerModule = getInteractiveMessageHandlerModule();
+            MessageHandlerModule geoMessageHandlerModule = getGeoMessageHandlerModule();
+
+            if (interactiveMessageHandlerModule != null) {
+                messageHandlerModules.add(interactiveMessageHandlerModule);
+            }
+            if (geoMessageHandlerModule != null) {
+                messageHandlerModules.add(geoMessageHandlerModule);
+            }
+        }
+        return messageHandlerModules;
+    }
+
+    public <T extends MessageHandlerModule> T getInteractiveMessageHandlerModule() {
+        if (interactiveModule == null) {
+            interactiveModule = getMessageHandlerModule(interactiveModuleClassName);
+        }
+        return (T) interactiveModule;
+    }
+
+    public <T extends MessageHandlerModule> T getGeoMessageHandlerModule() {
+        if (geoModule == null) {
+            geoModule = getMessageHandlerModule(geoModuleClassName);
+        }
+        return (T) geoModule;
+    }
+
+    public static <T extends MessageHandlerModule> T getMessageHandlerModule(String className) {
+        if (StringUtils.isBlank(className)) {
+            return null;
+        }
+        try {
+            Class<? extends MessageHandlerModule> messageHandlerModuleClass = (Class<? extends MessageHandlerModule>) Class.forName(className);
+            if (messageHandlerModuleClass == null) {
+                return null;
+            }
+
+            try {
+                return (T) messageHandlerModuleClass.newInstance();
+            } catch (Exception e) {
+                return null;
+            }
+
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
     }
 
     public static DatabaseHelper getDatabaseHelper(Context context) {
@@ -184,25 +253,29 @@ public class MobileMessagingCore extends MobileMessaging {
         }
     }
 
-    public static NotificationHandler resolveNotificationHandler(Context context) {
-        if (null != notificationHandler) {
+    public NotificationHandler getNotificationHandler() {
+        if (notificationHandler == null) {
+            String notificationHandlerClassName = ResourceLoader.loadStringResourceByName(context, "mm_interactive_notification_handler__class_name");
+            notificationHandler = getNotificationHandler(notificationHandlerClassName);
+        }
+        return notificationHandler;
+    }
+
+    NotificationHandler getNotificationHandler(String className) {
+        if (StringUtils.isBlank(className)) {
+            notificationHandler = new CoreNotificationHandler();
+            notificationHandler.setContext(context);
             return notificationHandler;
         }
 
-        return setNotificationHandler(context);
-    }
-
-    private static NotificationHandler setNotificationHandler(Context context) {
-
         try {
-            Class<?> c = Class.forName(INTERACTIVE_NOTIFICATION_HANDLER_CLASSNAME);
-            Constructor<?> constructor = c.getConstructor(Context.class);
-            Object resolvedInteractiveNotificationHandler = constructor.newInstance(context);
-            notificationHandler = (NotificationHandler) resolvedInteractiveNotificationHandler;
-
+            Class<?> c = Class.forName(className);
+            Object resolvedNotificationHandler = c.getConstructor().newInstance();
+            notificationHandler = (NotificationHandler) resolvedNotificationHandler;
         } catch (Exception e) {
-            notificationHandler = new NotificationHandlerImpl(context.getApplicationContext());
+            notificationHandler = new CoreNotificationHandler();
         }
+        notificationHandler.setContext(context);
 
         return notificationHandler;
     }
@@ -854,7 +927,7 @@ public class MobileMessagingCore extends MobileMessaging {
     @NonNull
     private MessagesSynchronizer messagesSynchronizer() {
         if (messagesSynchronizer == null) {
-            MobileMessageHandler mobileMessageHandler = new MobileMessageHandler(this, broadcaster, resolveNotificationHandler(context), getMessageStoreWrapper());
+            MobileMessageHandler mobileMessageHandler = new MobileMessageHandler(this, broadcaster, getNotificationHandler(), getMessageStoreWrapper());
             messagesSynchronizer = new MessagesSynchronizer(this, stats, registrationAlignedExecutor,
                     broadcaster, defaultRetryPolicy, mobileMessageHandler, mobileApiResourceProvider().getMobileApiMessages(context));
         }
@@ -982,7 +1055,6 @@ public class MobileMessagingCore extends MobileMessaging {
             }
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
-            MobileMessagingCore.notificationHandler = setNotificationHandler(application.getApplicationContext());
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);

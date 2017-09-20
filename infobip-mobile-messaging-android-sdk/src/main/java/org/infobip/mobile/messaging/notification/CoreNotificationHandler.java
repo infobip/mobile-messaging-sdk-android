@@ -39,18 +39,24 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
  * @author sslavin
  * @since 15/09/16.
  */
-public class NotificationHandlerImpl implements NotificationHandler {
+public class CoreNotificationHandler implements NotificationHandler {
 
     private static final int DEFAULT_NOTIFICATION_ID = 0;
 
-    private final Context context;
+    private Context context;
 
-    public NotificationHandlerImpl(Context context) {
+    public CoreNotificationHandler() {
+    }
+
+    @Override
+    public void setContext(Context context) {
         this.context = context;
     }
 
     @Override
     public void displayNotification(Message message) {
+        if (context == null) return;
+
         NotificationCompat.Builder builder = notificationCompatBuilder(message);
         int notificationId = getNotificationId(message);
 
@@ -59,10 +65,10 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
     /**
      * Displays native android notification with builder settings for the provided notificationId.
-     * @param builder Android NotificationCompat.Builder with settings for notification building.
-     * @param message Message object used for notification building.
-     * @param notificationId Id of notification to be displayed
      *
+     * @param builder        Android NotificationCompat.Builder with settings for notification building.
+     * @param message        Message object used for notification building.
+     * @param notificationId Id of notification to be displayed
      * @see #notificationCompatBuilder(Message)
      * @see #getNotificationId(Message)
      */
@@ -83,8 +89,8 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
     /**
      * Gets notification builder for Message.
-     * @param message message to display notification for.
      *
+     * @param message message to display notification for.
      * @return builder
      */
     public NotificationCompat.Builder notificationCompatBuilder(Message message) {
@@ -233,8 +239,8 @@ public class NotificationHandlerImpl implements NotificationHandler {
 
     /**
      * Gets notification ID for the given message
-     * @param message Message object used for setting notification ID
      *
+     * @param message Message object used for setting notification ID
      * @return notification ID
      */
     public int getNotificationId(Message message) {

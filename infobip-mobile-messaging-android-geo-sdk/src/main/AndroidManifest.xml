@@ -34,15 +34,6 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
-
-        <receiver
-            android:name="org.infobip.mobile.messaging.geo.push.PushMessageReceiver"
-            android:enabled="false"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.GEO_MESSAGE_RECEIVED" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

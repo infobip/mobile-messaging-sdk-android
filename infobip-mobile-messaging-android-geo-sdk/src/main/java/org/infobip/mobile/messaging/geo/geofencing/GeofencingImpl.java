@@ -30,7 +30,6 @@ import org.infobip.mobile.messaging.geo.BootReceiver;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver;
 import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
-import org.infobip.mobile.messaging.geo.push.PushMessageReceiver;
 import org.infobip.mobile.messaging.geo.storage.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -316,7 +315,6 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     public void setGeoComponentsEnabledSettings(Context context, boolean componentsStateEnabled) {
         ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsIntentService.class);
         ComponentUtil.setState(context, componentsStateEnabled, GeofencingConsistencyReceiver.class);
-        ComponentUtil.setState(context, componentsStateEnabled, PushMessageReceiver.class);
         ComponentUtil.setState(context, componentsStateEnabled, BootReceiver.class);
     }
 

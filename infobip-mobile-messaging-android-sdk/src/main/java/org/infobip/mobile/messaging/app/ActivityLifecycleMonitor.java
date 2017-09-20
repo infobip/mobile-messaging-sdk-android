@@ -4,11 +4,12 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 
-import org.infobip.mobile.messaging.LocalEvent;
+import org.infobip.mobile.messaging.MessageHandlerModule;
+import org.infobip.mobile.messaging.MobileMessagingCore;
+
+import java.util.Set;
 
 /**
  * @author sslavin
@@ -32,7 +33,20 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         boolean foregroundBefore = ActivityLifecycleMonitor.foreground;
         ActivityLifecycleMonitor.foreground = foreground;
         if (!foregroundBefore && foreground) {
-            LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(LocalEvent.APPLICATION_FOREGROUND.getKey()));
+            dispatchAppInForegroundEvent(context);
+        }
+    }
+
+    private static void dispatchAppInForegroundEvent(Context context) {
+        Set<MessageHandlerModule> messageHandlerModules = MobileMessagingCore.getInstance(context).getMessageHandlerModules();
+        if (messageHandlerModules == null) {
+            return;
+        }
+
+        for (MessageHandlerModule module : messageHandlerModules) {
+            if (module != null) {
+                module.applicationInForeground();
+            }
         }
     }
 

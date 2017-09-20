@@ -131,7 +131,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
             } catch (Exception ignored) {
             }
         }
-        databaseProvider.deleteDatabase();
+
+        if (databaseProvider != null)
+            databaseProvider.deleteDatabase();
     }
 
     public static class TestMessageStore implements MessageStore {
@@ -187,6 +189,14 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
                 .withId(givenTappedActionId)
                 .withIcon(android.R.drawable.btn_default)
                 .withTitleResourceId(android.R.string.ok);
+    }
+
+    @NonNull
+    protected NotificationCategory givenNotificationCategory(NotificationAction tappedAction) {
+        return new NotificationCategory(
+                "categoryId",
+                tappedAction,
+                givenNotificationAction("actionIdNotTapped").build());
     }
 
     protected Intent givenIntent(Message message, NotificationCategory notificationCategory, NotificationAction action, int notificationId, int flags) {

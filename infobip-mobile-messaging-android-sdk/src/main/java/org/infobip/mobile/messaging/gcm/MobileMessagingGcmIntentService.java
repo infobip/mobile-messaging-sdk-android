@@ -203,8 +203,8 @@ public class MobileMessagingGcmIntentService extends IntentService {
 
     private MobileMessageHandler mobileMessageHandler() {
         if (mobileMessageHandler == null) {
-            NotificationHandler notificationHandler = MobileMessagingCore.resolveNotificationHandler(this);
             MobileMessagingCore mobileMessagingCore = MobileMessagingCore.getInstance(this);
+            NotificationHandler notificationHandler = mobileMessagingCore.getNotificationHandler();
             mobileMessageHandler = new MobileMessageHandler(
                     mobileMessagingCore,
                     new AndroidBroadcaster(this),

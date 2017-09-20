@@ -479,6 +479,7 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(deepLinkIntent);
     }
+
     private void openWebView(String url) {
         Intent webViewIntent = new Intent(this, WebViewActivity.class);
         webViewIntent.putExtra(WebViewActivity.EXTRA_URL, url);

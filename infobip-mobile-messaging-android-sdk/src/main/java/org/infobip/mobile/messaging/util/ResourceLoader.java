@@ -7,6 +7,7 @@ import android.content.Context;
  * @since 25.03.2016.
  */
 public abstract class ResourceLoader {
+
     private ResourceLoader() {
     }
 
@@ -17,5 +18,21 @@ public abstract class ResourceLoader {
             String className = context.getApplicationContext().getPackageName() + ".R$" + resourceGroup;
             throw new MissingAndroidResourceException("Can't load resource: " + resourceName, className, resourceName, e);
         }
+    }
+
+    public static String loadStringResourceByName(final Context context, final String resourceName) {
+        int resource = 0;
+        try {
+            resource = loadResourceByName(context, "string", resourceName);
+        } catch (MissingAndroidResourceException ignore) {
+
+        }
+        if (resource > 0) {
+            String className = context.getResources().getString(resource);
+            if (StringUtils.isNotBlank(className)) {
+                return className;
+            }
+        }
+        return null;
     }
 }
