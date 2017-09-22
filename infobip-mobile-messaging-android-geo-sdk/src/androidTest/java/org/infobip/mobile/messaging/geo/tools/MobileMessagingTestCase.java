@@ -164,7 +164,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     /**
      * Generates messages with provided id
      *
-     * @param saveToStorage set to true to save messages to message store
+     * @param context       context
      * @param messageId     message id for a message
      * @param campaignId    id of a campaign for a message
      * @param saveToStorage true if the message should be saved to storage

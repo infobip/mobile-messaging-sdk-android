@@ -35,7 +35,7 @@ public class DeviceInformation {
         // Starting with android 6.0 calling isLockScreenDisabled fails altogether because the signature has changed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             KeyguardManager keyguardMgr = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
-            return keyguardMgr.isDeviceSecure();
+            return keyguardMgr != null && keyguardMgr.isDeviceSecure();
         }
 
         try {

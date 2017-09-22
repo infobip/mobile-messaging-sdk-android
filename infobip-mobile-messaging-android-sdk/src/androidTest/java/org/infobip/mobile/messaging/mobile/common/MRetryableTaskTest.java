@@ -19,7 +19,7 @@ import static org.mockito.Matchers.eq;
 public class MRetryableTaskTest extends MobileMessagingTestCase {
 
     private MRetryableTask<String, String> retryableTask;
-    private Executor executor = new Executor() {
+    private final Executor executor = new Executor() {
         @Override
         public void execute(@NonNull Runnable runnable) {
             runnable.run();

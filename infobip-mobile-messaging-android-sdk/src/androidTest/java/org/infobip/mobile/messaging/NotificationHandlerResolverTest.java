@@ -21,7 +21,7 @@ import static org.mockito.Mockito.reset;
 @RunWith(AndroidJUnit4.class)
 public class NotificationHandlerResolverTest {
 
-    private MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
+    private final MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
 
     @Before
     public void setUp() throws Exception {

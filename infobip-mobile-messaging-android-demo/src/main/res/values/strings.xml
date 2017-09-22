@@ -9,6 +9,8 @@
 
     <!-- Strings related to Inspect -->
     <string name="action_inspect">Inspect</string>
+    <string name="action_register">Register</string>
+    <string name="action_unregister">Unregister</string>
 
     <!-- General settings -->
     <string name="pref_header_information">Information</string>
@@ -60,15 +62,6 @@
     <string name="toast_message_received">"Message received: %s"</string>
     <string name="toast_notification_tapped">"Notification tapped: %s"</string>
     <string name="toast_notification_action_tapped">"Notification action tapped: %s"</string>
-
-    <!-- Strings related to Reply -->
-    <string name="reply_close_label">Close</string>
-    <string name="reply_sender_placeholder">Sender</string>
-
-    <!--Strings related to notification actions-->
-    <string name="action_mark_seen">Mark as read</string>
-    <string name="action_reply">Reply</string>
-    <string name="action_coupon">Checkout great offer</string>
 
     <string name="error_api_comm_unknown">Unknown API communication error</string>
 

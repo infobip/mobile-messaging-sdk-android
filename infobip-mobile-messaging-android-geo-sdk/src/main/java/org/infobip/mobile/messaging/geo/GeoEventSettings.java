@@ -9,9 +9,9 @@ public class GeoEventSettings {
 
     public static final int UNLIMITED_RECURRING = 0;
 
-    private GeoEventType type;
-    private Integer limit;
-    private Long timeoutInMinutes;
+    private final GeoEventType type;
+    private final Integer limit;
+    private final Long timeoutInMinutes;
 
     public GeoEventSettings(GeoEventType type, Integer limit, Long timeoutInMinutes) {
         this.type = type;

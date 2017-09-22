@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.api.support;
 
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,10 +17,6 @@ public class GeneratorTest {
     @Before
     public void setUp() throws Exception {
         generator = new Generator.Builder().withBaseUrl("X").build();
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
     @Test

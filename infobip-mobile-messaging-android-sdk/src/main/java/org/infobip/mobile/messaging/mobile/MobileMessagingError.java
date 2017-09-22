@@ -10,10 +10,10 @@ import java.util.Locale;
 
 public class MobileMessagingError implements Serializable {
 
-    private String code;
-    private String message;
-    private Type type;
-    private Throwable tr;
+    private final String code;
+    private final String message;
+    private final Type type;
+    private final Throwable tr;
 
     public static MobileMessagingError createFrom(Throwable e) {
         if (e instanceof BackendBaseException) {

@@ -96,7 +96,9 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
     private void cancelNotification(Context context, int notificationId) {
         if (notificationId != -1) {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.cancel(notificationId);
+            if (notificationManager != null) {
+                notificationManager.cancel(notificationId);
+            }
         }
     }
 

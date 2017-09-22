@@ -6,8 +6,8 @@ package org.infobip.mobile.messaging.geo;
  */
 
 public class GeoLatLng {
-    private Double lat;
-    private Double lng;
+    private final Double lat;
+    private final Double lng;
 
     public GeoLatLng(Double lat, Double lng) {
         this.lat = lat;

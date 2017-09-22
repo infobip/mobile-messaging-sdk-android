@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Pair;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -45,15 +45,15 @@ import java.util.Set;
 
 public class GeofencingImpl extends Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static String TAG = "GeofencingImpl";
+    private static final String TAG = "GeofencingImpl";
 
-    private Context context;
     private static GeofencingImpl instance;
+    private final Context context;
     private final GeofencingHelper geofencingHelper;
-    private GoogleApiClient googleApiClient;
+    private final GoogleApiClient googleApiClient;
+    private final MessageStore messageStore;
     private List<Geofence> geofences;
     private PendingIntent geofencePendingIntent;
-    private MessageStore messageStore;
     private GoogleApiClientRequestType requestType;
 
     private enum GoogleApiClientRequestType {
@@ -240,7 +240,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     public void startGeoMonitoring() {
 
         if (!PlayServicesSupport.isPlayServicesAvailable(context) ||
-                !GeofencingHelper.isActivated(context) ||
+                !GeofencingHelper.isGeoActivated(context) ||
                 // checking this to avoid multiple activation of geofencing API on Play services
                 GeofencingHelper.areAllActiveGeoAreasMonitored(context)) {
             return;
@@ -319,7 +319,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     private boolean checkRequiredPermissions() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             MobileMessagingLogger.e("Unable to initialize geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION));
             return false;
         }

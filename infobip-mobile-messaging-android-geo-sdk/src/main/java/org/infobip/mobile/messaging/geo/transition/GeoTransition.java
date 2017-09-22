@@ -17,13 +17,13 @@ import java.util.Set;
  */
 public class GeoTransition {
     @NonNull
-    private GeoEventType eventType;
+    private final GeoEventType eventType;
 
     @NonNull
-    private Set<String> requestIds;
+    private final Set<String> requestIds;
 
     @NonNull
-    private GeoLatLng triggeringLocation;
+    private final GeoLatLng triggeringLocation;
 
     public GeoTransition(@NonNull GeoEventType eventType, @NonNull Set<String> requestIds, @NonNull GeoLatLng triggeringLocation) {
         this.eventType = eventType;

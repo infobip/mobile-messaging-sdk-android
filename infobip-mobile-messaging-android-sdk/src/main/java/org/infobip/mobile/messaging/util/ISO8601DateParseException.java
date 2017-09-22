@@ -30,7 +30,7 @@ public class ISO8601DateParseException extends RuntimeException {
     public enum Reason {
         DATE_PARSE_EXCEPTION("Value cannot be parsed to java.util.Date. dateValue() should only be called if java.util.Date is expected.");
 
-        private String message;
+        private final String message;
 
         Reason(String message) {
             this.message = message;

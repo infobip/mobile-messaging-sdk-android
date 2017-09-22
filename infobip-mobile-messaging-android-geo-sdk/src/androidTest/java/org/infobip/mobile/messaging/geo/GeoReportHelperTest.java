@@ -29,11 +29,6 @@ import static junit.framework.Assert.assertTrue;
 
 public class GeoReportHelperTest extends MobileMessagingTestCase {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     @Test
     public void test_should_find_signaling_messages_for_report() throws Exception {
 

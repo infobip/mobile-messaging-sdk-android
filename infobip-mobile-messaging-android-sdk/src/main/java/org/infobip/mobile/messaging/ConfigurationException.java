@@ -33,7 +33,7 @@ public class ConfigurationException extends RuntimeException {
         MISSING_REQUIRED_PERMISSION("Missing required permission in AndroidManifest.xml, add: %s"),
         CHECK_LOCATION_SETTINGS("Check your location settings.");
 
-        private String message;
+        private final String message;
 
         Reason(String message) {
             this.message = message;

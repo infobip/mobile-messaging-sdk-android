@@ -8,12 +8,12 @@
         app:showAsAction="never" />
 
     <item android:id="@+id/action_register"
-        android:title="Register"
+        android:title="@string/action_register"
         android:orderInCategory="100"
         app:showAsAction="never" />
 
     <item android:id="@+id/action_unregister"
-        android:title="Unregister"
+        android:title="@string/action_unregister"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class MRetryableTask<IN, OUT> {
 
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private volatile ExecutionContext executionContext;
     private MRetryPolicy retryPolicy;
 
     private class ExecutionContext {
-        Executor executor;
-        IN args[];
+        final Executor executor;
+        final IN args[];
+        final MRetryPolicy retryPolicy;
         int attempts;
-        MRetryPolicy retryPolicy;
 
         ExecutionContext(Executor executor, IN args[], MRetryPolicy retryPolicy) {
             this.executor = executor;

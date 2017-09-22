@@ -27,7 +27,7 @@ class GeoTransitionHelper {
     /**
      * Supported geofence transition events
      */
-    private static SparseArray<GeoEventType> supportedTransitionEvents = new SparseArray<GeoEventType>() {{
+    private static final SparseArray<GeoEventType> supportedTransitionEvents = new SparseArray<GeoEventType>() {{
         put(Geofence.GEOFENCE_TRANSITION_ENTER, GeoEventType.entry);
     }};
 

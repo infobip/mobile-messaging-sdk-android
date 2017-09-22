@@ -11,7 +11,7 @@ public class MissingAndroidResourceException extends RuntimeException {
 
     private static final long serialVersionUID = -4876345176062000401L;
 
-    String className, key;
+    private final String className, key;
 
     /**
      * Constructs a new {@code MissingResourceException} with the stack trace,

@@ -13,11 +13,6 @@ import static junit.framework.Assert.assertFalse;
  */
 public class PreferenceHelperTest extends MobileMessagingTestCase {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     @Test
     public void test_encryptedPreferencesTest() throws Exception {
         String key = "thisIsMyUnencryptedKey";

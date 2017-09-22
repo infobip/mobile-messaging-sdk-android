@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class MRetryPolicy {
 
-    private Set<Class<? extends Throwable>> errorsToRetryOn = new HashSet<>();
+    private final Set<Class<? extends Throwable>> errorsToRetryOn = new HashSet<>();
 
     private int maxRetries = 1;
     private int backoffMultiplier = 0;

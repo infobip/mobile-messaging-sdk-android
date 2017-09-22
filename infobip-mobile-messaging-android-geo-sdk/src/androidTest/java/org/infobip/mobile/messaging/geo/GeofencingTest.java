@@ -55,7 +55,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         // Then
         Mockito.verify(geofencingMock, Mockito.times(1)).setGeoComponentsEnabledSettings(context, true);
         Mockito.verify(geofencingMock, Mockito.times(1)).startGeoMonitoring();
-        assertTrue(GeofencingHelper.isActivated(context));
+        assertTrue(GeofencingHelper.isGeoActivated(context));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         // Then
         Mockito.verify(geofencingMock, Mockito.times(1)).setGeoComponentsEnabledSettings(context, false);
         Mockito.verify(geofencingMock, Mockito.times(1)).stopGeoMonitoring();
-        assertFalse(GeofencingHelper.isActivated(context));
+        assertFalse(GeofencingHelper.isGeoActivated(context));
     }
 
     @Test

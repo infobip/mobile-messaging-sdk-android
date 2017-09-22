@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.dal.sqlite;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.shaded.google.gson.JsonArray;
 import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
@@ -24,7 +23,6 @@ import java.util.UUID;
 public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
 
     private SharedPreferencesMessageStore sharedPreferencesMessageStore;
-    private JsonSerializer jsonSerializer = new JsonSerializer();
 
     @Override
     public void setUp() throws Exception {

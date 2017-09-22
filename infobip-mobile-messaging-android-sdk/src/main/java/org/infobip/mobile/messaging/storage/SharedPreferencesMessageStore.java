@@ -49,7 +49,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
         return PreferenceHelper.find(context, getStoreTag(), new ArrayList<Message>(), new PreferenceHelper.SetConverter<List<Message>>() {
             @Override
             public List<Message> convert(Set<String> set) {
-                List<Message> messages = new ArrayList<Message>();
+                List<Message> messages = new ArrayList<>();
                 for (String bundle : set) {
                     messages.add(FCMMessageMapper.fromCloudBundle(deserialize(bundle)));
                 }

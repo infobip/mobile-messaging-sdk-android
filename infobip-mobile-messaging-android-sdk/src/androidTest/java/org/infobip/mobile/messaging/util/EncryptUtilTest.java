@@ -14,11 +14,6 @@ import static junit.framework.Assert.assertFalse;
  */
 public class EncryptUtilTest extends MobileMessagingTestCase {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
     @Test
     public void test_encryptDecrypt() throws Exception {
 

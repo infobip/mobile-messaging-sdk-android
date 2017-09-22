@@ -95,7 +95,7 @@ public class GeoReportHelper {
     /**
      * Generates set of geofencing reports
      *
-     * @param context
+     * @param context          context
      * @param signalingMessage original signaling message
      * @param areas            list of areas that triggered this geofencing event
      * @param event            transition type

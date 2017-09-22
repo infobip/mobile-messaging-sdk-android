@@ -22,7 +22,7 @@ import java.util.concurrent.Executor;
 public abstract class MAsyncTask<IN, OUT> {
 
     @SuppressLint("StaticFieldLeak")
-    private AsyncTask<IN, Void, ResultWrapper<IN, OUT>> asyncTask = new AsyncTask<IN, Void, ResultWrapper<IN, OUT>>() {
+    private final AsyncTask<IN, Void, ResultWrapper<IN, OUT>> asyncTask = new AsyncTask<IN, Void, ResultWrapper<IN, OUT>>() {
         @Override
         protected void onPreExecute() {
             before();
@@ -95,12 +95,12 @@ public abstract class MAsyncTask<IN, OUT> {
      */
     public void error(Throwable error) {
 
-}
+    }
 
     /**
      * Executed on UI thread in case of error.
      *
-     * @param ins original input parameters.
+     * @param ins   original input parameters.
      * @param error error that happened during background execution.
      */
     public void error(IN ins[], Throwable error) {

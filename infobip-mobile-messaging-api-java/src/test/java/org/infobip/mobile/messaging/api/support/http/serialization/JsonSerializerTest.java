@@ -2,9 +2,7 @@ package org.infobip.mobile.messaging.api.support.http.serialization;
 
 import com.google.gson.internal.LinkedTreeMap;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -17,20 +15,6 @@ import static org.junit.Assert.assertEquals;
  * @since 15/07/16.
  */
 public class JsonSerializerTest {
-
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
-
-    String getMessageForClassMismatch(Class expeceted, Class observed) {
-        return "Expected <" + expeceted.toString() + "> found <" + observed.toString() + ">";
-    }
 
     @Test
     public void execute_JSON_to_Map() throws Exception {
@@ -51,10 +35,6 @@ public class JsonSerializerTest {
         Assert.assertTrue(getMessageForClassMismatch(Double.class, map.get("double").getClass()), map.get("double") instanceof Double);
     }
 
-    // Given
-    public static class GivenClass {
-        String string;
-    }
     @Test
     public void should_support_custom_types() throws Exception {
 
@@ -86,5 +66,14 @@ public class JsonSerializerTest {
         // Then
         JSONAssert.assertEquals("{\"strrr\":\"someValue\"}", actualSerialized, true);
         assertEquals(givenObject.string, actualDeserialized.string);
+    }
+
+    private String getMessageForClassMismatch(Class expeceted, Class observed) {
+        return "Expected <" + expeceted.toString() + "> found <" + observed.toString() + ">";
+    }
+
+    // Given
+    public static class GivenClass {
+        String string;
     }
 }

@@ -19,12 +19,12 @@ import java.util.List;
  */
 public class Geo extends InternalDataMapper.InternalData {
 
-    private Double triggeringLatitude;
-    private Double triggeringLongitude;
-    private DeliveryTime deliveryTime;
-    private String expiryTime;
-    private String startTime;
-    private String campaignId;
+    private final Double triggeringLatitude;
+    private final Double triggeringLongitude;
+    private final DeliveryTime deliveryTime;
+    private final String expiryTime;
+    private final String startTime;
+    private final String campaignId;
     private List<Area> geo = new ArrayList<>();
     private List<GeoEventSettings> event = new ArrayList<>();
 

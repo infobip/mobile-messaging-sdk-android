@@ -13,11 +13,11 @@ import java.util.Date;
 
 public class Area {
 
-    private String id;
-    private String title;
-    private Double latitude;
-    private Double longitude;
-    private Integer radiusInMeters;
+    private final String id;
+    private final String title;
+    private final Double latitude;
+    private final Double longitude;
+    private final Integer radiusInMeters;
 
     public Area(String id, String title, Double latitude, Double longitude, Integer radiusInMeters) {
         this.id = id;
@@ -65,9 +65,9 @@ public class Area {
     }
 
     /**
-     * geofence is valid and it can be monitored
+     * Geofence is valid and it can be monitored
      *
-     * @return
+     * @return true if area is valid
      */
     public boolean isValid() {
         return getId() != null &&

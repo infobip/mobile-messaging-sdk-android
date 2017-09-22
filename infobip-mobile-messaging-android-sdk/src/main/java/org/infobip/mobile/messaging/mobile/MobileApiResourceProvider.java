@@ -109,7 +109,7 @@ public class MobileApiResourceProvider {
     }
 
     String[] getUserAgentAdditions(Context context) {
-        List<String> userAgentAdditions = new ArrayList<String>();
+        List<String> userAgentAdditions = new ArrayList<>();
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO)) {
             userAgentAdditions.add(SystemInformation.getAndroidSystemName());
             userAgentAdditions.add(SystemInformation.getAndroidSystemVersion());

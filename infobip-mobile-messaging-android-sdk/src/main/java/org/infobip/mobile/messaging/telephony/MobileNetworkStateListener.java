@@ -10,7 +10,7 @@ import android.telephony.TelephonyManager;
  */
 public class MobileNetworkStateListener extends PhoneStateListener {
 
-    private MobileNetworkChangeHandler mobileNetworkChangeHandler;
+    private final MobileNetworkChangeHandler mobileNetworkChangeHandler;
 
     public MobileNetworkStateListener(Context context) {
         mobileNetworkChangeHandler = new MobileNetworkChangeHandler(context);

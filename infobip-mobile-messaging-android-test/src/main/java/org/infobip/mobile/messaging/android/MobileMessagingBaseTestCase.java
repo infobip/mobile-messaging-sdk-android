@@ -37,7 +37,7 @@ public abstract class MobileMessagingBaseTestCase {
     protected Context context;
     protected Context contextMock;
     protected DebugServer debugServer;
-    private Gson gson = new GsonBuilder().serializeNulls().create();
+    private final Gson gson = new GsonBuilder().serializeNulls().create();
 
     @Before
     public void setUp() throws Exception {

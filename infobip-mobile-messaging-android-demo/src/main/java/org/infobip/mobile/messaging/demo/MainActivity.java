@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-    private BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver geofenceAreaEnteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             GeoMessage geoMessage = GeoMessage.createFrom(intent.getExtras());
@@ -334,12 +334,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearNotifications() {
         NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+        if (notificationManager != null) {
+            notificationManager.cancelAll();
+        }
     }
 
     @Override

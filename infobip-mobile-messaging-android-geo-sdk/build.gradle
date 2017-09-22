@@ -61,8 +61,8 @@ dependencies {
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
     def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        dependsOn variant.javaCompile
-        from variant.javaCompile.destinationDir
+        dependsOn variant.javaCompiler
+        from variant.javaCompiler.destinationDir
 
         manifest {
             attributes(

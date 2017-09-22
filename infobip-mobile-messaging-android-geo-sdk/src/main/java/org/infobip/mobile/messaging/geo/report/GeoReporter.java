@@ -131,7 +131,7 @@ public class GeoReporter {
     /**
      * Creates event report request body based on provided geofencing report.
      *
-     * @param geoMessageStore
+     * @param geoMessageStore message store for geo
      * @param geoReports      map that contains original signaling messages as keys and related geo reports as values.
      * @return request body for geo reporting.
      */

@@ -24,9 +24,9 @@ import static org.mockito.Mockito.when;
 @RunWith(AndroidJUnit4.class)
 public class MobileMessagingConnectivityReceiverTest {
 
-    private MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
-    private Context contextMock = mock(Context.class);
-    private ConnectivityManager connectivityManagerMock = mock(ConnectivityManager.class);
+    private final MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
+    private final Context contextMock = mock(Context.class);
+    private final ConnectivityManager connectivityManagerMock = mock(ConnectivityManager.class);
     private MobileMessagingConnectivityReceiver mobileMessagingConnectivityReceiver;
 
     @Before

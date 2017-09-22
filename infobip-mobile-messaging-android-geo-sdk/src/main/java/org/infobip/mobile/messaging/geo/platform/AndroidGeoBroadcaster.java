@@ -22,7 +22,7 @@ public class AndroidGeoBroadcaster implements GeoBroadcaster {
 
     private final Context context;
 
-    private static Map<GeoEventType, GeoEvent> eventBroadcasts = new HashMap<GeoEventType, GeoEvent>() {{
+    private final static Map<GeoEventType, GeoEvent> eventBroadcasts = new HashMap<GeoEventType, GeoEvent>() {{
         put(GeoEventType.entry, GeoEvent.GEOFENCE_AREA_ENTERED);
     }};
 

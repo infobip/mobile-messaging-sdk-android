@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.api.data;
 
-import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

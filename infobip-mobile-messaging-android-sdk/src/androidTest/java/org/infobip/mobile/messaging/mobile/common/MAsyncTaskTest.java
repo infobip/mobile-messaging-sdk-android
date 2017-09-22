@@ -18,7 +18,7 @@ import static org.mockito.Matchers.eq;
 public class MAsyncTaskTest extends MobileMessagingTestCase {
 
     private MAsyncTask<String, String> asyncTask;
-    private Executor executor = new Executor() {
+    private final Executor executor = new Executor() {
         @Override
         public void execute(@NonNull Runnable runnable) {
             runnable.run();

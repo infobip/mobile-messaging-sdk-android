@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
  *
  * @author mstipanov
  * @see MobileApiRegistration
- * @see MobileApiRegistration#upsert(String, String)
+ * @see MobileApiRegistration#upsert(String, Boolean)
  * @since 17.03.2016.
  */
 @Data

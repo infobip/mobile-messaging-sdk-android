@@ -27,9 +27,9 @@ import static org.mockito.Mockito.verify;
 @RunWith(AndroidJUnit4.class)
 public class MobileMessagingJobServiceTest {
 
-    private MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
-    private JobScheduler givenJobScheduler = mock(JobScheduler.class);
-    private JobParameters givenJobParameters = mock(JobParameters.class);
+    private final MobileMessagingCore mmcMock = mock(MobileMessagingCore.class);
+    private final JobScheduler givenJobScheduler = mock(JobScheduler.class);
+    private final JobParameters givenJobParameters = mock(JobParameters.class);
 
     @After
     public void after() {

@@ -35,7 +35,7 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
         this.geofencing = geofencing;
         if (geofencing == null) return;
 
-        GeofencingHelper.setActivated(context, true);
+        GeofencingHelper.setGeoActivated(context, true);
         geofencing.setGeoComponentsEnabledSettings(context, true);
         geofencing.startGeoMonitoring();
     }
@@ -51,14 +51,14 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
             geofencing = Geofencing.getInstance(context);
         }
 
-        GeofencingHelper.setActivated(context, false);
+        GeofencingHelper.setGeoActivated(context, false);
         geofencing.setGeoComponentsEnabledSettings(context, false);
         geofencing.stopGeoMonitoring();
     }
 
     @Override
     public boolean isGeofencingActivated() {
-        return GeofencingHelper.isActivated(context);
+        return GeofencingHelper.isGeoActivated(context);
     }
 
     @Override

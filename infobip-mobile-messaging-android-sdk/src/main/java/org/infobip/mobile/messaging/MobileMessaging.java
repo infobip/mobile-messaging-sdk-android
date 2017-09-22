@@ -192,7 +192,7 @@ public abstract class MobileMessaging {
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
-     * In this case you should manually invoke {@link #cleanup()} prior to {@link Builder#build()} otherwise the SDK will not
+     * In this case you should manually invoke cleanup() prior to {@link Builder#build()} otherwise the SDK will not
      * detect Application Code changes.
      */
     public abstract void cleanup();

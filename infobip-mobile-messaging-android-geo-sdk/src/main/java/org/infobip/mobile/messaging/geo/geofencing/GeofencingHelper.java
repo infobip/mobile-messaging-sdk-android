@@ -20,7 +20,7 @@ public class GeofencingHelper {
 
     private final Context context;
     private GeoSQLiteMessageStore internalStoreForGeo;
-    private JsonSerializer serializer = new JsonSerializer(false);
+    private final JsonSerializer serializer = new JsonSerializer(false);
 
     public GeofencingHelper(Context context) {
         this.context = context;
@@ -66,13 +66,13 @@ public class GeofencingHelper {
     }
 
     public void removeExpiredAreas() {
-        if (isActivated(context) && MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+        if (isGeoActivated(context) && MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
             GeofencingImpl.getInstance(context).removeExpiredAreasFromStorage();
         }
     }
 
     public void startGeoMonitoringIfNecessary() {
-        if (isActivated(context) && MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
+        if (isGeoActivated(context) && MobileMessagingCore.getInstance(context).isPushRegistrationEnabled()) {
             GeofencingImpl.getInstance(context).startGeoMonitoring();
         }
     }
@@ -104,11 +104,11 @@ public class GeofencingHelper {
         return PreferenceHelper.findStringSet(context, MobileMessagingGeoProperty.SUSPENDED_CAMPAIGN_IDS.getKey(), new ArraySet<String>());
     }
 
-    public static void setActivated(Context context, boolean activated) {
+    public static void setGeoActivated(Context context, boolean activated) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, activated);
     }
 
-    public static boolean isActivated(Context context) {
+    public static boolean isGeoActivated(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED.getKey(), false);
     }
 

@@ -21,9 +21,9 @@ import java.util.List;
 
 class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private Context context;
+    private final Context context;
+    private final OnMessageExpandedListener onMessageExpandedListener;
     private List<Message> messages; // header titles
-    private OnMessageExpandedListener onMessageExpandedListener;
 
     interface OnMessageExpandedListener {
         void onMessageExpanded(Message message);
@@ -73,8 +73,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.list_item, null);
         }
 
-        TextView txtListChild = (TextView) convertView
-                .findViewById(R.id.lblListItem);
+        TextView txtListChild = (TextView) convertView.findViewById(R.id.lblListItem);
 
         try {
             txtListChild.setText(getFullMessageText(groupPosition));
@@ -123,8 +122,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.list_group, null);
         }
 
-        TextView lblListHeader = (TextView) convertView
-                .findViewById(R.id.lblListHeader);
+        TextView lblListHeader = (TextView) convertView.findViewById(R.id.lblListHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);
 

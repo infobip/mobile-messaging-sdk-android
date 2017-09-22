@@ -13,14 +13,14 @@ public class SystemData {
 
     private static final JsonSerializer serializer = new JsonSerializer(false);
 
-    private String sdkVersion;
-    private String osVersion;
-    private String deviceManufacturer;
-    private String deviceModel;
-    private String applicationVersion;
-    private boolean geofencing;
-    private boolean notificationsEnabled;
-    private boolean deviceSecure;
+    private final String sdkVersion;
+    private final String osVersion;
+    private final String deviceManufacturer;
+    private final String deviceModel;
+    private final String applicationVersion;
+    private final boolean geofencing;
+    private final boolean notificationsEnabled;
+    private final boolean deviceSecure;
 
     public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion,
                       boolean geofencing, boolean notificationsEnabled, boolean deviceSecure) {

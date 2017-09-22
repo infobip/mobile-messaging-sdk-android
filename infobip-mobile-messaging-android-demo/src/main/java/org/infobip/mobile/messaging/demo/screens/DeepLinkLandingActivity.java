@@ -41,7 +41,9 @@ public class DeepLinkLandingActivity extends AppCompatActivity {
         List<String> segments = intent.getData().getPathSegments();
         if (segments.isEmpty()) {
             Intent launcherIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-            startActivity(launcherIntent.putExtras(intent));
+            if (launcherIntent != null) {
+                startActivity(launcherIntent.putExtras(intent));
+            }
             return;
         }
 

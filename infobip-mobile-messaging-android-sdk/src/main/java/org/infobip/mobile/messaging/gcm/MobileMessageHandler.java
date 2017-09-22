@@ -19,10 +19,10 @@ import java.util.Set;
  */
 public class MobileMessageHandler {
 
-    private Broadcaster broadcaster;
-    private NotificationHandler notificationHandler;
-    private MessageStoreWrapper messageStoreWrapper;
-    private MobileMessagingCore mobileMessagingCore;
+    private final Broadcaster broadcaster;
+    private final NotificationHandler notificationHandler;
+    private final MessageStoreWrapper messageStoreWrapper;
+    private final MobileMessagingCore mobileMessagingCore;
 
     public MobileMessageHandler(MobileMessagingCore mobileMessagingCore, Broadcaster broadcaster, NotificationHandler notificationHandler, MessageStoreWrapper messageStoreWrapper) {
         this.broadcaster = broadcaster;

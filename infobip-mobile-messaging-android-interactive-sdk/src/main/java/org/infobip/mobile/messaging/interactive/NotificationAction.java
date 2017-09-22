@@ -11,12 +11,12 @@ import org.infobip.mobile.messaging.util.StringUtils;
  * Notification action class
  */
 public class NotificationAction {
-    private String id;
-    private int titleResourceId;
-    private int icon;
-    private boolean bringsAppToForeground;
-    private boolean sendsMoMessage;
-    private Integer inputLabelResourceId;
+    private final String id;
+    private final int titleResourceId;
+    private final int icon;
+    private final boolean bringsAppToForeground;
+    private final boolean sendsMoMessage;
+    private final Integer inputLabelResourceId;
     private String inputText;
 
     private NotificationAction(String id, int titleResourceId, int icon, boolean bringsAppToForeground, boolean sendsMoMessage, Integer inputLabelResourceId) {
@@ -70,7 +70,7 @@ public class NotificationAction {
     }
 
     public static final class Builder {
-        private boolean predefined;
+        private final boolean predefined;
         private String id;
         private int titleResourceId;
         private int icon;

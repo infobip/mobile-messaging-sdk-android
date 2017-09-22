@@ -214,7 +214,7 @@ public class DefaultApiClient implements ApiClient {
         UNKNOWN_API_ERROR("-3"), // apiResponse == null
         API_IO_ERROR("-4"); // Can't access URI (404?)
 
-        private String value;
+        private final String value;
 
         ErrorCode(String value) {
             this.value = value;

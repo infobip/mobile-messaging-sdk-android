@@ -10,7 +10,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
  */
 class MobileNetworkChangeHandler {
 
-    private Context context;
+    private final Context context;
 
     MobileNetworkChangeHandler(Context context) {
         this.context = context;

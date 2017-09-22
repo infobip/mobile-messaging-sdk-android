@@ -32,7 +32,7 @@ public class CustomUserDataValue {
     }
 
     private Object value;
-    private Type type;
+    private final Type type;
 
     public CustomUserDataValue(String someString) {
         this.value = someString;
@@ -54,7 +54,7 @@ public class CustomUserDataValue {
      * </p>
      * For Date type this constructor accepts "yyyy-MM-dd" representation of date (for example 2016-12-31).
      *
-     * @throws ParseException if stringValue cannot be parsed to {@code CustomUserDataValue}
+     * @throws ParseException            if stringValue cannot be parsed to {@code CustomUserDataValue}
      * @throws InvalidParameterException if provided type is invalid
      */
     public CustomUserDataValue(String stringValue, Type type) throws ParseException, InvalidParameterException {

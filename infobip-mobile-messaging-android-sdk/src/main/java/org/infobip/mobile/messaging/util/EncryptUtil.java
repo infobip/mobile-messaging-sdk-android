@@ -17,7 +17,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class EncryptUtil {
 
-    private static String AES_ALGO = "AES/ECB/PKCS5Padding";
+    private final static String AES_ALGO = "AES/ECB/PKCS5Padding";
     private static Key key = null;
 
     private static Key getKey(String algorithm, Context context) {

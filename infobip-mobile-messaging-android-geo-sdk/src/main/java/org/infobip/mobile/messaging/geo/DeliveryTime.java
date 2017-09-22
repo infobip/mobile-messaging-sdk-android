@@ -6,8 +6,8 @@ package org.infobip.mobile.messaging.geo;
  */
 
 public class DeliveryTime {
-    private String days;
-    private String timeInterval;
+    private final String days;
+    private final String timeInterval;
 
     public DeliveryTime(String days, String timeInterval) {
         this.days = days;

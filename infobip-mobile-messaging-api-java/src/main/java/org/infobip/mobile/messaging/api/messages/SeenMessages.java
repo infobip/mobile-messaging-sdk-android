@@ -26,7 +26,7 @@ public class SeenMessages {
          * Delta timestamp (now - seenTimestamp) - delta between timestamp in seconds between now (time when seen status is sent to the backend)
          * and seenTimestamp (when seen timestamp was actually recorded).
          */
-        private long timestampDelta;
+        private final long timestampDelta;
 
         /**
          * Constructs message using only the message Id, timestamp is set to current time.

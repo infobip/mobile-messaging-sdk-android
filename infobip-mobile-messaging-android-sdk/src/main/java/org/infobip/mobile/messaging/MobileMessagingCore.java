@@ -99,7 +99,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private NotificationSettings notificationSettings;
     private MessageStore messageStore;
     private MessageStoreWrapper messageStoreWrapper;
-    private Context context;
+    private final Context context;
     private volatile boolean didSyncAtLeastOnce;
 
     protected MobileMessagingCore(Context context) {
@@ -186,7 +186,7 @@ public class MobileMessagingCore extends MobileMessaging {
         return (T) geoModule;
     }
 
-    public static <T extends MessageHandlerModule> T getMessageHandlerModule(String className) {
+    <T extends MessageHandlerModule> T getMessageHandlerModule(String className) {
         if (StringUtils.isBlank(className)) {
             return null;
         }
