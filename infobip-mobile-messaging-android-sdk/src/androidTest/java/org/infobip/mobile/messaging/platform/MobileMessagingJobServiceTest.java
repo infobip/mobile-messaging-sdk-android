@@ -3,13 +3,16 @@ package org.infobip.mobile.messaging.platform;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
+import static org.infobip.mobile.messaging.platform.MobileMessagingJobService.MM_JOB_SCHEDULER_START_ID;
 import static org.infobip.mobile.messaging.platform.MobileMessagingJobService.ON_NETWORK_AVAILABLE_ID;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -39,10 +42,12 @@ public class MobileMessagingJobServiceTest {
     @Test
     public void shouldInvokeResyncWhenJobStarts() throws Exception {
         // Given
+        PackageManager packageManagerMock = Mockito.mock(PackageManager.class);
         MobileMessagingJobService givenJobService = spy(new MobileMessagingJobService(mmcMock));
+        doReturn(packageManagerMock).when(givenJobService).getPackageManager();
         doReturn(givenJobScheduler).when(givenJobService).getSystemService(eq(Context.JOB_SCHEDULER_SERVICE));
         doReturn(getClass().getPackage().getName()).when(givenJobService).getPackageName();
-        doReturn(ON_NETWORK_AVAILABLE_ID).when(givenJobParameters).getJobId();
+        doReturn(ON_NETWORK_AVAILABLE_ID + MM_JOB_SCHEDULER_START_ID).when(givenJobParameters).getJobId();
 
         // When
         givenJobService.onStartJob(givenJobParameters);

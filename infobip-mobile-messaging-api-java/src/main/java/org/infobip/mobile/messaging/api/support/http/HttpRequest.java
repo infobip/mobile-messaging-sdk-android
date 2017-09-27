@@ -22,7 +22,7 @@ public @interface HttpRequest {
 
     /**
      * A relative or absolute path, or full URL of the endpoint. This value is optional if the first
-     * parameter of the method is annotated with {@link Url @Url}.
+     * parameter of the method is annotated with @Url.
      */
     String value() default "";
 }

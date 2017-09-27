@@ -10,7 +10,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
 /**
  * Message-related mobile API.
- * <p/>
+ * <p>
  * Usage:
  * <pre>{@code
  * MobileApiMessages mobileApiMessages = new Generator.Builder().build().create(MobileApiMessages.class);

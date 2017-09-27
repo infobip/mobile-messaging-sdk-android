@@ -64,8 +64,13 @@ public abstract class MobileInteractive {
      * {@link InteractiveEvent#NOTIFICATION_ACTION_TAPPED} event.
      *
      * @param categoryId Id of the category
-     * @param action Action to use for performing default actions. One that matches the category ID
-     * @param message Message object
+     * @param action     Action to use for performing default actions. One that matches the category ID
+     * @param message    Message object
      */
     public abstract void triggerSdkActionsFor(String categoryId, NotificationAction action, Message message);
+
+    /**
+     * Cleans up MobileInteractive installation and removes custom categories.
+     */
+    public abstract void cleanup();
 }

@@ -195,6 +195,11 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         //do nothing
     }
 
+    @Override
+    public void cleanup() {
+        PreferenceHelper.remove(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES.getKey());
+    }
+
     MobileMessagingCore mobileMessagingCore(Context context) {
         if (mobileMessagingCore == null) {
             mobileMessagingCore = MobileMessagingCore.getInstance(context);

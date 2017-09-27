@@ -3,11 +3,9 @@ package org.infobip.mobile.messaging;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -62,6 +60,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 /**
  * @author sslavin
  * @since 28.04.2016.
@@ -78,6 +77,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private static DatabaseHelper databaseHelper;
     private static NotificationHandler notificationHandler;
     private static Set<MessageHandlerModule> messageHandlerModules;
+    private static MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
     private final MRetryPolicy defaultRetryPolicy;
@@ -128,16 +128,11 @@ public class MobileMessagingCore extends MobileMessaging {
             }
         }
 
-        MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
-
-        LocalBroadcastManager.getInstance(context).registerReceiver(mobileMessagingSynchronizationReceiver,
-                new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            ComponentUtil.setState(context, true, MobileMessagingConnectivityReceiver.class);
-        } else {
-            ComponentUtil.setState(context, true, MobileMessagingJobService.class);
+        if (mobileMessagingSynchronizationReceiver == null) {
+            mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
         }
+        ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
+        ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
     }
 
     /**
@@ -702,7 +697,20 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     private static void cleanup(Context context) {
+        if (messageHandlerModules != null) {
+            for (MessageHandlerModule module : messageHandlerModules) {
+                if (module != null) {
+                    module.cleanup();
+                }
+            }
+        }
+
         applicationCode = null;
+        if (mobileMessagingSynchronizationReceiver != null) {
+            ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
+            mobileMessagingSynchronizationReceiver = null;
+        }
+        ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
         resetMobileApi();
 
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
@@ -722,7 +730,6 @@ public class MobileMessagingCore extends MobileMessaging {
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
-
     }
 
     public static void resetMobileApi() {

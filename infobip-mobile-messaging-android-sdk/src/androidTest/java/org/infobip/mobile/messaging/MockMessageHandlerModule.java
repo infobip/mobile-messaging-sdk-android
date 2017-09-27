@@ -23,4 +23,9 @@ public class MockMessageHandlerModule implements MessageHandlerModule {
     public void applicationInForeground() {
 
     }
+
+    @Override
+    public void cleanup() {
+
+    }
 }

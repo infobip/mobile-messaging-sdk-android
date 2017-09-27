@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
 /**
  * Geo-related mobile API.
- * <p/>
+ * <p>
  * Usage:
  * <pre>{@code
  * MobileApiGeo mobileApiGeo = new Generator.Builder().build().create(MobileApiGeo.class);

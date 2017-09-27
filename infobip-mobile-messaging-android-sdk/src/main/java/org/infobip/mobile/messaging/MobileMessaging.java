@@ -188,12 +188,15 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
-     * Deletes SDK data related to current application code.
+     * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
      * In this case you should manually invoke cleanup() prior to {@link Builder#build()} otherwise the SDK will not
      * detect Application Code changes.
+     *
+     * @throws IllegalStateException if an app targeting Android 8.0 tries to use this method when services cannot be started - background cases
+     * (call it from the foreground to avoid this)
      */
     public abstract void cleanup();
 

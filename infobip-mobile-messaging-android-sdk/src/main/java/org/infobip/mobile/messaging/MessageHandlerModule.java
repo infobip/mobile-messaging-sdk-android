@@ -10,4 +10,6 @@ public interface MessageHandlerModule {
     void messageReceived(Message message);
 
     void applicationInForeground();
+
+    void cleanup();
 }

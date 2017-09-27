@@ -1,6 +1,11 @@
 package org.infobip.mobile.messaging.geo.geofencing;
 
+import android.annotation.TargetApi;
+import android.app.Service;
 import android.content.Context;
+import android.location.LocationManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.util.ArraySet;
 
@@ -94,6 +99,35 @@ public class GeofencingHelper {
         //active areas stop being monitored on boot and we need to re-register them
         setAllActiveGeoAreasMonitored(context, false);
         GeofencingImpl.scheduleRefresh(context);
+    }
+
+    public boolean isLocationEnabled(Context context) {
+        if (isKitKatOrAbove()) {
+            try {
+                return (isLocationModeOn(context) || isNetworkProviderAvailable(context));
+
+            } catch (Settings.SettingNotFoundException e) {
+                return isNetworkProviderAvailable(context);
+            }
+        } else {
+            return isNetworkProviderAvailable(context);
+        }
+    }
+
+    public boolean isKitKatOrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public boolean isLocationModeOn(Context context) throws Settings.SettingNotFoundException {
+        int locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+    // this method seems to be unreliable, thus using also location mode from device settings for >= 4.4
+    public boolean isNetworkProviderAvailable(Context context) {
+        final LocationManager lm = (LocationManager) context.getSystemService(Service.LOCATION_SERVICE);
+        return lm != null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     public static Set<String> getFinishedCampaignIds(Context context) {

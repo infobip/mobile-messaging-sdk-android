@@ -44,7 +44,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         }
 
         for (MessageHandlerModule module : messageHandlerModules) {
-            if (module != null) {
+            if (module != null && MobileMessagingCore.getApplicationCode(context) != null) {
                 module.applicationInForeground();
             }
         }
