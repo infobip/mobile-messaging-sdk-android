@@ -7,14 +7,15 @@ import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import static org.infobip.mobile.messaging.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
+import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
 
 /**
  * Service that handles scheduled jobs
@@ -27,10 +28,6 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 public class MobileMessagingJobService extends JobService {
 
     private static final String TAG = MobileMessagingJobService.class.getSimpleName();
-    protected static final String MM_JOB_SCHEDULER_START_KEY = MobileMessagingJobService.class.getCanonicalName();
-    protected static final int MM_JOB_SCHEDULER_START_ID = 7000000;
-    protected static final int ON_NETWORK_AVAILABLE_ID = 1;
-    private static Integer jobSchedulerStartId;
 
     private MobileMessagingCore mobileMessagingCore;
 
@@ -45,7 +42,7 @@ public class MobileMessagingJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        int connectivityScheduleId = getScheduleId(this, ON_NETWORK_AVAILABLE_ID);
+        int connectivityScheduleId = getScheduleId(this, ON_NETWORK_AVAILABLE_JOB_ID);
         if (params.getJobId() == connectivityScheduleId) {
             MobileMessagingLogger.d(TAG, "Network available");
             mobileMessagingCore().retrySync();
@@ -70,35 +67,6 @@ public class MobileMessagingJobService extends JobService {
         registerForNetworkAvailability(context);
     }
 
-    /**
-     * Gets schedule ID that's used as job ID for scheduling jobs with {@link JobScheduler}.
-     * <p>
-     * Schedule ID is a sum of {@link #MM_JOB_SCHEDULER_START_ID} and particular job ID. {@link #MM_JOB_SCHEDULER_START_ID} might be
-     * overridden with the value under {@link #MM_JOB_SCHEDULER_START_KEY} key in meta data in AndroidManifest.
-     *
-     * @param context Android context object
-     * @param jobId   Predefined job ID
-     * @return Schedule ID
-     */
-    public static int getScheduleId(Context context, int jobId) {
-        if (jobSchedulerStartId == null) {
-            ApplicationInfo ai = null;
-            try {
-                ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            } catch (PackageManager.NameNotFoundException e) {
-                MobileMessagingLogger.e("Failed to get application info.");
-            }
-
-            if (ai != null && ai.metaData != null) {
-                jobSchedulerStartId = ai.metaData.getInt(MM_JOB_SCHEDULER_START_KEY, MM_JOB_SCHEDULER_START_ID);
-            } else {
-                jobSchedulerStartId = MM_JOB_SCHEDULER_START_ID;
-            }
-        }
-
-        return jobSchedulerStartId + jobId;
-    }
-
     //region Private methods
     @NonNull
     private MobileMessagingCore mobileMessagingCore() {
@@ -114,7 +82,7 @@ public class MobileMessagingJobService extends JobService {
             return;
         }
 
-        int scheduleId = getScheduleId(context, ON_NETWORK_AVAILABLE_ID);
+        int scheduleId = getScheduleId(context, ON_NETWORK_AVAILABLE_JOB_ID);
 
         jobScheduler.cancel(scheduleId);
 

@@ -25,7 +25,7 @@ abstract class ColoredScreenActivity extends AppCompatActivity {
         layout.setBackgroundColor(getBackgroundColor());
 
         Message message = Message.createFrom(getIntent().getExtras());
-        TextView tv = (TextView) findViewById(R.id.tv_text);
+        TextView tv = findViewById(R.id.tv_text);
         if (message != null) {
             tv.setText(message.getBody());
         } else {

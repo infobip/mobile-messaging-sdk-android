@@ -274,11 +274,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        totalReceivedTextView = (TextView) findViewById(R.id.totalReceivedTextView);
-        ExpandableListView messagesListView = (ExpandableListView) findViewById(R.id.messagesListView);
+        totalReceivedTextView = findViewById(R.id.totalReceivedTextView);
+        ExpandableListView messagesListView = findViewById(R.id.messagesListView);
         assert messagesListView != null;
         listAdapter = new ExpandableListAdapter(this, onMessageExpandedListener);
         messagesListView.setAdapter(listAdapter);

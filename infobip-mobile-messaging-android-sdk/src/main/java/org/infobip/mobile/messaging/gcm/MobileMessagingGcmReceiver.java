@@ -36,7 +36,7 @@ public class MobileMessagingGcmReceiver extends GcmReceiver {
 
         Intent service = new Intent(MobileMessagingGcmIntentService.ACTION_GCM_MESSAGE_RECEIVE, null, context, MobileMessagingGcmIntentService.class);
         service.putExtras(intent);
-        context.startService(service);
+        MobileMessagingGcmIntentService.enqueueWork(context, intent);
 
         if (isOrderedBroadcast()) {
             abortBroadcast();

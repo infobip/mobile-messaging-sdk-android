@@ -1,6 +1,8 @@
 package org.infobip.mobile.messaging;
 
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -69,6 +71,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
 
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
@@ -133,6 +136,24 @@ public class MobileMessagingCore extends MobileMessaging {
         }
         ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
+        initDefaultChannel(context);
+    }
+
+    private void initDefaultChannel(Context context) {
+        if (Build.VERSION.SDK_INT < 26) {
+            return;
+        }
+        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null) {
+            return;
+        }
+
+        final CharSequence channelName = SoftwareInformation.getAppName(context);
+        final int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        final NotificationChannel notificationChannel = new NotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, importance);
+        notificationChannel.enableLights(true);
+        notificationChannel.enableVibration(true);
+        notificationManager.createNotificationChannel(notificationChannel);
     }
 
     /**
@@ -717,7 +738,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
         Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
         intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
-        context.startService(intent);
+        MobileMessagingGcmIntentService.enqueueWork(context, intent);
 
         PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);

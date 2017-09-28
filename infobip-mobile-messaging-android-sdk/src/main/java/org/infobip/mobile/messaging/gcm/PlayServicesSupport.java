@@ -66,7 +66,7 @@ public class PlayServicesSupport {
         // Start IntentService to register this application with GCM.
         Intent intent = new Intent(context, MobileMessagingGcmIntentService.class);
         intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
-        context.startService(intent);
+        MobileMessagingGcmIntentService.enqueueWork(context, intent);
     }
 
     public static boolean isPlayServicesAvailable(Context context) {

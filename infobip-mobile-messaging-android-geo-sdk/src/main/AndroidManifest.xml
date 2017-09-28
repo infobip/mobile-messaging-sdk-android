@@ -8,10 +8,17 @@
 
     <application>
 
-        <!--Service that triggers when geofence area is entered-->
+        <!--Service that's triggered by GeofenceTransitionsReceiver when geofence area is entered-->
         <service
             android:name="org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
             android:enabled="false" />
+
+        <!--Receiver that triggers when geofence area is entered-->
+        <receiver
+            android:name="org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsReceiver"
+            android:enabled="false">
+        </receiver>
 
         <receiver
             android:name="org.infobip.mobile.messaging.geo.BootReceiver"
@@ -21,6 +28,12 @@
             </intent-filter>
         </receiver>
 
+
+        <!--Service that's triggered by GeofencingConsistencyReceiver when consistency of geo monitoring needs to be maintained-->
+        <service
+            android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyIntentService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:enabled="false" />
         <receiver
             android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver"
             android:enabled="false">

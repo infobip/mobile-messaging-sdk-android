@@ -194,9 +194,6 @@ public abstract class MobileMessaging {
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
      * In this case you should manually invoke cleanup() prior to {@link Builder#build()} otherwise the SDK will not
      * detect Application Code changes.
-     *
-     * @throws IllegalStateException if an app targeting Android 8.0 tries to use this method when services cannot be started - background cases
-     * (call it from the foreground to avoid this)
      */
     public abstract void cleanup();
 

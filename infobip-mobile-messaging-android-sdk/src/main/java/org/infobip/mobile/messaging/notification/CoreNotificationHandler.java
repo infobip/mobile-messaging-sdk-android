@@ -102,7 +102,7 @@ public class CoreNotificationHandler implements NotificationHandler {
         if (notificationSettings == null) return null;
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, MobileMessagingCore.MM_DEFAULT_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())

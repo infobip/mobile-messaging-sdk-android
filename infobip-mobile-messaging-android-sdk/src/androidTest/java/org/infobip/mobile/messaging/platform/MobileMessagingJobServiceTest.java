@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import static org.infobip.mobile.messaging.platform.MobileMessagingJobService.MM_JOB_SCHEDULER_START_ID;
-import static org.infobip.mobile.messaging.platform.MobileMessagingJobService.ON_NETWORK_AVAILABLE_ID;
+import static org.infobip.mobile.messaging.MobileMessagingJob.MM_JOB_SCHEDULER_START_ID;
+import static org.infobip.mobile.messaging.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -47,7 +47,7 @@ public class MobileMessagingJobServiceTest {
         doReturn(packageManagerMock).when(givenJobService).getPackageManager();
         doReturn(givenJobScheduler).when(givenJobService).getSystemService(eq(Context.JOB_SCHEDULER_SERVICE));
         doReturn(getClass().getPackage().getName()).when(givenJobService).getPackageName();
-        doReturn(ON_NETWORK_AVAILABLE_ID + MM_JOB_SCHEDULER_START_ID).when(givenJobParameters).getJobId();
+        doReturn(ON_NETWORK_AVAILABLE_JOB_ID + MM_JOB_SCHEDULER_START_ID).when(givenJobParameters).getJobId();
 
         // When
         givenJobService.onStartJob(givenJobParameters);

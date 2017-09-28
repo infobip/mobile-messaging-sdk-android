@@ -16,6 +16,6 @@ public class MobileMessagingInstanceIDListenerService extends InstanceIDListener
 
         Intent intent = new Intent(this, MobileMessagingGcmIntentService.class);
         intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
-        startService(intent);
+        MobileMessagingGcmIntentService.enqueueWork(this, intent);
     }
 }

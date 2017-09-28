@@ -32,10 +32,12 @@ import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.BootReceiver;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoEnabledConsistencyReceiver;
+import org.infobip.mobile.messaging.geo.GeofencingConsistencyIntentService;
 import org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver;
 import org.infobip.mobile.messaging.geo.mapper.GeoDataMapper;
 import org.infobip.mobile.messaging.geo.storage.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService;
+import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsReceiver;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ComponentUtil;
@@ -318,8 +320,10 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
 
     @Override
     public void setGeoComponentsEnabledSettings(Context context, boolean componentsStateEnabled) {
+        ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsReceiver.class);
         ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsIntentService.class);
         ComponentUtil.setState(context, componentsStateEnabled, GeofencingConsistencyReceiver.class);
+        ComponentUtil.setState(context, componentsStateEnabled, GeofencingConsistencyIntentService.class);
         ComponentUtil.setState(context, componentsStateEnabled, BootReceiver.class);
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
@@ -372,8 +376,8 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
 
     private PendingIntent geofencePendingIntent() {
         if (geofencePendingIntent == null) {
-            Intent intent = new Intent(context, GeofenceTransitionsIntentService.class);
-            geofencePendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(context, GeofenceTransitionsReceiver.class);
+            geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         return geofencePendingIntent;

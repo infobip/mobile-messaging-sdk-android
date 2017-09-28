@@ -1,7 +1,9 @@
 package org.infobip.mobile.messaging.gcm;
 
-import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.gcm.GcmListenerService;
@@ -15,6 +17,9 @@ import org.infobip.mobile.messaging.dal.bundle.FCMMessageMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+
+import static org.infobip.mobile.messaging.MobileMessagingJob.GCM_INTENT_JOB_ID;
+import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
 
 /**
  * MobileMessagingGcmIntentService processes GCM push notifications. To be able to use it you must register it as a receiver in AndroidManifest.xml
@@ -160,7 +165,7 @@ import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
  * @see LocalBroadcastManager
  * @since 21.03.2016.
  */
-public class MobileMessagingGcmIntentService extends IntentService {
+public class MobileMessagingGcmIntentService extends JobIntentService {
     public static final String ACTION_GCM_MESSAGE_RECEIVE = "com.google.android.c2dm.intent.RECEIVE";
     public static final String ACTION_ACQUIRE_INSTANCE_ID = "org.infobip.mobile.messaging.gcm.INSTANCE_ID";
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
@@ -169,15 +174,15 @@ public class MobileMessagingGcmIntentService extends IntentService {
     private final RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
     private MobileMessageHandler mobileMessageHandler;
 
-    public MobileMessagingGcmIntentService() {
-        super(MobileMessagingLogger.TAG + "-" + MobileMessagingGcmIntentService.class.getSimpleName());
+    /**
+     * Convenience method for enqueuing work in to this service.
+     */
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, MobileMessagingGcmIntentService.class, getScheduleId(context, GCM_INTENT_JOB_ID), work);
     }
 
     @Override
-    public void onHandleIntent(Intent intent) {
-        if (intent == null) {
-            return;
-        }
+    protected void onHandleWork(@NonNull Intent intent) {
 
         String action = intent.getAction();
         if (action == null) {

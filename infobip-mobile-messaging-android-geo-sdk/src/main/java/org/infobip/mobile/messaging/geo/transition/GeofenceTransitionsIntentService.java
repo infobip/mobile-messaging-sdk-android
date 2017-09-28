@@ -1,19 +1,26 @@
 package org.infobip.mobile.messaging.geo.transition;
 
-import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
 
-public class GeofenceTransitionsIntentService extends IntentService {
+import static org.infobip.mobile.messaging.MobileMessagingJob.GEO_TRANSITION_JOB_ID;
+import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
 
+public class GeofenceTransitionsIntentService extends JobIntentService {
 
-    public GeofenceTransitionsIntentService() {
-        super(GeofenceTransitionsIntentService.class.getSimpleName());
+    /**
+     * Convenience method for enqueuing work in to this service.
+     */
+    public static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, GeofenceTransitionsIntentService.class, getScheduleId(context, GEO_TRANSITION_JOB_ID), work);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleWork(@NonNull Intent intent) {
         final GeoAreasHandler geoAreasHandler = new GeoAreasHandler(this, new AndroidGeoBroadcaster(this));
         geoAreasHandler.handleTransition(intent);
     }
