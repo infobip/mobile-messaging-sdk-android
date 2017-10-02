@@ -89,4 +89,8 @@ afterReleaseBuild.dependsOn updateVersionInReadme
 
 release {
     buildTasks = ['clean', 'build', 'bintrayUpload']
+    git {
+        requireBranch = ''
+        pushToRemote = 'origin'
+    }
 }
