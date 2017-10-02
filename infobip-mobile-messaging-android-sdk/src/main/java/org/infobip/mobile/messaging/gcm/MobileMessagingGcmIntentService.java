@@ -162,6 +162,7 @@ import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
  */
 public class MobileMessagingGcmIntentService extends IntentService {
     public static final String ACTION_GCM_MESSAGE_RECEIVE = "com.google.android.c2dm.intent.RECEIVE";
+    public static final String ACTION_FCM_MESSAGE_RECEIVE = "com.google.firebase.MESSAGING_EVENT";
     public static final String ACTION_ACQUIRE_INSTANCE_ID = "org.infobip.mobile.messaging.gcm.INSTANCE_ID";
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
@@ -197,6 +198,10 @@ public class MobileMessagingGcmIntentService extends IntentService {
 
             case ACTION_ACQUIRE_INSTANCE_ID:
                 registrationTokenHandler.handleRegistrationTokenUpdate(this);
+                break;
+
+            case ACTION_FCM_MESSAGE_RECEIVE:
+                MobileMessagingLogger.v("Received message event from Firebase SDK, ignoring to avoid duplicate notifications");
                 break;
         }
     }
