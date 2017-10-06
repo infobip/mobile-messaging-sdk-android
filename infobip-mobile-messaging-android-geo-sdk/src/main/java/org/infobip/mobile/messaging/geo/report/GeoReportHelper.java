@@ -189,7 +189,7 @@ public class GeoReportHelper {
                 originalMessage.getFrom(),
                 Time.now(),
                 0,
-                originalMessage.getSentTimestamp(),
+                Time.now(),
                 originalMessage.getCustomPayload(),
                 internalData,
                 originalMessage.getDestination(),
