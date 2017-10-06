@@ -11,8 +11,6 @@ import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.util.Set;
-
 /**
  * @author mstipanov
  * @since 14.04.2016.
@@ -47,31 +45,21 @@ public class MobileMessageHandler {
         }
 
         message.setReceivedTimestamp(Time.now());
-
         sendDeliveryReport(message);
-        dispatchMessageReceivedEvent(message);
 
-        if (!MobileMessagingCore.hasGeo(message)) {
-            saveMessage(message);
-            broadcaster.messageReceived(message);
+        for (MessageHandlerModule handler : mobileMessagingCore.getMessageHandlerModules()) {
+            MobileMessagingLogger.d("Dispatching message to " + handler.getClass().getName());
+            if (handler.handleMessage(message)) {
+                return;
+            }
         }
+
+        saveMessage(message);
+        broadcaster.messageReceived(message);
 
         MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
             notificationHandler.displayNotification(message);
-        }
-    }
-
-    private void dispatchMessageReceivedEvent(Message message) {
-        Set<MessageHandlerModule> messageHandlerModules = mobileMessagingCore.getMessageHandlerModules();
-        if (messageHandlerModules == null) {
-            return;
-        }
-
-        for (MessageHandlerModule module : messageHandlerModules) {
-            if (module != null) {
-                module.messageReceived(message);
-            }
         }
     }
 

@@ -9,7 +9,7 @@ import android.os.Bundle;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * @author sslavin
@@ -38,7 +38,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     }
 
     private static void dispatchAppInForegroundEvent(Context context) {
-        Set<MessageHandlerModule> messageHandlerModules = MobileMessagingCore.getInstance(context).getMessageHandlerModules();
+        Collection<MessageHandlerModule> messageHandlerModules = MobileMessagingCore.getInstance(context).getMessageHandlerModules();
         if (messageHandlerModules == null) {
             return;
         }

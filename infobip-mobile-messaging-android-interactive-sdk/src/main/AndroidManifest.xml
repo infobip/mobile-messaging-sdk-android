@@ -5,6 +5,14 @@
 
         <receiver android:name="org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver" />
 
+        <meta-data
+            android:name="org.infobip.mobile.messaging.interactive.MobileInteractiveImpl"
+            android:value="org.infobip.mobile.messaging.MessageHandlerModule" />
+
+        <meta-data
+            android:name="org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler"
+            android:value="org.infobip.mobile.messaging.notification.NotificationHandler" />
+
     </application>
 
 </manifest>

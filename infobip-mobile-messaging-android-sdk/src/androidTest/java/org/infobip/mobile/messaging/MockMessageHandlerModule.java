@@ -10,13 +10,13 @@ import android.content.Context;
 public class MockMessageHandlerModule implements MessageHandlerModule {
 
     @Override
-    public void setContext(Context appContext) {
+    public void init(Context appContext) {
 
     }
 
     @Override
-    public void messageReceived(Message message) {
-
+    public boolean handleMessage(Message message) {
+        return false;
     }
 
     @Override

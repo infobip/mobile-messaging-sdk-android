@@ -48,7 +48,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
             return instance;
         }
 
-        instance = MobileMessagingCore.getInstance(context).getInteractiveMessageHandlerModule();
+        instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(MobileInteractiveImpl.class);
         return instance;
     }
 
@@ -181,13 +181,13 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     }
 
     @Override
-    public void setContext(Context appContext) {
+    public void init(Context appContext) {
         this.context = appContext;
     }
 
     @Override
-    public void messageReceived(Message message) {
-        //do nothing
+    public boolean handleMessage(Message message) {
+        return false;
     }
 
     @Override
@@ -200,7 +200,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         PreferenceHelper.remove(context, MobileMessagingProperty.INTERACTIVE_CATEGORIES.getKey());
     }
 
-    MobileMessagingCore mobileMessagingCore(Context context) {
+    private MobileMessagingCore mobileMessagingCore(Context context) {
         if (mobileMessagingCore == null) {
             mobileMessagingCore = MobileMessagingCore.getInstance(context);
         }

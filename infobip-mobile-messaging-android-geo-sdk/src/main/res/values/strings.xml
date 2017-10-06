@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="mm_module_geo__class_name">org.infobip.mobile.messaging.geo.MobileGeoImpl</string>
-</resources>

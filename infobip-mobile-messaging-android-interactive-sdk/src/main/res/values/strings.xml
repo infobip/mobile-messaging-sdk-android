@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="mm_module_interactive__class_name">org.infobip.mobile.messaging.interactive.MobileInteractiveImpl</string>
-    <string name="mm_interactive_notification_handler__class_name">org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler</string>
-
     <string name="mm_button_accept">Accept</string>
     <string name="mm_button_decline">Decline</string>
 </resources>

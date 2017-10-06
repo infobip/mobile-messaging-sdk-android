@@ -29,10 +29,15 @@ public class MessageHandlerModuleTest {
     @Test
     public void should_return_null_when_invalid_classname_provided() throws InterruptedException {
         // Given
-        String givenClassName = "some_invalid_class_name";
+        class UnknownModule implements MessageHandlerModule {
+            public void init(Context appContext) {}
+            public boolean handleMessage(Message message) {return false;}
+            public void applicationInForeground() {}
+            public void cleanup() {}
+        }
 
         // When
-        MessageHandlerModule messageHandlerModule = MobileMessagingCore.getInstance(context).getMessageHandlerModule(givenClassName);
+        MessageHandlerModule messageHandlerModule = MobileMessagingCore.getInstance(context).getMessageHandlerModule(UnknownModule.class);
 
         // Then
         assertNull(messageHandlerModule);
@@ -40,11 +45,8 @@ public class MessageHandlerModuleTest {
 
     @Test
     public void should_return_module_when_valid_classname_provided() throws InterruptedException {
-        // Given
-        String givenClassName = MockMessageHandlerModule.class.getCanonicalName();
-
         // When
-        MessageHandlerModule messageHandlerModule = MobileMessagingCore.getInstance(context).getMessageHandlerModule(givenClassName);
+        MessageHandlerModule messageHandlerModule = MobileMessagingCore.getInstance(context).getMessageHandlerModule(MockMessageHandlerModule.class);
 
         // Then
         assertNotNull(messageHandlerModule);

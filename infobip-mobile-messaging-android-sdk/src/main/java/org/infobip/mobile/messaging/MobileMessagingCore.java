@@ -43,17 +43,16 @@ import org.infobip.mobile.messaging.util.ComponentUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
+import org.infobip.mobile.messaging.util.ModuleLoader;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,17 +77,13 @@ public class MobileMessagingCore extends MobileMessaging {
     static String applicationCode;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
-    private static NotificationHandler notificationHandler;
-    private static Set<MessageHandlerModule> messageHandlerModules;
     private static MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
     private final MRetryPolicy defaultRetryPolicy;
     private final Broadcaster broadcaster;
-    private static String interactiveModuleClassName;
-    private static String geoModuleClassName;
-    private static MessageHandlerModule geoModule;
-    private static MessageHandlerModule interactiveModule;
+    private final ModuleLoader moduleLoader;
+    private NotificationHandler notificationHandler;
     private RegistrationSynchronizer registrationSynchronizer;
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
@@ -103,13 +98,14 @@ public class MobileMessagingCore extends MobileMessaging {
     private MessageStore messageStore;
     private MessageStoreWrapper messageStoreWrapper;
     private final Context context;
+    private Map<String, MessageHandlerModule> messageHandlerModules;
     private volatile boolean didSyncAtLeastOnce;
 
     protected MobileMessagingCore(Context context) {
-        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor());
+        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context));
     }
 
-    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor) {
+    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor, ModuleLoader moduleLoader) {
         MobileMessagingLogger.init(context);
 
         this.context = context;
@@ -117,29 +113,21 @@ public class MobileMessagingCore extends MobileMessaging {
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
         this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
-
-        notificationHandler = getNotificationHandler();
-
-        interactiveModuleClassName = ResourceLoader.loadStringResourceByName(context, "mm_module_interactive__class_name");
-        geoModuleClassName = ResourceLoader.loadStringResourceByName(context, "mm_module_geo__class_name");
-        messageHandlerModules = getMessageHandlerModules();
-        if (messageHandlerModules != null) {
-            for (MessageHandlerModule module : messageHandlerModules) {
-                if (module != null) {
-                    module.setContext(context);
-                }
-            }
-        }
+        this.moduleLoader = moduleLoader;
+        this.notificationHandler = loadNotificationHandler();
+        this.messageHandlerModules = loadMessageHandlerModules();
 
         if (mobileMessagingSynchronizationReceiver == null) {
             mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
         }
+
         ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
-        initDefaultChannel(context);
+
+        initDefaultChannel();
     }
 
-    private void initDefaultChannel(Context context) {
+    private void initDefaultChannel() {
         if (Build.VERSION.SDK_INT < 26) {
             return;
         }
@@ -167,60 +155,52 @@ public class MobileMessagingCore extends MobileMessaging {
      */
     public static MobileMessagingCore getInstance(Context context) {
         if (instance == null) {
-            instance = new MobileMessagingCore(context.getApplicationContext());
+            synchronized (MobileMessagingCore.class) {
+                if (instance == null) {
+                    instance = new MobileMessagingCore(context.getApplicationContext());
+                }
+            }
         }
         return instance;
     }
 
-    public Set<MessageHandlerModule> getMessageHandlerModules() {
-        if (messageHandlerModules == null) {
-            messageHandlerModules = new HashSet<>();
-            MessageHandlerModule interactiveMessageHandlerModule = getInteractiveMessageHandlerModule();
-            MessageHandlerModule geoMessageHandlerModule = getGeoMessageHandlerModule();
-
-            if (interactiveMessageHandlerModule != null) {
-                messageHandlerModules.add(interactiveMessageHandlerModule);
-            }
-            if (geoMessageHandlerModule != null) {
-                messageHandlerModules.add(geoMessageHandlerModule);
-            }
-        }
-        return messageHandlerModules;
+    public Collection<MessageHandlerModule> getMessageHandlerModules() {
+        return messageHandlerModules.values();
     }
 
-    public <T extends MessageHandlerModule> T getInteractiveMessageHandlerModule() {
-        if (interactiveModule == null) {
-            interactiveModule = getMessageHandlerModule(interactiveModuleClassName);
+    public <T extends MessageHandlerModule> T getMessageHandlerModule(Class<? extends MessageHandlerModule> cls) {
+        if (messageHandlerModules.containsKey(cls.getName())) {
+            //noinspection unchecked
+            return (T) messageHandlerModules.get(cls.getName());
         }
-        return (T) interactiveModule;
+
+        //noinspection unchecked
+        T module = (T) moduleLoader.createModule(cls);
+        if (module != null) {
+            module.init(context);
+            messageHandlerModules.put(cls.getName(), module);
+        }
+        return module;
     }
 
-    public <T extends MessageHandlerModule> T getGeoMessageHandlerModule() {
-        if (geoModule == null) {
-            geoModule = getMessageHandlerModule(geoModuleClassName);
+    private Map<String, MessageHandlerModule> loadMessageHandlerModules() {
+        Map<String, MessageHandlerModule> modules = moduleLoader.loadModules(MessageHandlerModule.class);
+        for (MessageHandlerModule module : modules.values()) {
+            module.init(context);
         }
-        return (T) geoModule;
+        return modules;
     }
 
-    <T extends MessageHandlerModule> T getMessageHandlerModule(String className) {
-        if (StringUtils.isBlank(className)) {
-            return null;
+    private NotificationHandler loadNotificationHandler() {
+        Map<String, NotificationHandler> handlers = moduleLoader.loadModules(NotificationHandler.class);
+        NotificationHandler handler;
+        if (!handlers.isEmpty()) {
+            handler = handlers.values().iterator().next();
+        } else {
+            handler = new CoreNotificationHandler();
         }
-        try {
-            Class<? extends MessageHandlerModule> messageHandlerModuleClass = (Class<? extends MessageHandlerModule>) Class.forName(className);
-            if (messageHandlerModuleClass == null) {
-                return null;
-            }
-
-            try {
-                return (T) messageHandlerModuleClass.newInstance();
-            } catch (Exception e) {
-                return null;
-            }
-
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+        handler.setContext(context);
+        return handler;
     }
 
     public static DatabaseHelper getDatabaseHelper(Context context) {
@@ -270,29 +250,6 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     public NotificationHandler getNotificationHandler() {
-        if (notificationHandler == null) {
-            String notificationHandlerClassName = ResourceLoader.loadStringResourceByName(context, "mm_interactive_notification_handler__class_name");
-            notificationHandler = getNotificationHandler(notificationHandlerClassName);
-        }
-        return notificationHandler;
-    }
-
-    NotificationHandler getNotificationHandler(String className) {
-        if (StringUtils.isBlank(className)) {
-            notificationHandler = new CoreNotificationHandler();
-            notificationHandler.setContext(context);
-            return notificationHandler;
-        }
-
-        try {
-            Class<?> c = Class.forName(className);
-            Object resolvedNotificationHandler = c.getConstructor().newInstance();
-            notificationHandler = (NotificationHandler) resolvedNotificationHandler;
-        } catch (Exception e) {
-            notificationHandler = new CoreNotificationHandler();
-        }
-        notificationHandler.setContext(context);
-
         return notificationHandler;
     }
 
@@ -718,11 +675,9 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     private static void cleanup(Context context) {
-        if (messageHandlerModules != null) {
-            for (MessageHandlerModule module : messageHandlerModules) {
-                if (module != null) {
-                    module.cleanup();
-                }
+        if (instance != null) {
+            for (MessageHandlerModule module : instance.messageHandlerModules.values()) {
+                module.cleanup();
             }
         }
 
@@ -894,20 +849,6 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static String getApplicationCodeProviderClassName(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME);
-    }
-
-    public static boolean hasGeo(Message message) {
-        if (message == null || message.getInternalData() == null) {
-            return false;
-        }
-
-        try {
-            JSONObject geo = new JSONObject(message.getInternalData());
-            return geo.getJSONArray("geo") != null && geo.getJSONArray("geo").length() > 0;
-        } catch (JSONException e) {
-            MobileMessagingLogger.e(e.getMessage());
-            return false;
-        }
     }
 
     public void saveUnreportedUserData(UserData userData) {
@@ -1090,7 +1031,9 @@ public class MobileMessagingCore extends MobileMessaging {
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
-            MobileMessagingCore.instance = mobileMessagingCore;
+            synchronized (MobileMessagingCore.class) {
+                MobileMessagingCore.instance = mobileMessagingCore;
+            }
             return mobileMessagingCore;
         }
     }

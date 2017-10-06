@@ -8,7 +8,10 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.geo.geofencing.Geofencing;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.push.PushMessageHandler;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
@@ -18,7 +21,7 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
     public static MobileGeoImpl getInstance(Context context) {
         if (instance == null) {
-            instance = MobileMessagingCore.getInstance(context).getGeoMessageHandlerModule();
+            instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(MobileGeoImpl.class);
         }
         return instance;
     }
@@ -74,16 +77,19 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
     }
 
     @Override
-    public void setContext(Context appContext) {
+    public void init(Context appContext) {
         this.context = appContext;
     }
 
     @Override
-    public void messageReceived(Message message) {
-        if (MobileMessagingCore.hasGeo(message)) {
-            PushMessageHandler pushMessageHandler = new PushMessageHandler();
-            pushMessageHandler.handleGeoMessage(context, message);
+    public boolean handleMessage(Message message) {
+        if (!hasGeo(message)) {
+            return false;
         }
+
+        PushMessageHandler pushMessageHandler = new PushMessageHandler();
+        pushMessageHandler.handleGeoMessage(context, message);
+        return true;
     }
 
     @Override
@@ -91,4 +97,19 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
         GeoReportSynchronization geoReportSynchronization = new GeoReportSynchronization(context);
         geoReportSynchronization.synchronize();
     }
+
+    private static boolean hasGeo(Message message) {
+        if (message == null || message.getInternalData() == null) {
+            return false;
+        }
+
+        try {
+            JSONObject geo = new JSONObject(message.getInternalData());
+            return geo.getJSONArray("geo") != null && geo.getJSONArray("geo").length() > 0;
+        } catch (JSONException e) {
+            MobileMessagingLogger.e(e.getMessage());
+            return false;
+        }
+    }
+
 }

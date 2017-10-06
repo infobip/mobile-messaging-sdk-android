@@ -47,7 +47,9 @@ dependencies {
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.nanohttpd:nanohttpd:2.1.0'
-    androidTestCompile 'org.skyscreamer:jsonassert:1.3.0'
+    androidTestCompile('org.skyscreamer:jsonassert:1.3.0') {
+        exclude group: 'org.json', module: 'json'
+    }
 
     testCompile project(':infobip-mobile-messaging-android-test')
 }
@@ -86,7 +88,7 @@ bintray {
         repo = 'maven'
         name = project.name
         userOrg = 'infobip'
-        vcsUrl = "https://git.ib-ci.com/projects/MML/repos/infobip-mobile-messaging-android/browse"
+        vcsUrl = "https://github.com/infobip/mobile-messaging-sdk-android"
         licenses = ['Apache-2.0']
         labels = ['aar', 'android']
     }

@@ -101,6 +101,6 @@ bintray {
         name = 'infobip-mobile-messaging-api-java'
         userOrg = 'infobip'
         licenses = ['Apache-2.0']
-        vcsUrl = "https://git.ib-ci.com/projects/MML/repos/infobip-mobile-messaging-android/browse"
+        vcsUrl = "https://github.com/infobip/mobile-messaging-sdk-android"
     }
 }
