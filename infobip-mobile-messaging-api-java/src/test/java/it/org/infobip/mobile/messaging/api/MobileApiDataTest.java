@@ -93,7 +93,7 @@ public class MobileApiDataTest {
         UserDataReport response = mobileApiData.reportUserData("myExternalUserId", null);
 
         //inspect http context
-        assertEquals("/mobile/4/data/user", debugServer.getUri());
+        assertEquals("/mobile/5/data/user", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(1, debugServer.getQueryParametersCount());

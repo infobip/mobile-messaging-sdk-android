@@ -4,12 +4,17 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
+import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationExceptionWithContent;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterExceptionWithContent;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -20,6 +25,14 @@ import java.util.concurrent.Executor;
  * @since 23/07/2017.
  */
 public abstract class MAsyncTask<IN, OUT> {
+
+    private final static Set<String> invalidParameterErrorCodes = new HashSet<String>() {{
+        add(ApiErrorCode.INVALID_MSISDN_FORMAT);
+        add(ApiErrorCode.INVALID_VALUE);
+        add(ApiErrorCode.INVALID_EMAIL_FORMAT);
+        add(ApiErrorCode.INVALID_BIRTHDATE_FORMAT);
+        add(ApiErrorCode.INVALID_TELEPHONE_FORMAT);
+    }};
 
     @SuppressLint("StaticFieldLeak")
     private final AsyncTask<IN, Void, ResultWrapper<IN, OUT>> asyncTask = new AsyncTask<IN, Void, ResultWrapper<IN, OUT>>() {
@@ -44,22 +57,9 @@ public abstract class MAsyncTask<IN, OUT> {
                 return;
             }
 
-            if (isInvalidParameterError(resultWrapper.error)) {
-                Throwable error = new BackendInvalidParameterException(resultWrapper.error.getMessage(), (ApiIOException) resultWrapper.error);
-                error(error);
-                error(resultWrapper.inputs, error);
-                return;
-            }
-
-            if (isBackendError(resultWrapper.error)) {
-                Throwable error = new BackendCommunicationException(resultWrapper.error.getMessage(), (ApiIOException) resultWrapper.error);
-                error(error);
-                error(resultWrapper.inputs, error);
-                return;
-            }
-
-            error(resultWrapper.error);
-            error(resultWrapper.inputs, resultWrapper.error);
+            Throwable error = backendErrorToTaskError(resultWrapper.error);
+            error(error);
+            error(resultWrapper.inputs, error);
         }
     };
 
@@ -128,6 +128,28 @@ public abstract class MAsyncTask<IN, OUT> {
         asyncTask.executeOnExecutor(executor, ins);
     }
 
+    // region private methods
+
+    private static Throwable backendErrorToTaskError(Throwable originalError) {
+        if (isInvalidParameterErrorWithContent(originalError)) {
+            return new BackendInvalidParameterExceptionWithContent(originalError.getMessage(), (ApiBackendExceptionWithContent) originalError);
+        }
+
+        if (isErrorWithContent(originalError)) {
+            return new BackendCommunicationExceptionWithContent(originalError.getMessage(), (ApiBackendExceptionWithContent) originalError);
+        }
+
+        if (isInvalidParameterError(originalError)) {
+            return new BackendInvalidParameterException(originalError.getMessage(), (ApiIOException) originalError);
+        }
+
+        if (isBackendError(originalError)) {
+            return new BackendCommunicationException(originalError.getMessage(), (ApiIOException) originalError);
+        }
+
+        return originalError;
+    }
+
     private static boolean isBackendError(@NonNull Throwable error) {
         if (!(error instanceof ApiIOException)) {
             return false;
@@ -143,7 +165,16 @@ public abstract class MAsyncTask<IN, OUT> {
         }
 
         String code = ((ApiIOException) error).getCode();
-        return ApiErrorCode.INVALID_MSISDN_FORMAT.equals(code) ||
-                ApiErrorCode.INVALID_VALUE.equals(code);
+        return invalidParameterErrorCodes.contains(code);
     }
+
+    private static boolean isErrorWithContent(@NonNull Throwable error) {
+        return error instanceof ApiBackendExceptionWithContent;
+    }
+
+    private static boolean isInvalidParameterErrorWithContent(@NonNull Throwable error) {
+        return error instanceof ApiBackendExceptionWithContent && isInvalidParameterError(error);
+    }
+
+    // endregion
 }

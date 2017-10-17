@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendBaseExceptionWithContent;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -85,7 +86,15 @@ public class UserDataReporter {
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
-                if (error instanceof BackendInvalidParameterException) {
+                if (error instanceof BackendBaseExceptionWithContent) {
+                    BackendBaseExceptionWithContent errorWithContent = (BackendBaseExceptionWithContent) error;
+                    mobileMessagingCore.setUserDataReported(errorWithContent.getContent(UserData.class));
+
+                    if (listener != null) {
+                        listener.onError(MobileMessagingError.createFrom(error));
+                    }
+
+                } else if (error instanceof BackendInvalidParameterException) {
                     mobileMessagingCore.setUserDataReportedWithError();
 
                     if (listener != null) {

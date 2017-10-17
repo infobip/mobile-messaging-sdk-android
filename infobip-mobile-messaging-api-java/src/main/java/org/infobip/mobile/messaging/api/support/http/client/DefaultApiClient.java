@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.api.support.http.client;
 
 import org.apache.commons.codec.binary.Base64;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
+import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.Tuple;
@@ -138,7 +139,14 @@ public class DefaultApiClient implements ApiClient {
 
             InputStream inputStream = urlConnection.getInputStream();
             String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
-            return JSON_SERIALIZER.deserialize(s, responseType);
+            R response = JSON_SERIALIZER.deserialize(s, responseType);
+            ApiResponse apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
+            if (apiResponse.getRequestError() != null) {
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
+                throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
+            }
+
+            return response;
         } catch (Exception e) {
             if (e instanceof ApiIOException) {
                 throw (ApiIOException) e;

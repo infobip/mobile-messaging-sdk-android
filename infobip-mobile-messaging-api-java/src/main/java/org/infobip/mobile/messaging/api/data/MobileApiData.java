@@ -30,7 +30,7 @@ public interface MobileApiData {
     @HttpRequest(method = HttpMethod.POST, value = "system")
     void reportSystemData(@Body SystemDataReport systemDataReport);
 
-    @Version("4")
+    @Version("5")
     @HttpRequest(method = HttpMethod.POST, value = "user")
     UserDataReport reportUserData(@Query(name = "externalUserId") String externalUserId,
                                   @Body org.infobip.mobile.messaging.api.data.UserDataReport userDataReport);

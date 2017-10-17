@@ -1,12 +1,7 @@
 package org.infobip.mobile.messaging.api.support.http.client;
 
-import fi.iki.elonen.NanoHTTPD;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-
 import org.apache.commons.codec.binary.Base64;
+import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiError;
@@ -18,6 +13,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import fi.iki.elonen.NanoHTTPD;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * @author mstipanov
@@ -155,6 +156,20 @@ public class DefaultApiClientTest {
         Assert.assertEquals(debugServer.getHeader("Authorization"), "Basic " + base64Auth);
     }
 
+    @Test
+    public void execute_receivesOK_withRequestErrorAndResponseBody() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new SomeApiResponse("1", "Invalid Application ID", 123)));
+
+        try {
+            apiClient.execute(HttpMethod.POST, "http://127.0.0.1:" + debugServer.getListeningPort(), null, null, MapUtils.map(), null, null, SomeApiResponse.class);
+            Assert.fail("Expected exception ApiBackendExceptionWithContent is not thrown");
+        } catch (ApiBackendExceptionWithContent error) {
+            Assert.assertEquals("1", error.getCode());
+            Assert.assertEquals("Invalid Application ID", error.getMessage());
+            Assert.assertEquals(123, ((SomeApiResponse) error.getContent()).getInternalRegistrationId());
+        }
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -168,5 +183,10 @@ public class DefaultApiClientTest {
     @AllArgsConstructor
     private static class SomeApiResponse extends ApiResponse {
         private int internalRegistrationId;
+
+        public SomeApiResponse(String code, String text, int internalRegistrationId) {
+            super(code, text);
+            this.internalRegistrationId = internalRegistrationId;
+        }
     }
 }
