@@ -329,6 +329,18 @@ public abstract class MobileMessaging {
             throw new IllegalArgumentException("Can't use 'with' method with null argument!");
         }
 
+        private void validateApplicationCodeAvailability() {
+            if (applicationCode != null && storeAppCodeOnDisk) {
+                return;
+            }
+
+            if (applicationCodeProvider != null && !storeAppCodeOnDisk) {
+                return;
+            }
+
+            throw new IllegalArgumentException("Application code is not provided to the library, make sure it is available in resources, builder or via app code provider");
+        }
+
         /**
          * When you want to use a GCM sender that is not stored to <i>google_app_id</i> string resource
          * By default it will use <i>google_app_id</i> string resource
@@ -550,6 +562,8 @@ public abstract class MobileMessaging {
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
+            validateApplicationCodeAvailability();
+
             MobileMessagingCore.setApiUri(application, apiUri);
             MobileMessagingCore.setGcmSenderId(application, gcmSenderId);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);

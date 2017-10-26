@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -218,6 +219,11 @@ public class MobileMessagingCore extends MobileMessaging {
         didSyncAtLeastOnce = true;
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
+            return;
+        }
+
+        if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
+            MobileMessagingLogger.w("Application code is not found, check your setup");
             return;
         }
 
