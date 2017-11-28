@@ -17,8 +17,8 @@ import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
-import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
@@ -76,8 +76,9 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         mobileApiGeo = mock(MobileApiGeo.class);
         mobileMessageHandler = mock(MobileMessageHandler.class);
 
-        retryPolicy = DefaultRetryPolicy.create(context);
-        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, mobileApiRegistration);
+        RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
+        retryPolicy = retryPolicyProvider.DEFAULT();
+        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicyProvider, mobileApiRegistration);
         seenStatusReporter = new SeenStatusReporter(mobileMessagingCore, stats, taskExecutor, coreBroadcaster, mobileApiMessages, new BatchReporter(100L));
         geoReporter = new GeoReporter(context, mobileMessagingCore, geoBroadcaster, mobileMessagingCore.getStats(), mobileApiGeo);
         messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, taskExecutor, coreBroadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);

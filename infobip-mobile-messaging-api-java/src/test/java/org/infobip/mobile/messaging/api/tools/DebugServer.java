@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging.api.tools;
 
-import fi.iki.elonen.NanoHTTPD;
 import org.infobip.mobile.messaging.api.support.util.StreamUtils;
 
 import java.io.IOException;
@@ -8,9 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import fi.iki.elonen.NanoHTTPD;
+
 public class DebugServer extends NanoHTTPD {
     private Map<String, String> queryParameters = new HashMap<>();
     private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> responseHeaders = new HashMap<>();
     private AtomicInteger requestCount = new AtomicInteger(0);
     private Response.Status status;
     private String mimeType;
@@ -33,7 +35,12 @@ public class DebugServer extends NanoHTTPD {
         headers = session.getHeaders();
         body = readBody(session);
 
-        return new Response(status, mimeType, txt);
+        Response response = new Response(status, mimeType, txt);
+        for (String key : responseHeaders.keySet()) {
+            response.addHeader(key, responseHeaders.get(key));
+        }
+
+        return response;
     }
 
     private String readBody(IHTTPSession session) {
@@ -68,6 +75,13 @@ public class DebugServer extends NanoHTTPD {
         this.status = status;
         this.mimeType = mimeType;
         this.txt = txt;
+    }
+
+    public void respondWith(Response.Status status, String body, Map<String, String> headers) {
+        this.status = status;
+        this.txt = body;
+        this.mimeType = "application/json";
+        this.responseHeaders = headers;
     }
 
     public String getQueryParameter(String paramName) {

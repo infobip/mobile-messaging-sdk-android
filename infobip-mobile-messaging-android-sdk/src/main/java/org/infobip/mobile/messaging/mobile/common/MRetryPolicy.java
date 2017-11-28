@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.mobile.common;
 
-import android.support.annotation.NonNull;
-
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
 
 import java.util.Arrays;
@@ -23,10 +21,6 @@ public class MRetryPolicy {
         errorsToRetryOn.add(BackendCommunicationException.class);
     }
 
-    public interface ErrorCheck {
-
-        boolean shouldRetry(@NonNull Throwable error);
-    }
     boolean shouldRetry(Throwable error, int attemptsDone) {
         for (Class cls : errorsToRetryOn) {
             if (cls.isInstance(error) && attemptsDone < maxRetries) {

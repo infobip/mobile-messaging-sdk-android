@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendBaseExceptionWithContent;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -29,21 +30,17 @@ public class UserDataReporter {
     private final Executor executor;
     private final Broadcaster broadcaster;
     private final MobileMessagingCore mobileMessagingCore;
-    private final MRetryPolicy retryPolicy;
-    private final MRetryPolicy noRetryPolicy;
     private final MobileMessagingStats stats;
     private final MobileApiData mobileApiData;
+    private final RetryPolicyProvider retryPolicyProvider;
 
-    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, MRetryPolicy retryPolicy, MobileMessagingStats stats, MobileApiData mobileApiData) {
+    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiData mobileApiData) {
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.mobileApiData = mobileApiData;
-        this.retryPolicy = retryPolicy;
-        this.noRetryPolicy = new MRetryPolicy.Builder()
-                .withMaxRetries(0)
-                .build();
+        this.retryPolicyProvider = retryPolicyProvider;
     }
 
     public void sync(final MobileMessaging.ResultListener listener, final UserData userData) {
@@ -118,6 +115,7 @@ public class UserDataReporter {
     }
 
     private MRetryPolicy retryPolicy(MobileMessaging.ResultListener listener) {
-        return listener == null && mobileMessagingCore.shouldSaveUserData() ? retryPolicy : noRetryPolicy;
+        return listener == null && mobileMessagingCore.shouldSaveUserData() ?
+                retryPolicyProvider.DEFAULT() : retryPolicyProvider.NO_RETRY();
     }
 }

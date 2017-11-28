@@ -409,7 +409,7 @@ public abstract class MobileMessaging {
          * }
          * </pre>
          * <p/>
-         * The default is set to <a href="https://oneapi.infobip.com">https://oneapi.infobip.com</a>.
+         * The default is set to <a href="https://mobile.infobip.com">https://mobile.infobip.com</a>.
          * <p/>
          * It fill fail if set to null or empty string.
          *

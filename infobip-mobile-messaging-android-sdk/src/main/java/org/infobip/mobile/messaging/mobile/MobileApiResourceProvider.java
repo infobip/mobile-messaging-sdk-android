@@ -10,19 +10,21 @@ import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.support.http.client.Request;
+import org.infobip.mobile.messaging.api.support.http.client.RequestInterceptor;
+import org.infobip.mobile.messaging.api.support.http.client.ResponsePreProcessor;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
+import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -33,24 +35,45 @@ import java.util.Properties;
  */
 public class MobileApiResourceProvider {
 
-    public static class MobileMessagingHeaderProvider implements Generator.CommonHeaderProvider {
+    public class BaseUrlManager implements RequestInterceptor, ResponsePreProcessor {
 
         private final Context context;
 
-        public MobileMessagingHeaderProvider(Context context) {
+        public BaseUrlManager(Context context) {
             this.context = context;
         }
 
+        @Override // request interceptor
+        public Request intercept(Request request) {
+            request.getHeaders().put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
+            request.getHeaders().put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getPushRegistrationId()));
+            return request;
+        }
+
         @Override
-        public Map<String, Collection<Object>> get() {
-            return new HashMap<String, Collection<Object>>() {{
-                put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
-                put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getPushRegistrationId()));
-            }};
+        public void beforeResponse(int responseCode, Map<String, List<String>> headers) {
+            if (responseCode >= 400) {
+                MobileMessagingCore.resetApiUri(context);
+                return;
+            }
+
+            List<String> values = headers.get(CustomApiHeaders.NEW_BASE_URL.getValue());
+            if (values == null || values.isEmpty() || StringUtils.isBlank(values.get(0))) {
+                return;
+            }
+
+            String url = values.get(0);
+            MobileMessagingCore.setApiUri(context, url);
+            generator.setBaseUrl(url);
+        }
+
+        @Override
+        public void beforeResponse(Exception error) {
+            MobileMessagingCore.resetApiUri(context);
         }
     }
 
-    private MobileMessagingHeaderProvider mobileMessagingDynamicHeaderProvider;
+    private BaseUrlManager mobileMessagingRequestInterceptor;
     private Generator generator;
     private MobileApiRegistration mobileApiRegistration;
     private MobileApiMessages mobileApiMessages;
@@ -108,7 +131,7 @@ public class MobileApiResourceProvider {
         return mobileApiGeo;
     }
 
-    String[] getUserAgentAdditions(Context context) {
+    private String[] getUserAgentAdditions(Context context) {
         List<String> userAgentAdditions = new ArrayList<>();
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO)) {
             userAgentAdditions.add(SystemInformation.getAndroidSystemName());
@@ -141,26 +164,26 @@ public class MobileApiResourceProvider {
             return generator;
         }
 
-
         Properties properties = new Properties();
         properties.putAll(System.getProperties());
         properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
         properties.put("library.version", SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context));
 
-        generator = new Generator.Builder().
-                withBaseUrl(MobileMessagingCore.getApiUri(context)).
-                withProperties(properties).
-                withUserAgentAdditions(getUserAgentAdditions(context)).
-                withDynamicHeaderProvider(mobileMessagingDynamicHeaderProvider(context)).
-                build();
+        generator = new Generator.Builder()
+                .withBaseUrl(MobileMessagingCore.getApiUri(context))
+                .withProperties(properties)
+                .withUserAgentAdditions(getUserAgentAdditions(context))
+                .withRequestInterceptors(baseUrlManager(context))
+                .withResponseHeaderInterceptors(baseUrlManager(context))
+                .build();
 
         return generator;
     }
 
-    private MobileMessagingHeaderProvider mobileMessagingDynamicHeaderProvider(Context context) {
-        if (mobileMessagingDynamicHeaderProvider == null) {
-            mobileMessagingDynamicHeaderProvider = new MobileMessagingHeaderProvider(context);
+    private BaseUrlManager baseUrlManager(Context context) {
+        if (mobileMessagingRequestInterceptor == null) {
+            mobileMessagingRequestInterceptor = new BaseUrlManager(context);
         }
-        return mobileMessagingDynamicHeaderProvider;
+        return mobileMessagingRequestInterceptor;
     }
 }

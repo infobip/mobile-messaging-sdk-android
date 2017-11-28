@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,6 +18,7 @@ import fi.iki.elonen.NanoHTTPD;
 public class DebugServer extends NanoHTTPD {
     private Map<String, String> queryParameters = new HashMap<>();
     private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> responseHeaders = new HashMap<>();
     private List<Pair<String, String>> bodies = new ArrayList<>();
     private AtomicInteger requestCount = new AtomicInteger(0);
     private Response.Status status;
@@ -40,10 +42,18 @@ public class DebugServer extends NanoHTTPD {
         headers = session.getHeaders();
         bodies.add(new Pair<>(session.getUri(), readBody(session)));
 
+        Response response;
         if (inputStream != null) {
-            return new Response(status, mimeType, inputStream);
+            response = new Response(status, mimeType, inputStream);
+        } else {
+            response = new Response(status, mimeType, txt);
         }
-        return new Response(status, mimeType, txt);
+
+        for (String key : responseHeaders.keySet()) {
+            response.addHeader(key, responseHeaders.get(key));
+        }
+
+        return response;
     }
 
     private String readBody(IHTTPSession session) {
@@ -81,6 +91,13 @@ public class DebugServer extends NanoHTTPD {
         this.status = status;
         this.mimeType = mimeType;
         this.txt = txt;
+    }
+
+    public void respondWith(Response.Status status, String body, Map<String, String> headers) {
+        this.status = status;
+        this.txt = body;
+        this.mimeType = "application/json";
+        this.responseHeaders = headers;
     }
 
     public String getQueryParameter(String paramName) {

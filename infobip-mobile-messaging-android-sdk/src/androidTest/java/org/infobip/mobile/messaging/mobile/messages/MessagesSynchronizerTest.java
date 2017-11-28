@@ -5,8 +5,8 @@ import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
-import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,7 +50,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         messageArgumentCaptor = forClass(Message.class);
         syncBodyCaptor = forClass(SyncMessagesBody.class);
 
-        retryPolicy = DefaultRetryPolicy.create(context);
+        retryPolicy = new RetryPolicyProvider(context).DEFAULT();
 
         messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, mobileMessagingCore.getStats(),
                 Executors.newSingleThreadExecutor(), broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);

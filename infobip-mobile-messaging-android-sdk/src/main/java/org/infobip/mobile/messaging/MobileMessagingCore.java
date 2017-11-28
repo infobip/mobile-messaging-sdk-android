@@ -20,8 +20,7 @@ import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
-import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -81,7 +80,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private static MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
     private final MobileMessagingStats stats;
     private final ExecutorService registrationAlignedExecutor;
-    private final MRetryPolicy defaultRetryPolicy;
+    private final RetryPolicyProvider retryPolicyProvider;
     private final Broadcaster broadcaster;
     private final ModuleLoader moduleLoader;
     private NotificationHandler notificationHandler;
@@ -113,7 +112,7 @@ public class MobileMessagingCore extends MobileMessaging {
         this.broadcaster = broadcaster;
         this.registrationAlignedExecutor = registrationAlignedExecutor;
         this.stats = new MobileMessagingStats(context);
-        this.defaultRetryPolicy = DefaultRetryPolicy.create(context);
+        this.retryPolicyProvider = new RetryPolicyProvider(context);
         this.moduleLoader = moduleLoader;
         this.notificationHandler = loadNotificationHandler();
         this.messageHandlerModules = loadMessageHandlerModules();
@@ -636,11 +635,15 @@ public class MobileMessagingCore extends MobileMessaging {
         return getApplicationCode(context);
     }
 
-    static void setApiUri(Context context, String apiUri) {
+    public static void setApiUri(Context context, String apiUri) {
         if (StringUtils.isBlank(apiUri)) {
             throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
         }
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
+    }
+
+    public static void resetApiUri(Context context) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, (String) MobileMessagingProperty.API_URI.getDefaultValue());
     }
 
     public static String getApiUri(Context context) {
@@ -876,7 +879,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private MoMessageSender moMessageSender() {
         if (moMessageSender == null) {
             moMessageSender = new MoMessageSender(context, this, broadcaster,
-                    registrationAlignedExecutor, stats, defaultRetryPolicy, mobileApiResourceProvider().getMobileApiMessages(context), getMessageStoreWrapper());
+                    registrationAlignedExecutor, stats, retryPolicyProvider.DEFAULT(), mobileApiResourceProvider().getMobileApiMessages(context), getMessageStoreWrapper());
         }
         return moMessageSender;
     }
@@ -885,7 +888,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private UserDataReporter userDataReporter() {
         if (userDataReporter == null) {
             userDataReporter = new UserDataReporter(this, registrationAlignedExecutor,
-                    broadcaster, defaultRetryPolicy, stats, mobileApiResourceProvider().getMobileApiData(context));
+                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiData(context));
         }
         return userDataReporter;
     }
@@ -893,7 +896,7 @@ public class MobileMessagingCore extends MobileMessaging {
     @NonNull
     private SystemDataReporter systemDataReporter() {
         if (systemDataReporter == null) {
-            systemDataReporter = new SystemDataReporter(this, stats, defaultRetryPolicy, registrationAlignedExecutor,
+            systemDataReporter = new SystemDataReporter(this, stats, retryPolicyProvider.DEFAULT(), registrationAlignedExecutor,
                     broadcaster, mobileApiResourceProvider().getMobileApiData(context));
         }
         return systemDataReporter;
@@ -904,7 +907,7 @@ public class MobileMessagingCore extends MobileMessaging {
         if (messagesSynchronizer == null) {
             MobileMessageHandler mobileMessageHandler = new MobileMessageHandler(this, broadcaster, getNotificationHandler(), getMessageStoreWrapper());
             messagesSynchronizer = new MessagesSynchronizer(this, stats, registrationAlignedExecutor,
-                    broadcaster, defaultRetryPolicy, mobileMessageHandler, mobileApiResourceProvider().getMobileApiMessages(context));
+                    broadcaster, retryPolicyProvider.DEFAULT(), mobileMessageHandler, mobileApiResourceProvider().getMobileApiMessages(context));
         }
         return messagesSynchronizer;
     }
@@ -913,7 +916,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private RegistrationSynchronizer registrationSynchronizer() {
         if (registrationSynchronizer == null) {
             registrationSynchronizer = new RegistrationSynchronizer(context, this, stats,
-                    registrationAlignedExecutor, broadcaster, defaultRetryPolicy, mobileApiResourceProvider().getMobileApiRegistration(context));
+                    registrationAlignedExecutor, broadcaster, retryPolicyProvider, mobileApiResourceProvider().getMobileApiRegistration(context));
         }
         return registrationSynchronizer;
     }
@@ -930,7 +933,7 @@ public class MobileMessagingCore extends MobileMessaging {
     @NonNull
     VersionChecker versionChecker() {
         if (versionChecker == null) {
-            versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context));
+            versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context), retryPolicyProvider);
         }
         return versionChecker;
     }

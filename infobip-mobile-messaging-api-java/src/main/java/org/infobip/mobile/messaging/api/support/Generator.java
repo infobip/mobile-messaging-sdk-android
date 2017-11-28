@@ -13,6 +13,9 @@ import org.infobip.mobile.messaging.api.support.http.Query;
 import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
+import org.infobip.mobile.messaging.api.support.http.client.Logger;
+import org.infobip.mobile.messaging.api.support.http.client.RequestInterceptor;
+import org.infobip.mobile.messaging.api.support.http.client.ResponsePreProcessor;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -46,25 +49,23 @@ import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.load
 @Data
 public class Generator {
 
-    public interface CommonHeaderProvider {
-        Map<String, Collection<Object>> get();
-    }
-
     private DefaultApiClient apiClient;
-    private String baseUrl = "https://oneapi.infobip.com/";
+    private String baseUrl = "https://mobile.infobip.com/";
     private ConcurrentHashMap<Class<?>, CachingInvocationHandler> proxyCacheMap = new ConcurrentHashMap<>();
     private Properties properties = System.getProperties();
     private int connectTimeout = DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
     private int readTimeout = DefaultApiClient.DEFAULT_READ_TIMEOUT;
     private String[] userAgentAdditions = new String[0];
-    private CommonHeaderProvider commonHeaderProvider = null;
+    private RequestInterceptor[] requestInterceptors = new RequestInterceptor[0];
+    private ResponsePreProcessor[] responsePreProcessors = new ResponsePreProcessor[0];
+    private Logger logger = new Logger();
 
     private DefaultApiClient getApiClient() {
         if (null != apiClient) {
             return apiClient;
         }
         String libraryVersion = properties.getProperty("library.version");
-        apiClient = new DefaultApiClient(connectTimeout, readTimeout, libraryVersion, userAgentAdditions);
+        apiClient = new DefaultApiClient(connectTimeout, readTimeout, libraryVersion, requestInterceptors, responsePreProcessors, logger, userAgentAdditions);
         return apiClient;
     }
 
@@ -200,7 +201,7 @@ public class Generator {
         }
 
         /**
-         * It will set the base API URL. By default it will be <a href="https://oneapi.infobip.com/">https://oneapi.infobip.com/</a>
+         * It will set the base API URL. By default it will be <a href="https://mobile.infobip.com/">https://mobile.infobip.com/</a>
          *
          * @return {@link Builder}
          */
@@ -256,13 +257,35 @@ public class Generator {
         }
 
         /**
-         * It will set dynamic header provider for generator.
+         * It will set request interceptors for http client.
          *
-         * @param provider callaback interface which providers headers.
+         * @param requestInterceptors interceptors to add to chain.
          * @return {@link Builder}
          */
-        public Builder withDynamicHeaderProvider(@NonNull CommonHeaderProvider provider) {
-            generator.commonHeaderProvider = provider;
+        public Builder withRequestInterceptors(@NonNull RequestInterceptor... requestInterceptors) {
+            generator.requestInterceptors = requestInterceptors;
+            return this;
+        }
+
+        /**
+         * Will set response header interceptors for http client
+         *
+         * @param responsePreProcessors interceptors to add
+         * @return {@link Builder}
+         */
+        public Builder withResponseHeaderInterceptors(@NonNull ResponsePreProcessor... responsePreProcessors) {
+            generator.responsePreProcessors = responsePreProcessors;
+            return this;
+        }
+
+
+        /**
+         * Will set custom logger for http client
+         * @param logger logger
+         * @return {@link Builder}
+         */
+        public Builder withLogger(@NonNull Logger logger) {
+            generator.logger = logger;
             return this;
         }
 
@@ -288,7 +311,7 @@ public class Generator {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             ProxyCache proxyCache = getProxyCache(method);
-            String uri = proxyCache.getUri();
+            String uri = StringUtils.join("/", baseUrl, proxyCache.getUri());
 
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
             Map<String, Collection<Object>> headerMap = new HashMap<>(proxyCache.getDefaultHeaderMap());
@@ -325,10 +348,6 @@ public class Generator {
                     String name = h.name();
                     headerMap.put(name, toCollection(arg));
                 }
-            }
-
-            if (commonHeaderProvider != null) {
-                headerMap.putAll(commonHeaderProvider.get());
             }
 
             return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, credentials, queryParams, headerMap, body, method.getReturnType());
@@ -432,7 +451,7 @@ public class Generator {
         }
 
         private String createUri(Method method) {
-            String uri = StringUtils.join("/", baseUrl, getHttpRequestValue());
+            String uri = getHttpRequestValue();
             Version version = getVersionAnnotation(method);
             if (null != version) {
                 uri = uri.replace("{version}", injectProperty(version.value()));

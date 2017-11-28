@@ -22,7 +22,7 @@ public class GeneratorTest {
     @Test
     public void build_noBaseUrl_default() throws Exception {
         Generator build = new Generator.Builder().build();
-        assertEquals("https://oneapi.infobip.com/", build.getBaseUrl());
+        assertEquals("https://mobile.infobip.com/", build.getBaseUrl());
     }
 
     @Test(expected = NullPointerException.class)

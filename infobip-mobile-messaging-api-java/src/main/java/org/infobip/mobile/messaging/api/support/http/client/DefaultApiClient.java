@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,40 +37,55 @@ public class DefaultApiClient implements ApiClient {
     private final int readTimeout;
     private final String libraryVersion;
     private final String[] userAgentAdditions;
+    private final RequestInterceptor requestInterceptors[];
+    private final ResponsePreProcessor responsePreProcessors[];
+    private final Logger logger;
     private String userAgent;
 
     public DefaultApiClient() {
-        this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, null, null, null, null);
+        this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, null, new RequestInterceptor[0], new ResponsePreProcessor[0], new Logger());
     }
 
-    public DefaultApiClient(int connectTimeout, int readTimeout, String libraryVersion, String... userAgentAdditions) {
+    public DefaultApiClient(int connectTimeout, int readTimeout, String libraryVersion, RequestInterceptor interceptors[], ResponsePreProcessor responsePreProcessors[], Logger logger, String... userAgentAdditions) {
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.libraryVersion = libraryVersion;
+        this.requestInterceptors = interceptors;
+        this.responsePreProcessors = responsePreProcessors;
         this.userAgentAdditions = userAgentAdditions;
+        this.logger = logger;
     }
 
     @Override
     public <B, R> R execute(HttpMethod method, String uri, String apiKey, Tuple<String, String> credentials, Map<String, Collection<Object>> queryParams, Map<String, Collection<Object>> headers, B body, Class<R> responseType) {
+        Request request = new Request(method, uri, apiKey, credentials, headers, queryParams, body);
+        for (RequestInterceptor interceptor : requestInterceptors) {
+            try {
+                request = interceptor.intercept(request);
+            } catch (Exception e) {
+                logger.e("Request interceptor " + interceptor + " thrown an exception " + e);
+            }
+        }
+
         HttpURLConnection urlConnection = null;
         try {
             StringBuilder sb = new StringBuilder();
-            for (Map.Entry<String, Collection<Object>> entry : queryParams.entrySet()) {
+            for (Map.Entry<String, Collection<Object>> entry : request.queryParams.entrySet()) {
                 appendValue(sb, entry);
             }
 
-            urlConnection = (HttpURLConnection) new URL(uri + sb.toString()).openConnection();
-            urlConnection.setRequestMethod(method.name());
+            urlConnection = (HttpURLConnection) new URL(request.uri + sb.toString()).openConnection();
+            urlConnection.setRequestMethod(request.httpMethod.name());
             urlConnection.setUseCaches(false);
-            if (method != HttpMethod.GET) {
+            if (request.httpMethod != HttpMethod.GET) {
                 urlConnection.setDoOutput(true);
             }
             urlConnection.setDoInput(true);
             urlConnection.setConnectTimeout(connectTimeout);
             urlConnection.setReadTimeout(readTimeout);
 
-            if (null != headers) {
-                for (Map.Entry<String, Collection<Object>> entry : headers.entrySet()) {
+            if (null != request.headers) {
+                for (Map.Entry<String, Collection<Object>> entry : request.headers.entrySet()) {
                     Collection<Object> value = entry.getValue();
                     if (null == value || value.isEmpty()) {
                         continue;
@@ -85,10 +101,10 @@ public class DefaultApiClient implements ApiClient {
                     }
                 }
             }
-            if (StringUtils.isNotBlank(apiKey)) {
-                urlConnection.setRequestProperty("Authorization", "App " + apiKey);
-            } else if (credentials != null && StringUtils.isNotBlank(credentials.getLeft()) && StringUtils.isNotBlank(credentials.getRight())) {
-                String basicApiKey = new String(Base64.encodeBase64((credentials.getLeft() + ":" + credentials.getRight()).getBytes()));
+            if (StringUtils.isNotBlank(request.apiKey)) {
+                urlConnection.setRequestProperty("Authorization", "App " + request.apiKey);
+            } else if (request.credentials != null && StringUtils.isNotBlank(request.credentials.getLeft()) && StringUtils.isNotBlank(request.credentials.getRight())) {
+                String basicApiKey = new String(Base64.encodeBase64((request.credentials.getLeft() + ":" + request.credentials.getRight()).getBytes()));
                 urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
             }
             urlConnection.setRequestProperty("Accept", "application/json");
@@ -97,8 +113,8 @@ public class DefaultApiClient implements ApiClient {
                 urlConnection.setRequestProperty("User-Agent", getUserAgent());
             }
 
-            if (null != body) {
-                byte[] bytes = JSON_SERIALIZER.serialize(body).getBytes("UTF-8");
+            if (null != request.body) {
+                byte[] bytes = JSON_SERIALIZER.serialize(request.body).getBytes("UTF-8");
                 urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 OutputStream outputStream = null;
@@ -112,6 +128,7 @@ public class DefaultApiClient implements ApiClient {
             }
 
             int responseCode = urlConnection.getResponseCode();
+            interceptResponse(responseCode, urlConnection.getHeaderFields());
             if (responseCode >= 400) {
                 ApiResponse apiResponse = new ApiResponse("-1", "Unknown error");
                 if (urlConnection.getContentLength() > 0) {
@@ -140,18 +157,25 @@ public class DefaultApiClient implements ApiClient {
             InputStream inputStream = urlConnection.getInputStream();
             String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
             R response = JSON_SERIALIZER.deserialize(s, responseType);
-            ApiResponse apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
-            if (apiResponse.getRequestError() != null) {
+
+            ApiResponse apiResponse = null;
+            try {
+                apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
+            } catch (Exception ignored) {
+            }
+
+            if (apiResponse != null  && apiResponse.getRequestError() != null) {
                 Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
                 throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
             }
 
             return response;
         } catch (Exception e) {
+            interceptErrorResponse(e);
             if (e instanceof ApiIOException) {
                 throw (ApiIOException) e;
             }
-            throw new ApiIOException("-4", "Can't access URI: " + uri, e);
+            throw new ApiIOException("-4", "Can't access URI: " + request.uri, e);
         } finally {
             if (null != urlConnection) {
                 try {
@@ -159,6 +183,26 @@ public class DefaultApiClient implements ApiClient {
                 } catch (Exception e) {
                     //ignore
                 }
+            }
+        }
+    }
+
+    private void interceptErrorResponse(Exception error) {
+        for (ResponsePreProcessor responsePreProcessor : responsePreProcessors) {
+            try {
+                responsePreProcessor.beforeResponse(error);
+            } catch (Exception e) {
+                logger.e("Response interceptor " + responsePreProcessor + " thrown an exception " + e);
+            }
+        }
+    }
+
+    private void interceptResponse(int httpStatusCode, Map<String, List<String>> responseHeaders) {
+        for (ResponsePreProcessor responsePreProcessor : responsePreProcessors) {
+            try {
+                responsePreProcessor.beforeResponse(httpStatusCode, responseHeaders);
+            } catch (Exception e) {
+                logger.e("Response interceptor " + responsePreProcessor + " thrown an exception " + e);
             }
         }
     }

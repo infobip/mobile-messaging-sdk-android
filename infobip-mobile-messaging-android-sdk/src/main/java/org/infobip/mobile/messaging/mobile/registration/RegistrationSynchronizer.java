@@ -8,9 +8,8 @@ import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
-import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -30,7 +29,7 @@ public class RegistrationSynchronizer {
     private final MobileMessagingStats stats;
     private final Executor executor;
     private final Broadcaster broadcaster;
-    private final MRetryPolicy retryPolicy;
+    private final RetryPolicyProvider retryPolicyProvider;
     private final MobileApiRegistration mobileApiRegistration;
 
     public RegistrationSynchronizer(
@@ -39,7 +38,7 @@ public class RegistrationSynchronizer {
             MobileMessagingStats stats,
             Executor executor,
             Broadcaster broadcaster,
-            MRetryPolicy retryPolicy,
+            RetryPolicyProvider retryPolicyProvider,
             MobileApiRegistration mobileApiRegistration) {
 
         this.context = context;
@@ -47,12 +46,12 @@ public class RegistrationSynchronizer {
         this.stats = stats;
         this.executor = executor;
         this.broadcaster = broadcaster;
-        this.retryPolicy = retryPolicy;
+        this.retryPolicyProvider = retryPolicyProvider;
         this.mobileApiRegistration = mobileApiRegistration;
     }
 
     public void updateStatus(final Boolean enabled) {
-        new MAsyncTask<Boolean, Registration>() {
+        new MRetryableTask<Boolean, Registration>() {
             @Override
             public Registration run(Boolean[] params) {
                 String cloudToken = mobileMessagingCore.getCloudToken();
@@ -80,6 +79,7 @@ public class RegistrationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
+        .retryWith(retryPolicyProvider.ONE_RETRY())
         .execute(executor, enabled);
     }
 
@@ -127,7 +127,7 @@ public class RegistrationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
-        .retryWith(retryPolicy)
+        .retryWith(retryPolicyProvider.DEFAULT())
         .execute(executor, cloudToken);
     }
 

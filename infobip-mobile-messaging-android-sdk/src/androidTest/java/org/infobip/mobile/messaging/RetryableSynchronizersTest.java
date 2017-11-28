@@ -11,8 +11,8 @@ import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
@@ -80,12 +80,13 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
         given(mobileApiRegistration.upsert(anyString(), anyBoolean())).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
 
-        retryPolicy = DefaultRetryPolicy.create(context);
+        RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
+        retryPolicy = retryPolicyProvider.DEFAULT();
         executor = Executors.newSingleThreadExecutor();
         systemDataReporter = new SystemDataReporter(mobileMessagingCore, stats, retryPolicy, executor, broadcaster, mobileApiData);
         messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
-        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileApiRegistration);
-        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicy, stats, mobileApiData);
+        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiRegistration);
+        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiData);
     }
 
     @Test

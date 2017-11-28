@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.api.version.LatestReleaseResponse;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -30,12 +31,14 @@ public class VersionChecker {
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
     private final MobileApiVersion mobileApiVersion;
+    private final RetryPolicyProvider retryPolicyProvider;
 
-    public VersionChecker(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, MobileApiVersion mobileApiVersion) {
+    public VersionChecker(Context context, MobileMessagingCore mobileMessagingCore, MobileMessagingStats stats, MobileApiVersion mobileApiVersion, RetryPolicyProvider retryPolicyProvider) {
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.mobileApiVersion = mobileApiVersion;
+        this.retryPolicyProvider = retryPolicyProvider;
     }
 
     public void sync() {
@@ -81,7 +84,9 @@ public class VersionChecker {
                 MobileMessagingLogger.e("Error while checking version!");
                 stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
             }
-        };
+        }
+        .retryWith(retryPolicyProvider.ONE_RETRY())
+        .execute();
     }
 
     private boolean shouldUpdate(String latest, String current) {

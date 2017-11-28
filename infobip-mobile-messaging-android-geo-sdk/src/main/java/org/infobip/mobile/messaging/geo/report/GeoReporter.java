@@ -17,9 +17,9 @@ import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.transition.GeoAreasHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.common.DefaultRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
@@ -53,7 +53,7 @@ public class GeoReporter {
         this.broadcaster = broadcaster;
         this.geofenceHelper = new GeofencingHelper(context);
         this.mobileApiGeo = mobileApiGeo;
-        this.retryPolicy = DefaultRetryPolicy.create(context);
+        this.retryPolicy = new RetryPolicyProvider(context).DEFAULT();
     }
 
     public void synchronize() {

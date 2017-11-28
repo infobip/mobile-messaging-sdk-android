@@ -6,7 +6,8 @@ package org.infobip.mobile.messaging.api.support;
 
 public enum CustomApiHeaders {
     FOREGROUND("foreground"),
-    PUSH_REGISTRATION_ID("pushregistrationid");
+    PUSH_REGISTRATION_ID("pushregistrationid"),
+    NEW_BASE_URL("newbaseurl");
 
     private final String value;
 
