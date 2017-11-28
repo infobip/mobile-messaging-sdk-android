@@ -10,11 +10,13 @@ import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.support.Generator;
+import org.infobip.mobile.messaging.api.support.http.client.Logger;
 import org.infobip.mobile.messaging.api.support.http.client.Request;
 import org.infobip.mobile.messaging.api.support.http.client.RequestInterceptor;
 import org.infobip.mobile.messaging.api.support.http.client.ResponsePreProcessor;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -175,6 +177,7 @@ public class MobileApiResourceProvider {
                 .withUserAgentAdditions(getUserAgentAdditions(context))
                 .withRequestInterceptors(baseUrlManager(context))
                 .withResponseHeaderInterceptors(baseUrlManager(context))
+                .withLogger(new AndroidHTTPLogger())
                 .build();
 
         return generator;
@@ -185,5 +188,25 @@ public class MobileApiResourceProvider {
             mobileMessagingRequestInterceptor = new BaseUrlManager(context);
         }
         return mobileMessagingRequestInterceptor;
+    }
+
+    class AndroidHTTPLogger extends Logger {
+
+        private static final String TAG = "MMHTTP";
+
+        @Override
+        public void e(String message) {
+            MobileMessagingLogger.e(TAG, message);
+        }
+
+        @Override
+        public void w(String message) {
+            MobileMessagingLogger.w(TAG, message);
+        }
+
+        @Override
+        public void i(String message) {
+            MobileMessagingLogger.i(TAG, message);
+        }
     }
 }
