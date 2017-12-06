@@ -167,14 +167,6 @@ public class UserData {
         setField(PredefinedField.MIDDLE_NAME, middleName);
     }
 
-    public String getLandlineNumber() {
-        return getField(PredefinedField.LANDLINE_NUMBER);
-    }
-
-    public void setLandlineNumber(String telephone) {
-        setField(PredefinedField.LANDLINE_NUMBER, telephone);
-    }
-
     public void setExternalUserId(String externalUserId) {
         this.externalUserId = externalUserId;
     }
@@ -207,8 +199,7 @@ public class UserData {
         MIDDLE_NAME("middleName"),
         GENDER("gender"),
         BIRTHDATE("birthdate"),
-        EMAIL("email"),
-        LANDLINE_NUMBER("telephone");
+        EMAIL("email");
 
         private final String key;
 

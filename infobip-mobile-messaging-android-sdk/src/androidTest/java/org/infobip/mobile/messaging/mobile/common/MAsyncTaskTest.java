@@ -202,22 +202,6 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldMapInvalidTelephoneToAppropriateException() {
-        // Given
-        ApiIOException givenError = new ApiIOException(ApiErrorCode.INVALID_TELEPHONE_FORMAT, "");
-        Mockito.when(tester.run(any(Object[].class)))
-                .thenThrow(givenError);
-
-        // When
-        asyncTask.execute(executor);
-
-        // Then
-        Mockito.verify(tester, Mockito.after(100).times(1))
-                .error(any(Object[].class), eqInvalidParamErrorWith(givenError));
-        Mockito.verify(tester, Mockito.never()).after(Mockito.any());
-    }
-
-    @Test
     public void shouldMapErrorWithContentToAppropriateException() {
         // Given
         String givenContent = "content";

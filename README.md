@@ -90,7 +90,7 @@ Library generates intents on the following events as described in [Event](infobi
 
 ### Linking MSISDN
 
-It is recommended that you link the Telephone number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
+It is recommended that you link the GSM number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
 It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
 
 ```java

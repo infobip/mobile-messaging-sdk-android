@@ -18,5 +18,4 @@ public class ApiErrorCode {
     public static final String CONTACT_SERVICE_ERROR = "10";
     public static final String INVALID_EMAIL_FORMAT = "17";
     public static final String INVALID_BIRTHDATE_FORMAT = "18";
-    public static final String INVALID_TELEPHONE_FORMAT = "19";
 }
