@@ -104,8 +104,13 @@ public class GeoAreasHandler {
             return;
         }
 
-        GeoReportingResult result = geoReporter.reportSync(unreportedEvents);
-        handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
+        try {
+            GeoReportingResult result = geoReporter.reportSync(unreportedEvents);
+            handleReportingResultWithNewMessagesAndNotifications(unreportedEvents, result);
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "Failed to report geo events " + e.toString());
+            handleGeoReportingResult(context, new GeoReportingResult(e));
+        }
     }
 
     /**

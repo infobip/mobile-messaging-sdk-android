@@ -272,4 +272,19 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         assertEquals("campaignId3", geo.getCampaignId());
         assertEquals("areaId1", geo.getAreasList().get(0).getId());
     }
+
+    @Test
+    public void test_should_not_throw_exception_if_reporting_fails() {
+        // Given
+        GeoTransition transition = GeoHelper.createTransition("areaId1");
+        Area area = createArea("areaId1");
+        Mockito.when(messageStore.findAll(Mockito.any(Context.class))).thenReturn(Arrays.asList(
+                createMessage(context, "signalingMessageId1", "campaignId1", true, "some url", area),
+                createMessage(context, "signalingMessageId2", "campaignId2", true, "some url", area),
+                createMessage(context, "signalingMessageId3", "campaignId3", true, "some url", area)));
+        Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenThrow(new RuntimeException("Hola!"));
+
+        // When
+        geoAreasHandler.handleTransition(transition);
+    }
 }
