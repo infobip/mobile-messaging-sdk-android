@@ -150,10 +150,10 @@ public class MobileApiResourceProvider {
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO)) {
             userAgentAdditions.add(MobileNetworkInformation.getMobileCarrierName(context));
             userAgentAdditions.add(MobileNetworkInformation.getMobileNetworkCode(context));
-            userAgentAdditions.add(MobileNetworkInformation.getMobileCoutryCode(context));
+            userAgentAdditions.add(MobileNetworkInformation.getMobileCountryCode(context));
             userAgentAdditions.add(MobileNetworkInformation.getSIMCarrierName(context));
             userAgentAdditions.add(MobileNetworkInformation.getSIMNetworkCode(context));
-            userAgentAdditions.add(MobileNetworkInformation.getSIMCoutryCode(context));
+            userAgentAdditions.add(MobileNetworkInformation.getSIMCountryCode(context));
         } else {
             String emptyCarrierInfoAdditions[] = {"", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptyCarrierInfoAdditions));

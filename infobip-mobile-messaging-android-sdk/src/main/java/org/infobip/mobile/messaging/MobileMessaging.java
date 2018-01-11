@@ -1,11 +1,13 @@
 package org.infobip.mobile.messaging;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -518,6 +520,20 @@ public abstract class MobileMessaging {
          */
         public Builder withoutSystemInfo() {
             this.reportSystemInfo = false;
+            return this;
+        }
+
+        /**
+         * It will check the presence of the required {@link Manifest.permission#READ_PHONE_STATE} permission needed for acquiring
+         * network information on all Android devices as some devices require the permission to be able to get SIM operator data
+         * (needed for SIM country and network code).
+         * <p>
+         *    <b>Note:</b> not using this method will result with some devices not being able to sync all network info.
+         *
+         * @return {@link Builder}
+         */
+        @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+        public Builder withMobileNetworkInfoOnAllDevices() {
             return this;
         }
 

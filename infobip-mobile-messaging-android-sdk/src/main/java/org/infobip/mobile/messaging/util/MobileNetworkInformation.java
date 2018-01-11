@@ -17,49 +17,73 @@ public class MobileNetworkInformation {
 
 
     public static String getMobileCarrierName(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return telephonyManager.getNetworkOperatorName();
+            try {
+                return telephonyManager.getNetworkOperatorName();
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }
 
-    public static String getMobileCoutryCode(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+    public static String getMobileCountryCode(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return extractMCC(telephonyManager.getNetworkOperator());
+            try {
+                return extractMCC(telephonyManager.getNetworkOperator());
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }
 
     public static String getMobileNetworkCode(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return extractMNC(telephonyManager.getNetworkOperator());
+            try {
+                return extractMNC(telephonyManager.getNetworkOperator());
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }
 
     public static String getSIMCarrierName(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return telephonyManager.getSimOperatorName();
+            try {
+                return telephonyManager.getSimOperatorName();
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }
 
-    public static String getSIMCoutryCode(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+    public static String getSIMCountryCode(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return extractMCC(telephonyManager.getSimOperator());
+            try {
+                return extractMCC(telephonyManager.getSimOperator());
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }
 
     public static String getSIMNetworkCode(Context context) {
-        TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         if (telephonyManager != null) {
-            return extractMNC(telephonyManager.getSimOperator());
+            try {
+                return extractMNC(telephonyManager.getSimOperator());
+            } catch (SecurityException ex) {
+                return "unknown";
+            }
         }
         return "unknown";
     }

@@ -40,10 +40,10 @@ public class MobileNetworkInfo {
     static MobileNetworkInfo fromSystem(Context context) {
         MobileNetworkInfo mobileNetworkInfo = new MobileNetworkInfo(context);
         mobileNetworkInfo.carrierName = MobileNetworkInformation.getMobileCarrierName(context);
-        mobileNetworkInfo.mcc = MobileNetworkInformation.getMobileCoutryCode(context);
+        mobileNetworkInfo.mcc = MobileNetworkInformation.getMobileCountryCode(context);
         mobileNetworkInfo.mnc = MobileNetworkInformation.getMobileNetworkCode(context);
         mobileNetworkInfo.simCarrierName = MobileNetworkInformation.getSIMCarrierName(context);
-        mobileNetworkInfo.simMcc = MobileNetworkInformation.getSIMCoutryCode(context);
+        mobileNetworkInfo.simMcc = MobileNetworkInformation.getSIMCountryCode(context);
         mobileNetworkInfo.simMnc = MobileNetworkInformation.getSIMNetworkCode(context);
         return mobileNetworkInfo;
     }
