@@ -9,6 +9,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static org.mockito.BDDMockito.given;
@@ -84,6 +87,9 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         userData.setExternalUserId("someUserId");
         userData.setFirstName("User");
         userData.setLastName("Tester");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2000, 1, 1);
+        userData.setBirthdate(new Date(calendar.getTimeInMillis()));
         return userData;
     }
 }

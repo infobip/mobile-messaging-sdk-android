@@ -2,9 +2,11 @@ package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
@@ -46,6 +48,22 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         UserData userData = dataCaptor.getValue();
         assertTrue(userData.getPredefinedUserData() == null || userData.getPredefinedUserData().isEmpty());
         assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
+    }
+
+    @Test
+    public void test_add_birthdate() throws Exception {
+
+        UserData userData = new UserData();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2000, 1, 1);
+        userData.setBirthdate(new Date(calendar.getTimeInMillis()));
+
+        mobileMessaging.syncUserData(userData);
+
+        verify(mobileApiData, after(1000).times(1)).reportUserData(anyString(), reportCaptor.capture());
+
+        UserDataReport report = reportCaptor.getValue();
+        assertEquals(userData.getBirthdate(), DateTimeUtil.DateFromYMDString((String)report.getPredefinedUserData().get("birthdate")));
     }
 
     @Test

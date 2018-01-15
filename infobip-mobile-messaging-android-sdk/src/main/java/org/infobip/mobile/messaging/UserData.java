@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -143,12 +146,17 @@ public class UserData {
         setField(PredefinedField.GENDER, gender);
     }
 
-    public String getBirthdate() {
-        return getField(PredefinedField.BIRTHDATE);
+    public Date getBirthdate() {
+        try {
+            return DateTimeUtil.DateFromYMDString((String)getField(PredefinedField.BIRTHDATE));
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
-    public void setBirthdate(String birthdate) {
-        setField(PredefinedField.BIRTHDATE, birthdate);
+    public void setBirthdate(Date birthdate) {
+        String ymdString = DateTimeUtil.DateToYMDString(birthdate);
+        setField(PredefinedField.BIRTHDATE, ymdString);
     }
 
     public String getEmail() {
