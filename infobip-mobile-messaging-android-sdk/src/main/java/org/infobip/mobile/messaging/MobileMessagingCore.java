@@ -1027,7 +1027,8 @@ public class MobileMessagingCore extends MobileMessaging {
          */
         public MobileMessagingCore build() {
             if (shouldSaveApplicationCode(application.getApplicationContext())) {
-                if (!applicationCode.equals(MobileMessagingCore.getApplicationCode(application.getApplicationContext()))) {
+                String existingApplicationCode = MobileMessagingCore.getApplicationCode(application.getApplicationContext());
+                if (existingApplicationCode != null && !applicationCode.equals(existingApplicationCode)) {
                     MobileMessagingCore.cleanup(application);
                 }
             }
