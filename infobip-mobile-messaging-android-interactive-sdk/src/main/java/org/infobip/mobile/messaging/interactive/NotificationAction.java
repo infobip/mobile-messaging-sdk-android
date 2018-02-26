@@ -1,10 +1,13 @@
 package org.infobip.mobile.messaging.interactive;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
+import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
@@ -16,17 +19,30 @@ public class NotificationAction {
     private final int icon;
     private final boolean bringsAppToForeground;
     private final boolean sendsMoMessage;
-    private final Integer inputLabelResourceId;
+    private final Integer inputPlaceholderResourceId;
     private String inputText;
+    private String titleText;
+    private String inputPlaceholderText;
 
-    private NotificationAction(String id, int titleResourceId, int icon, boolean bringsAppToForeground, boolean sendsMoMessage, Integer inputLabelResourceId) {
+    private NotificationAction(
+            String id,
+            int titleResourceId,
+            int icon,
+            boolean bringsAppToForeground,
+            boolean sendsMoMessage,
+            Integer inputPlaceholderResourceId,
+            String titleText,
+            String inputPlaceholderText) {
+
         this.id = id;
         this.titleResourceId = titleResourceId;
         this.icon = icon;
         this.bringsAppToForeground = bringsAppToForeground;
         this.sendsMoMessage = sendsMoMessage;
-        this.inputLabelResourceId = inputLabelResourceId;
-        if (inputLabelResourceId != null) {
+        this.inputPlaceholderResourceId = inputPlaceholderResourceId;
+        this.titleText = titleText;
+        this.inputPlaceholderText = inputPlaceholderText;
+        if (inputPlaceholderResourceId != null || inputPlaceholderText != null) {
             this.inputText = "";
         }
     }
@@ -55,10 +71,10 @@ public class NotificationAction {
         return sendsMoMessage;
     }
 
-    public boolean hasInput() { return inputLabelResourceId != null; }
+    public boolean hasInput() { return inputPlaceholderResourceId != null || inputPlaceholderText != null; }
 
-    public int getInputLabelResourceId() {
-        return inputLabelResourceId != null ? inputLabelResourceId : 0;
+    public int getInputPlaceholderResourceId() {
+        return inputPlaceholderResourceId != null ? inputPlaceholderResourceId : 0;
     }
 
     public String getInputText() {
@@ -69,6 +85,14 @@ public class NotificationAction {
         this.inputText = input;
     }
 
+    public String getTitleText() {
+        return titleText;
+    }
+
+    public String getInputPlaceholderText() {
+        return inputPlaceholderText;
+    }
+
     public static final class Builder {
         private final boolean predefined;
         private String id;
@@ -77,6 +101,8 @@ public class NotificationAction {
         private boolean bringsAppToForeground;
         private boolean sendsMoMessage;
         private Integer inputLabelResourceId;
+        private String titleText;
+        private String inputPlaceholderText;
 
         public Builder() {
             this.predefined = false;
@@ -142,6 +168,14 @@ public class NotificationAction {
         }
 
         /**
+         * Sends a speсific mobile originated message to the server when this notification action is triggered.
+         */
+        public Builder withMoMessage(boolean sendsMoMessage) {
+            this.sendsMoMessage = sendsMoMessage;
+            return this;
+        }
+
+        /**
          * Has a remote input interface. Can be used in chat and messaging apps to reply to messages directly from notification.
          */
         public Builder withInput() {
@@ -159,16 +193,51 @@ public class NotificationAction {
             return this;
         }
 
+        /**
+         * Title of action button. Only used if {@link NotificationAction#titleResourceId} is not specified.
+         *
+         * @param titleText title of action button
+         */
+        public Builder withTitleText(String titleText) {
+            this.titleText = titleText;
+            return this;
+        }
+
+        /**
+         * Has a remote input interface. Can be used in chat and messaging apps to reply to messages directly from notification.
+         * <p/>
+         * Only used if {@link NotificationAction#inputPlaceholderResourceId} is not specified.
+         *
+         * @param inputPlaceholderText text to put inside input field when there's no value.
+         */
+        public Builder withInput(String inputPlaceholderText) {
+            this.inputPlaceholderText = inputPlaceholderText;
+            return this;
+        }
+
+        /**
+         * Starting in Android N, actions are shown without icons in order to accommodate more text. An icon should still be provided
+         * because devices with earlier versions of the OS continue to rely on it, as will Android Wear and Android Auto devices.
+         *
+         * @param iconResourceName Name of the icon displayed on action button.
+         */
+        public Builder withIcon(Context context, String iconResourceName) {
+            if (!TextUtils.isEmpty(iconResourceName)) {
+                this.icon = ResourceLoader.loadResourceByName(context, null, iconResourceName);
+            }
+            return this;
+        }
+
         public NotificationAction build() {
             if (StringUtils.isBlank(id)) {
                 throw new IllegalArgumentException("Please specify valid ID for notification action");
             }
 
-            if (titleResourceId == 0) {
-                throw new IllegalArgumentException(String.format("Please specify valid resource ID for notification '%s' title", id));
+            if (titleResourceId == 0 && TextUtils.isEmpty(titleText)) {
+                throw new IllegalArgumentException(String.format("Please specify valid title for notification ID '%s'", id));
             }
 
-            return new NotificationAction(id, titleResourceId, icon, bringsAppToForeground, sendsMoMessage, inputLabelResourceId);
+            return new NotificationAction(id, titleResourceId, icon, bringsAppToForeground, sendsMoMessage, inputLabelResourceId, titleText, inputPlaceholderText);
         }
 
         private void validateWithParam(Object o) {

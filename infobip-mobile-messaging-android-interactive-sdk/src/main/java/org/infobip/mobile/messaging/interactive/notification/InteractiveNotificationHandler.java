@@ -78,18 +78,27 @@ public class InteractiveNotificationHandler implements NotificationHandler {
     private NotificationCompat.Action createAndroidNotificationAction(NotificationAction notificationAction, PendingIntent pendingIntent) {
         NotificationCompat.Action.Builder builder = new NotificationCompat.Action.Builder(
                 notificationAction.getIcon(),
-                context.getString(notificationAction.getTitleResourceId()),
+                notificationActionTitle(context, notificationAction),
                 pendingIntent);
 
         if (notificationAction.hasInput()) {
             RemoteInput.Builder inputBuilder = new RemoteInput.Builder(notificationAction.getId());
-            if (notificationAction.getInputLabelResourceId() > 0) {
-                inputBuilder.setLabel(context.getString(notificationAction.getInputLabelResourceId()));
+            String inputPlaceholderText = notificationActionInputPlaceholder(context, notificationAction);
+            if (inputPlaceholderText != null) {
+                inputBuilder.setLabel(inputPlaceholderText);
             }
             builder.addRemoteInput(inputBuilder.build());
         }
 
         return builder.build();
+    }
+
+    private static String notificationActionTitle(Context context, NotificationAction action) {
+        return action.getTitleResourceId() != 0 ? context.getString(action.getTitleResourceId()) : action.getTitleText();
+    }
+
+    private static String notificationActionInputPlaceholder(Context context, NotificationAction action) {
+        return action.getInputPlaceholderResourceId() != 0 ? context.getString(action.getInputPlaceholderResourceId()) : action.getInputPlaceholderText();
     }
 
     @SuppressWarnings("WrongConstant")
