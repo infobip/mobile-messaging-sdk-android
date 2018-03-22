@@ -30,12 +30,11 @@ public class PlayServicesSupport {
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    public void checkPlayServices(final Context context) {
+    public void checkPlayServicesAndTryToAcquireToken(final Context context) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int errorCode = apiAvailability.isGooglePlayServicesAvailable(context);
-
+        isPlayServicesAvailable = errorCode == ConnectionResult.SUCCESS;
         if (errorCode != ConnectionResult.SUCCESS) {
-            isPlayServicesAvailable = false;
 
             if (apiAvailability.isUserResolvableError(errorCode)) {
                 MobileMessagingLogger.e(InternalSdkError.ERROR_ACCESSING_GCM.get());
@@ -61,8 +60,6 @@ public class PlayServicesSupport {
             return;
         }
 
-        isPlayServicesAvailable = true;
-
         // Start IntentService to register this application with GCM.
         Intent intent = new Intent(context, MobileMessagingGcmIntentService.class);
         intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
@@ -70,9 +67,12 @@ public class PlayServicesSupport {
     }
 
     public static boolean isPlayServicesAvailable(Context context) {
-        if (isPlayServicesAvailable == null) {
-            new PlayServicesSupport().checkPlayServices(context);
+        if (isPlayServicesAvailable != null) {
+            return isPlayServicesAvailable;
         }
+
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        isPlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
         return isPlayServicesAvailable;
     }
 }

@@ -532,6 +532,12 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     private void setRegistrationIdReported(boolean registrationIdReported) {
+
+        if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
+            MobileMessagingLogger.w("Application code not found, check your setup");
+            return;
+        }
+
         registrationSynchronizer().setRegistrationIdReported(registrationIdReported);
     }
 
@@ -1040,7 +1046,7 @@ public class MobileMessagingCore extends MobileMessaging {
             mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
-            mobileMessagingCore.playServicesSupport.checkPlayServices(application.getApplicationContext());
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext());
             synchronized (MobileMessagingCore.class) {
                 MobileMessagingCore.instance = mobileMessagingCore;
             }
