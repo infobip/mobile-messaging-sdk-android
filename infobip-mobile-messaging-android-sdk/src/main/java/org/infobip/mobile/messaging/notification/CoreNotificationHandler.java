@@ -102,7 +102,7 @@ public class CoreNotificationHandler implements NotificationHandler {
         if (notificationSettings == null) return null;
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, MobileMessagingCore.MM_DEFAULT_CHANNEL_ID)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, getChannelIdForNotification(notificationSettings))
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
@@ -112,6 +112,7 @@ public class CoreNotificationHandler implements NotificationHandler {
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
+        setPriorityForHeadsupNotification(notificationBuilder, notificationSettings);
 
         return notificationBuilder;
     }
@@ -239,6 +240,38 @@ public class CoreNotificationHandler implements NotificationHandler {
         }
 
         notificationBuilder.setSound(soundUri);
+    }
+
+    /**
+     * This method will set priority to HIGH if heads up notification is required.
+     * <br>This setting is necessary for Android 5.0 - 7.1 versions
+     * @param notificationBuilder - notification builder
+     * @param notificationSettings - notification settings to use when choosing priority
+     */
+    private void setPriorityForHeadsupNotification(NotificationCompat.Builder notificationBuilder, @NonNull NotificationSettings notificationSettings) {
+        if (!notificationSettings.areHeadsUpNotificationsEnabled()) {
+            return;
+        }
+
+        if (ActivityLifecycleMonitor.isForeground()) {
+            return;
+        }
+
+        notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
+    }
+
+    /**
+     * This method will return channel with HIGH importance if heads up notification is required.
+     * <br>This is necessary for Android 8.0 and above.
+     * @param notificationSettings - notification settings to use when choosing the channel
+     */
+    @NonNull
+    private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings) {
+        if (!notificationSettings.areHeadsUpNotificationsEnabled() || ActivityLifecycleMonitor.isForeground()) {
+            return MobileMessagingCore.MM_DEFAULT_CHANNEL_ID;
+        }
+
+        return MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID;
     }
 
     /**

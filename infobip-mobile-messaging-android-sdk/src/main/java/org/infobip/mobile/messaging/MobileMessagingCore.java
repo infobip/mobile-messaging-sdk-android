@@ -70,6 +70,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
 
     protected static MobileMessagingCore instance;
@@ -124,24 +125,33 @@ public class MobileMessagingCore extends MobileMessaging {
         ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
 
-        initDefaultChannel();
+        initDefaultChannels();
     }
 
-    private void initDefaultChannel() {
+    private void initDefaultChannels() {
         if (Build.VERSION.SDK_INT < 26) {
             return;
         }
-        final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
             return;
         }
 
-        final CharSequence channelName = SoftwareInformation.getAppName(context);
-        final int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        final NotificationChannel notificationChannel = new NotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, importance);
+        CharSequence channelName = SoftwareInformation.getAppName(context);
+
+        NotificationChannel notificationChannel = new NotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
         notificationChannel.enableLights(true);
         notificationChannel.enableVibration(true);
         notificationManager.createNotificationChannel(notificationChannel);
+
+        NotificationSettings notificationSettings = getNotificationSettings();
+        if (notificationSettings.areHeadsUpNotificationsEnabled()) {
+            NotificationChannel highPriorityNotificationChannel = new NotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, channelName + " High Priority", NotificationManager.IMPORTANCE_HIGH);
+            highPriorityNotificationChannel.enableLights(true);
+            highPriorityNotificationChannel.enableVibration(true);
+            notificationManager.createNotificationChannel(highPriorityNotificationChannel);
+        }
     }
 
     /**

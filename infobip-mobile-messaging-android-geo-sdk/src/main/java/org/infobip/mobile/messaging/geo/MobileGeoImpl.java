@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.push.PushMessageHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -105,7 +106,8 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
         try {
             JSONObject geo = new JSONObject(message.getInternalData());
-            return geo.getJSONArray("geo") != null && geo.getJSONArray("geo").length() > 0;
+            JSONArray areas = geo.optJSONArray("geo");
+            return areas != null && areas.length() > 0;
         } catch (JSONException e) {
             MobileMessagingLogger.e(e.getMessage());
             return false;

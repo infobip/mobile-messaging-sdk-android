@@ -119,6 +119,14 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED);
     }
 
+    public void setHeadsUpNotificationsEnabled(boolean headsUpNotificationsEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.HEADSUP_NOTIFICATIONS_ENABLED, headsUpNotificationsEnabled);
+    }
+
+    public boolean areHeadsUpNotificationsEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.HEADSUP_NOTIFICATIONS_ENABLED);
+    }
+
     public boolean markSeenOnTap() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP);
     }
@@ -149,6 +157,7 @@ public class NotificationSettings {
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
         private boolean multipleNotificationsEnabled;
+        private boolean headsUpNotificationsEnabled = (boolean) MobileMessagingProperty.HEADSUP_NOTIFICATIONS_ENABLED.getDefaultValue();
 
         public Builder(Context context) {
             if (null == context) {
@@ -340,6 +349,16 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to disable heads-up notifications.
+         * <p/>
+         * @return {@link Builder}
+         */
+        public Builder withoutHeadsUpNotifications() {
+            this.headsUpNotificationsEnabled = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>NotificationSettings</i> configuration.
          *
          * @return {@link NotificationSettings}
@@ -355,6 +374,7 @@ public class NotificationSettings {
             notificationSettings.setNotificationAutoCancel(notificationAutoCancel);
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
             notificationSettings.setMultipleNotificationsEnabled(multipleNotificationsEnabled);
+            notificationSettings.setHeadsUpNotificationsEnabled(headsUpNotificationsEnabled);
 
             return notificationSettings;
         }
