@@ -33,7 +33,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldReturnUnknown_whenReadingMobileCountryCode_ifNetworkOperatorLengthIsLessThan3() {
+    public void shouldReturnUnknown_whenReadingMobileCountryCode_ifNetworkOperatorIsInvalid() {
         givenMethodWillReturn(telephonyManager.getNetworkOperator(), invalidOperatorCodes);
 
         for (String ignored : invalidOperatorCodes) {
@@ -42,7 +42,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldReturnUnknown_whenReadingSIMCountryCode_ifNetworkOperatorLengthIsLessThan3() {
+    public void shouldReturnUnknown_whenReadingSIMCountryCode_ifNetworkOperatorIsInvalid() {
         givenMethodWillReturn(telephonyManager.getSimOperator(), invalidOperatorCodes);
 
         for (String ignored : invalidOperatorCodes) {
@@ -51,7 +51,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldReturnUnknown_whenReadingMobileNetworkCode_ifNetworkOperatorLengthIsLessThan6() {
+    public void shouldReturnUnknown_whenReadingMobileNetworkCode_ifNetworkOperatorIsInvalid() {
         givenMethodWillReturn(telephonyManager.getNetworkOperator(), invalidOperatorCodes);
 
         for (String ignored : invalidOperatorCodes) {
@@ -60,7 +60,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldReturnUnknown_whenReadingSIMNetworkCode_ifNetworkOperatorLengthIsLessThan3() {
+    public void shouldReturnUnknown_whenReadingSIMNetworkCode_ifNetworkOperatorIsInvalid() {
         givenMethodWillReturn(telephonyManager.getSimOperator(), invalidOperatorCodes);
 
         for (String ignored : invalidOperatorCodes) {
