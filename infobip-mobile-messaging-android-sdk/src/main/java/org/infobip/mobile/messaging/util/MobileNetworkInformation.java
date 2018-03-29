@@ -89,14 +89,14 @@ public class MobileNetworkInformation {
     }
 
     private static String extractMCC(String operator) {
-        if (StringUtils.isNotBlank(operator)) {
+        if (StringUtils.isNotBlank(operator) && operator.length() >= 3) {
             return operator.substring(0, 3);
         }
         return "unknown";
     }
 
     private static String extractMNC(String operator) {
-        if (StringUtils.isNotBlank(operator)) {
+        if (StringUtils.isNotBlank(operator) && operator.length() >= 3) {
             return operator.substring(3);
         }
         return "unknown";
