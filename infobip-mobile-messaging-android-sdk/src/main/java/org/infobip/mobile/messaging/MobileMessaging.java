@@ -173,7 +173,7 @@ public abstract class MobileMessaging {
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <p>
-     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from you app,
+     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
      * but you might want to sync new user data to target this user specifically.
      * <p>
      * Use this method if:
@@ -195,7 +195,7 @@ public abstract class MobileMessaging {
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <p>
-     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from you app,
+     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
      * but you might want to sync new user data to target this user specifically.
      * <p>
      * Use this method if:
