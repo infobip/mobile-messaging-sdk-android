@@ -188,6 +188,11 @@ public enum Event {
     SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED"),
 
     /**
+     * It is triggered when user is successfully logged out from the server.
+     */
+    USER_LOGGED_OUT("org.infobip.mobile.messaging.USER_LOGGED_OUT"),
+
+    /**
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code

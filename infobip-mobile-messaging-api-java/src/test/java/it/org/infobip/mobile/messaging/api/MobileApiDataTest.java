@@ -157,4 +157,22 @@ public class MobileApiDataTest {
                 "}",
                 debugServer.getBody(), true);
     }
+
+    @Test
+    public void create_logoutUser_success() throws Exception {
+
+        // prepare server
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        // send request
+        mobileApiData.logoutUser();
+
+        //inspect http context
+        assertEquals("/mobile/1/data/logout", debugServer.getUri());
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals(0, debugServer.getQueryParametersCount());
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertNull(debugServer.getBody());
+    }
 }

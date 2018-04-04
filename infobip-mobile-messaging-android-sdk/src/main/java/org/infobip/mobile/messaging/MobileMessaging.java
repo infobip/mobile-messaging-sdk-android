@@ -167,6 +167,52 @@ public abstract class MobileMessaging {
     public abstract UserData getUserData();
 
     /**
+     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage.
+     * <p>
+     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
+     * registration. Logging out user means that push registration along with device specific data will remain, but user's data
+     * (such as first name, custom data,...) will be wiped out.
+     * <p>
+     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from you app,
+     * but you might want to sync new user data to target this user specifically.
+     * <p>
+     * Use this method if:
+     * <ul>
+     * <li>you're syncing user data to our server</li>
+     * <li>your application has logout option</li>
+     * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
+     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
+     * </ul>
+     *
+     * @see Event#USER_LOGGED_OUT
+     */
+    public abstract void logoutUser();
+
+    /**
+     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage.
+     * <p>
+     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
+     * registration. Logging out user means that push registration along with device specific data will remain, but user's data
+     * (such as first name, custom data,...) will be wiped out.
+     * <p>
+     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from you app,
+     * but you might want to sync new user data to target this user specifically.
+     * <p>
+     * Use this method if:
+     * <ul>
+     * <li>you're syncing user data to our server</li>
+     * <li>your application has logout option</li>
+     * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
+     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
+     * </ul>
+     *
+     * @param listener listener to report the result on
+     * @see ResultListener
+     * @see Event#USER_LOGGED_OUT
+     */
+    public abstract void logoutUser(ResultListener listener);
+
+    /**
      * Send mobile originated messages.
      * </p>
      * Destination for each message is set inside {@link Message}.

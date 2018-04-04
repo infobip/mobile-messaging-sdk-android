@@ -94,4 +94,9 @@ public interface Broadcaster {
      * @param systemData system data
      */
     void systemDataReported(SystemData systemData);
+
+    /**
+     * Sends broadcast that user is logged out
+     */
+    void userLoggedOut();
 }

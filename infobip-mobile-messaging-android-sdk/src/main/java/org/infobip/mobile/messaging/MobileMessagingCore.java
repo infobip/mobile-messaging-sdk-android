@@ -21,6 +21,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobile.data.LogoutUserSynchronizer;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -89,6 +90,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
     private SystemDataReporter systemDataReporter;
+    private LogoutUserSynchronizer logoutUserSynchronizer;
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
     private VersionChecker versionChecker;
@@ -788,6 +790,23 @@ public class MobileMessagingCore extends MobileMessaging {
         return UserData.merge(existing, getUnreportedUserData());
     }
 
+    @Override
+    public void logoutUser() {
+        logoutUserSynchronizer().sync(null);
+    }
+
+    @Override
+    public void logoutUser(ResultListener listener) {
+        logoutUserSynchronizer().sync(listener);
+    }
+
+    public void userLoggedOut() {
+        if (messageStore != null) {
+            messageStore.deleteAll(context);
+        }
+        resetUserData();
+    }
+
     @Nullable
     public UserData getUnreportedUserData() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
@@ -805,6 +824,11 @@ public class MobileMessagingCore extends MobileMessaging {
             PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+    }
+
+    public void resetUserData() {
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+        PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
     }
 
     @Override
@@ -916,6 +940,15 @@ public class MobileMessagingCore extends MobileMessaging {
                     broadcaster, mobileApiResourceProvider().getMobileApiData(context));
         }
         return systemDataReporter;
+    }
+
+    @NonNull
+    private LogoutUserSynchronizer logoutUserSynchronizer() {
+        if (logoutUserSynchronizer == null) {
+            logoutUserSynchronizer = new LogoutUserSynchronizer(this, stats, retryPolicyProvider.DEFAULT(), registrationAlignedExecutor,
+                    broadcaster, mobileApiResourceProvider().getMobileApiData(context));
+        }
+        return logoutUserSynchronizer;
     }
 
     @NonNull

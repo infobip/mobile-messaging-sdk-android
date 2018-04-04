@@ -132,6 +132,13 @@ public class AndroidBroadcaster implements Broadcaster {
         LocalBroadcastManager.getInstance(context).sendBroadcast(dataReported);
     }
 
+    @Override
+    public void userLoggedOut() {
+        Intent userLoggedOut = prepareIntent(Event.USER_LOGGED_OUT);
+        context.sendBroadcast(userLoggedOut);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(userLoggedOut);
+    }
+
     private Intent prepareIntent(Event event) {
         return prepareIntent(event.getKey());
     }

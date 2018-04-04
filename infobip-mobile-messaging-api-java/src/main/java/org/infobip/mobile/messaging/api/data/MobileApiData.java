@@ -34,4 +34,8 @@ public interface MobileApiData {
     @HttpRequest(method = HttpMethod.POST, value = "user")
     UserDataReport reportUserData(@Query(name = "externalUserId") String externalUserId,
                                   @Body org.infobip.mobile.messaging.api.data.UserDataReport userDataReport);
+
+    @Version("1")
+    @HttpRequest(method = HttpMethod.POST, value = "logout")
+    Void logoutUser();
 }
