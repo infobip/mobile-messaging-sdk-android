@@ -319,6 +319,12 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     @Override
+    public void logoutUser() {
+        stopGeoMonitoring();
+        messageStore.deleteAll(context);
+    }
+
+    @Override
     public void setGeoComponentsEnabledSettings(Context context, boolean componentsStateEnabled) {
         ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsReceiver.class);
         ComponentUtil.setState(context, componentsStateEnabled, GeofenceTransitionsIntentService.class);

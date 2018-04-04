@@ -28,4 +28,9 @@ public class MockMessageHandlerModule implements MessageHandlerModule {
     public void cleanup() {
 
     }
+
+    @Override
+    public void logoutUser() {
+
+    }
 }

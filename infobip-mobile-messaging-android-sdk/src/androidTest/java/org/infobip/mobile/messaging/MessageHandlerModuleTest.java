@@ -34,6 +34,7 @@ public class MessageHandlerModuleTest {
             public boolean handleMessage(Message message) {return false;}
             public void applicationInForeground() {}
             public void cleanup() {}
+            public void logoutUser() {}
         }
 
         // When

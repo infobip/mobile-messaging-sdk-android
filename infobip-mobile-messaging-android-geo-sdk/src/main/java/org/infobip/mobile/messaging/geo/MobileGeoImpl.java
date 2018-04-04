@@ -78,6 +78,16 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
     }
 
     @Override
+    public void logoutUser() {
+        Geofencing.getInstance(context).logoutUser();
+
+        PreferenceHelper.remove(context, MobileMessagingGeoProperty.ALL_ACTIVE_GEO_AREAS_MONITORED.getKey());
+        PreferenceHelper.remove(context, MobileMessagingGeoProperty.FINISHED_CAMPAIGN_IDS.getKey());
+        PreferenceHelper.remove(context, MobileMessagingGeoProperty.SUSPENDED_CAMPAIGN_IDS.getKey());
+        PreferenceHelper.remove(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey());
+    }
+
+    @Override
     public void init(Context appContext) {
         this.context = appContext;
     }

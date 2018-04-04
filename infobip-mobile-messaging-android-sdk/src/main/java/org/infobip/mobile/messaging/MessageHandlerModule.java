@@ -32,4 +32,10 @@ public interface MessageHandlerModule {
      * Called on module when cleanup is performed on the core library
      */
     void cleanup();
+
+
+    /**
+     * Called on module when user logout is performed on the core library
+     */
+    void logoutUser();
 }
