@@ -791,12 +791,12 @@ public class MobileMessagingCore extends MobileMessaging {
     }
 
     @Override
-    public void logoutUser() {
+    public void logout() {
         logoutUserSynchronizer().sync(null);
     }
 
     @Override
-    public void logoutUser(ResultListener listener) {
+    public void logout(ResultListener listener) {
         logoutUserSynchronizer().sync(listener);
     }
 

@@ -38,7 +38,7 @@ public class LogoutUserSyncronizerTest extends MobileMessagingTestCase {
         assertEquals(1, MobileMessaging.getInstance(context).getMessageStore().findAll(context).size());
 
         //when
-        mobileMessaging.logoutUser();
+        mobileMessaging.logout();
 
         //then
         verify(broadcaster, after(1000).atLeastOnce()).userLoggedOut();

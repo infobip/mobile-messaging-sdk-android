@@ -30,7 +30,7 @@ public interface Broadcaster {
     void notificationTapped(Message message);
 
     /**
-     * Sends broadcast that error occured.
+     * Sends broadcast that error occurred.
      *
      * @param error error to provide.
      */
@@ -47,7 +47,7 @@ public interface Broadcaster {
      * Sends broadcast about new registration data
      *
      * @param cloudToken         GCM/FCM cloud token
-     * @param pushRegistrationId Infobip registraiton id
+     * @param pushRegistrationId Infobip registration id
      */
     void registrationCreated(String cloudToken, String pushRegistrationId);
 
@@ -75,7 +75,7 @@ public interface Broadcaster {
     void seenStatusReported(String... messageIds);
 
     /**
-     * Sends broadacast indicating that MO messages were sent to the server
+     * Sends broadcast indicating that MO messages were sent to the server
      *
      * @param messages list of sent messages
      */

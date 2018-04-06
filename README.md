@@ -77,16 +77,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 
 ### Events
 
-Library generates intents on the following events as described in [Event](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java):
-
-* __Message received__ - is triggered when message is received.
-* __Messages sent__ - is triggered when messages are sent.
-* __Registration acquired__ - is triggered when GCM registration token is received.
-* __Registration created__ - is triggered when GCM registration token successfully stored on the registration server.
-* __API communication error__ - is triggered on every error returned by API.
-* __API validation error__ - is triggerred when there is an error during validation of input parameters (e.g.: invalid MSISDN).
-* __Delivery reports sent__ - is triggered when message delivery is reported.
-* __User data synced__ - is triggered when user data is successfully saved on the registration server.
+Library generates intents on the [events](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java) as described in [Events](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Events) wiki.
 
 ### Linking MSISDN
 

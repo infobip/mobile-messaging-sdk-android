@@ -81,7 +81,7 @@ class RegistrationTokenHandler {
     }
 
     /**
-     * Cleanup GCM token accosicated with a specific GCM sender ID.
+     * Cleanup GCM token associated with a specific GCM sender ID.
      *
      * @param gcmSenderID GCM sender ID
      */

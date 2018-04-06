@@ -97,7 +97,7 @@ public abstract class MobileMessaging {
     /**
      * Reports seen status of messages to Mobile Messaging servers.
      * </p>
-     * This method shall be user to report seen status when user actually sees message content.
+     * This method shall be used to report seen status when user actually sees message content.
      *
      * @param messageIds message ids to report seen status for
      * @see Event#SEEN_REPORTS_SENT
@@ -186,7 +186,7 @@ public abstract class MobileMessaging {
      *
      * @see Event#USER_LOGGED_OUT
      */
-    public abstract void logoutUser();
+    public abstract void logout();
 
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage.
@@ -210,7 +210,7 @@ public abstract class MobileMessaging {
      * @see ResultListener
      * @see Event#USER_LOGGED_OUT
      */
-    public abstract void logoutUser(ResultListener listener);
+    public abstract void logout(ResultListener listener);
 
     /**
      * Send mobile originated messages.
