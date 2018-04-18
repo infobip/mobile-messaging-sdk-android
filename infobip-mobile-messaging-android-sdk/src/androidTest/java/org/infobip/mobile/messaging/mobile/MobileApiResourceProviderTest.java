@@ -46,6 +46,37 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void shouldCalculateAppCodeHashInRequest() {
+        // when
+        try {
+            mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
+            assertTrue(false);
+        } catch (ApiIOException ignored) {
+        }
+        String applicationCodeInHeaders = debugServer.getHeader(CustomApiHeaders.APPLICATION_CODE.getValue());
+
+        // then
+        assertEquals(10, applicationCodeInHeaders.length());
+        assertEquals("0690db1eb3", applicationCodeInHeaders);
+        assertEquals("0690db1eb3", MobileMessagingCore.getApplicationCodeHash("TestApplicationCode"));
+    }
+
+    @Test
+    public void shouldForwardCustomHeadersInRequest() {
+        // when
+        try {
+            mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
+            assertTrue(false);
+        } catch (ApiIOException ignored) {
+        }
+
+        // then
+        assertEquals("0690db1eb3",  debugServer.getHeader(CustomApiHeaders.APPLICATION_CODE.getValue()));
+        assertEquals("false", debugServer.getHeader(CustomApiHeaders.FOREGROUND.getValue()));
+        assertEquals("TestDeviceInstanceId", debugServer.getHeader(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue()));
+    }
+
+    @Test
     public void shouldResetBaseUrlOnError() {
         // given
         MobileMessagingCore.setApiUri(context, "http://customurl");

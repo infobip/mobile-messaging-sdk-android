@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
@@ -54,6 +56,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +80,7 @@ public class MobileMessagingCore extends MobileMessaging {
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
     static String applicationCode;
+    static Map<String, String> applicationCodeHashMap;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private static MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
@@ -651,6 +655,25 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public String getApplicationCode() {
         return getApplicationCode(context);
+    }
+
+    public static String getApplicationCodeHash(Context context) {
+        return getApplicationCodeHash(getApplicationCode(context));
+    }
+
+    public static String getApplicationCodeHash(String applicationCode) {
+        if (StringUtils.isBlank(applicationCode)) {
+            return null;
+        }
+
+        if (applicationCodeHashMap != null && applicationCodeHashMap.containsKey(applicationCode)) {
+            return applicationCodeHashMap.get(applicationCode);
+        }
+
+        String appCodeHash = new String(Hex.encodeHex(DigestUtils.sha1(applicationCode))).substring(0, 10);
+        applicationCodeHashMap = Collections.singletonMap(applicationCode, appCodeHash);
+
+        return appCodeHash;
     }
 
     public static void setApiUri(Context context, String apiUri) {
