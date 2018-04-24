@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.InboxActivity">
+    <item
+        android:id="@+id/action_id"
+        android:title="@string/action_registration_id_copy"
+        android:icon="@drawable/ic_content_copy_white_24dp"
+        app:showAsAction="always" />
+</menu>

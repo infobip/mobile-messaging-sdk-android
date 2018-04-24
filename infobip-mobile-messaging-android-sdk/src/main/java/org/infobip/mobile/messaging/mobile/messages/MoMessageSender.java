@@ -82,10 +82,20 @@ public class MoMessageSender {
     }
 
     public void send(final MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
+        send(listener, true, messages);
+    }
+
+    public void sendDontSave(final MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
+        send(listener, false, messages);
+    }
+
+    public void send(final MobileMessaging.ResultListener<Message[]> listener, final boolean doSave, Message... messages) {
         new Task() {
             @Override
             public void after(Message[] messages) {
-                messageStoreWrapper.upsert(messages);
+                if (doSave) {
+                    messageStoreWrapper.upsert(messages);
+                }
                 broadcaster.messagesSent(Arrays.asList(messages));
                 if (listener != null) {
                     listener.onResult(messages);

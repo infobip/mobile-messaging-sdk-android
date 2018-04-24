@@ -24,6 +24,14 @@ public interface MessageHandlerModule {
     boolean handleMessage(Message message);
 
     /**
+     * Called when message is tapped by user
+     *
+     * @param message message object
+     * @return module should return true if this message was consumed and no further processing required
+     */
+    boolean messageTapped(Message message);
+
+    /**
      * Called in module when application goes to foreground
      */
     void applicationInForeground();

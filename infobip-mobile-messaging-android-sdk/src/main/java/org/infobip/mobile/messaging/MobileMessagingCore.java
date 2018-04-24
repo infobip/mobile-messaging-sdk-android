@@ -14,7 +14,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
-import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelperImpl;
+import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
@@ -221,7 +221,7 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public static DatabaseHelper getDatabaseHelper(Context context) {
         if (null == databaseHelper) {
-            databaseHelper = new DatabaseHelperImpl(context.getApplicationContext());
+            databaseHelper = new PushDatabaseHelperImpl(context.getApplicationContext());
         }
         return databaseHelper;
     }
@@ -494,6 +494,11 @@ public class MobileMessagingCore extends MobileMessaging {
     public void setMessagesSeen(String... messageIds) {
         addUnreportedSeenMessageIds(messageIds);
         updateStoredMessagesWithSeenStatus(messageIds);
+        sync();
+    }
+
+    public void setMessagesSeenDontStore(String... messageIds) {
+        addUnreportedSeenMessageIds(messageIds);
         sync();
     }
 
@@ -865,6 +870,10 @@ public class MobileMessagingCore extends MobileMessaging {
             getMessageStore().save(context, messages);
         }
         moMessageSender().send(listener, messages);
+    }
+
+    public void sendMessagesDontStore(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
+        moMessageSender().sendDontSave(listener, messages);
     }
 
     public void sendMessagesWithRetry(Message... messages) {

@@ -22,7 +22,7 @@ public abstract class PreferenceHelper {
     private static final Object LOCK = new Object();
     private static Cryptor cryptor = null;
 
-    private PreferenceHelper() {
+    protected PreferenceHelper() {
     }
 
     private static Cryptor getCryptor(Context context) {
@@ -275,12 +275,16 @@ public abstract class PreferenceHelper {
         editSet(context, key, mutator);
     }
 
-    public static void saveStringArray(Context context, MobileMessagingProperty property, final String... strings) {
+    public static void saveStringArray(Context context, MobileMessagingProperty property, String... strings) {
+        saveStringArray(context, property.getKey(), strings);
+    }
+
+    public static void saveStringArray(Context context, String key, final String... strings) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final HashSet<String> stringSet = new HashSet<String>() {{
             addAll(Arrays.asList(strings));
         }};
-        sharedPreferences.edit().putStringSet(property.getKey(), stringSet).apply();
+        sharedPreferences.edit().putStringSet(key, stringSet).apply();
     }
 
     public static Set<String> findStringSet(Context context, MobileMessagingProperty property) {

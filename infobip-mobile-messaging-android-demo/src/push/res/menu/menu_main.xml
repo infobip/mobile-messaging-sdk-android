@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".screens.MainActivity" >
+
+
+    <item
+        android:id="@+id/action_erase"
+        android:title="@string/menu_action_erase"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_registration_id"
+        android:title="@string/menu_action_registration_id"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_gsm"
+        android:title="@string/menu_action_gsm"
+        app:showAsAction="never" />
+</menu>

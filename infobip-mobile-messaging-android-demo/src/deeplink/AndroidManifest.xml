@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.infobip.mobile.messaging.demo">
+
+    <application>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/main_activity_title"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- Accepts URIs that begin with "com.infobip.mobilemessaging://deeplink" -->
+                <data
+                    android:host="deeplink"
+                    android:scheme="com.infobip.mobilemessaging" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".RedScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".GreenScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".BlueScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
+
+        <receiver
+            android:name=".NotificationTappedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

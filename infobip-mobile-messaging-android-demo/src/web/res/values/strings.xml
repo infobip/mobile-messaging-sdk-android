@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main_activity_title">Web View Example</string>
+    <string name="main_activity_web_deeplink_text">Send yourself a push message with web link and tap on notification. It will open web view with the link from the message.\n\nCheck github wiki for details:\nhttps://github.com/infobip/mobile-messaging-sdk-android/wiki</string>
+    <string name="web_view_activity_title">Web View</string>
+
+</resources>

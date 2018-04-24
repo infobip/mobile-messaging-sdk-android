@@ -167,7 +167,7 @@ public abstract class MobileMessaging {
     public abstract UserData getUserData();
 
     /**
-     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage.
+     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
      * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
@@ -189,7 +189,7 @@ public abstract class MobileMessaging {
     public abstract void logout();
 
     /**
-     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage.
+     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
      * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
@@ -236,7 +236,7 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
-     * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive).
+     * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
@@ -250,7 +250,7 @@ public abstract class MobileMessaging {
      * of the particular application installation. This identifier is only available after {@link Event#REGISTRATION_CREATED}
      * and does not change for the whole lifetime of the application installation.
      *
-     * @return unique push registration id
+     * @return unique push registration id, null if no registration is available yet
      */
     public abstract String getPushRegistrationId();
 

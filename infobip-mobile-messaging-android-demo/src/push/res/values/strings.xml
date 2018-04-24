@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main activity -->
+    <string name="main_activity_title">Messages</string>
+    <string name="main_activity_message_count_default">0</string>
+    <string name="main_activity_total_received">"Received messages: "</string>
+
+    <!-- Menu -->
+    <string name="menu_action_gsm">GSM number</string>
+    <string name="menu_action_registration_id">Registration ID</string>
+    <string name="menu_action_erase">Erase inbox</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_title_gsm">GSM</string>
+    <string name="dialog_title_registration_id">Registration ID</string>
+    <string name="dialog_action_save">Save</string>
+
+    <!-- Toast messages -->
+    <string name="toast_user_data_saved">User data saved</string>
+</resources>

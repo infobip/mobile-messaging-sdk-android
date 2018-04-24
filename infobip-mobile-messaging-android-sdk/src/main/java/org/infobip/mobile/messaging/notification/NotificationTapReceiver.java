@@ -9,10 +9,11 @@ import android.support.annotation.VisibleForTesting;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 
@@ -41,6 +42,12 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         if (message == null) {
             MobileMessagingLogger.e("Received no message in NotificationTapReceiver");
             return;
+        }
+
+        for (MessageHandlerModule module : mobileMessagingCore(context).getMessageHandlerModules()) {
+            if (module.messageTapped(message)) {
+                return;
+            }
         }
 
         broadcaster(context).notificationTapped(message);

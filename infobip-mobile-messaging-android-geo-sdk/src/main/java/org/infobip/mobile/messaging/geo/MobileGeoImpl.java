@@ -104,6 +104,11 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
     }
 
     @Override
+    public boolean messageTapped(Message message) {
+        return false;
+    }
+
+    @Override
     public void applicationInForeground() {
         GeoReportSynchronization geoReportSynchronization = new GeoReportSynchronization(context);
         geoReportSynchronization.synchronize();
@@ -123,5 +128,4 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
             return false;
         }
     }
-
 }

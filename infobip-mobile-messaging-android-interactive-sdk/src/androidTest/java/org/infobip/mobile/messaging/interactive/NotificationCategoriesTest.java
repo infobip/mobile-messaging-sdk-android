@@ -80,14 +80,14 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
     @Test
     public void shouldPerformSendMoAndMarkMessagesSeen_whenTriggeringSdkActions() throws Exception {
         //given
-        Message givenMessage = createMessage(context, "SomeMessageId", false);
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
                 .withMoMessage()
                 .build();
         NotificationCategory givenCategory = givenNotificationCategory(givenTappedNotificationAction);
+        Message givenMessage = createMessage(context, "SomeMessageId", givenCategory.getCategoryId(), false);
 
         //when
-        mobileInteractive.triggerSdkActionsFor(givenCategory.getCategoryId(), givenTappedNotificationAction, givenMessage);
+        mobileInteractive.triggerSdkActionsFor(givenTappedNotificationAction, givenMessage);
 
         //then
         Mockito.verify(mmcMock, Mockito.times(1)).setMessagesSeen(messageIdArgumentCaptor.capture());

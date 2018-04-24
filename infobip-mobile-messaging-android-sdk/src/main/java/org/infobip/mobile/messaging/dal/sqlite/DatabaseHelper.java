@@ -34,10 +34,25 @@ public interface DatabaseHelper {
     <T extends DatabaseContract.DatabaseObject> long countAll(Class<T> cls);
 
     /**
-     * Saves object to database
+     * Counts all instances of specified type in database
+     * @param cls object class
+     * @param <T> object type
+     * @param sqlWhereCondition additional custom condition to use when counting
+     * @return number of all objects in database
+     */
+    <T extends DatabaseContract.DatabaseObject> long countAll(Class<T> cls, String sqlWhereCondition);
+
+    /**
+     * Saves object to database, replaces on conflict
      * @param object object to save
      */
     void save(DatabaseContract.DatabaseObject object);
+
+    /**
+     * Inserts object to database, fails on conflict
+     * @param object object to insert
+     */
+    void insert(DatabaseContract.DatabaseObject object) throws PrimaryKeyViolationException;
 
     /**
      * Deletes all objects of the specified type from the database

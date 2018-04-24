@@ -62,10 +62,10 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
     public void test_should_send_notification_action_clicked_event() throws Exception {
 
         // Given
-        Message givenMessage = createMessage(context, "SomeMessageId", false);
-        int givenNotificationId = 1234;
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId").build();
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
+        Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
+        int givenNotificationId = 1234;
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
@@ -85,7 +85,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         assertJEquals(givenNotificationCategory, actualCategory);
         assertJEquals(givenMessage, actualMessage);
 
-        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualCategory.getCategoryId(), actualAction, actualMessage);
+        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualAction, actualMessage);
         Mockito.verify(contextMock, Mockito.never()).startActivity(any(Intent.class));
     }
 
@@ -93,12 +93,12 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
     public void test_should_send_action_clicked_event_and_open_activity() throws Exception {
 
         // Given
-        Message givenMessage = createMessage(context, "SomeMessageId", false);
-        int givenNotificationId = 1234;
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
                 .withBringingAppToForeground(true)
                 .build();
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
+        Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
+        int givenNotificationId = 1234;
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId, notificationSettings.getIntentFlags());
 
         // When
@@ -118,7 +118,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         assertJEquals(givenMessage, actualMessage);
         assertJEquals(givenTappedNotificationAction, actualAction);
 
-        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualCategory.getCategoryId(), actualAction, actualMessage);
+        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualAction, actualMessage);
         Mockito.verify(contextMock, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
 
         Intent actualIntent = intentArgumentCaptor.getValue();
@@ -137,11 +137,11 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
     public void test_should_trigger_sdk_actions_when_clicked_on_action_button() throws Exception {
 
         // Given
-        Message givenMessage = createMessage(context, "SomeMessageId", false);
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId")
                 .withMoMessage()
                 .build();
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
+        Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, 1234, notificationSettings.getIntentFlags());
 
         // When
@@ -155,6 +155,6 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         Message actualMessage = messageArgumentCaptor.getValue();
         NotificationAction actualAction = notificationActionArgumentCaptor.getValue();
         NotificationCategory actualCategory = notificationCategoryArgumentCaptor.getValue();
-        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualCategory.getCategoryId(), actualAction, actualMessage);
+        Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualAction, actualMessage);
     }
 }

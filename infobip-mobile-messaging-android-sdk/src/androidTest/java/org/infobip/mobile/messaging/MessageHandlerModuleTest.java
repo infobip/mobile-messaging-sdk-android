@@ -32,6 +32,7 @@ public class MessageHandlerModuleTest {
         class UnknownModule implements MessageHandlerModule {
             public void init(Context appContext) {}
             public boolean handleMessage(Message message) {return false;}
+            public boolean messageTapped(Message message) {return false;}
             public void applicationInForeground() {}
             public void cleanup() {}
             public void logoutUser() {}

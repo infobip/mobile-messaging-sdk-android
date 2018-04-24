@@ -50,32 +50,34 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         int notificationId = intent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
         Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
 
-        Message message = Message.createFrom(messageBundle);
-        NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
-        NotificationAction notificationAction = NotificationAction.createFrom(actionBundle);
-        String inputText = getInputTextFromIntent(intent, notificationAction);
         cancelNotification(context, notificationId);
 
+        Message message = Message.createFrom(messageBundle);
         if (message == null) {
             MobileMessagingLogger.e("Received no message in NotificationActionTapReceiver");
             return;
         }
+
+        NotificationAction notificationAction = NotificationAction.createFrom(actionBundle);
         if (notificationAction == null) {
             MobileMessagingLogger.e("Received no action in NotificationActionTapReceiver");
             return;
         }
+
+        NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
         if (notificationCategory == null) {
             MobileMessagingLogger.e("Received no notification category in NotificationActionTapReceiver");
             return;
         }
 
+        String inputText = getInputTextFromIntent(intent, notificationAction);
         if (inputText != null) {
             notificationAction.setInputText(inputText);
         }
 
         broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
 
-        mobileInteractive(context).triggerSdkActionsFor(notificationCategory.getCategoryId(), notificationAction, message);
+        mobileInteractive(context).triggerSdkActionsFor(notificationAction, message);
         startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
     }
 

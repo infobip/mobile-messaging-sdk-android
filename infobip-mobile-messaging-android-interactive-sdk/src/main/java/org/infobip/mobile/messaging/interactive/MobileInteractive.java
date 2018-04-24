@@ -4,6 +4,8 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.Message;
 
+import java.util.Set;
+
 /**
  * @author tjuric
  * @since 04/08/17.
@@ -60,14 +62,20 @@ public abstract class MobileInteractive {
     public abstract NotificationCategory getNotificationCategory(String categoryId);
 
     /**
+     * Gets map of notification categories. Key is category ID, value is related NotificatioCategory.
+     *
+     * @return map of configured categories.
+     */
+    public abstract Set<NotificationCategory> getNotificationCategories();
+
+    /**
      * Triggers default SDK actions (for example, mark message as seen) performed by SDK on
      * {@link InteractiveEvent#NOTIFICATION_ACTION_TAPPED} event.
      *
-     * @param categoryId Id of the category
      * @param action     Action to use for performing default actions. One that matches the category ID
      * @param message    Message object
      */
-    public abstract void triggerSdkActionsFor(String categoryId, NotificationAction action, Message message);
+    public abstract void triggerSdkActionsFor(NotificationAction action, Message message);
 
     /**
      * Cleans up MobileInteractive installation and removes custom categories.

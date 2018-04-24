@@ -27,29 +27,19 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("${project.hasProperty('signingKeystore') ? project['signingKeystore'] : System.getenv('KEYSTORE')}")
-            storePassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
+            storeFile file("${property(project, 'signingKeystore', 'KEYSTORE')}")
+            storePassword "${property(project, 'signingKeystorePassword', 'KEYSTORE_PASSWORD')}"
             keyAlias "alias_name"
+            keyPassword "${property(project, 'signingKeystorePassword', 'KEYSTORE_PASSWORD')}"
             keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
         }
     }
 
     buildTypes {
         all {
-            def googleAppId = project.hasProperty('google_app_id') ? project['google_app_id'] : System.getenv('GOOGLE_APP_ID')
-            if (googleAppId) {
-                resValue "string", "google_app_id", googleAppId
-            }
-
-            def infobipApplicationCode = project.hasProperty('infobip_application_code') ? project['infobip_application_code'] : System.getenv('INFOBIP_APPLICATION_CODE')
-            if (infobipApplicationCode) {
-                resValue "string", "infobip_application_code", infobipApplicationCode
-            }
-
-            def infobipApiUri = project.hasProperty('infobip_api_uri') ? project['infobip_api_uri'] : System.getenv('INFOBIP_API_URI')
-            if (infobipApiUri) {
-                resValue "string", "infobip_api_uri", infobipApiUri
-            }
+            property(project, 'google_app_id', 'GOOGLE_APP_ID')?.with { resValue "string", "google_app_id", delegate }
+            property(project, 'infobip_application_code', 'INFOBIP_APPLICATION_CODE')?.with { resValue "string", "infobip_application_code", delegate }
+            property(project, 'infobip_api_uri', 'INFOBIP_API_URI')?.with { resValue "string", "infobip_api_uri", delegate }
         }
         release {
             minifyEnabled true
@@ -62,10 +52,31 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        push {
+            dimension "default"
+        }
+
+        chat {
+            dimension "default"
+        }
+
+        deeplink {
+            dimension "default"
+        }
+
+        web {
+            dimension "default"
+        }
+    }
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
+    compile project(':infobip-mobile-messaging-android-chat-sdk')
     compile project(':infobip-mobile-messaging-android-geo-sdk')
     compile project(':infobip-mobile-messaging-android-interactive-sdk')
     compile project(':infobip-mobile-messaging-android-sdk')
@@ -73,4 +84,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:support-v4:26.1.0'
+}
+
+private String property(Project project, String projectKey, String environmentKey) {
+    return project.hasProperty(projectKey) ? project[projectKey] : System.getenv(environmentKey)
 }

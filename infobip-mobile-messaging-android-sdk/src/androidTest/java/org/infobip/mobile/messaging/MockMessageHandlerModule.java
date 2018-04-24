@@ -20,6 +20,11 @@ public class MockMessageHandlerModule implements MessageHandlerModule {
     }
 
     @Override
+    public boolean messageTapped(Message message) {
+        return false;
+    }
+
+    @Override
     public void applicationInForeground() {
 
     }

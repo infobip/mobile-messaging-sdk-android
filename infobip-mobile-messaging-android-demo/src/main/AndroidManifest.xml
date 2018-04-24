@@ -7,72 +7,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".InspectActivity"
-            android:label="@string/title_activity_inspect">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-
-        <activity
-            android:name=".WebViewActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-
-        <activity
-            android:name=".screens.DeepLinkLandingActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "com.infobip.mobilemessaging://deeplink" -->
-                <data
-                    android:host="deeplink"
-                    android:scheme="com.infobip.mobilemessaging" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".screens.RedScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".screens.GreenScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".screens.BlueScreenActivity" android:theme="@style/AppTheme.NoActionBar" />
-
-        <receiver
-            android:name="org.infobip.mobile.messaging.demo.MobileMessagingBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.REGISTRATION_ACQUIRED" />
-                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
-                <action android:name="org.infobip.mobile.messaging.API_COMMUNICATION_ERROR" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".WebContentReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED" />
-            </intent-filter>
-        </receiver>
+        android:theme="@style/AppTheme"
+        android:name="org.infobip.mobile.messaging.demo.Application">
 
     </application>
 </manifest>

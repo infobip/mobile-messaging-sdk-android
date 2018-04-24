@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/activatedBackgroundIndicator"
+    android:paddingBottom="5dp"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="5dp">
+
+    <RelativeLayout
+        android:id="@+id/content_with_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/balloon_incoming_normal">
+
+        <LinearLayout
+            android:id="@+id/chat_company_reply_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chat_company_reply_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="8dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="8dp"
+                android:paddingStart="20dp"
+                android:paddingTop="5dp"
+                android:text="@string/message_user_name_default"
+                android:textColor="@color/chatMessageHighlightColor"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/message_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="web"
+                android:maxWidth="280dp"
+                android:paddingBottom="5dp"
+                android:paddingEnd="8dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="8dp"
+                android:paddingStart="20dp"
+                android:paddingTop="5dp"
+                android:text="@string/message_text_default"
+                android:textColor="@android:color/black"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/ll_action_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:layout_marginEnd="@dimen/button_horizontal_margin_right"
+                android:layout_marginLeft="@dimen/button_horizontal_margin_left"
+                android:layout_marginRight="@dimen/button_horizontal_margin_right"
+                android:layout_marginStart="@dimen/button_horizontal_margin_left">
+
+                <Button
+                    android:id="@+id/btn_action_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/button_padding"
+                    android:background="@drawable/button_background"
+                    android:gravity="center"
+                    android:visibility="visible"
+                    android:textColor="@color/chatMessageHighlightColor" />
+
+                <Button
+                    android:id="@+id/btn_action_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/button_padding"
+                    android:background="@drawable/button_background"
+                    android:gravity="center"
+                    android:visibility="visible"
+                    android:textColor="@color/chatMessageHighlightColor" />
+
+                <Button
+                    android:id="@+id/btn_action_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/button_padding"
+                    android:background="@drawable/button_background"
+                    android:gravity="center"
+                    android:visibility="visible"
+                    android:textColor="@color/chatMessageHighlightColor" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/time_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:paddingBottom="5dp"
+                android:paddingRight="10dp"
+                android:text="@string/time_default"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

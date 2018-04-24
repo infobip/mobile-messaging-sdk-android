@@ -80,9 +80,22 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     }
 
     @Override
-    public void triggerSdkActionsFor(String categoryId, NotificationAction action, Message message) {
+    @NonNull
+    public Set<NotificationCategory> getNotificationCategories() {
+        if (!isDisplayNotificationEnabled()) {
+            return new HashSet<>();
+        }
+
+        Set<NotificationCategory> notificationCategories = getPredefinedNotificationCategories();
+        Set<NotificationCategory> customNotificationCategories = getCustomNotificationCategories();
+        notificationCategories.addAll(customNotificationCategories);
+        return notificationCategories;
+    }
+
+    @Override
+    public void triggerSdkActionsFor(NotificationAction action, Message message) {
         markAsSeen(context, message.getMessageId());
-        sendMo(context, categoryId, action, message);
+        sendMo(context, message.getCategory(), action, message);
     }
 
     void markAsSeen(Context context, String messageId) {
@@ -110,18 +123,6 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         map.put("initialMessageId", initialMessage.getMessageId());
         message.setInternalData(InternalDataMapper.mergeExistingInternalDataWithAnythingToJson(initialMessage.getInternalData(), map));
         return message;
-    }
-
-    public Set<NotificationCategory> getNotificationCategories() {
-        if (!isDisplayNotificationEnabled()) {
-            return null;
-        }
-
-        Set<NotificationCategory> notificationCategories = getPredefinedNotificationCategories();
-        Set<NotificationCategory> customNotificationCategories = getCustomNotificationCategories();
-        notificationCategories.addAll(customNotificationCategories);
-
-        return notificationCategories;
     }
 
     private Set<NotificationCategory> getPredefinedNotificationCategories() {
@@ -187,6 +188,11 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
 
     @Override
     public boolean handleMessage(Message message) {
+        return false;
+    }
+
+    @Override
+    public boolean messageTapped(Message message) {
         return false;
     }
 

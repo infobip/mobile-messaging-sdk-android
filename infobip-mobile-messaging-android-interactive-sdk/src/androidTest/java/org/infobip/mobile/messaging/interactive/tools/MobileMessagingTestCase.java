@@ -175,8 +175,13 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new message
      */
     protected static Message createMessage(Context context, String messageId, boolean saveToStorage) {
+        return createMessage(context, messageId, null, saveToStorage);
+    }
+
+    protected static Message createMessage(Context context, String messageId, String categoryId, boolean saveToStorage) {
         Message message = new Message();
         message.setMessageId(messageId);
+        message.setCategory(categoryId);
         if (saveToStorage) {
             MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
         }

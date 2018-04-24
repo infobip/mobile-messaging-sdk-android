@@ -81,7 +81,7 @@ public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
     @Test
     public void test_shouldCreateTableForGeoMessagesDuringMigration() throws Exception {
         // Create SQLiteOpenHelper directly to perform raw operations on database
-        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, DatabaseHelperImpl.DATABASE_NAME, null, DatabaseHelperImpl.VER_2017_JAN_12) {
+        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, PushDatabaseHelperImpl.DATABASE_NAME, null, PushDatabaseHelperImpl.VER_2017_JAN_12) {
             @Override
             public void onCreate(SQLiteDatabase db) {
                 db.execSQL(SQL_CREATE_OLD_MESSAGES_TABLE);
@@ -107,7 +107,7 @@ public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
     @Test
     public void test_shouldAddContentUrlColumnDuringMigration() throws Exception {
         // Create SQLiteOpenHelper directly to perform raw operations on database
-        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, DatabaseHelperImpl.DATABASE_NAME, null, DatabaseHelperImpl.VER_2017_FEB_14) {
+        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, PushDatabaseHelperImpl.DATABASE_NAME, null, PushDatabaseHelperImpl.VER_2017_FEB_14) {
             @Override
             public void onCreate(SQLiteDatabase db) {
                 db.execSQL(SQL_CREATE_OLD_MESSAGES_TABLE);
@@ -134,8 +134,8 @@ public class SqliteMessageMigrationTest extends MobileMessagingTestCase {
     @Test
     public void test_shouldAddSendDateTimeToInternalData() throws Exception {
         // Create SQLiteOpenHelper directly to perform raw operations on database
-        context.deleteDatabase(DatabaseHelperImpl.DATABASE_NAME);
-        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, DatabaseHelperImpl.DATABASE_NAME, null, DatabaseHelperImpl.VER_2017_MAY_15) {
+        context.deleteDatabase(PushDatabaseHelperImpl.DATABASE_NAME);
+        SQLiteOpenHelper sqLiteOpenHelper = new SQLiteOpenHelper(context, PushDatabaseHelperImpl.DATABASE_NAME, null, PushDatabaseHelperImpl.VER_2017_MAY_15) {
             @Override
             public void onCreate(SQLiteDatabase db) {
                 db.execSQL(SQL_CREATE_MAY_MESSAGES_TABLE);

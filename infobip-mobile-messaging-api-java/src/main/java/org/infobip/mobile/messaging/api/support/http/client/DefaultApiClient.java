@@ -156,15 +156,16 @@ public class DefaultApiClient implements ApiClient {
 
             InputStream inputStream = urlConnection.getInputStream();
             String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
-            R response = JSON_SERIALIZER.deserialize(s, responseType);
+            inputStream.close();
 
+            R response = JSON_SERIALIZER.deserialize(s, responseType);
             ApiResponse apiResponse = null;
             try {
                 apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
             } catch (Exception ignored) {
             }
 
-            if (apiResponse != null  && apiResponse.getRequestError() != null) {
+            if (apiResponse != null && apiResponse.getRequestError() != null) {
                 Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
                 throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
             }
