@@ -30,7 +30,7 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     ```groovy
     dependencies {
         ...
-        compile ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.11.0@aar') {
+        compile ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:1.12.X@aar') {
             transitive = true;
         }
     }
