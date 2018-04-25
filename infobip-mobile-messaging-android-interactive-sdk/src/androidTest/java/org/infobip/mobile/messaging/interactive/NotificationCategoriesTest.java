@@ -5,6 +5,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
+import org.infobip.mobile.messaging.interactive.inapp.InAppNotificationHandler;
 import org.infobip.mobile.messaging.interactive.platform.MockActivity;
 import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
 import org.junit.Test;
@@ -23,6 +24,7 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
 
     private MobileInteractiveImpl mobileInteractive;
     private MobileMessagingCore mmcMock;
+    private InAppNotificationHandler inAppNotificationHandlerMock;
     private ArgumentCaptor<Message> messageArgumentCaptor;
     private ArgumentCaptor<String> messageIdArgumentCaptor;
 
@@ -30,7 +32,8 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
         mmcMock = mock(MobileMessagingCore.class);
-        mobileInteractive = new MobileInteractiveImpl(contextMock, mmcMock);
+        inAppNotificationHandlerMock = mock(InAppNotificationHandler.class);
+        mobileInteractive = new MobileInteractiveImpl(contextMock, mmcMock, inAppNotificationHandlerMock);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
         messageIdArgumentCaptor = ArgumentCaptor.forClass(String.class);
 

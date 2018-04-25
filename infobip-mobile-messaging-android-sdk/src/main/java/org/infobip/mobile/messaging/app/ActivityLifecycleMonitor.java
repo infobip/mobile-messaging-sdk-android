@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.Service;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -15,8 +16,9 @@ import java.util.Collection;
  * @author sslavin
  * @since 22/06/16.
  */
-public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
-    private static boolean foreground = false;
+public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ForegroundStateMonitor {
+    private static volatile boolean foreground = false;
+    private volatile Activity foregroundActivity = null;
 
     public ActivityLifecycleMonitor(Context context) {
         Application application = getApplication(context);
@@ -27,6 +29,16 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     public static synchronized boolean isForeground() {
         return foreground;
+    }
+
+    @Override
+    @NonNull
+    public ForegroundState isInForeground() {
+        if (isForeground()) {
+            return ForegroundState.foreground(foregroundActivity);
+        }
+
+        return ForegroundState.background();
     }
 
     private static synchronized void setForeground(Context context, boolean foreground) {
@@ -50,7 +62,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         }
     }
 
-    protected static Application getApplication(Context context) {
+    private static Application getApplication(Context context) {
         if (context instanceof Activity) {
             return ((Activity) context).getApplication();
         } else if (context instanceof Service) {
@@ -73,11 +85,13 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityResumed(Activity activity) {
+        foregroundActivity = activity;
         setForeground(activity, true);
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
+        foregroundActivity = null;
         setForeground(activity, false);
     }
 

@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.app.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -228,6 +229,10 @@ public class MobileMessagingCore extends MobileMessaging {
 
     public static SqliteDatabaseProvider getDatabaseProvider(Context context) {
         return (SqliteDatabaseProvider) getDatabaseHelper(context);
+    }
+
+    public ForegroundStateMonitor getForegroundStateMonitor() {
+        return activityLifecycleMonitor;
     }
 
     public void sync() {

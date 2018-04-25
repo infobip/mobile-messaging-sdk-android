@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
+import org.infobip.mobile.messaging.interactive.inapp.InAppNotificationHandler;
+import org.infobip.mobile.messaging.interactive.inapp.InAppNotificationHandlerImpl;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -32,15 +34,17 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     private Set<NotificationCategory> customNotificationCategories;
     private Set<NotificationCategory> predefinedNotificationCategories;
     private MobileMessagingCore mobileMessagingCore;
+    private InAppNotificationHandler inAppNotificationHandler;
 
 
     public MobileInteractiveImpl() {
     }
 
     @VisibleForTesting
-    public MobileInteractiveImpl(Context context, MobileMessagingCore mobileMessagingCore) {
+    MobileInteractiveImpl(Context context, MobileMessagingCore mobileMessagingCore, InAppNotificationHandler inAppNotificationHandler) {
         this.context = context;
         this.mobileMessagingCore = mobileMessagingCore;
+        this.inAppNotificationHandler = inAppNotificationHandler;
     }
 
     public static MobileInteractiveImpl getInstance(Context context) {
@@ -96,9 +100,10 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     public void triggerSdkActionsFor(NotificationAction action, Message message) {
         markAsSeen(context, message.getMessageId());
         sendMo(context, message.getCategory(), action, message);
+        inAppNotificationHandler.userPressedNotificationButtonForMessage(message);
     }
 
-    void markAsSeen(Context context, String messageId) {
+    private void markAsSeen(Context context, String messageId) {
         NotificationSettings notificationSettings = mobileMessagingCore(context).getNotificationSettings();
         if (notificationSettings == null) {
             return;
@@ -108,7 +113,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         }
     }
 
-    void sendMo(Context context, String categoryId, NotificationAction action, Message initialMessage) {
+    private void sendMo(Context context, String categoryId, NotificationAction action, Message initialMessage) {
         if (!action.sendsMoMessage()) {
             return;
         }
@@ -188,6 +193,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
 
     @Override
     public boolean handleMessage(Message message) {
+        inAppNotificationHandler(context).handleMessage(message);
         return false;
     }
 
@@ -198,7 +204,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
 
     @Override
     public void applicationInForeground() {
-        //do nothing
+        inAppNotificationHandler(context).appWentToForeground();
     }
 
     @Override
@@ -216,5 +222,12 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
             mobileMessagingCore = MobileMessagingCore.getInstance(context);
         }
         return mobileMessagingCore;
+    }
+
+    private InAppNotificationHandler inAppNotificationHandler(Context context) {
+        if (inAppNotificationHandler == null) {
+            inAppNotificationHandler = new InAppNotificationHandlerImpl(context);
+        }
+        return inAppNotificationHandler;
     }
 }
