@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 
 /**
  * @author sslavin
@@ -13,17 +14,19 @@ public class InAppViewDialogClickListener implements DialogInterface.OnClickList
     private final InAppView inAppView;
     private final InAppView.Callback callback;
     private final Message message;
+    private final NotificationCategory category;
     private final NotificationAction action;
 
-    InAppViewDialogClickListener(InAppView inAppView, InAppView.Callback callback, Message message, NotificationAction action) {
+    InAppViewDialogClickListener(InAppView inAppView, InAppView.Callback callback, Message message, NotificationCategory category, NotificationAction action) {
         this.inAppView = inAppView;
         this.callback = callback;
         this.message = message;
+        this.category = category;
         this.action = action;
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        callback.buttonPressedFor(inAppView, message, action);
+        callback.buttonPressedFor(inAppView, message, category, action);
     }
 }

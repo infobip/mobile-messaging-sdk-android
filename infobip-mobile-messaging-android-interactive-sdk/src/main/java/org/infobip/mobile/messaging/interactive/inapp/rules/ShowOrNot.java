@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Size;
 
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 
 /**
  * @author sslavin
@@ -12,6 +13,7 @@ import org.infobip.mobile.messaging.interactive.NotificationAction;
  */
 public class ShowOrNot {
     private final Action action;
+    private final NotificationCategory category;
     private final NotificationAction[] actionsToDisplayFor;
     private final Activity baseActivityForDialog;
 
@@ -20,22 +22,23 @@ public class ShowOrNot {
         ShowNow,
         ShowWhenInForeground
     }
-    private ShowOrNot(Action action, NotificationAction[] actionsToDisplayFor, Activity baseActivityForDialog) {
+    private ShowOrNot(Action action, NotificationCategory category, NotificationAction[] actionsToDisplayFor, Activity baseActivityForDialog) {
         this.action = action;
+        this.category = category;
         this.actionsToDisplayFor = actionsToDisplayFor;
         this.baseActivityForDialog = baseActivityForDialog;
     }
 
     public static ShowOrNot not() {
-        return new ShowOrNot(Action.DontShow, new NotificationAction[0], null);
+        return new ShowOrNot(Action.DontShow, null, new NotificationAction[0], null);
     }
 
-    public static ShowOrNot showNow(@NonNull @Size(min = 1) NotificationAction actions[], Activity activity) {
-        return new ShowOrNot(Action.ShowNow, actions, activity);
+    public static ShowOrNot showNow(@NonNull NotificationCategory category, @NonNull @Size(min = 1) NotificationAction actions[], Activity activity) {
+        return new ShowOrNot(Action.ShowNow, category, actions, activity);
     }
 
-    public static ShowOrNot showWhenInForeground(@NonNull @Size(min = 1) NotificationAction actions[]) {
-        return new ShowOrNot(Action.ShowWhenInForeground, actions, null);
+    public static ShowOrNot showWhenInForeground() {
+        return new ShowOrNot(Action.ShowWhenInForeground, null, new NotificationAction[0], null);
     }
 
     public boolean shouldShowNow() {
@@ -48,6 +51,10 @@ public class ShowOrNot {
 
     public NotificationAction[] getActionsToShowFor() {
         return actionsToDisplayFor;
+    }
+
+    public NotificationCategory getCategory() {
+        return category;
     }
 
     public Activity getBaseActivityForDialog() {

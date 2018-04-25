@@ -106,14 +106,16 @@ public class InAppRulesTest {
     public void shouldDisplayActionNowIfOrdinaryActionsExistAndForeground() {
         String categoryId = "categoryId";
         NotificationAction action = ordinaryAction();
+        NotificationCategory category = category(categoryId, inputAction(), action);
         Activity activity = mock(Activity.class);
         when(message.getCategory()).thenReturn(categoryId);
-        when(mobileInteractive.getNotificationCategory(eq(categoryId))).thenReturn(new NotificationCategory(categoryId, inputAction(), action));
+        when(mobileInteractive.getNotificationCategory(eq(categoryId))).thenReturn(category);
         when(foregroundStateMonitor.isInForeground()).thenReturn(ForegroundState.foreground(activity));
 
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(true, showOrNot.shouldShowNow());
         assertEquals(false, showOrNot.shouldShowWhenInForeground());
+        assertEquals(category, showOrNot.getCategory());
         assertEquals(action, showOrNot.getActionsToShowFor()[0]);
         assertEquals(activity, showOrNot.getBaseActivityForDialog());
     }
@@ -122,14 +124,16 @@ public class InAppRulesTest {
     public void shouldDisplayActionLaterIfOrdinaryActionsExistAndBackground() {
         String categoryId = "categoryId";
         NotificationAction action = ordinaryAction();
+        NotificationCategory category = category(categoryId, inputAction(), action);
         when(message.getCategory()).thenReturn(categoryId);
-        when(mobileInteractive.getNotificationCategory(eq(categoryId))).thenReturn(new NotificationCategory(categoryId, inputAction(), action));
+        when(mobileInteractive.getNotificationCategory(eq(categoryId))).thenReturn(category);
         when(foregroundStateMonitor.isInForeground()).thenReturn(ForegroundState.background());
 
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(false, showOrNot.shouldShowNow());
         assertEquals(true, showOrNot.shouldShowWhenInForeground());
-        assertEquals(action, showOrNot.getActionsToShowFor()[0]);
+        assertEquals(0, showOrNot.getActionsToShowFor().length);
+        assertNull(showOrNot.getCategory());
         assertNull(showOrNot.getBaseActivityForDialog());
     }
 
@@ -146,5 +150,9 @@ public class InAppRulesTest {
                 .withId("id2")
                 .withTitleText("title")
                 .build();
+    }
+
+    private NotificationCategory category(String categoryId, NotificationAction...actions) {
+        return new NotificationCategory(categoryId, actions);
     }
 }

@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.R;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +47,6 @@ public class InAppViewDialogTest {
     private ImageView image = mock(ImageView.class);
     private AlertDialog alertDialog = mock(AlertDialog.class);
     private AlertDialog.Builder alertDialogBuilder = mock(AlertDialog.Builder.class);
-    private Activity baseActivity = mock(Activity.class);
 
     private Executor syncExecutor = new Executor() {
         @Override
@@ -78,8 +77,9 @@ public class InAppViewDialogTest {
     @Test
     public void shoudNotShowDialogInNoActions() {
         Message message = message();
+        NotificationCategory category = category();
 
-        inAppViewDialog.show(message);
+        inAppViewDialog.show(message, category);
 
         verify(activityWrapper, never()).createAlertDialogBuilder();
     }
@@ -88,8 +88,9 @@ public class InAppViewDialogTest {
     public void shouldSetupViewsAccordingToMessageContents() {
         Message message = message();
         NotificationAction actions[] = actions();
+        NotificationCategory category = category(actions);
 
-        inAppViewDialog.show(message, actions);
+        inAppViewDialog.show(message, category, actions);
 
         verify(tvMessageText, times(1)).setText(message.getBody());
         verify(rlDialogImage, times(1)).setVisibility(View.VISIBLE);
@@ -108,8 +109,9 @@ public class InAppViewDialogTest {
     public void shouldSetupOneButtonForOneAction() {
         Message message = message();
         NotificationAction action = action();
+        NotificationCategory category = category(action);
 
-        inAppViewDialog.show(message, action);
+        inAppViewDialog.show(message, category, action);
 
         verify(alertDialogBuilder, times(1)).setPositiveButton(eq(action.getTitleResourceId()), any(InAppViewDialogClickListener.class));
     }
@@ -119,8 +121,9 @@ public class InAppViewDialogTest {
         Message message = message();
         NotificationAction action1 = action();
         NotificationAction action2 = action();
+        NotificationCategory category = category(action1, action2);
 
-        inAppViewDialog.show(message, action1, action2);
+        inAppViewDialog.show(message, category, action1, action2);
 
         verify(alertDialogBuilder, times(1)).setNegativeButton(eq(action1.getTitleResourceId()), any(InAppViewDialogClickListener.class));
         verify(alertDialogBuilder, times(1)).setPositiveButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
@@ -132,8 +135,9 @@ public class InAppViewDialogTest {
         NotificationAction action1 = action();
         NotificationAction action2 = action();
         NotificationAction action3 = action();
+        NotificationCategory category = category(action1, action2, action3);
 
-        inAppViewDialog.show(message, action1, action2, action3);
+        inAppViewDialog.show(message, category, action1, action2, action3);
 
         verify(alertDialogBuilder, times(1)).setNegativeButton(eq(action1.getTitleResourceId()), any(InAppViewDialogClickListener.class));
         verify(alertDialogBuilder, times(1)).setNeutralButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
@@ -145,6 +149,10 @@ public class InAppViewDialogTest {
             setBody("messageBody");
             setContentUrl("contentUrl");
         }};
+    }
+
+    private NotificationCategory category(NotificationAction...actions) {
+        return new NotificationCategory("categoryId", actions);
     }
 
     private NotificationAction[] actions() {

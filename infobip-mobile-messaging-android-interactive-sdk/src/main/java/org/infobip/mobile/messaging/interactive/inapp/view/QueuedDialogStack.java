@@ -6,6 +6,7 @@ import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.DownloadImageTask;
 
 import java.util.Queue;
@@ -20,8 +21,8 @@ public class QueuedDialogStack implements DialogStack {
     private final Queue<InAppViewCtx> queue = new ConcurrentLinkedQueue<>();
 
     @Override
-    public void add(InAppView view, Message message, NotificationAction[] actions) {
-        queue.add(new InAppViewCtx(view, message, actions));
+    public void add(InAppView view, Message message, NotificationCategory category, NotificationAction[] actions) {
+        queue.add(new InAppViewCtx(view, message, category, actions));
         if (queue.size() <= 1) {
             show(queue.peek());
         }
@@ -48,7 +49,7 @@ public class QueuedDialogStack implements DialogStack {
             return;
         }
 
-        ctx.getInAppView().show(ctx.getMessage(), ctx.getActions());
+        ctx.getInAppView().show(ctx.getMessage(), ctx.getCategory(), ctx.getActions());
         if (!TextUtils.isEmpty(ctx.getMessage().getContentUrl())) {
             downloadImage(ctx.getMessage().getContentUrl(), ctx.getInAppView());
         }

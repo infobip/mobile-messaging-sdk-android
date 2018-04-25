@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.R;
 
 import java.util.concurrent.Executor;
@@ -43,7 +44,7 @@ public class InAppViewDialog implements InAppView {
     }
 
     @Override
-    public void show(@NonNull final Message message, @NonNull final NotificationAction... actions) {
+    public void show(@NonNull final Message message, @NonNull final NotificationCategory category, @NonNull final NotificationAction... actions) {
         if (actions.length == 0) {
             return;
         }
@@ -51,12 +52,12 @@ public class InAppViewDialog implements InAppView {
         uiThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                showOnUiThread(message, actions);
+                showOnUiThread(message, category, actions);
             }
         });
     }
 
-    private void showOnUiThread(@NonNull Message message, @NonNull NotificationAction[] actions) {
+    private void showOnUiThread(@NonNull Message message, @NonNull NotificationCategory category, @NonNull NotificationAction[] actions) {
         tvMessageText.setText(message.getBody());
         if (!TextUtils.isEmpty(message.getContentUrl())) {
             rlDialogImage.setVisibility(View.VISIBLE);
@@ -70,17 +71,17 @@ public class InAppViewDialog implements InAppView {
 
         switch (actions.length) {
             case 1:
-                builder.setPositiveButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[0]));
+                builder.setPositiveButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]));
                 break;
             case 2:
-                builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[0]))
-                        .setPositiveButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[1]));
+                builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                        .setPositiveButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]));
                 break;
             case 3:
             default:
-                builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[0]))
-                        .setNeutralButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[1]))
-                        .setPositiveButton(actions[2].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, actions[2]));
+                builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                        .setNeutralButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]))
+                        .setPositiveButton(actions[2].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[2]));
                 break;
         }
 

@@ -5,12 +5,14 @@ import android.app.Activity;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.cache.OneMessageCache;
 import org.infobip.mobile.messaging.interactive.inapp.rules.InAppRules;
 import org.infobip.mobile.messaging.interactive.inapp.rules.ShowOrNot;
 import org.infobip.mobile.messaging.interactive.inapp.view.DialogStack;
 import org.infobip.mobile.messaging.interactive.inapp.view.InAppView;
 import org.infobip.mobile.messaging.interactive.inapp.view.InAppViewFactory;
+import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +40,7 @@ public class InAppNotificationHandlerImplTest {
     private OneMessageCache oneMessageCache = mock(OneMessageCache.class);
     private InAppView inAppView = mock(InAppView.class);
     private DialogStack dialogStack = mock(DialogStack.class);
+    private InteractiveBroadcaster interactiveBroadcaster = mock(InteractiveBroadcaster.class);
 
     private Activity activity = mock(Activity.class);
 
@@ -45,32 +48,35 @@ public class InAppNotificationHandlerImplTest {
     public void before() {
         reset(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, inAppView);
         when(inAppViewFactory.create(eq(activity), any(InAppView.Callback.class))).thenReturn(inAppView);
-        inAppNotificationHandler = new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack);
+        inAppNotificationHandler = new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster);
     }
 
     @Test
     public void shouldShowDialogWhenInForeground() {
         Message message = message();
         NotificationAction actions[] = actions();
-        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(actions, activity));
+        NotificationCategory category = category(message.getCategory(), actions);
+
+        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
 
         inAppNotificationHandler.handleMessage(message);
 
-        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(actions));
+        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(category), eq(actions));
     }
 
     @Test
     public void shouldShowMessageOnceWhenGoesToForeground() {
         Message message = message();
         NotificationAction actions[] = actions();
+        NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message).thenReturn(null);
-        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(actions, activity));
+        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
 
         inAppNotificationHandler.appWentToForeground();
         inAppNotificationHandler.appWentToForeground();
 
         verify(oneMessageCache, times(2)).getAndRemove();
-        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(actions));
+        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(category), eq(actions));
     }
 
     @Test
@@ -86,7 +92,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldSaveMessageToCacheWhenInBackground() {
         Message message = message();
-        when(inAppRules.shouldDisplayDialogFor(any(Message.class))).thenReturn(ShowOrNot.showWhenInForeground(actions()));
+        when(inAppRules.shouldDisplayDialogFor(any(Message.class))).thenReturn(ShowOrNot.showWhenInForeground());
 
         inAppNotificationHandler.handleMessage(message);
 
@@ -99,24 +105,27 @@ public class InAppNotificationHandlerImplTest {
     public void shouldGetMessageFromCacheAndShowItWhenAppGoesToForeground() {
         Message message = message();
         NotificationAction actions[] = actions();
+        NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message);
-        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(actions, activity));
+        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
 
         inAppNotificationHandler.appWentToForeground();
 
         verify(oneMessageCache, times(1)).getAndRemove();
         verify(inAppViewFactory, times(1)).create(eq(activity), eq(inAppNotificationHandler));
-        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(actions));
+        verify(dialogStack, times(1)).add(eq(inAppView), eq(message), eq(category), eq(actions));
     }
 
     @Test
-    public void shouldTriggerSdkActionsWhenButtonIsPressed() {
+    public void shouldTriggerSdkActionsAndBroadcastWhenButtonIsPressed() {
         Message message = message();
-        NotificationAction action = actions()[0];
+        NotificationAction actions[] = actions();
+        NotificationCategory category = category(message.getCategory(), actions);
 
-        inAppNotificationHandler.buttonPressedFor(inAppView, message, action);
+        inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
 
-        verify(mobileInteractive, times(1)).triggerSdkActionsFor(eq(action), eq(message));
+        verify(mobileInteractive, times(1)).triggerSdkActionsFor(eq(actions[0]), eq(message));
+        verify(interactiveBroadcaster, times(1)).notificationActionTapped(eq(message), eq(category), eq(actions[0]));
     }
 
     @Test
@@ -140,6 +149,10 @@ public class InAppNotificationHandlerImplTest {
         inAppNotificationHandler.appWentToForeground();
 
         verify(dialogStack, times(1)).clear();
+    }
+
+    private NotificationCategory category(String categoryId, NotificationAction...actions) {
+        return new NotificationCategory(categoryId, actions);
     }
 
     private NotificationAction[] actions() {

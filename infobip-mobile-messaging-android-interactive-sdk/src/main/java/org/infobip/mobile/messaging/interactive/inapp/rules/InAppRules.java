@@ -53,9 +53,9 @@ public class InAppRules {
 
         ForegroundState state = foregroundStateMonitor.isInForeground();
         if (state.isForeground()) {
-            return ShowOrNot.showNow(eligibleActions, state.getForegroundActivity());
+            return ShowOrNot.showNow(category, eligibleActions, state.getForegroundActivity());
         } else {
-            return ShowOrNot.showWhenInForeground(eligibleActions);
+            return ShowOrNot.showWhenInForeground();
         }
     }
 
