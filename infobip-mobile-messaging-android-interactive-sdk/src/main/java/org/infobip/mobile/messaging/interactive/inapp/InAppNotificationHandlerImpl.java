@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitorImpl;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -49,7 +49,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 new InAppViewFactory(),
                 new InAppRules(
                         MobileInteractive.getInstance(context),
-                        MobileMessagingCore.getInstance(context).getForegroundStateMonitor()
+                        new ForegroundStateMonitorImpl(context)
                 ),
                 new OneMessagePreferenceCache(context),
                 new QueuedDialogStack(),

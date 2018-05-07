@@ -209,5 +209,10 @@ public class MobileApiResourceProvider {
         public void i(String message) {
             MobileMessagingLogger.i(TAG, message);
         }
+
+        @Override
+        public void d(String message) {
+            MobileMessagingLogger.d(TAG, message);
+        }
     }
 }

@@ -6,16 +6,14 @@ import java.util.Collection;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * @author sslavin
  * @since 27/11/2017.
  */
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 public class Request {
     protected HttpMethod httpMethod;

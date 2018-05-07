@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.app;
+package org.infobip.mobile.messaging.interactive.inapp.foreground;
 
 import android.support.annotation.NonNull;
 

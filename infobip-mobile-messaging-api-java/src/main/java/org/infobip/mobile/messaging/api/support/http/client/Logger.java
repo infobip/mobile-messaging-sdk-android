@@ -16,4 +16,8 @@ public class Logger {
 
     public void e(String message) {
     }
+
+    public void d(String message) {
+
+    }
 }

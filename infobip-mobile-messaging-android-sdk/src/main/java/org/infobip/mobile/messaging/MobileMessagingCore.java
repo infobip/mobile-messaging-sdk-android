@@ -13,7 +13,7 @@ import android.text.TextUtils;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
-import org.infobip.mobile.messaging.app.ForegroundStateMonitor;
+import org.infobip.mobile.messaging.app.ContextHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -81,7 +81,7 @@ public class MobileMessagingCore extends MobileMessaging {
     protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
     static String applicationCode;
-    static Map<String, String> applicationCodeHashMap;
+    private static Map<String, String> applicationCodeHashMap;
     static ApplicationCodeProvider applicationCodeProvider;
     private static DatabaseHelper databaseHelper;
     private static MobileMessagingSynchronizationReceiver mobileMessagingSynchronizationReceiver;
@@ -127,6 +127,11 @@ public class MobileMessagingCore extends MobileMessaging {
 
         if (mobileMessagingSynchronizationReceiver == null) {
             mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
+        }
+
+        Application application = new ContextHelper(context).getApplication();
+        if (application != null) {
+            this.activityLifecycleMonitor = new ActivityLifecycleMonitor(application);
         }
 
         ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
@@ -231,7 +236,8 @@ public class MobileMessagingCore extends MobileMessaging {
         return (SqliteDatabaseProvider) getDatabaseHelper(context);
     }
 
-    public ForegroundStateMonitor getForegroundStateMonitor() {
+    @Nullable
+    public ActivityLifecycleMonitor getActivityLifecycleMonitor() {
         return activityLifecycleMonitor;
     }
 
@@ -1123,7 +1129,6 @@ public class MobileMessagingCore extends MobileMessaging {
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
-            mobileMessagingCore.activityLifecycleMonitor = new ActivityLifecycleMonitor(application.getApplicationContext());
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext());

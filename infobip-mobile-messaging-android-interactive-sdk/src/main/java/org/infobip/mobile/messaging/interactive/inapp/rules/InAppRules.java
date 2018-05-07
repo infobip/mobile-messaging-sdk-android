@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging.interactive.inapp.rules;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.app.ForegroundState;
-import org.infobip.mobile.messaging.app.ForegroundStateMonitor;
+import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
+import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;

@@ -2,10 +2,10 @@ package org.infobip.mobile.messaging.app;
 
 import android.app.Activity;
 import android.app.Application;
-import android.app.Service;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -16,29 +16,21 @@ import java.util.Collection;
  * @author sslavin
  * @since 22/06/16.
  */
-public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ForegroundStateMonitor {
+public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
     private static volatile boolean foreground = false;
     private volatile Activity foregroundActivity = null;
 
-    public ActivityLifecycleMonitor(Context context) {
-        Application application = getApplication(context);
-        if (application != null) {
-            application.registerActivityLifecycleCallbacks(this);
-        }
+    public ActivityLifecycleMonitor(@NonNull Application application) {
+        application.registerActivityLifecycleCallbacks(this);
     }
 
     public static synchronized boolean isForeground() {
         return foreground;
     }
 
-    @Override
-    @NonNull
-    public ForegroundState isInForeground() {
-        if (isForeground()) {
-            return ForegroundState.foreground(foregroundActivity);
-        }
-
-        return ForegroundState.background();
+    @Nullable
+    public Activity getForegroundActivity() {
+        return foregroundActivity;
     }
 
     private static synchronized void setForeground(Context context, boolean foreground) {
@@ -62,17 +54,6 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         }
     }
 
-    private static Application getApplication(Context context) {
-        if (context instanceof Activity) {
-            return ((Activity) context).getApplication();
-        } else if (context instanceof Service) {
-            return ((Service) context).getApplication();
-        } else if (context.getApplicationContext() instanceof Application) {
-            return (Application) context.getApplicationContext();
-        }
-        return null;
-    }
-
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
 
@@ -92,7 +73,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     @Override
     public void onActivityPaused(Activity activity) {
         foregroundActivity = null;
-        setForeground(activity, false);
+        setForeground(null, false);
     }
 
     @Override

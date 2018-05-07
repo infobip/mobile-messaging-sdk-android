@@ -67,6 +67,8 @@ public class DefaultApiClient implements ApiClient {
             }
         }
 
+        logger.d("REQUEST: " + request);
+
         HttpURLConnection urlConnection = null;
         try {
             StringBuilder sb = new StringBuilder();
