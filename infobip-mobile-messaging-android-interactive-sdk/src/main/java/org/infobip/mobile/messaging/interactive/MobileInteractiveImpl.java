@@ -100,7 +100,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     public void triggerSdkActionsFor(NotificationAction action, Message message) {
         markAsSeen(context, message.getMessageId());
         sendMo(context, message.getCategory(), action, message);
-        inAppNotificationHandler.userPressedNotificationButtonForMessage(message);
+        inAppNotificationHandler(context).userPressedNotificationButtonForMessage(message);
     }
 
     private void markAsSeen(Context context, String messageId) {
