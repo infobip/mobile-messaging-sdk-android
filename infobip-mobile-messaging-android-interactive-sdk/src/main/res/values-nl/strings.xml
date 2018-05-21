@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Accepteer</string>
     <string name="mm_button_decline">Wijs af</string>
+    <string name="mm_button_open">Openen</string>
+    <string name="mm_button_cancel">Annuleer</string>
 </resources>

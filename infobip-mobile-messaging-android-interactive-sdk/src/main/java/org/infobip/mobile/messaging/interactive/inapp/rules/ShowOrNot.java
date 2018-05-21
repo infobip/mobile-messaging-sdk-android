@@ -6,6 +6,7 @@ import android.support.annotation.Size;
 
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.PredefinedNotificationAction;
 
 /**
  * @author sslavin
@@ -22,6 +23,7 @@ public class ShowOrNot {
         ShowNow,
         ShowWhenInForeground
     }
+
     private ShowOrNot(Action action, NotificationCategory category, NotificationAction[] actionsToDisplayFor, Activity baseActivityForDialog) {
         this.action = action;
         this.category = category;
@@ -33,7 +35,12 @@ public class ShowOrNot {
         return new ShowOrNot(Action.DontShow, null, new NotificationAction[0], null);
     }
 
-    public static ShowOrNot showNow(@NonNull NotificationCategory category, @NonNull @Size(min = 1) NotificationAction actions[], Activity activity) {
+    public static ShowOrNot showNowWithDefaultActions(Activity activity) {
+        NotificationAction[] defaultInAppActions = PredefinedNotificationAction.defaultInAppActions();
+        return new ShowOrNot(Action.ShowNow, null, defaultInAppActions, activity);
+    }
+
+    public static ShowOrNot showNow(NotificationCategory category, @NonNull @Size(min = 1) NotificationAction actions[], Activity activity) {
         return new ShowOrNot(Action.ShowNow, category, actions, activity);
     }
 

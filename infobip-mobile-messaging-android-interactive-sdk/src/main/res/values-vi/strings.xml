@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Chấp nhận</string>
     <string name="mm_button_decline">Từ chối</string>
+    <string name="mm_button_cancel">Hủy bỏ</string>
+    <string name="mm_button_open">Mở</string>
 </resources>

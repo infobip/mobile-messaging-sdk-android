@@ -9,5 +9,6 @@ import org.infobip.mobile.messaging.Message;
 public interface InAppNotificationHandler {
     void handleMessage(Message message);
     void userPressedNotificationButtonForMessage(Message message);
+    void userTappedNotificationForMessage(Message message);
     void appWentToForeground();
 }

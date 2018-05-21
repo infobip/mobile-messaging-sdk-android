@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Accetta</string>
     <string name="mm_button_decline">Rifiuta</string>
+    <string name="mm_button_cancel">Annulla</string>
+    <string name="mm_button_open">Apri</string>
 </resources>

@@ -38,17 +38,18 @@ public class AndroidInteractiveBroadcasterTest extends MobileMessagingTestCase {
         NotificationCategory givenNotificationCategory = new NotificationCategory("categoryId", notificationAction, givenTappedNotificationAction);
 
         // When
-        broadcastSender.notificationActionTapped(givenMessage, givenNotificationCategory, givenTappedNotificationAction);
+        Intent actionTappedIntent = broadcastSender.notificationActionTapped(givenMessage, givenNotificationCategory, givenTappedNotificationAction);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey(), intent.getAction());
+        Intent sentBroadcastIntent = intentArgumentCaptor.getValue();
+        assertEquals(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey(), sentBroadcastIntent.getAction());
+        assertEquals(actionTappedIntent, sentBroadcastIntent);
 
-        Message messageAfter = Message.createFrom(intent.getExtras());
-        NotificationAction actionAfter = NotificationAction.createFrom(intent.getExtras());
-        NotificationCategory categoryAfter = NotificationCategory.createFrom(intent.getExtras());
+        Message messageAfter = Message.createFrom(sentBroadcastIntent.getExtras());
+        NotificationAction actionAfter = NotificationAction.createFrom(sentBroadcastIntent.getExtras());
+        NotificationCategory categoryAfter = NotificationCategory.createFrom(sentBroadcastIntent.getExtras());
         assertNotSame(message, messageAfter);
         assertEquals("SomeMessageId", messageAfter.getMessageId());
         assertJEquals(givenMessage, messageAfter);

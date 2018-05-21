@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Terima</string>
     <string name="mm_button_decline">Tolak</string>
+    <string name="mm_button_cancel">Batal</string>
+    <string name="mm_button_open">Buka</string>
 </resources>

@@ -11,14 +11,11 @@ import android.support.v4.app.RemoteInput;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.interactive.InteractiveEvent;
+import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
-import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -32,23 +29,25 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
     private InteractiveBroadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
     private MobileInteractive mobileInteractive;
+    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
 
     public NotificationActionTapReceiver() {
     }
 
     @VisibleForTesting
-    public NotificationActionTapReceiver(InteractiveBroadcaster broadcaster, MobileMessagingCore mobileMessagingCore, MobileInteractive mobileInteractive) {
+    public NotificationActionTapReceiver(InteractiveBroadcaster broadcaster, MobileMessagingCore mobileMessagingCore, MobileInteractive mobileInteractive, CallbackActivityStarterWrapper callbackActivityStarterWrapper) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.mobileInteractive = mobileInteractive;
+        this.callbackActivityStarterWrapper = callbackActivityStarterWrapper;
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        Bundle actionBundle = intent.getBundleExtra(EXTRA_TAPPED_ACTION);
-        Bundle categoryBundle = intent.getBundleExtra(EXTRA_TAPPED_CATEGORY);
-        int notificationId = intent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
-        Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
+    public void onReceive(Context context, Intent receivedIntent) {
+        Bundle actionBundle = receivedIntent.getBundleExtra(EXTRA_TAPPED_ACTION);
+        Bundle categoryBundle = receivedIntent.getBundleExtra(EXTRA_TAPPED_CATEGORY);
+        int notificationId = receivedIntent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
+        Bundle messageBundle = receivedIntent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
 
         cancelNotification(context, notificationId);
 
@@ -70,15 +69,17 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
             return;
         }
 
-        String inputText = getInputTextFromIntent(intent, notificationAction);
+        String inputText = getInputTextFromIntent(receivedIntent, notificationAction);
         if (inputText != null) {
             notificationAction.setInputText(inputText);
         }
 
-        broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
-
+        Intent callbackIntent = broadcaster(context).notificationActionTapped(message, notificationCategory, notificationAction);
         mobileInteractive(context).triggerSdkActionsFor(notificationAction, message);
-        startCallbackActivity(context, intent, messageBundle, actionBundle, categoryBundle);
+
+        if (notificationAction.bringsAppToForeground()) {
+            callbackActivityStarterWrapper(context).startActivity(callbackIntent, true);
+        }
     }
 
     private String getInputTextFromIntent(Intent intent, NotificationAction notificationAction) {
@@ -104,40 +105,6 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         }
     }
 
-    private void startCallbackActivity(Context context, Intent intent, Bundle messageBundle, Bundle actionBundle, Bundle categoryBundle) {
-        NotificationAction notificationAction = NotificationActionBundleMapper.notificationActionFromBundle(actionBundle);
-        if (notificationAction == null) {
-            return;
-        }
-
-        if (!notificationAction.bringsAppToForeground()) {
-            return;
-        }
-
-        NotificationSettings notificationSettings = mobileMessagingCore(context).getNotificationSettings();
-        if (notificationSettings == null) {
-            return;
-        }
-        Class callbackActivity = notificationSettings.getCallbackActivity();
-        if (callbackActivity == null) {
-            MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
-            return;
-        }
-
-        int intentFlags = intent.getIntExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(),
-                (Integer) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue());
-
-        Intent callbackIntent = new Intent(context, callbackActivity);
-        callbackIntent.setAction(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey());
-        callbackIntent.putExtras(messageBundle);
-        callbackIntent.putExtras(actionBundle);
-        callbackIntent.putExtras(categoryBundle);
-
-        // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
-        callbackIntent.addFlags(intentFlags | Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(callbackIntent);
-    }
-
     private InteractiveBroadcaster broadcaster(Context context) {
         if (broadcaster == null) {
             broadcaster = new AndroidInteractiveBroadcaster(context);
@@ -157,5 +124,12 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
             mobileInteractive = MobileInteractiveImpl.getInstance(context);
         }
         return mobileInteractive;
+    }
+
+    private CallbackActivityStarterWrapper callbackActivityStarterWrapper(Context context) {
+        if (callbackActivityStarterWrapper == null) {
+            callbackActivityStarterWrapper = new CallbackActivityStarterWrapper(context, mobileMessagingCore(context));
+        }
+        return callbackActivityStarterWrapper;
     }
 }

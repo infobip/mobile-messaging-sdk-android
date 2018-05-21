@@ -61,9 +61,6 @@ public enum MobileMessagingProperty {
     DEFAULT_MAX_RETRY_COUNT("org.infobip.mobile.messaging.infobip.DEFAULT_MAX_RETRY_COUNT", 3),
     DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.DEFAULT_EXP_BACKOFF_MULTIPLIER", 2),
 
-    EXTRA_INTENT_FLAGS("org.infobip.mobile.messaging.infobip.EXTRA_INTENT_FLAGS"),
-    EXTRA_CALLBACK_ACTIVITY("org.infobip.mobile.messaging.infobip.EXTRA_CALLBACK_ACTIVITY"),
-
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false),
 
     SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX");

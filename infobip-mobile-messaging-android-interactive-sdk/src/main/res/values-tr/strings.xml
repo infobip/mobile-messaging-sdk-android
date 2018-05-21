@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Kabul Et</string>
     <string name="mm_button_decline">Reddet</string>
+    <string name="mm_button_open">Aç</string>
+    <string name="mm_button_cancel">İptal</string>
 </resources>

@@ -19,26 +19,11 @@ public class PredefinedNotificationCategories {
 
     @NonNull
     private static NotificationCategory mmAcceptDecline() {
-        final NotificationAction mmDecline = new NotificationAction.Builder(true)
-                .withId(PredefinedActionIds.mm_decline.name())
-                .withIcon(R.drawable.mm_ic_button_decline)
-                .withTitleResourceId(R.string.mm_button_decline)
-                .withMoMessage()
-                .build();
-
-        final NotificationAction mmAccept = new NotificationAction.Builder(true)
-                .withId(PredefinedActionIds.mm_accept.name())
-                .withIcon(R.drawable.mm_ic_button_accept)
-                .withTitleResourceId(R.string.mm_button_accept)
-                .withBringingAppToForeground(true)
-                .withMoMessage()
-                .build();
-
-        return new NotificationCategory(true, PredefinedCategoryIds.mm_accept_decline.name(), mmDecline, mmAccept);
-    }
-
-    private enum PredefinedActionIds {
-        mm_accept, mm_decline
+        return new NotificationCategory(
+                true,
+                PredefinedCategoryIds.mm_accept_decline.name(),
+                PredefinedNotificationAction.decline(),
+                PredefinedNotificationAction.accept());
     }
 
     private enum PredefinedCategoryIds {

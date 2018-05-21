@@ -11,8 +11,8 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -26,13 +26,16 @@ public class NotificationTapReceiver extends BroadcastReceiver {
 
     private Broadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
+    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
 
-    public NotificationTapReceiver() {}
+    public NotificationTapReceiver() {
+    }
 
     @VisibleForTesting
-    public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore) {
+    public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore, CallbackActivityStarterWrapper callbackActivityStarterWrapper) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
+        this.callbackActivityStarterWrapper = callbackActivityStarterWrapper;
     }
 
     @Override
@@ -61,23 +64,10 @@ public class NotificationTapReceiver extends BroadcastReceiver {
             mobileMessagingCore(context).setMessagesSeen(message.getMessageId());
         }
 
-        Class callbackActivity = notificationSettings.getCallbackActivity();
-        if (callbackActivity == null) {
-            MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
-            return;
-        }
-
-        int intentFlags = intent.getIntExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(),
-                (Integer) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue());
-
-        Intent callbackIntent = new Intent(context, callbackActivity);
+        Intent callbackIntent = new Intent(intent);
         callbackIntent.setAction(Event.NOTIFICATION_TAPPED.getKey());
-        callbackIntent.putExtra(BroadcastParameter.EXTRA_MESSAGE, messageBundle);
-        // FLAG_ACTIVITY_NEW_TASK has to be here
-        // because we're starting activity outside of activity context
-        callbackIntent.addFlags(intentFlags | Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        context.startActivity(callbackIntent);
+        callbackActivityStarterWrapper(context).startActivity(callbackIntent, true);
     }
 
     private Broadcaster broadcaster(Context context) {
@@ -92,5 +82,12 @@ public class NotificationTapReceiver extends BroadcastReceiver {
             mobileMessagingCore = MobileMessagingCore.getInstance(context);
         }
         return mobileMessagingCore;
+    }
+
+    private CallbackActivityStarterWrapper callbackActivityStarterWrapper(Context context) {
+        if (callbackActivityStarterWrapper == null) {
+            callbackActivityStarterWrapper = new CallbackActivityStarterWrapper(context, mobileMessagingCore(context));
+        }
+        return callbackActivityStarterWrapper;
     }
 }

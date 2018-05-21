@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Akceptuj</string>
     <string name="mm_button_decline">Odrzuć</string>
+    <string name="mm_button_cancel">Anuluj</string>
+    <string name="mm_button_open">Otwórz</string>
 </resources>

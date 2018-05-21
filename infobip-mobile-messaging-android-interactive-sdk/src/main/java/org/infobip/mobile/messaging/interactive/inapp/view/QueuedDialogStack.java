@@ -49,21 +49,26 @@ public class QueuedDialogStack implements DialogStack {
             return;
         }
 
-        ctx.getInAppView().show(ctx.getMessage(), ctx.getCategory(), ctx.getActions());
-        if (!TextUtils.isEmpty(ctx.getMessage().getContentUrl())) {
-            downloadImage(ctx.getMessage().getContentUrl(), ctx.getInAppView());
+        if (TextUtils.isEmpty(ctx.getMessage().getContentUrl())) {
+            ctx.getInAppView().show(ctx.getMessage(), ctx.getCategory(), ctx.getActions());
+        } else {
+            downloadImageThenShowDialog(ctx.getMessage(), ctx.getCategory(), ctx.getActions(), ctx.getMessage().getContentUrl(), ctx.getInAppView());
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void downloadImage(String imageUrl, final InAppView dialog) {
+    private void downloadImageThenShowDialog(final Message message,
+                                             final NotificationCategory category,
+                                             final NotificationAction[] actions,
+                                             String imageUrl,
+                                             final InAppView dialog) {
         new DownloadImageTask() {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
                 if (bitmap == null) {
-                    dialog.imageDownloadFailed();
+                    dialog.show(message, category, actions);
                 } else {
-                    dialog.showImage(bitmap);
+                    dialog.showWithImage(bitmap, message, category, actions);
                 }
             }
         }.execute(imageUrl);

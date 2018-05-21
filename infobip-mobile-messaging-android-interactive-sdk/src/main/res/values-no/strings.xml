@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Aksepter</string>
     <string name="mm_button_decline">Avslå</string>
+    <string name="mm_button_cancel">Avbryt</string>
+    <string name="mm_button_open">Åpne</string>
 </resources>

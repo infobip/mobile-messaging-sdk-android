@@ -25,13 +25,16 @@ public class AndroidInteractiveBroadcaster implements InteractiveBroadcaster {
     }
 
     @Override
-    public void notificationActionTapped(Message message, NotificationCategory category, NotificationAction action) {
+    public Intent notificationActionTapped(Message message, NotificationCategory category, NotificationAction action) {
         Intent actionTapped = prepareIntent(InteractiveEvent.NOTIFICATION_ACTION_TAPPED);
         actionTapped.putExtras(MessageBundleMapper.messageToBundle(message));
         actionTapped.putExtras(NotificationActionBundleMapper.notificationActionToBundle(action));
         actionTapped.putExtras(NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
+
         context.sendBroadcast(actionTapped);
         LocalBroadcastManager.getInstance(context).sendBroadcast(actionTapped);
+
+        return actionTapped;
     }
 
     private Intent prepareIntent(InteractiveEvent event) {

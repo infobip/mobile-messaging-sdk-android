@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">قبول</string>
     <string name="mm_button_decline">رفض</string>
+    <string name="mm_button_open">فتح</string>
+    <string name="mm_button_cancel">إلغاء</string>
 </resources>

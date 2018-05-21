@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">同意</string>
     <string name="mm_button_decline">拒否</string>
+    <string name="mm_button_cancel">キャンセルする</string>
+    <string name="mm_button_open">開く</string>
 </resources>

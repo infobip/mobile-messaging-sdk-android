@@ -176,7 +176,6 @@ public class CoreNotificationHandler implements NotificationHandler {
         Intent intent = new Intent(context, NotificationTapReceiver.class);
         intent.setAction(message.getMessageId());
         intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
-        intent.putExtra(MobileMessagingProperty.EXTRA_INTENT_FLAGS.getKey(), notificationSettings.getIntentFlags());
         return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
     }
 

@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.interactive.platform;
 
+import android.content.Intent;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -17,5 +19,5 @@ public interface InteractiveBroadcaster {
      * @param notificationCategory tapped category
      * @param notificationAction   tapped action
      */
-    void notificationActionTapped(Message message, NotificationCategory notificationCategory, NotificationAction notificationAction);
+    Intent notificationActionTapped(Message message, NotificationCategory notificationCategory, NotificationAction notificationAction);
 }

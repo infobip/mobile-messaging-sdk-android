@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">수락</string>
     <string name="mm_button_decline">거절</string>
+    <string name="mm_button_cancel">취소</string>
+    <string name="mm_button_open">열기</string>
 </resources>

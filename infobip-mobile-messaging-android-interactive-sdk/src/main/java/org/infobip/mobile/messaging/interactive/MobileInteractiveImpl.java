@@ -199,6 +199,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
 
     @Override
     public boolean messageTapped(Message message) {
+        inAppNotificationHandler(context).userTappedNotificationForMessage(message);
         return false;
     }
 

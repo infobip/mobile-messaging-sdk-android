@@ -43,7 +43,6 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
-import static org.infobip.mobile.messaging.MobileMessagingProperty.EXTRA_INTENT_FLAGS;
 
 /**
  * @author tjuric
@@ -204,14 +203,13 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
                 givenNotificationAction("actionIdNotTapped").build());
     }
 
-    protected Intent givenIntent(Message message, NotificationCategory notificationCategory, NotificationAction action, int notificationId, int flags) {
+    protected Intent givenIntent(Message message, NotificationCategory notificationCategory, NotificationAction action, int notificationId) {
         return new Intent(context, NotificationActionTapReceiver.class)
                 .setAction(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey())
                 .putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message))
                 .putExtra(EXTRA_TAPPED_ACTION, NotificationActionBundleMapper.notificationActionToBundle(action))
                 .putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory))
-                .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
-                .putExtra(EXTRA_INTENT_FLAGS.getKey(), flags);
+                .putExtra(EXTRA_NOTIFICATION_ID, notificationId);
     }
 
 }

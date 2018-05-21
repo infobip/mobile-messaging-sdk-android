@@ -1,11 +1,11 @@
 package org.infobip.mobile.messaging.interactive.inapp.rules;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
-import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
+import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
@@ -28,7 +28,7 @@ public class InAppRules {
     }
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
-        if (StringUtils.isBlank(message.getCategory()) || message.isSilent()) {
+        if (message.isSilent()) {
             return ShowOrNot.not();
         }
 
@@ -36,23 +36,27 @@ public class InAppRules {
             return ShowOrNot.not();
         }
 
-        NotificationCategory category = mobileInteractive.getNotificationCategory(message.getCategory());
-        if (category == null || category.getNotificationActions() == null) {
-            return ShowOrNot.not();
-        }
-
-        List<NotificationAction> actions = Arrays.asList(category.getNotificationActions());
-        if (actions.size() == 0) {
-            return ShowOrNot.not();
-        }
-
-        NotificationAction eligibleActions[] = filterActionsForInAppDialog(category.getNotificationActions());
-        if (eligibleActions.length == 0) {
-            return ShowOrNot.not();
-        }
-
         ForegroundState state = foregroundStateMonitor.isInForeground();
         if (state.isForeground()) {
+            if (StringUtils.isBlank(message.getCategory())) {
+                return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity());
+            }
+
+            NotificationCategory category = mobileInteractive.getNotificationCategory(message.getCategory());
+            if (category == null || category.getNotificationActions() == null) {
+                return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity());
+            }
+
+            List<NotificationAction> actions = Arrays.asList(category.getNotificationActions());
+            if (actions.size() == 0) {
+                return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity());
+            }
+
+            NotificationAction eligibleActions[] = filterActionsForInAppDialog(category.getNotificationActions());
+            if (eligibleActions.length == 0) {
+                return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity());
+            }
+
             return ShowOrNot.showNow(category, eligibleActions, state.getForegroundActivity());
         } else {
             return ShowOrNot.showWhenInForeground();

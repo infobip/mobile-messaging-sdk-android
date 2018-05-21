@@ -1,11 +1,11 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -42,7 +42,7 @@ public class InAppViewDialogTest {
 
     private RelativeLayout rlDialogImage = mock(RelativeLayout.class);
     private TextView tvMessageText = mock(TextView.class);
-    private ProgressBar pbDialog = mock(ProgressBar.class);
+    private TextView tvMessageTitle = mock(TextView.class);
     private View dialogView = mock(View.class);
     private ImageView image = mock(ImageView.class);
     private AlertDialog alertDialog = mock(AlertDialog.class);
@@ -58,10 +58,10 @@ public class InAppViewDialogTest {
 
     @Before
     public void before() {
-        reset(callback, activityWrapper, rlDialogImage, tvMessageText, pbDialog, dialogView, image);
+        reset(callback, activityWrapper, rlDialogImage, tvMessageText, tvMessageTitle, dialogView, image);
         when(dialogView.findViewById(R.id.tv_msg_text)).thenReturn(tvMessageText);
+        when(dialogView.findViewById(R.id.tv_msg_title)).thenReturn(tvMessageTitle);
         when(dialogView.findViewById(R.id.rl_dialog_image)).thenReturn(rlDialogImage);
-        when(dialogView.findViewById(R.id.pb_dialog)).thenReturn(pbDialog);
         when(dialogView.findViewById(R.id.iv_dialog)).thenReturn(image);
         when(alertDialogBuilder.setOnDismissListener(any(DialogInterface.OnDismissListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.setView(eq(dialogView))).thenReturn(alertDialogBuilder);
@@ -75,7 +75,7 @@ public class InAppViewDialogTest {
     }
 
     @Test
-    public void shoudNotShowDialogInNoActions() {
+    public void shouldNotShowDialogInNoActions() {
         Message message = message();
         NotificationCategory category = category();
 
@@ -90,12 +90,56 @@ public class InAppViewDialogTest {
         NotificationAction actions[] = actions();
         NotificationCategory category = category(actions);
 
+        inAppViewDialog.showWithImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8), message, category, actions);
+
+        verify(tvMessageText, times(1)).setText(message.getBody());
+        verify(tvMessageTitle, times(1)).setVisibility(View.VISIBLE);
+        verify(rlDialogImage, times(1)).setVisibility(View.VISIBLE);
+        verify(image, times(1)).setVisibility(View.VISIBLE);
+
+        verify(activityWrapper, times(1)).createAlertDialogBuilder();
+
+        verify(alertDialogBuilder, times(1)).setOnDismissListener(any(InAppViewDialogDismissListener.class));
+        verify(alertDialogBuilder, times(1)).setView(eq(dialogView));
+        verify(alertDialogBuilder, times(1)).create();
+        verify(alertDialog, times(1)).show();
+    }
+
+    @Test
+    public void shouldSetupViewsAccordingToMessageContentsWithoutImage() {
+        Message message = message();
+        NotificationAction actions[] = actions();
+        NotificationCategory category = category(actions);
+
         inAppViewDialog.show(message, category, actions);
 
         verify(tvMessageText, times(1)).setText(message.getBody());
-        verify(rlDialogImage, times(1)).setVisibility(View.VISIBLE);
-        verify(pbDialog, times(1)).setVisibility(View.VISIBLE);
-        verify(image, times(1)).setVisibility(View.VISIBLE);
+        verify(tvMessageTitle, times(1)).setVisibility(View.VISIBLE);
+        verify(rlDialogImage, never()).setVisibility(View.VISIBLE);
+        verify(image, never()).setVisibility(View.VISIBLE);
+
+        verify(activityWrapper, times(1)).createAlertDialogBuilder();
+
+        verify(alertDialogBuilder, times(1)).setOnDismissListener(any(InAppViewDialogDismissListener.class));
+        verify(alertDialogBuilder, times(1)).setView(eq(dialogView));
+        verify(alertDialogBuilder, times(1)).create();
+        verify(alertDialog, times(1)).show();
+    }
+
+    @Test
+    public void shouldNotDisplayTitleAndImageFieldsIfDataNotProvided() {
+        Message message = message();
+        message.setTitle(null);
+        message.setContentUrl(null);
+        NotificationAction actions[] = actions();
+        NotificationCategory category = category(actions);
+
+        inAppViewDialog.show(message, category, actions);
+
+        verify(tvMessageText, times(1)).setText(message.getBody());
+        verify(tvMessageTitle, never()).setVisibility(View.VISIBLE);
+        verify(rlDialogImage, never()).setVisibility(View.VISIBLE);
+        verify(image, never()).setVisibility(View.VISIBLE);
 
         verify(activityWrapper, times(1)).createAlertDialogBuilder();
 
@@ -148,10 +192,11 @@ public class InAppViewDialogTest {
         return new Message() {{
             setBody("messageBody");
             setContentUrl("contentUrl");
+            setTitle("messageTitle");
         }};
     }
 
-    private NotificationCategory category(NotificationAction...actions) {
+    private NotificationCategory category(NotificationAction... actions) {
         return new NotificationCategory("categoryId", actions);
     }
 

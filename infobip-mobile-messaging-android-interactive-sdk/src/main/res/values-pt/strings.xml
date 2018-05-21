@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Aceitar</string>
     <string name="mm_button_decline">Recusar</string>
+    <string name="mm_button_cancel">Cancelar</string>
+    <string name="mm_button_open">Abrir</string>
 </resources>

@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Prijať</string>
     <string name="mm_button_decline">Odmietnuť</string>
+    <string name="mm_button_open">Otvoriť</string>
+    <string name="mm_button_cancel">Zrušiť</string>
 </resources>

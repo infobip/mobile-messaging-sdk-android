@@ -2,4 +2,6 @@
 <resources>
     <string name="mm_button_accept">Hyväksy</string>
     <string name="mm_button_decline">Hylkää</string>
+    <string name="mm_button_open">Avaa</string>
+    <string name="mm_button_cancel">Peruuta</string>
 </resources>
