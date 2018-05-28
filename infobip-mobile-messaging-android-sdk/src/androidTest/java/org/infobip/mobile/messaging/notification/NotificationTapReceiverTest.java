@@ -19,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
 
 public class NotificationTapReceiverTest extends MobileMessagingTestCase {
 
@@ -64,7 +63,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
         // Then
         Intent expectedIntent = new Intent(Event.NOTIFICATION_TAPPED.getKey());
         expectedIntent.putExtras(givenIntent);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(intentArgumentCaptor.capture(), eq(true));
+        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
         Intent intent = intentArgumentCaptor.getValue();
 
         assertEquals(notificationSettings.getIntentFlags(), intent.getFlags());

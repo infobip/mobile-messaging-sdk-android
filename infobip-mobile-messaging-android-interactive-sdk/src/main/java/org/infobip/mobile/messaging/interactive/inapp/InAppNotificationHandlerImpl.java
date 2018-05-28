@@ -112,7 +112,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         Intent callbackIntent = interactiveBroadcaster.notificationActionTapped(message, category, action);
 
         if (PredefinedNotificationAction.open().getId().equals(action.getId()) || action.bringsAppToForeground()) {
-            callbackActivityStarterWrapper.startActivity(callbackIntent, false);
+            callbackActivityStarterWrapper.startActivity(callbackIntent);
         }
     }
 

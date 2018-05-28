@@ -106,7 +106,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
                 notificationActionArgumentCaptor.capture());
 
         verifyProperPayloadWasSentAndActionsTriggered(givenTappedNotificationAction, givenNotificationCategory, givenMessage);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(givenIntent, true);
+        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(givenIntent);
     }
 
     @Test
@@ -133,8 +133,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
                 notificationActionArgumentCaptor.capture());
 
         verifyProperPayloadWasSentAndActionsTriggered(givenTappedNotificationAction, givenNotificationCategory, givenMessage);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.never()).startActivity(givenIntent, true);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.never()).startActivity(givenIntent, false);
+        Mockito.verify(callbackActivityStarterWrapper, Mockito.never()).startActivity(givenIntent);
     }
 
     @Test

@@ -78,7 +78,7 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         mobileInteractive(context).triggerSdkActionsFor(notificationAction, message);
 
         if (notificationAction.bringsAppToForeground()) {
-            callbackActivityStarterWrapper(context).startActivity(callbackIntent, true);
+            callbackActivityStarterWrapper(context).startActivity(callbackIntent);
         }
     }
 

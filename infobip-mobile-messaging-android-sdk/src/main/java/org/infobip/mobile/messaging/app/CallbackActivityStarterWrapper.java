@@ -22,9 +22,8 @@ public class CallbackActivityStarterWrapper {
      * Starts activity
      *
      * @param callbackIntent       Intent with extras/actions etc. to forward to the callback activity
-     * @param calledFromBackground Appends {@link Intent#FLAG_ACTIVITY_NEW_TASK} when set to true (called from background)
      */
-    public void startActivity(Intent callbackIntent, boolean calledFromBackground) {
+    public void startActivity(Intent callbackIntent) {
         NotificationSettings notificationSettings = mobileMessagingCore.getNotificationSettings();
         if (notificationSettings == null) {
             return;
@@ -36,10 +35,8 @@ public class CallbackActivityStarterWrapper {
         }
 
         int intentFlags = notificationSettings.getIntentFlags();
-        if (calledFromBackground) {
-            // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
-            intentFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-        }
+        // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
+        intentFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
 
         callbackIntent.addFlags(intentFlags);
         callbackIntent.setClass(context, callbackActivity);

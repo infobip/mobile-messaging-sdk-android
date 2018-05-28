@@ -37,13 +37,13 @@ public class CallbackActivityStarterWrapperTest extends MobileMessagingTestCase 
     }
 
     @Test
-    public void testShouldStartActivityWithActionCalledFromBackground() throws Exception {
+    public void testShouldStartActivityWithActionCalled() throws Exception {
 
         // Given
         Intent givenIntent = new Intent();
 
         // When
-        callbackActivityStarterWrapper.startActivity(givenIntent, true);
+        callbackActivityStarterWrapper.startActivity(givenIntent);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
@@ -56,22 +56,6 @@ public class CallbackActivityStarterWrapperTest extends MobileMessagingTestCase 
     }
 
     @Test
-    public void testShouldStartActivityWithoutActionCalledFromBackground() throws Exception {
-
-        // Given
-        Intent givenIntent = new Intent();
-
-        // When
-        callbackActivityStarterWrapper.startActivity(givenIntent, false);
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
-        Intent calledIntent = intentArgumentCaptor.getValue();
-
-        assertEquals(givenFlags, calledIntent.getFlags());
-    }
-
-    @Test
     public void testShouldNotStartActivityIfCallbackActivityDoesNotExist() throws Exception {
 
         // Given
@@ -79,7 +63,7 @@ public class CallbackActivityStarterWrapperTest extends MobileMessagingTestCase 
         Intent givenIntent = new Intent();
 
         // When
-        callbackActivityStarterWrapper.startActivity(givenIntent, true);
+        callbackActivityStarterWrapper.startActivity(givenIntent);
 
         // Then
         Mockito.verify(contextMock, Mockito.never()).startActivity(givenIntent);

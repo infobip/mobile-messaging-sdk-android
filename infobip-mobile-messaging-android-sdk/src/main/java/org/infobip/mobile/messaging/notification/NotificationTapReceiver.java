@@ -67,7 +67,7 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         Intent callbackIntent = new Intent(intent);
         callbackIntent.setAction(Event.NOTIFICATION_TAPPED.getKey());
 
-        callbackActivityStarterWrapper(context).startActivity(callbackIntent, true);
+        callbackActivityStarterWrapper(context).startActivity(callbackIntent);
     }
 
     private Broadcaster broadcaster(Context context) {
