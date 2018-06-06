@@ -18,7 +18,7 @@ import java.util.Collection;
  */
 public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
     private static volatile boolean foreground = false;
-    private volatile Activity foregroundActivity = null;
+    private static volatile Activity foregroundActivity = null;
 
     public ActivityLifecycleMonitor(@NonNull Application application) {
         application.registerActivityLifecycleCallbacks(this);
