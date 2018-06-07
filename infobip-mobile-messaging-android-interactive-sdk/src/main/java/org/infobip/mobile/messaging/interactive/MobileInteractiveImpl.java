@@ -118,6 +118,10 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
             return;
         }
 
+        if (StringUtils.isBlank(categoryId)) {
+            return;
+        }
+
         mobileMessagingCore(context).sendMessagesWithRetry(messageFor(categoryId, action, initialMessage));
     }
 
