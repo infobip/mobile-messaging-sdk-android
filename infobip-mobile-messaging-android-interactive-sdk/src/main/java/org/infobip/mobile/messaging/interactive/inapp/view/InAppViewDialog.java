@@ -44,32 +44,43 @@ public class InAppViewDialog implements InAppView {
 
     @Override
     public void show(@NonNull final Message message, @NonNull final NotificationCategory category, @NonNull final NotificationAction... actions) {
-        if (actions.length == 0) {
-            return;
-        }
-
-        uiThreadExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                showOnUiThread(null, message, category, actions);
-            }
-        });
+        show(null, message, category, actions);
     }
 
     @Override
     public void showWithImage(@NonNull final Bitmap bitmap, @NonNull final Message message, final NotificationCategory category, @NonNull final NotificationAction... actions) {
+        show(bitmap, message, category, actions);
+    }
+
+    private void show(final Bitmap bitmap, @NonNull final Message message, final NotificationCategory category, @NonNull final NotificationAction... actions) {
         if (actions.length == 0) {
             return;
         }
         uiThreadExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                showOnUiThread(bitmap, message, category, actions);
+                try {
+                    showOnUiThreadWithAppTheme(bitmap, message, category, actions);
+                } catch (IllegalStateException e) {
+                    if (e.getMessage().contains("You need to use a Theme.AppCompat theme")) {
+                        showOnUiThreadWithOwnTheme(bitmap, message, category, actions);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         });
     }
 
-    private void showOnUiThread(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
+    private void showOnUiThreadWithOwnTheme(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
+        showOnUiThread(bitmap, message, category, actions, false);
+    }
+
+    private void showOnUiThreadWithAppTheme(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
+        showOnUiThread(bitmap, message, category, actions, true);
+    }
+
+    private void showOnUiThread(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions, boolean useAppTheme) {
         if (bitmap != null) {
             image.setImageBitmap(bitmap);
             rlDialogImage.setVisibility(View.VISIBLE);
@@ -82,7 +93,7 @@ public class InAppViewDialog implements InAppView {
         }
         tvMessageText.setText(message.getBody());
 
-        final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder()
+        final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder(useAppTheme)
                 .setOnDismissListener(new InAppViewDialogDismissListener(this, callback))
                 .setView(dialogView);
 

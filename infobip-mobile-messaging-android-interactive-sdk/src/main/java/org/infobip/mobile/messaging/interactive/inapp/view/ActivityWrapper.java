@@ -2,8 +2,11 @@ package org.infobip.mobile.messaging.interactive.inapp.view;
 
 import android.app.Activity;
 import android.support.v7.app.AlertDialog;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import org.infobip.mobile.messaging.interactive.R;
 
 
 /**
@@ -20,8 +23,8 @@ public class ActivityWrapper {
         this.layoutInflater = LayoutInflater.from(activity);
     }
 
-    public AlertDialog.Builder createAlertDialogBuilder() {
-        return new AlertDialog.Builder(activity);
+    public AlertDialog.Builder createAlertDialogBuilder(boolean useAppTheme) {
+        return new AlertDialog.Builder(useAppTheme ? activity : new ContextThemeWrapper(activity, R.style.InAppDialog));
     }
 
     public View inflateView(int layoutResId) {

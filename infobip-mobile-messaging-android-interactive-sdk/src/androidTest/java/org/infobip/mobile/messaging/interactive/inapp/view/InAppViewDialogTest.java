@@ -20,8 +20,10 @@ import java.util.Random;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -69,7 +71,7 @@ public class InAppViewDialogTest {
         when(alertDialogBuilder.setNegativeButton(anyInt(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.setNeutralButton(anyInt(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.create()).thenReturn(alertDialog);
-        when(activityWrapper.createAlertDialogBuilder()).thenReturn(alertDialogBuilder);
+        when(activityWrapper.createAlertDialogBuilder(anyBoolean())).thenReturn(alertDialogBuilder);
         when(activityWrapper.inflateView(eq(R.layout.in_app_dialog_image))).thenReturn(dialogView);
         inAppViewDialog = new InAppViewDialog(callback, syncExecutor, activityWrapper);
     }
@@ -81,7 +83,7 @@ public class InAppViewDialogTest {
 
         inAppViewDialog.show(message, category);
 
-        verify(activityWrapper, never()).createAlertDialogBuilder();
+        verify(activityWrapper, never()).createAlertDialogBuilder(anyBoolean());
     }
 
     @Test
@@ -97,7 +99,7 @@ public class InAppViewDialogTest {
         verify(rlDialogImage, times(1)).setVisibility(View.VISIBLE);
         verify(image, times(1)).setVisibility(View.VISIBLE);
 
-        verify(activityWrapper, times(1)).createAlertDialogBuilder();
+        verify(activityWrapper, times(1)).createAlertDialogBuilder(eq(true));
 
         verify(alertDialogBuilder, times(1)).setOnDismissListener(any(InAppViewDialogDismissListener.class));
         verify(alertDialogBuilder, times(1)).setView(eq(dialogView));
@@ -118,7 +120,7 @@ public class InAppViewDialogTest {
         verify(rlDialogImage, never()).setVisibility(View.VISIBLE);
         verify(image, never()).setVisibility(View.VISIBLE);
 
-        verify(activityWrapper, times(1)).createAlertDialogBuilder();
+        verify(activityWrapper, times(1)).createAlertDialogBuilder(eq(true));
 
         verify(alertDialogBuilder, times(1)).setOnDismissListener(any(InAppViewDialogDismissListener.class));
         verify(alertDialogBuilder, times(1)).setView(eq(dialogView));
@@ -141,12 +143,30 @@ public class InAppViewDialogTest {
         verify(rlDialogImage, never()).setVisibility(View.VISIBLE);
         verify(image, never()).setVisibility(View.VISIBLE);
 
-        verify(activityWrapper, times(1)).createAlertDialogBuilder();
+        verify(activityWrapper, times(1)).createAlertDialogBuilder(eq(true));
 
         verify(alertDialogBuilder, times(1)).setOnDismissListener(any(InAppViewDialogDismissListener.class));
         verify(alertDialogBuilder, times(1)).setView(eq(dialogView));
         verify(alertDialogBuilder, times(1)).create();
         verify(alertDialog, times(1)).show();
+    }
+
+    @Test
+    public void shouldDisplayDialogWithBuiltInThemeIfDefaultFails() {
+        Message message = message();
+        message.setTitle(null);
+        message.setContentUrl(null);
+        NotificationAction actions[] = actions();
+        NotificationCategory category = category(actions);
+
+        doThrow(new IllegalStateException("You need to use a Theme.AppCompat theme (or descendant) with this activity.")).doNothing().when(alertDialog).show();
+
+        inAppViewDialog.show(message, category, actions);
+
+        verify(activityWrapper, times(1)).createAlertDialogBuilder(eq(true));
+        verify(activityWrapper, times(1)).createAlertDialogBuilder(eq(false));
+
+        verify(alertDialog, times(2)).show();
     }
 
     @Test
