@@ -252,4 +252,19 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertNotSame(message, messageAfter);
         assertEquals("SomeMessageId", messageAfter.getMessageId());
     }
+
+    @Test
+    public void test_send_primary_changed_event() throws Exception {
+        // When
+        broadcastSender.primarySettingChanged(true);
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.PRIMARY_CHANGED.getKey(), intent.getAction());
+
+        Boolean intentPrimary = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_PRIMARY, false);
+        assertEquals(true, intentPrimary.booleanValue());
+    }
 }

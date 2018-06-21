@@ -41,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private MessageStore messageStore;
     private TextView totalReceivedTextView;
     private ArrayAdapter<String> adapter;
+    private Menu menu;
 
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver sdkBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             refresh();
@@ -69,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
 
         LocalBroadcastManager
                 .getInstance(this)
-                .registerReceiver(messageReceiver, new IntentFilter(Event.MESSAGE_RECEIVED.getKey()));
+                .registerReceiver(sdkBroadcastReceiver, new IntentFilter() {{
+                    addAction(Event.MESSAGE_RECEIVED.getKey());
+                    addAction(Event.PRIMARY_CHANGED.getKey());
+                }});
     }
 
     @Override
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         LocalBroadcastManager
                 .getInstance(this)
-                .unregisterReceiver(messageReceiver);
+                .unregisterReceiver(sdkBroadcastReceiver);
     }
 
     @Override
@@ -98,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        this.menu = menu;
+        updatePrimaryInMenu();
         return true;
     }
 
@@ -129,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_registration_id:
                 showDialog(R.string.dialog_title_registration_id, mobileMessaging.getPushRegistrationId(), null);
                 return true;
+
+            case R.id.action_primary:
+                changePrimary();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -158,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             adapter.addAll(message.getBody());
         }
         adapter.notifyDataSetChanged();
+        updatePrimaryInMenu();
     }
 
     private void showDialog(int titleResId, String text, @Nullable final RunnableWithParameter<String> onSaved) {
@@ -186,5 +197,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         builder.show();
+    }
+
+    private void changePrimary() {
+        mobileMessaging.setAsPrimaryDevice(!mobileMessaging.isPrimaryDevice());
+    }
+
+    private void updatePrimaryInMenu() {
+        if (menu == null) {
+            return;
+        }
+
+        MenuItem item = menu.findItem(R.id.action_primary);
+        if (mobileMessaging.isPrimaryDevice()) {
+            item.setTitle(R.string.menu_action_disable_primary);
+        } else {
+            item.setTitle(R.string.menu_action_enable_primary);
+        }
     }
 }

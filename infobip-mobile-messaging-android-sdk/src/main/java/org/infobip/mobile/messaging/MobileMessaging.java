@@ -236,6 +236,27 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
+     * This method allows you to configure this device as primary among other devices of a single user.
+     * SDK will try to set this device as primary on a server and report result through the listener.
+     * @param isPrimary set to true to make this device primary or to false otherwise.
+     * @param listener listener to invoke when the operation is complete.
+     */
+    public abstract void setAsPrimaryDevice(boolean isPrimary, ResultListener<Void> listener);
+
+    /**
+     * This method allows you to configure this device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     * @param isPrimary set to true to make this device primary or to false otherwise.
+     */
+    public abstract void setAsPrimaryDevice(boolean isPrimary);
+
+    /**
+     * Use this method to determine if this device is currently primary device or not.
+     * @return true if this device is primary or false otherwise.
+     */
+    public abstract boolean isPrimaryDevice();
+
+    /**
      * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},

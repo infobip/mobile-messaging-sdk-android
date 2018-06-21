@@ -23,10 +23,13 @@ import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.data.LogoutUserSynchronizer;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
+import org.infobip.mobile.messaging.mobile.instance.InstanceSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
@@ -71,7 +74,7 @@ import java.util.concurrent.TimeUnit;
  * @author sslavin
  * @since 28.04.2016.
  */
-public class MobileMessagingCore extends MobileMessaging {
+public class MobileMessagingCore extends MobileMessaging implements InstanceSynchronizer.ServerListener{
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
@@ -95,6 +98,7 @@ public class MobileMessagingCore extends MobileMessaging {
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
     private SystemDataReporter systemDataReporter;
+    private InstanceSynchronizer instanceSynchronizer;
     private LogoutUserSynchronizer logoutUserSynchronizer;
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
@@ -260,6 +264,7 @@ public class MobileMessagingCore extends MobileMessaging {
         userDataReporter().sync(null, getUnreportedUserData());
         versionChecker().sync();
 
+        syncPrimary();
         reportSystemData();
     }
 
@@ -272,7 +277,28 @@ public class MobileMessagingCore extends MobileMessaging {
         moMessageSender().sync();
         seenStatusReporter().sync();
         userDataReporter().sync(null, getUnreportedUserData());
+
+        syncPrimary();
         reportSystemData();
+    }
+
+    private void syncPrimary() {
+        Boolean settingToSend = PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Boolean>() {
+            @Override
+            public Boolean run() {
+                if (PreferenceHelper.contains(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED)) {
+                    PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+                }
+                return null;
+            }
+        });
+
+        if (settingToSend != null) {
+            instanceSynchronizer().sendPrimary(settingToSend);
+            return;
+        }
+
+        instanceSynchronizer().sync();
     }
 
     public void registerForNetworkAvailability() {
@@ -300,6 +326,68 @@ public class MobileMessagingCore extends MobileMessaging {
     @Override
     public String getPushRegistrationId() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+    }
+
+    @Override
+    public void setAsPrimaryDevice(final boolean isPrimary, final ResultListener<Void> listener) {
+        if (isPrimaryDevice() == isPrimary) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onResult(null);
+                }
+            });
+            return;
+        }
+
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
+        instanceSynchronizer().sendPrimary(isPrimary, new InstanceSynchronizer.ActionListener() {
+
+            @Override
+            public void onPrimarySetSuccess() {
+                PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, isPrimary);
+                listener.onResult(null);
+            }
+
+            @Override
+            public void onPrimarySetError(Throwable error) {
+                PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+                listener.onError(MobileMessagingError.createFrom(error));
+            }
+        });
+    }
+
+    @Override
+    public void setAsPrimaryDevice(boolean isPrimary) {
+        if (isPrimaryDevice() == isPrimary) {
+            return;
+        }
+
+        instanceSynchronizer().sendPrimary(isPrimary);
+    }
+
+    @Override
+    public boolean isPrimaryDevice() {
+        return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Boolean>() {
+            @Override
+            public Boolean run() {
+                if (PreferenceHelper.contains(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED)) {
+                    return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+                }
+                return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_PRIMARY);
+            }
+        });
+    }
+
+    @Override
+    public void onPrimaryFetchedFromServer(boolean primary) {
+        if (isPrimaryDevice() == primary) {
+            return;
+        }
+
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, primary);
+        broadcaster.primarySettingChanged(primary);
     }
 
     public boolean isPushRegistrationEnabled() {
@@ -950,6 +1038,21 @@ public class MobileMessagingCore extends MobileMessaging {
         }
     }
 
+    private void runOnUiThread(final Runnable runnable) {
+        new MAsyncTask<Void, Void>() {
+
+            @Override
+            public Void run(Void[] voids) {
+                return null;
+            }
+
+            @Override
+            public void after(Void aVoid) {
+                runnable.run();
+            }
+        };
+    }
+
     @NonNull
     private MobileApiResourceProvider mobileApiResourceProvider() {
         if (mobileApiResourceProvider == null) {
@@ -1028,6 +1131,19 @@ public class MobileMessagingCore extends MobileMessaging {
             versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context), retryPolicyProvider);
         }
         return versionChecker;
+    }
+
+    @NonNull
+    private InstanceSynchronizer instanceSynchronizer() {
+        if (instanceSynchronizer == null) {
+            instanceSynchronizer = new InstanceSynchronizer(
+                    this,
+                    registrationAlignedExecutor,
+                    mobileApiResourceProvider().getMobileApiInstance(context),
+                    new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
+                    retryPolicyProvider.DEFAULT());
+        }
+        return instanceSynchronizer;
     }
 
     /**

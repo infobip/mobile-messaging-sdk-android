@@ -210,7 +210,17 @@ public enum Event {
      * }
      * </pre>
      */
-    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED");
+    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED"),
+
+    /**
+     * It is triggered when primary setting changes for device.
+     * <pre>
+     * {@code
+     * boolean isPrimary = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_PRIMARY);
+     * }
+     * </pre>
+     */
+    PRIMARY_CHANGED("org.infobip.mobile.messaging.PRIMARY_CHANGED");
 
     private final String key;
 

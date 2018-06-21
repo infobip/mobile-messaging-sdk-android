@@ -99,4 +99,11 @@ public interface Broadcaster {
      * Sends broadcast that user is logged out
      */
     void userLoggedOut();
+
+    /**
+     * Sends broadcast indicating that primary setting has changed on server
+     *
+     * @param primary current value of the setting
+     */
+    void primarySettingChanged(boolean primary);
 }

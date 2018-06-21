@@ -18,4 +18,9 @@
         android:id="@+id/action_gsm"
         android:title="@string/menu_action_gsm"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_primary"
+        android:title="@string/menu_action_enable_primary"
+        app:showAsAction="never" />
 </menu>

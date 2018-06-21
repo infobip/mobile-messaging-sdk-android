@@ -38,6 +38,8 @@ public enum MobileMessagingProperty {
     UNREPORTED_SYSTEM_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_SYSTEM_DATA"),
     REPORTED_SYSTEM_DATA_HASH("org.infobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     UNSENT_MO_MESSAGES("org.infobip.mobile.messaging.infobip.UNSENT_MO_MESSAGES", new String[0]),
+    IS_PRIMARY("org.infobip.mobile.messaging.infobip.IS_PRIMARY", false),
+    IS_PRIMARY_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_PRIMARY_UNREPORTED"),
 
     PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", true),
 
