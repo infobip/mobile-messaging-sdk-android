@@ -132,7 +132,7 @@ public class DefaultApiClient implements ApiClient {
             int responseCode = urlConnection.getResponseCode();
             interceptResponse(responseCode, urlConnection.getHeaderFields());
             if (responseCode >= 400) {
-                ApiResponse apiResponse = new ApiResponse("-1", "Unknown error");
+                ApiResponse apiResponse = new ApiResponse(ErrorCode.UNKNOWN_ERROR.value, ErrorCode.UNKNOWN_ERROR.description);
                 if (urlConnection.getContentLength() > 0) {
                     InputStream inputStream = urlConnection.getErrorStream();
                     String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
@@ -140,11 +140,11 @@ public class DefaultApiClient implements ApiClient {
                 }
 
                 if (responseCode >= 500) {
-                    Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
+                    Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
                     throw new ApiBackendException(tuple.getLeft(), tuple.getRight());
                 }
 
-                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-3", "Unknown API error");
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_ERROR.value, ErrorCode.UNKNOWN_API_ERROR.description);
                 throw new ApiException(tuple.getLeft(), tuple.getRight());
             }
 
@@ -168,7 +168,7 @@ public class DefaultApiClient implements ApiClient {
             }
 
             if (apiResponse != null && apiResponse.getRequestError() != null) {
-                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, "-2", "Unknown API backend error");
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
                 throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
             }
 
@@ -178,7 +178,7 @@ public class DefaultApiClient implements ApiClient {
             if (e instanceof ApiIOException) {
                 throw (ApiIOException) e;
             }
-            throw new ApiIOException("-4", "Can't access URI: " + request.uri, e);
+            throw new ApiIOException(ErrorCode.API_IO_ERROR.value, ErrorCode.API_IO_ERROR.description + " : " + request.uri, e);
         } finally {
             if (null != urlConnection) {
                 try {
@@ -264,19 +264,25 @@ public class DefaultApiClient implements ApiClient {
     }
 
     public enum ErrorCode {
-        UNKNOWN_ERROR("-1"), // responseCode >= 400
-        UNKNOWN_API_BACKEND_ERROR("-2"), // responseCode >= 500
-        UNKNOWN_API_ERROR("-3"), // apiResponse == null
-        API_IO_ERROR("-4"); // Can't access URI (404?)
+        UNKNOWN_ERROR("-1", "Unknown error"), // responseCode >= 400
+        UNKNOWN_API_BACKEND_ERROR("-2", "Unknown API backend error"), // responseCode >= 500
+        UNKNOWN_API_ERROR("-3", "Unknown API error"), // apiResponse == null
+        API_IO_ERROR("-4", "Can't access URI"); // Can't access URI (404?)
 
         private final String value;
+        private final String description;
 
-        ErrorCode(String value) {
+        ErrorCode(String value, String description) {
             this.value = value;
+            this.description = description;
         }
 
         public String getValue() {
             return value;
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 }

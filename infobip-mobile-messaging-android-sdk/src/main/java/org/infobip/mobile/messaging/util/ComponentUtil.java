@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver;
 import org.infobip.mobile.messaging.MobileMessagingSynchronizationReceiver;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
 
 /**
@@ -53,6 +54,21 @@ public class ComponentUtil {
             ComponentUtil.setState(context, enabled, MobileMessagingConnectivityReceiver.class);
         } else {
             ComponentUtil.setState(context, enabled, MobileMessagingJobService.class);
+        }
+    }
+
+    /**
+     * Disables "com.google.firebase.iid.FirebaseInstanceIdReceiver" if it exists in the app.
+     * It is needed while we rely on GCM in SDK. To be removed upon full switch to FCM.
+     * @param context context object
+     */
+    public static void disableFirebaseInstanceIdReceiver(Context context) {
+        try {
+            setState(context, false, Class.forName("com.google.firebase.iid.FirebaseInstanceIdReceiver"));
+            MobileMessagingLogger.w("Disabled com.google.firebase.iid.FirebaseInstanceIdReceiver for compatibility reasons");
+        } catch (ClassNotFoundException ignored) {
+        } catch (Exception e) {
+            MobileMessagingLogger.d("Cannot disable FirebaseInstanceIdReceiver: ", e);
         }
     }
 }

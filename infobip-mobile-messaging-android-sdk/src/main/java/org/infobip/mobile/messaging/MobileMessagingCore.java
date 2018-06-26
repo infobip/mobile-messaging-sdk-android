@@ -1241,6 +1241,8 @@ public class MobileMessagingCore extends MobileMessaging implements InstanceSync
                 }
             }
 
+            ComponentUtil.disableFirebaseInstanceIdReceiver(application);
+
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
