@@ -334,7 +334,9 @@ public class MobileMessagingCore extends MobileMessaging implements InstanceSync
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    listener.onResult(null);
+                    if (listener != null) {
+                        listener.onResult(null);
+                    }
                 }
             });
             return;
@@ -347,24 +349,24 @@ public class MobileMessagingCore extends MobileMessaging implements InstanceSync
             public void onPrimarySetSuccess() {
                 PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
                 PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, isPrimary);
-                listener.onResult(null);
+                if (listener != null) {
+                    listener.onResult(null);
+                }
             }
 
             @Override
             public void onPrimarySetError(Throwable error) {
                 PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-                listener.onError(MobileMessagingError.createFrom(error));
+                if (listener != null) {
+                    listener.onError(MobileMessagingError.createFrom(error));
+                }
             }
         });
     }
 
     @Override
     public void setAsPrimaryDevice(boolean isPrimary) {
-        if (isPrimaryDevice() == isPrimary) {
-            return;
-        }
-
-        instanceSynchronizer().sendPrimary(isPrimary);
+        setAsPrimaryDevice(isPrimary, null);
     }
 
     @Override
