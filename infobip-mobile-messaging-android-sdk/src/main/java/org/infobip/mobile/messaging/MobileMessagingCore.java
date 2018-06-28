@@ -283,6 +283,11 @@ public class MobileMessagingCore extends MobileMessaging implements InstanceSync
     }
 
     private void syncPrimary() {
+        if (StringUtils.isBlank(getPushRegistrationId())) {
+            MobileMessagingLogger.w("PushRegistrationID is not available yet, will sync primary setting later");
+            return;
+        }
+
         Boolean settingToSend = PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Boolean>() {
             @Override
             public Boolean run() {
@@ -1244,6 +1249,7 @@ public class MobileMessagingCore extends MobileMessaging implements InstanceSync
             }
 
             ComponentUtil.disableFirebaseInstanceIdReceiver(application);
+            ComponentUtil.verifyManifestComponentsForPush(application);
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             mobileMessagingCore.setNotificationSettings(notificationSettings);

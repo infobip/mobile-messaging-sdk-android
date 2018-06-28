@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.util;
 
+import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -11,7 +13,11 @@ import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver;
 import org.infobip.mobile.messaging.MobileMessagingSynchronizationReceiver;
+import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
+import org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver;
+import org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.notification.NotificationTapReceiver;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
 
 /**
@@ -69,6 +75,44 @@ public class ComponentUtil {
         } catch (ClassNotFoundException ignored) {
         } catch (Exception e) {
             MobileMessagingLogger.d("Cannot disable FirebaseInstanceIdReceiver: ", e);
+        }
+    }
+
+    /**
+     * Verifies that manifest contains all components needed for normal operation of push.
+     * @param context context object
+     * @throws ConfigurationException if any of desired components is not registered in manifest
+     */
+    public static void verifyManifestComponentsForPush(Context context) {
+        verifyManifestReceiver(context, MobileMessagingGcmReceiver.class);
+        verifyManifestReceiver(context, NotificationTapReceiver.class);
+        verifyManifestService(context, MobileMessagingGcmIntentService.class);
+        verifyManifestService(context, MobileMessagingInstanceIDListenerService.class);
+        verifyManifestService(context, MobileMessagingJobService.class);
+    }
+
+    private static void verifyManifestService(Context context, Class<? extends Service> cls) {
+        try {
+            context.getPackageManager().getServiceInfo(new ComponentName(context, cls), 0);
+        } catch (Exception ignored) {
+            reportMissingComponent(context, cls);
+        }
+    }
+
+    private static void verifyManifestReceiver(Context context, Class<? extends BroadcastReceiver> cls) {
+        try {
+            context.getPackageManager().getReceiverInfo(new ComponentName(context, cls), 0);
+        } catch (Exception ignored) {
+            reportMissingComponent(context, cls);
+        }
+    }
+
+    private static void reportMissingComponent(Context context, Class cls) {
+        ConfigurationException exception = new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_COMPONENT, cls.getCanonicalName());
+        if (SoftwareInformation.isDebuggableApplicationBuild(context)) {
+            throw exception;
+        } else {
+            MobileMessagingLogger.e(exception.getMessage());
         }
     }
 }

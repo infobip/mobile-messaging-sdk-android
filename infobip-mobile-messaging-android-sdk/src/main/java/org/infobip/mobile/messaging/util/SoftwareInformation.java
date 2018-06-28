@@ -23,6 +23,7 @@ public class SoftwareInformation {
     private static String sdkVersionWithPostfixForSystemData = null;
     private static String sdkVersionWithPostfixForUserAgent = null;
     private static NotificationManagerCompat notificationManagerCompat = null;
+    private static Boolean isDebuggableBuild = null;
 
     public static String getAppVersion(Context context) {
         if (appVersion != null) {
@@ -99,7 +100,12 @@ public class SoftwareInformation {
     }
 
     public static boolean isDebuggableApplicationBuild(Context context) {
-        return (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        if (isDebuggableBuild != null) {
+            return isDebuggableBuild;
+        }
+
+        isDebuggableBuild = (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        return isDebuggableBuild;
     }
 
     public static boolean areNotificationsEnabled(Context context) {

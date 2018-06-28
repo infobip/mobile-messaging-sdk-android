@@ -29,7 +29,7 @@ public class ConfigurationException extends RuntimeException {
     }
 
     public enum Reason {
-        MISSING_REQUIRED_COMPONENT("Missing required component in AndroidManifest.xml, add: %s"),
+        MISSING_REQUIRED_COMPONENT("Missing required component in AndroidManifest.xml, add: %s, check all needed components in https://github.com/infobip/mobile-messaging-sdk-android/wiki/Android-Manifest-components#push-notifications"),
         MISSING_REQUIRED_PERMISSION("Missing required permission in AndroidManifest.xml, add: %s"),
         CHECK_LOCATION_SETTINGS("Check your location settings.");
 

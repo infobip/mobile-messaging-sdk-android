@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
-import org.infobip.mobile.messaging.interactive.inapp.DownloadImageTask;
+import org.infobip.mobile.messaging.interactive.inapp.image.DownloadImageTask;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;

@@ -134,18 +134,14 @@ public final class MobileMessagingLogger {
     }
 
     private static void log(Level level, String tag, String msg, Object o) {
-        if (!loggingEnabled()) {
-            return;
+        if (loggingEnabled() || level == Level.ERROR) {
+            log(level, tag, msg + "\n" + objectToPrettyString(o), null);
         }
-
-        log(level, tag, msg + "\n" + objectToPrettyString(o), null);
     }
 
     private static void log(Level level, String tag, String msg, Throwable tr) {
-        if (!loggingEnabled()) {
-            return;
+        if (loggingEnabled() || level == Level.ERROR) {
+            writer.write(level, tag, msg, tr);
         }
-
-        writer.write(level, tag, msg, tr);
     }
 }
