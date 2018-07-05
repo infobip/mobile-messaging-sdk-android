@@ -63,6 +63,17 @@ public class CoreNotificationHandler implements NotificationHandler {
         displayNotification(builder, message, notificationId);
     }
 
+    @Override
+    public void cancelAllNotifications() {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null) {
+            MobileMessagingLogger.e("Unable to get notification manager and cancel notifications");
+            return;
+        }
+
+        notificationManager.cancelAll();
+    }
+
     /**
      * Displays native android notification with builder settings for the provided notificationId.
      *

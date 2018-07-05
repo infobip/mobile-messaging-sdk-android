@@ -53,6 +53,6 @@ public class MobileMessagingJobServiceTest {
         givenJobService.onStartJob(givenJobParameters);
 
         // Then
-        verify(mmcMock, times(1)).retrySync();
+        verify(mmcMock, times(1)).retrySyncOnNetworkAvailable();
     }
 }

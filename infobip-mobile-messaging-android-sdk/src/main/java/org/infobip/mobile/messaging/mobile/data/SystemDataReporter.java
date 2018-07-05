@@ -14,7 +14,6 @@ import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
@@ -54,11 +53,6 @@ public class SystemDataReporter {
                 if (systemDatas.length < 1 || systemDatas[0] == null) {
                     MobileMessagingLogger.e(InternalSdkError.ERROR_EMPTY_SYSTEM_DATA.get());
                     throw InternalSdkError.ERROR_EMPTY_SYSTEM_DATA.getException();
-                }
-
-                if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-                    MobileMessagingLogger.w("Can't report system data without valid registration");
-                    throw InternalSdkError.NO_VALID_REGISTRATION.getException();
                 }
 
                 SystemData data = systemDatas[0];

@@ -40,6 +40,7 @@ public enum MobileMessagingProperty {
     UNSENT_MO_MESSAGES("org.infobip.mobile.messaging.infobip.UNSENT_MO_MESSAGES", new String[0]),
     IS_PRIMARY("org.infobip.mobile.messaging.infobip.IS_PRIMARY", false),
     IS_PRIMARY_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_PRIMARY_UNREPORTED"),
+    LOGOUT_UNREPORTED("org.infobip.mobile.messaging.infobip.LOGOUT_UNREPORTED", false),
 
     PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", true),
 
@@ -56,7 +57,7 @@ public enum MobileMessagingProperty {
 
     INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
 
-    BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 3000L),
+    BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 5000L),
     VERSION_CHECK_INTERVAL_DAYS("org.infobip.mobile.messaging.notification.VERSION_CHECK_INTERVAL_DAYS", 1),
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),
 

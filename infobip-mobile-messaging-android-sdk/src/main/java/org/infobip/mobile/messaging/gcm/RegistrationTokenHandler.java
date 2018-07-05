@@ -93,4 +93,24 @@ class RegistrationTokenHandler {
             MobileMessagingLogger.e(InternalSdkError.ERROR_GCM_TOKEN_CLEANUP.get(), e);
         }
     }
+
+    /**
+     * Cleanup token and get a new one
+     *
+     * @param context context object
+     * @param senderId GCM sender ID
+     */
+    void handleRegistrationTokenReset(Context context, String senderId) {
+        try {
+            InstanceID instanceID = InstanceID.getInstance(context);
+            instanceID.deleteToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE);
+            String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+            MobileMessagingLogger.v(MobileMessagingLogger.TAG, "RECEIVED TOKEN AFTER RESET", token);
+            new AndroidBroadcaster(context).registrationAcquired(token);
+            sendRegistrationToServer(context, token);
+            subscribeTopics(context, token);
+        } catch (IOException e) {
+            MobileMessagingLogger.e(InternalSdkError.ERROR_GCM_TOKEN_CLEANUP.get(), e);
+        }
+    }
 }

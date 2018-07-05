@@ -26,26 +26,31 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEG
 public class InteractiveNotificationHandler implements NotificationHandler {
 
     private Context context;
+    private CoreNotificationHandler coreNotificationHandler;
 
     public InteractiveNotificationHandler() {
-
+        coreNotificationHandler = new CoreNotificationHandler();
     }
 
     @Override
     public void setContext(Context context) {
         this.context = context;
+        coreNotificationHandler.setContext(context);
     }
 
     @Override
     public void displayNotification(Message message) {
         if (context == null) return;
 
-        CoreNotificationHandler notificationHandler = new CoreNotificationHandler();
-        notificationHandler.setContext(context);
-        int notificationId = notificationHandler.getNotificationId(message);
-        NotificationCompat.Builder builder = getNotificationBuilder(message, notificationHandler, notificationId);
+        int notificationId = coreNotificationHandler.getNotificationId(message);
+        NotificationCompat.Builder builder = getNotificationBuilder(message, coreNotificationHandler, notificationId);
 
-        notificationHandler.displayNotification(builder, message, notificationId);
+        coreNotificationHandler.displayNotification(builder, message, notificationId);
+    }
+
+    @Override
+    public void cancelAllNotifications() {
+        coreNotificationHandler.cancelAllNotifications();
     }
 
     private NotificationCompat.Builder getNotificationBuilder(Message message, CoreNotificationHandler notificationHandler, int notificationId) {

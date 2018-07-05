@@ -36,7 +36,7 @@ public class MobileMessagingConnectivityReceiver extends BroadcastReceiver {
         }
 
         if (isInternetConnected(intent, context)) {
-            mobileMessagingCore(context).retrySync();
+            mobileMessagingCore(context).retrySyncOnNetworkAvailable();
         }
     }
 

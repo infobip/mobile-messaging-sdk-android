@@ -23,4 +23,10 @@
         android:id="@+id/action_primary"
         android:title="@string/menu_action_enable_primary"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:title="@string/menu_action_logout"
+        app:showAsAction="never" />
+
 </menu>

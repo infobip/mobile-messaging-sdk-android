@@ -45,7 +45,7 @@ public class MobileMessagingJobService extends JobService {
         int connectivityScheduleId = getScheduleId(this, ON_NETWORK_AVAILABLE_JOB_ID);
         if (params.getJobId() == connectivityScheduleId) {
             MobileMessagingLogger.d(TAG, "Network available");
-            mobileMessagingCore().retrySync();
+            mobileMessagingCore().retrySyncOnNetworkAvailable();
             return false;
         }
 

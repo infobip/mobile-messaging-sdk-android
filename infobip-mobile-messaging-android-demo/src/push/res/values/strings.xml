@@ -11,6 +11,7 @@
     <string name="menu_action_erase">Erase inbox</string>
     <string name="menu_action_enable_primary">Enable primary</string>
     <string name="menu_action_disable_primary">Disable primary</string>
+    <string name="menu_action_logout">Logout</string>
 
     <!-- Dialogs -->
     <string name="dialog_title_gsm">GSM</string>

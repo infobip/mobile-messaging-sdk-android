@@ -86,14 +86,14 @@ public class ComponentUtil {
     public static void verifyManifestComponentsForPush(Context context) {
         verifyManifestReceiver(context, MobileMessagingGcmReceiver.class);
         verifyManifestReceiver(context, NotificationTapReceiver.class);
+        verifyManifestService(context, MobileMessagingJobService.class);
         verifyManifestService(context, MobileMessagingGcmIntentService.class);
         verifyManifestService(context, MobileMessagingInstanceIDListenerService.class);
-        verifyManifestService(context, MobileMessagingJobService.class);
     }
 
     private static void verifyManifestService(Context context, Class<? extends Service> cls) {
         try {
-            context.getPackageManager().getServiceInfo(new ComponentName(context, cls), 0);
+            context.getPackageManager().getServiceInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
         } catch (Exception ignored) {
             reportMissingComponent(context, cls);
         }
@@ -101,7 +101,7 @@ public class ComponentUtil {
 
     private static void verifyManifestReceiver(Context context, Class<? extends BroadcastReceiver> cls) {
         try {
-            context.getPackageManager().getReceiverInfo(new ComponentName(context, cls), 0);
+            context.getPackageManager().getReceiverInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
         } catch (Exception ignored) {
             reportMissingComponent(context, cls);
         }

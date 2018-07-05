@@ -18,4 +18,9 @@ public interface NotificationHandler {
      * @param message message to display notification for.
      */
     void displayNotification(Message message);
+
+    /**
+     * Cancels all outstanding notifications.
+     */
+    void cancelAllNotifications();
 }

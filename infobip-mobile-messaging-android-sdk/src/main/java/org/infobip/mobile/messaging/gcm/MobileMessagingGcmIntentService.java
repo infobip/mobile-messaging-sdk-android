@@ -170,6 +170,7 @@ public class MobileMessagingGcmIntentService extends JobIntentService {
     public static final String ACTION_FCM_MESSAGE_RECEIVE = "com.google.firebase.MESSAGING_EVENT";
     public static final String ACTION_ACQUIRE_INSTANCE_ID = "org.infobip.mobile.messaging.gcm.INSTANCE_ID";
     public static final String ACTION_TOKEN_CLEANUP = "org.infobip.mobile.messaging.gcm.token.cleanup";
+    public static final String ACTION_TOKEN_RESET = "org.infobip.mobile.messaging.gcm.token.reset";
     public static final String EXTRA_GCM_SENDER_ID = "org.infobip.mobile.messaging.gcm.GCM_SENDER_ID";
 
     private final RegistrationTokenHandler registrationTokenHandler = new RegistrationTokenHandler();
@@ -199,6 +200,10 @@ public class MobileMessagingGcmIntentService extends JobIntentService {
 
             case ACTION_TOKEN_CLEANUP:
                 registrationTokenHandler.handleRegistrationTokenCleanup(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID));
+                break;
+
+            case ACTION_TOKEN_RESET:
+                registrationTokenHandler.handleRegistrationTokenReset(this, intent.getStringExtra(EXTRA_GCM_SENDER_ID));
                 break;
 
             case ACTION_ACQUIRE_INSTANCE_ID:

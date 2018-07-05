@@ -49,7 +49,7 @@ public class MobileMessagingConnectivityReceiverTest {
         mobileMessagingConnectivityReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        verify(mmcMock, times(1)).retrySync();
+        verify(mmcMock, times(1)).retrySyncOnNetworkAvailable();
     }
 
     @Test
@@ -62,6 +62,6 @@ public class MobileMessagingConnectivityReceiverTest {
         mobileMessagingConnectivityReceiver.onReceive(contextMock, givenIntent);
 
         // Then
-        verify(mmcMock, never()).retrySync();
+        verify(mmcMock, never()).retrySyncOnNetworkAvailable();
     }
 }

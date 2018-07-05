@@ -20,4 +20,9 @@ public class MockNotificationHandler implements NotificationHandler {
     public void displayNotification(Message message) {
 
     }
+
+    @Override
+    public void cancelAllNotifications() {
+
+    }
 }

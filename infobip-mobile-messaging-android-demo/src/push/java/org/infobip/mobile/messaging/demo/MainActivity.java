@@ -112,36 +112,52 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_erase:
-                messageStore.deleteAll(this);
-                refresh();
+                actionErase();
                 return true;
 
             case R.id.action_gsm:
-                final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
-                showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
-                    @Override
-                    public void run(String param) {
-                        userData.setMsisdn(param);
-                        mobileMessaging.syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
-                            @Override
-                            public void onResult(UserData result) {
-                                Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                });
+                actionGsm();
                 return true;
 
             case R.id.action_registration_id:
-                showDialog(R.string.dialog_title_registration_id, mobileMessaging.getPushRegistrationId(), null);
+                actionRegistrationId();
                 return true;
 
             case R.id.action_primary:
-                changePrimary();
+                actionPrimary();
+                return true;
+
+            case R.id.action_logout:
+                actionLogout();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void actionRegistrationId() {
+        showDialog(R.string.dialog_title_registration_id, mobileMessaging.getPushRegistrationId(), null);
+    }
+
+    private void actionGsm() {
+        final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
+        showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
+            @Override
+            public void run(String param) {
+                userData.setMsisdn(param);
+                mobileMessaging.syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+                    @Override
+                    public void onResult(UserData result) {
+                        Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+    }
+
+    private void actionErase() {
+        messageStore.deleteAll(this);
+        refresh();
     }
 
     private void activateGeofencing() {
@@ -199,8 +215,12 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void changePrimary() {
+    private void actionPrimary() {
         mobileMessaging.setAsPrimaryDevice(!mobileMessaging.isPrimaryDevice());
+    }
+
+    private void actionLogout() {
+        mobileMessaging.logout();
     }
 
     private void updatePrimaryInMenu() {
