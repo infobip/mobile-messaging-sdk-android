@@ -357,7 +357,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
 
     private boolean checkRequiredPermissions() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            MobileMessagingLogger.e("Unable to initialize geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION));
+            MobileMessagingLogger.e("Unable to configure geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION).getMessage());
             return false;
         }
 
