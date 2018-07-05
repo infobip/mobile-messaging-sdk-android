@@ -364,6 +364,7 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.LOGOUT_UNREPORTED, true);
         if (messageStore != null) {
@@ -952,6 +953,8 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
     }
 
     private void resetCloudToken() {
