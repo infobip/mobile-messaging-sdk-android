@@ -28,10 +28,6 @@ public class InAppRules {
     }
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
-        if (message.isSilent()) {
-            return ShowOrNot.not();
-        }
-
         if (!hasInAppEnabled(message)) {
             return ShowOrNot.not();
         }

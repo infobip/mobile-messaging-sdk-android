@@ -43,15 +43,6 @@ public class InAppRulesTest {
     }
 
     @Test
-    public void shouldNotDisplayIfSilent() {
-        when(message.isSilent()).thenReturn(true);
-
-        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
-        assertEquals(false, showOrNot.shouldShowNow());
-        assertEquals(false, showOrNot.shouldShowWhenInForeground());
-    }
-
-    @Test
     public void shouldNotDisplayIfInAppNotConfigured() {
         when(message.getInternalData()).thenReturn("{}");
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
@@ -64,6 +55,16 @@ public class InAppRulesTest {
         when(message.getInternalData()).thenReturn("{\"inApp\":false}");
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(false, showOrNot.shouldShowNow());
+        assertEquals(false, showOrNot.shouldShowWhenInForeground());
+    }
+
+    @Test
+    public void shouldDisplayIfSilent() {
+        when(message.isSilent()).thenReturn(true);
+        when(foregroundStateMonitor.isInForeground()).thenReturn(ForegroundState.foreground(activity));
+
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+        assertEquals(true, showOrNot.shouldShowNow());
         assertEquals(false, showOrNot.shouldShowWhenInForeground());
     }
 
