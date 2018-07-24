@@ -474,6 +474,11 @@ public class MobileMessagingCore
     }
 
     @Override
+    public void fetchPrimaryDeviceSetting() {
+        syncPrimary();
+    }
+
+    @Override
     public void onPrimaryFetchedFromServer(boolean primary) {
         if (isPrimaryDevice() == primary) {
             return;

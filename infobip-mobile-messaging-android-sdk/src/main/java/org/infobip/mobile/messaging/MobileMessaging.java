@@ -257,6 +257,14 @@ public abstract class MobileMessaging {
     public abstract boolean isPrimaryDevice();
 
     /**
+     * Use this method to trigger communication between SDK and server and to sync current primary setting for this device.
+     * <br>It will later on trigger {@link Event#PRIMARY_CHANGED} if the setting will be updated locally in SDK.
+     * <br><b>Note:</b> multiple invocations of this method within short period of time may not necessarily result in multiple calls to server,
+     * they will rather be optimized and throttled and number of network calls will be reduced by the library.
+     */
+    public abstract void fetchPrimaryDeviceSetting();
+
+    /**
      * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
