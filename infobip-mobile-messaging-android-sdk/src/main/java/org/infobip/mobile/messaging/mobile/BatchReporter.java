@@ -1,5 +1,8 @@
 package org.infobip.mobile.messaging.mobile;
 
+import org.infobip.mobile.messaging.platform.SystemTimeProvider;
+import org.infobip.mobile.messaging.platform.TimeProvider;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,16 +12,39 @@ import java.util.TimerTask;
  */
 public class BatchReporter {
 
-    private long delay;
+    private final long delay;
+    private final TimeProvider timeProvider;
     private Timer timer = new Timer();
-    private TimerTask timerTask;
+    private volatile TimerTask timerTask = null;
+    private volatile long lastSubmitted = 0;
+
+    public BatchReporter(Long batchReportingDelay, TimeProvider timeProvider) {
+        this.delay = batchReportingDelay;
+        this.timeProvider = timeProvider;
+    }
 
     public BatchReporter(Long batchReportingDelay) {
-        this.delay = batchReportingDelay;
+        this(batchReportingDelay, new SystemTimeProvider());
     }
 
     public synchronized void put(final Runnable task) {
-        if (this.timerTask != null) {
+        long now = timeProvider.now();
+        if (now - lastSubmitted >= delay) {
+            runNow(task);
+            return;
+        }
+
+        long after = lastSubmitted + delay - now;
+        scheduleWithDelay(task, after);
+    }
+
+    private void runNow(Runnable task) {
+        lastSubmitted = timeProvider.now();
+        task.run();
+    }
+
+    private void scheduleWithDelay(final Runnable task, long delay) {
+        if (timerTask != null) {
             timerTask.cancel();
             timer.purge();
         }

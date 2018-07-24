@@ -3,10 +3,13 @@ package org.infobip.mobile.messaging.app;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
+import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 
@@ -37,11 +40,12 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         boolean foregroundBefore = ActivityLifecycleMonitor.foreground;
         ActivityLifecycleMonitor.foreground = foreground;
         if (!foregroundBefore && foreground) {
-            dispatchAppInForegroundEvent(context);
+            dispatchEventToCore(context);
+            dispatchEventToModules(context);
         }
     }
 
-    private static void dispatchAppInForegroundEvent(Context context) {
+    private static void dispatchEventToModules(Context context) {
         Collection<MessageHandlerModule> messageHandlerModules = MobileMessagingCore.getInstance(context).getMessageHandlerModules();
         if (messageHandlerModules == null) {
             return;
@@ -52,6 +56,10 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
                 module.applicationInForeground();
             }
         }
+    }
+
+    private static void dispatchEventToCore(Context context) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(LocalEvent.APPLICATION_FOREGROUND.getKey()));
     }
 
     @Override

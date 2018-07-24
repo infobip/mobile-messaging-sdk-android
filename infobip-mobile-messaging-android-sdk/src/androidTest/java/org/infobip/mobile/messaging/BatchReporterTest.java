@@ -42,4 +42,16 @@ public class BatchReporterTest extends MobileMessagingTestCase {
 
         Mockito.verify(runnable, Mockito.times(5)).run();
     }
+
+    @Test
+    public void test_firstRunnableInvokedRightAway() throws Exception {
+
+        batchReporter = new BatchReporter(100L);
+        for (int i = 0; i < 5; i++) {
+            batchReporter.put(runnable);
+        }
+
+        Mockito.verify(runnable, Mockito.times(1)).run();
+        Mockito.verify(runnable, Mockito.after(200).times(2)).run();
+    }
 }
