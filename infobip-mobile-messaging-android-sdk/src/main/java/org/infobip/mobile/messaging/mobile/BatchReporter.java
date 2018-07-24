@@ -28,6 +28,11 @@ public class BatchReporter {
     }
 
     public synchronized void put(final Runnable task) {
+        if (timerTask != null) {
+            timerTask.cancel();
+            timer.purge();
+        }
+
         long now = timeProvider.now();
         if (now - lastSubmitted >= delay) {
             runNow(task);
@@ -44,14 +49,10 @@ public class BatchReporter {
     }
 
     private void scheduleWithDelay(final Runnable task, long delay) {
-        if (timerTask != null) {
-            timerTask.cancel();
-            timer.purge();
-        }
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                task.run();
+                runNow(task);
             }
         };
         timer.schedule(timerTask, delay);

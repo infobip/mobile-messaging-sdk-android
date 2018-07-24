@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
 
-import static java.util.concurrent.Executors.newSingleThreadExecutor;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -28,10 +27,9 @@ public class SeenStatusReporterTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        batchReporter = new BatchReporter(100L);
+        batchReporter = new BatchReporter(300L);
         mobileApiMessages = mock(MobileApiMessages.class);
 
-        executor = newSingleThreadExecutor();
         MobileMessagingStats stats = mobileMessagingCore.getStats();
         executor = mock(Executor.class);
         seenStatusReporter = new SeenStatusReporter(mobileMessagingCore, stats, executor, broadcaster, mobileApiMessages, batchReporter);
@@ -46,7 +44,7 @@ public class SeenStatusReporterTest extends MobileMessagingTestCase {
             seenStatusReporter.sync();
         }
 
-        Mockito.verify(executor, Mockito.after(50).never()).execute(Mockito.any(Runnable.class));
-        Mockito.verify(executor, Mockito.after(500).atMost(1)).execute(Mockito.any(Runnable.class));
+        Mockito.verify(executor, Mockito.times(1)).execute(Mockito.any(Runnable.class));
+        Mockito.verify(executor, Mockito.after(500).atMost(2)).execute(Mockito.any(Runnable.class));
     }
 }
