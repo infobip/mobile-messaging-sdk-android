@@ -262,7 +262,7 @@ public abstract class MobileMessaging {
      * <br><b>Note:</b> multiple invocations of this method within short period of time may not necessarily result in multiple calls to server,
      * they will rather be optimized and throttled and number of network calls will be reduced by the library.
      */
-    public abstract void fetchPrimaryDeviceSetting();
+    public abstract void syncPrimaryDeviceSettingWithServer();
 
     /**
      * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).

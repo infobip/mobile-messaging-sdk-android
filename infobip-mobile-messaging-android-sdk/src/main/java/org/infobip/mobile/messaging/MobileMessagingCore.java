@@ -474,7 +474,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void fetchPrimaryDeviceSetting() {
+    public void syncPrimaryDeviceSettingWithServer() {
         syncPrimary();
     }
 
