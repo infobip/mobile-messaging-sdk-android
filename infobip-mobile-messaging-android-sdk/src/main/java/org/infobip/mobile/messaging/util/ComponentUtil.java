@@ -86,9 +86,13 @@ public class ComponentUtil {
     public static void verifyManifestComponentsForPush(Context context) {
         verifyManifestReceiver(context, MobileMessagingGcmReceiver.class);
         verifyManifestReceiver(context, NotificationTapReceiver.class);
-        verifyManifestService(context, MobileMessagingJobService.class);
         verifyManifestService(context, MobileMessagingGcmIntentService.class);
         verifyManifestService(context, MobileMessagingInstanceIDListenerService.class);
+        if (Build.VERSION_CODES.N >= Build.VERSION.SDK_INT) {
+            verifyManifestService(context, MobileMessagingJobService.class);
+        } else {
+            verifyManifestReceiver(context, MobileMessagingConnectivityReceiver.class);
+        }
     }
 
     private static void verifyManifestService(Context context, Class<? extends Service> cls) {
