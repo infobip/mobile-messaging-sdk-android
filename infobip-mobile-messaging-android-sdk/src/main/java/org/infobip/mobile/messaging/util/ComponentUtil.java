@@ -88,7 +88,7 @@ public class ComponentUtil {
         verifyManifestReceiver(context, NotificationTapReceiver.class);
         verifyManifestService(context, MobileMessagingGcmIntentService.class);
         verifyManifestService(context, MobileMessagingInstanceIDListenerService.class);
-        if (Build.VERSION_CODES.N >= Build.VERSION.SDK_INT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             verifyManifestService(context, MobileMessagingJobService.class);
         } else {
             verifyManifestReceiver(context, MobileMessagingConnectivityReceiver.class);
