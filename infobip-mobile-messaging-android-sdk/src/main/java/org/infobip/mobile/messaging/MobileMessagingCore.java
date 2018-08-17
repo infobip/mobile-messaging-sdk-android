@@ -10,8 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -57,6 +55,7 @@ import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.ModuleLoader;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.SHA1;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
@@ -876,7 +875,7 @@ public class MobileMessagingCore
             return applicationCodeHashMap.get(applicationCode);
         }
 
-        String appCodeHash = new String(Hex.encodeHex(DigestUtils.sha1(applicationCode))).substring(0, 10);
+        String appCodeHash = SHA1.calc(applicationCode).substring(0, 10);
         applicationCodeHashMap = Collections.singletonMap(applicationCode, appCodeHash);
 
         return appCodeHash;
