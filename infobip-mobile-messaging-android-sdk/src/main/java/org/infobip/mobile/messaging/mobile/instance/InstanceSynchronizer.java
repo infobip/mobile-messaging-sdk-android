@@ -15,23 +15,14 @@ import java.util.concurrent.Executor;
  */
 public class InstanceSynchronizer {
 
-    public interface ServerListener {
-        void onPrimaryFetchedFromServer(boolean primary);
-    }
-
-    public interface ActionListener {
-        void onPrimarySetSuccess();
-        void onPrimarySetError(Throwable error);
-    }
-
-    private final ServerListener serverListener;
+    private final InstanceServerListener serverListener;
     private final Executor executor;
     private final MobileApiInstance mobileApiInstance;
     private final BatchReporter batchReporter;
     private final MRetryPolicy retryPolicy;
 
     public InstanceSynchronizer(
-            ServerListener serverListener,
+            InstanceServerListener serverListener,
             Executor executor,
             MobileApiInstance mobileApiInstance,
             BatchReporter batchReporter,
@@ -79,7 +70,7 @@ public class InstanceSynchronizer {
         sendPrimary(primary, null);
     }
 
-    public void sendPrimary(final Boolean primary, final ActionListener actionListener) {
+    public void sendPrimary(final Boolean primary, final InstanceActionListener actionListener) {
         new MRetryableTask<Boolean, Void>() {
 
             @Override

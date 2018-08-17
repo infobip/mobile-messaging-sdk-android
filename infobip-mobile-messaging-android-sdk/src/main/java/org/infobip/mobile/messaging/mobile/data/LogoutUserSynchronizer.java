@@ -10,22 +10,12 @@ import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import java.util.concurrent.Executor;
 
 public class LogoutUserSynchronizer {
+
     private final MobileApiData mobileApiData;
     private final Executor executor;
     private final BatchReporter batchReporter;
     private final MRetryPolicy policy;
-    private final ServerListener serverListener;
-
-    public interface ActionListener {
-        void onUserInitiatedLogoutCompleted();
-        void onUserInitiatedLogoutFailed(Throwable error);
-    }
-
-    public interface ServerListener {
-        void onServerLogoutStarted();
-        void onServerLogoutCompleted();
-        void onServerLogoutFailed(Throwable error);
-    }
+    private final LogoutServerListener serverListener;
 
     private class LogoutTask extends MRetryableTask<Void, Void> {
         @Override
@@ -37,7 +27,7 @@ public class LogoutUserSynchronizer {
         }
     }
 
-    public LogoutUserSynchronizer(MobileApiData mobileApiData, MRetryPolicy policy, Executor executor, BatchReporter batchReporter, ServerListener serverListener) {
+    public LogoutUserSynchronizer(MobileApiData mobileApiData, MRetryPolicy policy, Executor executor, BatchReporter batchReporter, LogoutServerListener serverListener) {
         this.executor = executor;
         this.batchReporter = batchReporter;
         this.policy = policy;
@@ -71,7 +61,7 @@ public class LogoutUserSynchronizer {
         });
     }
 
-    public void logout(final ActionListener actionListener) {
+    public void logout(final LogoutActionListener actionListener) {
         new LogoutTask() {
             @Override
             public void after(Void objects) {

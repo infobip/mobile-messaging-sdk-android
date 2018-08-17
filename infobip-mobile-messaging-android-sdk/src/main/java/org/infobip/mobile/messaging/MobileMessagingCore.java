@@ -27,9 +27,13 @@ import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobile.data.LogoutActionListener;
+import org.infobip.mobile.messaging.mobile.data.LogoutServerListener;
 import org.infobip.mobile.messaging.mobile.data.LogoutUserSynchronizer;
 import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
+import org.infobip.mobile.messaging.mobile.instance.InstanceActionListener;
+import org.infobip.mobile.messaging.mobile.instance.InstanceServerListener;
 import org.infobip.mobile.messaging.mobile.instance.InstanceSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
@@ -77,7 +81,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MobileMessagingCore
         extends MobileMessaging
-        implements InstanceSynchronizer.ServerListener, LogoutUserSynchronizer.ServerListener {
+        implements InstanceServerListener, LogoutServerListener {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
@@ -434,7 +438,7 @@ public class MobileMessagingCore
         }
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
-        instanceSynchronizer().sendPrimary(isPrimary, new InstanceSynchronizer.ActionListener() {
+        instanceSynchronizer().sendPrimary(isPrimary, new InstanceActionListener() {
 
             @Override
             public void onPrimarySetSuccess() {
@@ -1050,7 +1054,7 @@ public class MobileMessagingCore
     @Override
     public void logout(final ResultListener listener) {
         onLogoutStarted();
-        logoutUserSynchronizer().logout(new LogoutUserSynchronizer.ActionListener() {
+        logoutUserSynchronizer().logout(new LogoutActionListener() {
             @Override
             public void onUserInitiatedLogoutCompleted() {
                 onLogoutCompleted();

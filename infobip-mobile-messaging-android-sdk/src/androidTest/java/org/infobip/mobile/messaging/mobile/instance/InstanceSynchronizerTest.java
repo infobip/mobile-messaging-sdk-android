@@ -32,10 +32,10 @@ public class InstanceSynchronizerTest extends MobileMessagingTestCase {
 
     private InstanceSynchronizer instanceSynchronizer;
 
-    private InstanceSynchronizer.ServerListener serverListener = mock(InstanceSynchronizer.ServerListener.class);
+    private InstanceServerListener serverListener = mock(InstanceServerListener.class);
     private MobileApiInstance mobileApiInstance = mock(MobileApiInstance.class);
     private BatchReporter batchReporter = new BatchReporter(0L);
-    private InstanceSynchronizer.ActionListener actionListener = mock(InstanceSynchronizer.ActionListener.class);
+    private InstanceActionListener actionListener = mock(InstanceActionListener.class);
     private Executor executor = new Executor() {
         @Override
         public void execute(@NonNull Runnable command) {
