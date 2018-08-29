@@ -6,7 +6,6 @@ import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.data.MobileApiData;
 import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -50,14 +49,14 @@ public class UserDataReporter {
 
         mobileMessagingCore.saveUnreportedUserData(userData);
 
+        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
+            MobileMessagingLogger.w("Registration not available yet, will sync user data later");
+            return;
+        }
+
         new MRetryableTask<UserData, UserData>() {
             @Override
             public UserData run(UserData[] userData) {
-
-                if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-                    MobileMessagingLogger.w("Can't report system data without valid registration");
-                    throw InternalSdkError.NO_VALID_REGISTRATION.getException();
-                }
 
                 UserDataReport request = UserDataMapper.toUserDataReport(userData[0].getPredefinedUserData(), userData[0].getCustomUserData());
                 MobileMessagingLogger.v("USER DATA >>>", request);

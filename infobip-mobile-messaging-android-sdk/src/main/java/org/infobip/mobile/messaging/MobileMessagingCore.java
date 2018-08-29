@@ -305,7 +305,7 @@ public class MobileMessagingCore
 
     private void syncPrimary() {
         if (StringUtils.isBlank(getPushRegistrationId())) {
-            MobileMessagingLogger.w("PushRegistrationID is not available yet, will sync primary setting later");
+            MobileMessagingLogger.w("Registration is not available yet, will sync primary setting later");
             return;
         }
 
@@ -328,12 +328,12 @@ public class MobileMessagingCore
     }
 
     private void logoutOnServerIfNeeded() {
-        if (StringUtils.isBlank(getPushRegistrationId())) {
-            MobileMessagingLogger.w("PushRegistrationID is not available, cannot logout");
-            return;
-        }
-
         if (isLogoutUnreported()) {
+            if (StringUtils.isBlank(getPushRegistrationId())) {
+                MobileMessagingLogger.w("Registration is not available, cannot logout now");
+                return;
+            }
+
             logoutUserSynchronizer().logout();
         }
     }
@@ -1110,7 +1110,7 @@ public class MobileMessagingCore
     public void reportSystemData() {
 
         if (StringUtils.isBlank(getPushRegistrationId())) {
-            MobileMessagingLogger.w("Push registration ID is not available, cannot send system data");
+            MobileMessagingLogger.w("Registration is not available yet, will sync system data later");
             return;
         }
 

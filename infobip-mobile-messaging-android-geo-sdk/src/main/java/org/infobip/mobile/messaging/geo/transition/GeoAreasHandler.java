@@ -6,9 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.GeoEventType;
+import org.infobip.mobile.messaging.geo.MobileGeoImpl;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.geo.platform.GeoBroadcaster;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
@@ -125,6 +127,7 @@ public class GeoAreasHandler {
         saveMessages(messages.keySet());
         handleGeoReportingResult(context, result);
         geoNotificationHelper.notifyAboutGeoTransitions(messages);
+        notifyOtherModulesAboutGeoMessages(messages.keySet());
     }
 
     /**
@@ -218,6 +221,17 @@ public class GeoAreasHandler {
         }
     }
 
+    private void notifyOtherModulesAboutGeoMessages(Collection<Message> messages) {
+        for (MessageHandlerModule module : mobileMessagingCore.getMessageHandlerModules()) {
+            if (module instanceof MobileGeoImpl) {
+                continue;
+            }
+
+            for (Message message : messages) {
+                module.handleMessage(message);
+            }
+        }
+    }
 
     @VisibleForTesting
     public MobileMessagingCore getMobileMessagingCore() {

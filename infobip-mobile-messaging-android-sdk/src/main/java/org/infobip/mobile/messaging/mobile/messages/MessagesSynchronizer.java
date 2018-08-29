@@ -7,7 +7,6 @@ import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -56,16 +55,15 @@ public class MessagesSynchronizer {
             return;
         }
 
+        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
+            MobileMessagingLogger.w("Registration not available yet, will sync messages later");
+            return;
+        }
 
         final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
             public List<Message> run(Void[] objects) {
-
-                if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-                    MobileMessagingLogger.w("Can't sync messages without valid registration");
-                    throw InternalSdkError.NO_VALID_REGISTRATION.getException();
-                }
 
                 String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
 
@@ -96,9 +94,7 @@ public class MessagesSynchronizer {
                 MobileMessagingLogger.e("MobileMessaging API returned error (synchronizing messages)! ", error);
                 stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
 
-                if (!(error instanceof InternalSdkError.InternalSdkException)) {
-                    broadcaster.error(MobileMessagingError.createFrom(error));
-                }
+                broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
         .retryWith(retryPolicy)
