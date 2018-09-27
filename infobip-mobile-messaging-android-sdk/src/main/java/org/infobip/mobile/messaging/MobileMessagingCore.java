@@ -1041,6 +1041,11 @@ public class MobileMessagingCore
 
     @Override
     public void logout() {
+        if (StringUtils.isBlank(getPushRegistrationId())) {
+            MobileMessagingLogger.e("Registration not available yet, cannot logout");
+            return;
+        }
+
         onLogoutStarted();
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
@@ -1052,6 +1057,12 @@ public class MobileMessagingCore
 
     @Override
     public void logout(final ResultListener listener) {
+        if (StringUtils.isBlank(getPushRegistrationId())) {
+            MobileMessagingLogger.e("Registration not available yet, cannot logout");
+            listener.onError(InternalSdkError.NO_VALID_REGISTRATION.getError());
+            return;
+        }
+
         onLogoutStarted();
         logoutUserSynchronizer().logout(new LogoutActionListener() {
             @Override
