@@ -168,7 +168,7 @@ public class MobileMessagingCore
         notificationManager.createNotificationChannel(notificationChannel);
 
         NotificationSettings notificationSettings = getNotificationSettings();
-        if (notificationSettings.areHeadsUpNotificationsEnabled()) {
+        if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
             NotificationChannel highPriorityNotificationChannel = new NotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, channelName + " High Priority", NotificationManager.IMPORTANCE_HIGH);
             highPriorityNotificationChannel.enableLights(true);
             highPriorityNotificationChannel.enableVibration(true);
@@ -717,6 +717,7 @@ public class MobileMessagingCore
         }
     }
 
+    @Nullable
     public NotificationSettings getNotificationSettings() {
         if (!isDisplayNotificationEnabled()) {
             return null;
@@ -1068,6 +1069,7 @@ public class MobileMessagingCore
             @Override
             public void onUserInitiatedLogoutCompleted() {
                 onLogoutCompleted();
+                //noinspection unchecked
                 listener.onResult(null);
             }
 
@@ -1274,7 +1276,7 @@ public class MobileMessagingCore
     }
 
     @NonNull
-    VersionChecker versionChecker() {
+    private VersionChecker versionChecker() {
         if (versionChecker == null) {
             versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context), retryPolicyProvider);
         }
