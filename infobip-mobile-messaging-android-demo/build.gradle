@@ -78,7 +78,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(':infobip-mobile-messaging-android-chat-sdk')
     compile project(':infobip-mobile-messaging-android-geo-sdk')
-    compile project(':infobip-mobile-messaging-android-interactive-sdk')
+    compile project(':infobip-mobile-messaging-android-resources')
     compile project(':infobip-mobile-messaging-android-sdk')
     compile project(':infobip-mobile-messaging-api-java')
     compile 'com.android.support:appcompat-v7:26.1.0'

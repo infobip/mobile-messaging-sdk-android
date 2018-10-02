@@ -57,5 +57,7 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver" />
+
     </application>
 </manifest>

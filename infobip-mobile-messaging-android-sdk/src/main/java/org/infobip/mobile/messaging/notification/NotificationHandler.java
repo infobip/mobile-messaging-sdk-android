@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.notification;
 
-import android.content.Context;
-
 import org.infobip.mobile.messaging.Message;
 
 /**
@@ -10,8 +8,6 @@ import org.infobip.mobile.messaging.Message;
  */
 
 public interface NotificationHandler {
-
-    void setContext(Context context);
 
     /**
      * Displays native android notification for the provided message.

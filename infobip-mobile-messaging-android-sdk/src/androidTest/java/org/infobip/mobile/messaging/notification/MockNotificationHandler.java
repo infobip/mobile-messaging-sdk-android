@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.notification;
 
-import android.content.Context;
-
 import org.infobip.mobile.messaging.Message;
 
 /**
@@ -10,11 +8,6 @@ import org.infobip.mobile.messaging.Message;
  */
 
 public class MockNotificationHandler implements NotificationHandler {
-
-    @Override
-    public void setContext(Context context) {
-
-    }
 
     @Override
     public void displayNotification(Message message) {

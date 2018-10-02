@@ -23,7 +23,6 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName project.version
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'proguard-rules.pro'
     }
 
@@ -42,24 +41,6 @@ android {
     lintOptions {
         abortOnError false
     }
-}
-
-dependencies {
-    compile project(':infobip-mobile-messaging-android-sdk')
-    compile project(':infobip-mobile-messaging-android-resources')
-    compile project(':infobip-mobile-messaging-api-java')
-    compile 'com.android.support:support-v4:26.1.0'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile "com.android.support:design:26.1.0"
-
-    androidTestCompile project(':infobip-mobile-messaging-android-test')
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'com.nanohttpd:nanohttpd:2.1.0'
-
-    testCompile project(':infobip-mobile-messaging-android-test')
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
 }
 
 android.libraryVariants.all { variant ->
@@ -101,7 +82,6 @@ bintray {
         labels = ['aar', 'android']
     }
 }
-
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'

@@ -39,6 +39,7 @@ android {
 
 dependencies {
     compile project(':infobip-mobile-messaging-api-java')
+    compile project(':infobip-mobile-messaging-android-resources')
     compile 'com.google.android.gms:play-services-gcm:10.2.1'
     compile 'com.google.android.gms:play-services-location:10.2.1'
     compile 'com.android.support:support-v4:26.1.0'

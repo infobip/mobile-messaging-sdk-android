@@ -58,7 +58,7 @@ public class ModuleLoaderTest {
         ModuleLoader givenModuleLoader = new ModuleLoader(mockedContext);
 
         // When
-        Map<String, BaseClass> actualModuleMap = givenModuleLoader.loadModules(BaseClass.class);
+        Map<String, BaseClass> actualModuleMap = givenModuleLoader.loadModulesFromManifest(BaseClass.class);
 
         // Then
         assertEquals(3, actualModuleMap.size());

@@ -25,7 +25,7 @@ public class ModuleLoader {
         this.context = context;
     }
 
-    public <T> Map<String, T> loadModules(Class<T> cls) {
+    public <T> Map<String, T> loadModulesFromManifest(Class<T> cls) {
         Map<String, T> modules = new HashMap<>();
         for (Class<T> implementation : loadModuleClassesFromManifest(cls)) {
             T module;

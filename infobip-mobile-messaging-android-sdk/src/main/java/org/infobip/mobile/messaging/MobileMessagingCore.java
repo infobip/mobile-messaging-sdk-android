@@ -18,6 +18,8 @@ import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
 import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
 import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
+import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
+import org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
@@ -38,7 +40,6 @@ import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
-import org.infobip.mobile.messaging.notification.CoreNotificationHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -132,7 +133,7 @@ public class MobileMessagingCore
         this.stats = new MobileMessagingStats(context);
         this.retryPolicyProvider = new RetryPolicyProvider(context);
         this.moduleLoader = moduleLoader;
-        this.notificationHandler = loadNotificationHandler();
+        this.notificationHandler = new InteractiveNotificationHandler(context);
         this.messageHandlerModules = loadMessageHandlerModules();
 
         if (mobileMessagingSynchronizationReceiver == null) {
@@ -216,23 +217,12 @@ public class MobileMessagingCore
     }
 
     private Map<String, MessageHandlerModule> loadMessageHandlerModules() {
-        Map<String, MessageHandlerModule> modules = moduleLoader.loadModules(MessageHandlerModule.class);
+        Map<String, MessageHandlerModule> modules = moduleLoader.loadModulesFromManifest(MessageHandlerModule.class);
+        modules.put(MobileInteractiveImpl.class.getName(), new MobileInteractiveImpl());
         for (MessageHandlerModule module : modules.values()) {
             module.init(context);
         }
         return modules;
-    }
-
-    private NotificationHandler loadNotificationHandler() {
-        Map<String, NotificationHandler> handlers = moduleLoader.loadModules(NotificationHandler.class);
-        NotificationHandler handler;
-        if (!handlers.isEmpty()) {
-            handler = handlers.values().iterator().next();
-        } else {
-            handler = new CoreNotificationHandler();
-        }
-        handler.setContext(context);
-        return handler;
     }
 
     public static DatabaseHelper getDatabaseHelper(Context context) {
