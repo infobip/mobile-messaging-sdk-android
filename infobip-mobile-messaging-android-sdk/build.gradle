@@ -116,3 +116,17 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
+
+// Remove this when Gradle bug is fixed.
+// https://github.com/gradle/gradle/issues/3170
+task modifyPomBeforeUpload << {
+    def pom = "${project.projectDir}/build/poms/pom-default.xml"
+    def project = new XmlParser().parse(pom)
+    project.dependencies
+            .dependency
+            .find { dependency -> dependency.artifactId[0].text() == 'infobip-mobile-messaging-android-resources' }
+            .appendNode('type', 'aar')
+    //noinspection UnnecessaryQualifiedReference
+    groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
+}
+uploadArchives.finalizedBy(modifyPomBeforeUpload)
