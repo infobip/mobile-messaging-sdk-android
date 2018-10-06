@@ -129,4 +129,5 @@ task modifyPomBeforeUpload << {
     //noinspection UnnecessaryQualifiedReference
     groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
 }
-uploadArchives.finalizedBy(modifyPomBeforeUpload)
+artifactoryPublish.dependsOn(modifyPomBeforeUpload)
+bintrayUpload.dependsOn(modifyPomBeforeUpload)
