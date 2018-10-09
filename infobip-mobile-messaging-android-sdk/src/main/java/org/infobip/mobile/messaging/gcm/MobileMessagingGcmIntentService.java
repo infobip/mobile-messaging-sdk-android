@@ -150,7 +150,7 @@ import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
  *    </service>
  * }
  * </pre>
- * <p/>
+ * <br>
  * MobileMessagingGcmIntentService receives GCM registration tokens and raises several intents you can listen to in your
  * application and services:
  * <ul>

@@ -160,7 +160,7 @@ public class NotificationAction {
         }
 
         /**
-         * Sends a speсific mobile originated message to the server when this notification action is triggered.
+         * Sends a specific mobile originated message to the server when this notification action is triggered.
          */
         public Builder withMoMessage() {
             this.sendsMoMessage = true;
@@ -168,7 +168,7 @@ public class NotificationAction {
         }
 
         /**
-         * Sends a speсific mobile originated message to the server when this notification action is triggered.
+         * Sends a specific mobile originated message to the server when this notification action is triggered.
          */
         public Builder withMoMessage(boolean sendsMoMessage) {
             this.sendsMoMessage = sendsMoMessage;
@@ -205,7 +205,7 @@ public class NotificationAction {
 
         /**
          * Has a remote input interface. Can be used in chat and messaging apps to reply to messages directly from notification.
-         * <p/>
+         * <br>
          * Only used if {@link NotificationAction#inputPlaceholderResourceId} is not specified.
          *
          * @param inputPlaceholderText text to put inside input field when there's no value.

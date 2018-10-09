@@ -20,7 +20,7 @@ public class DateTimeUtil {
 
     /**
      * Android's SimpleDateFormat cannot properly parse 'Z' (ISO8601 GMT) time zone.
-     * </p>
+     * <br>
      * This method does additional job and replaces 'Z' with '+00:00'.
      *
      * @param dateString string representation of date

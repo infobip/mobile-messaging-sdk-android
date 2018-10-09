@@ -179,7 +179,7 @@ public class MobileMessagingCore
 
     /**
      * Gets an instance of MobileMessagingCore after it is initialized via {@link MobileMessagingCore.Builder}.
-     * </p>
+     * <br>
      * {@link MobileMessagingCore} is initialized here from application context to minimize possibility of memory leaks.
      *
      * @param context android context object.
@@ -1047,7 +1047,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void logout(final ResultListener listener) {
+    public void logout(final ResultListener<SuccessPending> listener) {
         if (StringUtils.isBlank(getPushRegistrationId())) {
             MobileMessagingLogger.e("Registration not available yet, cannot logout");
             listener.onError(InternalSdkError.NO_VALID_REGISTRATION.getError());
@@ -1055,12 +1055,17 @@ public class MobileMessagingCore
         }
 
         onLogoutStarted();
+        if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
+            listener.onResult(SuccessPending.Pending);
+            registerForNetworkAvailability();
+            return;
+        }
+
         logoutUserSynchronizer().logout(new LogoutActionListener() {
             @Override
             public void onUserInitiatedLogoutCompleted() {
                 onLogoutCompleted();
-                //noinspection unchecked
-                listener.onResult(null);
+                listener.onResult(SuccessPending.Success);
             }
 
             @Override

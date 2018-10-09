@@ -16,7 +16,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
- * <p/>
+ * <br>
  * It should be used in the Application entry point.
  * <pre>
  * {@code
@@ -48,7 +48,7 @@ public abstract class MobileMessaging {
 
     /**
      * Gets an instance of MobileMessaging after it is initialized via {@link MobileMessaging.Builder}.
-     * </p>
+     * <br>
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      *
      * @param context android context object.
@@ -84,7 +84,7 @@ public abstract class MobileMessaging {
 
     /**
      * Reports delivery of messages to Mobile Messaging servers.
-     * </p>
+     * <br>
      * This method has to be used only if you handle GCM message notifications
      * without Mobile Messaging library. In all other cases the library will
      * send delivery report automatically whenever GCM push is delivered to device.
@@ -96,7 +96,7 @@ public abstract class MobileMessaging {
 
     /**
      * Reports seen status of messages to Mobile Messaging servers.
-     * </p>
+     * <br>
      * This method shall be used to report seen status when user actually sees message content.
      *
      * @param messageIds message ids to report seen status for
@@ -114,7 +114,7 @@ public abstract class MobileMessaging {
 
     /**
      * Does a synchronization of user data with server.
-     * </p>
+     * <br>
      * This method will synchronize new data with server and will also trigger {@link Event#USER_DATA_REPORTED}
      * with all the data currently available on a server for this user.
      *
@@ -125,7 +125,7 @@ public abstract class MobileMessaging {
 
     /**
      * Does a synchronization of user data with server.
-     * </p>
+     * <br>
      * This method will synchronize new data with server. The result of synchronization will be provided via listener.
      * It will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
      *
@@ -138,7 +138,7 @@ public abstract class MobileMessaging {
 
     /**
      * Does a fetch of user data from the server.
-     * </p>
+     * <br>
      * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
      *
      * @see Event#USER_DATA_REPORTED
@@ -147,7 +147,7 @@ public abstract class MobileMessaging {
 
     /**
      * Does a fetch of user data from the server.
-     * </p>
+     * <br>
      * The result of fetch operation will be provided via listener.
      * This method will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
      *
@@ -158,7 +158,7 @@ public abstract class MobileMessaging {
 
     /**
      * Reads user data that is currently stored in the library.
-     * </p>
+     * <br>
      * This method does not trigger {@link Event#USER_DATA_REPORTED}.
      *
      * @return last synchronized UserData object
@@ -190,14 +190,14 @@ public abstract class MobileMessaging {
 
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
-     * <p>
+     * <br>
      * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
-     * <p>
+     * <br>
      * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
      * but you might want to sync new user data to target this user specifically.
-     * <p>
+     * <br>
      * Use this method if:
      * <ul>
      * <li>you're syncing user data to our server</li>
@@ -205,16 +205,18 @@ public abstract class MobileMessaging {
      * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
      * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
      * </ul>
+     * <br>
+     * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with logout when network becomes available, {@link Event#USER_LOGGED_OUT} will be produced upon success.
      *
      * @param listener listener to report the result on
      * @see ResultListener
      * @see Event#USER_LOGGED_OUT
      */
-    public abstract void logout(ResultListener listener);
+    public abstract void logout(ResultListener<SuccessPending> listener);
 
     /**
      * Send mobile originated messages.
-     * </p>
+     * <br>
      * Destination for each message is set inside {@link Message}.
      *
      * @param messages messages to send
@@ -223,7 +225,7 @@ public abstract class MobileMessaging {
 
     /**
      * Send mobile originated messages.
-     * </p>
+     * <br>
      * Destination for each message is set inside {@link Message}.
      * The result of fetch operation will be provided via listener.
      * {@link ResultListener#onResult(Object)} will be called both in case of success and error,
@@ -485,9 +487,9 @@ public abstract class MobileMessaging {
          *       .build();
          * }
          * </pre>
-         * <p/>
+         * <br>
          * The default is set to <a href="https://mobile.infobip.com">https://mobile.infobip.com</a>.
-         * <p/>
+         * <br>
          * It fill fail if set to null or empty string.
          *
          * @param apiUri API endpoint
@@ -528,7 +530,7 @@ public abstract class MobileMessaging {
          *       .build();
          * }
          * </pre>
-         * <p/>
+         * <br>
          *
          * @return {@link Builder}
          */

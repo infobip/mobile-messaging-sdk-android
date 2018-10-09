@@ -54,7 +54,7 @@ public class InternalDataMapper {
 
     /**
      * Creates internal data json based on message contents
-     * </p> Note that boolean fields will be saved as String for FCM.
+     * <br> Note that boolean fields will be saved as String for FCM.
      *
      * @param message a message which to create internal data for
      * @return internal data json

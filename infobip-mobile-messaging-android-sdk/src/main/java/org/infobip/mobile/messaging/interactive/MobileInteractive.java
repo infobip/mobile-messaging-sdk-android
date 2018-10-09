@@ -14,7 +14,7 @@ public abstract class MobileInteractive {
 
     /**
      * Gets an instance of MobileInteractive after it is initialized.
-     * </p>
+     * <br>
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      *
      * @param context android context object.
@@ -48,7 +48,7 @@ public abstract class MobileInteractive {
      * NotificationCategory notificationCategory = new NotificationCategory("category_confirm", action1, action2);
      * new MobileInteractive().setNotificationCategories(notificationCategory);
      * </pre>
-     * <p/>
+     * <br>
      */
     public abstract void setNotificationCategories(NotificationCategory... notificationCategories);
 

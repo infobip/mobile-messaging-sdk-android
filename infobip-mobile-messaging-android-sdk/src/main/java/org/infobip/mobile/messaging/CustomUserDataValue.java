@@ -51,7 +51,7 @@ public class CustomUserDataValue {
 
     /**
      * Parses string into CustomUserDataValue based on desired format.
-     * </p>
+     * <br>
      * For Date type this constructor accepts "yyyy-MM-dd" representation of date (for example 2016-12-31).
      *
      * @throws ParseException            if stringValue cannot be parsed to {@code CustomUserDataValue}

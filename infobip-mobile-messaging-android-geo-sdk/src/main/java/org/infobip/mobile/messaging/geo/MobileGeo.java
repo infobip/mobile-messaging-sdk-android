@@ -9,7 +9,7 @@ public abstract class MobileGeo {
 
     /**
      * Gets an instance of MobileGeo after it is initialized.
-     * </p>
+     * <br>
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      *
      * @param context android context object.

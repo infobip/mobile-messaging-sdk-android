@@ -52,7 +52,7 @@ public interface MessageStore {
 
     /**
      * Deletes all stored messages
-     * </p>
+     * <br>
      * This is convenience method.
      * Mobile Messaging SDK will never delete messages from the store by itself.
      * @param context current context

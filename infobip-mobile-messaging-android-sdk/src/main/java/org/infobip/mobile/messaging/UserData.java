@@ -15,7 +15,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
 
 /**
  * User data is used to provide user details to the server.
- * </p>
+ * <br>
  * User data supports set of predefined fields ({@link PredefinedField}) and custom fields.
  * In order to delete any field, set it to null and report it to server.
  *

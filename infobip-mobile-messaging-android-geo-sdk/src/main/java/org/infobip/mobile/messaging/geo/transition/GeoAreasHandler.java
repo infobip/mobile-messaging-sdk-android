@@ -160,7 +160,7 @@ public class GeoAreasHandler {
 
     /**
      * Updates ids of existing messages based on reporting result.
-     * </p> Does nothing if message store is not enabled.
+     * <br> Does nothing if message store is not enabled.
      *
      * @param reportingResult geo reporting result that contains mapping for new message ids
      */

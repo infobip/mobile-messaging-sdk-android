@@ -10,7 +10,7 @@ public abstract class Geofencing {
 
     /**
      * Gets an instance of Geofencing after it is initialized.
-     * </p>
+     * <br>
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      *
      * @param context android context object.

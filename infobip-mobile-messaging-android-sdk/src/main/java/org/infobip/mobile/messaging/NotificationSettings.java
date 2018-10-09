@@ -226,7 +226,7 @@ public class NotificationSettings {
          *                .build();
          * }
          * </pre>
-         * <p/>
+         * <br>
          * By default it will use the default activity for the application package.
          *
          * @param callbackActivity The component class that is to be used for the intent when notification is clicked.
@@ -240,7 +240,7 @@ public class NotificationSettings {
 
         /**
          * When you want to use some notification title instead of the app name <i>R.string.app_name</i>
-         * <p/>
+         * <br>
          * By default it will use <i>R.string.app_name</i>
          *
          * @param defaultTitle will be displayed in the notification title, if the notification doesn't override it.
@@ -254,7 +254,7 @@ public class NotificationSettings {
 
         /**
          * When you want to use some notification icon instead of the app icon <i>R.mipmap.ic_launcher</i>
-         * <p/>
+         * <br>
          * By default it will use <i>R.mipmap.ic_launcher</i>
          *
          * @param defaultIcon will be displayed in the notification area, if the notification doesn't override it.
@@ -267,7 +267,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification intent flags. It is delegated to {@link Intent#addFlags(int)}
-         * <p/>
+         * <br>
          * By default it will use <i>Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP</i>
          *
          * @param intentFlags to be delegated to {@link Intent#addFlags(int)}.
@@ -282,7 +282,7 @@ public class NotificationSettings {
         /**
          * When you want to set notification pending intent flags. It is delegated to
          * {@link PendingIntent#getActivity(android.content.Context, int, android.content.Intent, int)}
-         * <p/>
+         * <br>
          * By default it will use {@link PendingIntent#FLAG_CANCEL_CURRENT}
          *
          * @param pendingIntentFlags to be delegated to {@link PendingIntent#getActivity(android.content.Context, int, android.content.Intent, int)}.
@@ -298,7 +298,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification auto-cancel to <i>true</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
-         * <p/>
+         * <br>
          * By default it will be set to <i>true</i>
          *
          * @return {@link Builder}
@@ -312,7 +312,7 @@ public class NotificationSettings {
 
         /**
          * When you want to show multiple notifications in status bar.
-         * <p/>
+         * <br>
          * By default in navigation bar, only one notification is shown which is overwritten by the newest one.
          *
          * @return {@link Builder}
@@ -324,7 +324,7 @@ public class NotificationSettings {
 
         /**
          * When you want to set notification auto-cancel to <i>false</i>. It is delegated to {@link NotificationCompat.Builder#setAutoCancel(boolean)}
-         * <p/>
+         * <br>
          * By default it will be set to <i>true</i>
          *
          * @return {@link Builder}
@@ -338,7 +338,7 @@ public class NotificationSettings {
 
         /**
          * When you want to disable notifications when your app is in foreground.
-         * <p/>
+         * <br>
          * By default foreground notifications are enabled
          *
          * @return {@link Builder}
@@ -350,7 +350,7 @@ public class NotificationSettings {
 
         /**
          * When you want to disable heads-up notifications.
-         * <p/>
+         * <br>
          * @return {@link Builder}
          */
         public Builder withoutHeadsUpNotifications() {

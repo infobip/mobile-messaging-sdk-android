@@ -116,7 +116,7 @@ public abstract class MobileChat {
 
     /**
      * Sets which activities to start when user taps on chat notification. Last one in array will be show, others will be put to task stack.
-     * </p>Library will also provide appropriate message together with intent, use following code to retrieve the message:</p>
+     * <p>Library will also provide appropriate message together with intent, use following code to retrieve the message:</p>
      * * <pre>
      * {@code
      * ChatMessage message = ChatMessage.createFrom(intent);
