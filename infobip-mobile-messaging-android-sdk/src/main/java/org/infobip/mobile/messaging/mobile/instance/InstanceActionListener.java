@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.mobile.instance;
 
 public interface InstanceActionListener {
-    void onPrimarySetSuccess();
+    void onSuccess(boolean isPrimary);
 
-    void onPrimarySetError(Throwable error);
+    void onError(Throwable error);
 }

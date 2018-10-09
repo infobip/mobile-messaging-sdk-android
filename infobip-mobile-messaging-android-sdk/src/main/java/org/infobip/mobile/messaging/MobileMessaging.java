@@ -142,7 +142,9 @@ public abstract class MobileMessaging {
      * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
      *
      * @see Event#USER_DATA_REPORTED
+     * @deprecated Use {@link MobileMessaging#fetchUserData(ResultListener)} instead.
      */
+    @Deprecated
     public abstract void fetchUserData();
 
     /**
@@ -243,7 +245,7 @@ public abstract class MobileMessaging {
      * @param isPrimary set to true to make this device primary or to false otherwise.
      * @param listener listener to invoke when the operation is complete.
      */
-    public abstract void setAsPrimaryDevice(boolean isPrimary, ResultListener<Void> listener);
+    public abstract void setAsPrimaryDevice(boolean isPrimary, ResultListener<Boolean> listener);
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.
@@ -254,16 +256,24 @@ public abstract class MobileMessaging {
 
     /**
      * Use this method to determine if this device is currently primary device or not.
-     * @return true if this device is primary or false otherwise.
+     * @return true if this device is primary or false otherwise. The value represents latest value synchronized with the server.
      */
     public abstract boolean isPrimaryDevice();
+
+    /**
+     * Use this method to determine if this device is currently primary device or not. Will trigger communication with server to get latest setting.
+     */
+    public abstract void getPrimaryDeviceSetting(ResultListener<Boolean> listener);
 
     /**
      * Use this method to trigger communication between SDK and server and to sync current primary setting for this device.
      * <br>It will later on trigger {@link Event#PRIMARY_CHANGED} if the setting will be updated locally in SDK.
      * <br><b>Note:</b> multiple invocations of this method within short period of time may not necessarily result in multiple calls to server,
      * they will rather be optimized and throttled and number of network calls will be reduced by the library.
+     *
+     * @deprecated Use {@link MobileMessaging#getPrimaryDeviceSetting(ResultListener)} instead.
      */
+    @Deprecated
     public abstract void syncPrimaryDeviceSettingWithServer();
 
     /**
