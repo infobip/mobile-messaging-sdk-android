@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.mobile;
 
 public enum InternalSdkError {
     ERROR_SAVING_MESSAGE("20000", "Error saving message"),
-    ERROR_ACCESSING_GCM("20001", "Error accessing GCM"),
+    ERROR_ACCESSING_PLAY_SERVICES("20001", "Error accessing play services, use provided 'googleErrorCode' with 'GoogleApiAvailability.getErrorDialog()' (https://developers.google.com/android/reference/com/google/android/gms/common/GoogleApiAvailability.html)"),
     ERROR_TOKEN_REFRESH("20002", "Failed to complete token refresh"),
     ERROR_GCM_TOKEN_CLEANUP("20003", "Failed to complete GCM token cleanup"),
     ERROR_EMPTY_SYSTEM_DATA("20004", "System data is empty, cannot report"),

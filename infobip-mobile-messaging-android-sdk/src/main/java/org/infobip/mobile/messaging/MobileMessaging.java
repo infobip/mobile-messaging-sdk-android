@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -320,6 +321,19 @@ public abstract class MobileMessaging {
         public void onError(MobileMessagingError e) {
 
         }
+    }
+
+    /**
+     * Listener for initialization errors.
+     */
+    public static abstract class InitErrorListener {
+        /**
+         * This method is invoked on listener when there's an unrecoverable error.
+         *
+         * @param e internal SDK error describing the problem, see {@link InternalSdkError}
+         * @param googleErrorCode optional error code provided by play services
+         */
+        public abstract void onError(InternalSdkError e, @Nullable Integer googleErrorCode);
     }
 
     /**
@@ -665,6 +679,18 @@ public abstract class MobileMessaging {
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build() {
+            return build(null);
+        }
+
+        /**
+         * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
+         * Any messages received in the past will be reported as delivered!
+         *
+         * @param initErrorListener provide listener to handle any errors during intialization
+         *
+         * @return {@link MobileMessaging}
+         */
+        public MobileMessaging build(@Nullable InitErrorListener initErrorListener) {
             validateApplicationCodeAvailability();
 
             MobileMessagingCore.setApiUri(application, apiUri);
@@ -685,7 +711,7 @@ public abstract class MobileMessaging {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCodeProvider);
             }
 
-            return mobileMessagingCoreBuilder.build();
+            return mobileMessagingCoreBuilder.build(initErrorListener);
         }
     }
 }
