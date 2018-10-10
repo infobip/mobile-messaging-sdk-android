@@ -32,7 +32,7 @@ public class PlayServicesSupport {
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    public void checkPlayServicesAndTryToAcquireToken(final Context context, @Nullable MobileMessaging.InitErrorListener initErrorListener) {
+    public void checkPlayServicesAndTryToAcquireToken(final Context context, @Nullable MobileMessaging.InitListener initListener) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int errorCode = apiAvailability.isGooglePlayServicesAvailable(context);
         isPlayServicesAvailable = errorCode == ConnectionResult.SUCCESS;
@@ -47,8 +47,8 @@ public class PlayServicesSupport {
             }
 
             final int finalErrorCode = errorCode;
-            if (initErrorListener != null) {
-                initErrorListener.onError(internalSdkError, finalErrorCode);
+            if (initListener != null) {
+                initListener.onError(internalSdkError, finalErrorCode);
             }
             MobileMessagingLogger.e(internalSdkError.get() + ". google error code: " + errorCode + ", see com.google.android.gms.common.ConnectionResult");
 
@@ -71,6 +71,10 @@ public class PlayServicesSupport {
         Intent intent = new Intent(context, MobileMessagingGcmIntentService.class);
         intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
         MobileMessagingGcmIntentService.enqueueWork(context, intent);
+
+        if (initListener != null) {
+            initListener.onSuccess();
+        }
     }
 
     public static boolean isPlayServicesAvailable(Context context) {

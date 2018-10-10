@@ -1410,7 +1410,7 @@ public class MobileMessagingCore
          *
          * @return {@link MobileMessagingCore}
          */
-        public MobileMessagingCore build(@Nullable final InitErrorListener initErrorListener) {
+        public MobileMessagingCore build(@Nullable final InitListener initListener) {
             if (shouldSaveApplicationCode(application.getApplicationContext())) {
                 String existingApplicationCode = MobileMessagingCore.getApplicationCode(application.getApplicationContext());
                 if (existingApplicationCode != null && !applicationCode.equals(existingApplicationCode)) {
@@ -1427,7 +1427,7 @@ public class MobileMessagingCore
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
-            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initErrorListener);
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initListener);
             synchronized (MobileMessagingCore.class) {
                 MobileMessagingCore.instance = mobileMessagingCore;
             }

@@ -326,14 +326,20 @@ public abstract class MobileMessaging {
     /**
      * Listener for initialization errors.
      */
-    public static abstract class InitErrorListener {
+    public interface InitListener {
+
+        /**
+         * This method is called when initialization succeeds
+         */
+        void onSuccess();
+
         /**
          * This method is invoked on listener when there's an unrecoverable error.
          *
          * @param e internal SDK error describing the problem, see {@link InternalSdkError}
          * @param googleErrorCode optional error code provided by play services
          */
-        public abstract void onError(InternalSdkError e, @Nullable Integer googleErrorCode);
+        void onError(InternalSdkError e, @Nullable Integer googleErrorCode);
     }
 
     /**
@@ -686,11 +692,11 @@ public abstract class MobileMessaging {
          * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
          * Any messages received in the past will be reported as delivered!
          *
-         * @param initErrorListener provide listener to handle any errors during intialization
+         * @param initListener provide listener to handle any errors during intialization
          *
          * @return {@link MobileMessaging}
          */
-        public MobileMessaging build(@Nullable InitErrorListener initErrorListener) {
+        public MobileMessaging build(@Nullable InitListener initListener) {
             validateApplicationCodeAvailability();
 
             MobileMessagingCore.setApiUri(application, apiUri);
@@ -711,7 +717,7 @@ public abstract class MobileMessaging {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCodeProvider);
             }
 
-            return mobileMessagingCoreBuilder.build(initErrorListener);
+            return mobileMessagingCoreBuilder.build(initListener);
         }
     }
 }
