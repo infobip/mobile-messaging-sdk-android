@@ -1225,7 +1225,7 @@ public class MobileMessagingCore
             public void after(Void aVoid) {
                 runnable.run();
             }
-        };
+        }.execute();
     }
 
     @NonNull
