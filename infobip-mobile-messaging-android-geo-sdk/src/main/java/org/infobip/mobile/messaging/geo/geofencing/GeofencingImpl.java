@@ -369,7 +369,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
             MobileMessagingLogger.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
 
         } else {
-            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " +  status.getStatusMessage());
+            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " +  status.toString());
         }
     }
 
