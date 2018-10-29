@@ -83,9 +83,17 @@
 # Application classes that will be serialized/deserialized over Gson
 -keep class org.infobip.mobile.messaging.dal.json.** { *; }
 -keep class org.infobip.mobile.messaging.Message { *; }
+-keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+
+# Do not warn us about GCM dependency issues since Firebase is used as a default - listed classes not used
+# There should not be warnings if GCM dependency is provided and used
+-dontwarn org.xmlpull.v1.**
+-dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver
+-dontwarn org.infobip.mobile.messaging.cloud.gcm.GCMRegistrationTokenHandler
+-dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService
