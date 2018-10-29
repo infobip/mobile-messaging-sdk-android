@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.dal.bundle;
+package org.infobip.mobile.messaging.cloud.gcm;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +13,10 @@ import org.json.JSONObject;
  * @author sslavin
  * @since 29/12/2016.
  */
+@Deprecated
+public class GCMMessageMapper {
 
-public class FCMMessageMapper {
-
-    private static final String TAG = FCMMessageMapper.class.getSimpleName();
+    private static final String TAG = GCMMessageMapper.class.getSimpleName();
 
     /**
      * De-serializes Push message from the Bundle we receive from GCM/FCM

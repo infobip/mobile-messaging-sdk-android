@@ -3,21 +3,22 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.google.gms:google-services:2.1.0-alpha3'
+        classpath 'com.google.gms:google-services:4.1.0'
     }
 }
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 26
+        minSdkVersion mm_minSdkVersion
+        targetSdkVersion mm_targetSdkVersion
         versionCode 1
         versionName version
         applicationId "org.infobip.mobile.messaging.demo"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -75,15 +76,17 @@ android {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    compile project(':infobip-mobile-messaging-android-chat-sdk')
-    compile project(':infobip-mobile-messaging-android-geo-sdk')
-    compile project(':infobip-mobile-messaging-android-resources')
-    compile project(':infobip-mobile-messaging-android-sdk')
-    compile project(':infobip-mobile-messaging-api-java')
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.android.support:support-v4:26.1.0'
+    testCompile "junit:junit:4.12"
+    compile "com.android.support.test:runner:1.0.2"
+
+    compile project(":infobip-mobile-messaging-android-chat-sdk")
+    compile project(":infobip-mobile-messaging-android-geo-sdk")
+    compile project(":infobip-mobile-messaging-android-resources")
+    compile project(":infobip-mobile-messaging-android-sdk")
+    compile project(":infobip-mobile-messaging-api-java")
+    compile "com.android.support:appcompat-v7:${mm_supportLibrariesVersion}"
+    compile "com.android.support:design:${mm_supportLibrariesVersion}"
+    compile "com.android.support:support-v4:${mm_supportLibrariesVersion}"
 }
 
 private String property(Project project, String projectKey, String environmentKey) {

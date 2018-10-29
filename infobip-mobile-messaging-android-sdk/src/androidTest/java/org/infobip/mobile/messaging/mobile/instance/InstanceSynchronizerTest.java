@@ -62,7 +62,7 @@ public class InstanceSynchronizerTest extends MobileMessagingTestCase {
         verify(mobileApiInstance, times(1)).update(argThat(new ArgumentMatcher<Instance>() {
             @Override
             public boolean matches(Object argument) {
-                return ((Instance) (argument)).getPrimary();
+                return ((Instance)argument).getPrimary();
             }
         }));
     }

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.gcm;
+package org.infobip.mobile.messaging.cloud;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 
@@ -67,10 +68,8 @@ public class PlayServicesSupport {
             return;
         }
 
-        // Start IntentService to register this application with GCM.
-        Intent intent = new Intent(context, MobileMessagingGcmIntentService.class);
-        intent.setAction(MobileMessagingGcmIntentService.ACTION_ACQUIRE_INSTANCE_ID);
-        MobileMessagingGcmIntentService.enqueueWork(context, intent);
+        String senderId = MobileMessagingCore.getSenderId(context);
+        MobileMessagingCloudService.enqueueTokenAcquisition(context, senderId);
 
         if (initListener != null) {
             initListener.onSuccess();

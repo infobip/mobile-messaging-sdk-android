@@ -50,20 +50,20 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void registrationAcquired(String cloudToken) {
         send(prepare(Event.REGISTRATION_ACQUIRED)
-                .putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken));
+                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken));
     }
 
     @Override
     public void registrationCreated(String cloudToken, String pushRegistrationId) {
         send(prepare(Event.REGISTRATION_CREATED)
-                .putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken)
+                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken)
                 .putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, pushRegistrationId));
     }
 
     @Override
     public void registrationEnabled(String cloudToken, String deviceInstanceId, Boolean registrationEnabled) {
         send(prepare(Event.PUSH_REGISTRATION_ENABLED)
-                .putExtra(BroadcastParameter.EXTRA_GCM_TOKEN, cloudToken)
+                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken)
                 .putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, deviceInstanceId)
                 .putExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, registrationEnabled));
     }

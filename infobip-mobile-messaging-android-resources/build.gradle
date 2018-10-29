@@ -15,12 +15,12 @@ apply plugin: 'idea'
 apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 26
+        minSdkVersion mm_minSdkVersion
+        targetSdkVersion mm_targetSdkVersion
         versionCode 1
         versionName project.version
         consumerProguardFiles 'proguard-rules.pro'

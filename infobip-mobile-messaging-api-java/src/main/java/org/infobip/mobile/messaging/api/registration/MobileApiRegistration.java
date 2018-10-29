@@ -34,5 +34,6 @@ public interface MobileApiRegistration {
     @HttpRequest(method = HttpMethod.POST, value = "registration")
     @Query(name = "platformType", value = "${platform.type:GCM}")
     RegistrationResponse upsert(@Query(name = "registrationId") String registrationId,
-                                @Query(name = "pushRegistrationEnabled") Boolean pushRegistrationEnabled);
+                                @Query(name = "pushRegistrationEnabled") Boolean pushRegistrationEnabled,
+                                @Query(name = "service") PushServiceType pushServiceType);
 }

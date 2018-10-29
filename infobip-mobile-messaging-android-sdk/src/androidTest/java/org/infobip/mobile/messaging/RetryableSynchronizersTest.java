@@ -8,8 +8,9 @@ import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
+import org.infobip.mobile.messaging.api.registration.PushServiceType;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
-import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -78,7 +79,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
         doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiData).reportSystemData(any(SystemDataReport.class));
         given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean())).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
 
         RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
         retryPolicy = retryPolicyProvider.DEFAULT();
@@ -136,14 +137,14 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
     public void test_registration_retry() {
 
         // Given
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
 
         // When
         registrationSynchronizer.sync();
 
         // Then
         verify(broadcaster, after(3000).times(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiRegistration, times(1 + retryPolicy.getMaxRetries())).upsert(anyString(), anyBoolean());
+        verify(mobileApiRegistration, times(1 + retryPolicy.getMaxRetries())).upsert(anyString(), anyBoolean(), any(PushServiceType.class));
     }
 
     @Test

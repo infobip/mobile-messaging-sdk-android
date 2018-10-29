@@ -86,7 +86,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.PUSH_REGISTRATION_ENABLED.getKey(), intent.getAction());
-        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_GCM_TOKEN));
+        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
         assertEquals("SomeDeviceInstanceId", intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
         assertEquals(false, intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, true));
     }
@@ -101,7 +101,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.REGISTRATION_ACQUIRED.getKey(), intent.getAction());
-        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_GCM_TOKEN));
+        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.REGISTRATION_CREATED.getKey(), intent.getAction());
-        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_GCM_TOKEN));
+        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
         assertEquals("SomeDeviceInstanceId", intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
     }
 

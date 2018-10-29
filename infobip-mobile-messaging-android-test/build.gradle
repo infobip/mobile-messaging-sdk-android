@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 26
+        minSdkVersion mm_minSdkVersion
+        targetSdkVersion mm_targetSdkVersion
         versionCode 1
         versionName project.version
 
@@ -25,19 +25,19 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: "libs", include: ["*.jar"])
 
-    compile 'com.google.code.gson:gson:2.8.0'
+    compile "com.google.code.gson:gson:2.8.2"
 
-    compile 'com.android.support.test:runner:0.5'
-    compile 'com.crittercism.dexmaker:dexmaker-dx:1.4'
-    compile 'com.crittercism.dexmaker:dexmaker:1.4'
-    compile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
-    compile 'org.mockito:mockito-core:1.10.19'
-    compile 'junit:junit:4.12'
-    compile 'com.nanohttpd:nanohttpd:2.1.0'
-    compile('org.skyscreamer:jsonassert:1.3.0') {
-        exclude group: 'org.json', module: 'json'
+    compile "com.android.support.test:runner:1.0.2"
+    compile "com.crittercism.dexmaker:dexmaker-dx:1.4"
+    compile "com.crittercism.dexmaker:dexmaker:1.4"
+    compile "com.crittercism.dexmaker:dexmaker-mockito:1.4"
+    compile "org.mockito:mockito-core:1.10.19"
+    compile "junit:junit:4.12"
+    compile "com.nanohttpd:nanohttpd:2.1.0"
+    compile("org.skyscreamer:jsonassert:1.3.0") {
+        exclude group: "org.json", module: "json"
     }
 }
 android.libraryVariants.all { variant ->

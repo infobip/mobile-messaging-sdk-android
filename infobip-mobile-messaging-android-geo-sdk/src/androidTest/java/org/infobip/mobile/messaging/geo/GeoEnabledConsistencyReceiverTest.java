@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.provider.Settings;
-import android.test.mock.MockContentResolver;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
@@ -113,8 +112,6 @@ public class GeoEnabledConsistencyReceiverTest extends MobileMessagingTestCase {
     public void test_shouldFirstCallIsLocationModeOn_whenVersionKitKatOrAboveAndGeoActivated() throws Settings.SettingNotFoundException {
         //noinspection WrongConstant
         Mockito.when(contextMock.getSystemService(Mockito.eq(Context.LOCATION_SERVICE))).thenReturn(locationManagerMock);
-        MockContentResolver mockContentResolver = new MockContentResolver();
-        Mockito.when(contextMock.getContentResolver()).thenReturn(mockContentResolver);
         Mockito.when(geoHelperSpy.isLocationModeOn(context)).thenReturn(true);
         Mockito.when(geoHelperSpy.isKitKatOrAbove()).thenReturn(true);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);

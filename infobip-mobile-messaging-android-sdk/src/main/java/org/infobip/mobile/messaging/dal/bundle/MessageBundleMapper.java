@@ -24,9 +24,8 @@ public class MessageBundleMapper extends BundleMapper {
      * @param bundle where to load data from
      * @return new message object
      */
-    public static
     @Nullable
-    Message messageFromBundle(@NonNull Bundle bundle) {
+    public static Message messageFromBundle(@NonNull Bundle bundle) {
         return objectFromBundle(bundle, BUNDLED_MESSAGE_TAG, Message.class);
     }
 
@@ -36,9 +35,8 @@ public class MessageBundleMapper extends BundleMapper {
      * @param bundles where to read messages from
      * @return list of messages
      */
-    public static
     @NonNull
-    List<Message> messagesFromBundles(@NonNull ArrayList<Bundle> bundles) {
+    public static List<Message> messagesFromBundles(@NonNull ArrayList<Bundle> bundles) {
         return objectsFromBundles(bundles, BUNDLED_MESSAGE_TAG, Message.class);
     }
 
@@ -48,9 +46,8 @@ public class MessageBundleMapper extends BundleMapper {
      * @param message object to serialize
      * @return bundle with message contents
      */
-    public static
     @NonNull
-    Bundle messageToBundle(@NonNull Message message) {
+    public static Bundle messageToBundle(@NonNull Message message) {
         return objectToBundle(message, BUNDLED_MESSAGE_TAG);
     }
 
@@ -60,9 +57,8 @@ public class MessageBundleMapper extends BundleMapper {
      * @param messages objects to serialize
      * @return list of bundles with messages' contents
      */
-    public static
     @NonNull
-    ArrayList<Bundle> messagesToBundles(@NonNull List<Message> messages) {
+    public static ArrayList<Bundle> messagesToBundles(@NonNull List<Message> messages) {
         return objectsToBundles(messages, BUNDLED_MESSAGE_TAG);
     }
 }

@@ -1,11 +1,16 @@
-package org.infobip.mobile.messaging.gcm;
+package org.infobip.mobile.messaging.cloud.gcm;
 
 import android.content.Context;
 import android.content.Intent;
+
 import com.google.android.gms.gcm.GcmReceiver;
 
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
 /**
- * Receives GCM push notifications and triggers processing in {@link MobileMessagingGcmIntentService}.
+ * Receives GCM push notifications and triggers processing in {@link MobileMessagingCloudService}.
  * <p>
  * To be able to use it you must register it as a receiver in AndroidManifest.xml
  * <pre>
@@ -25,18 +30,18 @@ import com.google.android.gms.gcm.GcmReceiver;
  *
  * @author mstipanov
  * @see GcmReceiver
- * @see MobileMessagingGcmIntentService
  * @since 21.03.2016.
  */
+@Deprecated
 public class MobileMessagingGcmReceiver extends GcmReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
-        Intent service = new Intent(MobileMessagingGcmIntentService.ACTION_GCM_MESSAGE_RECEIVE, null, context, MobileMessagingGcmIntentService.class);
-        service.putExtras(intent);
-        MobileMessagingGcmIntentService.enqueueWork(context, intent);
+        Message message = GCMMessageMapper.fromCloudBundle(intent.getExtras());
+        MobileMessagingLogger.v("RECEIVED MESSAGE FROM GCM", message);
+        MobileMessagingCloudService.enqueueNewMessage(context, message);
 
         if (isOrderedBroadcast()) {
             abortBroadcast();

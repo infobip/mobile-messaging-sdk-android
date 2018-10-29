@@ -11,8 +11,9 @@ import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
+import org.infobip.mobile.messaging.api.registration.PushServiceType;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
-import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
+import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
@@ -90,7 +91,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     public void test_push_registration_disabled() throws Exception {
 
         // Given
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class)))
                 .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", false));
 
         // Then
@@ -108,7 +109,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     @Test
     public void test_push_registration_enabled() throws Exception {
         // Given
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class)))
                 .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", true));
 
         verifyRegistrationStatusUpdate(after(1000).atLeastOnce(), true);
@@ -125,22 +126,22 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     public void test_push_registration_default_status() throws Exception {
 
         // Verify disable
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class)))
                 .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", false));
 
         mobileMessagingCore.disablePushRegistration();
-        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean());
+        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean(), any(PushServiceType.class));
         verify(coreBroadcaster, times(1)).registrationEnabled(anyString(), eq("testDeviceApplicationInstanceId"), eq(false));
 
 
         // Verify resync
         reset(mobileApiRegistration);
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean()))
+        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class)))
                 .willReturn(new RegistrationResponse("testDeviceApplicationInstanceId", true));
 
         registrationSynchronizer.setRegistrationIdReported(false);
         registrationSynchronizer.sync();
-        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean());
+        verify(mobileApiRegistration, after(1000).times(1)).upsert(anyString(), anyBoolean(), any(PushServiceType.class));
         verify(coreBroadcaster, times(1)).registrationCreated(anyString(), eq("testDeviceApplicationInstanceId"));
 
         // Verify final value of 'enabled'
@@ -196,6 +197,6 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
 
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
         registrationSynchronizer.updateStatus(enable);
-        verify(mobileApiRegistration, verificationMode).upsert(anyString(), captor.capture());
+        verify(mobileApiRegistration, verificationMode).upsert(anyString(), captor.capture(), any(PushServiceType.class));
     }
 }

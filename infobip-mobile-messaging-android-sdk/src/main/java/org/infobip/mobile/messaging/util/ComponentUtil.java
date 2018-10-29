@@ -13,12 +13,12 @@ import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver;
 import org.infobip.mobile.messaging.MobileMessagingSynchronizationReceiver;
-import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
-import org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver;
-import org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService;
+import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
+import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationTapReceiver;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
+import org.infobip.mobile.messaging.platform.Platform;
 
 /**
  * Utility class for component state management
@@ -64,30 +64,16 @@ public class ComponentUtil {
     }
 
     /**
-     * Disables "com.google.firebase.iid.FirebaseInstanceIdReceiver" if it exists in the app.
-     * It is needed while we rely on GCM in SDK. To be removed upon full switch to FCM.
-     * @param context context object
-     */
-    public static void disableFirebaseInstanceIdReceiver(Context context) {
-        try {
-            setState(context, false, Class.forName("com.google.firebase.iid.FirebaseInstanceIdReceiver"));
-            MobileMessagingLogger.w("Disabled com.google.firebase.iid.FirebaseInstanceIdReceiver for compatibility reasons");
-        } catch (ClassNotFoundException ignored) {
-        } catch (Exception e) {
-            MobileMessagingLogger.d("Cannot disable FirebaseInstanceIdReceiver: ", e);
-        }
-    }
-
-    /**
      * Verifies that manifest contains all components needed for normal operation of push.
      * @param context context object
      * @throws ConfigurationException if any of desired components is not registered in manifest
      */
     public static void verifyManifestComponentsForPush(Context context) {
-        verifyManifestReceiver(context, MobileMessagingGcmReceiver.class);
         verifyManifestReceiver(context, NotificationTapReceiver.class);
-        verifyManifestService(context, MobileMessagingGcmIntentService.class);
-        verifyManifestService(context, MobileMessagingInstanceIDListenerService.class);
+        verifyManifestService(context, MobileMessagingCloudService.class);
+        if (!Platform.shouldUseGCM) {
+            verifyManifestService(context, MobileMessagingFirebaseService.class);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             verifyManifestService(context, MobileMessagingJobService.class);
         } else {
@@ -95,7 +81,7 @@ public class ComponentUtil {
         }
     }
 
-    private static void verifyManifestService(Context context, Class<? extends Service> cls) {
+    public static void verifyManifestService(Context context, Class<? extends Service> cls) {
         try {
             context.getPackageManager().getServiceInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
         } catch (Exception ignored) {
@@ -103,7 +89,7 @@ public class ComponentUtil {
         }
     }
 
-    private static void verifyManifestReceiver(Context context, Class<? extends BroadcastReceiver> cls) {
+    public static void verifyManifestReceiver(Context context, Class<? extends BroadcastReceiver> cls) {
         try {
             context.getPackageManager().getReceiverInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
         } catch (Exception ignored) {

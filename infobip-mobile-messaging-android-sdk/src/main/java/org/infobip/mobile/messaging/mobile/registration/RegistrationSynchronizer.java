@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -57,7 +58,7 @@ public class RegistrationSynchronizer {
                 String cloudToken = mobileMessagingCore.getCloudToken();
                 Boolean pushRegistrationEnabled = params.length > 0 ? params[0] : null;
                 MobileMessagingLogger.v("REGISTRATION >>>", cloudToken, pushRegistrationEnabled);
-                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, pushRegistrationEnabled);
+                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, pushRegistrationEnabled, Platform.usedPushServiceType);
                 MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
                 return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
             }
@@ -67,6 +68,7 @@ public class RegistrationSynchronizer {
                 setPushRegistrationEnabled(registration.enabled);
                 setPushRegistrationId(registration.registrationId);
                 setRegistrationIdReported(true);
+                mobileMessagingCore.setReportedPushServiceType();
 
                 broadcaster.registrationEnabled(registration.cloudToken, registration.registrationId, registration.enabled);
             }
@@ -84,7 +86,7 @@ public class RegistrationSynchronizer {
     }
 
     public void sync() {
-        if (isRegistrationIdReported()) {
+        if (isRegistrationIdReported() && !mobileMessagingCore.isPushServiceTypeChanged()) {
             return;
         }
 
@@ -101,7 +103,7 @@ public class RegistrationSynchronizer {
             public Registration run(String[] params) {
                 String cloudToken = params.length > 0 ? params[0] : null;
                 MobileMessagingLogger.v("REGISTRATION >>>", cloudToken);
-                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, null);
+                RegistrationResponse registrationResponse = mobileApiRegistration.upsert(cloudToken, null, Platform.usedPushServiceType);
                 MobileMessagingLogger.v("REGISTRATION <<<", registrationResponse);
                 return new Registration(cloudToken, registrationResponse.getDeviceApplicationInstanceId(), registrationResponse.getPushRegistrationEnabled());
             }
@@ -111,6 +113,7 @@ public class RegistrationSynchronizer {
                 setPushRegistrationEnabled(registration.enabled);
                 setPushRegistrationId(registration.registrationId);
                 setRegistrationIdReported(true);
+                mobileMessagingCore.setReportedPushServiceType();
 
                 MobileMessagingCore.getInstance(context).reportSystemData();
 
@@ -148,10 +151,10 @@ public class RegistrationSynchronizer {
     }
 
     public void setRegistrationIdReported(boolean reported) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, reported);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, reported);
     }
 
     public boolean isRegistrationIdReported() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED);
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED);
     }
 }

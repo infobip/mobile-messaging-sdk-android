@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.dal.bundle;
+package org.infobip.mobile.messaging.cloud.gcm;
 
 import android.os.Bundle;
 
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertNotEquals;
  * @since 29/12/2016.
  */
 
-public class FCMMessageMapperTest extends TestCase {
+public class GCMMessageMapperTest extends TestCase {
 
     public void test_message_should_be_possible_to_construct_message_from_bundle() throws Exception {
         // Given
@@ -38,7 +38,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("status_message", "SomeStatusMessage");
 
         // When
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         // Then
         assertEquals("SomeMessageId", message.getMessageId());
@@ -64,7 +64,7 @@ public class FCMMessageMapperTest extends TestCase {
         message.setTitle("lala");
         message.setFrom("from");
 
-        Bundle plainBundle = FCMMessageMapper.toCloudBundle(message);
+        Bundle plainBundle = GCMMessageMapper.toCloudBundle(message);
         assertEquals(plainBundle.getString("gcm.notification.title"), "lala");
         assertEquals(plainBundle.getString("from"), "from");
     }
@@ -80,7 +80,7 @@ public class FCMMessageMapperTest extends TestCase {
         plainBundle.putString("gcm.notification.icon", "some icon");
         plainBundle.putString("gcm.notification.silent", "false");
 
-        Message message = FCMMessageMapper.fromCloudBundle(plainBundle);
+        Message message = GCMMessageMapper.fromCloudBundle(plainBundle);
 
         assertEquals(message.getMessageId(), "1234");
         assertEquals(message.getSound(), "some sound");
@@ -102,7 +102,7 @@ public class FCMMessageMapperTest extends TestCase {
         Bundle bundle = new Bundle();
         bundle.putString("customPayload", customPayload);
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         JSONAssert.assertEquals(customPayload, message.getCustomPayload(), true);
     }
@@ -126,7 +126,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("android.support.content.wakelockid", "11");
         bundle.putString("collapse_key", "org.infobip.mobile.messaging.showcase.dev");
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         JSONAssert.assertEquals(customPayload, message.getCustomPayload(), true);
     }
@@ -152,7 +152,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("internalData", internalData);
         bundle.putString("gcm.notification.silent", "true");
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertEquals("silentTitle", message.getTitle());
         assertEquals("silentBody", message.getBody());
@@ -172,7 +172,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("gcm.notification.body", "notSilentBody");
         bundle.putString("gcm.notification.sound", "notSilentSound");
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertNotEquals("notSilentTitle", message.getTitle());
         assertNotEquals("notSilentBody", message.getBody());
@@ -203,7 +203,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("gcm.notification.category", "notSilentCategory");
         bundle.putString("internalData", internalData);
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertEquals("notSilentTitle", message.getTitle());
         assertEquals("notSilentBody", message.getBody());
@@ -231,7 +231,7 @@ public class FCMMessageMapperTest extends TestCase {
         bundle.putString("collapse_key", "org.infobip.mobile.messaging.showcase.dev");
         bundle.putString("internalData", internalData);
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertNotEquals("silentTitle", message.getTitle());
         assertNotEquals("silentBody", message.getBody());
@@ -251,7 +251,7 @@ public class FCMMessageMapperTest extends TestCase {
         Bundle bundle = new Bundle();
         bundle.putString("internalData", internalData);
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertEquals("someUrl", message.getContentUrl());
     }
@@ -278,7 +278,7 @@ public class FCMMessageMapperTest extends TestCase {
         Bundle bundle = new Bundle();
         bundle.putString("internalData", internalData);
 
-        Message message = FCMMessageMapper.fromCloudBundle(bundle);
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
 
         assertEquals("someUrl1", message.getContentUrl());
     }

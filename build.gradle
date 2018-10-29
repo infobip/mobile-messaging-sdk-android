@@ -20,15 +20,24 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7"
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7'
     }
 }
 
-
-
 plugins {
     id 'net.researchgate.release' version '2.2.1'
-    id "com.jfrog.artifactory" version "4.4.7"
+    id 'com.jfrog.artifactory' version '4.4.7'
+}
+
+ext {
+    mm_minSdkVersion = 14
+    mm_compileSdkVersion = 28
+    mm_targetSdkVersion = 28
+    mm_buildToolsVersion = "28.0.3"
+    mm_supportLibrariesVersion = "28.0.0"
+    mm_firebaseMessagingVersion = "17.3.4"
+    mm_gcmVersion = "16.0.0"
+    mm_gmsLocationVersion = "16.0.0"
 }
 
 allprojects {

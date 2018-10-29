@@ -71,7 +71,7 @@ public enum Event {
      * Contains the GCM registration token.
      * <pre>
      * {@code
-     * String gcmRegistrationToken = intent.getStringExtra({@link BroadcastParameter#EXTRA_GCM_TOKEN});
+     * String gcmRegistrationToken = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
      * }
      * </pre>
      */
@@ -84,7 +84,7 @@ public enum Event {
      * (which identifies every application instance).
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_GCM_TOKEN});
+     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
      * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
      * }
      * </pre>

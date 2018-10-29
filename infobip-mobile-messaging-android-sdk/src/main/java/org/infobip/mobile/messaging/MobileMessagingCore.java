@@ -4,7 +4,6 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,12 +11,12 @@ import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
+import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
+import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
+import org.infobip.mobile.messaging.cloud.PlayServicesSupport;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
-import org.infobip.mobile.messaging.gcm.MobileMessageHandler;
-import org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService;
-import org.infobip.mobile.messaging.gcm.PlayServicesSupport;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -43,6 +42,7 @@ import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
+import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -87,7 +87,6 @@ public class MobileMessagingCore
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
 
-    protected static MobileMessagingCore instance;
     protected static MobileApiResourceProvider mobileApiResourceProvider;
     static String applicationCode;
     private static Map<String, String> applicationCodeHashMap;
@@ -187,14 +186,7 @@ public class MobileMessagingCore
      * @see MobileMessagingCore.Builder
      */
     public static MobileMessagingCore getInstance(Context context) {
-        if (instance == null) {
-            synchronized (MobileMessagingCore.class) {
-                if (instance == null) {
-                    instance = new MobileMessagingCore(context.getApplicationContext());
-                }
-            }
-        }
-        return instance;
+        return Platform.mobileMessagingCore.get(context);
     }
 
     public Collection<MessageHandlerModule> getMessageHandlerModules() {
@@ -520,11 +512,11 @@ public class MobileMessagingCore
     }
 
     public String getCloudToken() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+        return PreferenceHelper.findString(context, MobileMessagingProperty.CLOUD_TOKEN);
     }
 
     public void setRegistrationId(String registrationId) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_REGISTRATION_ID, registrationId);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.CLOUD_TOKEN, registrationId);
         setRegistrationUnreported();
     }
 
@@ -762,19 +754,32 @@ public class MobileMessagingCore
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
-    static void setGcmSenderId(Context context, String gcmSenderId) {
-        if (StringUtils.isBlank(gcmSenderId)) {
-            throw new IllegalArgumentException("gcmSenderId is mandatory! Get one here: https://developers.google.com/mobile/add?platform=android&cntapi=gcm");
+    static void setSenderId(Context context, String senderId) {
+        if (StringUtils.isBlank(senderId)) {
+            throw new IllegalArgumentException("senderId is mandatory! Get one here: https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging");
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.GCM_SENDER_ID, gcmSenderId);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.SENDER_ID, senderId);
     }
 
-    public static String getGcmSenderId(Context context) {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
+    public static String getSenderId(Context context) {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
     }
 
     public boolean isRegistrationIdReported() {
         return registrationSynchronizer().isRegistrationIdReported();
+    }
+
+    public boolean isPushServiceTypeChanged() {
+        String reportedPushServiceType = getReportedPushServiceType();
+        return StringUtils.isBlank(reportedPushServiceType) || !Platform.usedPushServiceType.name().equals(reportedPushServiceType);
+    }
+
+    private String getReportedPushServiceType() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE);
+    }
+
+    public void setReportedPushServiceType() {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE, Platform.usedPushServiceType.name());
     }
 
     private void setRegistrationUnreported() {
@@ -955,10 +960,8 @@ public class MobileMessagingCore
     }
 
     private static void cleanup(Context context) {
-        if (instance != null) {
-            for (MessageHandlerModule module : instance.messageHandlerModules.values()) {
-                module.cleanup();
-            }
+        for (MessageHandlerModule module : Platform.mobileMessagingCore.get(context).messageHandlerModules.values()) {
+            module.cleanup();
         }
 
         applicationCode = null;
@@ -969,16 +972,13 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
         resetMobileApi();
 
-        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
+        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
+        MobileMessagingCloudService.enqueueTokenCleanup(context, gcmSenderID);
 
-        Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_CLEANUP, null, context, MobileMessagingGcmIntentService.class);
-        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
-        MobileMessagingGcmIntentService.enqueueWork(context, intent);
-
-        PreferenceHelper.remove(context, MobileMessagingProperty.GCM_REGISTRATION_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GCM_REGISTRATION_ID_REPORTED, false);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
 
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
@@ -991,10 +991,8 @@ public class MobileMessagingCore
     }
 
     private void resetCloudToken() {
-        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.GCM_SENDER_ID);
-        Intent intent = new Intent(MobileMessagingGcmIntentService.ACTION_TOKEN_RESET, null, context, MobileMessagingGcmIntentService.class);
-        intent.putExtra(MobileMessagingGcmIntentService.EXTRA_GCM_SENDER_ID, gcmSenderID);
-        MobileMessagingGcmIntentService.enqueueWork(context, intent);
+        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
+        MobileMessagingCloudService.enqueueTokenReset(context, gcmSenderID);
     }
 
     public static void resetMobileApi() {
@@ -1418,8 +1416,7 @@ public class MobileMessagingCore
                 }
             }
 
-            ComponentUtil.disableFirebaseInstanceIdReceiver(application);
-            ComponentUtil.verifyManifestComponentsForPush(application);
+            Platform.verify(application);
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
@@ -1428,9 +1425,9 @@ public class MobileMessagingCore
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initListener);
-            synchronized (MobileMessagingCore.class) {
-                MobileMessagingCore.instance = mobileMessagingCore;
-            }
+
+            Platform.reset(mobileMessagingCore);
+
             return mobileMessagingCore;
         }
     }

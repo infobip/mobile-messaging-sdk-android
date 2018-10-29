@@ -9,10 +9,10 @@ import android.content.Intent;
  */
 public enum MobileMessagingProperty {
 
-    GCM_REGISTRATION_ID_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
-    GCM_REGISTRATION_ID("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),
+    CLOUD_TOKEN_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
+    CLOUD_TOKEN("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID", null, true),
-    GCM_SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
+    SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
     APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE", null, true),
     LAST_HTTP_EXCEPTION("org.infobip.mobile.messaging.infobip.LAST_HTTP_EXCEPTION"),
     INFOBIP_UNREPORTED_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS", new String[0]),
@@ -66,7 +66,9 @@ public enum MobileMessagingProperty {
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false),
 
-    SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX");
+    SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX"),
+
+    REPORTED_PUSH_SERVICE_TYPE("org.infobip.mobile.messaging.REPORTED_PUSH_SERVICE_TYPE");
 
     private final String key;
     private final Object defaultValue;

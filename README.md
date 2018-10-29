@@ -36,7 +36,8 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
     }
     ```
 
-5. Add GCM Sender ID, obtained in step 1, and Infobip Application Code, obtained in step 2, to values/strings.xml resource file
+5. a) Add GCM Sender ID, obtained in step 1 to values/strings.xml (can skip this if you're using [Google Services Gradle Plugin](https://developers.google.com/android/guides/google-services-plugin) - google-services.json)
+   b) Add Infobip Application Code, obtained in step 2, to values/strings.xml resource file
     ```groovy
     <resources>
         <string name="google_app_id">YOUR GCM SENDER</string>

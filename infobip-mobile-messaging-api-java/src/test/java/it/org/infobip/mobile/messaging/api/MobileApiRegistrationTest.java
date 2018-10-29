@@ -1,6 +1,7 @@
 package it.org.infobip.mobile.messaging.api;
 
 import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
+import org.infobip.mobile.messaging.api.registration.PushServiceType;
 import org.infobip.mobile.messaging.api.registration.RegistrationResponse;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiException;
@@ -28,6 +29,8 @@ import static org.junit.Assert.assertTrue;
 public class MobileApiRegistrationTest {
     private DebugServer debugServer;
     private MobileApiRegistration mobileApiRegistration;
+
+    private PushServiceType firebaseServiceType = PushServiceType.Firebase;
 
     @Before
     public void setUp() throws Exception {
@@ -59,19 +62,20 @@ public class MobileApiRegistrationTest {
     public void create_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new RegistrationResponse("11", true)));
 
-        RegistrationResponse response = mobileApiRegistration.upsert("123", true);
+        RegistrationResponse response = mobileApiRegistration.upsert("123", true, firebaseServiceType);
 
         //inspect http context
         assertEquals("/mobile/4/registration", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        assertEquals(3, debugServer.getQueryParametersCount());
+        assertEquals(4, debugServer.getQueryParametersCount());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertNull(debugServer.getBody());
 
         //inspect parameters
         assertEquals("123", debugServer.getQueryParameter("registrationId"));
         assertEquals("GCM", debugServer.getQueryParameter("platformType"));
+        assertEquals("Firebase", debugServer.getQueryParameter("service"));
 
         //inspect response
         assertEquals("11", response.getDeviceApplicationInstanceId());
@@ -83,28 +87,28 @@ public class MobileApiRegistrationTest {
         debugServer.stop();
         debugServer = null;
 
-        mobileApiRegistration.upsert("123", true);
+        mobileApiRegistration.upsert("123", true, firebaseServiceType);
     }
 
     @Test(expected = ApiException.class)
     public void create_onResponseError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some error!")));
 
-        mobileApiRegistration.upsert("123", true);
+        mobileApiRegistration.upsert("123", true, firebaseServiceType);
     }
 
     @Test(expected = ApiBackendException.class)
     public void create_onBackendError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some internal error!")));
 
-        mobileApiRegistration.upsert("123", true);
+        mobileApiRegistration.upsert("123", true, firebaseServiceType);
     }
 
     @Test
     public void update() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, DefaultApiClient.JSON_SERIALIZER.serialize(new RegistrationResponse("11", true)));
 
-        mobileApiRegistration.upsert("123", true);
+        mobileApiRegistration.upsert("123", true, firebaseServiceType);
 
         //inspect http context
         assertEquals("/mobile/4/registration", debugServer.getUri());

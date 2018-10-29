@@ -15,7 +15,8 @@
     <application>
 
         <receiver
-            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmReceiver"
+            android:name="org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver"
+            android:enabled="false"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
@@ -24,18 +25,27 @@
         </receiver>
 
         <service
-            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingGcmIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" >
-        </service>
-
-        <service
-            android:name="org.infobip.mobile.messaging.gcm.MobileMessagingInstanceIDListenerService"
+            android:name="org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService"
+            android:enabled="false"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />
                 <!-- Intent filter is for pre-4.4 KitKat devices -->
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="org.infobip.mobile.messaging.cloud.MobileMessagingCloudService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" >
+        </service>
+
+        <service
+            android:name="org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 

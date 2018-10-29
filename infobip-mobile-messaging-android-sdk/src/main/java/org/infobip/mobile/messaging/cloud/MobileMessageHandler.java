@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.gcm;
+package org.infobip.mobile.messaging.cloud;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
