@@ -977,6 +977,7 @@ public class MobileMessagingCore
 
         PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE);
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
 
