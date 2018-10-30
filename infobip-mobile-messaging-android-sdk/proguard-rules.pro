@@ -84,6 +84,7 @@
 -keep class org.infobip.mobile.messaging.dal.json.** { *; }
 -keep class org.infobip.mobile.messaging.Message { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
+-keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper$* { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
