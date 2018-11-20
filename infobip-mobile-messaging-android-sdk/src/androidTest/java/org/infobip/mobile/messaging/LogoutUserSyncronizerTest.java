@@ -30,7 +30,7 @@ public class LogoutUserSyncronizerTest extends MobileMessagingTestCase {
         UserData userData = new UserData();
         userData.setFirstName("John");
         userData.setCustomUserDataElement("someKey", new CustomUserDataValue("someValue"));
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true);
+        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeOsLanguage");
         PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, systemData.toString());
         createMessage(context, "SomeMessageId", true);

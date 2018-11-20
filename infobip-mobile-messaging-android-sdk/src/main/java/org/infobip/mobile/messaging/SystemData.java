@@ -21,9 +21,10 @@ public class SystemData {
     private final boolean geofencing;
     private final boolean notificationsEnabled;
     private final boolean deviceSecure;
+    private final String osLanguage;
 
     public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion,
-                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure) {
+                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure, String osLanguage) {
         this.sdkVersion = sdkVersion;
         this.osVersion = osVersion;
         this.deviceManufacturer = deviceManufacturer;
@@ -32,6 +33,7 @@ public class SystemData {
         this.geofencing = geofencing;
         this.notificationsEnabled = notificationsEnabled;
         this.deviceSecure = deviceSecure;
+        this.osLanguage = osLanguage;
     }
 
     public static SystemData fromJson(String json) {
@@ -74,6 +76,10 @@ public class SystemData {
         return deviceSecure;
     }
 
+    public String getOsLanguage() {
+        return osLanguage;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -86,6 +92,7 @@ public class SystemData {
         result = appendToHash(result, prime, geofencing);
         result = appendToHash(result, prime, notificationsEnabled);
         result = appendToHash(result, prime, deviceSecure);
+        result = appendToHash(result, prime, osLanguage);
         return result;
     }
 
@@ -111,12 +118,12 @@ public class SystemData {
                 StringUtils.isEqual(this.applicationVersion, other.applicationVersion) &&
                 (this.geofencing == other.geofencing) &&
                 (this.notificationsEnabled == other.notificationsEnabled) &&
-                (this.deviceSecure == other.deviceSecure);
+                (this.deviceSecure == other.deviceSecure) &&
+                StringUtils.isEqual(this.osLanguage, other.osLanguage);
     }
 
     @Override
     public String toString() {
         return serializer.serialize(this);
     }
-
 }

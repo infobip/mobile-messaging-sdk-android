@@ -1164,7 +1164,8 @@ public class MobileMessagingCore
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
                 isGeofencingActivated(),
                 SoftwareInformation.areNotificationsEnabled(context),
-                reportEnabled && DeviceInformation.isDeviceSecure(context));
+                reportEnabled && DeviceInformation.isDeviceSecure(context),
+                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "");
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {

@@ -94,6 +94,7 @@ public class SystemDataReporter {
                 data.getApplicationVersion(),
                 data.isGeofencing(),
                 data.areNotificationsEnabled(),
-                data.isDeviceSecure());
+                data.isDeviceSecure(),
+                data.getOsLanguage());
     }
 }

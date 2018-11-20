@@ -6,6 +6,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.lang.reflect.Field;
+import java.util.Locale;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -54,5 +55,9 @@ public class SystemInformation {
 
     public static String getAndroidSystemVersion() {
         return Build.VERSION.RELEASE;
+    }
+
+    public static String getAndroidSystemLanguage() {
+        return Locale.getDefault().getLanguage();
     }
 }

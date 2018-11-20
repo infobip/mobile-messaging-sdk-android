@@ -20,4 +20,5 @@ public class SystemDataReport {
     Boolean geofencing;
     Boolean notificationsEnabled;
     Boolean deviceSecure;
+    String osLanguage;
 }

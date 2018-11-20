@@ -128,6 +128,7 @@ public class MobileApiDataTest {
         systemDataReport.setGeofencing(false);
         systemDataReport.setNotificationsEnabled(true);
         systemDataReport.setDeviceSecure(true);
+        systemDataReport.setOsLanguage("en");
 
         // prepare server
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -146,15 +147,16 @@ public class MobileApiDataTest {
         //inspect request
         JSONAssert.assertEquals(
                 "{" +
-                    "'sdkVersion':'1.2.3.TEST'," +
-                    "'osVersion':'0.1.2.TEST'," +
-                    "'deviceManufacturer':'INFOBIP'," +
-                    "'deviceModel':'TEST'," +
-                    "'applicationVersion':'3.4.5.TEST'," +
-                    "'geofencing':false," +
-                    "'notificationsEnabled':true," +
-                    "'deviceSecure':true" +
-                "}",
+                        "'sdkVersion':'1.2.3.TEST'," +
+                        "'osVersion':'0.1.2.TEST'," +
+                        "'deviceManufacturer':'INFOBIP'," +
+                        "'deviceModel':'TEST'," +
+                        "'applicationVersion':'3.4.5.TEST'," +
+                        "'geofencing':false," +
+                        "'notificationsEnabled':true," +
+                        "'deviceSecure':true," +
+                        "'osLanguage':'en'" +
+                    "}",
                 debugServer.getBody(), true);
     }
 
