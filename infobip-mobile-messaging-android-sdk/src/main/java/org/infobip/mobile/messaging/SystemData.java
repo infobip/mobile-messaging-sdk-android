@@ -22,9 +22,10 @@ public class SystemData {
     private final boolean notificationsEnabled;
     private final boolean deviceSecure;
     private final String osLanguage;
+    private final String deviceName;
 
     public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion,
-                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure, String osLanguage) {
+                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure, String osLanguage, String deviceName) {
         this.sdkVersion = sdkVersion;
         this.osVersion = osVersion;
         this.deviceManufacturer = deviceManufacturer;
@@ -34,6 +35,7 @@ public class SystemData {
         this.notificationsEnabled = notificationsEnabled;
         this.deviceSecure = deviceSecure;
         this.osLanguage = osLanguage;
+        this.deviceName = deviceName;
     }
 
     public static SystemData fromJson(String json) {
@@ -80,6 +82,10 @@ public class SystemData {
         return osLanguage;
     }
 
+    public String getDeviceName() {
+        return deviceName;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -93,6 +99,7 @@ public class SystemData {
         result = appendToHash(result, prime, notificationsEnabled);
         result = appendToHash(result, prime, deviceSecure);
         result = appendToHash(result, prime, osLanguage);
+        result = appendToHash(result, prime, deviceName);
         return result;
     }
 
@@ -106,7 +113,7 @@ public class SystemData {
             return true;
         }
 
-        if (o == null || this.getClass() != o.getClass()){
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
 
@@ -119,7 +126,9 @@ public class SystemData {
                 (this.geofencing == other.geofencing) &&
                 (this.notificationsEnabled == other.notificationsEnabled) &&
                 (this.deviceSecure == other.deviceSecure) &&
-                StringUtils.isEqual(this.osLanguage, other.osLanguage);
+                StringUtils.isEqual(this.osLanguage, other.osLanguage) &&
+                StringUtils.isEqual(this.deviceName, other.deviceName);
+
     }
 
     @Override

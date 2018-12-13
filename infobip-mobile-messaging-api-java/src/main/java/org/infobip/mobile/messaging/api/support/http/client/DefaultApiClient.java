@@ -77,11 +77,19 @@ public class DefaultApiClient implements ApiClient {
             }
 
             urlConnection = (HttpURLConnection) new URL(request.uri + sb.toString()).openConnection();
-            urlConnection.setRequestMethod(request.httpMethod.name());
-            urlConnection.setUseCaches(false);
+
+            if (request.httpMethod == HttpMethod.PATCH) {
+                urlConnection.setRequestProperty("X-HTTP-Method-Override", HttpMethod.PATCH.name());
+                urlConnection.setRequestMethod(HttpMethod.POST.name());
+            } else {
+                urlConnection.setRequestMethod(request.httpMethod.name());
+            }
+
             if (request.httpMethod != HttpMethod.GET) {
                 urlConnection.setDoOutput(true);
             }
+
+            urlConnection.setUseCaches(false);
             urlConnection.setDoInput(true);
             urlConnection.setConnectTimeout(connectTimeout);
             urlConnection.setReadTimeout(readTimeout);

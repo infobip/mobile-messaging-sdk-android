@@ -17,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,14 +25,19 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.infobip.mobile.messaging.CustomUserDataValue;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.geo.MobileGeo;
 import org.infobip.mobile.messaging.storage.MessageStore;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -141,23 +147,45 @@ public class MainActivity extends AppCompatActivity {
 
     private void actionGsm() {
         final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
-        showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
-            @Override
-            public void run(String param) {
-                userData.setMsisdn(param);
-                mobileMessaging.syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
-                    @Override
-                    public void onResult(UserData result) {
-                        Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
+        userData.setFirstName("Tereza");
+        userData.setLastName("Juric");
+        HashSet<String> tags = new HashSet<>();
+        tags.add("dance");
+        tags.add("music");
+        userData.setTags(tags);
+        userData.setGsms(Collections.singletonList(new UserData.Gsm("385992691431")));
+        userData.setEmails(Collections.singletonList(new UserData.Email("terezajuric@gmail.com")));
+        userData.setCustomUserDataElement("date_1", new CustomUserDataValue(new Date()));
+        userData.setCustomUserDataElement("number_1", new CustomUserDataValue(1234.3));
+        userData.removeCustomUserDataElement("string_1");
+        userData.setGender(UserData.Gender.Female);
+        userData.setBirthday(new GregorianCalendar(1988, 6, 31).getTime());
+        mobileMessaging.saveUserData(userData);
+
+        //TODO fix!
+//        showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
+//            @Override
+//            public void run(String param) {
+//                userData.setMsisdn(param);
+//                mobileMessaging.saveUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+//                    @Override
+//                    public void onResult(UserData result) {
+//                        Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
+//        });
     }
 
     private void actionErase() {
-        messageStore.deleteAll(this);
-        refresh();
+        mobileMessaging.fetchUserData(new MobileMessaging.ResultListener<UserData>() {
+            @Override
+            public void onResult(UserData result) {
+                Log.d("tag", result.getInstallations().toString());
+            }
+        });
+//        messageStore.deleteAll(this);
+//        refresh();
     }
 
     private void activateGeofencing() {

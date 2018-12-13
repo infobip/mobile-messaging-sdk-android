@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
@@ -14,9 +13,6 @@ import java.util.Date;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 
 public class UserDataStoreTest extends MobileMessagingTestCase {
 
@@ -26,8 +22,6 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
         captor = ArgumentCaptor.forClass(UserData.class);
-        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class)))
-                .willReturn(new UserDataReport());
     }
 
     @Test
@@ -69,7 +63,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         UserData givenUserData = userData();
 
         // When
-        mobileMessagingCore.syncUserData(givenUserData);
+        mobileMessagingCore.saveUserData(givenUserData);
 
         // Then
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
@@ -83,13 +77,12 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
     @NonNull
     private UserData userData() {
         UserData userData = new UserData();
-        userData.setEmail("email@UserDataStoreTest.com");
         userData.setExternalUserId("someUserId");
         userData.setFirstName("User");
         userData.setLastName("Tester");
         Calendar calendar = Calendar.getInstance();
         calendar.set(2000, 1, 1);
-        userData.setBirthdate(new Date(calendar.getTimeInMillis()));
+        userData.setBirthday(new Date(calendar.getTimeInMillis()));
         return userData;
     }
 }

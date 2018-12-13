@@ -44,7 +44,8 @@ public class JsonSerializer {
     }
 
     public JsonSerializer() {
-        gson = new GsonBuilder().serializeNulls().create();
+        //TODO revert to serializeNulls?
+        gson = new GsonBuilder().create();
     }
 
     public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {

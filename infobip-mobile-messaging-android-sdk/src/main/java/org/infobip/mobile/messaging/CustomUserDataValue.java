@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.util.DateTimeUtil;
-import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
 import java.security.InvalidParameterException;
 import java.text.NumberFormat;
@@ -18,9 +17,9 @@ import java.util.Map;
  * <li>{@link Date}</li>
  * </ul>
  *
- * @see UserData#setCustomUserData(Map)
+ * @see UserData#setCustomAttributes(Map)
  * @see UserData#setCustomUserDataElement(String, CustomUserDataValue)
- * @see UserData#getCustomUserData()
+ * @see UserData#getCustomAttributes()
  * @see UserData#getCustomUserDataValue(String)
  */
 public class CustomUserDataValue {
@@ -45,7 +44,7 @@ public class CustomUserDataValue {
     }
 
     public CustomUserDataValue(Date someDate) {
-        this.value = DateTimeUtil.ISO8601DateToString(someDate);
+        this.value = DateTimeUtil.DateToYMDString(someDate);
         this.type = Type.Date;
     }
 
@@ -120,8 +119,8 @@ public class CustomUserDataValue {
         }
 
         try {
-            return DateTimeUtil.ISO8601DateFromString((String) value);
-        } catch (ISO8601DateParseException e) {
+            return DateTimeUtil.DateFromYMDString((String) value);
+        } catch (ParseException e) {
             throw new ClassCastException(e.getMessage());
         }
     }

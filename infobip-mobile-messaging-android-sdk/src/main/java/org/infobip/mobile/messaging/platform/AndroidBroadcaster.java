@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 
 import java.util.List;
 
@@ -107,9 +108,27 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
+    public void userDataAcquired(UserData userData) {
+        send(prepare(Event.USER_DATA_ACQUIRED)
+                .putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString()));
+    }
+
+    @Override
     public void systemDataReported(SystemData systemData) {
         send(prepare(Event.SYSTEM_DATA_REPORTED)
                 .putExtra(BroadcastParameter.EXTRA_SYSTEM_DATA, systemData.toString()));
+    }
+
+    @Override
+    public void installationUpdated(Installation installation) {
+        send(prepare(Event.INSTALLATION_UPDATED)
+                .putExtra(BroadcastParameter.EXTRA_INSTALLATION, installation.toString()));
+    }
+
+    @Override
+    public void installationCreated(Installation installation) {
+        send(prepare(Event.INSTALLATION_CREATED)
+                .putExtra(BroadcastParameter.EXTRA_INSTALLATION, installation.toString()));
     }
 
     @Override

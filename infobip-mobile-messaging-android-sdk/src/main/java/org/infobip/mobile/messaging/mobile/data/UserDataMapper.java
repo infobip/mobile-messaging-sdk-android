@@ -1,80 +1,130 @@
 package org.infobip.mobile.messaging.mobile.data;
 
+import android.support.annotation.NonNull;
+
 import org.infobip.mobile.messaging.CustomUserDataValue;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.api.data.CustomUserDataValueReport;
-import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/**
- * @author pandric
- * @since sdk v1.3.14
- */
 
-public class UserDataMapper extends UserData {
+public class UserDataMapper {
 
-    private static class CustomValueMapper extends CustomUserDataValue {
+    static UserBody toUserDataReport(UserData userData) {
+        UserBody userBody = new UserBody();
+        userBody.setExternalUserId(userData.getExternalUserId());
+        userBody.setFirstName(userData.getFirstName());
+        userBody.setLastName(userData.getLastName());
+        userBody.setMiddleName(userData.getMiddleName());
+        userBody.setBirthday(DateTimeUtil.DateToYMDString(userData.getBirthday()));
+        if (userData.getGender() != null) {
+            userBody.setGender(userData.getGender().name());
+        }
+        userBody.setEmails((List<Object>) (Object) userData.getEmails());
+        userBody.setGsms((List<Object>) (Object) userData.getGsms());
+        userBody.setTags(userData.getTags());
+        userBody.setCustomAttributes(mapCustomAttsForUserDataReport(userData));
 
-        CustomValueMapper(CustomUserDataValue value) {
-            super(value);
+        return userBody;
+    }
+
+    public static UserData createFrom(UserBody userResponse) {
+        UserData userData = new UserData();
+
+        if (userResponse.getExternalUserId() != null) userData.setExternalUserId(userResponse.getExternalUserId());
+        if (userResponse.getFirstName() != null) userData.setFirstName(userResponse.getFirstName());
+        if (userResponse.getLastName() != null) userData.setLastName(userResponse.getLastName());
+        if (userResponse.getMiddleName() != null)
+            userData.setMiddleName(userResponse.getMiddleName());
+        if (userResponse.getBirthday() != null) {
+            try {
+                userData.setBirthday(DateTimeUtil.DateFromYMDString(userResponse.getBirthday()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        if (userData.getGender() != null) userData.setGender(UserData.Gender.valueOf(userResponse.getGender()));
+        if (userResponse.getEmails() != null) userData.setEmails((List<UserData.Email>) (Object) userResponse.getEmails());
+        if (userResponse.getGsms() != null) userData.setGsms((List<UserData.Gsm>) (Object) userResponse.getGsms());
+        if (userResponse.getTags() != null) userData.setTags(userResponse.getTags());
+        if (userResponse.getCustomAttributes() != null) userData.setCustomAttributes(mapCustomAttsFromUserDataResponse(userResponse));
+        if (userResponse.getInstances() != null) userData.setInstallations(mapInstancesToUserInstallations(userResponse));
+
+        return userData;
+    }
+
+    private static List<UserData.Installation> mapInstancesToUserInstallations(UserBody userResponse) {
+        List<UserData.Installation> installations = new ArrayList<>();
+        for (AppInstanceWithPushRegId instance : userResponse.getInstances()) {
+            installations.add(UserData.Installation.createFrom(instance));
         }
 
-        Object objectValue() {
-            return getValue();
+        return installations;
+    }
+
+    @NonNull
+    private static Map<String, Object> mapCustomAttsForUserDataReport(UserData userData) {
+        Map<String, CustomUserDataValue> customAttributes = userData.getCustomAttributes();
+        Map<String, Object> customAttributesToReport = new HashMap<>(customAttributes.size());
+        for (Map.Entry<String, CustomUserDataValue> entry : customAttributes.entrySet()) {
+            String key = entry.getKey();
+            CustomUserDataValue value = entry.getValue();
+
+            if (value == null) {
+                customAttributesToReport.put(key, null);
+            } else if (value.getType() == CustomUserDataValue.Type.Date) {
+                customAttributesToReport.put(entry.getKey(), DateTimeUtil.DateToYMDString(value.dateValue()));
+            } else if (value.getType() == CustomUserDataValue.Type.Number) {
+                customAttributesToReport.put(key, value.numberValue());
+            } else if (value.getType() == CustomUserDataValue.Type.String) {
+                customAttributesToReport.put(key, value.stringValue());
+            }
         }
+        return customAttributesToReport;
     }
 
-    private UserDataMapper(String externalUserId, Map<String, Object> predefinedUserData, Map<String, CustomUserDataValue> customUserData) {
-        super(externalUserId, predefinedUserData, customUserData);
-    }
-
-    public static UserData fromUserDataReport(String externalUserId, Map<String, Object> predefinedUserData, Map<String, CustomUserDataValueReport> customUserDataReport) {
-        return new UserDataMapper(externalUserId, predefinedUserData, mapFromCustomUserDataReport(customUserDataReport));
-    }
-
-    static UserDataReport toUserDataReport(Map<String, Object> predefinedUserData, Map<String, CustomUserDataValue> customUserData) {
-        return new UserDataReport(predefinedUserData, mapToCustomUserDataReport(customUserData));
-    }
-
-    private static Map<String, CustomUserDataValue> mapFromCustomUserDataReport(Map<String, CustomUserDataValueReport> customUserDataReportMap) {
+    private static Map<String, CustomUserDataValue> mapCustomAttsFromUserDataResponse(UserBody userBody) {
+        Map<String, Object> customAttributes = userBody.getCustomAttributes();
         Map<String, CustomUserDataValue> customUserDataValueMap = new HashMap<>();
-        if (customUserDataReportMap == null) {
+
+        if (customAttributes == null) {
             return customUserDataValueMap;
         }
 
-        for (String key : customUserDataReportMap.keySet()) {
-            CustomUserDataValueReport customUserDataValueReport = customUserDataReportMap.get(key);
-            String type = customUserDataValueReport.getType();
+        for (Map.Entry<String, Object> entry : customAttributes.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
 
-            switch (type) {
-                case "String":
-                    customUserDataValueMap.put(key, new CustomUserDataValue((String) customUserDataValueReport.getValue()));
-                    break;
-                case "Number":
-                    customUserDataValueMap.put(key, new CustomUserDataValue((Number) customUserDataValueReport.getValue()));
-                    break;
-                case "Date":
-                    customUserDataValueMap.put(key, new CustomUserDataValue(DateTimeUtil.ISO8601DateFromString((String) customUserDataValueReport.getValue())));
-                    break;
+            if (value instanceof String) {
+                String stringValue = (String) value;
+
+                if (isPossibleDate(stringValue)) {
+                    try {
+                        Date dateValue = DateTimeUtil.DateFromYMDString(stringValue);
+                        customUserDataValueMap.put(key, new CustomUserDataValue(dateValue));
+                        continue;
+                    } catch (ParseException ignored) {
+                    }
+                }
+                customUserDataValueMap.put(key, new CustomUserDataValue(stringValue));
+
+            } else if (value instanceof Number) {
+                customUserDataValueMap.put(key, new CustomUserDataValue((Number) value));
             }
         }
 
         return customUserDataValueMap;
     }
 
-    private static Map<String, CustomUserDataValueReport> mapToCustomUserDataReport(Map<String, CustomUserDataValue> customUserDataValueMap) {
-        Map<String, CustomUserDataValueReport> customUserDataValueReportMap = new HashMap<>(customUserDataValueMap.size());
-        for (String key : customUserDataValueMap.keySet()) {
-            CustomUserDataValue customUserDataValue = customUserDataValueMap.get(key);
-            CustomUserDataValueReport customUserDataValueReport = customUserDataValue != null
-                    ? new CustomUserDataValueReport(new CustomValueMapper(customUserDataValue).objectValue(), customUserDataValue.getType().name())
-                    : null;
-            customUserDataValueReportMap.put(key, customUserDataValueReport);
-        }
-
-        return customUserDataValueReportMap;
+    private static boolean isPossibleDate(String stringValue) {
+        return Character.isDigit(stringValue.charAt(0)) && stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length();
     }
 }

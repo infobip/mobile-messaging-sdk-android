@@ -4,6 +4,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 
 import java.util.List;
 
@@ -89,11 +90,33 @@ public interface Broadcaster {
     void userDataReported(UserData userData);
 
     /**
+     * Sends broadcast with fetched user data
+     *
+     * @param userData user data
+     */
+    void userDataAcquired(UserData userData);
+
+    /**
      * Sends broadcast with system data
      *
      * @param systemData system data
      */
     void systemDataReported(SystemData systemData);
+
+    /**
+     * Sends broadcast with installation data on installation update
+     *
+     * @param installation device instance
+     */
+    void installationUpdated(Installation installation);
+
+
+    /**
+     * Sends broadcast with installation data when installation is created
+     *
+     * @param installation device instance
+     */
+    void installationCreated(Installation installation);
 
     /**
      * Sends broadcast that user is logged out

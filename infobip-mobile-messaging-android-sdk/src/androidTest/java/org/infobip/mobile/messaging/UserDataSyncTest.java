@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;
@@ -9,61 +9,57 @@ import org.mockito.ArgumentCaptor;
 import java.util.Calendar;
 import java.util.Date;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-/**
- * @author sslavin
- * @since 10/11/2016.
- */
 
 public class UserDataSyncTest extends MobileMessagingTestCase {
 
-    private ArgumentCaptor<UserDataReport> reportCaptor;
+    private ArgumentCaptor<UserBody> reportCaptor;
     private ArgumentCaptor<UserData> dataCaptor;
+    private MobileMessaging.ResultListener resultListener;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        reportCaptor = forClass(UserDataReport.class);
+        resultListener = mock(MobileMessaging.ResultListener.class);
+        reportCaptor = forClass(UserBody.class);
         dataCaptor = forClass(UserData.class);
-        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class)))
-                .willReturn(new UserDataReport());
+        given(mobileApiAppInstance.getUser(anyString())).willReturn(new UserBody());
     }
 
     @Test
     public void test_empty_user_data() throws Exception {
+        mobileMessaging.fetchUserData(resultListener);
 
-        mobileMessaging.fetchUserData();
-
-        verify(broadcaster, after(1000).atLeastOnce()).userDataReported(dataCaptor.capture());
+        verify(broadcaster, after(1000).atLeastOnce()).userDataAcquired(dataCaptor.capture());
 
         UserData userData = dataCaptor.getValue();
-        assertTrue(userData.getPredefinedUserData() == null || userData.getPredefinedUserData().isEmpty());
-        assertTrue(userData.getCustomUserData() == null || userData.getCustomUserData().isEmpty());
+        assertTrue(userData.getStandardAttributes() == null || userData.getStandardAttributes().isEmpty());
+        assertTrue(userData.getCustomAttributes() == null || userData.getCustomAttributes().isEmpty());
     }
 
     @Test
-    public void test_add_birthdate() throws Exception {
-
+    public void test_add_birthday() throws Exception {
         UserData userData = new UserData();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2000, 1, 1);
-        userData.setBirthdate(new Date(calendar.getTimeInMillis()));
+        userData.setBirthday(new Date(calendar.getTimeInMillis()));
 
-        mobileMessaging.syncUserData(userData);
+        mobileMessaging.saveUserData(userData);
 
-        verify(mobileApiData, after(1000).times(1)).reportUserData(anyString(), reportCaptor.capture());
+        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
-        UserDataReport report = reportCaptor.getValue();
-        assertEquals(userData.getBirthdate(), DateTimeUtil.DateFromYMDString((String)report.getPredefinedUserData().get("birthdate")));
+        UserBody report = reportCaptor.getValue();
+        assertEquals(userData.getBirthday(), DateTimeUtil.DateFromYMDString(report.getBirthday()));
     }
 
     @Test
@@ -78,13 +74,13 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         userData.removeCustomUserDataElement("myKey2");
         userData.removeCustomUserDataElement("myKey3");
 
-        mobileMessaging.syncUserData(userData);
+        mobileMessaging.saveUserData(userData);
 
-        verify(mobileApiData, after(1000).times(1)).reportUserData(anyString(), reportCaptor.capture());
+        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
-        UserDataReport report = reportCaptor.getValue();
-        assertEquals(null, report.getCustomUserData().get("myKey1"));
-        assertEquals(null, report.getCustomUserData().get("myKey2"));
-        assertEquals(null, report.getCustomUserData().get("myKey3"));
+        UserBody report = reportCaptor.getValue();
+        assertEquals(null, report.getCustomAttributes().get("myKey1"));
+        assertEquals(null, report.getCustomAttributes().get("myKey2"));
+        assertEquals(null, report.getCustomAttributes().get("myKey3"));
     }
 }

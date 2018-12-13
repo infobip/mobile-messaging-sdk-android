@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.registration.PushServiceType;
+import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.cloud.RegistrationTokenHandler;
 import org.infobip.mobile.messaging.cloud.firebase.FirebaseRegistrationTokenHandler;

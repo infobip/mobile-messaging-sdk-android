@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
-import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -55,7 +55,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected NotificationHandler notificationHandler;
 
     protected MobileApiMessages mobileApiMessages;
-    protected MobileApiData mobileApiData;
+    protected MobileApiAppInstance mobileApiAppInstance;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -139,10 +139,10 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         MobileApiResourceProvider mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
         mobileApiMessages = mock(MobileApiMessages.class);
-        mobileApiData = mock(MobileApiData.class);
+        mobileApiAppInstance = mock(MobileApiAppInstance.class);
 
         given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
-        given(mobileApiResourceProvider.getMobileApiData(any(Context.class))).willReturn(mobileApiData);
+        given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);
 
         notificationHandler = mock(NotificationHandler.class);
         broadcaster = mock(Broadcaster.class);

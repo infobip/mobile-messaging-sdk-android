@@ -22,6 +22,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_TAPPED_ACTION = "org.infobip.mobile.messaging.notification.action.tapped";
     public static final String EXTRA_TAPPED_CATEGORY = "org.infobip.mobile.messaging.notification.category.tapped";
     public static final String EXTRA_NOTIFICATION_ID = "org.infobip.mobile.messaging.notification.id";
+    public static final String EXTRA_INSTALLATION = "org.infobip.mobile.messaging.installation";
 
     private BroadcastParameter() {
     }

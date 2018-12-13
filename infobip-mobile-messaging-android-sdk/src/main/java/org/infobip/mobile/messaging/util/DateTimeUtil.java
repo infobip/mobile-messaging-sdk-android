@@ -12,7 +12,7 @@ import java.util.Locale;
  */
 public class DateTimeUtil {
 
-    private static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssX";
     private static final String GMT_TIME_ZONE = "+00:00";

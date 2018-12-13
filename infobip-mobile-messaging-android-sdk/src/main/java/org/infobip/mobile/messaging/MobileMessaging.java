@@ -11,6 +11,8 @@ import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.appinstance.Installation;
+import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -114,55 +116,79 @@ public abstract class MobileMessaging {
     public abstract MessageStore getMessageStore();
 
     /**
+     * Gets local instance of currently active installation.
+     *
+     * @return installation installation data object with locally stored data
+     */
+    public abstract Installation getInstallation();
+
+    /**
+     * Gets instance of currently active installation from server.
+     *
+     * @param listener listener to report the result on
+     */
+    public abstract void getInstallationFromServer(InstallationActionListener listener);
+
+    /**
+     * Does a synchronization of installation with server.
+     * <br>
+     * This method will synchronize new installation data (such as setting of primary device, application user ID,...) with server
+     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
+     *
+     * @param installation installation object with desired changes
+     * @see Event#INSTALLATION_UPDATED
+     */
+    public abstract void saveInstallation(Installation installation);
+
+    /**
+     * Does a synchronization of installation with server.
+     * <br>
+     * This method will synchronize new installation data (such as setting of primary device, application user ID,...) with server
+     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
+     * The result of synchronization will be provided via listener.
+     *
+     * @param installation installation object with desired changes
+     * @param listener listener to report the result on
+     * @see InstallationActionListener
+     * @see Event#INSTALLATION_UPDATED
+     */
+    public abstract void saveInstallation(Installation installation, InstallationActionListener listener);
+
+    /**
      * Does a synchronization of user data with server.
      * <br>
      * This method will synchronize new data with server and will also trigger {@link Event#USER_DATA_REPORTED}
-     * with all the data currently available on a server for this user.
+     * with the currently available data in local cache for this user.
      *
      * @param userData user data object with desired changes
      * @see Event#USER_DATA_REPORTED
      */
-    public abstract void syncUserData(UserData userData);
+    public abstract void saveUserData(UserData userData);
 
     /**
      * Does a synchronization of user data with server.
      * <br>
      * This method will synchronize new data with server. The result of synchronization will be provided via listener.
-     * It will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     * It will also trigger {@link Event#USER_DATA_REPORTED} with the currently available data in local cache for this user.
      *
      * @param userData user data object with desired changes
      * @param listener listener to report the result on
      * @see ResultListener
      * @see Event#USER_DATA_REPORTED
      */
-    public abstract void syncUserData(UserData userData, ResultListener<UserData> listener);
+    public abstract void saveUserData(UserData userData, ResultListener<UserData> listener);
 
     /**
-     * Does a fetch of user data from the server.
+     * Does a fetching of user data from the server.
      * <br>
-     * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
-     *
-     * @see Event#USER_DATA_REPORTED
-     * @deprecated Use {@link MobileMessaging#fetchUserData(ResultListener)} instead.
-     */
-    @Deprecated
-    public abstract void fetchUserData();
-
-    /**
-     * Does a fetch of user data from the server.
-     * <br>
-     * The result of fetch operation will be provided via listener.
-     * This method will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     * The result of fetching operation will be provided via listener with all the data currently available on a server for this user.
      *
      * @see ResultListener
-     * @see Event#USER_DATA_REPORTED
      */
     public abstract void fetchUserData(ResultListener<UserData> listener);
 
     /**
      * Reads user data that is currently stored in the library.
-     * <br>
-     * This method does not trigger {@link Event#USER_DATA_REPORTED}.
      *
      * @return last synchronized UserData object
      */
@@ -172,7 +198,7 @@ public abstract class MobileMessaging {
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
-     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
+     * User's data synced over MobileMessaging {@link #saveUserData(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <p>
@@ -194,7 +220,7 @@ public abstract class MobileMessaging {
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <br>
-     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
+     * User's data synced over MobileMessaging {@link #saveUserData(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <br>
@@ -217,6 +243,8 @@ public abstract class MobileMessaging {
      */
     public abstract void logout(ResultListener<SuccessPending> listener);
 
+    public abstract void logout(String pushRegId, ResultListener<SuccessPending> listener);
+
     /**
      * Send mobile originated messages.
      * <br>
@@ -230,7 +258,7 @@ public abstract class MobileMessaging {
      * Send mobile originated messages.
      * <br>
      * Destination for each message is set inside {@link Message}.
-     * The result of fetch operation will be provided via listener.
+     * The result of fetchInstance operation will be provided via listener.
      * {@link ResultListener#onResult(Object)} will be called both in case of success and error,
      * separate status for each message can be retrieved via {@link Message#getStatus()} and {@link Message#getStatusMessage()}.
      *
@@ -240,42 +268,69 @@ public abstract class MobileMessaging {
      */
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
+    //TODO DOCS!
+
     /**
      * This method allows you to configure this device as primary among other devices of a single user.
      * SDK will try to set this device as primary on a server and report result through the listener.
-     * @param isPrimary set to true to make this device primary or to false otherwise.
-     * @param listener listener to invoke when the operation is complete.
+     *
+     * @param applicationUserId set to true to make this device primary or to false otherwise.
+     * @param listener          listener to invoke when the operation is complete.
      */
-    public abstract void setAsPrimaryDevice(boolean isPrimary, ResultListener<Boolean> listener);
+    public abstract void setApplicationUserId(String applicationUserId, InstallationActionListener listener);
+
+    //TODO DOCS!
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.
      * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
+     * @param applicationUserId set to true to make this device primary or to false otherwise.
+     */
+    public abstract void setApplicationUserId(String applicationUserId);
+
+    /**
+     * This method allows you to configure this device as primary among other devices of a single user.
+     * SDK will try to set this device as primary on a server and report result through the listener.
+     *
+     * @param isPrimary set to true to make this device primary or to false otherwise.
+     * @param listener  listener to invoke when the operation is complete.
+     */
+    public abstract void setAsPrimaryDevice(boolean isPrimary, InstallationActionListener listener);
+
+    /**
+     * This method allows you to configure this device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
      * @param isPrimary set to true to make this device primary or to false otherwise.
      */
     public abstract void setAsPrimaryDevice(boolean isPrimary);
 
     /**
+     * This method allows you to configure this device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
+     * @param pushRegistrationId set the push registration ID to make some other device installation primary one.
+     * @param isPrimary          set to true to make this device primary or to false otherwise.
+     * @param listener           listener to invoke when the operation is complete.
+     */
+    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary, InstallationActionListener listener);
+
+    /**
+     * This method allows you to configure this device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
+     * @param pushRegistrationId set the push registration ID to make some other device installation primary one.
+     * @param isPrimary          set to true to make this device primary or to false otherwise.
+     */
+    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary);
+
+    /**
      * Use this method to determine if this device is currently primary device or not.
+     *
      * @return true if this device is primary or false otherwise. The value represents latest value synchronized with the server.
      */
     public abstract boolean isPrimaryDevice();
-
-    /**
-     * Use this method to determine if this device is currently primary device or not. Will trigger communication with server to get latest setting.
-     */
-    public abstract void getPrimaryDeviceSetting(ResultListener<Boolean> listener);
-
-    /**
-     * Use this method to trigger communication between SDK and server and to sync current primary setting for this device.
-     * <br>It will later on trigger {@link Event#PRIMARY_CHANGED} if the setting will be updated locally in SDK.
-     * <br><b>Note:</b> multiple invocations of this method within short period of time may not necessarily result in multiple calls to server,
-     * they will rather be optimized and throttled and number of network calls will be reduced by the library.
-     *
-     * @deprecated Use {@link MobileMessaging#getPrimaryDeviceSetting(ResultListener)} instead.
-     */
-    @Deprecated
-    public abstract void syncPrimaryDeviceSettingWithServer();
 
     /**
      * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
@@ -336,7 +391,7 @@ public abstract class MobileMessaging {
         /**
          * This method is invoked on listener when there's an unrecoverable error.
          *
-         * @param e internal SDK error describing the problem, see {@link InternalSdkError}
+         * @param e               internal SDK error describing the problem, see {@link InternalSdkError}
          * @param googleErrorCode optional error code provided by play services
          */
         void onError(InternalSdkError e, @Nullable Integer googleErrorCode);
@@ -644,7 +699,7 @@ public abstract class MobileMessaging {
          * network information on all Android devices as some devices require the permission to be able to get SIM operator data
          * (needed for SIM country and network code).
          * <p>
-         *    <b>Note:</b> not using this method will result with some devices not being able to sync all network info.
+         * <b>Note:</b> not using this method will result with some devices not being able to sync all network info.
          *
          * @return {@link Builder}
          */
@@ -672,7 +727,7 @@ public abstract class MobileMessaging {
          * It will not store {@link UserData} on device.
          * <p>
          * <b>Note:</b> since {@link UserData} is not stored on device, automatic retries will not be applied.
-         * It should be handled manually using {@link MobileMessaging#syncUserData(UserData, ResultListener)}} method,
+         * It should be handled manually using {@link MobileMessaging#saveUserData(UserData, ResultListener)}} method,
          * where you can check error in callback and retry accordingly.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -702,7 +757,6 @@ public abstract class MobileMessaging {
          * Any messages received in the past will be reported as delivered!
          *
          * @param initListener provide listener to handle any errors during intialization
-         *
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build(@Nullable InitListener initListener) {

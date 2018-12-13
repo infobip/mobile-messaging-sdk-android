@@ -3,8 +3,8 @@ package org.infobip.mobile.messaging.mobile.data;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.api.data.MobileApiData;
-import org.infobip.mobile.messaging.api.data.UserDataReport;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
@@ -19,10 +19,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
-/**
- * @author sslavin
- * @since 15/07/16.
- */
+
 @SuppressWarnings("unchecked")
 public class UserDataReporter {
 
@@ -30,15 +27,15 @@ public class UserDataReporter {
     private final Broadcaster broadcaster;
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
-    private final MobileApiData mobileApiData;
+    private final MobileApiAppInstance mobileApiAppInstance;
     private final RetryPolicyProvider retryPolicyProvider;
 
-    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiData mobileApiData) {
+    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiAppInstance mobileApiAppInstance) {
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
-        this.mobileApiData = mobileApiData;
+        this.mobileApiAppInstance = mobileApiAppInstance;
         this.retryPolicyProvider = retryPolicyProvider;
     }
 
@@ -54,20 +51,19 @@ public class UserDataReporter {
             return;
         }
 
-        new MRetryableTask<UserData, UserData>() {
+        new MRetryableTask<UserData, Void>() {
             @Override
-            public UserData run(UserData[] userData) {
-
-                UserDataReport request = UserDataMapper.toUserDataReport(userData[0].getPredefinedUserData(), userData[0].getCustomUserData());
+            public Void run(UserData[] userData) {
+                UserBody request = UserDataMapper.toUserDataReport(userData[0]);
                 MobileMessagingLogger.v("USER DATA >>>", request);
-                UserDataReport response = mobileApiData.reportUserData(userData[0].getExternalUserId(), request);
-                MobileMessagingLogger.v("USER DATA <<<", response);
-
-                return UserDataMapper.fromUserDataReport(userData[0].getExternalUserId(), response.getPredefinedUserData(), response.getCustomUserData());
+                mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
+                MobileMessagingLogger.v("USER DATA <<<");
+                return null;
             }
 
             @Override
-            public void after(UserData userData) {
+            public void after(Void aVoid) {
+                //TODO recheck this part
                 mobileMessagingCore.setUserDataReported(userData);
                 broadcaster.userDataReported(userData);
 
@@ -109,8 +105,48 @@ public class UserDataReporter {
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
-        .retryWith(retryPolicy(listener))
-        .execute(executor, userData);
+                .retryWith(retryPolicy(listener))
+                .execute(executor, userData);
+    }
+
+    public void fetch(final MobileMessaging.ResultListener listener) {
+
+        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
+            MobileMessagingLogger.w("Registration not available yet, will sync user data later");
+            return;
+        }
+
+        new MRetryableTask<Void, UserBody>() {
+            @Override
+            public UserBody run(Void[] aVoid) {
+                MobileMessagingLogger.v("FETCHING USER DATA >>>");
+                UserBody userResponse = mobileApiAppInstance.getUser(mobileMessagingCore.getPushRegistrationId());
+                MobileMessagingLogger.v("FETCHING USER DATA <<<", userResponse.toString());
+                return userResponse;
+            }
+
+            @Override
+            public void after(UserBody userResponse) {
+                UserData userData = UserDataMapper.createFrom(userResponse);
+
+                if (listener != null) {
+                    listener.onResult(userData);
+                }
+
+                broadcaster.userDataAcquired(userData);
+            }
+
+            @Override
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
+                mobileMessagingCore.setLastHttpException(error);
+                stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
+
+                broadcaster.error(MobileMessagingError.createFrom(error));
+            }
+        }
+                .retryWith(retryPolicy(listener))
+                .execute(executor);
     }
 
     private MRetryPolicy retryPolicy(MobileMessaging.ResultListener listener) {

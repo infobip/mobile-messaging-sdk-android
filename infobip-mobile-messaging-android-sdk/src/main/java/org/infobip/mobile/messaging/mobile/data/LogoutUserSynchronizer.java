@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.mobile.data;
 
 
-import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
@@ -11,27 +11,33 @@ import java.util.concurrent.Executor;
 
 public class LogoutUserSynchronizer {
 
-    private final MobileApiData mobileApiData;
+    private final MobileApiAppInstance mobileApiAppInstance;
     private final Executor executor;
     private final BatchReporter batchReporter;
     private final MRetryPolicy policy;
     private final LogoutServerListener serverListener;
 
-    private class LogoutTask extends MRetryableTask<Void, Void> {
+    private class LogoutTask extends MRetryableTask<String, Void> {
         @Override
-        public Void run(Void[] voids) {
+        public Void run(String[] pushRegIds) {
             MobileMessagingLogger.v("LOGOUT USER >>>");
-            mobileApiData.logoutUser();
+            mobileApiAppInstance.logoutUser(pushRegIds[0]);
             MobileMessagingLogger.v("LOGOUT USER <<<");
             return null;
         }
     }
 
-    public LogoutUserSynchronizer(MobileApiData mobileApiData, MRetryPolicy policy, Executor executor, BatchReporter batchReporter, LogoutServerListener serverListener) {
+    public LogoutUserSynchronizer(
+            MobileApiAppInstance mobileApiAppInstance,
+            MRetryPolicy policy,
+            Executor executor,
+            BatchReporter batchReporter,
+            LogoutServerListener serverListener) {
+
         this.executor = executor;
         this.batchReporter = batchReporter;
         this.policy = policy;
-        this.mobileApiData = mobileApiData;
+        this.mobileApiAppInstance = mobileApiAppInstance;
         this.serverListener = serverListener;
     }
 
@@ -61,7 +67,7 @@ public class LogoutUserSynchronizer {
         });
     }
 
-    public void logout(final LogoutActionListener actionListener) {
+    public void logout(String pushRegId, final LogoutActionListener actionListener) {
         new LogoutTask() {
             @Override
             public void after(Void objects) {

@@ -89,7 +89,7 @@ public class ObjectMapper {
 
     public ChatParticipant fromUserData(UserData userData) {
         MJSONObject data = null;
-        Map<String, CustomUserDataValue> customData = userData.getCustomUserData();
+        Map<String, CustomUserDataValue> customData = userData.getCustomAttributes();
         if (customData != null) {
             CustomUserDataValue value = customData.get("chatCustomData");
             if (value != null) {
@@ -101,8 +101,8 @@ public class ObjectMapper {
                 userData.getFirstName(),
                 userData.getLastName(),
                 userData.getMiddleName(),
-                userData.getEmail(),
-                userData.getMsisdn(),
+                null,
+                null,
                 data);
     }
 
@@ -116,9 +116,9 @@ public class ObjectMapper {
         userData.setFirstName(participant.getFirstName());
         userData.setLastName(participant.getLastName());
         userData.setMiddleName(participant.getMiddleName());
-        userData.setEmail(participant.getEmail());
-        userData.setMsisdn(participant.getGsm());
-        userData.setCustomUserData(customData);
+//        userData.setEmail(participant.getEmail());
+//        userData.setMsisdn(participant.getGsm());
+        userData.setCustomAttributes(customData);
         return userData;
     }
 }

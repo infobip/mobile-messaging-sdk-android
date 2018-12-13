@@ -92,6 +92,34 @@ public enum Event {
     REGISTRATION_CREATED("org.infobip.mobile.messaging.REGISTRATION_CREATED"),
 
     /**
+     * It is triggered when GCM registration token successfully stored on the registration server.
+     * <p>
+     * Contains the GCM registration token and Infobip device application instance ID
+     * (which identifies every application instance).
+     * <pre>
+     * {@code
+     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
+     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * }
+     * </pre>
+     */
+    INSTALLATION_CREATED("org.infobip.mobile.messaging.INSTALLATION_CREATED"),
+
+    /**
+     * It is triggered when GCM registration token successfully stored on the registration server.
+     * <p>
+     * Contains the GCM registration token and Infobip device application instance ID
+     * (which identifies every application instance).
+     * <pre>
+     * {@code
+     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
+     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * }
+     * </pre>
+     */
+    INSTALLATION_UPDATED("org.infobip.mobile.messaging.INSTALLATION_UPDATED"),
+
+    /**
      * It is triggered when message is received.
      * <p>
      * Contains the received message information.
@@ -176,6 +204,16 @@ public enum Event {
      * </pre>
      */
     USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED"),
+
+    /**
+     * It is triggered when user data is successfully reported to the server.
+     * <pre>
+     * {@code
+     * UserData userData = UserData.createFrom(intent.getExtras());
+     * }
+     * </pre>
+     */
+    USER_DATA_ACQUIRED("org.infobip.mobile.messaging.USER_DATA_ACQUIRED"),
 
     /**
      * It is triggered when system data is successfully reported to the server.

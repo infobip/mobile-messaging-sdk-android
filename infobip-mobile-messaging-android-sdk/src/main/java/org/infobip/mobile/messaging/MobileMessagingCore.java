@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
@@ -24,18 +25,17 @@ import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.appinstance.Installation;
+import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
+import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.data.LogoutActionListener;
 import org.infobip.mobile.messaging.mobile.data.LogoutServerListener;
 import org.infobip.mobile.messaging.mobile.data.LogoutUserSynchronizer;
-import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
 import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
-import org.infobip.mobile.messaging.mobile.instance.InstanceActionListener;
-import org.infobip.mobile.messaging.mobile.instance.InstanceSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
-import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
@@ -50,7 +50,6 @@ import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapperImpl;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ComponentUtil;
-import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.ModuleLoader;
@@ -58,7 +57,6 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SHA1;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -99,12 +97,12 @@ public class MobileMessagingCore
     private final Broadcaster broadcaster;
     private final ModuleLoader moduleLoader;
     private NotificationHandler notificationHandler;
-    private RegistrationSynchronizer registrationSynchronizer;
+
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
-    private SystemDataReporter systemDataReporter;
-    private InstanceSynchronizer instanceSynchronizer;
+    private InstallationSynchronizer installationSynchronizer;
     private LogoutUserSynchronizer logoutUserSynchronizer;
+
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
     private VersionChecker versionChecker;
@@ -245,22 +243,8 @@ public class MobileMessagingCore
             return;
         }
 
-        boolean isLogoutInProgress = isLogoutUnreported();
-
-        registrationSynchronizer().sync();
         versionChecker().sync();
-        reportSystemData();
-        logoutOnServerIfNeeded();
-
-        if (isLogoutInProgress) {
-            return;
-        }
-
-        messagesSynchronizer().sync();
-        moMessageSender().sync();
-        seenStatusReporter().sync();
-        userDataReporter().sync(null, getUnreportedUserData());
-        updatePrimaryOnServerIfNeeded();
+        performSyncActions();
     }
 
     public void retrySyncOnNetworkAvailable() {
@@ -268,34 +252,28 @@ public class MobileMessagingCore
             return;
         }
 
-        boolean isLogoutInProgress = isLogoutUnreported();
+        performSyncActions();
+    }
 
-        reportSystemData();
+    private void performSyncActions() {
         logoutOnServerIfNeeded();
+        syncInstallation();
+        userDataReporter().sync(null, getUnreportedUserData());
 
-        if (isLogoutInProgress) {
+        if (isLogoutInProgress()) {
             return;
         }
 
         messagesSynchronizer().sync();
         moMessageSender().sync();
         seenStatusReporter().sync();
-        userDataReporter().sync(null, getUnreportedUserData());
-        updatePrimaryOnServerIfNeeded();
     }
 
-    private void updatePrimaryOnServerIfNeeded() {
-        if (isRegistrationUnavailable()) {
-            return;
-        }
-
-        Boolean settingToSend = getUnreportedPrimarySetting();
-        if (settingToSend != null) {
-            instanceSynchronizer().sync(settingToSend, instanceActionListenerForSync());
-        }
+    protected void syncInstallation() {
+        installationSynchronizer().sync();
     }
 
-    private Boolean getUnreportedPrimarySetting() {
+    public Boolean getUnreportedPrimarySetting() {
         return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Boolean>() {
             @Override
             public Boolean run() {
@@ -307,7 +285,7 @@ public class MobileMessagingCore
         });
     }
 
-    private boolean isRegistrationUnavailable() {
+    public boolean isRegistrationUnavailable() {
         if (StringUtils.isBlank(getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration is not available yet");
             return true;
@@ -315,62 +293,12 @@ public class MobileMessagingCore
         return false;
     }
 
-    private InstanceActionListener instanceActionListenerForFetch() {
-        return instanceActionListener(null, false);
-    }
-
-    private InstanceActionListener instanceActionListenerForFetch(ResultListener<Boolean> listener) {
-        return instanceActionListener(listener, false);
-    }
-
-    private InstanceActionListener instanceActionListenerForSync() {
-        return instanceActionListener(null, true);
-    }
-
-    private InstanceActionListener instanceActionListenerForSync(ResultListener<Boolean> listener) {
-        return instanceActionListener(listener, true);
-    }
-
-    private InstanceActionListener instanceActionListener(@Nullable final ResultListener<Boolean> listener, final boolean isWritingToServer) {
-        return new InstanceActionListener() {
-            @Override
-            public void onSuccess(boolean isPrimary) {
-                if (isWritingToServer) {
-                    PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-                }
-
-                if (listener != null) {
-                    listener.onResult(isPrimary);
-                }
-
-                if (isPrimaryDevice() == isPrimary) {
-                    return;
-                }
-
-                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, isPrimary);
-                broadcaster.primarySettingChanged(isPrimary);
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                // keep unreported data to retry next time if call was done in "send & forget" manner (w/o callback)
-                if (isWritingToServer && listener != null) {
-                    PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-                }
-
-                if (listener != null) {
-                    listener.onError(MobileMessagingError.createFrom(error));
-                }
-            }
-        };
-    }
-
     private void logoutOnServerIfNeeded() {
         if (isRegistrationUnavailable()) {
             return;
         }
 
-        if (!isLogoutUnreported()) {
+        if (!isLogoutInProgress()) {
             return;
         }
 
@@ -379,7 +307,15 @@ public class MobileMessagingCore
 
     @Override
     public void onServerLogoutStarted() {
-        onLogoutStarted();
+        onLogoutStarted(getUnreportedLogoutPushRegId());
+    }
+
+    private void saveUnreportedLogoutPushRegId(String pushRegId) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_LOGOUT_PUSH_REG_ID, pushRegId);
+    }
+
+    private String getUnreportedLogoutPushRegId() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_LOGOUT_PUSH_REG_ID);
     }
 
     @Override
@@ -398,27 +334,32 @@ public class MobileMessagingCore
         resetCloudToken();
     }
 
-    private void onLogoutStarted() {
+    private void onLogoutStarted(String pushRegId) {
+        saveUnreportedLogoutPushRegId(pushRegId);
 
-        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
-        PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
-        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
-        PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-        PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
+        if (pushRegId != null && pushRegId.equals(getPushRegistrationId())) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
+            PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
+            PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
+            PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
+            PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
+            PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+            PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.LOGOUT_UNREPORTED, true);
-        if (messageStore != null) {
-            messageStore.deleteAll(context);
-        }
-        getNotificationHandler().cancelAllNotifications();
-        for (MessageHandlerModule module : messageHandlerModules.values()) {
-            module.logoutUser();
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.LOGOUT_UNREPORTED, true);
+            if (messageStore != null) {
+                messageStore.deleteAll(context);
+            }
+            getNotificationHandler().cancelAllNotifications();
+            for (MessageHandlerModule module : messageHandlerModules.values()) {
+                module.logoutUser();
+            }
+        } else {
+            //TODO check the right approach here: fetch user data after it's done?
         }
     }
 
-    public boolean isLogoutUnreported() {
+    public boolean isLogoutInProgress() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.LOGOUT_UNREPORTED);
     }
 
@@ -435,13 +376,13 @@ public class MobileMessagingCore
     @Override
     public void enablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        registrationSynchronizer().updateStatus(true);
+        installationSynchronizer().updatePushRegEnabledStatus(true, null);
     }
 
     @Override
     public void disablePushRegistration() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        registrationSynchronizer().updateStatus(false);
+        installationSynchronizer().updatePushRegEnabledStatus(false, null);
     }
 
     @Override
@@ -450,19 +391,41 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setAsPrimaryDevice(final boolean isPrimary, final ResultListener<Boolean> listener) {
-        if (isLogoutUnreported()) {
-            reportErrorLogoutInProgress(listener);
-            return;
-        }
-
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
-        instanceSynchronizer().sync(isPrimary, instanceActionListenerForSync(listener));
+    public void setAsPrimaryDevice(boolean isPrimary) {
+        setAsPrimaryDevice(isPrimary, null);
     }
 
     @Override
-    public void setAsPrimaryDevice(boolean isPrimary) {
-        setAsPrimaryDevice(isPrimary, null);
+    public void setAsPrimaryDevice(final boolean isPrimary, final InstallationActionListener listener) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
+
+        if (isLogoutInProgress()) {
+            reportErrorLogoutInProgress(listener);
+        } else {
+            installationSynchronizer().updatePrimaryStatus(isPrimary, listener);
+        }
+    }
+
+    @Override
+    public void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary) {
+        setAsPrimaryDevice(pushRegistrationId, isPrimary, null);
+    }
+
+    @Override
+    public void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary, final InstallationActionListener listener) {
+        installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, null);
+    }
+
+    @Override
+    public void setApplicationUserId(final String applicationUserId, final InstallationActionListener listener) {
+        setApplicationUserIdReported(false);
+        saveApplicationUserId(applicationUserId);
+
+        if (isLogoutInProgress()) {
+            reportErrorLogoutInProgress(listener);
+        } else {
+            installationSynchronizer().updateApplicationUserId(applicationUserId, listener);
+        }
     }
 
     @Override
@@ -478,22 +441,36 @@ public class MobileMessagingCore
         });
     }
 
-    @Override
-    public void syncPrimaryDeviceSettingWithServer() {
-        if (isRegistrationUnavailable()) {
-            return;
-        }
+    public void saveApplicationUserId(String applicationUserId) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APP_USER_ID, applicationUserId);
+    }
 
-        instanceSynchronizer().fetch(instanceActionListenerForFetch());
+    public String getApplicationUserId() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.APP_USER_ID);
     }
 
     @Override
-    public void getPrimaryDeviceSetting(final ResultListener<Boolean> listener) {
-        if (isRegistrationUnavailable()) {
-            return;
-        }
+    public void setApplicationUserId(String applicationUserId) {
+        setApplicationUserId(applicationUserId, null);
+    }
 
-        instanceSynchronizer().fetch(instanceActionListenerForFetch(listener));
+    public void setApplicationUserIdReported(boolean reported) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_REPORTED, reported);
+    }
+
+    public Boolean isApplicationUserIdReported() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_REPORTED);
+    }
+
+    private void reportErrorLogoutInProgress(final InstallationActionListener listener) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (listener != null) {
+                    listener.onError(InternalSdkError.LOGOUT_IN_PROGRESS.getException());
+                }
+            }
+        });
     }
 
     private void reportErrorLogoutInProgress(final ResultListener listener) {
@@ -515,9 +492,9 @@ public class MobileMessagingCore
         return PreferenceHelper.findString(context, MobileMessagingProperty.CLOUD_TOKEN);
     }
 
-    public void setRegistrationId(String registrationId) {
+    public void setCloudToken(String registrationId) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.CLOUD_TOKEN, registrationId);
-        setRegistrationUnreported();
+        setCloudTokenUnreported();
     }
 
     public String[] getAndRemoveUnreportedMessageIds() {
@@ -766,7 +743,7 @@ public class MobileMessagingCore
     }
 
     public boolean isRegistrationIdReported() {
-        return registrationSynchronizer().isRegistrationIdReported();
+        return installationSynchronizer().isCloudTokenReported();
     }
 
     public boolean isPushServiceTypeChanged() {
@@ -782,14 +759,14 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE, Platform.usedPushServiceType.name());
     }
 
-    private void setRegistrationUnreported() {
+    private void setCloudTokenUnreported() {
 
         if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
             MobileMessagingLogger.w("Application code not found, check your setup");
             return;
         }
 
-        registrationSynchronizer().setRegistrationIdReported(false);
+        installationSynchronizer().setCloudTokenReported(false);
     }
 
     public static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
@@ -814,6 +791,34 @@ public class MobileMessagingCore
         } catch (Exception e) {
             throw new MessageStoreInstantiationException("Can't create message store of type: " + messageStoreClass, e);
         }
+    }
+
+    @Override
+    public Installation getInstallation() {
+        AppInstanceWithPushRegId instance = new AppInstanceWithPushRegId();
+        instance.setPushRegId(getPushRegistrationId());
+        instance.setApplicationUserId(getApplicationUserId());
+        instance.setIsPrimary(isPrimaryDevice());
+        instance.setNotificationsEnabled(isDisplayNotificationEnabled());
+        instance.setRegEnabled(isPushRegistrationEnabled());
+//        instance.setCustomAttributes(getInstallationCustomAtts());
+        //TODO put system data also?
+        return Installation.from(instance);
+    }
+
+    @Override
+    public void getInstallationFromServer(InstallationActionListener listener) {
+        installationSynchronizer().fetchInstance(listener);
+    }
+
+    @Override
+    public void saveInstallation(Installation installation) {
+        saveInstallation(installation, null);
+    }
+
+    @Override
+    public void saveInstallation(Installation installation, InstallationActionListener listener) {
+        installationSynchronizer().patch(installation, listener);
     }
 
     @SuppressWarnings({"unchecked", "WeakerAccess"})
@@ -1001,14 +1006,14 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void syncUserData(UserData userData) {
-        syncUserData(userData, null);
+    public void saveUserData(UserData userData) {
+        saveUserData(userData, null);
     }
 
     @Override
-    public void syncUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
+    public void saveUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
 
-        if (isLogoutUnreported()) {
+        if (isLogoutInProgress()) {
             reportErrorLogoutInProgress(listener);
             return;
         }
@@ -1026,6 +1031,7 @@ public class MobileMessagingCore
 
             userDataToReport = UserData.merge(existingData, userData);
         } else {
+            // setting external user id if it exists in current user data
             UserData existingUserData = getUserData();
             String externalUserId = existingUserData != null ? existingUserData.getExternalUserId() : null;
             if (externalUserId != null) {
@@ -1037,13 +1043,13 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void fetchUserData() {
-        fetchUserData(null);
-    }
-
-    @Override
     public void fetchUserData(MobileMessaging.ResultListener<UserData> listener) {
-        syncUserData(null, listener);
+        if (isLogoutInProgress()) {
+            reportErrorLogoutInProgress(listener);
+            return;
+        }
+
+        userDataReporter().fetch(listener);
     }
 
     @Nullable
@@ -1062,7 +1068,8 @@ public class MobileMessagingCore
             return;
         }
 
-        onLogoutStarted();
+        String currentPushRegistrationId = getPushRegistrationId();
+        onLogoutStarted(currentPushRegistrationId);
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
             return;
@@ -1072,7 +1079,12 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void logout(final ResultListener<SuccessPending> listener) {
+    public void logout(ResultListener<SuccessPending> listener) {
+        logout(getPushRegistrationId(), listener);
+    }
+
+    @Override
+    public void logout(String pushRegId, final ResultListener<SuccessPending> listener) {
         if (isRegistrationUnavailable()) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1083,7 +1095,7 @@ public class MobileMessagingCore
             return;
         }
 
-        onLogoutStarted();
+        onLogoutStarted(pushRegId);
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1095,7 +1107,7 @@ public class MobileMessagingCore
             return;
         }
 
-        logoutUserSynchronizer().logout(new LogoutActionListener() {
+        logoutUserSynchronizer().logout(pushRegId, new LogoutActionListener() {
             @Override
             public void onUserInitiatedLogoutCompleted() {
                 onLogoutCompleted();
@@ -1149,33 +1161,7 @@ public class MobileMessagingCore
         moMessageSender().sendWithRetry(messages);
     }
 
-    public void reportSystemData() {
-
-        if (isRegistrationUnavailable()) {
-            return;
-        }
-
-        boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
-
-        SystemData data = new SystemData(SoftwareInformation.getSDKVersionWithPostfixForSystemData(context),
-                reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
-                reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
-                reportEnabled ? DeviceInformation.getDeviceModel() : "",
-                reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
-                isGeofencingActivated(),
-                SoftwareInformation.areNotificationsEnabled(context),
-                reportEnabled && DeviceInformation.isDeviceSecure(context),
-                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "");
-
-        Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
-        if (hash != data.hashCode()) {
-            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
-        }
-
-        systemDataReporter().synchronize();
-    }
-
-    boolean isGeofencingActivated() {
+    public boolean isGeofencingActivated() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED.getKey(), false);
     }
 
@@ -1249,25 +1235,16 @@ public class MobileMessagingCore
     private UserDataReporter userDataReporter() {
         if (userDataReporter == null) {
             userDataReporter = new UserDataReporter(this, registrationAlignedExecutor,
-                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiData(context));
+                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiAppInstance(context));
         }
         return userDataReporter;
-    }
-
-    @NonNull
-    private SystemDataReporter systemDataReporter() {
-        if (systemDataReporter == null) {
-            systemDataReporter = new SystemDataReporter(this, stats, retryPolicyProvider.DEFAULT(), registrationAlignedExecutor,
-                    broadcaster, mobileApiResourceProvider().getMobileApiData(context));
-        }
-        return systemDataReporter;
     }
 
     @NonNull
     private LogoutUserSynchronizer logoutUserSynchronizer() {
         if (logoutUserSynchronizer == null) {
             logoutUserSynchronizer = new LogoutUserSynchronizer(
-                    mobileApiResourceProvider().getMobileApiData(context),
+                    mobileApiResourceProvider().getMobileApiAppInstance(context),
                     retryPolicyProvider.DEFAULT(),
                     registrationAlignedExecutor,
                     new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
@@ -1284,15 +1261,6 @@ public class MobileMessagingCore
                     broadcaster, retryPolicyProvider.DEFAULT(), mobileMessageHandler, mobileApiResourceProvider().getMobileApiMessages(context));
         }
         return messagesSynchronizer;
-    }
-
-    @NonNull
-    private RegistrationSynchronizer registrationSynchronizer() {
-        if (registrationSynchronizer == null) {
-            registrationSynchronizer = new RegistrationSynchronizer(context, this, stats,
-                    registrationAlignedExecutor, broadcaster, retryPolicyProvider, mobileApiResourceProvider().getMobileApiRegistration(context));
-        }
-        return registrationSynchronizer;
     }
 
     @NonNull
@@ -1313,14 +1281,18 @@ public class MobileMessagingCore
     }
 
     @NonNull
-    private InstanceSynchronizer instanceSynchronizer() {
-        if (instanceSynchronizer == null) {
-            instanceSynchronizer = new InstanceSynchronizer(
+    private InstallationSynchronizer installationSynchronizer() {
+        if (installationSynchronizer == null) {
+            installationSynchronizer = new InstallationSynchronizer(
+                    context,
+                    this,
+                    stats,
                     registrationAlignedExecutor,
-                    mobileApiResourceProvider().getMobileApiInstance(context),
-                    retryPolicyProvider.DEFAULT());
+                    broadcaster,
+                    retryPolicyProvider,
+                    mobileApiResourceProvider().getMobileApiAppInstance(context));
         }
-        return instanceSynchronizer;
+        return installationSynchronizer;
     }
 
     /**

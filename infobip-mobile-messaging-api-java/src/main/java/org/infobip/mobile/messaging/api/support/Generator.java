@@ -350,6 +350,10 @@ public class Generator {
                 }
             }
 
+            if (uri.endsWith("/")) {
+                uri = uri.substring(0, uri.length() - 1);
+            }
+
             return getApiClient().execute(getHttpRequestMethod(proxyCache.httpRequests), uri, apiKey, credentials, queryParams, headerMap, body, method.getReturnType());
         }
 

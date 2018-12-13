@@ -213,7 +213,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     private void setChatUserInfo(ChatParticipant info, final MobileMessaging.ResultListener<ChatParticipant> listener) {
         userProfileManager().save(info);
         UserData userData = objectMapper.toUserData(info);
-        mobileMessagingCore().syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+        mobileMessagingCore().saveUserData(userData, new MobileMessaging.ResultListener<UserData>() {
             @Override
             public void onResult(UserData result) {
                 if (result == null) {

@@ -135,9 +135,9 @@ public class ObjectMapperTest {
             setFirstName("firstName");
             setLastName("lastName");
             setMiddleName("middleName");
-            setEmail("email@email.com");
-            setMsisdn("msisdn");
-            setCustomUserData(new HashMap<String, CustomUserDataValue>() {{
+//            setEmail("email@email.com");
+//            setMsisdn("msisdn");
+            setCustomAttributes(new HashMap<String, CustomUserDataValue>() {{
                 put("chatCustomData", new CustomUserDataValue(
                         MJSONObject.create().add("key", "value").toString()));
             }});
@@ -148,8 +148,8 @@ public class ObjectMapperTest {
         assertEquals("firstName", participant.getFirstName());
         assertEquals("lastName", participant.getLastName());
         assertEquals("middleName", participant.getMiddleName());
-        assertEquals("email@email.com", participant.getEmail());
-        assertEquals("msisdn", participant.getGsm());
+//        assertEquals("email@email.com", participant.getEmail());
+//        assertEquals("msisdn", participant.getGsm());
         JSONAssert.assertEquals(MJSONObject.create().add("key", "value"), participant.getCustomData(), false);
     }
 
@@ -160,8 +160,8 @@ public class ObjectMapperTest {
                 "firstName",
                 "lastName",
                 "middleName",
-                "participant@email.com",
-                "gsm",
+                null,
+                null,
                 MJSONObject.create().add("key", "value"));
 
         UserData userData = objectMapper.toUserData(givenParticipant);
@@ -170,8 +170,8 @@ public class ObjectMapperTest {
         assertEquals("firstName", userData.getFirstName());
         assertEquals("lastName",userData.getLastName());
         assertEquals("middleName", userData.getMiddleName());
-        assertEquals("participant@email.com", userData.getEmail());
-        assertEquals("gsm", userData.getMsisdn());
-        assertEquals("{\"key\":\"value\"}", userData.getCustomUserData().get("chatCustomData").stringValue());
+//        assertEquals("participant@email.com", userData.getEmail());
+//        assertEquals("gsm", userData.getMsisdn());
+        assertEquals("{\"key\":\"value\"}", userData.getCustomAttributes().get("chatCustomData").stringValue());
     }
 }

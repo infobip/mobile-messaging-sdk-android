@@ -19,7 +19,7 @@ public enum MobileMessagingProperty {
     INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS", new String[0]),
     INFOBIP_GENERATED_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_GENERATED_MESSAGE_IDS", new String[0]),
     INFOBIP_SYNC_MESSAGES_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_SYNC_MESSAGES_IDS", new String[0]),
-    API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://mobile.infobip.com/"),
+    API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://oneapi.ioinfobip.com/"),
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),
     MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
     MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
@@ -39,8 +39,15 @@ public enum MobileMessagingProperty {
     REPORTED_SYSTEM_DATA_HASH("org.infobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     UNSENT_MO_MESSAGES("org.infobip.mobile.messaging.infobip.UNSENT_MO_MESSAGES", new String[0]),
     IS_PRIMARY("org.infobip.mobile.messaging.infobip.IS_PRIMARY", false),
+
+    //in migration check for these two fields!
     IS_PRIMARY_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_PRIMARY_UNREPORTED"),
     LOGOUT_UNREPORTED("org.infobip.mobile.messaging.infobip.LOGOUT_UNREPORTED", false),
+
+    IS_APP_USER_ID_REPORTED("org.infobip.mobile.messaging.infobip.IS_APP_USER_ID_REPORTED", false),
+    APP_USER_ID("org.infobip.mobile.messaging.infobip.APP_USER_ID"),
+
+    UNREPORTED_INSTALLATION_ATTRIBUTES("org.infobip.mobile.messaging.infobip.UNREPORTED_INSTALLATION_ATTRIBUTES", new String[0]),
 
     PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", true),
 
@@ -68,7 +75,8 @@ public enum MobileMessagingProperty {
 
     SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX"),
 
-    REPORTED_PUSH_SERVICE_TYPE("org.infobip.mobile.messaging.REPORTED_PUSH_SERVICE_TYPE");
+    REPORTED_PUSH_SERVICE_TYPE("org.infobip.mobile.messaging.REPORTED_PUSH_SERVICE_TYPE"),
+    UNREPORTED_LOGOUT_PUSH_REG_ID("org.infobip.mobile.messaging.UNREPORTED_LOGOUT_PUSH_REG_ID");
 
     private final String key;
     private final Object defaultValue;

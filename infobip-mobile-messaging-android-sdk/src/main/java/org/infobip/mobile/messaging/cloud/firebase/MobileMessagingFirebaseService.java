@@ -30,7 +30,9 @@ public class MobileMessagingFirebaseService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Message message = messageMapper.createMessage(remoteMessage);
         MobileMessagingLogger.v(TAG, "RECEIVED MESSAGE FROM FCM", message);
-        MobileMessagingCloudService.enqueueNewMessage(this, message);
+        if (message != null) {
+            MobileMessagingCloudService.enqueueNewMessage(this, message);
+        }
     }
 
     @Override
