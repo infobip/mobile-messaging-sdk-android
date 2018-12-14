@@ -1107,7 +1107,7 @@ public class MobileMessagingCore
             return;
         }
 
-        logoutUserSynchronizer().logout(pushRegId, new LogoutActionListener() {
+        logoutUserSynchronizer().logout(new LogoutActionListener() {
             @Override
             public void onUserInitiatedLogoutCompleted() {
                 onLogoutCompleted();

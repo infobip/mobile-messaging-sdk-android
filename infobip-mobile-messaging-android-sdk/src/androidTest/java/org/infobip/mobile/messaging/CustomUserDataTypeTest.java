@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
-import org.infobip.mobile.messaging.mobile.data.UserDataMapper;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;

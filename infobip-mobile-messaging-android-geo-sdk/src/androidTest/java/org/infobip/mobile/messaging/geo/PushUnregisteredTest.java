@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.geo;
 
 import android.annotation.SuppressLint;
 
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.geo.EventReportBody;
@@ -23,6 +24,7 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.verification.VerificationMode;
@@ -41,6 +43,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 
@@ -122,30 +126,30 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     }
 
     //TODO fix
-//    @Test
-//    public void test_push_registration_default_status() throws Exception {
-//
-//        // Verify disable
-//        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
-//
-//        mobileMessagingCore.disablePushRegistration();
-//        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
-//        verify(coreBroadcaster, times(1)).registrationEnabled(anyString(), eq("testDeviceApplicationInstanceId"), eq(false));
-//
-//
-//        // Verify resync
-//        reset(mobileApiAppInstance);
-//        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
-//
-//        installationSynchronizer.setCloudTokenReported(false);
-//        installationSynchronizer.sync();
-//        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
-//        verify(coreBroadcaster, times(1)).registrationCreated(anyString(), eq("testDeviceApplicationInstanceId"));
-//
-//        // Verify final value of 'enabled'
-//        assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
-//    }
+    @Ignore
+    @Test
+    public void test_push_registration_default_status() throws Exception {
 
+        // Verify disable
+        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+
+        mobileMessagingCore.disablePushRegistration();
+        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+        verify(coreBroadcaster, times(1)).registrationEnabled(anyString(), eq("testDeviceApplicationInstanceId"), eq(false));
+
+
+        // Verify resync
+        reset(mobileApiAppInstance);
+        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+
+        installationSynchronizer.setCloudTokenReported(false);
+        installationSynchronizer.sync();
+        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+        verify(coreBroadcaster, times(1)).registrationCreated(anyString(), eq("testDeviceApplicationInstanceId"));
+
+        // Verify final value of 'enabled'
+        assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
+    }
 
     private void verifyMessagesSynchronizer(VerificationMode verificationMode) throws InterruptedException {
         mobileMessagingCore.addSyncMessagesIds("test-message-id");

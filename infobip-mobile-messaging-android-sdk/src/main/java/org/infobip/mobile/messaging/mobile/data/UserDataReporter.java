@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.mobile.data;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;

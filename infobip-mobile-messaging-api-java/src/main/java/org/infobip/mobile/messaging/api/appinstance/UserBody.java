@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging.api.appinstance;
 
-import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.List;
@@ -29,11 +28,71 @@ public class UserBody {
     private String birthday;
     private String gender;
 
-    private List<Object> emails;
-    private List<Object> gsms;
+    private List<Email> emails;
+    private List<Gsm> gsms;
     private Set<String> tags;
     private Map<String, Object> customAttributes;
     private List<AppInstanceWithPushRegId> instances;
+
+    public static class Gsm {
+        String number;
+        Boolean preferred;
+
+        public Gsm(String number) {
+            this(number, false);
+        }
+
+        public Gsm(String number, Boolean preferred) {
+            this.number = number;
+            this.preferred = preferred;
+        }
+
+        public String getNumber() {
+            return number;
+        }
+
+        public void setNumber(String number) {
+            this.number = number;
+        }
+
+        public Boolean getPreferred() {
+            return preferred;
+        }
+
+        public void setPreferred(Boolean preferred) {
+            this.preferred = preferred;
+        }
+    }
+
+    public static class Email {
+        String address;
+        Boolean preferred;
+
+        public Email(String address) {
+            this(address, false);
+        }
+
+        public Email(String address, Boolean preferred) {
+            this.address = address;
+            this.preferred = preferred;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public Boolean getPreferred() {
+            return preferred;
+        }
+
+        public void setPreferred(Boolean preferred) {
+            this.preferred = preferred;
+        }
+    }
 
     @Override
     public String toString() {

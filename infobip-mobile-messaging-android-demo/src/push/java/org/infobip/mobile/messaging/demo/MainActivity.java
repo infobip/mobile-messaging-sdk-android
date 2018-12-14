@@ -153,8 +153,8 @@ public class MainActivity extends AppCompatActivity {
         tags.add("dance");
         tags.add("music");
         userData.setTags(tags);
-        userData.setGsms(Collections.singletonList(new UserData.Gsm("385992691431")));
-        userData.setEmails(Collections.singletonList(new UserData.Email("terezajuric@gmail.com")));
+        userData.setGsms(Collections.singletonList("385992691431"));
+        userData.setEmails(Collections.singletonList("terezajuric@gmail.com"));
         userData.setCustomUserDataElement("date_1", new CustomUserDataValue(new Date()));
         userData.setCustomUserDataElement("number_1", new CustomUserDataValue(1234.3));
         userData.removeCustomUserDataElement("string_1");

@@ -2,8 +2,10 @@ package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 
@@ -34,11 +36,13 @@ public class UserData {
 
     private transient String externalUserId;
     private transient Set<String> tags;
-    private transient List<Gsm> gsms;
-    private transient List<Email> emails;
+    private transient List<String> gsms;
+    private transient List<String> emails;
+    private transient String preferredEmail;
+    private transient String preferredGsm;
     private Map<String, Object> standardAttributes;
     private Map<String, CustomUserDataValue> customAttributes;
-    private List<Installation> installations;
+    private transient List<Installation> installations;
 
     public UserData() {
         this.externalUserId = null;
@@ -60,16 +64,10 @@ public class UserData {
         this.customAttributes = data.customAttributes;
     }
 
-    protected UserData(String externalUserId, Map<String, Object> standardAttributes, Map<String, CustomUserDataValue> customAttributes) {
-        this.externalUserId = externalUserId;
-        this.standardAttributes = standardAttributes;
-        this.customAttributes = customAttributes;
-    }
-
     protected UserData(String externalUserId,
                        Set<String> tags,
-                       List<Gsm> gsms,
-                       List<Email> emails,
+                       List<String> gsms,
+                       List<String> emails,
                        Map<String, Object> standardAttributes,
                        Map<String, CustomUserDataValue> customAttributes) {
         this.externalUserId = externalUserId;
@@ -177,8 +175,17 @@ public class UserData {
      * Gets user's GSMs.
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
-    public List<Gsm> getGsms() {
-        return getField(StandardAttribute.GSMS);
+    public List<String> getGsms() {
+        if (this.gsms == null) {
+            List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
+            if (gsmsWithPreferred != null) {
+                for (UserBody.Gsm gsm : gsmsWithPreferred) {
+                    this.gsms.add(gsm.getNumber());
+                    if (gsm.getPreferred()) this.preferredGsm = gsm.getNumber();
+                }
+            }
+        }
+        return this.gsms;
     }
 
     /**
@@ -188,8 +195,42 @@ public class UserData {
      * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
      * @see MobileMessaging#saveUserData(UserData)
      */
-    public void setGsms(List<Gsm> gsms) {
+    public void setGsms(List<String> gsms) {
         if (gsms == null) gsms = Collections.emptyList();
+        this.gsms = gsms;
+
+        List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
+        if (gsmsWithPreferred == null) gsmsWithPreferred = new ArrayList<>(gsms.size());
+        for (String gsm : gsms) {
+            if (TextUtils.isEmpty(gsm)) continue;
+            gsmsWithPreferred.add(new UserBody.Gsm(gsm, gsm.equals(preferredGsm)));
+        }
+        setField(StandardAttribute.GSMS, gsmsWithPreferred);
+    }
+
+    /**
+     * Gets user's preferred GSM.
+     * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
+     */
+    public String getPreferredGsm() {
+        if (this.preferredGsm == null) {
+            List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
+            if (gsmsWithPreferred != null) {
+                for (UserBody.Gsm gsm : gsmsWithPreferred) {
+                    if (gsm.getPreferred()) this.preferredGsm = gsm.getNumber();
+                }
+            }
+        }
+        return this.preferredGsm;
+    }
+
+    protected List<UserBody.Gsm> getGsmsWithPreferred() {
+        return getField(StandardAttribute.GSMS);
+    }
+
+    protected void setGsmsWithPreferred(List<UserBody.Gsm> gsms) {
+        if (gsms == null) gsms = Collections.emptyList();
+        if (this.gsms == null) this.gsms = new ArrayList<>(gsms.size());
         setField(StandardAttribute.GSMS, gsms);
     }
 
@@ -197,8 +238,17 @@ public class UserData {
      * Gets user's emails.
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
-    public List<Email> getEmails() {
-        return getField(StandardAttribute.EMAILS);
+    public List<String> getEmails() {
+        if (this.emails == null) {
+            List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+            if (emailsWithPreferred != null) {
+                for (UserBody.Email email : emailsWithPreferred) {
+                    this.emails.add(email.getAddress());
+                    if (email.getPreferred()) this.preferredEmail = email.getAddress();
+                }
+            }
+        }
+        return this.emails;
     }
 
     /**
@@ -208,7 +258,39 @@ public class UserData {
      * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
      * @see MobileMessaging#saveUserData(UserData)
      */
-    public void setEmails(List<Email> emails) {
+    public void setEmails(List<String> emails) {
+        if (emails == null) emails = Collections.emptyList();
+        this.emails = emails;
+
+        List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+        for (String email : emails) {
+            if (TextUtils.isEmpty(email)) continue;
+            emailsWithPreferred.add(new UserBody.Email(email, email.equals(preferredEmail)));
+        }
+        setField(StandardAttribute.EMAILS, emailsWithPreferred);
+    }
+
+    /**
+     * Gets user's preferred email.
+     * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
+     */
+    public String getPreferredEmail() {
+        if (this.preferredEmail == null) {
+            List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+            if (emailsWithPreferred != null) {
+                for (UserBody.Email email : emailsWithPreferred) {
+                    if (email.getPreferred()) this.preferredEmail = email.getAddress();
+                }
+            }
+        }
+        return this.preferredEmail;
+    }
+
+    protected List<UserBody.Email> getEmailsWithPreferred() {
+        return getField(StandardAttribute.EMAILS);
+    }
+
+    protected void setEmailsWithPreferred(List<UserBody.Email> emails) {
         if (emails == null) emails = Collections.emptyList();
         setField(StandardAttribute.EMAILS, emails);
     }
@@ -331,66 +413,6 @@ public class UserData {
 
         public String getKey() {
             return key;
-        }
-    }
-
-    public static class Gsm {
-        String number;
-        Boolean preferred;
-
-        public Gsm(String number) {
-            this(number, false);
-        }
-
-        public Gsm(String number, Boolean preferred) {
-            this.number = number;
-            this.preferred = preferred;
-        }
-
-        public String getNumber() {
-            return number;
-        }
-
-        public void setNumber(String number) {
-            this.number = number;
-        }
-
-        public Boolean getPreferred() {
-            return preferred;
-        }
-
-        public void setPreferred(Boolean preferred) {
-            this.preferred = preferred;
-        }
-    }
-
-    public static class Email {
-        String address;
-        Boolean preferred;
-
-        public Email(String address) {
-            this(address, false);
-        }
-
-        public Email(String address, Boolean preferred) {
-            this.address = address;
-            this.preferred = preferred;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        public Boolean getPreferred() {
-            return preferred;
-        }
-
-        public void setPreferred(Boolean preferred) {
-            this.preferred = preferred;
         }
     }
 

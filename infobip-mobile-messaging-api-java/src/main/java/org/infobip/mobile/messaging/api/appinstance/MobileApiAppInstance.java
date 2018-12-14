@@ -39,7 +39,7 @@ public interface MobileApiAppInstance {
     @HttpRequest(method = HttpMethod.GET, value = "{regId}")
     AppInstanceWithPushRegId getInstance(@Path(name = "regId") String regId);
 
-    //TODO NOT USED - delete?
+    //TODO NOT USED (used in showcase) - delete?
     @HttpRequest(method = HttpMethod.DELETE, value = "{regId}")
     Void expireInstance(@Path(name = "regId") String regId);
 

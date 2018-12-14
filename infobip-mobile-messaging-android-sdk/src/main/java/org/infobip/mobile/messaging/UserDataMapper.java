@@ -1,9 +1,7 @@
-package org.infobip.mobile.messaging.mobile.data;
+package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.CustomUserDataValue;
-import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
@@ -18,7 +16,7 @@ import java.util.Map;
 
 public class UserDataMapper {
 
-    static UserBody toUserDataReport(UserData userData) {
+    public static UserBody toUserDataReport(UserData userData) {
         UserBody userBody = new UserBody();
         userBody.setExternalUserId(userData.getExternalUserId());
         userBody.setFirstName(userData.getFirstName());
@@ -28,8 +26,8 @@ public class UserDataMapper {
         if (userData.getGender() != null) {
             userBody.setGender(userData.getGender().name());
         }
-        userBody.setEmails((List<Object>) (Object) userData.getEmails());
-        userBody.setGsms((List<Object>) (Object) userData.getGsms());
+        userBody.setEmails(userData.getEmailsWithPreferred());
+        userBody.setGsms(userData.getGsmsWithPreferred());
         userBody.setTags(userData.getTags());
         userBody.setCustomAttributes(mapCustomAttsForUserDataReport(userData));
 
@@ -39,7 +37,8 @@ public class UserDataMapper {
     public static UserData createFrom(UserBody userResponse) {
         UserData userData = new UserData();
 
-        if (userResponse.getExternalUserId() != null) userData.setExternalUserId(userResponse.getExternalUserId());
+        if (userResponse.getExternalUserId() != null)
+            userData.setExternalUserId(userResponse.getExternalUserId());
         if (userResponse.getFirstName() != null) userData.setFirstName(userResponse.getFirstName());
         if (userResponse.getLastName() != null) userData.setLastName(userResponse.getLastName());
         if (userResponse.getMiddleName() != null)
@@ -51,12 +50,17 @@ public class UserDataMapper {
                 e.printStackTrace();
             }
         }
-        if (userData.getGender() != null) userData.setGender(UserData.Gender.valueOf(userResponse.getGender()));
-        if (userResponse.getEmails() != null) userData.setEmails((List<UserData.Email>) (Object) userResponse.getEmails());
-        if (userResponse.getGsms() != null) userData.setGsms((List<UserData.Gsm>) (Object) userResponse.getGsms());
+        if (userData.getGender() != null)
+            userData.setGender(UserData.Gender.valueOf(userResponse.getGender()));
+        if (userResponse.getEmails() != null)
+            userData.setEmailsWithPreferred(userResponse.getEmails());
+        if (userResponse.getGsms() != null)
+            userData.setGsmsWithPreferred(userResponse.getGsms());
         if (userResponse.getTags() != null) userData.setTags(userResponse.getTags());
-        if (userResponse.getCustomAttributes() != null) userData.setCustomAttributes(mapCustomAttsFromUserDataResponse(userResponse));
-        if (userResponse.getInstances() != null) userData.setInstallations(mapInstancesToUserInstallations(userResponse));
+        if (userResponse.getCustomAttributes() != null)
+            userData.setCustomAttributes(mapCustomAttsFromUserDataResponse(userResponse));
+        if (userResponse.getInstances() != null)
+            userData.setInstallations(mapInstancesToUserInstallations(userResponse));
 
         return userData;
     }

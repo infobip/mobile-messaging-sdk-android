@@ -67,7 +67,7 @@ public class LogoutUserSynchronizer {
         });
     }
 
-    public void logout(String pushRegId, final LogoutActionListener actionListener) {
+    public void logout(final LogoutActionListener actionListener) {
         new LogoutTask() {
             @Override
             public void after(Void objects) {
