@@ -47,8 +47,6 @@ public class UserDataReporter {
             return;
         }
 
-        mobileMessagingCore.saveUnreportedUserData(userData);
-
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will sync user data later");
             return;

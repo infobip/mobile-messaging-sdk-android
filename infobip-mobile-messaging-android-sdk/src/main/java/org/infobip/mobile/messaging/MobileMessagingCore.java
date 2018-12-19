@@ -245,14 +245,12 @@ public class MobileMessagingCore
             return;
         }
 
-        boolean isLogoutInProgress = isLogoutUnreported();
-
         registrationSynchronizer().sync();
         versionChecker().sync();
         reportSystemData();
         logoutOnServerIfNeeded();
 
-        if (isLogoutInProgress) {
+        if (isLogoutInProgress()) {
             return;
         }
 
@@ -268,12 +266,10 @@ public class MobileMessagingCore
             return;
         }
 
-        boolean isLogoutInProgress = isLogoutUnreported();
-
         reportSystemData();
         logoutOnServerIfNeeded();
 
-        if (isLogoutInProgress) {
+        if (isLogoutInProgress()) {
             return;
         }
 
@@ -370,7 +366,7 @@ public class MobileMessagingCore
             return;
         }
 
-        if (!isLogoutUnreported()) {
+        if (!isLogoutInProgress()) {
             return;
         }
 
@@ -418,7 +414,7 @@ public class MobileMessagingCore
         }
     }
 
-    public boolean isLogoutUnreported() {
+    public boolean isLogoutInProgress() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.LOGOUT_UNREPORTED);
     }
 
@@ -451,12 +447,12 @@ public class MobileMessagingCore
 
     @Override
     public void setAsPrimaryDevice(final boolean isPrimary, final ResultListener<Boolean> listener) {
-        if (isLogoutUnreported()) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
+        if (isLogoutInProgress()) {
             reportErrorLogoutInProgress(listener);
             return;
         }
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
         instanceSynchronizer().sync(isPrimary, instanceActionListenerForSync(listener));
     }
 
@@ -1007,12 +1003,6 @@ public class MobileMessagingCore
 
     @Override
     public void syncUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
-
-        if (isLogoutUnreported()) {
-            reportErrorLogoutInProgress(listener);
-            return;
-        }
-
         UserData userDataToReport = new UserData();
         if (userData != null) {
             UserData existingData = getUnreportedUserData();
@@ -1031,6 +1021,15 @@ public class MobileMessagingCore
             if (externalUserId != null) {
                 userDataToReport.setExternalUserId(externalUserId);
             }
+        }
+
+        if (userDataToReport != null) {
+            saveUnreportedUserData(userDataToReport);
+        }
+
+        if (isLogoutInProgress()) {
+            reportErrorLogoutInProgress(listener);
+            return;
         }
 
         userDataReporter().sync(listener, userDataToReport);
@@ -1150,7 +1149,6 @@ public class MobileMessagingCore
     }
 
     public void reportSystemData() {
-
         if (isRegistrationUnavailable()) {
             return;
         }
