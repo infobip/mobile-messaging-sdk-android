@@ -46,6 +46,8 @@ public enum MobileMessagingProperty {
 
     IS_APP_USER_ID_REPORTED("org.infobip.mobile.messaging.infobip.IS_APP_USER_ID_REPORTED", false),
     APP_USER_ID("org.infobip.mobile.messaging.infobip.APP_USER_ID"),
+    CUSTOM_ATTRIBUTES("org.infobip.mobile.messaging.infobip.CUSTOM_ATTRIBUTES"),
+    CUSTOM_ATTRIBUTES_UNREPORTED("org.infobip.mobile.messaging.infobip.CUSTOM_ATTRIBUTES_UNREPORTED"),
 
     UNREPORTED_INSTALLATION_ATTRIBUTES("org.infobip.mobile.messaging.infobip.UNREPORTED_INSTALLATION_ATTRIBUTES", new String[0]),
 

@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.mobile.data;
 
 
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executor;
 
 public class LogoutUserSynchronizer {
 
+    private final MobileMessagingCore mobileMessagingCore;
     private final MobileApiAppInstance mobileApiAppInstance;
     private final Executor executor;
     private final BatchReporter batchReporter;
@@ -28,16 +30,18 @@ public class LogoutUserSynchronizer {
     }
 
     public LogoutUserSynchronizer(
+            MobileMessagingCore mobileMessagingCore,
             MobileApiAppInstance mobileApiAppInstance,
             MRetryPolicy policy,
             Executor executor,
             BatchReporter batchReporter,
             LogoutServerListener serverListener) {
 
+        this.mobileMessagingCore = mobileMessagingCore;
+        this.mobileApiAppInstance = mobileApiAppInstance;
+        this.policy = policy;
         this.executor = executor;
         this.batchReporter = batchReporter;
-        this.policy = policy;
-        this.mobileApiAppInstance = mobileApiAppInstance;
         this.serverListener = serverListener;
     }
 
@@ -62,7 +66,9 @@ public class LogoutUserSynchronizer {
                     public void after(Void aVoid) {
                         serverListener.onServerLogoutCompleted();
                     }
-                }.retryWith(policy).execute(executor);
+                }
+                        .retryWith(policy)
+                        .execute(executor, mobileMessagingCore.getUnreportedLogoutPushRegId());
             }
         });
     }
@@ -83,6 +89,8 @@ public class LogoutUserSynchronizer {
                     actionListener.onUserInitiatedLogoutFailed(error);
                 }
             }
-        }.retryWith(policy).execute(executor);
+        }
+                .retryWith(policy)
+                .execute(executor, mobileMessagingCore.getUnreportedLogoutPushRegId());
     }
 }

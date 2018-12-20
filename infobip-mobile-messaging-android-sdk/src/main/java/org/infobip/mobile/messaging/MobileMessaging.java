@@ -17,6 +17,8 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Map;
+
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
  * <br>
@@ -245,6 +247,8 @@ public abstract class MobileMessaging {
 
     public abstract void logout(String pushRegId, ResultListener<SuccessPending> listener);
 
+    public abstract void logout(String pushRegId, InstallationActionListener listener);
+
     /**
      * Send mobile originated messages.
      * <br>
@@ -271,21 +275,34 @@ public abstract class MobileMessaging {
     //TODO DOCS!
 
     /**
-     * This method allows you to configure this device as primary among other devices of a single user.
-     * SDK will try to set this device as primary on a server and report result through the listener.
+     * This method allows you to set application user ID for this installation.
      *
-     * @param applicationUserId set to true to make this device primary or to false otherwise.
+     * @param applicationUserId
      * @param listener          listener to invoke when the operation is complete.
      */
     public abstract void setApplicationUserId(String applicationUserId, InstallationActionListener listener);
 
+    /**
+     * This method allows you to set custom attributes for this installation.
+     *
+     * @param customAttributes
+     * @param listener          listener to invoke when the operation is complete.
+     */
+    public abstract void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, InstallationActionListener listener);
+
+    /**
+     * This method allows you to set custom attributes for this installation.
+     *
+     * @param customAttributes
+     */
+    public abstract void setCustomAttributes(Map<String,CustomUserDataValue> customAttributes);
+
     //TODO DOCS!
 
     /**
-     * This method allows you to configure this device as primary among others devices of a single user.
-     * Use this method to let SDK decide when it is best time to try to send request to server.
+     * This method allows you to set application user ID for this installation.
      *
-     * @param applicationUserId set to true to make this device primary or to false otherwise.
+     * @param applicationUserId
      */
     public abstract void setApplicationUserId(String applicationUserId);
 

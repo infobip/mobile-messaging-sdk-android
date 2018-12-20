@@ -45,17 +45,16 @@ public class UserDataReporter {
             return;
         }
 
-        mobileMessagingCore.saveUnreportedUserData(userData);
-
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will sync user data later");
             return;
         }
 
         new MRetryableTask<UserData, Void>() {
+
             @Override
             public Void run(UserData[] userData) {
-                UserBody request = UserDataMapper.toUserDataReport(userData[0]);
+                UserBody request = UserDataMapper.toUserDataBody(userData[0]);
                 MobileMessagingLogger.v("USER DATA >>>", request);
                 mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
                 MobileMessagingLogger.v("USER DATA <<<");
@@ -64,12 +63,16 @@ public class UserDataReporter {
 
             @Override
             public void after(Void aVoid) {
-                //TODO recheck this part
-                mobileMessagingCore.setUserDataReported(userData);
-                broadcaster.userDataReported(userData);
+                mobileMessagingCore.setUserDataReported(userData, true);
+
+                UserData userDataToReturn = userData;
+                if (mobileMessagingCore.shouldSaveUserData()) {
+                     userDataToReturn = mobileMessagingCore.getUserData();
+                }
+                broadcaster.userDataReported(userDataToReturn);
 
                 if (listener != null) {
-                    listener.onResult(userData);
+                    listener.onResult(userDataToReturn);
                 }
             }
 
@@ -81,7 +84,7 @@ public class UserDataReporter {
 
                 if (error instanceof BackendBaseExceptionWithContent) {
                     BackendBaseExceptionWithContent errorWithContent = (BackendBaseExceptionWithContent) error;
-                    mobileMessagingCore.setUserDataReported(errorWithContent.getContent(UserData.class));
+                    mobileMessagingCore.setUserDataReported(errorWithContent.getContent(UserData.class), true);
 
                     if (listener != null) {
                         listener.onError(MobileMessagingError.createFrom(error));
@@ -99,7 +102,8 @@ public class UserDataReporter {
                     MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
 
                     if (listener != null) {
-                        listener.onResult(UserData.merge(mobileMessagingCore.getUserData(), userData));
+                        UserData storedUserData = mobileMessagingCore.getUserData();
+                        listener.onResult(storedUserData);
                     }
                 }
 
@@ -129,6 +133,7 @@ public class UserDataReporter {
             @Override
             public void after(UserBody userResponse) {
                 UserData userData = UserDataMapper.createFrom(userResponse);
+                mobileMessagingCore.setUserDataReported(userData, false);
 
                 if (listener != null) {
                     listener.onResult(userData);

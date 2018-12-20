@@ -132,7 +132,7 @@ public class MobileApiResourceProvider {
             userAgentAdditions.add(DeviceInformation.getDeviceManufacturer());
             userAgentAdditions.add(SoftwareInformation.getAppName(context));
             userAgentAdditions.add(SoftwareInformation.getAppVersion(context));
-            userAgentAdditions.add(SystemInformation.getAndroidDeviceName(context)); //TODO recheck if this place is ok for device name
+            userAgentAdditions.add(SystemInformation.getAndroidDeviceName(context));
         } else {
             String emptySystemInfo[] = {"", "", "", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptySystemInfo));

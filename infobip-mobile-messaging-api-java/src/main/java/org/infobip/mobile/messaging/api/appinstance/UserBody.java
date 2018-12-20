@@ -39,12 +39,12 @@ public class UserBody {
         Boolean preferred;
 
         public Gsm(String number) {
-            this(number, false);
+            this(number, null);
         }
 
         public Gsm(String number, Boolean preferred) {
             this.number = number;
-            this.preferred = preferred;
+            this.preferred = null;
         }
 
         public String getNumber() {
@@ -69,12 +69,12 @@ public class UserBody {
         Boolean preferred;
 
         public Email(String address) {
-            this(address, false);
+            this(address, null);
         }
 
         public Email(String address, Boolean preferred) {
             this.address = address;
-            this.preferred = preferred;
+            this.preferred = null;
         }
 
         public String getAddress() {

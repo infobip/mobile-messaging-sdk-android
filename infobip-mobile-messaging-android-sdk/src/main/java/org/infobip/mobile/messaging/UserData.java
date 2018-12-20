@@ -4,10 +4,13 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
+
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -35,20 +38,20 @@ public class UserData {
     private static final JsonSerializer serializer = new JsonSerializer();
 
     private transient String externalUserId;
-    private transient Set<String> tags;
     private transient List<String> gsms;
     private transient List<String> emails;
     private transient String preferredEmail;
     private transient String preferredGsm;
+    private Set<String> tags;
     private Map<String, Object> standardAttributes;
     private Map<String, CustomUserDataValue> customAttributes;
-    private transient List<Installation> installations;
+    private List<UserData.Installation> installations;
 
     public UserData() {
         this.externalUserId = null;
-        this.tags = new HashSet<>();
         this.gsms = new ArrayList<>();
         this.emails = new ArrayList<>();
+        this.tags = new HashSet<>();
         this.standardAttributes = new HashMap<>();
         this.customAttributes = new HashMap<>();
         this.installations = new ArrayList<>();
@@ -57,25 +60,28 @@ public class UserData {
     public UserData(String userData) {
         UserData data = serializer.deserialize(userData, UserData.class);
         this.externalUserId = data.externalUserId;
-        this.tags = data.tags;
         this.gsms = data.gsms;
         this.emails = data.emails;
+        this.tags = data.tags;
         this.standardAttributes = data.standardAttributes;
         this.customAttributes = data.customAttributes;
+        this.installations = data.installations;
     }
 
     protected UserData(String externalUserId,
-                       Set<String> tags,
                        List<String> gsms,
                        List<String> emails,
+                       Set<String> tags,
                        Map<String, Object> standardAttributes,
-                       Map<String, CustomUserDataValue> customAttributes) {
+                       Map<String, CustomUserDataValue> customAttributes,
+                       List<UserData.Installation> installations) {
         this.externalUserId = externalUserId;
-        this.tags = tags;
         this.gsms = gsms;
         this.emails = emails;
+        this.tags = tags;
         this.standardAttributes = standardAttributes;
         this.customAttributes = customAttributes;
+        this.installations = installations;
     }
 
     @Nullable
@@ -117,6 +123,10 @@ public class UserData {
 
         if (data.tags != null) {
             this.tags.addAll(data.tags);
+        }
+
+        if (data.installations != null) {
+            this.installations.addAll(data.installations);
         }
 
         this.externalUserId = data.externalUserId;
@@ -176,12 +186,13 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public List<String> getGsms() {
-        if (this.gsms == null) {
+        if (this.gsms == null || this.gsms.isEmpty()) {
             List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
             if (gsmsWithPreferred != null) {
                 for (UserBody.Gsm gsm : gsmsWithPreferred) {
                     this.gsms.add(gsm.getNumber());
-                    if (gsm.getPreferred()) this.preferredGsm = gsm.getNumber();
+                    Boolean preferredGsm = gsm.getPreferred();
+                    if (preferredGsm != null && preferredGsm) this.preferredGsm = gsm.getNumber();
                 }
             }
         }
@@ -208,24 +219,20 @@ public class UserData {
         setField(StandardAttribute.GSMS, gsmsWithPreferred);
     }
 
-    /**
-     * Gets user's preferred GSM.
-     * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
-     */
-    public String getPreferredGsm() {
-        if (this.preferredGsm == null) {
-            List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
-            if (gsmsWithPreferred != null) {
-                for (UserBody.Gsm gsm : gsmsWithPreferred) {
-                    if (gsm.getPreferred()) this.preferredGsm = gsm.getNumber();
+    protected List<UserBody.Gsm> getGsmsWithPreferred() {
+        List<Object> gsmsObjList = (List<Object>) standardAttributes.get(StandardAttribute.GSMS.getKey());
+        List<UserBody.Gsm> gsms = null;
+        if (gsmsObjList != null) {
+            gsms = new ArrayList<>(gsmsObjList.size());
+            for (Object gsm : gsmsObjList) {
+                if (gsm instanceof UserBody.Gsm) {
+                    gsms.add((UserBody.Gsm) gsm);
+                } else {
+                    gsms.add(new Gson().fromJson(String.valueOf(gsm), UserBody.Gsm.class));
                 }
             }
         }
-        return this.preferredGsm;
-    }
-
-    protected List<UserBody.Gsm> getGsmsWithPreferred() {
-        return getField(StandardAttribute.GSMS);
+        return gsms;
     }
 
     protected void setGsmsWithPreferred(List<UserBody.Gsm> gsms) {
@@ -239,12 +246,13 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public List<String> getEmails() {
-        if (this.emails == null) {
+        if (this.emails == null || this.emails.isEmpty()) {
             List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
             if (emailsWithPreferred != null) {
                 for (UserBody.Email email : emailsWithPreferred) {
                     this.emails.add(email.getAddress());
-                    if (email.getPreferred()) this.preferredEmail = email.getAddress();
+                    Boolean preferredEmail = email.getPreferred();
+                    if (preferredEmail != null && preferredEmail) this.preferredEmail = email.getAddress();
                 }
             }
         }
@@ -263,6 +271,7 @@ public class UserData {
         this.emails = emails;
 
         List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+        if (emailsWithPreferred == null) emailsWithPreferred = new ArrayList<>();
         for (String email : emails) {
             if (TextUtils.isEmpty(email)) continue;
             emailsWithPreferred.add(new UserBody.Email(email, email.equals(preferredEmail)));
@@ -270,24 +279,22 @@ public class UserData {
         setField(StandardAttribute.EMAILS, emailsWithPreferred);
     }
 
-    /**
-     * Gets user's preferred email.
-     * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
-     */
-    public String getPreferredEmail() {
-        if (this.preferredEmail == null) {
-            List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
-            if (emailsWithPreferred != null) {
-                for (UserBody.Email email : emailsWithPreferred) {
-                    if (email.getPreferred()) this.preferredEmail = email.getAddress();
+    protected List<UserBody.Email> getEmailsWithPreferred() {
+        List<Object> emailsObjList = (List<Object>) standardAttributes.get(StandardAttribute.EMAILS.getKey());
+        List<UserBody.Email> emails = null;
+        if (emailsObjList != null) {
+            emails = new ArrayList<>(emailsObjList.size());
+
+            for (Object email : emailsObjList) {
+                if (email instanceof UserBody.Email) {
+                    emails.add((UserBody.Email) email);
+                } else {
+                    emails.add(new Gson().fromJson(String.valueOf(email), UserBody.Email.class));
                 }
             }
         }
-        return this.preferredEmail;
-    }
 
-    protected List<UserBody.Email> getEmailsWithPreferred() {
-        return getField(StandardAttribute.EMAILS);
+        return emails;
     }
 
     protected void setEmailsWithPreferred(List<UserBody.Email> emails) {
@@ -300,12 +307,7 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public Set<String> getTags() {
-        Object tagsField = getField(StandardAttribute.TAGS);
-        if (tagsField instanceof List) {
-            return new HashSet<>((List<String>) tagsField);
-        } else {
-            return (HashSet<String>) tagsField;
-        }
+        return tags;
     }
 
     /**
@@ -317,7 +319,7 @@ public class UserData {
      */
     public void setTags(Set<String> tags) {
         if (tags == null) tags = new HashSet<>(0);
-        setField(StandardAttribute.TAGS, tags);
+        this.tags = tags;
     }
 
     public String getFirstName() {
@@ -345,11 +347,17 @@ public class UserData {
     }
 
     public Gender getGender() {
-        return getField(StandardAttribute.GENDER);
+        String gender = getField(StandardAttribute.GENDER);
+        if (StringUtils.isNotBlank(gender)) {
+            return Gender.valueOf(gender);
+        }
+        return null;
     }
 
     public void setGender(Gender gender) {
-        setField(StandardAttribute.GENDER, gender);
+        if (gender != null) {
+            setField(StandardAttribute.GENDER, gender.name());
+        }
     }
 
     public Date getBirthday() {
@@ -366,12 +374,11 @@ public class UserData {
     }
 
     public List<Installation> getInstallations() {
-        return getField(StandardAttribute.INSTALLATIONS);
+        return this.installations;
     }
 
-    //TODO
     public void setInstallations(List<Installation> installations) {
-        setField(StandardAttribute.INSTALLATIONS, installations);
+        this.installations = installations;
     }
 
     // STANDARD ATTRIBUTES
@@ -401,9 +408,7 @@ public class UserData {
         BIRTHDAY("birthday"),
         GSMS("gsms"),
         EMAILS("emails"),
-        TAGS("tags"),
-        EXTERNAL_USER_ID("externalUserId"),
-        INSTALLATIONS("installations");
+        EXTERNAL_USER_ID("externalUserId");
 
         private final String key;
 
@@ -422,14 +427,18 @@ public class UserData {
 
     public static class Installation {
 
-        private String pushRegistrationId;
-        private Boolean isPrimaryDevice;
-        private Boolean isPushRegistrationEnabled;
-        private String deviceManufacturer;
-        private String deviceModel;
-        private String deviceName;
-        private String osVersion;
-        private Boolean notificationsEnabled;
+        protected String pushRegistrationId;
+        protected Boolean isPrimaryDevice;
+        protected Boolean isPushRegistrationEnabled;
+        protected String deviceManufacturer;
+        protected String deviceModel;
+        protected String deviceName;
+        protected String os;
+        protected String osVersion;
+        protected Boolean notificationsEnabled;
+
+        public Installation() {
+        }
 
         public static Installation createFrom(AppInstanceWithPushRegId instance) {
             return new Installation(
@@ -439,6 +448,7 @@ public class UserData {
                     instance.getDeviceManufacturer(),
                     instance.getDeviceModel(),
                     instance.getDeviceName(),
+                    instance.getOs(),
                     instance.getOsVersion(),
                     instance.getNotificationsEnabled()
             );
@@ -450,6 +460,7 @@ public class UserData {
                             String deviceManufacturer,
                             String deviceModel,
                             String deviceName,
+                            String os,
                             String osVersion,
                             Boolean notificationsEnabled) {
             this.pushRegistrationId = pushRegistrationId;
@@ -458,6 +469,7 @@ public class UserData {
             this.deviceManufacturer = deviceManufacturer;
             this.deviceModel = deviceModel;
             this.deviceName = deviceName;
+            this.os = os;
             this.osVersion = osVersion;
             this.notificationsEnabled = notificationsEnabled;
         }
@@ -488,6 +500,10 @@ public class UserData {
 
         public String getDeviceName() {
             return deviceName;
+        }
+
+        public String getOs() {
+            return os;
         }
 
         public String getOsVersion() {

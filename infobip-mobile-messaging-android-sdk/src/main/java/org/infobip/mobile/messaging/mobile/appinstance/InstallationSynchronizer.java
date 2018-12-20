@@ -2,9 +2,12 @@ package org.infobip.mobile.messaging.mobile.appinstance;
 
 import android.content.Context;
 
+import org.infobip.mobile.messaging.CustomUserDataValue;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.SystemData;
+import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
@@ -22,6 +25,8 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 
@@ -105,6 +110,12 @@ public class InstallationSynchronizer {
         patchInstance(appInstance, actionListener);
     }
 
+    public void updateCustomAttributes(Map<String,CustomUserDataValue> customAtts, InstallationActionListener actionListener) {
+        AppInstance appInstance = new AppInstance();
+        appInstance.setCustomAttributes(UserDataMapper.mapCustomAttsForBackendReport(customAtts));
+        patchInstance(appInstance, actionListener);
+    }
+
     public void updatePushRegEnabledStatus(Boolean enabled, InstallationActionListener actionListener) {
         AppInstance installation = new AppInstance();
         installation.setRegEnabled(enabled);
@@ -146,13 +157,13 @@ public class InstallationSynchronizer {
                 }
 
                 Installation installation = Installation.from(appInstanceWithPushRegId);
-                setPushRegistrationId(installation.getPushRegId());
-                updateInstallationReported(installation);
+                setPushRegistrationId(installation.getPushRegistrationId());
+                updateInstallationReported(installation, true);
 
                 broadcaster.installationCreated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
                 }
             }
 
@@ -166,7 +177,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onError(error);
+                    actionListener.onError(MobileMessagingError.createFrom(error));
                 }
             }
         }
@@ -175,24 +186,32 @@ public class InstallationSynchronizer {
     }
 
     private void patchInstance(final AppInstance appInstance, final InstallationActionListener actionListener) {
+        String pushRegId = mobileMessagingCore.getPushRegistrationId();
+        final boolean myDevice = isMyDevice(appInstance, pushRegId);
+        if (!myDevice) {
+            pushRegId = appInstance.getPushRegId();
+        }
+
+        final String pushRegIdToUpdate = pushRegId;
         new MRetryableTask<Void, Void>() {
             @Override
             public Void run(Void[] voids) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION >>>");
-                return mobileApiAppInstance.patchInstance(mobileMessagingCore.getPushRegistrationId(), true, appInstance);
+                return mobileApiAppInstance.patchInstance(pushRegIdToUpdate, true, appInstance);
             }
 
             @Override
             public void after(Void aVoid) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION <<<");
                 Installation installation = Installation.from(appInstance);
+                //TODO get local instance
 
-                updateInstallationReported(installation);
+                updateInstallationReported(installation, myDevice);
 
                 broadcaster.installationUpdated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
                 }
             }
 
@@ -206,7 +225,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onError(error);
+                    actionListener.onError(MobileMessagingError.createFrom(error));
                 }
             }
         }
@@ -214,15 +233,26 @@ public class InstallationSynchronizer {
                 .execute(executor);
     }
 
-    private void updateInstallationReported(Installation installation) {
-        PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-        if (installation.getPrimary() != null) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimary());
+    private boolean isMyDevice(AppInstance appInstance, String myPushRegId) {
+        return  (appInstance.getPushRegId() != null && myPushRegId.equals(appInstance.getPushRegId())) || appInstance.getPushRegId() == null;
+    }
+
+    private void updateInstallationReported(Installation installation, boolean myDevice) {
+        if (!myDevice) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, false);
+            return;
         }
-        setPushRegistrationEnabled(installation.getRegEnabled());
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
+        if (installation.getPrimaryDevice() != null) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimaryDevice());
+        }
+        setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
         setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
+        mobileMessagingCore.setCustomAttributesReported(true);
         mobileMessagingCore.setSystemDataReported();
         mobileMessagingCore.setReportedPushServiceType();
     }
@@ -244,7 +274,7 @@ public class InstallationSynchronizer {
                 Installation installation = Installation.from(instance);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
                 }
                 MobileMessagingLogger.v("GET INSTALLATION <<<");
             }
@@ -252,7 +282,7 @@ public class InstallationSynchronizer {
             @Override
             public void error(Throwable error) {
                 if (actionListener != null) {
-                    actionListener.onError(error);
+                    actionListener.onError(MobileMessagingError.createFrom(error));
                 }
                 MobileMessagingLogger.v("GET INSTALLATION ERROR <<<", error);
             }

@@ -1,5 +1,8 @@
 package org.infobip.mobile.messaging.mobile.appinstance;
 
+import org.infobip.mobile.messaging.CustomUserDataValue;
+import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
@@ -7,39 +10,30 @@ import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
 import java.util.Map;
 
 
-public class Installation {
+public class Installation extends UserData.Installation {
 
-    private Boolean regEnabled;
     private String applicationUserId;
-    private Map<String, Object> customAttributes;
-    private Boolean isPrimary;
-    private Boolean notificationsEnabled;
+    private Map<String, CustomUserDataValue> customAttributes;
     private Boolean geoEnabled;
     private String sdkVersion;
     private String appVersion;
-    private String os;
-    private String osVersion;
-    private String deviceManufacturer;
-    private String deviceModel;
     private Boolean deviceSecure;
     private String osLanguage;
     private String deviceTimezoneId;
-    private String deviceName;
     private PushServiceType pushServiceType;
     private String pushServiceToken;
-    private String pushRegId;
 
     public Installation() {
     }
 
-    protected Installation(Boolean regEnabled, String applicationUserId, Map<String, Object> customAttributes, Boolean isPrimary, Boolean notificationsEnabled,
+    protected Installation(Boolean regEnabled, String applicationUserId, Map<String, CustomUserDataValue> customAttributes, Boolean isPrimary, Boolean notificationsEnabled,
                            Boolean geoEnabled, String sdkVersion, String appVersion, String os, String osVersion, String deviceManufacturer, String deviceModel,
                            Boolean deviceSecure, String osLanguage, String deviceTimezoneId, String deviceName, PushServiceType pushServiceType, String pushServiceToken,
                            String pushRegId) {
-        this.regEnabled = regEnabled;
+        this.isPushRegistrationEnabled = regEnabled;
         this.applicationUserId = applicationUserId;
         this.customAttributes = customAttributes;
-        this.isPrimary = isPrimary;
+        this.isPrimaryDevice = isPrimary;
         this.notificationsEnabled = notificationsEnabled;
         this.geoEnabled = geoEnabled;
         this.sdkVersion = sdkVersion;
@@ -54,43 +48,36 @@ public class Installation {
         this.deviceName = deviceName;
         this.pushServiceType = pushServiceType;
         this.pushServiceToken = pushServiceToken;
-        this.pushRegId = pushRegId;
+        this.pushRegistrationId = pushRegId;
     }
 
     public void setRegEnabled(Boolean regEnabled) {
-        this.regEnabled = regEnabled;
+        this.isPushRegistrationEnabled = regEnabled;
     }
 
     public void setApplicationUserId(String applicationUserId) {
         this.applicationUserId = applicationUserId;
     }
 
-    public void setCustomAttributes(Map<String, Object> customAttributes) {
+    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
     public void setPrimary(Boolean primary) {
-        isPrimary = primary;
+        isPrimaryDevice = primary;
     }
 
-    public Boolean getRegEnabled() {
-        return regEnabled;
+    @Override
+    public String getPushRegistrationId() {
+        return pushRegistrationId;
     }
 
     public String getApplicationUserId() {
         return applicationUserId;
     }
 
-    public Map<String, Object> getCustomAttributes() {
+    public Map<String, CustomUserDataValue> getCustomAttributes() {
         return customAttributes;
-    }
-
-    public Boolean getPrimary() {
-        return isPrimary;
-    }
-
-    public Boolean getNotificationsEnabled() {
-        return notificationsEnabled;
     }
 
     public Boolean getGeoEnabled() {
@@ -105,22 +92,6 @@ public class Installation {
         return appVersion;
     }
 
-    public String getOs() {
-        return os;
-    }
-
-    public String getOsVersion() {
-        return osVersion;
-    }
-
-    public String getDeviceManufacturer() {
-        return deviceManufacturer;
-    }
-
-    public String getDeviceModel() {
-        return deviceModel;
-    }
-
     public Boolean getDeviceSecure() {
         return deviceSecure;
     }
@@ -133,10 +104,6 @@ public class Installation {
         return deviceTimezoneId;
     }
 
-    public String getDeviceName() {
-        return deviceName;
-    }
-
     public PushServiceType getPushServiceType() {
         return pushServiceType;
     }
@@ -145,14 +112,10 @@ public class Installation {
         return pushServiceToken;
     }
 
-    public String getPushRegId() {
-        return pushRegId;
-    }
-
     public static Installation from(AppInstanceWithPushRegId appInstanceWithPushRegId) {
         return new Installation(appInstanceWithPushRegId.getRegEnabled(),
                 appInstanceWithPushRegId.getApplicationUserId(),
-                appInstanceWithPushRegId.getCustomAttributes(),
+                UserDataMapper.mapCustomAttsFromBackendResponse(appInstanceWithPushRegId.getCustomAttributes()),
                 appInstanceWithPushRegId.getIsPrimary(),
                 appInstanceWithPushRegId.getNotificationsEnabled(),
                 appInstanceWithPushRegId.getGeoEnabled(),
@@ -173,10 +136,10 @@ public class Installation {
 
     public AppInstance toAppInstance() {
         AppInstance appInstance = new AppInstance();
-        appInstance.setPushRegId(this.getPushRegId());
-        appInstance.setCustomAttributes(this.getCustomAttributes());
-        appInstance.setRegEnabled(this.getRegEnabled());
-        appInstance.setIsPrimary(this.getPrimary());
+        appInstance.setPushRegId(this.getPushRegistrationId());
+        appInstance.setCustomAttributes(UserDataMapper.mapCustomAttsForBackendReport(this.getCustomAttributes()));
+        appInstance.setRegEnabled(this.isPushRegistrationEnabled());
+        appInstance.setIsPrimary(this.getPrimaryDevice());
         appInstance.setApplicationUserId(this.getApplicationUserId());
         return appInstance;
     }

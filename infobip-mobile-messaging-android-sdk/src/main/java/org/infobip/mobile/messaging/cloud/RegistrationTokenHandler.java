@@ -29,7 +29,7 @@ public abstract class RegistrationTokenHandler {
                 null == mobileMessagingCore.getCloudToken() ||
                 !token.equals(mobileMessagingCore.getCloudToken()) ||
                 !mobileMessagingCore.isRegistrationIdReported() ||
-                !mobileMessagingCore.isPushServiceTypeChanged();
+                mobileMessagingCore.isPushServiceTypeChanged();
 
         if (saveNeeded) {
             mobileMessagingCore.setCloudToken(token);

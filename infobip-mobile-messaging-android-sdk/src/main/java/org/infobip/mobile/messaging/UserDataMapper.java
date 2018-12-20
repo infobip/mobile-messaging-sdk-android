@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class UserDataMapper {
 
-    public static UserBody toUserDataReport(UserData userData) {
+    public static UserBody toUserDataBody(UserData userData) {
         UserBody userBody = new UserBody();
         userBody.setExternalUserId(userData.getExternalUserId());
         userBody.setFirstName(userData.getFirstName());
@@ -29,7 +29,7 @@ public class UserDataMapper {
         userBody.setEmails(userData.getEmailsWithPreferred());
         userBody.setGsms(userData.getGsmsWithPreferred());
         userBody.setTags(userData.getTags());
-        userBody.setCustomAttributes(mapCustomAttsForUserDataReport(userData));
+        userBody.setCustomAttributes(mapCustomAttsForBackendReport(userData.getCustomAttributes()));
 
         return userBody;
     }
@@ -39,8 +39,10 @@ public class UserDataMapper {
 
         if (userResponse.getExternalUserId() != null)
             userData.setExternalUserId(userResponse.getExternalUserId());
-        if (userResponse.getFirstName() != null) userData.setFirstName(userResponse.getFirstName());
-        if (userResponse.getLastName() != null) userData.setLastName(userResponse.getLastName());
+        if (userResponse.getFirstName() != null)
+            userData.setFirstName(userResponse.getFirstName());
+        if (userResponse.getLastName() != null)
+            userData.setLastName(userResponse.getLastName());
         if (userResponse.getMiddleName() != null)
             userData.setMiddleName(userResponse.getMiddleName());
         if (userResponse.getBirthday() != null) {
@@ -50,15 +52,16 @@ public class UserDataMapper {
                 e.printStackTrace();
             }
         }
-        if (userData.getGender() != null)
+        if (userResponse.getGender() != null)
             userData.setGender(UserData.Gender.valueOf(userResponse.getGender()));
         if (userResponse.getEmails() != null)
             userData.setEmailsWithPreferred(userResponse.getEmails());
         if (userResponse.getGsms() != null)
             userData.setGsmsWithPreferred(userResponse.getGsms());
-        if (userResponse.getTags() != null) userData.setTags(userResponse.getTags());
+        if (userResponse.getTags() != null)
+            userData.setTags(userResponse.getTags());
         if (userResponse.getCustomAttributes() != null)
-            userData.setCustomAttributes(mapCustomAttsFromUserDataResponse(userResponse));
+            userData.setCustomAttributes(mapCustomAttsFromBackendResponse(userResponse.getCustomAttributes()));
         if (userResponse.getInstances() != null)
             userData.setInstallations(mapInstancesToUserInstallations(userResponse));
 
@@ -70,13 +73,11 @@ public class UserDataMapper {
         for (AppInstanceWithPushRegId instance : userResponse.getInstances()) {
             installations.add(UserData.Installation.createFrom(instance));
         }
-
         return installations;
     }
 
     @NonNull
-    private static Map<String, Object> mapCustomAttsForUserDataReport(UserData userData) {
-        Map<String, CustomUserDataValue> customAttributes = userData.getCustomAttributes();
+    public static Map<String, Object> mapCustomAttsForBackendReport(Map<String, CustomUserDataValue> customAttributes) {
         Map<String, Object> customAttributesToReport = new HashMap<>(customAttributes.size());
         for (Map.Entry<String, CustomUserDataValue> entry : customAttributes.entrySet()) {
             String key = entry.getKey();
@@ -95,10 +96,8 @@ public class UserDataMapper {
         return customAttributesToReport;
     }
 
-    private static Map<String, CustomUserDataValue> mapCustomAttsFromUserDataResponse(UserBody userBody) {
-        Map<String, Object> customAttributes = userBody.getCustomAttributes();
+    public static Map<String, CustomUserDataValue> mapCustomAttsFromBackendResponse(Map<String, Object> customAttributes) {
         Map<String, CustomUserDataValue> customUserDataValueMap = new HashMap<>();
-
         if (customAttributes == null) {
             return customUserDataValueMap;
         }
