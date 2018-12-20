@@ -66,7 +66,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         mobileMessagingCore.saveUserData(givenUserData);
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(5000).atLeastOnce()).userDataReported(captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
         assertNotNull(captor.getValue());
     }
 

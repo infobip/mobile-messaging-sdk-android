@@ -6,7 +6,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -17,6 +17,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Matchers.any;
@@ -69,7 +70,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         installationSynchronizer.sync(actionListener);
 
-        verify(actionListener, after(300).times(1)).onSuccess(any(Installation.class));
+        verify(actionListener, after(300).times(1)).onSuccess(any(List.class));
         verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
     }
 
@@ -81,14 +82,14 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         installationSynchronizer.sync(actionListener);
 
-        verify(actionListener, after(300).times(1)).onError(any(Throwable.class));
+        verify(actionListener, after(300).times(1)).onError(any(MobileMessagingError.class));
     }
 
     @Test
     public void shouldPatchInstallationOnServer() {
         installationSynchronizer.sync(actionListener);
 
-        verify(actionListener, after(300).times(1)).onSuccess(any(Installation.class));
+        verify(actionListener, after(300).times(1)).onSuccess(any(List.class));
         verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
     }
 
@@ -98,14 +99,14 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         installationSynchronizer.sync(actionListener);
 
-        verify(actionListener, after(300).times(1)).onError(any(Throwable.class));
+        verify(actionListener, after(300).times(1)).onError(any(MobileMessagingError.class));
     }
 
     @Test
     public void shouldGetInstallationFromServer() {
         installationSynchronizer.fetchInstance(actionListener);
 
-        verify(actionListener, after(300).times(1)).onSuccess(any(Installation.class));
+        verify(actionListener, after(300).times(1)).onSuccess(any(List.class));
         verify(mobileApiAppInstance, times(1)).getInstance(anyString());
     }
 
@@ -115,6 +116,6 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         installationSynchronizer.fetchInstance(actionListener);
 
-        verify(actionListener, after(300).times(1)).onError(any(Throwable.class));
+        verify(actionListener, after(300).times(1)).onError(any(MobileMessagingError.class));
     }
 }
