@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging;
 
+import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
@@ -72,6 +73,28 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
 
         Map<String, CustomUserDataValue> customUserData = userData.getCustomAttributes();
         assertEquals(3, customUserData.size());
+    }
+
+    @Test
+    public void test_get_custom_installation_data_value_from_json_string() {
+        AppInstance serverResponse = new AppInstance();
+
+        Map<String, Object> customAtts = new HashMap<>();
+        customAtts.put(KEY_FOR_STRING, SOME_STRING_VALUE);
+        customAtts.put(KEY_FOR_DATE, DateTimeUtil.DateToYMDString(SOME_DATE_VALUE));
+        customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
+        serverResponse.setCustomAttributes(customAtts);
+
+        Map<String, CustomUserDataValue> customAttsFromBackend = UserDataMapper.mapCustomAttsFromBackendResponse(serverResponse.getCustomAttributes());
+        String keyForString = customAttsFromBackend.get(KEY_FOR_STRING).stringValue();
+        Number keyForNumber = customAttsFromBackend.get(KEY_FOR_NUMBER).numberValue();
+        Date keyForDate = customAttsFromBackend.get(KEY_FOR_DATE).dateValue();
+
+        assertEquals(SOME_STRING_VALUE, keyForString);
+        assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
+        assertEquals(DateTimeUtil.DateToYMDString(SOME_DATE_VALUE), DateTimeUtil.DateToYMDString(keyForDate));
+
+        assertEquals(3, customAttsFromBackend.size());
     }
 
     @Test

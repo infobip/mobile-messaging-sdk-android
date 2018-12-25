@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.mobile.data;
+package org.infobip.mobile.messaging.mobile.user;
 
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -68,12 +68,12 @@ public class LogoutUserSynchronizer {
                     }
                 }
                         .retryWith(policy)
-                        .execute(executor, mobileMessagingCore.getUnreportedLogoutPushRegId());
+                        .execute(executor, mobileMessagingCore.getPushRegistrationId());
             }
         });
     }
 
-    public void logout(final LogoutActionListener actionListener) {
+    public void logout(String unreportedLogoutPushRegId, final LogoutActionListener actionListener) {
         new LogoutTask() {
             @Override
             public void after(Void objects) {
@@ -91,6 +91,6 @@ public class LogoutUserSynchronizer {
             }
         }
                 .retryWith(policy)
-                .execute(executor, mobileMessagingCore.getUnreportedLogoutPushRegId());
+                .execute(executor, unreportedLogoutPushRegId);
     }
 }

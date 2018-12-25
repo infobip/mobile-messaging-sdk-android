@@ -150,7 +150,6 @@ public class MobileApiAppInstanceTest {
         assertEquals(1, debugServer.getQueryParametersCount());
     }
 
-
     @Test
     public void log_out_user_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
@@ -195,6 +194,7 @@ public class MobileApiAppInstanceTest {
                 "    \"string_1\": \"blabla\",\n" +
                 "    \"date_1\": \"2018-12-13\"\n" +
                 "  },\n" +
+                "  \"externalUserId\":\"father_of_luke\",\n" +
                 "  \"emails\": [\n" +
                 "    {\n" +
                 "      \"address\": \"darth_vader@mail.com\",\n" +
@@ -255,6 +255,7 @@ public class MobileApiAppInstanceTest {
         assertEquals("Vader", response.getLastName());
         assertEquals("1988-07-31", response.getBirthday());
         assertEquals("Male", response.getGender());
+        assertEquals("father_of_luke", response.getExternalUserId());
         HashMap<String, Object> expectedCustomAtts = new HashMap<>();
         expectedCustomAtts.put("number_1", 1234.3);
         expectedCustomAtts.put("string_1", "blabla");
@@ -264,6 +265,8 @@ public class MobileApiAppInstanceTest {
             add("music");
             add("darkSide");
         }}, response.getTags());
+        assertEquals(new UserBody.Gsm("385991111666"), response.getGsms().toArray()[0]);
+        assertEquals(new UserBody.Email("darth_vader@mail.com"), response.getEmails().toArray()[0]);
     }
 
     @Test

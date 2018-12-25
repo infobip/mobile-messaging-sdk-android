@@ -6,11 +6,14 @@ import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 import java.util.Map;
 
 
 public class Installation extends UserData.Installation {
+
+    private static final JsonSerializer serializer = new JsonSerializer(false);
 
     private String applicationUserId;
     private Map<String, CustomUserDataValue> customAttributes;
@@ -137,10 +140,17 @@ public class Installation extends UserData.Installation {
     public AppInstance toAppInstance() {
         AppInstance appInstance = new AppInstance();
         appInstance.setPushRegId(this.getPushRegistrationId());
-        appInstance.setCustomAttributes(UserDataMapper.mapCustomAttsForBackendReport(this.getCustomAttributes()));
+        if (this.getCustomAttributes() != null) {
+            appInstance.setCustomAttributes(UserDataMapper.mapCustomAttsForBackendReport(this.getCustomAttributes()));
+        }
         appInstance.setRegEnabled(this.isPushRegistrationEnabled());
         appInstance.setIsPrimary(this.getPrimaryDevice());
         appInstance.setApplicationUserId(this.getApplicationUserId());
         return appInstance;
+    }
+
+    @Override
+    public String toString() {
+        return serializer.serialize(this);
     }
 }

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.mobile.data;
+package org.infobip.mobile.messaging.mobile.user;
 
 public interface LogoutActionListener {
     void onUserInitiatedLogoutCompleted();

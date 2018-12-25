@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
+import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -247,7 +248,7 @@ public abstract class MobileMessaging {
 
     public abstract void logout(String pushRegId, ResultListener<SuccessPending> listener);
 
-    public abstract void logout(String pushRegId, InstallationActionListener listener);
+    public abstract void logout(String pushRegId, InstallationsActionListener listener);
 
     /**
      * Send mobile originated messages.
@@ -331,7 +332,7 @@ public abstract class MobileMessaging {
      * @param isPrimary          set to true to make this device primary or to false otherwise.
      * @param listener           listener to invoke when the operation is complete.
      */
-    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary, InstallationActionListener listener);
+    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary, InstallationsActionListener listener);
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.

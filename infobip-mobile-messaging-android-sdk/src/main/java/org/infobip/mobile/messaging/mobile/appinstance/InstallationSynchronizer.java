@@ -2,15 +2,17 @@ package org.infobip.mobile.messaging.mobile.appinstance;
 
 import android.content.Context;
 
+import com.google.gson.reflect.TypeToken;
+
 import org.infobip.mobile.messaging.CustomUserDataValue;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.SystemData;
-import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -25,7 +27,8 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
-import java.util.Collections;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -163,7 +166,7 @@ public class InstallationSynchronizer {
                 broadcaster.installationCreated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
+                    actionListener.onSuccess(installation);
                 }
             }
 
@@ -181,6 +184,7 @@ public class InstallationSynchronizer {
                 }
             }
         }
+
                 .retryWith(retryPolicyProvider.DEFAULT())
                 .execute(executor);
     }
@@ -204,14 +208,13 @@ public class InstallationSynchronizer {
             public void after(Void aVoid) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION <<<");
                 Installation installation = Installation.from(appInstance);
-                //TODO get local instance
 
                 updateInstallationReported(installation, myDevice);
 
                 broadcaster.installationUpdated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
+                    actionListener.onSuccess(installation);
                 }
             }
 
@@ -240,19 +243,33 @@ public class InstallationSynchronizer {
     private void updateInstallationReported(Installation installation, boolean myDevice) {
         if (!myDevice) {
             PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, false);
+            mobileMessagingCore.savePrimarySetting(false);
             return;
         }
 
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
         if (installation.getPrimaryDevice() != null) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimaryDevice());
+            mobileMessagingCore.savePrimarySetting(installation.getPrimaryDevice());
         }
         setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
         setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
-        mobileMessagingCore.setCustomAttributesReported(true);
+        String unreportedCustomAttributes = mobileMessagingCore.getUnreportedCustomAttributes();
+        if (unreportedCustomAttributes != null) {
+            mobileMessagingCore.setUnreportedCustomAttributes(null);
+            String reportedCustomAtts = mobileMessagingCore.getCustomAttributes();
+            Type type = new TypeToken<Map<String, CustomUserDataValue>>() {
+            }.getType();
+            Map<String, CustomUserDataValue> customAttsMap = new JsonSerializer().deserialize(reportedCustomAtts, type);
+            Map<String, CustomUserDataValue> unreportedCustomAttsMap = new JsonSerializer().deserialize(unreportedCustomAttributes, type);
+            if (customAttsMap == null) {
+                customAttsMap = new HashMap<>();
+            }
+            customAttsMap.putAll(unreportedCustomAttsMap);
+
+            mobileMessagingCore.saveCustomAttributes(customAttsMap);
+        }
         mobileMessagingCore.setSystemDataReported();
         mobileMessagingCore.setReportedPushServiceType();
     }
@@ -272,9 +289,13 @@ public class InstallationSynchronizer {
             @Override
             public void after(AppInstanceWithPushRegId instance) {
                 Installation installation = Installation.from(instance);
+                if (installation.getPrimaryDevice() != null) {
+                    mobileMessagingCore.savePrimarySetting(installation.getPrimaryDevice());
+                }
+                mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(Collections.<UserData.Installation>singletonList(installation));
+                    actionListener.onSuccess(installation);
                 }
                 MobileMessagingLogger.v("GET INSTALLATION <<<");
             }

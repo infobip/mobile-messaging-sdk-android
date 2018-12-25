@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.mobile.data;
+package org.infobip.mobile.messaging.mobile.user;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -55,9 +55,11 @@ public class UserDataReporter {
             @Override
             public Void run(UserData[] userData) {
                 UserBody request = UserDataMapper.toUserDataBody(userData[0]);
-                MobileMessagingLogger.v("USER DATA >>>", request);
-                mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
-                MobileMessagingLogger.v("USER DATA <<<");
+                if (!UserDataMapper.isUserBodyEmpty(request)) {
+                    MobileMessagingLogger.v("USER DATA >>>", request);
+                    mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
+                    MobileMessagingLogger.v("USER DATA <<<");
+                }
                 return null;
             }
 
@@ -135,6 +137,8 @@ public class UserDataReporter {
                 UserData userData = UserDataMapper.createFrom(userResponse);
                 mobileMessagingCore.setUserDataReported(userData, false);
 
+                saveLatestPrimaryToMyInstallation(userData);
+
                 if (listener != null) {
                     listener.onResult(userData);
                 }
@@ -153,6 +157,17 @@ public class UserDataReporter {
         }
                 .retryWith(retryPolicy(listener))
                 .execute(executor);
+    }
+
+    private void saveLatestPrimaryToMyInstallation(UserData userData) {
+        if (userData.getInstallations() != null) {
+            for (UserData.Installation installation : userData.getInstallations()) {
+                if (mobileMessagingCore.getPushRegistrationId() != null &&
+                        mobileMessagingCore.getPushRegistrationId().equals(installation.getPushRegistrationId())) {
+                    mobileMessagingCore.savePrimarySetting(installation.getPrimaryDevice());
+                }
+            }
+        }
     }
 
     private MRetryPolicy retryPolicy(MobileMessaging.ResultListener listener) {

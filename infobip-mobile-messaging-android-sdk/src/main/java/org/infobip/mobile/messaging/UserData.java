@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
-import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +36,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
  */
 public class UserData {
 
-    private static final JsonSerializer serializer = new JsonSerializer();
+    private static final JsonSerializer serializer = new JsonSerializer(false);
 
     private transient String externalUserId;
     private transient List<String> gsms;
@@ -51,9 +52,9 @@ public class UserData {
         this.externalUserId = null;
         this.gsms = new ArrayList<>();
         this.emails = new ArrayList<>();
-        this.tags = new HashSet<>();
+        this.tags = null;
         this.standardAttributes = new HashMap<>();
-        this.customAttributes = new HashMap<>();
+        this.customAttributes = null;
         this.installations = new ArrayList<>();
     }
 
@@ -110,6 +111,7 @@ public class UserData {
         }
 
         if (data.customAttributes != null) {
+            if (this.customAttributes == null) this.customAttributes = new HashMap<>();
             this.customAttributes.putAll(data.customAttributes);
         }
 
@@ -122,6 +124,7 @@ public class UserData {
         }
 
         if (data.tags != null) {
+            if (this.tags == null) this.tags = new HashSet<>();
             this.tags.addAll(data.tags);
         }
 
@@ -133,6 +136,9 @@ public class UserData {
     }
 
     public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
+        if (customAttributes == null) {
+            customAttributes = new HashMap<>();
+        }
         this.customAttributes = customAttributes;
     }
 
@@ -141,15 +147,19 @@ public class UserData {
     }
 
     public void setCustomUserDataElement(String key, CustomUserDataValue customUserDataValue) {
+        if (customAttributes == null) this.customAttributes = new HashMap<>();
         this.customAttributes.put(key, customUserDataValue);
     }
 
     public CustomUserDataValue getCustomUserDataValue(String key) {
+        if (customAttributes == null) return null;
         return this.customAttributes.get(key);
     }
 
     public void removeCustomUserDataElement(String key) {
-        this.customAttributes.put(key, null);
+        if (this.customAttributes != null) {
+            this.customAttributes.put(key, null);
+        }
     }
 
 
@@ -187,7 +197,7 @@ public class UserData {
      */
     public List<String> getGsms() {
         if (this.gsms == null || this.gsms.isEmpty()) {
-            List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
+            HashSet<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
             if (gsmsWithPreferred != null) {
                 for (UserBody.Gsm gsm : gsmsWithPreferred) {
                     this.gsms.add(gsm.getNumber());
@@ -210,35 +220,25 @@ public class UserData {
         if (gsms == null) gsms = Collections.emptyList();
         this.gsms = gsms;
 
-        List<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
-        if (gsmsWithPreferred == null) gsmsWithPreferred = new ArrayList<>(gsms.size());
+        HashSet<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
+        if (gsmsWithPreferred == null) gsmsWithPreferred = new HashSet<>(gsms.size());
         for (String gsm : gsms) {
             if (TextUtils.isEmpty(gsm)) continue;
             gsmsWithPreferred.add(new UserBody.Gsm(gsm, gsm.equals(preferredGsm)));
         }
-        setField(StandardAttribute.GSMS, gsmsWithPreferred);
+        setGsmsWithPreferred(gsmsWithPreferred);
     }
 
-    protected List<UserBody.Gsm> getGsmsWithPreferred() {
-        List<Object> gsmsObjList = (List<Object>) standardAttributes.get(StandardAttribute.GSMS.getKey());
-        List<UserBody.Gsm> gsms = null;
-        if (gsmsObjList != null) {
-            gsms = new ArrayList<>(gsmsObjList.size());
-            for (Object gsm : gsmsObjList) {
-                if (gsm instanceof UserBody.Gsm) {
-                    gsms.add((UserBody.Gsm) gsm);
-                } else {
-                    gsms.add(new Gson().fromJson(String.valueOf(gsm), UserBody.Gsm.class));
-                }
-            }
-        }
-        return gsms;
+    protected HashSet<UserBody.Gsm> getGsmsWithPreferred() {
+        Type type = new TypeToken<Set<UserBody.Gsm>>() {}.getType();
+        return serializer.deserialize((String) getField(StandardAttribute.GSMS), type);
     }
 
-    protected void setGsmsWithPreferred(List<UserBody.Gsm> gsms) {
-        if (gsms == null) gsms = Collections.emptyList();
+    protected void setGsmsWithPreferred(HashSet<UserBody.Gsm> gsms) {
+        if (gsms == null) gsms = new HashSet<>();
         if (this.gsms == null) this.gsms = new ArrayList<>(gsms.size());
-        setField(StandardAttribute.GSMS, gsms);
+        String gsmsSerialized = serializer.serialize(gsms);
+        setField(StandardAttribute.GSMS, gsmsSerialized);
     }
 
     /**
@@ -247,12 +247,13 @@ public class UserData {
      */
     public List<String> getEmails() {
         if (this.emails == null || this.emails.isEmpty()) {
-            List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+            HashSet<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
             if (emailsWithPreferred != null) {
                 for (UserBody.Email email : emailsWithPreferred) {
                     this.emails.add(email.getAddress());
                     Boolean preferredEmail = email.getPreferred();
-                    if (preferredEmail != null && preferredEmail) this.preferredEmail = email.getAddress();
+                    if (preferredEmail != null && preferredEmail)
+                        this.preferredEmail = email.getAddress();
                 }
             }
         }
@@ -270,36 +271,25 @@ public class UserData {
         if (emails == null) emails = Collections.emptyList();
         this.emails = emails;
 
-        List<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
-        if (emailsWithPreferred == null) emailsWithPreferred = new ArrayList<>();
+        HashSet<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
+        if (emailsWithPreferred == null) emailsWithPreferred = new HashSet<>();
         for (String email : emails) {
             if (TextUtils.isEmpty(email)) continue;
             emailsWithPreferred.add(new UserBody.Email(email, email.equals(preferredEmail)));
         }
-        setField(StandardAttribute.EMAILS, emailsWithPreferred);
+        setEmailsWithPreferred(emailsWithPreferred);
     }
 
-    protected List<UserBody.Email> getEmailsWithPreferred() {
-        List<Object> emailsObjList = (List<Object>) standardAttributes.get(StandardAttribute.EMAILS.getKey());
-        List<UserBody.Email> emails = null;
-        if (emailsObjList != null) {
-            emails = new ArrayList<>(emailsObjList.size());
-
-            for (Object email : emailsObjList) {
-                if (email instanceof UserBody.Email) {
-                    emails.add((UserBody.Email) email);
-                } else {
-                    emails.add(new Gson().fromJson(String.valueOf(email), UserBody.Email.class));
-                }
-            }
-        }
-
-        return emails;
+    protected HashSet<UserBody.Email> getEmailsWithPreferred() {
+        Type type = new TypeToken<Set<UserBody.Email>>() {}.getType();
+        return serializer.deserialize((String) getField(StandardAttribute.EMAILS), type);
     }
 
-    protected void setEmailsWithPreferred(List<UserBody.Email> emails) {
-        if (emails == null) emails = Collections.emptyList();
-        setField(StandardAttribute.EMAILS, emails);
+    protected void setEmailsWithPreferred(Set<UserBody.Email> emails) {
+        if (emails == null) emails = new HashSet<>();
+        if (this.emails == null) this.emails = new ArrayList<>(emails.size());
+        String emailsSerialized = serializer.serialize(emails);
+        setField(StandardAttribute.EMAILS, emailsSerialized);
     }
 
     /**

@@ -28,8 +28,8 @@ public class UserBody {
     private String birthday;
     private String gender;
 
-    private List<Email> emails;
-    private List<Gsm> gsms;
+    private Set<Email> emails;
+    private Set<Gsm> gsms;
     private Set<String> tags;
     private Map<String, Object> customAttributes;
     private List<AppInstanceWithPushRegId> instances;
@@ -62,6 +62,33 @@ public class UserBody {
         public void setPreferred(Boolean preferred) {
             this.preferred = preferred;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 9;
+            int result = 1;
+            result = appendToHash(result, prime, number);
+            result = appendToHash(result, prime, preferred);
+            return result;
+        }
+
+        private static int appendToHash(int result, int prime, Object o) {
+            return prime * result + (o == null ? 0 : o.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+
+            Gsm other = (Gsm) o;
+            return org.apache.commons.codec.binary.StringUtils.equals(other.number, this.number);
+        }
     }
 
     public static class Email {
@@ -91,6 +118,33 @@ public class UserBody {
 
         public void setPreferred(Boolean preferred) {
             this.preferred = preferred;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 9;
+            int result = 1;
+            result = appendToHash(result, prime, address);
+            result = appendToHash(result, prime, preferred);
+            return result;
+        }
+
+        private static int appendToHash(int result, int prime, Object o) {
+            return prime * result + (o == null ? 0 : o.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+
+            Email other = (Email) o;
+            return org.apache.commons.codec.binary.StringUtils.equals(other.address, this.address);
         }
     }
 

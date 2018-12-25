@@ -13,7 +13,7 @@ import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
-import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
+import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
