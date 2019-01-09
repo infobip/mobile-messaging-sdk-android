@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Pair;
 
 import com.google.gson.JsonElement;
@@ -10,6 +11,8 @@ import com.google.gson.reflect.TypeToken;
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
+import org.infobip.mobile.messaging.api.support.util.MapUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 
@@ -20,8 +23,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class UserDataMapper {
@@ -90,8 +95,8 @@ public class UserDataMapper {
         if (userData.getGender() != null) {
             userBody.setGender(userData.getGender().name());
         }
-        userBody.setEmails(userData.getEmailsWithPreferred());
-        userBody.setGsms(userData.getGsmsWithPreferred());
+        userBody.setEmails(emails(userData.getEmails()));
+        userBody.setGsms(gsms(userData.getGsms()));
         userBody.setTags(userData.getTags());
         if (userData.getCustomAttributes() != null) {
             userBody.setCustomAttributes(mapCustomAttsForBackendReport(userData.getCustomAttributes()));
@@ -125,9 +130,9 @@ public class UserDataMapper {
         if (userResponseBody.getGender() != null)
             userData.setGender(UserData.Gender.valueOf(userResponseBody.getGender()));
         if (userResponseBody.getEmails() != null)
-            userData.setEmailsWithPreferred(userResponseBody.getEmails());
+            userData.setEmails(destinations(userResponseBody.getEmails()));
         if (userResponseBody.getGsms() != null)
-            userData.setGsmsWithPreferred((HashSet<UserBody.Gsm>) userResponseBody.getGsms());
+            userData.setGsms(destinations(userResponseBody.getGsms()));
         if (userResponseBody.getTags() != null)
             userData.setTags(userResponseBody.getTags());
         if (userResponseBody.getCustomAttributes() != null)
@@ -161,6 +166,8 @@ public class UserDataMapper {
                 customAttributesToReport.put(key, value.numberValue());
             } else if (value.getType() == CustomUserDataValue.Type.String) {
                 customAttributesToReport.put(key, value.stringValue());
+            } else if (value.getType() == CustomUserDataValue.Type.Boolean) {
+                customAttributesToReport.put(entry.getKey(), value.booleanValue());
             }
         }
         return customAttributesToReport;
@@ -191,6 +198,8 @@ public class UserDataMapper {
 
             } else if (value instanceof Number) {
                 customUserDataValueMap.put(key, new CustomUserDataValue((Number) value));
+            } else if (value instanceof Boolean) {
+                customUserDataValueMap.put(key, new CustomUserDataValue((Boolean) value));
             }
         }
 
@@ -199,5 +208,90 @@ public class UserDataMapper {
 
     private static boolean isPossiblyDate(String stringValue) {
         return Character.isDigit(stringValue.charAt(0)) && stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length();
+    }
+
+    private static Set<UserBody.Email> emails(List<String> addresses) {
+        if (addresses == null) {
+            return null;
+        }
+
+        Set<UserBody.Email> emails = new HashSet<>(addresses.size());
+        for (String address : addresses) {
+            emails.add(new UserBody.Email(address));
+        }
+        return emails;
+    }
+
+    private static Set<UserBody.Gsm> gsms(List<String> numbers) {
+        if (numbers == null) {
+            return null;
+        }
+
+        Set<UserBody.Gsm> gsms = new HashSet<>(numbers.size());
+        for (String number : numbers) {
+            gsms.add(new UserBody.Gsm(number));
+        }
+        return gsms;
+    }
+
+    static List<String> destinations(Set<? extends UserBody.Destination> destinations) {
+        if (destinations == null) {
+            return null;
+        }
+
+        List<String> addresses = new ArrayList<>(destinations.size());
+        for (UserBody.Destination destination : destinations) {
+            addresses.add(destination.getDestinationId());
+        }
+        return addresses;
+    }
+
+    public static UserData filterOutDeletedData(UserData userData) {
+        UserData modifiedData = merge(null, userData);
+        Map<String, CustomUserDataValue> customAtts = modifiedData != null ? modifiedData.getCustomAttributes() : null;
+        userData.setCustomAttributes(filterOutRemovedElements(customAtts));
+        Map<String, Object> standardAtts = userData.getStandardAttributes();
+        userData.getStandardAttributes().clear();
+        userData.getStandardAttributes().putAll(filterOutRemovedElements(standardAtts));
+        return userData;
+    }
+
+    @Nullable
+    public static UserData merge(UserData old, UserData latest) {
+        if (old == null && latest == null) {
+            return null;
+        }
+
+        UserData merged = new UserData();
+        plus(merged, old);
+        plus(merged, latest);
+        return merged;
+    }
+
+    private static void plus(UserData existing, UserData data) {
+        if (data == null) {
+            return;
+        }
+
+        Map<String, Object> standardAtts = existing.getStandardAttributes();
+        existing.getStandardAttributes().clear();
+        existing.getStandardAttributes().putAll(MapUtils.concatOrEmpty(standardAtts, data.getStandardAttributes()));
+        existing.setCustomAttributes(MapUtils.concat(existing.getCustomAttributes(), data.getCustomAttributes()));
+        existing.setInstallations(CollectionUtils.concat(existing.getInstallations(), data.getInstallations()));
+    }
+
+    private static <T> Map<String, T> filterOutRemovedElements(Map<String, T> atts) {
+        if (atts == null) {
+            return null;
+        }
+
+        Map<String, T> newAtts = new HashMap<>(atts);
+        for (Iterator<Map.Entry<String, T>> iterator = newAtts.entrySet().iterator(); iterator.hasNext();) {
+            Map.Entry<String, T> entry = iterator.next();
+            if (entry.getValue() == null) {
+                iterator.remove();
+            }
+        }
+        return newAtts;
     }
 }

@@ -1,20 +1,15 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
-import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
-import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,23 +31,16 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_USER_DATA;
  */
 public class UserData {
 
-    private static final JsonSerializer serializer = new JsonSerializer(false);
+    private static final JsonSerializer serializer = new JsonSerializer(true);
 
-    private transient String externalUserId;
     private transient List<String> gsms;
     private transient List<String> emails;
-    private transient String preferredEmail;
-    private transient String preferredGsm;
-    private Set<String> tags;
+    private transient Set<String> tags;
     private Map<String, Object> standardAttributes;
     private Map<String, CustomUserDataValue> customAttributes;
     private List<UserData.Installation> installations;
 
     public UserData() {
-        this.externalUserId = null;
-        this.gsms = new ArrayList<>();
-        this.emails = new ArrayList<>();
-        this.tags = null;
         this.standardAttributes = new HashMap<>();
         this.customAttributes = null;
         this.installations = new ArrayList<>();
@@ -60,80 +48,24 @@ public class UserData {
 
     public UserData(String userData) {
         UserData data = serializer.deserialize(userData, UserData.class);
-        this.externalUserId = data.externalUserId;
-        this.gsms = data.gsms;
-        this.emails = data.emails;
-        this.tags = data.tags;
         this.standardAttributes = data.standardAttributes;
         this.customAttributes = data.customAttributes;
         this.installations = data.installations;
     }
 
-    protected UserData(String externalUserId,
-                       List<String> gsms,
-                       List<String> emails,
-                       Set<String> tags,
-                       Map<String, Object> standardAttributes,
+    protected UserData(Map<String, Object> standardAttributes,
                        Map<String, CustomUserDataValue> customAttributes,
                        List<UserData.Installation> installations) {
-        this.externalUserId = externalUserId;
-        this.gsms = gsms;
-        this.emails = emails;
-        this.tags = tags;
         this.standardAttributes = standardAttributes;
         this.customAttributes = customAttributes;
         this.installations = installations;
-    }
-
-    @Nullable
-    public static UserData merge(UserData old, UserData latest) {
-        if (old == null && latest == null) {
-            return null;
-        }
-
-        UserData merged = new UserData();
-        merged.add(old);
-        merged.add(latest);
-        return merged;
     }
 
     public static UserData createFrom(Bundle bundle) {
         return new UserData(bundle.getString(EXTRA_USER_DATA));
     }
 
-    private void add(UserData data) {
-        if (data == null) {
-            return;
-        }
-
-        if (data.standardAttributes != null) {
-            this.standardAttributes.putAll(data.standardAttributes);
-        }
-
-        if (data.customAttributes != null) {
-            if (this.customAttributes == null) this.customAttributes = new HashMap<>();
-            this.customAttributes.putAll(data.customAttributes);
-        }
-
-        if (data.emails != null) {
-            this.emails.addAll(data.emails);
-        }
-
-        if (data.gsms != null) {
-            this.gsms.addAll(data.gsms);
-        }
-
-        if (data.tags != null) {
-            if (this.tags == null) this.tags = new HashSet<>();
-            this.tags.addAll(data.tags);
-        }
-
-        if (data.installations != null) {
-            this.installations.addAll(data.installations);
-        }
-
-        this.externalUserId = data.externalUserId;
-    }
+    // CUSTOM ATTRIBUTES
 
     public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
         if (customAttributes == null) {
@@ -161,6 +93,8 @@ public class UserData {
             this.customAttributes.put(key, null);
         }
     }
+
+    // CUSTOM ATTRIBUTES
 
 
     // STANDARD ATTRIBUTES
@@ -196,16 +130,17 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public List<String> getGsms() {
-        if (this.gsms == null || this.gsms.isEmpty()) {
-            HashSet<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
-            if (gsmsWithPreferred != null) {
-                for (UserBody.Gsm gsm : gsmsWithPreferred) {
-                    this.gsms.add(gsm.getNumber());
-                    Boolean preferredGsm = gsm.getPreferred();
-                    if (preferredGsm != null && preferredGsm) this.preferredGsm = gsm.getNumber();
-                }
-            }
+        if (this.gsms != null && !this.gsms.isEmpty()) {
+            return this.gsms;
         }
+
+        Collection<String> gsms = getField(StandardAttribute.GSMS);
+        if (gsms == null) {
+            this.gsms = null;
+            return Collections.emptyList();
+        }
+
+        this.gsms = new ArrayList<>(gsms);
         return this.gsms;
     }
 
@@ -217,28 +152,9 @@ public class UserData {
      * @see MobileMessaging#saveUserData(UserData)
      */
     public void setGsms(List<String> gsms) {
-        if (gsms == null) gsms = Collections.emptyList();
-        this.gsms = gsms;
-
-        HashSet<UserBody.Gsm> gsmsWithPreferred = getGsmsWithPreferred();
-        if (gsmsWithPreferred == null) gsmsWithPreferred = new HashSet<>(gsms.size());
-        for (String gsm : gsms) {
-            if (TextUtils.isEmpty(gsm)) continue;
-            gsmsWithPreferred.add(new UserBody.Gsm(gsm, gsm.equals(preferredGsm)));
-        }
-        setGsmsWithPreferred(gsmsWithPreferred);
-    }
-
-    protected HashSet<UserBody.Gsm> getGsmsWithPreferred() {
-        Type type = new TypeToken<Set<UserBody.Gsm>>() {}.getType();
-        return serializer.deserialize((String) getField(StandardAttribute.GSMS), type);
-    }
-
-    protected void setGsmsWithPreferred(HashSet<UserBody.Gsm> gsms) {
-        if (gsms == null) gsms = new HashSet<>();
-        if (this.gsms == null) this.gsms = new ArrayList<>(gsms.size());
-        String gsmsSerialized = serializer.serialize(gsms);
-        setField(StandardAttribute.GSMS, gsmsSerialized);
+        setField(StandardAttribute.GSMS, gsms);
+        this.gsms = null;
+        getGsms();
     }
 
     /**
@@ -246,17 +162,17 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public List<String> getEmails() {
-        if (this.emails == null || this.emails.isEmpty()) {
-            HashSet<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
-            if (emailsWithPreferred != null) {
-                for (UserBody.Email email : emailsWithPreferred) {
-                    this.emails.add(email.getAddress());
-                    Boolean preferredEmail = email.getPreferred();
-                    if (preferredEmail != null && preferredEmail)
-                        this.preferredEmail = email.getAddress();
-                }
-            }
+        if (this.emails != null && !this.emails.isEmpty()) {
+            return this.emails;
         }
+
+        Collection<String> emails = getField(StandardAttribute.EMAILS);
+        if (emails == null) {
+            this.emails = null;
+            return Collections.emptyList();
+        }
+
+        this.emails = new ArrayList<>(emails);
         return this.emails;
     }
 
@@ -268,28 +184,9 @@ public class UserData {
      * @see MobileMessaging#saveUserData(UserData)
      */
     public void setEmails(List<String> emails) {
-        if (emails == null) emails = Collections.emptyList();
-        this.emails = emails;
-
-        HashSet<UserBody.Email> emailsWithPreferred = getEmailsWithPreferred();
-        if (emailsWithPreferred == null) emailsWithPreferred = new HashSet<>();
-        for (String email : emails) {
-            if (TextUtils.isEmpty(email)) continue;
-            emailsWithPreferred.add(new UserBody.Email(email, email.equals(preferredEmail)));
-        }
-        setEmailsWithPreferred(emailsWithPreferred);
-    }
-
-    protected HashSet<UserBody.Email> getEmailsWithPreferred() {
-        Type type = new TypeToken<Set<UserBody.Email>>() {}.getType();
-        return serializer.deserialize((String) getField(StandardAttribute.EMAILS), type);
-    }
-
-    protected void setEmailsWithPreferred(Set<UserBody.Email> emails) {
-        if (emails == null) emails = new HashSet<>();
-        if (this.emails == null) this.emails = new ArrayList<>(emails.size());
-        String emailsSerialized = serializer.serialize(emails);
-        setField(StandardAttribute.EMAILS, emailsSerialized);
+        setField(StandardAttribute.EMAILS, emails);
+        this.emails = null;
+        getEmails();
     }
 
     /**
@@ -297,7 +194,17 @@ public class UserData {
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      */
     public Set<String> getTags() {
-        return tags;
+        if (this.tags != null && !this.tags.isEmpty()) {
+            return this.tags;
+        }
+
+        Collection<String> tags = getField(StandardAttribute.TAGS);
+        if (tags == null) {
+            this.tags = null;
+            return Collections.emptySet();
+        }
+        this.tags = new HashSet<>(tags);
+        return this.tags;
     }
 
     /**
@@ -308,8 +215,9 @@ public class UserData {
      * @see MobileMessaging#saveUserData(UserData)
      */
     public void setTags(Set<String> tags) {
-        if (tags == null) tags = new HashSet<>(0);
-        this.tags = tags;
+        setField(StandardAttribute.TAGS, tags != null ? new ArrayList<>(tags) : null);
+        this.tags.clear();
+        getTags();
     }
 
     public String getFirstName() {
@@ -398,7 +306,8 @@ public class UserData {
         BIRTHDAY("birthday"),
         GSMS("gsms"),
         EMAILS("emails"),
-        EXTERNAL_USER_ID("externalUserId");
+        EXTERNAL_USER_ID("externalUserId"),
+        TAGS("tags");
 
         private final String key;
 

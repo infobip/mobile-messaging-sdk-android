@@ -91,6 +91,7 @@ public class MobileMessagingCore
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    private static final JsonSerializer nullSerializer = new JsonSerializer(true);
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
 
@@ -545,7 +546,7 @@ public class MobileMessagingCore
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
+        PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
     }
 
     public String getCustomAttributes() {
@@ -556,7 +557,7 @@ public class MobileMessagingCore
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
     }
 
     public String getUnreportedCustomAttributes() {
@@ -945,7 +946,7 @@ public class MobileMessagingCore
         if (customAttributes != null) {
             Type type = new TypeToken<Map<String, CustomUserDataValue>>() {
             }.getType();
-            Map<String, CustomUserDataValue> customAttsMap = new JsonSerializer().deserialize(customAttributes, type);
+            Map<String, CustomUserDataValue> customAttsMap = nullSerializer.deserialize(customAttributes, type);
             installation.setCustomAttributes(customAttsMap);
         }
         //TODO put system data also?
@@ -1167,7 +1168,7 @@ public class MobileMessagingCore
     @Override
     public void saveUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
         UserData existingData = getUnreportedUserData();
-        UserData userDataToReport = UserData.merge(existingData, userData);
+        UserData userDataToReport = UserDataMapper.merge(existingData, userData);
 
         if (userDataToReport != null) {
             saveUnreportedUserData(userDataToReport);
@@ -1201,7 +1202,7 @@ public class MobileMessagingCore
             }
         }
 
-        return UserData.merge(existing, getUnreportedUserData());
+        return UserDataMapper.merge(existing, getUnreportedUserData());
     }
 
     private boolean areInstallationsExpired() {
@@ -1345,7 +1346,7 @@ public class MobileMessagingCore
         if (userData != null && shouldSaveUserData()) {
             UserData dataForStoring = userData;
             if (merge) {
-                dataForStoring = UserData.merge(getUserData(), userData);
+                dataForStoring = UserDataMapper.filterOutDeletedData(UserDataMapper.merge(getUserData(), userData));
             }
             saveUserDataToPrefs(dataForStoring);
         }

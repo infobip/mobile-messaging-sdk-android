@@ -95,8 +95,8 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertEquals(givenUserData.getMiddleName(), report.getMiddleName());
         assertEquals(givenUserData.getLastName(), report.getLastName());
         assertEquals(givenUserData.getExternalUserId(), report.getExternalUserId());
-        assertEquals(givenUserData.getEmailsWithPreferred(), report.getEmails());
-        assertEquals(givenUserData.getGsmsWithPreferred(), report.getGsms());
+        assertEquals(givenUserData.getEmails(), UserDataMapper.destinations(report.getEmails()));
+        assertEquals(givenUserData.getGsms(), UserDataMapper.destinations(report.getGsms()));
         assertJEquals(givenUserData.getStandardAttributes(), mobileMessagingCore.getUserData().getStandardAttributes());
 
         assertNull(mobileMessagingCore.getUnreportedUserData());
@@ -109,6 +109,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         givenUserData.setCustomUserDataElement("myKey1", new CustomUserDataValue("Some string"));
         givenUserData.setCustomUserDataElement("myKey2", new CustomUserDataValue(12345));
         givenUserData.setCustomUserDataElement("myKey3", new CustomUserDataValue(new Date()));
+        givenUserData.setCustomUserDataElement("myKey4", new CustomUserDataValue(false));
 
         mobileMessaging.saveUserData(givenUserData);
 
@@ -118,6 +119,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertEquals(givenUserData.getCustomUserDataValue("myKey1").stringValue(), report.getCustomAttributes().get("myKey1"));
         assertEquals(givenUserData.getCustomUserDataValue("myKey2").numberValue(), report.getCustomAttributes().get("myKey2"));
         assertEquals(givenUserData.getCustomUserDataValue("myKey3").dateValue(), DateTimeUtil.DateFromYMDString((String) report.getCustomAttributes().get("myKey3")));
+        assertEquals(givenUserData.getCustomUserDataValue("myKey4").booleanValue(), report.getCustomAttributes().get("myKey4"));
 
         assertJEquals(givenUserData.getCustomAttributes(), mobileMessagingCore.getUserData().getCustomAttributes());
         assertNull(mobileMessagingCore.getUnreportedUserData());

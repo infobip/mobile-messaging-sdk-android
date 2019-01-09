@@ -67,7 +67,7 @@ public class UserDataReporter {
             public void after(Void aVoid) {
                 mobileMessagingCore.setUserDataReported(userData, true);
 
-                UserData userDataToReturn = userData;
+                UserData userDataToReturn = UserDataMapper.filterOutDeletedData(userData);
                 if (mobileMessagingCore.shouldSaveUserData()) {
                      userDataToReturn = mobileMessagingCore.getUserData();
                 }
