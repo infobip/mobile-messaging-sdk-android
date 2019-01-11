@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.cloud.firebase;
 
+import android.content.Context;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -16,29 +18,40 @@ public class MobileMessagingFirebaseService extends FirebaseMessagingService {
 
     private final static String TAG = MobileMessagingFirebaseService.class.getSimpleName();
 
-    private final FirebaseMessageMapper messageMapper;
+    private static FirebaseMessageMapper messageMapper;
 
-    public MobileMessagingFirebaseService() {
-        this(new FirebaseMessageMapper());
-    }
-
-    public MobileMessagingFirebaseService(FirebaseMessageMapper messageMapper) {
-        this.messageMapper = messageMapper;
+    public static FirebaseMessageMapper getMessageMapper() {
+        if (null == messageMapper) {
+            messageMapper = new FirebaseMessageMapper();
+        }
+        return messageMapper;
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Message message = messageMapper.createMessage(remoteMessage);
-        MobileMessagingLogger.v(TAG, "RECEIVED MESSAGE FROM FCM", message);
-        if (message != null) {
-            MobileMessagingCloudService.enqueueNewMessage(this, message);
-        }
+        onMessageReceived(this, remoteMessage);
     }
 
     @Override
     public void onNewToken(String token) {
+        onNewToken(this, token);
+    }
+
+    public static boolean onMessageReceived(Context context, RemoteMessage remoteMessage) {
+        Message message = getMessageMapper().createMessage(remoteMessage);
+        MobileMessagingLogger.v(TAG, "RECEIVED MESSAGE FROM FCM", message);
+        if (message != null) {
+            MobileMessagingCloudService.enqueueNewMessage(context, message);
+            return true;
+        } else {
+            MobileMessagingLogger.w("Cannot process message");
+            return false;
+        }
+    }
+
+    public static void onNewToken(Context context, String token) {
         MobileMessagingLogger.v(TAG, "RECEIVED TOKEN FROM FCM", token);
-        String senderId = MobileMessagingCore.getSenderId(this);
-        MobileMessagingCloudService.enqueueNewToken(this, senderId, token);
+        String senderId = MobileMessagingCore.getSenderId(context);
+        MobileMessagingCloudService.enqueueNewToken(context, senderId, token);
     }
 }

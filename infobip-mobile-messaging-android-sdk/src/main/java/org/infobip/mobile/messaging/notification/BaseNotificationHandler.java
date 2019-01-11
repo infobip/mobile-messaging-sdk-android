@@ -10,11 +10,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.BitmapCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.ConfigurationException;
@@ -142,12 +144,35 @@ public class BaseNotificationHandler {
             InputStream input = connection.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(input);
             input.close();
-            return bitmap;
+            return validateBitmap(bitmap);
 
         } catch (Exception e) {
             MobileMessagingLogger.e(e.getMessage());
             return null;
         }
+    }
+
+    private static @Nullable Bitmap validateBitmap(@Nullable Bitmap bitmap) {
+        if (bitmap == null) {
+            return null;
+        }
+
+        if (bitmap.getWidth() == 0
+                || bitmap.getHeight() == 0
+                || isBitmapEmpty(bitmap)) {
+
+            MobileMessagingLogger.e("Got empty or malformed Bitmap, ignoring it");
+            return null;
+        }
+
+        return bitmap;
+    }
+
+    /**
+     * Same code as in {@link BitmapCompat#getAllocationByteCount(Bitmap)} to avoid compat dependencies
+     */
+    private static boolean isBitmapEmpty(@NonNull Bitmap bitmap) {
+        return (Build.VERSION.SDK_INT >= 19 ? bitmap.getAllocationByteCount() : bitmap.getByteCount()) == 0;
     }
 
     @Nullable
@@ -240,7 +265,8 @@ public class BaseNotificationHandler {
     /**
      * This method will set priority to HIGH if heads up notification is required.
      * <br>This setting is necessary for Android 5.0 - 7.1 versions
-     * @param notificationBuilder - notification builder
+     *
+     * @param notificationBuilder  - notification builder
      * @param notificationSettings - notification settings to use when choosing priority
      */
     private void setPriorityForHeadsupNotification(NotificationCompat.Builder notificationBuilder, @NonNull NotificationSettings notificationSettings) {
@@ -258,6 +284,7 @@ public class BaseNotificationHandler {
     /**
      * This method will return channel with HIGH importance if heads up notification is required.
      * <br>This is necessary for Android 8.0 and above.
+     *
      * @param notificationSettings - notification settings to use when choosing the channel
      */
     @NonNull
