@@ -27,7 +27,8 @@ public class CustomUserDataValue {
     public enum Type {
         String,
         Number,
-        Date
+        Date,
+        Boolean
     }
 
     private Object value;
@@ -46,6 +47,11 @@ public class CustomUserDataValue {
     public CustomUserDataValue(Date someDate) {
         this.value = DateTimeUtil.DateToYMDString(someDate);
         this.type = Type.Date;
+    }
+
+    public CustomUserDataValue(Boolean someBoolean) {
+        this.value = someBoolean;
+        this.type = Type.Boolean;
     }
 
     /**
@@ -68,6 +74,9 @@ public class CustomUserDataValue {
             case Date:
                 DateTimeUtil.DateFromYMDString(stringValue);
                 this.value = stringValue;
+                break;
+            case Boolean:
+                this.value = Boolean.valueOf(stringValue);
                 break;
             default:
                 throw new InvalidParameterException();
@@ -125,6 +134,20 @@ public class CustomUserDataValue {
         }
     }
 
+    /**
+     * Return the value of specified {@code CustomUserDataValue} as {@link Boolean}.
+     *
+     * @return {@link Boolean}
+     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Boolean} type.
+     */
+    public Boolean booleanValue() {
+        if (!(value instanceof Boolean) || type != Type.Boolean) {
+            throw new ClassCastException();
+        }
+
+        return Boolean.valueOf("" + value);
+    }
+
     public Type getType() {
         return type;
     }
@@ -146,6 +169,8 @@ public class CustomUserDataValue {
                 return DateTimeUtil.DateToYMDString(dateValue());
             case Number:
                 return "" + numberValue();
+            case Boolean:
+                return "" + booleanValue();
             default:
                 return super.toString();
         }

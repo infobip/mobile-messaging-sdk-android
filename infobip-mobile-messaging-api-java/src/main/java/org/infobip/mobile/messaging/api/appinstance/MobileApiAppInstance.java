@@ -9,6 +9,8 @@ import org.infobip.mobile.messaging.api.support.http.Query;
 import org.infobip.mobile.messaging.api.support.http.Version;
 import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 
+import java.util.Map;
+
 /**
  * User and app instance related mobile API.
  * <p>
@@ -27,32 +29,32 @@ public interface MobileApiAppInstance {
 
     @HttpRequest(method = HttpMethod.POST)
     @Query(name = "ri", value = "true")
-    AppInstanceWithPushRegId createInstance(@Query(name = "rt", value = "false") boolean returnToken,
-                                            @Body AppInstance instance);
+    AppInstance createInstance(@Query(name = "rt", value = "false") boolean returnToken,
+                               @Body AppInstance instance);
 
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}")
     @Query(name = "rt", value = "false")
-    Void patchInstance(@Path(name = "regId") String regId,
+    void patchInstance(@Path(name = "regId") String regId,
                        @Query(name = "ri", value = "false") boolean returnInstance,
-                       @Body AppInstance instance);
+                       @Body Map instance);
 
     @HttpRequest(method = HttpMethod.GET, value = "{regId}")
-    AppInstanceWithPushRegId getInstance(@Path(name = "regId") String regId);
+    AppInstance getInstance(@Path(name = "regId") String regId);
 
     //TODO NOT USED (used in showcase) - delete?
     @HttpRequest(method = HttpMethod.DELETE, value = "{regId}")
-    Void expireInstance(@Path(name = "regId") String regId);
+    void expireInstance(@Path(name = "regId") String regId);
 
 
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}/user")
-    Void patchUser(@Path(name = "regId") String regId,
+    void patchUser(@Path(name = "regId") String regId,
                    @Query(name = "ru", value = "false") boolean returnUser,
-                   @Body UserBody user);
+                   @Body Map user);
 
     @HttpRequest(method = HttpMethod.GET, value = "{regId}/user")
     @Query(name = "ri", value = "true")
     UserBody getUser(@Path(name = "regId") String regId);
 
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/logout")
-    Void logoutUser(@Path(name = "regId") String regId);
+    void logoutUser(@Path(name = "regId") String regId);
 }

@@ -92,30 +92,16 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_should_send_push_registration_acquired() {
+    public void test_should_send_push_token_received() {
         // When
-        broadcastSender.registrationAcquired("SomeCloudToken");
+        broadcastSender.tokenReceived("SomeCloudToken");
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.REGISTRATION_ACQUIRED.getKey(), intent.getAction());
+        assertEquals(Event.TOKEN_RECEIVED.getKey(), intent.getAction());
         assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
-    }
-
-    @Test
-    public void test_should_send_push_registration_created() {
-        // When
-        broadcastSender.registrationCreated("SomeCloudToken", "SomeDeviceInstanceId");
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.REGISTRATION_CREATED.getKey(), intent.getAction());
-        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
-        assertEquals("SomeDeviceInstanceId", intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
     }
 
     @Test

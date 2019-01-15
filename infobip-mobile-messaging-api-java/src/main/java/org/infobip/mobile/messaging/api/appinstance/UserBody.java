@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.api.appinstance;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.support.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,42 @@ public class UserBody {
     private Set<Gsm> gsms;
     private Set<String> tags;
     private Map<String, Object> customAttributes;
-    private List<AppInstanceWithPushRegId> instances;
+    private List<AppInstance> instances;
 
-    public static class Gsm {
+    public abstract static class Destination {
+
+        public abstract String getDestinationId();
+        public abstract Boolean getPreferred();
+
+        @Override
+        public int hashCode() {
+            final int prime = 9;
+            int result = 1;
+            result = appendToHash(result, prime, getDestinationId());
+            result = appendToHash(result, prime, getPreferred());
+            return result;
+        }
+
+        private static int appendToHash(int result, int prime, Object o) {
+            return prime * result + (o == null ? 0 : o.hashCode());
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+
+            Destination other = (Destination) o;
+            return StringUtils.equals(other.getDestinationId(), this.getDestinationId());
+        }
+    }
+
+    public static class Gsm extends Destination {
         String number;
         Boolean preferred;
 
@@ -55,6 +89,12 @@ public class UserBody {
             this.number = number;
         }
 
+        @Override
+        public String getDestinationId() {
+            return getNumber();
+        }
+
+        @Override
         public Boolean getPreferred() {
             return preferred;
         }
@@ -62,36 +102,9 @@ public class UserBody {
         public void setPreferred(Boolean preferred) {
             this.preferred = preferred;
         }
-
-        @Override
-        public int hashCode() {
-            final int prime = 9;
-            int result = 1;
-            result = appendToHash(result, prime, number);
-            result = appendToHash(result, prime, preferred);
-            return result;
-        }
-
-        private static int appendToHash(int result, int prime, Object o) {
-            return prime * result + (o == null ? 0 : o.hashCode());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-
-            Gsm other = (Gsm) o;
-            return org.apache.commons.codec.binary.StringUtils.equals(other.number, this.number);
-        }
     }
 
-    public static class Email {
+    public static class Email extends Destination {
         String address;
         Boolean preferred;
 
@@ -112,39 +125,18 @@ public class UserBody {
             this.address = address;
         }
 
+        @Override
+        public String getDestinationId() {
+            return getAddress();
+        }
+
+        @Override
         public Boolean getPreferred() {
             return preferred;
         }
 
         public void setPreferred(Boolean preferred) {
             this.preferred = preferred;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 9;
-            int result = 1;
-            result = appendToHash(result, prime, address);
-            result = appendToHash(result, prime, preferred);
-            return result;
-        }
-
-        private static int appendToHash(int result, int prime, Object o) {
-            return prime * result + (o == null ? 0 : o.hashCode());
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-
-            Email other = (Email) o;
-            return org.apache.commons.codec.binary.StringUtils.equals(other.address, this.address);
         }
     }
 
