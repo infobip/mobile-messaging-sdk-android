@@ -203,14 +203,6 @@ public class MobileMessagingCore
         }
     }
 
-    private void migrateUserData() {
-
-    }
-
-    private void migrateInstallationData() {
-
-    }
-
     private void initDefaultChannels() {
         if (Build.VERSION.SDK_INT < 26) {
             return;

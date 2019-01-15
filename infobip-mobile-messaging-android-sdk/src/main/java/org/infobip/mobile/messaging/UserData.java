@@ -192,7 +192,7 @@ public class UserData extends CustomAttributeHolder {
 
     public void setBirthday(Date birthday) {
         this.birthday = DateTimeUtil.DateToYMDString(birthday);
-        setField(UserAtts.birthday, birthday);
+        setField(UserAtts.birthday, this.birthday);
     }
 
     String getBirthdayString() {
