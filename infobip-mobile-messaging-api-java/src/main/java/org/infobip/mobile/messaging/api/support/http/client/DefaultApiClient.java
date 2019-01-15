@@ -31,7 +31,7 @@ public class DefaultApiClient implements ApiClient {
 
     public static final int DEFAULT_READ_TIMEOUT = 60000;
 
-    protected static final JsonSerializer JSON_SERIALIZER = new JsonSerializer();
+    public static final JsonSerializer JSON_SERIALIZER = new JsonSerializer();
     private static final JsonSerializer JSON_SERIALIZER_WITH_NULLS = new JsonSerializer(true);
 
     private final int connectTimeout;

@@ -171,8 +171,8 @@ public class UserDataReporter {
         if (userData.getInstallations() != null) {
             for (Installation installation : userData.getInstallations()) {
                 if (mobileMessagingCore.getPushRegistrationId() != null &&
-                        mobileMessagingCore.getPushRegistrationId().equals(installation.getPushRegId())) {
-                    mobileMessagingCore.savePrimarySetting(installation.getPrimary());
+                        mobileMessagingCore.getPushRegistrationId().equals(installation.getPushRegistrationId())) {
+                    mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
                 }
             }
         }

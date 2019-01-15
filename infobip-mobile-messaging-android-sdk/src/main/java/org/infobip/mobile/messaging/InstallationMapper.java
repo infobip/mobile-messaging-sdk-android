@@ -38,7 +38,7 @@ public class InstallationMapper {
 
     public static AppInstance toBackend(Installation installation) {
         AppInstance appInstance = new AppInstance();
-        appInstance.setRegEnabled(installation.getRegEnabled());
+        appInstance.setRegEnabled(installation.isPushRegistrationEnabled());
         appInstance.setNotificationsEnabled(installation.getNotificationsEnabled());
         appInstance.setGeoEnabled(installation.getGeoEnabled());
         appInstance.setSdkVersion(installation.getSdkVersion());
@@ -51,7 +51,7 @@ public class InstallationMapper {
         appInstance.setOsLanguage(installation.getOsLanguage());
         appInstance.setDeviceTimezoneId(installation.getDeviceTimezoneId());
         appInstance.setDeviceName(installation.getDeviceName());
-        appInstance.setIsPrimary(installation.getPrimary());
+        appInstance.setIsPrimary(installation.isPrimaryDevice());
         appInstance.setPushServiceType(pushServiceTypeToBackend(installation.getPushServiceType()));
         appInstance.setPushServiceToken(installation.getPushServiceToken());
         return appInstance;

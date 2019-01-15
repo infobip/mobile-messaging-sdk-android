@@ -90,7 +90,7 @@ public class InstallationSynchronizer {
         }
 
         if (mobileMessagingCore.getUnreportedPrimarySetting() != null) {
-            installation.setPrimary(mobileMessagingCore.getUnreportedPrimarySetting());
+            installation.setPrimaryDevice(mobileMessagingCore.getUnreportedPrimarySetting());
         }
 
         if (!mobileMessagingCore.isApplicationUserIdReported()) {
@@ -98,7 +98,7 @@ public class InstallationSynchronizer {
         }
 
         if (installation.hasDataToReport()) {
-            installation.setRegEnabled(mobileMessagingCore.isPushRegistrationEnabled());
+            installation.setPushRegistrationEnabled(mobileMessagingCore.isPushRegistrationEnabled());
         }
 
         if (mobileMessagingCore.isRegistrationUnavailable()) {
@@ -122,7 +122,7 @@ public class InstallationSynchronizer {
 
     public void updatePushRegEnabledStatus(Boolean enabled, InstallationActionListener actionListener) {
         Installation installation = new Installation();
-        installation.setRegEnabled(enabled);
+        installation.setPushRegistrationEnabled(enabled);
         patch(installation, actionListener);
     }
 
@@ -132,7 +132,7 @@ public class InstallationSynchronizer {
 
     public void updatePrimaryStatus(String pushRegId, Boolean primary, InstallationActionListener actionListener) {
         Installation installation = new Installation(pushRegId);
-        installation.setPrimary(primary);
+        installation.setPrimaryDevice(primary);
         patch(installation, actionListener);
     }
 
@@ -156,7 +156,7 @@ public class InstallationSynchronizer {
                 }
 
                 Installation installation = InstallationMapper.fromBackend(appInstance);
-                setPushRegistrationId(installation.getPushRegId());
+                setPushRegistrationId(installation.getPushRegistrationId());
                 updateInstallationReported(installation, true);
 
                 broadcaster.installationCreated(installation);
@@ -189,7 +189,7 @@ public class InstallationSynchronizer {
         String pushRegId = mobileMessagingCore.getPushRegistrationId();
         final boolean myDevice = isMyDevice(installation, pushRegId);
         if (!myDevice) {
-            pushRegId = installation.getPushRegId();
+            pushRegId = installation.getPushRegistrationId();
         }
 
         final String pushRegIdToUpdate = pushRegId;
@@ -233,7 +233,7 @@ public class InstallationSynchronizer {
     }
 
     private boolean isMyDevice(Installation installation, String myPushRegId) {
-        return  (installation.getPushRegId() != null && myPushRegId.equals(installation.getPushRegId())) || installation.getPushRegId() == null;
+        return  (installation.getPushRegistrationId() != null && myPushRegId.equals(installation.getPushRegistrationId())) || installation.getPushRegistrationId() == null;
     }
 
     private void updateInstallationReported(Installation installation, boolean myDevice) {
@@ -244,10 +244,10 @@ public class InstallationSynchronizer {
         }
 
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
-        if (installation.getPrimary() != null) {
-            mobileMessagingCore.savePrimarySetting(installation.getPrimary());
+        if (installation.isPrimaryDevice() != null) {
+            mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
         }
-        setPushRegistrationEnabled(installation.getRegEnabled());
+        setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
         setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
@@ -283,8 +283,8 @@ public class InstallationSynchronizer {
             @Override
             public void after(AppInstance instance) {
                 Installation installation = InstallationMapper.fromBackend(instance);
-                if (installation.getPrimary() != null) {
-                    mobileMessagingCore.savePrimarySetting(installation.getPrimary());
+                if (installation.isPrimaryDevice() != null) {
+                    mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
                 }
                 mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 

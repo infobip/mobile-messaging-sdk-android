@@ -10,8 +10,9 @@ import static org.infobip.mobile.messaging.InstallationMapper.fromBundle;
 
 public class Installation extends CustomAttributeHolder {
 
-    private String pushRegId;
-    private Boolean regEnabled;
+    private String pushRegistrationId;
+    private Boolean isPrimaryDevice;
+    private Boolean isPushRegistrationEnabled;
     private Boolean notificationsEnabled;
     private Boolean geoEnabled;
     private String sdkVersion;
@@ -25,7 +26,6 @@ public class Installation extends CustomAttributeHolder {
     private String deviceTimezoneId;
     private String applicationUserId;
     private String deviceName;
-    private Boolean isPrimary;
     private PushServiceType pushServiceType;
     private String pushServiceToken;
 
@@ -38,12 +38,12 @@ public class Installation extends CustomAttributeHolder {
 
     }
 
-    public Installation(String pushRegId) {
-        this.pushRegId = pushRegId;
+    public Installation(String pushRegistrationId) {
+        this.pushRegistrationId = pushRegistrationId;
     }
 
-    public Installation(String pushRegId,
-                        Boolean regEnabled,
+    public Installation(String pushRegistrationId,
+                        Boolean isPushRegistrationEnabled,
                         Boolean notificationsEnabled,
                         Boolean geoEnabled,
                         String sdkVersion,
@@ -57,13 +57,13 @@ public class Installation extends CustomAttributeHolder {
                         String deviceTimezoneId,
                         String applicationUserId,
                         String deviceName,
-                        Boolean isPrimary,
+                        Boolean isPrimaryDevice,
                         PushServiceType pushServiceType,
                         String pushServiceToken,
                         Map<String, CustomUserDataValue> customAttributes) {
         super(customAttributes);
-        this.pushRegId = pushRegId;
-        this.regEnabled = regEnabled;
+        this.pushRegistrationId = pushRegistrationId;
+        this.isPushRegistrationEnabled = isPushRegistrationEnabled;
         this.notificationsEnabled = notificationsEnabled;
         this.geoEnabled = geoEnabled;
         this.sdkVersion = sdkVersion;
@@ -77,7 +77,7 @@ public class Installation extends CustomAttributeHolder {
         this.deviceTimezoneId = deviceTimezoneId;
         this.applicationUserId = applicationUserId;
         this.deviceName = deviceName;
-        this.isPrimary = isPrimary;
+        this.isPrimaryDevice = isPrimaryDevice;
         this.pushServiceType = pushServiceType;
         this.pushServiceToken = pushServiceToken;
     }
@@ -86,22 +86,31 @@ public class Installation extends CustomAttributeHolder {
         return fromBundle(BroadcastParameter.EXTRA_INSTALLATION, bundle);
     }
 
-    public String getPushRegId() {
-        return pushRegId;
+    public String getPushRegistrationId() {
+        return pushRegistrationId;
     }
 
-    void setPushRegId(String pushRegId) {
-        this.pushRegId = pushRegId;
-        setField(AppInstanceAtts.pushRegId, pushRegId);
+    public void setPushRegistrationId(String pushRegistrationId) {
+        this.pushRegistrationId = pushRegistrationId;
+        setField(AppInstanceAtts.pushRegId, pushRegistrationId);
     }
 
-    public Boolean getRegEnabled() {
-        return regEnabled;
+    public Boolean isPrimaryDevice() {
+        return isPrimaryDevice;
     }
 
-    public void setRegEnabled(Boolean regEnabled) {
-        this.regEnabled = regEnabled;
-        setField(AppInstanceAtts.regEnabled, regEnabled);
+    public void setPrimaryDevice(Boolean primaryDevice) {
+        isPrimaryDevice = primaryDevice;
+        setField(AppInstanceAtts.isPrimary, primaryDevice);
+    }
+
+    public Boolean isPushRegistrationEnabled() {
+        return isPushRegistrationEnabled;
+    }
+
+    public void setPushRegistrationEnabled(Boolean pushRegistrationEnabled) {
+        isPushRegistrationEnabled = pushRegistrationEnabled;
+        setField(AppInstanceAtts.regEnabled, pushRegistrationEnabled);
     }
 
     public Boolean getNotificationsEnabled() {
@@ -219,15 +228,6 @@ public class Installation extends CustomAttributeHolder {
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
         setField(AppInstanceAtts.deviceName, deviceName);
-    }
-
-    public Boolean getPrimary() {
-        return isPrimary;
-    }
-
-    public void setPrimary(Boolean primary) {
-        isPrimary = primary;
-        setField(AppInstanceAtts.isPrimary, primary);
     }
 
     public PushServiceType getPushServiceType() {

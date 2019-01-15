@@ -499,10 +499,10 @@ public class MobileMessagingCore
         if (installations != null && !installations.isEmpty()) {
             List<Installation> installationsTemp = new ArrayList<>();
             for (Installation installation : installations) {
-                if (pushRegId.equals(installation.getPushRegId())) {
-                    installation.setPrimary(isPrimary);
-                } else if (installation.getPrimary()) {
-                    installation.setPrimary(false);
+                if (pushRegId.equals(installation.getPushRegistrationId())) {
+                    installation.setPrimaryDevice(isPrimary);
+                } else if (installation.isPrimaryDevice()) {
+                    installation.setPrimaryDevice(false);
                 }
                 installationsTemp.add(installation);
             }
@@ -978,7 +978,7 @@ public class MobileMessagingCore
             setUnreportedCustomAttributes(installation.getCustomAttributes());
         }
         if (installation.containsField(AppInstanceAtts.isPrimary)) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimary());
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.isPrimaryDevice());
             PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
         }
         installationSynchronizer().patch(installation, listener);
@@ -1327,7 +1327,7 @@ public class MobileMessagingCore
         if (installations != null && !installations.isEmpty()) {
             List<Installation> installationsTemp = new ArrayList<>(installations);
             for (Installation installation : installationsTemp) {
-                if (pushRegId.equals(installation.getPushRegId())) {
+                if (pushRegId.equals(installation.getPushRegistrationId())) {
                     installations.remove(installation);
                     break;
                 }
