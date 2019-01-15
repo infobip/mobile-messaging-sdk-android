@@ -28,7 +28,7 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
 
     public void handleNewToken(String senderId, String token) {
         MobileMessagingLogger.v(TAG, "RECEIVED TOKEN", token);
-        broadcaster.registrationAcquired(token);
+        broadcaster.tokenReceived(token);
         sendRegistrationToServer(token);
     }
 

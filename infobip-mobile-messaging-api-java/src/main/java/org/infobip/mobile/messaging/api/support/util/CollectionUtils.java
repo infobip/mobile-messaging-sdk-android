@@ -2,9 +2,11 @@ package org.infobip.mobile.messaging.api.support.util;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class CollectionUtils {
     public static boolean isEmpty(Collection collection) {
@@ -34,5 +36,10 @@ public class CollectionUtils {
             result.addAll(collections.get(i));
         }
         return result;
+    }
+
+    @SafeVarargs
+    public static <T> Set<T> setOf(T... ts) {
+        return new HashSet<>(Arrays.asList(ts));
     }
 }

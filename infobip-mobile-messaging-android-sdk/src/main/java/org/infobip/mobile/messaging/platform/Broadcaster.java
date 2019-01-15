@@ -1,10 +1,10 @@
 package org.infobip.mobile.messaging.platform;
 
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 
 import java.util.List;
 
@@ -42,15 +42,7 @@ public interface Broadcaster {
      *
      * @param cloudToken GCM/FCM cloud token
      */
-    void registrationAcquired(String cloudToken);
-
-    /**
-     * Sends broadcast about new registration data
-     *
-     * @param cloudToken         GCM/FCM cloud token
-     * @param pushRegistrationId Infobip registration id
-     */
-    void registrationCreated(String cloudToken, String pushRegistrationId);
+    void tokenReceived(String cloudToken);
 
     /**
      * Sends broadcast when push registration enabled is available

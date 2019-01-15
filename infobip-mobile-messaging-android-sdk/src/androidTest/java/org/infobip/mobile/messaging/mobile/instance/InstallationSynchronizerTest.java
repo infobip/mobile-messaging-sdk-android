@@ -2,12 +2,11 @@ package org.infobip.mobile.messaging.mobile.instance;
 
 import android.support.annotation.NonNull;
 
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
-import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -18,6 +17,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Matchers.any;
@@ -54,8 +54,8 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         MobileMessagingStats stats = mobileMessagingCore.getStats();
         RetryPolicyProvider retryPolicy = new RetryPolicyProvider(context);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileApiAppInstance);
-        when(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).thenReturn(new AppInstanceWithPushRegId("pushRegId"));
-        when(mobileApiAppInstance.getInstance(anyString())).thenReturn(new AppInstanceWithPushRegId("pushRegId"));
+        when(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).thenReturn(new AppInstance("pushRegId"));
+        when(mobileApiAppInstance.getInstance(anyString())).thenReturn(new AppInstance("pushRegId"));
     }
 
     @Override
@@ -90,12 +90,12 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         installationSynchronizer.sync(actionListener);
 
         verify(actionListener, after(300).times(1)).onSuccess(any(Installation.class));
-        verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+        verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
     }
 
     @Test
     public void shouldReportErrorWhenPatchingOnServer() {
-        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(Map.class));
 
         installationSynchronizer.sync(actionListener);
 

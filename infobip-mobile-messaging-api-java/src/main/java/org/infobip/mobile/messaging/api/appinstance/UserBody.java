@@ -33,7 +33,7 @@ public class UserBody {
     private Set<Gsm> gsms;
     private Set<String> tags;
     private Map<String, Object> customAttributes;
-    private List<AppInstanceWithPushRegId> instances;
+    private List<AppInstance> instances;
 
     public abstract static class Destination {
 

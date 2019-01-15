@@ -1,14 +1,14 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
-import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
+
+import java.util.Map;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -88,7 +88,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     @Test
     public void test_reportSystemData_repeatAfterError() {
 
-        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(AppInstance.class));
+        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(Map.class));
 
         mobileMessagingCore.syncInstallation();
 
@@ -107,8 +107,8 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
 
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED);
-        AppInstanceWithPushRegId appInstanceWithPushRegId = new AppInstanceWithPushRegId("pushRegId");
-        BDDMockito.given(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).willReturn(appInstanceWithPushRegId);
+        AppInstance appInstance = new AppInstance("pushRegId");
+        BDDMockito.given(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).willReturn(appInstance);
 
         mobileMessagingCore.syncInstallation();
 

@@ -1,48 +1,37 @@
 package org.infobip.mobile.messaging.api.appinstance;
 
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import java.util.Map;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@EqualsAndHashCode(callSuper = true)
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class AppInstance extends AppInstanceWithPushRegId {
+public class AppInstance {
 
-    private static final JsonSerializer serializer = new JsonSerializer(false);
+    private String pushRegId;
+    private Boolean regEnabled;
+    private Boolean notificationsEnabled;
+    private Boolean geoEnabled;
+    private String sdkVersion;
+    private String appVersion;
+    private String os;
+    private String osVersion;
+    private String deviceManufacturer;
+    private String deviceModel;
+    private Boolean deviceSecure;
+    private String osLanguage;
+    private String deviceTimezoneId;
+    private String applicationUserId;
+    private String deviceName;
+    private Map<String, Object> customAttributes;
+    private Boolean isPrimary;
+    private PushServiceType pushServiceType;
+    private String pushServiceToken;
 
-    transient String pushRegId;
-
-    public AppInstance(String sdkVersion,
-                       String osVersion,
-                       String deviceManufacturer,
-                       String deviceModel,
-                       String appVersion,
-                       boolean geoEnabled,
-                       boolean notificationsEnabled,
-                       boolean deviceSecure,
-                       String osLanguage,
-                       String deviceName,
-                       String os) {
-        this.sdkVersion = sdkVersion;
-        this.osVersion = osVersion;
-        this.deviceManufacturer = deviceManufacturer;
-        this.deviceModel = deviceModel;
-        this.appVersion = appVersion;
-        this.geoEnabled = geoEnabled;
-        this.notificationsEnabled = notificationsEnabled;
-        this.deviceSecure = deviceSecure;
-        this.osLanguage = osLanguage;
-        this.deviceName = deviceName;
-        this.os = os;
-    }
-
-    @Override
-    public String toString() {
-        return serializer.serialize(this);
+    public AppInstance(String pushRegId) {
+        this.pushRegId = pushRegId;
     }
 }

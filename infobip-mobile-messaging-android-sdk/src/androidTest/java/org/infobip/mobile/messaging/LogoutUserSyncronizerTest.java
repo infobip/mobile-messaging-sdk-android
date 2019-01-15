@@ -6,16 +6,13 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
+import static org.infobip.mobile.messaging.UserDataMapper.toJson;
 
 public class LogoutUserSyncronizerTest extends MobileMessagingTestCase {
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        given(mobileApiAppInstance.logoutUser(anyString())).willReturn(null);
 
         enableMessageStoreForReceivedMessages();
     }
@@ -28,7 +25,7 @@ public class LogoutUserSyncronizerTest extends MobileMessagingTestCase {
         userData.setFirstName("John");
         userData.setCustomUserDataElement("someKey", new CustomUserDataValue("someValue"));
         SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeOsLanguage", "SomeDeviceName");
-        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
+        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, toJson(userData));
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, systemData.toString());
         createMessage(context, "SomeMessageId", true);
 
