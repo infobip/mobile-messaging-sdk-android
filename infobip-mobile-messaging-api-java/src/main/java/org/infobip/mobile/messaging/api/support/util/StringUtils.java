@@ -41,4 +41,12 @@ public abstract class StringUtils {
         }
         return sb.toString();
     }
+
+    public static boolean equals(String one, String two) {
+        if (isBlank(one) && isBlank(two)) {
+            return true;
+        }
+
+        return ("" + one).equals(two);
+    }
 }

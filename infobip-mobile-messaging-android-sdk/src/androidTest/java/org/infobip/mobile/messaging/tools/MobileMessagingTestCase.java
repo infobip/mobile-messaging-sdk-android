@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * @author sslavin
@@ -139,7 +140,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         MobileApiResourceProvider mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
         mobileApiMessages = mock(MobileApiMessages.class);
-        mobileApiAppInstance = mock(MobileApiAppInstance.class);
+        mobileApiAppInstance = mock(MobileApiAppInstance.class, withSettings().verboseLogging());
 
         given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
         given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);

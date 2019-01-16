@@ -45,7 +45,6 @@ public class JsonSerializer {
     }
 
     public JsonSerializer() {
-        //TODO revert to serializeNulls?
         gson = new GsonBuilder().create();
     }
 

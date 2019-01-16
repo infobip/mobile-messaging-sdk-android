@@ -37,7 +37,7 @@ public class GCMRegistrationTokenHandler extends RegistrationTokenHandler {
             InstanceID instanceID = InstanceID.getInstance(context);
             String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             MobileMessagingLogger.v(MobileMessagingLogger.TAG, "RECEIVED TOKEN", token);
-            broadcaster.registrationAcquired(token);
+            broadcaster.tokenReceived(token);
             sendRegistrationToServer(token);
             subscribeTopics(token);
         } catch (IOException e) {
@@ -61,7 +61,7 @@ public class GCMRegistrationTokenHandler extends RegistrationTokenHandler {
             InstanceID instanceID = InstanceID.getInstance(context);
             String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             MobileMessagingLogger.v(MobileMessagingLogger.TAG, "RECEIVED TOKEN AFTER RESET", token);
-            broadcaster.registrationAcquired(token);
+            broadcaster.tokenReceived(token);
             sendRegistrationToServer(token);
             subscribeTopics(token);
         } catch (IOException e) {

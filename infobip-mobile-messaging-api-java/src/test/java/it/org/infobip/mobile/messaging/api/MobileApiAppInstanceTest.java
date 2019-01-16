@@ -1,7 +1,6 @@
 package it.org.infobip.mobile.messaging.api;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
-import org.infobip.mobile.messaging.api.appinstance.AppInstanceWithPushRegId;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
@@ -78,7 +77,7 @@ public class MobileApiAppInstanceTest {
     public void patch_instance_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.patchInstance(regId, false, new AppInstance());
+        mobileApiAppInstance.patchInstance(regId, false, new HashMap<String, Object>());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567", debugServer.getUri());
@@ -123,7 +122,7 @@ public class MobileApiAppInstanceTest {
     public void patch_userData_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.patchUser(regId, false, new UserBody());
+        mobileApiAppInstance.patchUser(regId, false, new HashMap<String, Object>());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567/user", debugServer.getUri());
@@ -305,7 +304,7 @@ public class MobileApiAppInstanceTest {
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
 
-        AppInstanceWithPushRegId response = mobileApiAppInstance.getInstance(regId);
+        AppInstance response = mobileApiAppInstance.getInstance(regId);
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567", debugServer.getUri());

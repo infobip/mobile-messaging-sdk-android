@@ -62,7 +62,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
         serverResponse.setCustomAttributes(customAtts);
 
-        UserData userData = UserDataMapper.createFrom(serverResponse);
+        UserData userData = UserDataMapper.fromBackend(serverResponse);
         String keyForString = userData.getCustomUserDataValue(KEY_FOR_STRING).stringValue();
         Number keyForNumber = userData.getCustomUserDataValue(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = userData.getCustomUserDataValue(KEY_FOR_DATE).dateValue();
@@ -85,7 +85,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
         serverResponse.setCustomAttributes(customAtts);
 
-        Map<String, CustomUserDataValue> customAttsFromBackend = UserDataMapper.mapCustomAttsFromBackendResponse(serverResponse.getCustomAttributes());
+        Map<String, CustomUserDataValue> customAttsFromBackend = UserDataMapper.customAttsFromBackend(serverResponse.getCustomAttributes());
         String keyForString = customAttsFromBackend.get(KEY_FOR_STRING).stringValue();
         Number keyForNumber = customAttsFromBackend.get(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = customAttsFromBackend.get(KEY_FOR_DATE).dateValue();

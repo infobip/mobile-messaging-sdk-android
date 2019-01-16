@@ -8,12 +8,14 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Installation;
+import org.infobip.mobile.messaging.InstallationMapper;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 
 import java.util.List;
 
@@ -49,16 +51,9 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void registrationAcquired(String cloudToken) {
-        send(prepare(Event.REGISTRATION_ACQUIRED)
+    public void tokenReceived(String cloudToken) {
+        send(prepare(Event.TOKEN_RECEIVED)
                 .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken));
-    }
-
-    @Override
-    public void registrationCreated(String cloudToken, String pushRegistrationId) {
-        send(prepare(Event.REGISTRATION_CREATED)
-                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken)
-                .putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, pushRegistrationId));
     }
 
     @Override
@@ -104,13 +99,13 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void userDataReported(UserData userData) {
         send(prepare(Event.USER_DATA_REPORTED)
-                .putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString()));
+                .putExtras(UserDataMapper.toBundle(BroadcastParameter.EXTRA_USER_DATA, userData)));
     }
 
     @Override
     public void userDataAcquired(UserData userData) {
         send(prepare(Event.USER_DATA_ACQUIRED)
-                .putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString()));
+                .putExtras(UserDataMapper.toBundle(BroadcastParameter.EXTRA_USER_DATA, userData)));
     }
 
     @Override
@@ -122,13 +117,13 @@ public class AndroidBroadcaster implements Broadcaster {
     @Override
     public void installationUpdated(Installation installation) {
         send(prepare(Event.INSTALLATION_UPDATED)
-                .putExtra(BroadcastParameter.EXTRA_INSTALLATION, installation.toString()));
+                .putExtras(InstallationMapper.toBundle(BroadcastParameter.EXTRA_INSTALLATION, installation)));
     }
 
     @Override
     public void installationCreated(Installation installation) {
         send(prepare(Event.INSTALLATION_CREATED)
-                .putExtra(BroadcastParameter.EXTRA_INSTALLATION, installation.toString()));
+                .putExtras(InstallationMapper.toBundle(BroadcastParameter.EXTRA_INSTALLATION, installation)));
     }
 
     @Override

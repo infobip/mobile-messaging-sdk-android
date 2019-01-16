@@ -11,7 +11,6 @@ import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.Installation;
 import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -366,7 +365,7 @@ public abstract class MobileMessaging {
 
     /**
      * Retrieves unique push registration identifier issued by server. This identifier matches one to one with FCM(GCM) cloud token
-     * of the particular application installation. This identifier is only available after {@link Event#REGISTRATION_CREATED}
+     * of the particular application installation. This identifier is only available after {@link Event#INSTALLATION_CREATED}
      * and does not change for the whole lifetime of the application installation.
      *
      * @return unique push registration id, null if no registration is available yet

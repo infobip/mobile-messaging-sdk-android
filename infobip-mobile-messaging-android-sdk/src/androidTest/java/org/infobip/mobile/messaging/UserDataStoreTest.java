@@ -8,9 +8,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
@@ -35,7 +32,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
 
         // Then
         UserData userData = mobileMessagingCore.getUser();
-        assertJEquals(givenUserData, userData);
+        assertJEquals(givenUserData, userData, "map");
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
@@ -76,13 +73,17 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
 
     @NonNull
     private UserData userData() {
-        UserData userData = new UserData();
-        userData.setExternalUserId("someUserId");
-        userData.setFirstName("User");
-        userData.setLastName("Tester");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2000, 1, 1);
-        userData.setBirthday(new Date(calendar.getTimeInMillis()));
-        return userData;
+        return new UserData(
+                "someUserId",
+                "User",
+                "Tester",
+                null,
+                null,
+                "2000-01-01",
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 }

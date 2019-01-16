@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -38,7 +37,7 @@ public class PersonalizeSyncronizerTest extends MobileMessagingTestCase {
     @Test
     public void test_depersonalize_without_params_completed() throws Exception {
         //given
-        given(mobileApiAppInstance.depersonalize(anyString())).willReturn(null);
+//        given(mobileApiAppInstance.depersonalize(anyString())).willReturn(null);
         givenUserData();
 
         //when
@@ -71,7 +70,7 @@ public class PersonalizeSyncronizerTest extends MobileMessagingTestCase {
     public void test_depersonalize_with_success_pending_listener_completed() throws Exception {
 
         //given
-        given(mobileApiAppInstance.depersonalize(anyString())).willReturn(null);
+//        given(mobileApiAppInstance.depersonalize(anyString())).willReturn(null);
         givenUserData();
 
         //when
@@ -110,7 +109,7 @@ public class PersonalizeSyncronizerTest extends MobileMessagingTestCase {
 
         //given
         String givenRegId = "depersonalizePushRegId";
-        given(mobileApiAppInstance.depersonalize(givenRegId)).willReturn(null);
+//        given(mobileApiAppInstance.depersonalize(givenRegId)).willReturn(null);
         givenUserData();
 
         //when

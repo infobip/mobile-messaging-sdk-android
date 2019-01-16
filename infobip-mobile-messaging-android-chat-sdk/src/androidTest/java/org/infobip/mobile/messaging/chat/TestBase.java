@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static org.infobip.mobile.messaging.UserDataMapper.toJson;
 import static org.mockito.Matchers.argThat;
 
 /**
@@ -73,7 +74,7 @@ public abstract class TestBase {
 
     protected Intent givenIntentWithUserData(UserData userData) {
         return new Intent(org.infobip.mobile.messaging.Event.USER_DATA_REPORTED.getKey())
-                .putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
+                .putExtra(BroadcastParameter.EXTRA_USER_DATA, toJson(userData));
     }
 
     protected void assertMessageEquals(ChatMessage expected, ChatMessage actual) throws JSONException {

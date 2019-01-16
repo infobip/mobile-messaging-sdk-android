@@ -58,8 +58,7 @@ import android.content.BroadcastReceiver;
  * @author mstipanov
  * @see BroadcastReceiver
  * @see Event#MESSAGE_RECEIVED
- * @see Event#REGISTRATION_ACQUIRED
- * @see Event#REGISTRATION_CREATED
+ * @see Event#TOKEN_RECEIVED
  * @see Event#DELIVERY_REPORTS_SENT
  * @see Event#API_COMMUNICATION_ERROR
  * @since 01.03.2016.
@@ -75,21 +74,7 @@ public enum Event {
      * }
      * </pre>
      */
-    REGISTRATION_ACQUIRED("org.infobip.mobile.messaging.REGISTRATION_ACQUIRED"),
-
-    /**
-     * It is triggered when GCM registration token successfully stored on the registration server.
-     * <p>
-     * Contains the GCM registration token and Infobip device application instance ID
-     * (which identifies every application instance).
-     * <pre>
-     * {@code
-     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
-     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
-     * }
-     * </pre>
-     */
-    REGISTRATION_CREATED("org.infobip.mobile.messaging.REGISTRATION_CREATED"),
+    TOKEN_RECEIVED("org.infobip.mobile.messaging.TOKEN_RECEIVED"),
 
     /**
      * It is triggered when GCM registration token successfully stored on the registration server.
