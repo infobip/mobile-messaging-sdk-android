@@ -27,16 +27,15 @@ import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
-import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.mobile.user.DepersonalizeActionListener;
 import org.infobip.mobile.messaging.mobile.user.DepersonalizeServerListener;
+import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.mobile.user.PersonalizeSynchronizer;
 import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
@@ -153,7 +152,7 @@ public class MobileMessagingCore
             this.activityLifecycleMonitor = new ActivityLifecycleMonitor(application);
         }
 
-        ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
+        ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
 
         initDefaultChannels();
@@ -956,7 +955,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void getInstallationFromServer(ResultListener<Installation> listener) {
+    public void fetchInstallation(ResultListener<Installation> listener) {
         installationSynchronizer().fetchInstance(listener);
     }
 
@@ -1127,7 +1126,7 @@ public class MobileMessagingCore
 
         applicationCode = null;
         if (mobileMessagingSynchronizationReceiver != null) {
-            ComponentUtil.setSyncronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
+            ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
             mobileMessagingSynchronizationReceiver = null;
         }
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
@@ -1162,12 +1161,12 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void saveUserData(UserData userData) {
-        saveUserData(userData, null);
+    public void saveUser(UserData userData) {
+        saveUser(userData, null);
     }
 
     @Override
-    public void saveUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
+    public void saveUser(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
         UserData existingData = getUnreportedUserData();
         UserData userDataToReport = UserDataMapper.merge(existingData, userData);
 

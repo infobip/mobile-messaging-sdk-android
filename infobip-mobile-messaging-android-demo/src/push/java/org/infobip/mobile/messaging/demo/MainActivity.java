@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionGsm() {
-        final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
+        final UserData userData = mobileMessaging.getUser() != null ? mobileMessaging.getUser() : new UserData();
         String gsm = userData.getGsms() == null || userData.getGsms().isEmpty() ? "" : userData.getGsms().iterator().next();
         showDialog(R.string.dialog_title_gsm, gsm, new RunnableWithParameter<String>() {
             @Override

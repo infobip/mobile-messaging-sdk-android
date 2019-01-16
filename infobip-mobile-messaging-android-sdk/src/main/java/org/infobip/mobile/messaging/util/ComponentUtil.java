@@ -47,7 +47,7 @@ public class ComponentUtil {
         }
     }
 
-    public static void setSyncronizationReceiverStateEnabled(Context context, MobileMessagingSynchronizationReceiver syncReceiver, boolean enabled) {
+    public static void setSynchronizationReceiverStateEnabled(Context context, MobileMessagingSynchronizationReceiver syncReceiver, boolean enabled) {
         if (enabled) {
             LocalBroadcastManager.getInstance(context).registerReceiver(syncReceiver, new IntentFilter(LocalEvent.APPLICATION_FOREGROUND.getKey()));
         } else {
