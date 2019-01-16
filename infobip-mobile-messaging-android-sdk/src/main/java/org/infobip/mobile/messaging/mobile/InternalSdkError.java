@@ -8,7 +8,8 @@ public enum InternalSdkError {
     ERROR_EMPTY_SYSTEM_DATA("20004", "System data is empty, cannot report"),
     DEVICE_NOT_SUPPORTED("20005", "Device is not supported"),
     NO_VALID_REGISTRATION("20006", "There is no valid registration"),
-    LOGOUT_IN_PROGRESS("20007", "Logout is currently in progress");
+    LOGOUT_IN_PROGRESS("20007", "Logout is currently in progress"),
+    ERROR_SAVING_EMPTY_OBJECT("20008", "Cannot save object without changes");
 
     private final String code;
     private final String message;

@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
@@ -52,6 +53,17 @@ public class UserDataReporter {
 
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will sync user data later");
+            if (listener != null) {
+                listener.onError(InternalSdkError.NO_VALID_REGISTRATION.getError());
+            }
+            return;
+        }
+
+        if (userData.getMap().isEmpty()) {
+            MobileMessagingLogger.w("Attempt to save empty user data, will do nothing");
+            if (listener != null) {
+                listener.onError(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError());
+            }
             return;
         }
 
@@ -60,11 +72,6 @@ public class UserDataReporter {
             @Override
             public Void run(UserData[] userData) {
                 Map<String, Object> request = new HashMap<>(userData[0].getMap());
-                if (request.isEmpty()) {
-                    MobileMessagingLogger.w("Attempt to save empty user data, will do nothing");
-                    return null;
-                }
-
                 MobileMessagingLogger.v("USER DATA >>>", request);
                 mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
                 MobileMessagingLogger.v("USER DATA <<<");

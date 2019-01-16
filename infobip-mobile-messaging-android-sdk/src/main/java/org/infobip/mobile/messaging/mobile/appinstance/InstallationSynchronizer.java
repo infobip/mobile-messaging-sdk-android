@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.UserDataMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -190,6 +191,14 @@ public class InstallationSynchronizer {
         final boolean myDevice = isMyDevice(installation, pushRegId);
         if (!myDevice) {
             pushRegId = installation.getPushRegistrationId();
+        }
+
+        if (installation.getMap().isEmpty()) {
+            MobileMessagingLogger.w("Attempt to save empty installation data, will do nothing");
+            if (actionListener != null) {
+                actionListener.onError(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError());
+            }
+            return;
         }
 
         final String pushRegIdToUpdate = pushRegId;
