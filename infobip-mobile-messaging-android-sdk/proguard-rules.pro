@@ -82,7 +82,9 @@
 
 # Application classes that will be serialized/deserialized over Gson
 -keep class org.infobip.mobile.messaging.dal.json.** { *; }
+-keep class org.infobip.mobile.messaging.Installation { *; }
 -keep class org.infobip.mobile.messaging.Message { *; }
+-keep class org.infobip.mobile.messaging.UserData { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper$* { *; }
 
