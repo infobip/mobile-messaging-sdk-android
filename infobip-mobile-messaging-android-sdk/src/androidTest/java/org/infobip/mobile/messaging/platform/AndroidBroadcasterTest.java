@@ -211,13 +211,13 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     public void test_should_send_logout_user_event() throws Exception {
 
         // When
-        broadcastSender.userLoggedOut();
+        broadcastSender.depersonalized();
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.USER_LOGGED_OUT.getKey(), intent.getAction());
+        assertEquals(Event.DEPERSONALIZED.getKey(), intent.getAction());
     }
 
     @Test

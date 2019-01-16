@@ -34,7 +34,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         mobileMessagingCore.setUserDataReported(givenUserData, false);
 
         // Then
-        UserData userData = mobileMessagingCore.getUserData();
+        UserData userData = mobileMessagingCore.getUser();
         assertJEquals(givenUserData, userData);
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
@@ -50,7 +50,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         mobileMessagingCore.setUserDataReported(givenUserData, false);
 
         // Then
-        UserData userData = mobileMessagingCore.getUserData();
+        UserData userData = mobileMessagingCore.getUser();
         assertNull(userData);
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
@@ -63,7 +63,7 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
         UserData givenUserData = userData();
 
         // When
-        mobileMessagingCore.saveUserData(givenUserData);
+        mobileMessagingCore.saveUser(givenUserData);
 
         // Then
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());

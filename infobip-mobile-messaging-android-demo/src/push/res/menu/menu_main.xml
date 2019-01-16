@@ -25,8 +25,8 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_logout"
-        android:title="@string/menu_action_logout"
+        android:id="@+id/action_depersonalize"
+        android:title="@string/menu_action_depersonalize"
         app:showAsAction="never" />
 
 </menu>

@@ -40,7 +40,7 @@ public class CustomUserDataTypeTest extends MobileMessagingTestCase {
         userData.setCustomUserDataElement(KEY_FOR_STRING, new CustomUserDataValue(SOME_STRING_VALUE));
         userData.setCustomUserDataElement(KEY_FOR_NUMBER, new CustomUserDataValue(SOME_NUMBER_VALUE));
         userData.setCustomUserDataElement(KEY_FOR_DATE, new CustomUserDataValue(SOME_DATE_VALUE));
-        mobileMessaging.saveUserData(userData);
+        mobileMessaging.saveUser(userData);
 
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
         UserData userDataResponse = captor.getValue();

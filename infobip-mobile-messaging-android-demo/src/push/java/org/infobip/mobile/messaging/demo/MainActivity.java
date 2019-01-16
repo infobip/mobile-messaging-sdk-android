@@ -133,8 +133,8 @@ public class MainActivity extends AppCompatActivity {
                 actionPrimary();
                 return true;
 
-            case R.id.action_logout:
-                actionLogout();
+            case R.id.action_depersonalize:
+                actionDepersonalize();
                 return true;
         }
 
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionGsm() {
-        final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
+        final UserData userData = mobileMessaging.getUser() != null ? mobileMessaging.getUser() : new UserData();
         userData.setFirstName("Tereza");
         userData.setLastName("Juric");
         HashSet<String> tags = new HashSet<>();
@@ -160,14 +160,14 @@ public class MainActivity extends AppCompatActivity {
         userData.removeCustomUserDataElement("string_1");
         userData.setGender(UserData.Gender.Female);
         userData.setBirthday(new GregorianCalendar(1988, 6, 31).getTime());
-        mobileMessaging.saveUserData(userData);
+        mobileMessaging.saveUser(userData);
 
         //TODO fix!
 //        showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
 //            @Override
 //            public void run(String param) {
 //                userData.setMsisdn(param);
-//                mobileMessaging.saveUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+//                mobileMessaging.saveUser(userData, new MobileMessaging.ResultListener<UserData>() {
 //                    @Override
 //                    public void onResult(UserData result) {
 //                        Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionErase() {
-        mobileMessaging.fetchUserData(new MobileMessaging.ResultListener<UserData>() {
+        mobileMessaging.fetchUser(new MobileMessaging.ResultListener<UserData>() {
             @Override
             public void onResult(UserData result) {
                 Log.d("tag", result.getInstallations().toString());
@@ -244,11 +244,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionPrimary() {
-        mobileMessaging.setAsPrimaryDevice(!mobileMessaging.isPrimaryDevice());
+        mobileMessaging.setCurrentInstallationAsPrimary(!mobileMessaging.isPrimaryDevice());
     }
 
-    private void actionLogout() {
-        mobileMessaging.logout();
+    private void actionDepersonalize() {
+        mobileMessaging.depersonalize();
     }
 
     private void updatePrimaryInMenu() {

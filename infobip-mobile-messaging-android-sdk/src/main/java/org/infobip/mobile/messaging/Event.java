@@ -216,6 +216,11 @@ public enum Event {
     USER_DATA_ACQUIRED("org.infobip.mobile.messaging.USER_DATA_ACQUIRED"),
 
     /**
+     * It is triggered when user is depersonalized on the server.
+     */
+    DEPERSONALIZED("org.infobip.mobile.messaging.DEPERSONALIZED"),
+
+    /**
      * It is triggered when system data is successfully reported to the server.
      * <pre>
      * {@code
@@ -224,11 +229,6 @@ public enum Event {
      * </pre>
      */
     SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED"),
-
-    /**
-     * It is triggered when user is successfully logged out from the server.
-     */
-    USER_LOGGED_OUT("org.infobip.mobile.messaging.USER_LOGGED_OUT"),
 
     /**
      * It is triggered when Google Play Services are not available.

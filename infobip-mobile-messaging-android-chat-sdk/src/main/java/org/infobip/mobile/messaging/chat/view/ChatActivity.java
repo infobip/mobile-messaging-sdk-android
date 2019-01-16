@@ -475,7 +475,7 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
     }
 
     private void showUserNameInputDialog() {
-        UserData userData = MobileMessagingCore.getInstance(this).getUserData();
+        UserData userData = MobileMessagingCore.getInstance(this).getUser();
         if (userData != null) {
             String firstName = userData.getFirstName();
             String lastName = userData.getLastName();

@@ -35,7 +35,7 @@ public class MessageHandlerModuleTest {
             public boolean messageTapped(Message message) {return false;}
             public void applicationInForeground() {}
             public void cleanup() {}
-            public void logoutUser() {}
+            public void depersonalize() {}
         }
 
         // When

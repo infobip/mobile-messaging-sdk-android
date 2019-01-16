@@ -43,7 +43,7 @@ public interface MessageHandlerModule {
 
 
     /**
-     * Called on module when user logout is performed on the core library
+     * Called on module when user depersonalize is performed on the core library
      */
-    void logoutUser();
+    void depersonalize();
 }

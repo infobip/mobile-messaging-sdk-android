@@ -35,7 +35,7 @@ public class MobileMessageHandler {
      * @param message new message
      */
     public void handleMessage(Message message) {
-        if (!mobileMessagingCore.isPushRegistrationEnabled() || mobileMessagingCore.isLogoutInProgress()) {
+        if (!mobileMessagingCore.isPushRegistrationEnabled() || mobileMessagingCore.isDepersonalizeInProgress()) {
             return;
         }
 

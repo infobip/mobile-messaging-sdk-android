@@ -10,32 +10,42 @@ import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 
 import java.util.concurrent.Executor;
 
-public class LogoutUserSynchronizer {
+public class PersonalizeSynchronizer {
 
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileApiAppInstance mobileApiAppInstance;
     private final Executor executor;
     private final BatchReporter batchReporter;
     private final MRetryPolicy policy;
-    private final LogoutServerListener serverListener;
+    private final DepersonalizeServerListener serverListener;
 
-    private class LogoutTask extends MRetryableTask<String, Void> {
+    private class DepersonalizeTask extends MRetryableTask<String, Void> {
         @Override
         public Void run(String[] pushRegIds) {
-            MobileMessagingLogger.v("LOGOUT USER >>>");
-            mobileApiAppInstance.logoutUser(pushRegIds[0]);
-            MobileMessagingLogger.v("LOGOUT USER <<<");
+            MobileMessagingLogger.v("DEPERSONALIZE >>>");
+            mobileApiAppInstance.depersonalize(pushRegIds[0]);
+            MobileMessagingLogger.v("DEPERSONALIZE <<<");
             return null;
         }
     }
 
-    public LogoutUserSynchronizer(
+    private class PersonalizeTask extends MRetryableTask<Boolean, Void> {
+        @Override
+        public Void run(Boolean[] forceDepersonalize) {
+            MobileMessagingLogger.v("PERSONALIZE >>>");
+            mobileApiAppInstance.personalize(mobileMessagingCore.getPushRegistrationId(), forceDepersonalize[0]);
+            MobileMessagingLogger.v("PERSONALIZE <<<");
+            return null;
+        }
+    }
+
+    public PersonalizeSynchronizer(
             MobileMessagingCore mobileMessagingCore,
             MobileApiAppInstance mobileApiAppInstance,
             MRetryPolicy policy,
             Executor executor,
             BatchReporter batchReporter,
-            LogoutServerListener serverListener) {
+            DepersonalizeServerListener serverListener) {
 
         this.mobileMessagingCore = mobileMessagingCore;
         this.mobileApiAppInstance = mobileApiAppInstance;
@@ -45,26 +55,33 @@ public class LogoutUserSynchronizer {
         this.serverListener = serverListener;
     }
 
-    public void logout() {
+    public void personalize(boolean forceDepersonalize) {
+        new PersonalizeTask() {
+
+        }.retryWith(policy)
+                .execute(executor, forceDepersonalize);
+    }
+
+    public void depersonalize() {
         batchReporter.put(new Runnable() {
             @Override
             public void run() {
-                new LogoutTask() {
+                new DepersonalizeTask() {
 
                     @Override
                     public void before() {
-                        serverListener.onServerLogoutStarted();
+                        serverListener.onServerDepersonalizeStarted();
                     }
 
                     @Override
                     public void error(Throwable error) {
-                        MobileMessagingLogger.v("LOGOUT USER ERROR <<<", error);
-                        serverListener.onServerLogoutFailed(error);
+                        MobileMessagingLogger.v("DEPERSONALIZE ERROR <<<", error);
+                        serverListener.onServerDepersonalizeFailed(error);
                     }
 
                     @Override
                     public void after(Void aVoid) {
-                        serverListener.onServerLogoutCompleted();
+                        serverListener.onServerDepersonalizeCompleted();
                     }
                 }
                         .retryWith(policy)
@@ -73,24 +90,24 @@ public class LogoutUserSynchronizer {
         });
     }
 
-    public void logout(String unreportedLogoutPushRegId, final LogoutActionListener actionListener) {
-        new LogoutTask() {
+    public void depersonalize(String unreportedDepersonalizedPushRegId, final DepersonalizeActionListener actionListener) {
+        new DepersonalizeTask() {
             @Override
             public void after(Void objects) {
                 if (actionListener != null) {
-                    actionListener.onUserInitiatedLogoutCompleted();
+                    actionListener.onUserInitiatedDepersonalizeCompleted();
                 }
             }
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("LOGOUT USER ERROR <<<", error);
+                MobileMessagingLogger.v("DEPERSONALIZE ERROR <<<", error);
                 if (actionListener != null) {
-                    actionListener.onUserInitiatedLogoutFailed(error);
+                    actionListener.onUserInitiatedDepersonalizeFailed(error);
                 }
             }
         }
                 .retryWith(policy)
-                .execute(executor, unreportedLogoutPushRegId);
+                .execute(executor, unreportedDepersonalizedPushRegId);
     }
 }

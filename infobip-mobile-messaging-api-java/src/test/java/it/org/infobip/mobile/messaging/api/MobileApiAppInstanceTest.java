@@ -151,13 +151,28 @@ public class MobileApiAppInstanceTest {
     }
 
     @Test
-    public void log_out_user_success_examineResponse() throws Exception {
+    public void personalize_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.logoutUser(regId);
+        mobileApiAppInstance.personalize(regId, true);
 
         //inspect http context
-        assertEquals("/mobile/1/appinstance/1234regId567/logout", debugServer.getUri());
+        assertEquals("/mobile/1/appinstance/1234regId567/personalize", debugServer.getUri());
+        assertEquals("true", debugServer.getQueryParameter("forceDepersonalize"));
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(1, debugServer.getQueryParametersCount());
+    }
+
+    @Test
+    public void depersonalize_success_examineResponse() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        mobileApiAppInstance.depersonalize(regId);
+
+        //inspect http context
+        assertEquals("/mobile/1/appinstance/1234regId567/depersonalize", debugServer.getUri());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertEquals(1, debugServer.getRequestCount());

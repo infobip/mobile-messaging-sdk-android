@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.CustomUserDataValue;
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.SystemData;
@@ -67,7 +68,7 @@ public class InstallationSynchronizer {
         sync(null);
     }
 
-    public void sync(InstallationActionListener actionListener) {
+    public void sync(MobileMessaging.ResultListener<Installation> actionListener) {
         AppInstance appInstance = new AppInstance();
         SystemData systemDataForReport = systemDataForReport();
         boolean shouldUpdateInstance = false;
@@ -107,40 +108,40 @@ public class InstallationSynchronizer {
         }
     }
 
-    public void updateApplicationUserId(String applicationUserId, InstallationActionListener actionListener) {
+    public void updateApplicationUserId(String applicationUserId, MobileMessaging.ResultListener<Installation> actionListener) {
         AppInstance appInstance = new AppInstance();
         appInstance.setApplicationUserId(applicationUserId);
         patchInstance(appInstance, actionListener);
     }
 
-    public void updateCustomAttributes(Map<String,CustomUserDataValue> customAtts, InstallationActionListener actionListener) {
+    public void updateCustomAttributes(Map<String, CustomUserDataValue> customAtts, MobileMessaging.ResultListener<Installation> actionListener) {
         AppInstance appInstance = new AppInstance();
         appInstance.setCustomAttributes(UserDataMapper.mapCustomAttsForBackendReport(customAtts));
         patchInstance(appInstance, actionListener);
     }
 
-    public void updatePushRegEnabledStatus(Boolean enabled, InstallationActionListener actionListener) {
+    public void updatePushRegEnabledStatus(Boolean enabled, MobileMessaging.ResultListener<Installation> actionListener) {
         AppInstance installation = new AppInstance();
         installation.setRegEnabled(enabled);
         patchInstance(installation, actionListener);
     }
 
-    public void updatePrimaryStatus(Boolean primary, InstallationActionListener actionListener) {
+    public void updatePrimaryStatus(Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
         updatePrimaryStatus(null, primary, actionListener);
     }
 
-    public void updatePrimaryStatus(String pushRegId, Boolean primary, InstallationActionListener actionListener) {
+    public void updatePrimaryStatus(String pushRegId, Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
         AppInstance installation = new AppInstance();
         installation.setPushRegId(pushRegId);
         installation.setIsPrimary(primary);
         patchInstance(installation, actionListener);
     }
 
-    public void patch(Installation installation, InstallationActionListener actionListener) {
+    public void patch(Installation installation, MobileMessaging.ResultListener<Installation> actionListener) {
         patchInstance(installation.toAppInstance(), actionListener);
     }
 
-    private void createInstance(final AppInstance appInstance, final InstallationActionListener actionListener) {
+    private void createInstance(final AppInstance appInstance, final MobileMessaging.ResultListener<Installation> actionListener) {
         new MRetryableTask<Void, AppInstanceWithPushRegId>() {
 
             @Override
@@ -166,7 +167,7 @@ public class InstallationSynchronizer {
                 broadcaster.installationCreated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onResult(installation);
                 }
             }
 
@@ -189,7 +190,7 @@ public class InstallationSynchronizer {
                 .execute(executor);
     }
 
-    private void patchInstance(final AppInstance appInstance, final InstallationActionListener actionListener) {
+    private void patchInstance(final AppInstance appInstance, final MobileMessaging.ResultListener<Installation> actionListener) {
         String pushRegId = mobileMessagingCore.getPushRegistrationId();
         final boolean myDevice = isMyDevice(appInstance, pushRegId);
         if (!myDevice) {
@@ -214,7 +215,7 @@ public class InstallationSynchronizer {
                 broadcaster.installationUpdated(installation);
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onResult(installation);
                 }
             }
 
@@ -237,7 +238,7 @@ public class InstallationSynchronizer {
     }
 
     private boolean isMyDevice(AppInstance appInstance, String myPushRegId) {
-        return  (appInstance.getPushRegId() != null && myPushRegId.equals(appInstance.getPushRegId())) || appInstance.getPushRegId() == null;
+        return (appInstance.getPushRegId() != null && myPushRegId.equals(appInstance.getPushRegId())) || appInstance.getPushRegId() == null;
     }
 
     private void updateInstallationReported(Installation installation, boolean myDevice) {
@@ -274,7 +275,7 @@ public class InstallationSynchronizer {
         mobileMessagingCore.setReportedPushServiceType();
     }
 
-    public void fetchInstance(final InstallationActionListener actionListener) {
+    public void fetchInstance(final MobileMessaging.ResultListener<Installation> actionListener) {
         if (mobileMessagingCore.isRegistrationUnavailable()) {
             return;
         }
@@ -295,7 +296,7 @@ public class InstallationSynchronizer {
                 mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 
                 if (actionListener != null) {
-                    actionListener.onSuccess(installation);
+                    actionListener.onResult(installation);
                 }
                 MobileMessagingLogger.v("GET INSTALLATION <<<");
             }

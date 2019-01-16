@@ -12,7 +12,6 @@ import android.support.annotation.RequiresPermission;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.appinstance.Installation;
-import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -119,23 +118,9 @@ public abstract class MobileMessaging {
     public abstract MessageStore getMessageStore();
 
     /**
-     * Gets local instance of currently active installation.
-     *
-     * @return installation installation data object with locally stored data
-     */
-    public abstract Installation getInstallation();
-
-    /**
-     * Gets instance of currently active installation from server.
-     *
-     * @param listener listener to report the result on
-     */
-    public abstract void getInstallationFromServer(InstallationActionListener listener);
-
-    /**
      * Does a synchronization of installation with server.
      * <br>
-     * This method will synchronize new installation data (such as setting of primary device, application user ID,...) with server
+     * This method will synchronize new installation data (such as setting of primary device, application user ID, custom atts...) with server
      * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
      *
      * @param installation installation object with desired changes
@@ -151,11 +136,26 @@ public abstract class MobileMessaging {
      * The result of synchronization will be provided via listener.
      *
      * @param installation installation object with desired changes
-     * @param listener listener to report the result on
-     * @see InstallationActionListener
+     * @param listener     listener to report the result on
+     * @see ResultListener
      * @see Event#INSTALLATION_UPDATED
      */
-    public abstract void saveInstallation(Installation installation, InstallationActionListener listener);
+    public abstract void saveInstallation(Installation installation, ResultListener<Installation> listener);
+
+    /**
+     * Gets instance of currently active installation from server.
+     *
+     * @param listener listener to report the result on
+     * @see ResultListener
+     */
+    public abstract void fetchInstallation(ResultListener<Installation> listener);
+
+    /**
+     * Gets local instance of currently active installation.
+     *
+     * @return installation installation data object with locally stored data
+     */
+    public abstract Installation getInstallation();
 
     /**
      * Does a synchronization of user data with server.
@@ -166,7 +166,7 @@ public abstract class MobileMessaging {
      * @param userData user data object with desired changes
      * @see Event#USER_DATA_REPORTED
      */
-    public abstract void saveUserData(UserData userData);
+    public abstract void saveUser(UserData userData);
 
     /**
      * Does a synchronization of user data with server.
@@ -179,7 +179,7 @@ public abstract class MobileMessaging {
      * @see ResultListener
      * @see Event#USER_DATA_REPORTED
      */
-    public abstract void saveUserData(UserData userData, ResultListener<UserData> listener);
+    public abstract void saveUser(UserData userData, ResultListener<UserData> listener);
 
     /**
      * Does a fetching of user data from the server.
@@ -188,7 +188,7 @@ public abstract class MobileMessaging {
      *
      * @see ResultListener
      */
-    public abstract void fetchUserData(ResultListener<UserData> listener);
+    public abstract void fetchUser(ResultListener<UserData> listener);
 
     /**
      * Reads user data that is currently stored in the library.
@@ -196,34 +196,40 @@ public abstract class MobileMessaging {
      * @return last synchronized UserData object
      */
     @Nullable
-    public abstract UserData getUserData();
+    public abstract UserData getUser();
+
+    //TODO docs
+    public abstract void personalize(UserData userData);
+
+    public abstract void personalize(UserData userData, boolean forceDepersonalize);
 
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
-     * User's data synced over MobileMessaging {@link #saveUserData(UserData)} is by default associated with created push
-     * registration. Logging out user means that push registration along with device specific data will remain, but user's data
-     * (such as first name, custom data,...) will be wiped out.
+     * User's data synced over MobileMessaging {@link #saveUser(UserData)} is by default associated with created installation (push
+     * registration). Depersonalizing an installation means that push registration along with device specific data will remain, but user's data
+     * (such as first name, custom attributes,...) will be wiped out.
      * <p>
-     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
-     * but you might want to sync new user data to target this user specifically.
+     * If you depersonalize an installation, there is a way to personalize it again by providing new user data (either by {@link MobileMessaging#saveUser(UserData)} )} setter
+     * or {@link MobileMessaging#personalize(UserData)} method) in order to target this user specifically.
      * <p>
      * Use this method if:
      * <ul>
      * <li>you're syncing user data to our server</li>
-     * <li>your application has logout option</li>
-     * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
-     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
+     * <li>your application has logout functionality</li>
+     * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
+     * <li>you want depersonalized installation to still receive broadcast notifications (otherwise, you need to call {@link #disablePushRegistration()}
+     * to disable all messages)</li>
      * </ul>
      *
-     * @see Event#USER_LOGGED_OUT
+     * @see Event#DEPERSONALIZED
      */
-    public abstract void logout();
+    public abstract void depersonalize();
 
     /**
      * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <br>
-     * User's data synced over MobileMessaging {@link #saveUserData(UserData)} is by default associated with created push
+     * User's data synced over MobileMessaging {@link #saveUser(UserData)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <br>
@@ -233,22 +239,23 @@ public abstract class MobileMessaging {
      * Use this method if:
      * <ul>
      * <li>you're syncing user data to our server</li>
-     * <li>your application has logout option</li>
+     * <li>your application has depersonalize option</li>
      * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
      * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
      * </ul>
      * <br>
-     * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with logout when network becomes available, {@link Event#USER_LOGGED_OUT} will be produced upon success.
+     * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with depersonalize when network becomes available,
+     * {@link Event#DEPERSONALIZED} will be produced upon success.
      *
      * @param listener listener to report the result on
      * @see ResultListener
-     * @see Event#USER_LOGGED_OUT
+     * @see Event#DEPERSONALIZED
      */
-    public abstract void logout(ResultListener<SuccessPending> listener);
+    public abstract void depersonalize(ResultListener<SuccessPending> listener);
 
-    public abstract void logout(String pushRegId, ResultListener<SuccessPending> listener);
+    public abstract void depersonalize(String pushRegId, ResultListener<SuccessPending> listener);
 
-    public abstract void logout(String pushRegId, InstallationsActionListener listener);
+    public abstract void depersonalize(String pushRegId, InstallationsActionListener listener);
 
     /**
      * Send mobile originated messages.
@@ -273,7 +280,21 @@ public abstract class MobileMessaging {
      */
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
-    //TODO DOCS!
+    /**
+     * This method allows you to set custom attributes for this installation.
+     * You can provide additional users information to the server, so that you will be able to send personalised targeted messages to the exact user.
+     *
+     * @param customAttributes
+     * @param listener         listener to invoke when the operation is complete.
+     */
+    public abstract void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, ResultListener<Installation> listener);
+
+    /**
+     * This method allows you to set custom attributes for this installation.
+     *
+     * @param customAttributes
+     */
+    public abstract void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes);
 
     /**
      * This method allows you to set application user ID for this installation.
@@ -281,24 +302,7 @@ public abstract class MobileMessaging {
      * @param applicationUserId
      * @param listener          listener to invoke when the operation is complete.
      */
-    public abstract void setApplicationUserId(String applicationUserId, InstallationActionListener listener);
-
-    /**
-     * This method allows you to set custom attributes for this installation.
-     *
-     * @param customAttributes
-     * @param listener          listener to invoke when the operation is complete.
-     */
-    public abstract void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, InstallationActionListener listener);
-
-    /**
-     * This method allows you to set custom attributes for this installation.
-     *
-     * @param customAttributes
-     */
-    public abstract void setCustomAttributes(Map<String,CustomUserDataValue> customAttributes);
-
-    //TODO DOCS!
+    public abstract void setApplicationUserId(String applicationUserId, ResultListener<Installation> listener);
 
     /**
      * This method allows you to set application user ID for this installation.
@@ -314,34 +318,34 @@ public abstract class MobileMessaging {
      * @param isPrimary set to true to make this device primary or to false otherwise.
      * @param listener  listener to invoke when the operation is complete.
      */
-    public abstract void setAsPrimaryDevice(boolean isPrimary, InstallationActionListener listener);
+    public abstract void setCurrentInstallationAsPrimary(boolean isPrimary, ResultListener<Installation> listener);
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.
      * Use this method to let SDK decide when it is best time to try to send request to server.
      *
-     * @param isPrimary set to true to make this device primary or to false otherwise.
+     * @param isPrimary set to true to make this installation primary or to false otherwise.
      */
-    public abstract void setAsPrimaryDevice(boolean isPrimary);
+    public abstract void setCurrentInstallationAsPrimary(boolean isPrimary);
 
     /**
-     * This method allows you to configure this device as primary among others devices of a single user.
+     * This method allows you to configure some other device as primary among others devices of a single user.
      * Use this method to let SDK decide when it is best time to try to send request to server.
      *
-     * @param pushRegistrationId set the push registration ID to make some other device installation primary one.
-     * @param isPrimary          set to true to make this device primary or to false otherwise.
+     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
+     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
      * @param listener           listener to invoke when the operation is complete.
      */
-    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary, InstallationsActionListener listener);
+    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, InstallationsActionListener listener);
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.
      * Use this method to let SDK decide when it is best time to try to send request to server.
      *
-     * @param pushRegistrationId set the push registration ID to make some other device installation primary one.
-     * @param isPrimary          set to true to make this device primary or to false otherwise.
+     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
+     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
      */
-    public abstract void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary);
+    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary);
 
     /**
      * Use this method to determine if this device is currently primary device or not.
@@ -745,7 +749,7 @@ public abstract class MobileMessaging {
          * It will not store {@link UserData} on device.
          * <p>
          * <b>Note:</b> since {@link UserData} is not stored on device, automatic retries will not be applied.
-         * It should be handled manually using {@link MobileMessaging#saveUserData(UserData, ResultListener)}} method,
+         * It should be handled manually using {@link MobileMessaging#saveUser(UserData, ResultListener)}} method,
          * where you can check error in callback and retry accordingly.
          * <pre>
          * {@code new MobileMessaging.Builder(application)

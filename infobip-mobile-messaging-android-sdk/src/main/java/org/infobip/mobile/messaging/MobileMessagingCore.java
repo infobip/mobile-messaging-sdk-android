@@ -30,7 +30,6 @@ import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.appinstance.Installation;
-import org.infobip.mobile.messaging.mobile.appinstance.InstallationActionListener;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -38,9 +37,9 @@ import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
-import org.infobip.mobile.messaging.mobile.user.LogoutActionListener;
-import org.infobip.mobile.messaging.mobile.user.LogoutServerListener;
-import org.infobip.mobile.messaging.mobile.user.LogoutUserSynchronizer;
+import org.infobip.mobile.messaging.mobile.user.DepersonalizeActionListener;
+import org.infobip.mobile.messaging.mobile.user.DepersonalizeServerListener;
+import org.infobip.mobile.messaging.mobile.user.PersonalizeSynchronizer;
 import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
@@ -87,7 +86,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MobileMessagingCore
         extends MobileMessaging
-        implements LogoutServerListener {
+        implements DepersonalizeServerListener {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
@@ -110,7 +109,7 @@ public class MobileMessagingCore
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
     private InstallationSynchronizer installationSynchronizer;
-    private LogoutUserSynchronizer logoutUserSynchronizer;
+    private PersonalizeSynchronizer personalizeSynchronizer;
 
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
@@ -186,7 +185,7 @@ public class MobileMessagingCore
             if (userDataProperty == MobileMessagingProperty.UNREPORTED_USER_DATA) {
                 saveUnreportedUserData(userDataWithCustomAtts.first);
             } else if (userDataProperty == MobileMessagingProperty.USER_DATA) {
-                saveUserData(userDataWithCustomAtts.first);
+                saveUser(userDataWithCustomAtts.first);
             }
         }
 
@@ -309,10 +308,10 @@ public class MobileMessagingCore
     }
 
     private void performSyncActions() {
-        logoutOnServerIfNeeded();
+        depersonalizeOnServerIfNeeded();
         syncInstallation();
 
-        if (isLogoutInProgress()) {
+        if (isDepersonalizeInProgress()) {
             return;
         }
 
@@ -346,53 +345,53 @@ public class MobileMessagingCore
         return false;
     }
 
-    private void logoutOnServerIfNeeded() {
+    private void depersonalizeOnServerIfNeeded() {
         if (isRegistrationUnavailable()) {
             return;
         }
 
-        if (!isLogoutInProgress()) {
+        if (!isDepersonalizeInProgress()) {
             return;
         }
 
-        logoutUserSynchronizer().logout();
+        personalizeSynchronizer().depersonalize();
     }
 
     @Override
-    public void onServerLogoutStarted() {
-        onLogoutStarted(getPushRegistrationId());
+    public void onServerDepersonalizeStarted() {
+        onDepersonalizeStarted(getPushRegistrationId());
     }
 
     @Override
-    public void onServerLogoutCompleted() {
-        onLogoutCompleted();
+    public void onServerDepersonalizeCompleted() {
+        onDepersonalizeCompleted();
     }
 
     @Override
-    public void onServerLogoutFailed(Throwable error) {
-        MobileMessagingLogger.w("Server logout failed", error);
+    public void onServerDepersonalizeFailed(Throwable error) {
+        MobileMessagingLogger.w("Server depersonalize failed", error);
     }
 
-    private void onLogoutCompleted() {
+    private void onDepersonalizeCompleted() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, false);
-        broadcaster.userLoggedOut();
+        broadcaster.depersonalized();
         resetCloudToken();
     }
 
-    private void onLogoutStarted(String pushRegId) {
+    private void onDepersonalizeStarted(String pushRegId) {
         if (pushRegId == null) {
             return;
         }
 
         if (pushRegId.equals(getPushRegistrationId())) {
-            logoutCurrentInstallation();
+            depersonalizeCurrentInstallation();
             return;
         }
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, true);
     }
 
-    private void logoutCurrentInstallation() {
+    private void depersonalizeCurrentInstallation() {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
@@ -400,6 +399,10 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
+        PreferenceHelper.remove(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES);
+        PreferenceHelper.remove(context, MobileMessagingProperty.APP_USER_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, true);
         if (messageStore != null) {
@@ -407,11 +410,11 @@ public class MobileMessagingCore
         }
         getNotificationHandler().cancelAllNotifications();
         for (MessageHandlerModule module : messageHandlerModules.values()) {
-            module.logoutUser();
+            module.depersonalize();
         }
     }
 
-    public boolean isLogoutInProgress() {
+    public boolean isDepersonalizeInProgress() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED);
     }
 
@@ -443,16 +446,16 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setAsPrimaryDevice(boolean isPrimary) {
-        setAsPrimaryDevice(isPrimary, null);
+    public void setCurrentInstallationAsPrimary(boolean isPrimary) {
+        setCurrentInstallationAsPrimary(isPrimary, null);
     }
 
     @Override
-    public void setAsPrimaryDevice(final boolean isPrimary, final InstallationActionListener listener) {
+    public void setCurrentInstallationAsPrimary(final boolean isPrimary, final ResultListener<Installation> listener) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
 
-        if (isLogoutInProgress()) {
-            reportErrorLogoutInProgress(listener);
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
             return;
         }
         installationSynchronizer().updatePrimaryStatus(isPrimary, listener);
@@ -463,15 +466,15 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setAsPrimaryDevice(String pushRegistrationId, boolean isPrimary) {
-        setAsPrimaryDevice(pushRegistrationId, isPrimary, null);
+    public void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary) {
+        setInstallationAsPrimary(pushRegistrationId, isPrimary, null);
     }
 
     @Override
-    public void setAsPrimaryDevice(final String pushRegistrationId, final boolean isPrimary, final InstallationsActionListener listener) {
-        installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, new InstallationActionListener() {
+    public void setInstallationAsPrimary(final String pushRegistrationId, final boolean isPrimary, final InstallationsActionListener listener) {
+        installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, new ResultListener<Installation>() {
             @Override
-            public void onSuccess(Installation installations) {
+            public void onResult(Installation installations) {
                 List<UserData.Installation> installationsToReturn = performLocalSettingOfPrimary(pushRegistrationId, isPrimary);
                 if (listener != null) {
                     listener.onSuccess(installationsToReturn);
@@ -488,7 +491,7 @@ public class MobileMessagingCore
     }
 
     private List<UserData.Installation> performLocalSettingOfPrimary(String pushRegId, boolean isPrimary) {
-        UserData userData = getUserData();
+        UserData userData = getUser();
         if (userData == null) {
             return null;
         }
@@ -511,26 +514,26 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setApplicationUserId(final String applicationUserId, final InstallationActionListener listener) {
+    public void setApplicationUserId(final String applicationUserId, final ResultListener<Installation> listener) {
         setApplicationUserIdReported(false);
         saveApplicationUserId(applicationUserId);
 
-        if (isLogoutInProgress()) {
-            reportErrorLogoutInProgress(listener);
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
         } else {
             installationSynchronizer().updateApplicationUserId(applicationUserId, listener);
         }
     }
 
     @Override
-    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, final InstallationActionListener listener) {
+    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, final ResultListener<Installation> listener) {
         if (customAttributes == null) {
             return;
         }
         setUnreportedCustomAttributes(customAttributes);
 
-        if (isLogoutInProgress()) {
-            reportErrorLogoutInProgress(listener);
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
         } else {
             installationSynchronizer().updateCustomAttributes(customAttributes, listener);
         }
@@ -558,6 +561,7 @@ public class MobileMessagingCore
         }
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
     }
+
 
     public String getUnreportedCustomAttributes() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES)) {
@@ -600,23 +604,12 @@ public class MobileMessagingCore
         return !PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
     }
 
-    private void reportErrorLogoutInProgress(final InstallationActionListener listener) {
+    private void reportErrorDepersonalizeInProgress(final ResultListener listener) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (listener != null) {
-                    listener.onError(InternalSdkError.LOGOUT_IN_PROGRESS.getError());
-                }
-            }
-        });
-    }
-
-    private void reportErrorLogoutInProgress(final ResultListener listener) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (listener != null) {
-                    listener.onError(InternalSdkError.LOGOUT_IN_PROGRESS.getError());
+                    listener.onError(InternalSdkError.DEPERSONALIZATION_IN_PROGRESS.getError());
                 }
             }
         });
@@ -931,50 +924,6 @@ public class MobileMessagingCore
         }
     }
 
-    @Override
-    public Installation getInstallation() {
-        AppInstanceWithPushRegId instance = new AppInstanceWithPushRegId();
-        instance.setPushRegId(getPushRegistrationId());
-        instance.setApplicationUserId(getApplicationUserId());
-        instance.setIsPrimary(isPrimaryDevice());
-        instance.setNotificationsEnabled(isDisplayNotificationEnabled());
-        instance.setRegEnabled(isPushRegistrationEnabled());
-
-        Installation installation = Installation.from(instance);
-        String customAttributes = getCustomAttributes();
-        if (customAttributes != null) {
-            Type type = new TypeToken<Map<String, CustomUserDataValue>>() {
-            }.getType();
-            Map<String, CustomUserDataValue> customAttsMap = new JsonSerializer().deserialize(customAttributes, type);
-            installation.setCustomAttributes(customAttsMap);
-        }
-        //TODO put system data also?
-
-        return installation;
-    }
-
-    @Override
-    public void getInstallationFromServer(InstallationActionListener listener) {
-        installationSynchronizer().fetchInstance(listener);
-    }
-
-    @Override
-    public void saveInstallation(Installation installation) {
-        saveInstallation(installation, null);
-    }
-
-    @Override
-    public void saveInstallation(Installation installation, InstallationActionListener listener) {
-        if (installation.getCustomAttributes() != null) {
-            setUnreportedCustomAttributes(installation.getCustomAttributes());
-        }
-        if (installation.getPrimaryDevice() != null) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimaryDevice());
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
-        }
-        installationSynchronizer().patch(installation, listener);
-    }
-
     @SuppressWarnings({"unchecked", "WeakerAccess"})
     protected Class<? extends MessageStore> getMessageStoreClass() {
         return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
@@ -1160,12 +1109,57 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void saveUserData(UserData userData) {
-        saveUserData(userData, null);
+    public void saveInstallation(Installation installation) {
+        saveInstallation(installation, null);
     }
 
     @Override
-    public void saveUserData(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
+    public void saveInstallation(Installation installation, ResultListener<Installation> listener) {
+        if (installation.getCustomAttributes() != null) {
+            setUnreportedCustomAttributes(installation.getCustomAttributes());
+        }
+        if (installation.getPrimaryDevice() != null) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.getPrimaryDevice());
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
+        }
+        installationSynchronizer().patch(installation, listener);
+    }
+
+    @Override
+    public void fetchInstallation(ResultListener<Installation> listener) {
+        installationSynchronizer().fetchInstance(listener);
+    }
+
+    @Override
+    public Installation getInstallation() {
+        AppInstanceWithPushRegId instance = new AppInstanceWithPushRegId();
+        instance.setPushRegId(getPushRegistrationId());
+        instance.setApplicationUserId(getApplicationUserId());
+        instance.setIsPrimary(isPrimaryDevice());
+        instance.setNotificationsEnabled(isDisplayNotificationEnabled());
+        instance.setRegEnabled(isPushRegistrationEnabled());
+
+        Installation installation = Installation.from(instance);
+        String customAttributes = getCustomAttributes();
+        if (customAttributes != null) {
+            Type type = new TypeToken<Map<String, CustomUserDataValue>>() {
+            }.getType();
+            Map<String, CustomUserDataValue> customAttsMap = new JsonSerializer().deserialize(customAttributes, type);
+            installation.setCustomAttributes(customAttsMap);
+        }
+        //TODO put system data also?
+
+        return installation;
+    }
+
+
+    @Override
+    public void saveUser(UserData userData) {
+        saveUser(userData, null);
+    }
+
+    @Override
+    public void saveUser(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
         UserData existingData = getUnreportedUserData();
         UserData userDataToReport = UserData.merge(existingData, userData);
 
@@ -1173,8 +1167,8 @@ public class MobileMessagingCore
             saveUnreportedUserData(userDataToReport);
         }
 
-        if (isLogoutInProgress()) {
-            reportErrorLogoutInProgress(listener);
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
             return;
         }
 
@@ -1182,9 +1176,9 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void fetchUserData(MobileMessaging.ResultListener<UserData> listener) {
-        if (isLogoutInProgress()) {
-            reportErrorLogoutInProgress(listener);
+    public void fetchUser(MobileMessaging.ResultListener<UserData> listener) {
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
             return;
         }
 
@@ -1192,7 +1186,7 @@ public class MobileMessagingCore
     }
 
     @Nullable
-    public UserData getUserData() {
+    public UserData getUser() {
         UserData existing = null;
         if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
             existing = new UserData(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
@@ -1202,6 +1196,25 @@ public class MobileMessagingCore
         }
 
         return UserData.merge(existing, getUnreportedUserData());
+    }
+
+    @Override
+    public void personalize(UserData userData) {
+        personalize(userData, false);
+    }
+
+    @Override
+    public void personalize(UserData userData, boolean forceDepersonalize) {
+        if (isRegistrationUnavailable()) {
+            return;
+        }
+
+        if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
+            registerForNetworkAvailability();
+            return;
+        }
+
+        personalizeSynchronizer().personalize(forceDepersonalize);
     }
 
     private boolean areInstallationsExpired() {
@@ -1215,28 +1228,28 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void logout() {
+    public void depersonalize() {
         if (isRegistrationUnavailable()) {
             return;
         }
 
         String currentPushRegistrationId = getPushRegistrationId();
-        onLogoutStarted(currentPushRegistrationId);
+        onDepersonalizeStarted(currentPushRegistrationId);
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
             return;
         }
 
-        logoutUserSynchronizer().logout();
+        personalizeSynchronizer().depersonalize();
     }
 
     @Override
-    public void logout(ResultListener<SuccessPending> listener) {
-        logout(getPushRegistrationId(), listener);
+    public void depersonalize(ResultListener<SuccessPending> listener) {
+        depersonalize(getPushRegistrationId(), listener);
     }
 
     @Override
-    public void logout(String pushRegId, final ResultListener<SuccessPending> listener) {
+    public void depersonalize(String pushRegId, final ResultListener<SuccessPending> listener) {
         if (isRegistrationUnavailable()) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1249,7 +1262,7 @@ public class MobileMessagingCore
             return;
         }
 
-        onLogoutStarted(pushRegId);
+        onDepersonalizeStarted(pushRegId);
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1263,17 +1276,17 @@ public class MobileMessagingCore
             return;
         }
 
-        logoutUserSynchronizer().logout(pushRegId, new LogoutActionListener() {
+        personalizeSynchronizer().depersonalize(pushRegId, new DepersonalizeActionListener() {
             @Override
-            public void onUserInitiatedLogoutCompleted() {
-                onLogoutCompleted();
+            public void onUserInitiatedDepersonalizeCompleted() {
+                onDepersonalizeCompleted();
                 if (listener != null) {
                     listener.onResult(SuccessPending.Success);
                 }
             }
 
             @Override
-            public void onUserInitiatedLogoutFailed(Throwable error) {
+            public void onUserInitiatedDepersonalizeFailed(Throwable error) {
                 if (listener != null) {
                     listener.onError(MobileMessagingError.createFrom(error));
                 }
@@ -1282,8 +1295,8 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void logout(final String pushRegId, final InstallationsActionListener listener) {
-        logout(pushRegId, new ResultListener<SuccessPending>() {
+    public void depersonalize(final String pushRegId, final InstallationsActionListener listener) {
+        depersonalize(pushRegId, new ResultListener<SuccessPending>() {
             @Override
             public void onResult(SuccessPending result) {
                 if (SuccessPending.Pending.name().equals(result.name())) {
@@ -1293,7 +1306,7 @@ public class MobileMessagingCore
                     return;
                 }
 
-                List<UserData.Installation> installations = performLocalLogout(pushRegId);
+                List<UserData.Installation> installations = performLocalDepersonalization(pushRegId);
                 if (listener != null) {
                     listener.onSuccess(installations);
                 }
@@ -1308,8 +1321,8 @@ public class MobileMessagingCore
         });
     }
 
-    private List<UserData.Installation> performLocalLogout(String pushRegId) {
-        UserData userData = getUserData();
+    private List<UserData.Installation> performLocalDepersonalization(String pushRegId) {
+        UserData userData = getUser();
         if (userData == null) {
             return null;
         }
@@ -1345,7 +1358,7 @@ public class MobileMessagingCore
         if (userData != null && shouldSaveUserData()) {
             UserData dataForStoring = userData;
             if (merge) {
-                dataForStoring = UserData.merge(getUserData(), userData);
+                dataForStoring = UserData.merge(getUser(), userData);
             }
             saveUserDataToPrefs(dataForStoring);
         }
@@ -1463,9 +1476,9 @@ public class MobileMessagingCore
     }
 
     @NonNull
-    private LogoutUserSynchronizer logoutUserSynchronizer() {
-        if (logoutUserSynchronizer == null) {
-            logoutUserSynchronizer = new LogoutUserSynchronizer(
+    private PersonalizeSynchronizer personalizeSynchronizer() {
+        if (personalizeSynchronizer == null) {
+            personalizeSynchronizer = new PersonalizeSynchronizer(
                     this,
                     mobileApiResourceProvider().getMobileApiAppInstance(context),
                     retryPolicyProvider.DEFAULT(),
@@ -1473,7 +1486,7 @@ public class MobileMessagingCore
                     new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
                     this);
         }
-        return logoutUserSynchronizer;
+        return personalizeSynchronizer;
     }
 
     @NonNull

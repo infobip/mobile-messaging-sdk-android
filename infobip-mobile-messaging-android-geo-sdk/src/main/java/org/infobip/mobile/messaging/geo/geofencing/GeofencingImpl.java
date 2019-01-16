@@ -319,7 +319,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     @Override
-    public void logoutUser() {
+    public void depersonalize() {
         stopGeoMonitoring();
         messageStore.deleteAll(context);
     }

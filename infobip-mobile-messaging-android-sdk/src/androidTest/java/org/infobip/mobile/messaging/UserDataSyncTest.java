@@ -41,7 +41,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
 
     @Test
     public void test_empty_user_data() throws Exception {
-        mobileMessaging.fetchUserData(resultListener);
+        mobileMessaging.fetchUser(resultListener);
 
         verify(broadcaster, after(1000).atLeastOnce()).userDataAcquired(dataCaptor.capture());
 
@@ -59,14 +59,14 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         tags.add("third");
         givenUserData.setTags(tags);
 
-        mobileMessaging.saveUserData(givenUserData);
+        mobileMessaging.saveUser(givenUserData);
 
         verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
         UserBody report = reportCaptor.getValue();
         assertEquals(givenUserData.getTags(), report.getTags());
 
-        assertJEquals(givenUserData.getTags(), mobileMessagingCore.getUserData().getTags());
+        assertJEquals(givenUserData.getTags(), mobileMessagingCore.getUser().getTags());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
@@ -84,7 +84,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         givenUserData.setEmails(Collections.singletonList("darth_vader@mail.com"));
         givenUserData.setGsms(Collections.singletonList("385991111666"));
 
-        mobileMessaging.saveUserData(givenUserData);
+        mobileMessaging.saveUser(givenUserData);
 
         verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
@@ -97,7 +97,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertEquals(givenUserData.getExternalUserId(), report.getExternalUserId());
         assertEquals(givenUserData.getEmailsWithPreferred(), report.getEmails());
         assertEquals(givenUserData.getGsmsWithPreferred(), report.getGsms());
-        assertJEquals(givenUserData.getStandardAttributes(), mobileMessagingCore.getUserData().getStandardAttributes());
+        assertJEquals(givenUserData.getStandardAttributes(), mobileMessagingCore.getUser().getStandardAttributes());
 
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
@@ -110,7 +110,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         givenUserData.setCustomUserDataElement("myKey2", new CustomUserDataValue(12345));
         givenUserData.setCustomUserDataElement("myKey3", new CustomUserDataValue(new Date()));
 
-        mobileMessaging.saveUserData(givenUserData);
+        mobileMessaging.saveUser(givenUserData);
 
         verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
@@ -119,7 +119,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertEquals(givenUserData.getCustomUserDataValue("myKey2").numberValue(), report.getCustomAttributes().get("myKey2"));
         assertEquals(givenUserData.getCustomUserDataValue("myKey3").dateValue(), DateTimeUtil.DateFromYMDString((String) report.getCustomAttributes().get("myKey3")));
 
-        assertJEquals(givenUserData.getCustomAttributes(), mobileMessagingCore.getUserData().getCustomAttributes());
+        assertJEquals(givenUserData.getCustomAttributes(), mobileMessagingCore.getUser().getCustomAttributes());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
@@ -134,7 +134,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         givenUserData.removeCustomUserDataElement("myKey2");
         givenUserData.removeCustomUserDataElement("myKey3");
 
-        mobileMessaging.saveUserData(givenUserData);
+        mobileMessaging.saveUser(givenUserData);
 
         verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), reportCaptor.capture());
 
@@ -143,7 +143,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         assertEquals(null, report.getCustomAttributes().get("myKey2"));
         assertEquals(null, report.getCustomAttributes().get("myKey3"));
 
-        assertEquals(1, mobileMessagingCore.getUserData().getCustomAttributes().size());
+        assertEquals(1, mobileMessagingCore.getUser().getCustomAttributes().size());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 }

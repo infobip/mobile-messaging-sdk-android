@@ -69,7 +69,7 @@ public class UserDataReporter {
 
                 UserData userDataToReturn = userData;
                 if (mobileMessagingCore.shouldSaveUserData()) {
-                     userDataToReturn = mobileMessagingCore.getUserData();
+                     userDataToReturn = mobileMessagingCore.getUser();
                 }
                 broadcaster.userDataReported(userDataToReturn);
 
@@ -104,7 +104,7 @@ public class UserDataReporter {
                     MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
 
                     if (listener != null) {
-                        UserData storedUserData = mobileMessagingCore.getUserData();
+                        UserData storedUserData = mobileMessagingCore.getUser();
                         listener.onResult(storedUserData);
                     }
                 }

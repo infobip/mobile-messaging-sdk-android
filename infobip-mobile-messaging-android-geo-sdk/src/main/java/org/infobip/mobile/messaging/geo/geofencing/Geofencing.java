@@ -35,5 +35,5 @@ public abstract class Geofencing {
 
     public abstract void cleanup();
 
-    public abstract void logoutUser();
+    public abstract void depersonalize();
 }

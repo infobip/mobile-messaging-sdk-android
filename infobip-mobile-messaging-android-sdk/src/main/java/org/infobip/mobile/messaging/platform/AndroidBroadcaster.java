@@ -132,8 +132,8 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void userLoggedOut() {
-        send(prepare(Event.USER_LOGGED_OUT));
+    public void depersonalized() {
+        send(prepare(Event.DEPERSONALIZED));
     }
 
     @Override

@@ -138,7 +138,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
 
     @Override
     public void fetchUserInfo(final MobileMessaging.ResultListener<ChatParticipant> listener) {
-        mobileMessagingCore().fetchUserData(new MobileMessaging.ResultListener<UserData>() {
+        mobileMessagingCore().fetchUser(new MobileMessaging.ResultListener<UserData>() {
             @Override
             public void onResult(UserData result) {
                 if (result == null) {
@@ -213,7 +213,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     private void setChatUserInfo(ChatParticipant info, final MobileMessaging.ResultListener<ChatParticipant> listener) {
         userProfileManager().save(info);
         UserData userData = objectMapper.toUserData(info);
-        mobileMessagingCore().saveUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+        mobileMessagingCore().saveUser(userData, new MobileMessaging.ResultListener<UserData>() {
             @Override
             public void onResult(UserData result) {
                 if (result == null) {
@@ -304,7 +304,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     }
 
     @Override
-    public void logoutUser() {
+    public void depersonalize() {
         chatMessageStorage().deleteAll();
         participantRepository().clear();
         propertyHelper().remove(MobileChatProperty.USER_NAME_DIALOG_SHOWN);

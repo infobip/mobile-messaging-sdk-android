@@ -184,8 +184,8 @@ public class UserData {
      * Sets external user ID - the user's ID you can provide in order to <b>link your own unique user identifier</b> with Mobile Messaging user id,
      * so that you will be able to send personalised targeted messages to the exact user.
      *
-     * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
-     * @see MobileMessaging#saveUserData(UserData)
+     * @see MobileMessaging#saveUser(UserData, MobileMessaging.ResultListener)
+     * @see MobileMessaging#saveUser(UserData)
      */
     public void setExternalUserId(String externalUserId) {
         setField(StandardAttribute.EXTERNAL_USER_ID, externalUserId);
@@ -213,8 +213,8 @@ public class UserData {
      * Sets user's GSMs.
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      *
-     * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
-     * @see MobileMessaging#saveUserData(UserData)
+     * @see MobileMessaging#saveUser(UserData, MobileMessaging.ResultListener)
+     * @see MobileMessaging#saveUser(UserData)
      */
     public void setGsms(List<String> gsms) {
         if (gsms == null) gsms = Collections.emptyList();
@@ -264,8 +264,8 @@ public class UserData {
      * Sets user's emails.
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      *
-     * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
-     * @see MobileMessaging#saveUserData(UserData)
+     * @see MobileMessaging#saveUser(UserData, MobileMessaging.ResultListener)
+     * @see MobileMessaging#saveUser(UserData)
      */
     public void setEmails(List<String> emails) {
         if (emails == null) emails = Collections.emptyList();
@@ -304,8 +304,8 @@ public class UserData {
      * Sets user's tags.
      * You can provide additional user's information to the server, so that you will be able to send personalised targeted messages to the exact user.
      *
-     * @see MobileMessaging#saveUserData(UserData, MobileMessaging.ResultListener)
-     * @see MobileMessaging#saveUserData(UserData)
+     * @see MobileMessaging#saveUser(UserData, MobileMessaging.ResultListener)
+     * @see MobileMessaging#saveUser(UserData)
      */
     public void setTags(Set<String> tags) {
         if (tags == null) tags = new HashSet<>(0);

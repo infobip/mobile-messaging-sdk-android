@@ -119,9 +119,9 @@ public interface Broadcaster {
     void installationCreated(Installation installation);
 
     /**
-     * Sends broadcast that user is logged out
+     * Sends broadcast that user specific data is detached from current installation
      */
-    void userLoggedOut();
+    void depersonalized();
 
     /**
      * Sends broadcast indicating that primary setting has changed on server

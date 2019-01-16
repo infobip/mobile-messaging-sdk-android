@@ -35,7 +35,7 @@ public class MockMessageHandlerModule implements MessageHandlerModule {
     }
 
     @Override
-    public void logoutUser() {
+    public void depersonalize() {
 
     }
 }

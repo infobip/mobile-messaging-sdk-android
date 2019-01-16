@@ -53,6 +53,10 @@ public interface MobileApiAppInstance {
     @Query(name = "ri", value = "true")
     UserBody getUser(@Path(name = "regId") String regId);
 
-    @HttpRequest(method = HttpMethod.POST, value = "{regId}/logout")
-    Void logoutUser(@Path(name = "regId") String regId);
+    @HttpRequest(method = HttpMethod.POST, value = "{regId}/depersonalize")
+    Void depersonalize(@Path(name = "regId") String regId);
+
+    @HttpRequest(method = HttpMethod.POST, value = "{regId}/personalize")
+    void personalize(@Path(name = "regId") String regId,
+                     @Query(name = "forceDepersonalize", value = "false") boolean forceDepersonalize);
 }
