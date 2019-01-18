@@ -44,6 +44,11 @@ public class MobileMessageHandler {
             return;
         }
 
+        if (mobileMessagingCore.isMessageAlreadyProcessed(message.getMessageId())) {
+            MobileMessagingLogger.w("Skipping message " + message.getMessageId() + " as already processed");
+            return;
+        }
+
         message.setReceivedTimestamp(Time.now());
         sendDeliveryReport(message);
 

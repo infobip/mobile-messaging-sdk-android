@@ -562,6 +562,10 @@ public class MobileMessagingCore
         return messageIdsToSync.toArray(new String[messageIdsToSync.size()]);
     }
 
+    public boolean isMessageAlreadyProcessed(String messageId) {
+        return Arrays.asList(getSyncMessagesIds()).contains(messageId);
+    }
+
     public String[] getUnreportedSeenMessageIds() {
         String[] ids = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS);
         return filterOutGeneratedMessageIds(ids);
