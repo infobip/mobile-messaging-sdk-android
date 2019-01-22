@@ -126,8 +126,8 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     private void verifySuccess() {
         verify(actionListener, after(300).times(1)).onResult(captor.capture());
         Result result = captor.getValue();
-        assertNotNull(result.getData());
         assertTrue(result.isSuccess());
+        assertNotNull(result.getData());
         assertNull(result.getError());
     }
 
@@ -135,7 +135,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         verify(actionListener, after(300).times(1)).onResult(captor.capture());
         Result result = captor.getValue();
         assertFalse(result.isSuccess());
-        assertNull(result.getData());
+        assertNotNull(result.getData());
         assertNotNull(result.getError());
     }
 }

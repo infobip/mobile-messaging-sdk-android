@@ -196,16 +196,6 @@ public enum Event {
     PERSONALIZED("org.infobip.mobile.messaging.PERSONALIZED"),
 
     /**
-     * It is triggered when system data is successfully reported to the server.
-     * <pre>
-     * {@code
-     * SystemData systemData = SystemData.createFrom(intent.getExtras());
-     * }
-     * </pre>
-     */
-    SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED"),
-
-    /**
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code

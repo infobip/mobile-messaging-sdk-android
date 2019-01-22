@@ -99,32 +99,32 @@ public class UserDataReporter {
                 MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 if (error instanceof BackendBaseExceptionWithContent) {
                     BackendBaseExceptionWithContent errorWithContent = (BackendBaseExceptionWithContent) error;
                     mobileMessagingCore.setUserDataReported(errorWithContent.getContent(User.class), true);
 
                     if (listener != null) {
-                        listener.onResult(new Result(MobileMessagingError.createFrom(error)));
+                        listener.onResult(new Result(mobileMessagingCore.getUser(), mobileMessagingError));
                     }
 
                 } else if (error instanceof BackendInvalidParameterException) {
                     mobileMessagingCore.setUserDataReportedWithError();
 
                     if (listener != null) {
-                        listener.onResult(new Result(MobileMessagingError.createFrom(error)));
+                        listener.onResult(new Result(mobileMessagingCore.getUser(), mobileMessagingError));
                     }
 
                 } else {
                     MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
 
                     if (listener != null) {
-                        User storedUser = mobileMessagingCore.getUser();
-                        listener.onResult(new Result(storedUser));
+                        listener.onResult(new Result(mobileMessagingCore.getUser()));
                     }
                 }
 
-                broadcaster.error(MobileMessagingError.createFrom(error));
+                broadcaster.error(mobileMessagingError);
             }
         }
                 .retryWith(retryPolicy(listener))

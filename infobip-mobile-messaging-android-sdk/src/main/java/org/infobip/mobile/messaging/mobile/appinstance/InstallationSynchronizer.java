@@ -157,7 +157,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<Installation, MobileMessagingError>(MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(), MobileMessagingError.createFrom(error)));
                 }
             }
         }
@@ -195,7 +195,6 @@ public class InstallationSynchronizer {
                 MobileMessagingLogger.v("UPDATE INSTALLATION <<<");
 
                 updateInstallationReported(installation, myDevice);
-
                 broadcaster.installationUpdated(installation);
 
                 if (actionListener != null) {
@@ -213,7 +212,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<Installation, MobileMessagingError>(MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(), MobileMessagingError.createFrom(error)));
                 }
             }
         }

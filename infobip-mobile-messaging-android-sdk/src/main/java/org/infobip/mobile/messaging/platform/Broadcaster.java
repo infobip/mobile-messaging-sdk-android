@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.platform;
 
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
@@ -72,13 +71,6 @@ public interface Broadcaster {
      * @param pushRegistrationId Infobip registration id
      */
     void registrationCreated(String cloudToken, String pushRegistrationId);
-
-    /**
-     * Sends broadcast with system data
-     *
-     * @param systemData system data
-     */
-    void systemDataReported(SystemData systemData);
 
     /**
      * Sends broadcast with installation data on installation update

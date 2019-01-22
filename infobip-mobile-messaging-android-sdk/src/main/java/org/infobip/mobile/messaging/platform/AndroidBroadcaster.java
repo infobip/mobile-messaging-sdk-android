@@ -11,7 +11,6 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -92,12 +91,6 @@ public class AndroidBroadcaster implements Broadcaster {
     public void userUpdated(User user) {
         send(prepare(Event.USER_UPDATED)
                 .putExtras(UserMapper.toBundle(BroadcastParameter.EXTRA_USER, user)));
-    }
-
-    @Override
-    public void systemDataReported(SystemData systemData) {
-        send(prepare(Event.SYSTEM_DATA_REPORTED)
-                .putExtra(BroadcastParameter.EXTRA_SYSTEM_DATA, systemData.toString()));
     }
 
     @Override

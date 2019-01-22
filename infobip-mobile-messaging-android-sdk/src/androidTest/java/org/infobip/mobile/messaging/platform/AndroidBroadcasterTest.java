@@ -7,7 +7,6 @@ import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.SystemData;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -194,25 +193,6 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
 
         Installation installationAfter = Installation.createFrom(intent.getExtras());
         assertJEquals(installation, installationAfter);
-    }
-
-    @Test
-    public void test_should_send_system_data() throws Exception {
-        // Given
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "someLanguage", "someDeviceName", "GMT+1");
-
-        // When
-        broadcastSender.systemDataReported(systemData);
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.SYSTEM_DATA_REPORTED.getKey(), intent.getAction());
-
-        SystemData systemDataAfter = SystemData.createFrom(intent.getExtras());
-        assertNotSame(systemData, systemDataAfter);
-        assertJEquals(systemData, systemDataAfter);
     }
 
     @Test
