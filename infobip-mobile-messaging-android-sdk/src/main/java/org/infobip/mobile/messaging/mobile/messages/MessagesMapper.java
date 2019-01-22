@@ -59,7 +59,8 @@ class MessagesMapper {
                 null,
                 Message.Status.UNKNOWN,
                 null,
-                InternalDataMapper.getInternalDataContentUrl(response.getInternalData())
+                InternalDataMapper.getInternalDataContentUrl(response.getInternalData()),
+                InternalDataMapper.getInternalDataInAppStyle(response.getInternalData())
         );
 
         InternalDataMapper.updateMessageWithInternalData(message, response.getInternalData());

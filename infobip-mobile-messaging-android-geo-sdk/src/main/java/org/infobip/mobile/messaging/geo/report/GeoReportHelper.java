@@ -195,7 +195,8 @@ public class GeoReportHelper {
                 originalMessage.getDestination(),
                 originalMessage.getStatus(),
                 originalMessage.getStatusMessage(),
-                originalMessage.getContentUrl()
+                originalMessage.getContentUrl(),
+                originalMessage.getInAppStyle()
         );
     }
 

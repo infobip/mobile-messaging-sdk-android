@@ -124,6 +124,12 @@ public interface DatabaseContract {
          *  [TEXT]
          */
         String CONTENT_URL = "content_url";
+
+        /**
+         * style of in app notificiation
+         *  [TEXT]
+         */
+        String IN_APP_STYLE = "in_app_style";
     }
 
     interface DatabaseObject {

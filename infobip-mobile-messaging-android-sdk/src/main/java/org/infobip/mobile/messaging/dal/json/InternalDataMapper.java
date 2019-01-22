@@ -35,6 +35,8 @@ public class InternalDataMapper {
         Silent<VibrateValueType> silent;
         String bulkId;
         String initialMessageId;
+        @Deprecated Boolean inApp;
+        Message.InAppStyle inAppStyle;
 
         public InternalData() {
         }
@@ -223,6 +225,23 @@ public class InternalDataMapper {
         }
     }
 
+    public static Message.InAppStyle getInternalDataInAppStyle(String json) {
+       try {
+            InternalData internalData = serializer.deserialize(json, InternalData.class);
+            if (internalData.inAppStyle != null) {
+                return internalData.inAppStyle;
+            }
+
+            if (internalData.inApp != null) {
+                return Message.InAppStyle.MODAL;
+            }
+
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     @Nullable
     private static <VibrateValueType> String createInternalDataForMessage(Message message) {
@@ -230,6 +249,7 @@ public class InternalDataMapper {
         internalData = addContentUrlToInternalData(message, internalData);
         internalData = addSilentToInternalData(message, internalData);
         internalData = addSendDateTimeToInternalData(message, internalData);
+        internalData = addInAppStyleToInternalData(message, internalData);
         return mergeExistingInternalDataWithAnythingToJson(message.getInternalData(), internalData);
     }
 
@@ -299,6 +319,20 @@ public class InternalDataMapper {
         }
 
         internalData.sendDateTime = message.getSentTimestamp();
+        return internalData;
+    }
+
+    private static InternalData addInAppStyleToInternalData(@NonNull Message message, InternalData internalData) {
+        if (message.getInAppStyle() == null) {
+            return internalData;
+        }
+
+        if (internalData == null) {
+            internalData = new InternalData();
+        }
+
+        internalData.inAppStyle = message.getInAppStyle();
+        internalData.inApp = message.getInAppStyle() == Message.InAppStyle.MODAL ? true : null;
         return internalData;
     }
 

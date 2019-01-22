@@ -39,7 +39,7 @@ public class InAppRulesTest {
     @Before
     public void before() {
         reset(mobileInteractive, foregroundStateMonitor, message, predefinedActionsProvider);
-        when(message.getInternalData()).thenReturn("{\"inApp\":true}");
+        when(message.getInAppStyle()).thenReturn(Message.InAppStyle.MODAL);
         defaultActions = new NotificationAction[]{
                 new NotificationAction.Builder(true)
                         .withId("action_id")
@@ -52,15 +52,15 @@ public class InAppRulesTest {
 
     @Test
     public void shouldNotDisplayIfInAppNotConfigured() {
-        when(message.getInternalData()).thenReturn("{}");
+        when(message.getInAppStyle()).thenReturn(null);
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(false, showOrNot.shouldShowNow());
         assertEquals(false, showOrNot.shouldShowWhenInForeground());
     }
 
     @Test
-    public void shouldNotDisplayIfInAppDisabled() {
-        when(message.getInternalData()).thenReturn("{\"inApp\":false}");
+    public void shouldNotDisplayIfBannerIsConfigured() {
+        when(message.getInAppStyle()).thenReturn(Message.InAppStyle.BANNER);
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(false, showOrNot.shouldShowNow());
         assertEquals(false, showOrNot.shouldShowWhenInForeground());

@@ -31,6 +31,10 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         return foreground;
     }
 
+    public static boolean isBackground() {
+        return !isForeground();
+    }
+
     @Nullable
     public Activity getForegroundActivity() {
         return foregroundActivity;

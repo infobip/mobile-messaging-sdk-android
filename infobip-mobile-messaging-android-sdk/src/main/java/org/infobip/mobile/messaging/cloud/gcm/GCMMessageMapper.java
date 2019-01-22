@@ -29,7 +29,6 @@ public class GCMMessageMapper {
             return null;
         }
 
-
         boolean silent = "true".equals(bundle.getString(BundleField.SILENT.getKey()));
         String messageId = bundle.getString(BundleField.MESSAGE_ID.getKey());
         String icon = bundle.getString(BundleField.ICON.getKey());
@@ -54,12 +53,13 @@ public class GCMMessageMapper {
             status = Message.Status.valueOf(bundle.getString(BundleField.STATUS.getKey()));
         } catch (Exception ignored) {
         }
+        Message.InAppStyle inAppStyle = InternalDataMapper.getInternalDataInAppStyle(internalDataJson);
 
         return new Message(messageId, title, body, sound,
                 vibrate, icon, silent, category, from,
                 receivedTs, seenTs, sentDateTime, customPayload,
                 internalDataJson, destination, status, statusMessage,
-                contentUrl);
+                contentUrl, inAppStyle);
     }
 
     /**

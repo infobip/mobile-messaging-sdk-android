@@ -84,7 +84,8 @@ public class ObjectMapper {
                 null,
                 message.getStatus(),
                 null,
-                message.getContentUrl());
+                message.getContentUrl(),
+                null);
     }
 
     public ChatParticipant fromUserData(UserData userData) {

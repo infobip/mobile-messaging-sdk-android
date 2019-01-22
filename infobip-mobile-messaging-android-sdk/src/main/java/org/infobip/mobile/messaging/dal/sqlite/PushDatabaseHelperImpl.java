@@ -27,7 +27,8 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
     static final int VER_2017_FEB_14 = 2; // Added separate table for geo messages
     static final int VER_2017_MAY_15 = 3; // Added "content_url" column to messages/geo_messages table
     static final int VER_2017_AUG_25 = 4; // Added "sendDateTime" to internal data (must be present for all messages)
-    private static final int VER_CURRENT = VER_2017_AUG_25;
+    static final int VER_2019_JAN_21 = 5; // Added "inAppStyle" to internal data
+    private static final int VER_CURRENT = VER_2019_JAN_21;
 
     @SuppressWarnings("WeakerAccess")
     static final String DATABASE_NAME = "mm_infobip_database.db";
@@ -74,6 +75,12 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
     private static final String SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL = "ALTER TABLE "
             + Tables.GEO_MESSAGES + " ADD COLUMN " + MessageColumns.CONTENT_URL + " TEXT;";
 
+    private static final String SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE = "ALTER TABLE "
+            + Tables.MESSAGES + " ADD COLUMN " + MessageColumns.IN_APP_STYLE + " TEXT;";
+
+    private static final String SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE  = "ALTER TABLE "
+            + Tables.GEO_MESSAGES + " ADD COLUMN " + MessageColumns.IN_APP_STYLE + " TEXT;";
+
     public PushDatabaseHelperImpl(Context context) {
         super(context, DATABASE_NAME, VER_CURRENT);
     }
@@ -85,6 +92,8 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
         db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL);
         db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
         db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL);
+        db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE);
+        db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE);
         db.setTransactionSuccessful();
         db.endTransaction();
         SharedPreferencesMigrator.migrateMessages(context, db);
@@ -105,8 +114,14 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
         }
 
         if (version <= VER_2017_MAY_15) {
-            setSendDateTimeToReceivedTImeIfAbsent(db);
+            setSendDateTimeToReceivedTimeIfAbsent(db);
             version = VER_2017_AUG_25;
+        }
+
+        if (version <= VER_2017_AUG_25) {
+            db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE);
+            db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE);
+            version = VER_2019_JAN_21;
         }
 
         if (version != VER_CURRENT) {
@@ -114,7 +129,7 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
         }
     }
 
-    private void setSendDateTimeToReceivedTImeIfAbsent(SQLiteDatabase db) {
+    private void setSendDateTimeToReceivedTimeIfAbsent(SQLiteDatabase db) {
         // Read existing data from database
         class Message {
             private String id;

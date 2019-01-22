@@ -1,12 +1,12 @@
 package org.infobip.mobile.messaging.dal.sqlite;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonArray;
-import org.infobip.mobile.messaging.api.shaded.google.gson.JsonObject;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -38,15 +38,15 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         UUID uuid = UUID.randomUUID();
         int numberOfMessages = 100;
 
-        JsonObject attachment = new JsonObject();
-        attachment.addProperty("url", "http://www.some-content.com.ru.hr");
+        JSONObject attachment = new JSONObject();
+        attachment.put("url", "http://www.some-content.com.ru.hr");
 
-        JsonArray attachments = new JsonArray();
-        attachments.add(attachment);
+        JSONArray attachments = new JSONArray();
+        attachments.put(attachment);
 
-        JsonObject internalData = new JsonObject();
-        internalData.add("atts", attachments);
-        internalData.add("silent", new JsonObject());
+        JSONObject internalData = new JSONObject();
+        internalData.put("atts", attachments);
+        internalData.put("silent", new JSONObject());
 
         for (int i = 0; i < numberOfMessages; i++) {
             sharedPreferencesMessageStore.save(context, new Message(
@@ -67,7 +67,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     "SomeDestination" + i,
                     Message.Status.SUCCESS,
                     "SomeStatusMessage" + i,
-                    "http://www.some-content.com.ru.hr"
+                    "http://www.some-content.com.ru.hr",
+                    null
             ));
         }
 

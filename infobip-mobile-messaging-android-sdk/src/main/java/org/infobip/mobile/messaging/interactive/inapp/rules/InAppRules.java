@@ -74,11 +74,6 @@ public class InAppRules {
     }
 
     private static boolean hasInAppEnabled(Message message) {
-        try {
-            JSONObject json = new JSONObject(message.getInternalData());
-            return json.getBoolean("inApp");
-        } catch (Exception e) {
-            return false;
-        }
+        return message.getInAppStyle() == Message.InAppStyle.MODAL;
     }
 }

@@ -17,7 +17,7 @@ import org.json.JSONObject;
 public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
     public SqliteMessage() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, 0, null, null, null, Status.UNKNOWN, null, null);
+        super(null, null, null, null, true, null, false, null, null, 0, 0, 0, null, null, null, Status.UNKNOWN, null, null, null);
     }
 
     public SqliteMessage(Message m) {
@@ -39,7 +39,8 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getDestination(),
                 m.getStatus(),
                 m.getStatusMessage(),
-                m.getContentUrl()
+                m.getContentUrl(),
+                m.getInAppStyle()
         );
     }
 
@@ -83,6 +84,12 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         String statusName = cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS));
         setStatus(statusName != null ? Status.valueOf(statusName) : null);
         setStatusMessage(cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS_MESSAGE)));
+        try {
+            String inAppStyle = cursor.getString(cursor.getColumnIndex(MessageColumns.IN_APP_STYLE));
+            setInAppStyle(InAppStyle.valueOf(inAppStyle));
+        } catch (Exception ignored) {
+
+        }
     }
 
     @Override
@@ -105,6 +112,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         contentValues.put(MessageColumns.STATUS, getStatus() != null ? getStatus().name() : null);
         contentValues.put(MessageColumns.STATUS_MESSAGE, getStatusMessage());
         contentValues.put(MessageColumns.CONTENT_URL, getContentUrl());
+        contentValues.put(MessageColumns.IN_APP_STYLE, getInAppStyle() != null ? getInAppStyle().name() : null);
         return contentValues;
     }
 

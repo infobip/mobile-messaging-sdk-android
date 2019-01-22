@@ -100,7 +100,7 @@ public class BaseNotificationHandler {
         if (notificationSettings == null) return null;
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, getChannelIdForNotification(notificationSettings))
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, getChannelIdForNotification(notificationSettings, message))
                 .setContentTitle(title)
                 .setContentText(message.getBody())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
@@ -110,7 +110,7 @@ public class BaseNotificationHandler {
         setNotificationStyle(notificationBuilder, message, title);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
-        setPriorityForHeadsupNotification(notificationBuilder, notificationSettings);
+        setNotificationPriority(notificationBuilder, notificationSettings, message);
 
         return notificationBuilder;
     }
@@ -269,16 +269,10 @@ public class BaseNotificationHandler {
      * @param notificationBuilder  - notification builder
      * @param notificationSettings - notification settings to use when choosing priority
      */
-    private void setPriorityForHeadsupNotification(NotificationCompat.Builder notificationBuilder, @NonNull NotificationSettings notificationSettings) {
-        if (!notificationSettings.areHeadsUpNotificationsEnabled()) {
-            return;
+    private void setNotificationPriority(NotificationCompat.Builder notificationBuilder, @NonNull NotificationSettings notificationSettings, Message message) {
+        if (shouldDisplayHeadsUpNotification(notificationSettings, message)) {
+            notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
         }
-
-        if (ActivityLifecycleMonitor.isForeground()) {
-            return;
-        }
-
-        notificationBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
     }
 
     /**
@@ -288,12 +282,10 @@ public class BaseNotificationHandler {
      * @param notificationSettings - notification settings to use when choosing the channel
      */
     @NonNull
-    private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings) {
-        if (!notificationSettings.areHeadsUpNotificationsEnabled() || ActivityLifecycleMonitor.isForeground()) {
-            return MobileMessagingCore.MM_DEFAULT_CHANNEL_ID;
-        }
-
-        return MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID;
+    private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings, Message message) {
+        return shouldDisplayHeadsUpNotification(notificationSettings, message)
+                ? MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID
+                : MobileMessagingCore.MM_DEFAULT_CHANNEL_ID;
     }
 
     /**
@@ -310,5 +302,15 @@ public class BaseNotificationHandler {
 
         boolean areMultipleNotificationsEnabled = settings.areMultipleNotificationsEnabled();
         return areMultipleNotificationsEnabled ? message.getMessageId().hashCode() : DEFAULT_NOTIFICATION_ID;
+    }
+
+    private boolean shouldDisplayHeadsUpNotification(NotificationSettings notificationSettings, Message message) {
+        if (!notificationSettings.areHeadsUpNotificationsEnabled()) {
+            return false;
+        }
+
+        // 1) always display in background
+        // 2) display in foreground when configured in message
+        return ActivityLifecycleMonitor.isBackground() || message.getInAppStyle() == Message.InAppStyle.BANNER;
     }
 }

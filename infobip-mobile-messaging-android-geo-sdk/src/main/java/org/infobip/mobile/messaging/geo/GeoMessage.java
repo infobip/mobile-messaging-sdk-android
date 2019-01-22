@@ -16,7 +16,7 @@ public class GeoMessage extends Message {
     public static GeoMessage createFrom(Message message, Geo geo) {
         return new GeoMessage(message.getMessageId(), message.getTitle(), message.getBody(), message.getSound(), message.isVibrate(), message.getIcon(),
                 message.isSilent(), message.getCategory(), message.getFrom(), message.getReceivedTimestamp(), message.getSeenTimestamp(), message.getSentTimestamp(),
-                message.getCustomPayload(), message.getInternalData(), message.getDestination(), message.getStatus(), message.getStatusMessage(), message.getContentUrl(), geo);
+                message.getCustomPayload(), message.getInternalData(), message.getDestination(), message.getStatus(), message.getStatusMessage(), message.getContentUrl(), geo, message.getInAppStyle());
     }
 
     public static GeoMessage createFrom(Bundle bundle) {
@@ -26,11 +26,11 @@ public class GeoMessage extends Message {
     static Message toMessage(GeoMessage geoMessage) {
         return new Message(geoMessage.getMessageId(), geoMessage.getTitle(), geoMessage.getBody(), geoMessage.getSound(), geoMessage.isVibrate(), geoMessage.getIcon(),
                 geoMessage.isSilent(), geoMessage.getCategory(), geoMessage.getFrom(), geoMessage.getReceivedTimestamp(), geoMessage.getSeenTimestamp(), geoMessage.getSentTimestamp(),
-                geoMessage.getCustomPayload(), geoMessage.getInternalData(), geoMessage.getDestination(), geoMessage.getStatus(), geoMessage.getStatusMessage(), geoMessage.getContentUrl());
+                geoMessage.getCustomPayload(), geoMessage.getInternalData(), geoMessage.getDestination(), geoMessage.getStatus(), geoMessage.getStatusMessage(), geoMessage.getContentUrl(), geoMessage.getInAppStyle());
     }
 
-    private GeoMessage(String messageId, String title, String body, String sound, boolean vibrate, String icon, boolean silent, String category, String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp, JSONObject customPayload, String internalData, String destination, Status status, String statusMessage, String contentUrl, Geo geo) {
-        super(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTimestamp, seenTimestamp, seenTimestamp, customPayload, internalData, destination, status, statusMessage, contentUrl);
+    private GeoMessage(String messageId, String title, String body, String sound, boolean vibrate, String icon, boolean silent, String category, String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp, JSONObject customPayload, String internalData, String destination, Status status, String statusMessage, String contentUrl, Geo geo, InAppStyle inAppStyle) {
+        super(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTimestamp, seenTimestamp, seenTimestamp, customPayload, internalData, destination, status, statusMessage, contentUrl, inAppStyle);
         this.geo = geo;
     }
 

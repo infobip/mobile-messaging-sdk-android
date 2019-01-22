@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -18,8 +19,10 @@ import org.mockito.Mockito;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -113,6 +116,34 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(1, debugServer.getRequestCount());
     }
 
+    @Test
+    public void shouldSetHightPriorityForMessageWithBanner() {
+
+        // Given
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
+        PreferenceHelper.saveClass(context, MobileMessagingProperty.CALLBACK_ACTIVITY, Activity.class);
+
+        // When
+        NotificationCompat.Builder builder = simpleNotificationHandler.createNotificationCompatBuilder(prepareMessageWithBanner());
+
+        // Then
+        assertEquals(NotificationCompat.PRIORITY_HIGH, builder.getPriority());
+    }
+
+    @Test
+    public void shouldUseHighPriorityChannelForMessageWithBanner() throws Exception {
+
+        // Given
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
+        PreferenceHelper.saveClass(context, MobileMessagingProperty.CALLBACK_ACTIVITY, Activity.class);
+
+        // When
+        NotificationCompat.Builder builder = simpleNotificationHandler.createNotificationCompatBuilder(prepareMessageWithBanner());
+
+        // Then
+        assertEquals(MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, getChannelId(builder));
+    }
+
     private String prepareBitmapUrl() {
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), android.R.drawable.ic_media_play);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -120,5 +151,36 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         byte[] bitmapdata = bos.toByteArray();
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, "image/png", new ByteArrayInputStream(bitmapdata));
         return "http://127.0.0.1:" + debugServer.getListeningPort() + "/";
+    }
+
+    private Message prepareMessageWithBanner() {
+        return new Message(
+                UUID.randomUUID().toString(),
+                "SomeTitle",
+                "SomeBody",
+                "SomeSound",
+                true,
+                "SomeIcon",
+                false,
+                "SomeCategory",
+                "SomeFrom",
+                0,
+                0,
+                0,
+                null,
+                null,
+                "SomeDestination",
+                Message.Status.SUCCESS,
+                "SomeStatusMessage",
+                "http://www.some-content.com.ru.hr",
+                Message.InAppStyle.BANNER
+        );
+    }
+
+    // getting via reflection due to API issues on different android versions
+    private static String getChannelId(NotificationCompat.Builder builder) throws Exception {
+        Field field = NotificationCompat.Builder.class.getDeclaredField("mChannelId");
+        field.setAccessible(true);
+        return (String) field.get(builder);
     }
 }

@@ -35,11 +35,17 @@ public class Message implements Comparable<Message> {
     private JSONObject customPayload;
     private String internalData;
     private String contentUrl;
+    private InAppStyle inAppStyle;
 
     public enum Status {
         SUCCESS,
         ERROR,
         UNKNOWN
+    }
+
+    public enum InAppStyle {
+        MODAL,
+        BANNER
     }
 
     private String destination;
@@ -58,7 +64,7 @@ public class Message implements Comparable<Message> {
                    boolean vibrate, String icon, boolean silent, String category,
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
-                   String destination, Status status, String statusMessage, String contentUrl) {
+                   String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -77,6 +83,7 @@ public class Message implements Comparable<Message> {
         this.status = status;
         this.statusMessage = statusMessage;
         this.contentUrl = contentUrl;
+        this.inAppStyle = inAppStyle;
     }
 
     public Message() {
@@ -240,5 +247,13 @@ public class Message implements Comparable<Message> {
 
     public void setStatusMessage(String statusMessage) {
         this.statusMessage = statusMessage;
+    }
+
+    public InAppStyle getInAppStyle() {
+        return inAppStyle;
+    }
+
+    public void setInAppStyle(InAppStyle inAppStyle) {
+        this.inAppStyle = inAppStyle;
     }
 }
