@@ -21,11 +21,12 @@ public class SystemData {
     private final boolean geofencing;
     private final boolean notificationsEnabled;
     private final boolean deviceSecure;
-    private final String osLanguage;
+    private final String language;
     private final String deviceName;
+    private final String deviceTimeZoneOffset;
 
-    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion,
-                      boolean geofencing, boolean notificationsEnabled, boolean deviceSecure, String osLanguage, String deviceName) {
+    public SystemData(String sdkVersion, String osVersion, String deviceManufacturer, String deviceModel, String applicationVersion, boolean geofencing,
+                      boolean notificationsEnabled, boolean deviceSecure, String language, String deviceName, String deviceTimeZoneOffset) {
         this.sdkVersion = sdkVersion;
         this.osVersion = osVersion;
         this.deviceManufacturer = deviceManufacturer;
@@ -34,8 +35,9 @@ public class SystemData {
         this.geofencing = geofencing;
         this.notificationsEnabled = notificationsEnabled;
         this.deviceSecure = deviceSecure;
-        this.osLanguage = osLanguage;
+        this.language = language;
         this.deviceName = deviceName;
+        this.deviceTimeZoneOffset = deviceTimeZoneOffset;
     }
 
     public static SystemData fromJson(String json) {
@@ -78,12 +80,16 @@ public class SystemData {
         return deviceSecure;
     }
 
-    public String getOsLanguage() {
-        return osLanguage;
+    public String getLanguage() {
+        return language;
     }
 
     public String getDeviceName() {
         return deviceName;
+    }
+
+    public String getDeviceTimeZoneOffset() {
+        return deviceTimeZoneOffset;
     }
 
     @Override
@@ -98,8 +104,9 @@ public class SystemData {
         result = appendToHash(result, prime, geofencing);
         result = appendToHash(result, prime, notificationsEnabled);
         result = appendToHash(result, prime, deviceSecure);
-        result = appendToHash(result, prime, osLanguage);
+        result = appendToHash(result, prime, language);
         result = appendToHash(result, prime, deviceName);
+        result = appendToHash(result, prime, deviceTimeZoneOffset);
         return result;
     }
 
@@ -126,8 +133,9 @@ public class SystemData {
                 (this.geofencing == other.geofencing) &&
                 (this.notificationsEnabled == other.notificationsEnabled) &&
                 (this.deviceSecure == other.deviceSecure) &&
-                StringUtils.isEqual(this.osLanguage, other.osLanguage) &&
-                StringUtils.isEqual(this.deviceName, other.deviceName);
+                StringUtils.isEqual(this.language, other.language) &&
+                StringUtils.isEqual(this.deviceName, other.deviceName) &&
+                StringUtils.isEqual(this.deviceTimeZoneOffset, other.deviceTimeZoneOffset);
 
     }
 

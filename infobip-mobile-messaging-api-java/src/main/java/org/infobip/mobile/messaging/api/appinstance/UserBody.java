@@ -30,7 +30,7 @@ public class UserBody {
     private String gender;
 
     private Set<Email> emails;
-    private Set<Gsm> gsms;
+    private Set<Phone> phones;
     private Set<String> tags;
     private Map<String, Object> customAttributes;
     private List<AppInstance> instances;
@@ -68,15 +68,15 @@ public class UserBody {
         }
     }
 
-    public static class Gsm extends Destination {
+    public static class Phone extends Destination {
         String number;
         Boolean preferred;
 
-        public Gsm(String number) {
+        public Phone(String number) {
             this(number, null);
         }
 
-        public Gsm(String number, Boolean preferred) {
+        public Phone(String number, Boolean preferred) {
             this.number = number;
             this.preferred = null;
         }

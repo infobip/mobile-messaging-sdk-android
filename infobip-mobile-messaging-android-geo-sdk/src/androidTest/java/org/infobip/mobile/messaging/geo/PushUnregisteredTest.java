@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -136,9 +137,11 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         // Verify disable
         mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(Map.class));
 
-        mobileMessagingCore.disablePushRegistration();
+        mobileMessagingCore.getInstallation();
         verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
-        verify(coreBroadcaster, times(1)).registrationEnabled(anyString(), eq("testDeviceApplicationInstanceId"), eq(false));
+        Installation installation = new Installation();
+        installation.setPushRegistrationEnabled(false);
+        verify(coreBroadcaster, times(1)).installationUpdated(eq(installation));
 
 
         // Verify resync
@@ -148,10 +151,10 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         installationSynchronizer.setCloudTokenReported(false);
         installationSynchronizer.sync();
         verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
-        verify(coreBroadcaster, times(1)).installationCreated(any(Installation.class));
+        verify(coreBroadcaster, times(1)).registrationCreated(anyString(), anyString());
 
         // Verify final value of 'enabled'
-        assertTrue(MobileMessaging.getInstance(context).isPushRegistrationEnabled());
+        assertTrue(MobileMessaging.getInstance(context).getInstallation().isPushRegistrationEnabled());
     }
 
     private void verifyMessagesSynchronizer(VerificationMode verificationMode) throws InterruptedException {
@@ -201,7 +204,12 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     }
 
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
-        installationSynchronizer.updatePushRegEnabledStatus(enable, null);
+        Installation installation = new Installation();
+        installation.setPushRegistrationEnabled(enable);
+        installationSynchronizer.patch(installation, null);
+
         verify(mobileApiAppInstance, verificationMode).patchInstance(anyString(), anyBoolean(), captor.capture());
+        Map instanceMap = captor.getValue();
+        assertEquals(enable, instanceMap.get(AppInstanceAtts.regEnabled));
     }
 }

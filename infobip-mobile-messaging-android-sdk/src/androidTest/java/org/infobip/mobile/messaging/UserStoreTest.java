@@ -11,28 +11,28 @@ import org.mockito.Mockito;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 
-public class UserDataStoreTest extends MobileMessagingTestCase {
+public class UserStoreTest extends MobileMessagingTestCase {
 
-    private ArgumentCaptor<UserData> captor;
+    private ArgumentCaptor<User> captor;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        captor = ArgumentCaptor.forClass(UserData.class);
+        captor = ArgumentCaptor.forClass(User.class);
     }
 
     @Test
     public void test_should_save_user_data_on_disk() throws Exception {
 
         // Given
-        UserData givenUserData = userData();
+        User givenUser = userData();
 
         // When
-        mobileMessagingCore.setUserDataReported(givenUserData, false);
+        mobileMessagingCore.setUserDataReported(givenUser, false);
 
         // Then
-        UserData userData = mobileMessagingCore.getUser();
-        assertJEquals(givenUserData, userData, "map");
+        User user = mobileMessagingCore.getUser();
+        assertJEquals(givenUser, user, "map");
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
@@ -41,14 +41,14 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
 
         // Given
         withoutStoringUserData();
-        UserData givenUserData = userData();
+        User givenUser = userData();
 
         // When
-        mobileMessagingCore.setUserDataReported(givenUserData, false);
+        mobileMessagingCore.setUserDataReported(givenUser, false);
 
         // Then
-        UserData userData = mobileMessagingCore.getUser();
-        assertNull(userData);
+        User user = mobileMessagingCore.getUser();
+        assertNull(user);
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
@@ -57,13 +57,13 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
 
         // Given
         withoutStoringUserData();
-        UserData givenUserData = userData();
+        User givenUser = userData();
 
         // When
-        mobileMessagingCore.saveUser(givenUserData);
+        mobileMessagingCore.saveUser(givenUser);
 
         // Then
-        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userDataReported(captor.capture());
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userUpdated(captor.capture());
         assertNotNull(captor.getValue());
     }
 
@@ -72,8 +72,8 @@ public class UserDataStoreTest extends MobileMessagingTestCase {
     }
 
     @NonNull
-    private UserData userData() {
-        return new UserData(
+    private User userData() {
+        return new User(
                 "someUserId",
                 "User",
                 "Tester",

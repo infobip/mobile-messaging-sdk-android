@@ -10,19 +10,24 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * This class wraps user data types used to interact with backend services. The custom parameters may be of following types:
+ * This class wraps custom attribute types used to interact with backend services. The custom parameters may be of following types:
  * <ul>
  * <li>{@link String}</li>
  * <li>{@link Number}</li>
  * <li>{@link Date}</li>
+ * <li>{@link Boolean}</li>
  * </ul>
  *
- * @see UserData#setCustomAttributes(Map)
- * @see UserData#setCustomUserDataElement(String, CustomUserDataValue)
- * @see UserData#getCustomAttributes()
- * @see UserData#getCustomUserDataValue(String)
+ * @see User#setCustomAttributes(Map)
+ * @see User#setCustomAttributeElement(String, CustomAttributeValue)
+ * @see User#getCustomAttributes()
+ * @see User#getCustomAttributeValue(String)
+ * @see Installation#setCustomAttributes(Map)
+ * @see Installation#setCustomAttributeElement(String, CustomAttributeValue)
+ * @see Installation#getCustomAttributes()
+ * @see Installation#getCustomAttributeValue(String)
  */
-public class CustomUserDataValue {
+public class CustomAttributeValue {
 
     public enum Type {
         String,
@@ -34,35 +39,35 @@ public class CustomUserDataValue {
     private Object value;
     private final Type type;
 
-    public CustomUserDataValue(String someString) {
+    public CustomAttributeValue(String someString) {
         this.value = someString;
         this.type = Type.String;
     }
 
-    public CustomUserDataValue(Number someNumber) {
+    public CustomAttributeValue(Number someNumber) {
         this.value = someNumber;
         this.type = Type.Number;
     }
 
-    public CustomUserDataValue(Date someDate) {
+    public CustomAttributeValue(Date someDate) {
         this.value = DateTimeUtil.DateToYMDString(someDate);
         this.type = Type.Date;
     }
 
-    public CustomUserDataValue(Boolean someBoolean) {
+    public CustomAttributeValue(Boolean someBoolean) {
         this.value = someBoolean;
         this.type = Type.Boolean;
     }
 
     /**
-     * Parses string into CustomUserDataValue based on desired format.
+     * Parses string into CustomAttributeValue based on desired format.
      * <br>
      * For Date type this constructor accepts "yyyy-MM-dd" representation of date (for example 2016-12-31).
      *
-     * @throws ParseException            if stringValue cannot be parsed to {@code CustomUserDataValue}
+     * @throws ParseException            if stringValue cannot be parsed to {@code CustomAttributeValue}
      * @throws InvalidParameterException if provided type is invalid
      */
-    public CustomUserDataValue(String stringValue, Type type) throws ParseException, InvalidParameterException {
+    public CustomAttributeValue(String stringValue, Type type) throws ParseException, InvalidParameterException {
         this.type = type;
         switch (type) {
             case String:
@@ -83,16 +88,16 @@ public class CustomUserDataValue {
         }
     }
 
-    protected CustomUserDataValue(CustomUserDataValue that) {
+    protected CustomAttributeValue(CustomAttributeValue that) {
         this.value = that.value;
         this.type = that.type;
     }
 
     /**
-     * Return the value of specified {@code CustomUserDataValue} as {@link String}.
+     * Return the value of specified {@code CustomAttributeValue} as {@link String}.
      *
      * @return {@link String}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link String} type.
+     * @throws ClassCastException if {@code CustomAttributeValue} is not of {@link String} type.
      */
     public String stringValue() {
         if (!(value instanceof String) || type != Type.String) {
@@ -103,10 +108,10 @@ public class CustomUserDataValue {
     }
 
     /**
-     * Return the value of specified {@code CustomUserDataValue} as {@link Number}.
+     * Return the value of specified {@code CustomAttributeValue} as {@link Number}.
      *
      * @return {@link Number}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Number} type.
+     * @throws ClassCastException if {@code CustomAttributeValue} is not of {@link Number} type.
      */
     public Number numberValue() {
         if (!(value instanceof Number) || type != Type.Number) {
@@ -117,10 +122,10 @@ public class CustomUserDataValue {
     }
 
     /**
-     * Return the value of specified {@code CustomUserDataValue} as {@link Date}.
+     * Return the value of specified {@code CustomAttributeValue} as {@link Date}.
      *
      * @return {@link Date}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Date} type.
+     * @throws ClassCastException if {@code CustomAttributeValue} is not of {@link Date} type.
      */
     public Date dateValue() {
         if (!(value instanceof String) || type != Type.Date) {
@@ -135,10 +140,10 @@ public class CustomUserDataValue {
     }
 
     /**
-     * Return the value of specified {@code CustomUserDataValue} as {@link Boolean}.
+     * Return the value of specified {@code CustomAttributeValue} as {@link Boolean}.
      *
      * @return {@link Boolean}
-     * @throws ClassCastException if {@code CustomUserDataValue} is not of {@link Boolean} type.
+     * @throws ClassCastException if {@code CustomAttributeValue} is not of {@link Boolean} type.
      */
     public Boolean booleanValue() {
         if (!(value instanceof Boolean) || type != Type.Boolean) {

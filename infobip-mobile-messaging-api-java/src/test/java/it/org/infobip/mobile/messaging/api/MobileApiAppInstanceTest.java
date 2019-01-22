@@ -3,6 +3,7 @@ package it.org.infobip.mobile.messaging.api;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
+import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -153,7 +154,7 @@ public class MobileApiAppInstanceTest {
     public void personalize_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.personalize(regId, true);
+        mobileApiAppInstance.personalize(regId, true, new UserPersonalizeBody());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567/personalize", debugServer.getUri());
@@ -220,7 +221,7 @@ public class MobileApiAppInstanceTest {
                 "  \"lastName\": \"Vader\",\n" +
                 "  \"birthday\": \"1988-07-31\",\n" +
                 "  \"gender\": \"Male\",\n" +
-                "  \"gsms\": [\n" +
+                "  \"phones\": [\n" +
                 "    {\n" +
                 "      \"number\": \"385991111666\",\n" +
                 "      \"preferred\": false\n" +
@@ -228,7 +229,7 @@ public class MobileApiAppInstanceTest {
                 "  ],\n" +
                 "  \"instances\": [\n" +
                 "    {\n" +
-                "      \"appVersion\": \"1.17.0-SNAPSHOT\",\n" +
+                "      \"appVersion\": \"1.18.0-SNAPSHOT\",\n" +
                 "      \"deviceManufacturer\": \"motorola\",\n" +
                 "      \"deviceModel\": \"Nexus 6\",\n" +
                 "      \"deviceName\": \"Nexus 6\",\n" +
@@ -237,7 +238,7 @@ public class MobileApiAppInstanceTest {
                 "      \"isPrimary\": false,\n" +
                 "      \"notificationsEnabled\": true,\n" +
                 "      \"os\": \"Android\",\n" +
-                "      \"osLanguage\": \"en\",\n" +
+                "      \"language\": \"en\",\n" +
                 "      \"osVersion\": \"7.1.1\",\n" +
                 "      \"pushRegId\": \"pushRegId\",\n" +
                 "      \"regEnabled\": true,\n" +
@@ -279,14 +280,14 @@ public class MobileApiAppInstanceTest {
             add("music");
             add("darkSide");
         }}, response.getTags());
-        assertEquals(new UserBody.Gsm("385991111666"), response.getGsms().toArray()[0]);
+        assertEquals(new UserBody.Phone("385991111666"), response.getPhones().toArray()[0]);
         assertEquals(new UserBody.Email("darth_vader@mail.com"), response.getEmails().toArray()[0]);
     }
 
     @Test
     public void getInstance_examineResponse() {
         String jsonResponse = "{" +
-                "      \"appVersion\": \"1.17.0-SNAPSHOT\",\n" +
+                "      \"appVersion\": \"1.18.0-SNAPSHOT\",\n" +
                 "      \"deviceManufacturer\": \"motorola\",\n" +
                 "      \"deviceModel\": \"Nexus 6\",\n" +
                 "      \"deviceName\": \"Nexus 6\",\n" +
@@ -295,7 +296,7 @@ public class MobileApiAppInstanceTest {
                 "      \"isPrimary\": false,\n" +
                 "      \"notificationsEnabled\": true,\n" +
                 "      \"os\": \"Android\",\n" +
-                "      \"osLanguage\": \"en\",\n" +
+                "      \"language\": \"en\",\n" +
                 "      \"osVersion\": \"7.1.1\",\n" +
                 "      \"pushRegId\": \"pushRegId\",\n" +
                 "      \"regEnabled\": true,\n" +
@@ -314,7 +315,7 @@ public class MobileApiAppInstanceTest {
         assertEquals(0, debugServer.getQueryParametersCount());
         assertNull(debugServer.getBody());
 
-        assertEquals("1.17.0-SNAPSHOT", response.getAppVersion());
+        assertEquals("1.18.0-SNAPSHOT", response.getAppVersion());
         assertEquals("motorola", response.getDeviceManufacturer());
         assertEquals("Nexus 6", response.getDeviceModel());
         assertEquals("Nexus 6", response.getDeviceName());
@@ -323,7 +324,7 @@ public class MobileApiAppInstanceTest {
         assertEquals(false, response.getIsPrimary());
         assertEquals(true, response.getNotificationsEnabled());
         assertEquals("Android", response.getOs());
-        assertEquals("en", response.getOsLanguage());
+        assertEquals("en", response.getLanguage());
         assertEquals("7.1.1", response.getOsVersion());
         assertEquals("pushRegId", response.getPushRegId());
         assertEquals(true, response.getRegEnabled());

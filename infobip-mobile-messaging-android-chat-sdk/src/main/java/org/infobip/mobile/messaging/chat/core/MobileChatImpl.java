@@ -11,7 +11,7 @@ import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatMessage;
 import org.infobip.mobile.messaging.chat.ChatMessageStorage;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
@@ -27,6 +27,7 @@ import org.infobip.mobile.messaging.chat.repository.RepositoryMapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
 
@@ -138,21 +139,19 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
 
     @Override
     public void fetchUserInfo(final MobileMessaging.ResultListener<ChatParticipant> listener) {
-        mobileMessagingCore().fetchUser(new MobileMessaging.ResultListener<UserData>() {
+        mobileMessagingCore().fetchUser(new MobileMessaging.ResultListener<User>() {
             @Override
-            public void onResult(UserData result) {
-                if (result == null) {
-                    onError(MobileMessagingError.createFrom(new RuntimeException()));
-                } else if (listener != null) {
-                    listener.onResult(objectMapper.fromUserData(result));
+            public void onResult(Result<User, MobileMessagingError> result) {
+                if (listener == null) {
+                    return;
                 }
-            }
 
-            @Override
-            public void onError(MobileMessagingError e) {
-                if (listener != null) {
-                    listener.onError(e);
+                if (result.getData() == null) {
+                    listener.onResult(new Result<ChatParticipant, MobileMessagingError>(MobileMessagingError.createFrom(new RuntimeException())));
+                    return;
                 }
+
+                listener.onResult(new Result<>(objectMapper.fromUserData(result.getData()), result.getError()));
             }
         });
     }
@@ -178,7 +177,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     // region private methods
 
     private void sendChatMessage(String text, JSONObject customData, final MobileMessaging.ResultListener<ChatMessage> listener) {
-        ChatMessage message = new ChatMessage();
+        final ChatMessage message = new ChatMessage();
         message.setBody(text);
         message.setAuthor(userProfileManager().get());
         message.setCustomData(customData);
@@ -188,51 +187,45 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
         Message baseMessage = objectMapper.toBaseMessage(message);
         mobileMessagingCore().sendMessagesDontStore(new MobileMessaging.ResultListener<Message[]>() {
             @Override
-            public void onResult(Message[] result) {
-                if (result == null || result.length == 0) {
-                    onError(MobileMessagingError.createFrom(new RuntimeException()));
-                } else {
-                    ChatMessage sentMessage = objectMapper.fromBaseMessage(result[0], userProfileManager().isUsersMessage(result[0]));
-                    chatMessageStorage().save(sentMessage);
-                    broadcaster().chatMessageSent(sentMessage);
-                    if (listener != null) {
-                        listener.onResult(sentMessage);
-                    }
+            public void onResult(Result<Message[], MobileMessagingError> result) {
+                if (listener == null) {
+                    return;
                 }
-            }
 
-            @Override
-            public void onError(MobileMessagingError e) {
-                if (listener != null) {
-                    listener.onError(e);
+                Message[] messages = result.getData();
+                if (messages == null || messages.length == 0) {
+                    listener.onResult(new Result<ChatMessage, MobileMessagingError>(MobileMessagingError.createFrom(new RuntimeException())));
+                    return;
                 }
+
+                ChatMessage sentMessage = objectMapper.fromBaseMessage(messages[0], userProfileManager().isUsersMessage(messages[0]));
+                chatMessageStorage().save(sentMessage);
+
+                broadcaster().chatMessageSent(sentMessage);
+                listener.onResult(new Result<>(sentMessage, result.getError()));
             }
         }, baseMessage);
     }
 
     private void setChatUserInfo(ChatParticipant info, final MobileMessaging.ResultListener<ChatParticipant> listener) {
         userProfileManager().save(info);
-        UserData userData = objectMapper.toUserData(info);
-        mobileMessagingCore().saveUser(userData, new MobileMessaging.ResultListener<UserData>() {
+        User user = objectMapper.toUserData(info);
+        mobileMessagingCore().saveUser(user, new MobileMessaging.ResultListener<User>() {
             @Override
-            public void onResult(UserData result) {
-                if (result == null) {
-                    onError(MobileMessagingError.createFrom(new RuntimeException()));
-                } else {
-                    ChatParticipant participant = objectMapper.fromUserData(result);
-                    userProfileManager.save(participant);
-                    broadcaster().userInfoSynchronized(participant);
-                    if (listener != null) {
-                        listener.onResult(participant);
-                    }
+            public void onResult(Result<User, MobileMessagingError> result) {
+                if (listener == null) {
+                    return;
                 }
-            }
 
-            @Override
-            public void onError(MobileMessagingError e) {
-                if (listener != null) {
-                    listener.onError(e);
+                if (result == null) {
+                    listener.onResult(new Result<ChatParticipant, MobileMessagingError>(MobileMessagingError.createFrom(new RuntimeException())));
+                    return;
                 }
+
+                ChatParticipant participant = objectMapper.fromUserData(result.getData());
+                userProfileManager.save(participant);
+                broadcaster().userInfoSynchronized(participant);
+                listener.onResult(new Result<>(participant, result.getError()));
             }
         });
     }

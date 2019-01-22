@@ -86,9 +86,9 @@ It is recommended that you link the GSM number (in [MSISDN](https://en.wikipedia
 It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
 
 ```java
-UserData userData = new UserData();
-userData.setMsisdn("385911234567");
-MobileMessaging.getInstance(context).syncUserData(userData);
+User user = new User();
+user.setMsisdn("385911234567");
+MobileMessaging.getInstance(context).saveUser(user);
 ```
 
 

@@ -104,7 +104,8 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
                 SoftwareInformation.areNotificationsEnabled(context),
                 DeviceInformation.isDeviceSecure(context),
                 reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "",
-                reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "");
+                reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "",
+                reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "");
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {
@@ -141,12 +142,12 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
     public void test_user_data_retry() {
 
         // Given
-        UserData userData = new UserData();
-        userData.setFirstName("Retry");
-        userData.setLastName("Everything");
+        User user = new User();
+        user.setFirstName("Retry");
+        user.setLastName("Everything");
 
         // When
-        userDataReporter.sync(null, userData);
+        userDataReporter.patch(null, user);
 
         // Then
         verify(broadcaster, after(3000).atLeast(1)).error(any(MobileMessagingError.class));
@@ -159,12 +160,12 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         // Given
         withoutStoringUserData();
 
-        UserData userData = new UserData();
-        userData.setFirstName("Retry");
-        userData.setLastName("Everything");
+        User user = new User();
+        user.setFirstName("Retry");
+        user.setLastName("Everything");
 
         // When
-        userDataReporter.sync(null, userData);
+        userDataReporter.patch(null, user);
 
         // Then
         verify(broadcaster, after(4000).times(1)).error(any(MobileMessagingError.class));

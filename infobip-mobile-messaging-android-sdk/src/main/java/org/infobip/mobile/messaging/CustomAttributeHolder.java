@@ -6,40 +6,40 @@ import org.infobip.mobile.messaging.api.support.MapModel;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.infobip.mobile.messaging.UserDataMapper.customAttsToBackend;
+import static org.infobip.mobile.messaging.UserMapper.customAttsToBackend;
 
 public class CustomAttributeHolder extends MapModel {
 
-    private Map<String, CustomUserDataValue> customAttributes;
+    private Map<String, CustomAttributeValue> customAttributes;
 
     public CustomAttributeHolder() {
 
     }
 
-    public CustomAttributeHolder(Map<String, CustomUserDataValue> customAttributes) {
+    public CustomAttributeHolder(Map<String, CustomAttributeValue> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
     /// region CUSTOM ATTRIBUTES
 
-    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
+    public void setCustomAttributes(Map<String, CustomAttributeValue> customAttributes) {
         this.customAttributes = customAttributes;
         setField(UserAtts.customAttributes, customAttributes != null ? customAttsToBackend(customAttributes) : null);
     }
 
-    public Map<String, CustomUserDataValue> getCustomAttributes() {
+    public Map<String, CustomAttributeValue> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomUserDataElement(String key, CustomUserDataValue customUserDataValue) {
+    public void setCustomAttributeElement(String key, CustomAttributeValue customAttributeValue) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
-        customAttributes.put(key, customUserDataValue);
-        setCustomAttField(key, customUserDataValue);
+        customAttributes.put(key, customAttributeValue);
+        setCustomAttField(key, customAttributeValue);
     }
 
-    public CustomUserDataValue getCustomUserDataValue(String key) {
+    public CustomAttributeValue getCustomAttributeValue(String key) {
         if (customAttributes == null) {
             return null;
         }
@@ -47,7 +47,7 @@ public class CustomAttributeHolder extends MapModel {
         return customAttributes.get(key);
     }
 
-    public void removeCustomUserDataElement(String key) {
+    public void removeCustomAttributeElement(String key) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
@@ -59,12 +59,12 @@ public class CustomAttributeHolder extends MapModel {
 
     /// region PRIVATE METHODS
 
-    private void setCustomAttField(String key, CustomUserDataValue customUserDataValue) {
+    private void setCustomAttField(String key, CustomAttributeValue customAttributeValue) {
         Map<String, Object> customAtts = getField(UserAtts.customAttributes);
         if (customAtts == null) {
             customAtts = new HashMap<>();
         }
-        customAtts.put(key, UserDataMapper.customValueToBackend(customUserDataValue));
+        customAtts.put(key, UserMapper.customValueToBackend(customAttributeValue));
         setField(UserAtts.customAttributes, customAtts);
     }
 

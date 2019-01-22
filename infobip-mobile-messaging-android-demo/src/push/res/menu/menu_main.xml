@@ -15,7 +15,7 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_gsm"
+        android:id="@+id/action_phone"
         android:title="@string/menu_action_gsm"
         app:showAsAction="never" />
 

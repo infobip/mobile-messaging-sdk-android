@@ -4,9 +4,11 @@ package org.infobip.mobile.messaging;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.HashMap;
 
@@ -17,7 +19,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.verify;
 public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
     private MobileMessaging.ResultListener<SuccessPending> successPendingResultListener = mock(MobileMessaging.ResultListener.class);
+    private ArgumentCaptor<Result> captor = ArgumentCaptor.forClass(Result.class);
 
     @Override
     public void setUp() throws Exception {
@@ -44,7 +46,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verify(broadcaster, after(300).atLeastOnce()).depersonalized();
-        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
+        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
         verifyNeededPrefsCleanUp();
     }
 
@@ -60,8 +62,8 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verify(broadcaster, after(300).never()).depersonalized();
-        verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
-        assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
+        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+        assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
         verifyNeededPrefsCleanUp();
     }
 
@@ -77,9 +79,14 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         //then
         verify(broadcaster, after(300).atLeastOnce()).depersonalized();
         verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
-        verify(successPendingResultListener, after(300).atLeastOnce()).onResult(any(SuccessPending.class));
-        verify(successPendingResultListener, after(300).never()).onError(any(MobileMessagingError.class));
-        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
+
+        verify(successPendingResultListener, after(300).times(1)).onResult(captor.capture());
+        Result result = captor.getValue();
+        assertNotNull(result.getData());
+        assertTrue(result.isSuccess());
+        assertNull(result.getError());
+
+        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
         verifyNeededPrefsCleanUp();
     }
 
@@ -95,62 +102,28 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verify(broadcaster, after(300).never()).depersonalized();
-        verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
-        verify(successPendingResultListener, after(300).never()).onResult(any(SuccessPending.class));
-        verify(successPendingResultListener, after(300).atLeastOnce()).onError(any(MobileMessagingError.class));
-        assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
+        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+
+        verify(successPendingResultListener, after(300).times(1)).onResult(captor.capture());
+        Result result = captor.getValue();
+        assertNull(result.getData());
+        assertFalse(result.isSuccess());
+        assertNotNull(result.getError());
+
+        assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
         verifyNeededPrefsCleanUp();
     }
 
-    @Test
-    public void test_depersonalize_with_push_reg_id_and_success_pending_listener_completed() {
-
-        //given
-        String givenRegId = "depersonalizePushRegId";
-        givenUserData();
-
-        //when
-        mobileMessaging.depersonalize(eq(givenRegId), successPendingResultListener);
-
-        //then
-        verify(broadcaster, after(300).atLeastOnce()).depersonalized();
-        verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
-        verify(successPendingResultListener, after(300).atLeastOnce()).onResult(any(SuccessPending.class));
-        verify(successPendingResultListener, after(300).never()).onError(any(MobileMessagingError.class));
-        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
-        verifyPrefs();
-    }
-
-    @Test
-    public void test_depersonalize_with_push_reg_id_and_success_pending_listener_api_error() {
-
-        //given
-        String givenRegId = "depersonalizePushRegId";
-        doThrow(new ApiIOException("400", "Failed request")).when(mobileApiAppInstance).depersonalize(givenRegId);
-        givenUserData();
-
-        //when
-        mobileMessaging.depersonalize(givenRegId, successPendingResultListener);
-
-        //then
-        verify(broadcaster, after(300).never()).depersonalized();
-        verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
-        verify(successPendingResultListener, after(300).never()).onResult(any(SuccessPending.class));
-        verify(successPendingResultListener, after(300).atLeastOnce()).onError(any(MobileMessagingError.class));
-        assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED));
-        verifyPrefs();
-    }
-
     private void givenUserData() {
-        UserData userData = new UserData();
-        userData.setFirstName("John");
-        userData.setCustomUserDataElement("someKey", new CustomUserDataValue("someValue"));
+        User user = new User();
+        user.setFirstName("John");
+        user.setCustomAttributeElement("someKey", new CustomAttributeValue("someValue"));
         HashMap<String, Object> customAttributes = new HashMap<>();
         customAttributes.put("key", "value");
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeOsLanguage", "SomeDeviceName");
+        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, userData.toString());
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, userData.toString());
+        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, user.toString());
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, user.toString());
         PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
         PreferenceHelper.saveString(context, MobileMessagingProperty.APP_USER_ID, "appUserId");

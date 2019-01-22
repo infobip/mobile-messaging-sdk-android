@@ -38,7 +38,7 @@ public class RepositoryMapper {
                 participant.lastName,
                 participant.middleName,
                 participant.email,
-                participant.gsm,
+                participant.phone,
                 MJSONObject.create(participant.customData));
     }
 
@@ -68,7 +68,7 @@ public class RepositoryMapper {
         participant.lastName = chatParticipant.getLastName();
         participant.middleName = chatParticipant.getMiddleName();
         participant.email = chatParticipant.getEmail();
-        participant.gsm = chatParticipant.getGsm();
+        participant.phone = chatParticipant.getGsm();
         participant.customData = chatParticipant.getCustomData() == null ? null : chatParticipant.getCustomData().toString();
         return participant;
     }

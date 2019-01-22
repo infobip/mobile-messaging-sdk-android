@@ -22,8 +22,8 @@ public class AppInstance {
     private String deviceManufacturer;
     private String deviceModel;
     private Boolean deviceSecure;
-    private String osLanguage;
-    private String deviceTimezoneId;
+    private String language;
+    private String deviceTimezoneOffset;
     private String applicationUserId;
     private String deviceName;
     private Map<String, Object> customAttributes;

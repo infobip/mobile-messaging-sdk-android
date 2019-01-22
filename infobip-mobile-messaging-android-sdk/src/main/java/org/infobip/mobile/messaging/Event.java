@@ -77,28 +77,23 @@ public enum Event {
     TOKEN_RECEIVED("org.infobip.mobile.messaging.TOKEN_RECEIVED"),
 
     /**
-     * It is triggered when GCM registration token successfully stored on the registration server.
+     * It is triggered when GCM registration token is successfully stored on the server.
      * <p>
-     * Contains the GCM registration token and Infobip device application instance ID
+     * Contains the GCM registration token, Infobip device application instance ID and system data in installation
      * (which identifies every application instance).
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
-     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * Installation installation = Installation.createFrom(intent.getExtras());
      * }
      * </pre>
      */
-    INSTALLATION_CREATED("org.infobip.mobile.messaging.INSTALLATION_CREATED"),
+    REGISTRATION_CREATED("org.infobip.mobile.messaging.REGISTRATION_CREATED"),
 
     /**
-     * It is triggered when GCM registration token successfully stored on the registration server.
-     * <p>
-     * Contains the GCM registration token and Infobip device application instance ID
-     * (which identifies every application instance).
+     * It is triggered when installation is successfully reported to the server.
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
-     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * Installation installation = Installation.createFrom(intent.getExtras());
      * }
      * </pre>
      */
@@ -181,29 +176,24 @@ public enum Event {
     NOTIFICATION_TAPPED("org.infobip.mobile.messaging.NOTIFICATION_TAPPED"),
 
     /**
-     * It is triggered when user data is successfully reported to the server.
+     * It is triggered when user is successfully reported to the server.
      * <pre>
      * {@code
-     * UserData userData = UserData.createFrom(intent.getExtras());
+     * User user = User.createFrom(intent.getExtras());
      * }
      * </pre>
      */
-    USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED"),
-
-    /**
-     * It is triggered when user data is successfully reported to the server.
-     * <pre>
-     * {@code
-     * UserData userData = UserData.createFrom(intent.getExtras());
-     * }
-     * </pre>
-     */
-    USER_DATA_ACQUIRED("org.infobip.mobile.messaging.USER_DATA_ACQUIRED"),
+    USER_UPDATED("org.infobip.mobile.messaging.USER_UPDATED"),
 
     /**
      * It is triggered when user is depersonalized on the server.
      */
     DEPERSONALIZED("org.infobip.mobile.messaging.DEPERSONALIZED"),
+
+    /**
+     * It is triggered when user is personalized on the server.
+     */
+    PERSONALIZED("org.infobip.mobile.messaging.PERSONALIZED"),
 
     /**
      * It is triggered when system data is successfully reported to the server.
@@ -223,27 +213,7 @@ public enum Event {
      * }
      * </pre>
      */
-    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR"),
-
-    /**
-     * It is triggered when push registration status is changed.
-     * <pre>
-     * {@code
-     * boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED);
-     * }
-     * </pre>
-     */
-    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED"),
-
-    /**
-     * It is triggered when primary setting changes for device.
-     * <pre>
-     * {@code
-     * boolean isPrimary = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_PRIMARY);
-     * }
-     * </pre>
-     */
-    PRIMARY_CHANGED("org.infobip.mobile.messaging.PRIMARY_CHANGED");
+    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR");
 
     private final String key;
 

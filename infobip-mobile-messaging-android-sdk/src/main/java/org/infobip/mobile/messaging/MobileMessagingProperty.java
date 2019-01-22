@@ -76,19 +76,20 @@ public enum MobileMessagingProperty {
     REPORTED_SYSTEM_DATA_HASH("org.infobip.mobile.messaging.infobip.REPORTED_SYSTEM_DATA_HASH", 0),
     SYSTEM_DATA_VERSION_POSTFIX("org.infobip.mobile.messaging.SYSTEM_DATA_VERSION_POSTFIX"),
 
-    IS_LOGOUT_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_LOGOUT_UNREPORTED", false),
     IS_PRIMARY("org.infobip.mobile.messaging.infobip.IS_PRIMARY", false),
     IS_PRIMARY_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_PRIMARY_UNREPORTED"),
     APP_USER_ID("org.infobip.mobile.messaging.infobip.APP_USER_ID"),
     IS_APP_USER_ID_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_APP_USER_ID_UNREPORTED", false),
     CUSTOM_ATTRIBUTES("org.infobip.mobile.messaging.infobip.CUSTOM_ATTRIBUTES"),
     UNREPORTED_CUSTOM_ATTRIBUTES("org.infobip.mobile.messaging.infobip.UNREPORTED_CUSTOM_ATTRIBUTES"),
-
     PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.PUSH_REGISTRATION_ENABLED", true),
+    UNREPORTED_PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.UNREPORTED_PUSH_REGISTRATION_ENABLED"),
+
+    IS_DEPERSONALIZE_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_DEPERSONALIZE_UNREPORTED", false),
 
     UNREPORTED_USER_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
     USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA"),
-    USER_DATA_INSTALLATIONS_EXPIRE_AT("org.infobip.mobile.messaging.infobip.USER_DATA_INSTALLATIONS_EXPIRE_AT");
+    USER_INSTALLATIONS_EXPIRE_AT("org.infobip.mobile.messaging.infobip.USER_INSTALLATIONS_EXPIRE_AT");
     // END
 
     private final String key;

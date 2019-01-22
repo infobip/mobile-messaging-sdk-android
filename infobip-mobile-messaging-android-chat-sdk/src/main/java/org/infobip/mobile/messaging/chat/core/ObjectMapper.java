@@ -2,9 +2,9 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.support.annotation.VisibleForTesting;
 
-import org.infobip.mobile.messaging.CustomUserDataValue;
+import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatMessage;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
 import org.infobip.mobile.messaging.chat.repository.MJSONObject;
@@ -87,38 +87,38 @@ public class ObjectMapper {
                 message.getContentUrl());
     }
 
-    public ChatParticipant fromUserData(UserData userData) {
+    public ChatParticipant fromUserData(User user) {
         MJSONObject data = null;
-        Map<String, CustomUserDataValue> customData = userData.getCustomAttributes();
+        Map<String, CustomAttributeValue> customData = user.getCustomAttributes();
         if (customData != null) {
-            CustomUserDataValue value = customData.get("chatCustomData");
+            CustomAttributeValue value = customData.get("chatCustomData");
             if (value != null) {
                 data = MJSONObject.create(value.stringValue());
             }
         }
         return new ChatParticipant(
-                userData.getExternalUserId(),
-                userData.getFirstName(),
-                userData.getLastName(),
-                userData.getMiddleName(),
+                user.getExternalUserId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getMiddleName(),
                 null,
                 null,
                 data);
     }
 
-    public UserData toUserData(ChatParticipant participant) {
-        Map<String, CustomUserDataValue> customData = new HashMap<>();
+    public User toUserData(ChatParticipant participant) {
+        Map<String, CustomAttributeValue> customData = new HashMap<>();
         if (participant.getCustomData() != null) {
-            customData.put("chatCustomData", new CustomUserDataValue(participant.getCustomData().toString()));
+            customData.put("chatCustomData", new CustomAttributeValue(participant.getCustomData().toString()));
         }
-        UserData userData = new UserData();
-        userData.setExternalUserId(participant.getId());
-        userData.setFirstName(participant.getFirstName());
-        userData.setLastName(participant.getLastName());
-        userData.setMiddleName(participant.getMiddleName());
-//        userData.setEmail(participant.getEmail());
-//        userData.setMsisdn(participant.getGsm());
-        userData.setCustomAttributes(customData);
-        return userData;
+        User user = new User();
+        user.setExternalUserId(participant.getId());
+        user.setFirstName(participant.getFirstName());
+        user.setLastName(participant.getLastName());
+        user.setMiddleName(participant.getMiddleName());
+//        user.setEmail(participant.getEmail());
+//        user.setMsisdn(participant.getGsm());
+        user.setCustomAttributes(customData);
+        return user;
     }
 }

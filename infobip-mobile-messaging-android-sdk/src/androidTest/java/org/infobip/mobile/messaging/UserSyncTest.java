@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;
@@ -15,9 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyBoolean;
@@ -28,60 +30,65 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 
-public class UserDataSyncTest extends MobileMessagingTestCase {
+public class UserSyncTest extends MobileMessagingTestCase {
 
-    private ArgumentCaptor<UserData> dataCaptor;
-    private MobileMessaging.ResultListener resultListener;
+    private ArgumentCaptor<User> dataCaptor;
+    private ArgumentCaptor<Result> resultCaptor;
+    private MobileMessaging.ResultListener<User> resultListener;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         resultListener = mock(MobileMessaging.ResultListener.class);
-        dataCaptor = forClass(UserData.class);
+        dataCaptor = forClass(User.class);
+        resultCaptor = forClass(Result.class);
         given(mobileApiAppInstance.getUser(anyString())).willReturn(new UserBody());
     }
 
     @Test
-    public void test_empty_user_data() throws Exception {
+    public void test_user_data_fetch() throws Exception {
         mobileMessaging.fetchUser(resultListener);
 
-        verify(broadcaster, after(1000).atLeastOnce()).userDataAcquired(dataCaptor.capture());
-
-        UserData userData = dataCaptor.getValue();
-        assertTrue(userData.getCustomAttributes() == null || userData.getCustomAttributes().isEmpty());
+        verify(mobileApiAppInstance, after(500).times(1)).getUser(anyString());
+        verify(resultListener, after(300).times(1)).onResult(resultCaptor.capture());
+        Result result = resultCaptor.getValue();
+        assertNotNull(result.getData());
+        assertTrue(result.isSuccess());
+        assertNull(result.getError());
     }
 
     @Test
     public void test_add_tags() throws Exception {
-        final UserData givenUserData = new UserData();
-        givenUserData.setTags(CollectionUtils.setOf("first", "second", "third"));
+        final User givenUser = new User();
+        givenUser.setTags(CollectionUtils.setOf("first", "second", "third"));
 
-        mobileMessaging.saveUser(givenUserData);
+        mobileMessaging.saveUser(givenUser);
 
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.tags, CollectionUtils.setOf("first", "second", "third"));
 
-        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
-
-        assertEquals(givenUserData.getTags(), report.get(UserAtts.tags));
-        assertJEquals(givenUserData.getTags(), mobileMessagingCore.getUser().getTags());
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
+
+        assertEquals(givenUser.getTags(), report.get(UserAtts.tags));
+        assertJEquals(givenUser.getTags(), mobileMessagingCore.getUser().getTags());
     }
 
     @Test
     public void test_add_standard_atts() throws Exception {
-        UserData givenUserData = new UserData();
+        User givenUser = new User();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2000, 1, 1);
-        givenUserData.setBirthday(new Date(calendar.getTimeInMillis()));
-        givenUserData.setGender(UserData.Gender.Male);
-        givenUserData.setFirstName("Darth");
-        givenUserData.setMiddleName("Beloved");
-        givenUserData.setLastName("Vader");
-        givenUserData.setExternalUserId("father_of_luke");
-        givenUserData.setEmails(CollectionUtils.setOf("darth_vader@mail.com"));
-        givenUserData.setGsms(CollectionUtils.setOf("385991111666"));
+        givenUser.setBirthday(new Date(calendar.getTimeInMillis()));
+        givenUser.setGender(User.Gender.Male);
+        givenUser.setFirstName("Darth");
+        givenUser.setMiddleName("Beloved");
+        givenUser.setLastName("Vader");
+        givenUser.setExternalUserId("father_of_luke");
+        givenUser.setEmails(CollectionUtils.setOf("darth_vader@mail.com"));
+        givenUser.setPhones(CollectionUtils.setOf("385991111666"));
 
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.birthday, "2000-02-01");
@@ -91,24 +98,25 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         report.put(UserAtts.lastName, "Vader");
         report.put(UserAtts.externalUserId, "father_of_luke");
         report.put(UserAtts.emails, backendEmails("darth_vader@mail.com"));
-        report.put(UserAtts.gsms, backendPhoneNumbers("385991111666"));
+        report.put(UserAtts.phones, backendPhoneNumbers("385991111666"));
 
-        mobileMessaging.saveUser(givenUserData);
+        mobileMessaging.saveUser(givenUser);
 
-        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
     @Test
     public void test_add_custom_element() throws Exception {
 
-        UserData givenUserData = new UserData();
-        givenUserData.setCustomUserDataElement("myKey1", new CustomUserDataValue("Some string"));
-        givenUserData.setCustomUserDataElement("myKey2", new CustomUserDataValue(12345));
-        givenUserData.setCustomUserDataElement("myKey3", new CustomUserDataValue(new Date()));
-        givenUserData.setCustomUserDataElement("myKey4", new CustomUserDataValue(false));
+        User givenUser = new User();
+        givenUser.setCustomAttributeElement("myKey1", new CustomAttributeValue("Some string"));
+        givenUser.setCustomAttributeElement("myKey2", new CustomAttributeValue(12345));
+        givenUser.setCustomAttributeElement("myKey3", new CustomAttributeValue(new Date()));
+        givenUser.setCustomAttributeElement("myKey4", new CustomAttributeValue(false));
 
-        mobileMessaging.saveUser(givenUserData);
+        mobileMessaging.saveUser(givenUser);
 
         HashMap<String, Object> customAtts = new HashMap<>();
         customAtts.put("myKey1", "Some string");
@@ -119,23 +127,25 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
-        assertJEquals(givenUserData.getCustomAttributes(), mobileMessagingCore.getUser().getCustomAttributes());
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
+
+        assertJEquals(givenUser.getCustomAttributes(), mobileMessagingCore.getUser().getCustomAttributes());
     }
 
     @Test
     public void test_remove_custom_element() throws Exception {
 
-        UserData givenUserData = new UserData();
-        givenUserData.setCustomUserDataElement("myKey1", new CustomUserDataValue("Some string"));
-        givenUserData.setCustomUserDataElement("myKey2", new CustomUserDataValue(12345));
-        givenUserData.setCustomUserDataElement("myKey3", new CustomUserDataValue(new Date()));
+        User givenUser = new User();
+        givenUser.setCustomAttributeElement("myKey1", new CustomAttributeValue("Some string"));
+        givenUser.setCustomAttributeElement("myKey2", new CustomAttributeValue(12345));
+        givenUser.setCustomAttributeElement("myKey3", new CustomAttributeValue(new Date()));
 
-        givenUserData.removeCustomUserDataElement("myKey2");
-        givenUserData.removeCustomUserDataElement("myKey3");
+        givenUser.removeCustomAttributeElement("myKey2");
+        givenUser.removeCustomAttributeElement("myKey3");
 
-        mobileMessaging.saveUser(givenUserData);
+        mobileMessaging.saveUser(givenUser);
 
         HashMap<String, Object> customAtts = new HashMap<>();
         customAtts.put("myKey1", "Some string");
@@ -145,10 +155,11 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(1000).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
+        assertNull(mobileMessagingCore.getUnreportedUserData());
 
         assertEquals(1, mobileMessagingCore.getUser().getCustomAttributes().size());
-        assertNull(mobileMessagingCore.getUnreportedUserData());
     }
 
     private List<Map<String, Object>> backendEmails(String... emails) {
@@ -165,7 +176,7 @@ public class UserDataSyncTest extends MobileMessagingTestCase {
         List<Map<String, Object>> list = new ArrayList<>(phoneNumbers.length);
         for (String phoneNumber : phoneNumbers) {
             Map<String, Object> map = new HashMap<>();
-            map.put(UserAtts.gsmNumber, phoneNumber);
+            map.put(UserAtts.phoneNumber, phoneNumber);
             list.add(map);
         }
         return list;

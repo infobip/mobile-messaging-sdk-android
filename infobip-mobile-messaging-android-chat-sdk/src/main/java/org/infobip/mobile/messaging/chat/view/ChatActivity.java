@@ -45,8 +45,7 @@ import android.widget.Toast;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatMessage;
 import org.infobip.mobile.messaging.chat.ChatMessageStorage;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
@@ -56,8 +55,8 @@ import org.infobip.mobile.messaging.chat.properties.MobileChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
@@ -411,13 +410,15 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
 
         mobileChat.sendMessage(text, new JSONObject(), new MobileMessaging.ResultListener<ChatMessage>() {
             @Override
-            public void onResult(ChatMessage chatMessage) {
-                if (internetConnected != null && !internetConnected) {
-                    showToast(R.string.sending_message_failed_no_connection);
-                }
+            public void onResult(Result<ChatMessage, MobileMessagingError> result) {
+                if (result.isSuccess()) {
+                    if (internetConnected != null && !internetConnected) {
+                        showToast(R.string.sending_message_failed_no_connection);
+                    }
 
-                onMessageSent(chatMessage);
-                scrollToBottom();
+                    onMessageSent(result.getData());
+                    scrollToBottom();
+                }
             }
         });
 
@@ -428,10 +429,6 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
         }
 
         etReply.setText("");
-    }
-
-    String getInternalRegistrationIdFromPrefs() {
-        return PreferenceHelper.findString(this, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
     }
 
     private void scrollToBottom() {
@@ -475,10 +472,10 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
     }
 
     private void showUserNameInputDialog() {
-        UserData userData = MobileMessagingCore.getInstance(this).getUser();
-        if (userData != null) {
-            String firstName = userData.getFirstName();
-            String lastName = userData.getLastName();
+        User user = MobileMessagingCore.getInstance(this).getUser();
+        if (user != null) {
+            String firstName = user.getFirstName();
+            String lastName = user.getLastName();
 
             if (StringUtils.isNotBlank(firstName) || StringUtils.isNotBlank(lastName)) {
                 createChatParticipantAndSendMessage(firstName, lastName);
@@ -523,16 +520,16 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
 
         mobileChat.setUserInfo(chatParticipant, new MobileMessaging.ResultListener<ChatParticipant>() {
             @Override
-            public void onResult(ChatParticipant chatParticipant) {
+            public void onResult(Result<ChatParticipant, MobileMessagingError> result) {
+                if (!result.isSuccess()) {
+                    hideProgressDialog();
+                    Toast.makeText(ChatActivity.this, result.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 propertyHelper.saveBoolean(MobileChatProperty.USER_NAME_DIALOG_SHOWN, true);
                 sendMessage();
                 hideProgressDialog();
-            }
-
-            @Override
-            public void onError(MobileMessagingError e) {
-                hideProgressDialog();
-                Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -22,8 +22,8 @@ public class Installation extends CustomAttributeHolder {
     private String deviceManufacturer;
     private String deviceModel;
     private Boolean deviceSecure;
-    private String osLanguage;
-    private String deviceTimezoneId;
+    private String language;
+    private String deviceTimezoneOffset;
     private String applicationUserId;
     private String deviceName;
     private PushServiceType pushServiceType;
@@ -53,14 +53,14 @@ public class Installation extends CustomAttributeHolder {
                         String deviceManufacturer,
                         String deviceModel,
                         Boolean deviceSecure,
-                        String osLanguage,
-                        String deviceTimezoneId,
+                        String language,
+                        String deviceTimezoneOffset,
                         String applicationUserId,
                         String deviceName,
                         Boolean isPrimaryDevice,
                         PushServiceType pushServiceType,
                         String pushServiceToken,
-                        Map<String, CustomUserDataValue> customAttributes) {
+                        Map<String, CustomAttributeValue> customAttributes) {
         super(customAttributes);
         this.pushRegistrationId = pushRegistrationId;
         this.isPushRegistrationEnabled = isPushRegistrationEnabled;
@@ -73,8 +73,8 @@ public class Installation extends CustomAttributeHolder {
         this.deviceManufacturer = deviceManufacturer;
         this.deviceModel = deviceModel;
         this.deviceSecure = deviceSecure;
-        this.osLanguage = osLanguage;
-        this.deviceTimezoneId = deviceTimezoneId;
+        this.language = language;
+        this.deviceTimezoneOffset = deviceTimezoneOffset;
         this.applicationUserId = applicationUserId;
         this.deviceName = deviceName;
         this.isPrimaryDevice = isPrimaryDevice;
@@ -95,19 +95,42 @@ public class Installation extends CustomAttributeHolder {
         setField(AppInstanceAtts.pushRegId, pushRegistrationId);
     }
 
+    /**
+     * Use this method to determine if this device is currently primary device or not.
+     *
+     * @return <i>true</i> if this device is primary or false otherwise.
+     */
     public Boolean isPrimaryDevice() {
         return isPrimaryDevice;
     }
 
+    /**
+     * This method allows you to configure this device as primary among other devices of a single user.
+     */
     public void setPrimaryDevice(Boolean primaryDevice) {
         isPrimaryDevice = primaryDevice;
         setField(AppInstanceAtts.isPrimary, primaryDevice);
     }
 
+    /**
+     * Push registration status defines whether the device is allowed to receive push notifications from Infobip
+     * (regular push messages/geofencing campaign messages/messages fetched from the server).
+     * MobileMessaging SDK has the push registration enabled by default.
+     *
+     * @return Current push registration status.
+     */
     public Boolean isPushRegistrationEnabled() {
         return isPushRegistrationEnabled;
     }
 
+    /**
+     * Enables or disables the push registration. Installation is able to receive push notifications
+     * through MobileMessaging SDK (regular push messages/geofencing campaign messages/messages fetched from the server).
+     * MobileMessaging SDK has the push registration enabled by default.
+     *
+     * @param pushRegistrationEnabled set to <i>true</i> to enable receiving of push notifications (regular push messages/geofencing
+     *                                campaign messages/messages fetched from the server) over Infobip, <i>false</i> to disable it
+     */
     public void setPushRegistrationEnabled(Boolean pushRegistrationEnabled) {
         isPushRegistrationEnabled = pushRegistrationEnabled;
         setField(AppInstanceAtts.regEnabled, pushRegistrationEnabled);
@@ -194,22 +217,22 @@ public class Installation extends CustomAttributeHolder {
         setField(AppInstanceAtts.deviceSecure, deviceSecure);
     }
 
-    public String getOsLanguage() {
-        return osLanguage;
+    public String getLanguage() {
+        return language;
     }
 
-    public void setOsLanguage(String osLanguage) {
-        this.osLanguage = osLanguage;
-        setField(AppInstanceAtts.osLanguage, osLanguage);
+    public void setLanguage(String language) {
+        this.language = language;
+        setField(AppInstanceAtts.language, language);
     }
 
-    public String getDeviceTimezoneId() {
-        return deviceTimezoneId;
+    public String getDeviceTimezoneOffset() {
+        return deviceTimezoneOffset;
     }
 
-    public void setDeviceTimezoneId(String deviceTimezoneId) {
-        this.deviceTimezoneId = deviceTimezoneId;
-        setField(AppInstanceAtts.deviceTimezoneId, deviceTimezoneId);
+    public void setDeviceTimezoneOffset(String deviceTimezoneOffset) {
+        this.deviceTimezoneOffset = deviceTimezoneOffset;
+        setField(AppInstanceAtts.deviceTimezoneOffset, deviceTimezoneOffset);
     }
 
     public String getApplicationUserId() {

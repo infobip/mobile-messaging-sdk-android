@@ -12,8 +12,8 @@ import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.SystemData;
-import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.UserDataMapper;
+import org.infobip.mobile.messaging.User;
+import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
@@ -57,14 +57,6 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void registrationEnabled(String cloudToken, String deviceInstanceId, Boolean registrationEnabled) {
-        send(prepare(Event.PUSH_REGISTRATION_ENABLED)
-                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken)
-                .putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, deviceInstanceId)
-                .putExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, registrationEnabled));
-    }
-
-    @Override
     public void deliveryReported(@NonNull String... messageIds) {
         if (messageIds.length == 0) {
             return;
@@ -97,15 +89,9 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void userDataReported(UserData userData) {
-        send(prepare(Event.USER_DATA_REPORTED)
-                .putExtras(UserDataMapper.toBundle(BroadcastParameter.EXTRA_USER_DATA, userData)));
-    }
-
-    @Override
-    public void userDataAcquired(UserData userData) {
-        send(prepare(Event.USER_DATA_ACQUIRED)
-                .putExtras(UserDataMapper.toBundle(BroadcastParameter.EXTRA_USER_DATA, userData)));
+    public void userUpdated(User user) {
+        send(prepare(Event.USER_UPDATED)
+                .putExtras(UserMapper.toBundle(BroadcastParameter.EXTRA_USER, user)));
     }
 
     @Override
@@ -121,9 +107,10 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void installationCreated(Installation installation) {
-        send(prepare(Event.INSTALLATION_CREATED)
-                .putExtras(InstallationMapper.toBundle(BroadcastParameter.EXTRA_INSTALLATION, installation)));
+    public void registrationCreated(String cloudToken, String pushRegistrationId) {
+        send(prepare(Event.REGISTRATION_CREATED)
+                .putExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN, cloudToken)
+                .putExtra(BroadcastParameter.EXTRA_INFOBIP_ID, pushRegistrationId));
     }
 
     @Override
@@ -132,9 +119,9 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
-    public void primarySettingChanged(boolean primary) {
-        send(prepare(Event.PRIMARY_CHANGED)
-                .putExtra(BroadcastParameter.EXTRA_IS_PRIMARY, primary));
+    public void personalized(User user) {
+        send(prepare(Event.PERSONALIZED)
+                .putExtras(UserMapper.toBundle(BroadcastParameter.EXTRA_USER, user)));
     }
 
     private void send(Intent intent) {

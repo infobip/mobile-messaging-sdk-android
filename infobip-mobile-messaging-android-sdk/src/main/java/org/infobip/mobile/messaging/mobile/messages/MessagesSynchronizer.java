@@ -56,7 +56,7 @@ public class MessagesSynchronizer {
         }
 
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-            MobileMessagingLogger.w("Registration not available yet, will sync messages later");
+            MobileMessagingLogger.w("Registration not available yet, will patch messages later");
             return;
         }
 

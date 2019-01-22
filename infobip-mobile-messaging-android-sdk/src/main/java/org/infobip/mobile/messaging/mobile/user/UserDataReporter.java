@@ -3,13 +3,14 @@ package org.infobip.mobile.messaging.mobile.user;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.UserData;
-import org.infobip.mobile.messaging.UserDataMapper;
+import org.infobip.mobile.messaging.User;
+import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -24,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static org.infobip.mobile.messaging.UserDataMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 
 
 @SuppressWarnings("unchecked")
@@ -46,31 +47,31 @@ public class UserDataReporter {
         this.retryPolicyProvider = retryPolicyProvider;
     }
 
-    public void sync(final MobileMessaging.ResultListener listener, final UserData userData) {
-        if (userData == null) {
+    public void patch(final MobileMessaging.ResultListener listener, final User user) {
+        if (user == null) {
             return;
         }
 
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-            MobileMessagingLogger.w("Registration not available yet, will sync user data later");
+            MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
-                listener.onError(InternalSdkError.NO_VALID_REGISTRATION.getError());
+                listener.onResult(new Result(InternalSdkError.NO_VALID_REGISTRATION.getError()));
             }
             return;
         }
 
-        if (userData.getMap().isEmpty()) {
+        if (!user.hasDataToReport()) {
             MobileMessagingLogger.w("Attempt to save empty user data, will do nothing");
             if (listener != null) {
-                listener.onError(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError());
+                listener.onResult(new Result(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
             }
             return;
         }
 
-        new MRetryableTask<UserData, Void>() {
+        new MRetryableTask<User, Void>() {
 
             @Override
-            public Void run(UserData[] userData) {
+            public Void run(User[] userData) {
                 Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
                 mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
@@ -80,16 +81,16 @@ public class UserDataReporter {
 
             @Override
             public void after(Void aVoid) {
-                mobileMessagingCore.setUserDataReported(userData, true);
+                mobileMessagingCore.setUserDataReported(user, true);
 
-                UserData userDataToReturn = filterOutDeletedData(userData);
+                User userToReturn = filterOutDeletedData(user);
                 if (mobileMessagingCore.shouldSaveUserData()) {
-                    userDataToReturn = mobileMessagingCore.getUser();
+                    userToReturn = mobileMessagingCore.getUser();
                 }
-                broadcaster.userDataReported(userDataToReturn);
+                broadcaster.userUpdated(userToReturn);
 
                 if (listener != null) {
-                    listener.onResult(userDataToReturn);
+                    listener.onResult(new Result(userToReturn));
                 }
             }
 
@@ -101,26 +102,25 @@ public class UserDataReporter {
 
                 if (error instanceof BackendBaseExceptionWithContent) {
                     BackendBaseExceptionWithContent errorWithContent = (BackendBaseExceptionWithContent) error;
-                    mobileMessagingCore.setUserDataReported(errorWithContent.getContent(UserData.class), true);
+                    mobileMessagingCore.setUserDataReported(errorWithContent.getContent(User.class), true);
 
                     if (listener != null) {
-                        listener.onError(MobileMessagingError.createFrom(error));
+                        listener.onResult(new Result(MobileMessagingError.createFrom(error)));
                     }
 
                 } else if (error instanceof BackendInvalidParameterException) {
                     mobileMessagingCore.setUserDataReportedWithError();
 
                     if (listener != null) {
-                        listener.onError(MobileMessagingError.createFrom(error));
+                        listener.onResult(new Result(MobileMessagingError.createFrom(error)));
                     }
 
                 } else {
-
                     MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
 
                     if (listener != null) {
-                        UserData storedUserData = mobileMessagingCore.getUser();
-                        listener.onResult(storedUserData);
+                        User storedUser = mobileMessagingCore.getUser();
+                        listener.onResult(new Result(storedUser));
                     }
                 }
 
@@ -128,13 +128,16 @@ public class UserDataReporter {
             }
         }
                 .retryWith(retryPolicy(listener))
-                .execute(executor, userData);
+                .execute(executor, user);
     }
 
     public void fetch(final MobileMessaging.ResultListener listener) {
 
-        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
-            MobileMessagingLogger.w("Registration not available yet, will sync user data later");
+        if (mobileMessagingCore.isRegistrationUnavailable()) {
+            MobileMessagingLogger.w("Registration not available yet, will fetch user data later");
+            if (listener != null) {
+                listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
             return;
         }
 
@@ -149,16 +152,14 @@ public class UserDataReporter {
 
             @Override
             public void after(UserBody userResponse) {
-                UserData userData = UserDataMapper.fromBackend(userResponse);
-                mobileMessagingCore.setUserDataReported(userData, false);
+                User user = UserMapper.fromBackend(userResponse);
+                mobileMessagingCore.setUserDataReported(user, false);
 
-                saveLatestPrimaryToMyInstallation(userData);
+                saveLatestPrimaryToMyInstallation(user);
 
                 if (listener != null) {
-                    listener.onResult(userData);
+                    listener.onResult(new Result(user));
                 }
-
-                broadcaster.userDataAcquired(userData);
             }
 
             @Override
@@ -167,16 +168,18 @@ public class UserDataReporter {
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
-                broadcaster.error(MobileMessagingError.createFrom(error));
+                if (listener != null) {
+                    listener.onResult(new Result(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(error)));
+                }
             }
         }
                 .retryWith(retryPolicy(listener))
                 .execute(executor);
     }
 
-    private void saveLatestPrimaryToMyInstallation(UserData userData) {
-        if (userData.getInstallations() != null) {
-            for (Installation installation : userData.getInstallations()) {
+    private void saveLatestPrimaryToMyInstallation(User user) {
+        if (user.getInstallations() != null) {
+            for (Installation installation : user.getInstallations()) {
                 if (mobileMessagingCore.getPushRegistrationId() != null &&
                         mobileMessagingCore.getPushRegistrationId().equals(installation.getPushRegistrationId())) {
                     mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());

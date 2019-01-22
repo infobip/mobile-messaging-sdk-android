@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
 import org.infobip.mobile.messaging.chat.TestBase;
 import org.infobip.mobile.messaging.chat.broadcast.ChatBroadcaster;
@@ -45,9 +45,9 @@ public class CoreBroadcastReceiverTest extends TestBase {
     public void should_resend_user_data_broadcast() {
 
         ChatParticipant givenParticipant = givenChatParticipant();
-        UserData givenUserData = givenUserData(givenParticipant);
-        Intent givenIntent = givenIntentWithUserData(givenUserData);
-        given(objectMapper.fromUserData(any(UserData.class))).willReturn(givenParticipant);
+        User givenUser = givenUserData(givenParticipant);
+        Intent givenIntent = givenIntentWithUserData(givenUser);
+        given(objectMapper.fromUserData(any(User.class))).willReturn(givenParticipant);
 
         coreBroadcastReceiver.onReceive(context, givenIntent);
 
@@ -57,7 +57,7 @@ public class CoreBroadcastReceiverTest extends TestBase {
 
     // region internal methods
 
-    private UserData givenUserData(ChatParticipant chatParticipant) {
+    private User givenUserData(ChatParticipant chatParticipant) {
         return new ObjectMapper().toUserData(chatParticipant);
     }
 

@@ -27,6 +27,7 @@ import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
@@ -77,8 +78,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.infobip.mobile.messaging.UserDataMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.UserDataMapper.toJson;
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
 
 
 /**
@@ -160,7 +161,7 @@ public class MobileMessagingCore
     }
 
     /**
-     * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of sync method
+     * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of patch method
      */
     private void migratePrefsIfNecessary() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.PERFORMED_USER_DATA_MIGRATION)) {
@@ -182,7 +183,7 @@ public class MobileMessagingCore
             return;
         }
 
-        Pair<UserData, Map<String, CustomUserDataValue>> userDataWithCustomAtts = UserDataMapper.migrateToNewModels(unreportedUserData);
+        Pair<User, Map<String, CustomAttributeValue>> userDataWithCustomAtts = UserMapper.migrateToNewModels(unreportedUserData);
         if (userDataWithCustomAtts.first != null) {
             if (userDataProperty == MobileMessagingProperty.UNREPORTED_USER_DATA) {
                 saveUnreportedUserData(userDataWithCustomAtts.first);
@@ -191,7 +192,7 @@ public class MobileMessagingCore
             }
         }
 
-        Map<String, CustomUserDataValue> customAtts = userDataWithCustomAtts.second;
+        Map<String, CustomAttributeValue> customAtts = userDataWithCustomAtts.second;
         if (customAtts != null) {
             saveCustomAttributes(customAtts);
             if (userDataProperty == MobileMessagingProperty.UNREPORTED_USER_DATA) {
@@ -317,7 +318,7 @@ public class MobileMessagingCore
             return;
         }
 
-        userDataReporter().sync(null, getUnreportedUserData());
+        userDataReporter().patch(null, getUnreportedUserData());
         messagesSynchronizer().sync();
         moMessageSender().sync();
         seenStatusReporter().sync();
@@ -375,7 +376,7 @@ public class MobileMessagingCore
     }
 
     private void onDepersonalizeCompleted() {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, false);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, false);
         broadcaster.depersonalized();
         resetCloudToken();
     }
@@ -390,7 +391,7 @@ public class MobileMessagingCore
             return;
         }
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, true);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, true);
     }
 
     private void depersonalizeCurrentInstallation() {
@@ -406,7 +407,7 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.APP_USER_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED, true);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, true);
         if (messageStore != null) {
             messageStore.deleteAll(context);
         }
@@ -417,7 +418,7 @@ public class MobileMessagingCore
     }
 
     public boolean isDepersonalizeInProgress() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_LOGOUT_UNREPORTED);
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED);
     }
 
     private void registerForNetworkAvailability() {
@@ -430,37 +431,8 @@ public class MobileMessagingCore
         return notificationHandler;
     }
 
-    @Override
-    public void enablePushRegistration() {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, true);
-        installationSynchronizer().updatePushRegEnabledStatus(true, null);
-    }
-
-    @Override
-    public void disablePushRegistration() {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, false);
-        installationSynchronizer().updatePushRegEnabledStatus(false, null);
-    }
-
-    @Override
     public String getPushRegistrationId() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
-    }
-
-    @Override
-    public void setCurrentInstallationAsPrimary(boolean isPrimary) {
-        setCurrentInstallationAsPrimary(isPrimary, null);
-    }
-
-    @Override
-    public void setCurrentInstallationAsPrimary(final boolean isPrimary, final ResultListener<Installation> listener) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, isPrimary);
-
-        if (isDepersonalizeInProgress()) {
-            reportErrorDepersonalizeInProgress(listener);
-            return;
-        }
-        installationSynchronizer().updatePrimaryStatus(isPrimary, listener);
     }
 
     public void savePrimarySetting(boolean isPrimary) {
@@ -476,29 +448,29 @@ public class MobileMessagingCore
     public void setInstallationAsPrimary(final String pushRegistrationId, final boolean isPrimary, final InstallationsActionListener listener) {
         installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, new ResultListener<Installation>() {
             @Override
-            public void onResult(Installation installations) {
+            public void onResult(Result<Installation, MobileMessagingError> result) {
+                if (!result.isSuccess()) {
+                    if (listener != null) {
+                        listener.onError(result.getError());
+                    }
+                    return;
+                }
+
                 List<Installation> installationsToReturn = performLocalSettingOfPrimary(pushRegistrationId, isPrimary);
                 if (listener != null) {
                     listener.onSuccess(installationsToReturn);
-                }
-            }
-
-            @Override
-            public void onError(MobileMessagingError error) {
-                if (listener != null) {
-                    listener.onError(error);
                 }
             }
         });
     }
 
     private List<Installation> performLocalSettingOfPrimary(String pushRegId, boolean isPrimary) {
-        UserData userData = getUser();
-        if (userData == null) {
+        User user = getUser();
+        if (user == null) {
             return null;
         }
 
-        List<Installation> installations = userData.getInstallations();
+        List<Installation> installations = user.getInstallations();
         if (installations != null && !installations.isEmpty()) {
             List<Installation> installationsTemp = new ArrayList<>();
             for (Installation installation : installations) {
@@ -509,44 +481,13 @@ public class MobileMessagingCore
                 }
                 installationsTemp.add(installation);
             }
-            userData.setInstallations(installationsTemp);
-            saveUserDataToPrefs(userData);
+            user.setInstallations(installationsTemp);
+            saveUserDataToPrefs(user);
         }
-        return userData.getInstallations();
+        return user.getInstallations();
     }
 
-    @Override
-    public void setApplicationUserId(final String applicationUserId, final ResultListener<Installation> listener) {
-        setApplicationUserIdReported(false);
-        saveApplicationUserId(applicationUserId);
-
-        if (isDepersonalizeInProgress()) {
-            reportErrorDepersonalizeInProgress(listener);
-        } else {
-            installationSynchronizer().updateApplicationUserId(applicationUserId, listener);
-        }
-    }
-
-    @Override
-    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes, final ResultListener<Installation> listener) {
-        if (customAttributes == null) {
-            return;
-        }
-        setUnreportedCustomAttributes(customAttributes);
-
-        if (isDepersonalizeInProgress()) {
-            reportErrorDepersonalizeInProgress(listener);
-        } else {
-            installationSynchronizer().updateCustomAttributes(customAttributes, listener);
-        }
-    }
-
-    @Override
-    public void setCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
-        setCustomAttributes(customAttributes, null);
-    }
-
-    public void saveCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
+    public void saveCustomAttributes(Map<String, CustomAttributeValue> customAttributes) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
@@ -557,7 +498,7 @@ public class MobileMessagingCore
         return PreferenceHelper.findString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES);
     }
 
-    public void setUnreportedCustomAttributes(Map<String, CustomUserDataValue> customAttributes) {
+    public void setUnreportedCustomAttributes(Map<String, CustomAttributeValue> customAttributes) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
@@ -571,8 +512,7 @@ public class MobileMessagingCore
         return null;
     }
 
-    @Override
-    public boolean isPrimaryDevice() {
+    private boolean isPrimaryDevice() {
         return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<Boolean>() {
             @Override
             public Boolean run() {
@@ -584,17 +524,12 @@ public class MobileMessagingCore
         });
     }
 
-    public void saveApplicationUserId(String applicationUserId) {
+    private void saveApplicationUserId(String applicationUserId) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.APP_USER_ID, applicationUserId);
     }
 
     public String getApplicationUserId() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APP_USER_ID);
-    }
-
-    @Override
-    public void setApplicationUserId(String applicationUserId) {
-        setApplicationUserId(applicationUserId, null);
     }
 
     public void setApplicationUserIdReported(boolean reported) {
@@ -610,7 +545,7 @@ public class MobileMessagingCore
             @Override
             public void run() {
                 if (listener != null) {
-                    listener.onError(InternalSdkError.DEPERSONALIZATION_IN_PROGRESS.getError());
+                    listener.onResult(new Result<>(InternalSdkError.DEPERSONALIZATION_IN_PROGRESS.getError()));
                 }
             }
         });
@@ -618,6 +553,15 @@ public class MobileMessagingCore
 
     public boolean isPushRegistrationEnabled() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
+    }
+
+    public boolean isPushRegistrationEnabledUnreported() {
+        return PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED) &&
+                PreferenceHelper.findBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
+    }
+
+    public void setPushRegistrationEnabledReported() {
+       PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, false);
     }
 
     public String getCloudToken() {
@@ -927,10 +871,10 @@ public class MobileMessagingCore
 
     @Override
     public Installation getInstallation() {
-        Map<String, CustomUserDataValue> customAttsMap = new HashMap<>();
+        Map<String, CustomAttributeValue> customAttsMap = new HashMap<>();
         String customAttributes = getCustomAttributes();
         if (customAttributes != null) {
-            customAttsMap = UserDataMapper.customAttsFrom(customAttributes);
+            customAttsMap = UserMapper.customAttsFrom(customAttributes);
         }
         return new Installation(
                 getPushRegistrationId(),
@@ -945,7 +889,7 @@ public class MobileMessagingCore
                 DeviceInformation.getDeviceModel(),
                 DeviceInformation.isDeviceSecure(context),
                 SystemInformation.getAndroidSystemLanguage(),
-                null, // TODO: get timezone
+                DeviceInformation.getDeviceTimeZoneOffset(),
                 getApplicationUserId(),
                 DeviceInformation.getDeviceModel(),
                 isPrimaryDevice(),
@@ -966,6 +910,10 @@ public class MobileMessagingCore
 
     @Override
     public void saveInstallation(Installation installation, ResultListener<Installation> listener) {
+        if (installation.containsField(AppInstanceAtts.regEnabled)) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, installation.isPushRegistrationEnabled());
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, true);
+        }
         if (installation.containsField(AppInstanceAtts.customAttributes)) {
             setUnreportedCustomAttributes(installation.getCustomAttributes());
         }
@@ -973,6 +921,16 @@ public class MobileMessagingCore
             PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.isPrimaryDevice());
             PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
         }
+        if (installation.containsField(AppInstanceAtts.applicationUserId)) {
+            setApplicationUserIdReported(false);
+            saveApplicationUserId(installation.getApplicationUserId());
+        }
+
+        if (isDepersonalizeInProgress()) {
+            reportErrorDepersonalizeInProgress(listener);
+            return;
+        }
+
         installationSynchronizer().patch(installation, listener);
     }
 
@@ -1149,6 +1107,14 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
+
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
+        PreferenceHelper.remove(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES);
+        PreferenceHelper.remove(context, MobileMessagingProperty.APP_USER_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
     }
 
     private void resetCloudToken() {
@@ -1161,17 +1127,17 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void saveUser(UserData userData) {
-        saveUser(userData, null);
+    public void saveUser(User user) {
+        saveUser(user, null);
     }
 
     @Override
-    public void saveUser(UserData userData, final MobileMessaging.ResultListener<UserData> listener) {
-        UserData existingData = getUnreportedUserData();
-        UserData userDataToReport = UserDataMapper.merge(existingData, userData);
+    public void saveUser(User user, final MobileMessaging.ResultListener<User> listener) {
+        User existingData = getUnreportedUserData();
+        User userToReport = UserMapper.merge(existingData, user);
 
-        if (userDataToReport != null) {
-            saveUnreportedUserData(userDataToReport);
+        if (userToReport != null) {
+            saveUnreportedUserData(userToReport);
         }
 
         if (isDepersonalizeInProgress()) {
@@ -1179,11 +1145,11 @@ public class MobileMessagingCore
             return;
         }
 
-        userDataReporter().sync(listener, userDataToReport);
+        userDataReporter().patch(listener, userToReport);
     }
 
     @Override
-    public void fetchUser(MobileMessaging.ResultListener<UserData> listener) {
+    public void fetchUser(MobileMessaging.ResultListener<User> listener) {
         if (isDepersonalizeInProgress()) {
             reportErrorDepersonalizeInProgress(listener);
             return;
@@ -1193,25 +1159,35 @@ public class MobileMessagingCore
     }
 
     @Nullable
-    public UserData getUser() {
-        UserData existing = null;
+    public User getUser() {
+        User existing = null;
         if (PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA)) {
-            existing = UserDataMapper.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
-            if (areInstallationsExpired()) {
+            existing = UserMapper.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
+            if (areInstallationsExpired() && existing != null) {
                 existing.setInstallations(null);
             }
         }
 
-        return UserDataMapper.merge(existing, getUnreportedUserData());
+        return UserMapper.merge(existing, getUnreportedUserData());
     }
 
     @Override
-    public void personalize(UserData userData) {
-        personalize(userData, false);
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes) {
+        personalize(userIdentity, userAttributes, false, null);
     }
 
     @Override
-    public void personalize(UserData userData, boolean forceDepersonalize) {
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize) {
+        personalize(userIdentity, userAttributes, forceDepersonalize, null);
+    }
+
+    @Override
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, ResultListener<User> listener) {
+        personalize(userIdentity, userAttributes, false, listener);
+    }
+
+    @Override
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener) {
         if (isRegistrationUnavailable()) {
             return;
         }
@@ -1221,12 +1197,12 @@ public class MobileMessagingCore
             return;
         }
 
-        personalizeSynchronizer().personalize(forceDepersonalize);
+        personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
     }
 
     private boolean areInstallationsExpired() {
         Date now = new Date();
-        long expiryTimestamp = PreferenceHelper.findLong(context, MobileMessagingProperty.USER_DATA_INSTALLATIONS_EXPIRE_AT);
+        long expiryTimestamp = PreferenceHelper.findLong(context, MobileMessagingProperty.USER_INSTALLATIONS_EXPIRE_AT);
         if (expiryTimestamp != 0) {
             Date expiryDate = new Date(expiryTimestamp);
             return expiryDate.before(now);
@@ -1255,14 +1231,13 @@ public class MobileMessagingCore
         depersonalize(getPushRegistrationId(), listener);
     }
 
-    @Override
     public void depersonalize(String pushRegId, final ResultListener<SuccessPending> listener) {
         if (isRegistrationUnavailable()) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if (listener != null) {
-                        listener.onError(InternalSdkError.NO_VALID_REGISTRATION.getError());
+                        listener.onResult(new Result<SuccessPending, MobileMessagingError>(InternalSdkError.NO_VALID_REGISTRATION.getError()));
                     }
                 }
             });
@@ -1275,7 +1250,7 @@ public class MobileMessagingCore
                 @Override
                 public void run() {
                     if (listener != null) {
-                        listener.onResult(SuccessPending.Pending);
+                        listener.onResult(new Result<>(SuccessPending.Pending));
                     }
                 }
             });
@@ -1288,27 +1263,35 @@ public class MobileMessagingCore
             public void onUserInitiatedDepersonalizeCompleted() {
                 onDepersonalizeCompleted();
                 if (listener != null) {
-                    listener.onResult(SuccessPending.Success);
+                    listener.onResult(new Result<>(SuccessPending.Success));
                 }
             }
 
             @Override
             public void onUserInitiatedDepersonalizeFailed(Throwable error) {
                 if (listener != null) {
-                    listener.onError(MobileMessagingError.createFrom(error));
+                    listener.onResult(new Result<SuccessPending, MobileMessagingError>(MobileMessagingError.createFrom(error)));
                 }
             }
         });
     }
 
     @Override
-    public void depersonalize(final String pushRegId, final InstallationsActionListener listener) {
+    public void depersonalizeInstallation(final String pushRegId, final InstallationsActionListener listener) {
         depersonalize(pushRegId, new ResultListener<SuccessPending>() {
+
             @Override
-            public void onResult(SuccessPending result) {
-                if (SuccessPending.Pending.name().equals(result.name())) {
+            public void onResult(Result<SuccessPending, MobileMessagingError> result) {
+                if (SuccessPending.Pending.name().equals(result.getData().name())) {
                     if (listener != null) {
                         listener.onError(MobileMessagingError.createFrom(new IllegalStateException())); //TODO put something more convenient here or use different approach!
+                    }
+                    return;
+                }
+
+                if (!result.isSuccess()) {
+                    if (listener != null) {
+                        listener.onError(result.getError());
                     }
                     return;
                 }
@@ -1318,23 +1301,16 @@ public class MobileMessagingCore
                     listener.onSuccess(installations);
                 }
             }
-
-            @Override
-            public void onError(MobileMessagingError e) {
-                if (listener != null) {
-                    listener.onError(e);
-                }
-            }
         });
     }
 
     private List<Installation> performLocalDepersonalization(String pushRegId) {
-        UserData userData = getUser();
-        if (userData == null) {
+        User user = getUser();
+        if (user == null) {
             return null;
         }
 
-        List<Installation> installations = userData.getInstallations();
+        List<Installation> installations = user.getInstallations();
         if (installations != null && !installations.isEmpty()) {
             List<Installation> installationsTemp = new ArrayList<>(installations);
             for (Installation installation : installationsTemp) {
@@ -1343,16 +1319,16 @@ public class MobileMessagingCore
                     break;
                 }
             }
-            userData.setInstallations(installations);
-            saveUserDataToPrefs(userData);
+            user.setInstallations(installations);
+            saveUserDataToPrefs(user);
         }
-        return userData.getInstallations();
+        return user.getInstallations();
     }
 
     @Nullable
-    public UserData getUnreportedUserData() {
+    public User getUnreportedUserData() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_USER_DATA)) {
-            return UserDataMapper.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
+            return UserMapper.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
         }
         return null;
     }
@@ -1361,25 +1337,25 @@ public class MobileMessagingCore
         setUserDataReported(null, false);
     }
 
-    public void setUserDataReported(UserData userData, boolean merge) {
-        if (userData != null && shouldSaveUserData()) {
-            UserData dataForStoring = userData;
+    public void setUserDataReported(User user, boolean merge) {
+        if (user != null && shouldSaveUserData()) {
+            User dataForStoring = user;
             dataForStoring.clearUnreportedData();
             if (merge) {
-                dataForStoring = UserDataMapper.merge(getUser(), userData);
+                dataForStoring = UserMapper.merge(getUser(), user);
             }
             saveUserDataToPrefs(filterOutDeletedData(dataForStoring));
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
 
-    private void saveUserDataToPrefs(UserData dataForStoring) {
+    private void saveUserDataToPrefs(User dataForStoring) {
         long oneMinuteInMillis = 60000;
         Calendar date = Calendar.getInstance();
         long t = date.getTimeInMillis();
         Date inOneMinute = new Date(t + oneMinuteInMillis);
 
-        PreferenceHelper.saveLong(context, MobileMessagingProperty.USER_DATA_INSTALLATIONS_EXPIRE_AT, inOneMinute.getTime());
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.USER_INSTALLATIONS_EXPIRE_AT, inOneMinute.getTime());
         PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, toJson(dataForStoring));
     }
 
@@ -1435,10 +1411,10 @@ public class MobileMessagingCore
         return PreferenceHelper.findString(context, MobileMessagingProperty.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME);
     }
 
-    public void saveUnreportedUserData(UserData userData) {
+    public void saveUnreportedUserData(User user) {
         if (shouldSaveUserData()) {
             PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
-            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, toJson(userData));
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, toJson(user));
         }
     }
 
@@ -1488,6 +1464,7 @@ public class MobileMessagingCore
         if (personalizeSynchronizer == null) {
             personalizeSynchronizer = new PersonalizeSynchronizer(
                     this,
+                    broadcaster,
                     mobileApiResourceProvider().getMobileApiAppInstance(context),
                     retryPolicyProvider.DEFAULT(),
                     registrationAlignedExecutor,
@@ -1606,7 +1583,7 @@ public class MobileMessagingCore
         /**
          * When you want to take more care about privacy and don't want to store Application code in <i>infobip_application_code</i>
          * string resource nor in our persistent storage, but would like to use it only from memory. In this case, you should
-         * provide it on demand. For example, you should implement <b>sync</b> API call to your server where you store required
+         * provide it on demand. For example, you should implement <b>patch</b> API call to your server where you store required
          * Application code and provide it to {@link ApplicationCodeProvider#resolve()} method as a return type.
          * <p>
          * Sync (not async) API call is encouraged because we already handle your code in a background thread.
@@ -1621,7 +1598,7 @@ public class MobileMessagingCore
         }
 
         /**
-         * Builds the <i>MobileMessagingCore</i> configuration. Registration token sync is started by default.
+         * Builds the <i>MobileMessagingCore</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
          * @return {@link MobileMessagingCore}

@@ -113,7 +113,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         mobileMessagingCore.syncInstallation();
 
         verify(broadcaster, after(1000).never()).installationUpdated(any(Installation.class));
-        verify(broadcaster, after(1000).times(1)).installationCreated(any(Installation.class));
+        verify(broadcaster, after(1000).times(1)).registrationCreated(anyString(), anyString());
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
 

@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Event;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
 import org.infobip.mobile.messaging.chat.broadcast.ChatBroadcaster;
 import org.infobip.mobile.messaging.chat.broadcast.ChatBroadcasterImpl;
@@ -40,12 +40,12 @@ public class CoreBroadcastReceiver extends BroadcastReceiver {
             return;
         }
 
-        if (!Event.USER_DATA_REPORTED.getKey().equals(intent.getAction())) {
+        if (!Event.USER_UPDATED.getKey().equals(intent.getAction())) {
             return;
         }
 
-        UserData userData = UserData.createFrom(intent.getExtras());
-        ChatParticipant participant = mapper.fromUserData(userData);
+        User user = User.createFrom(intent.getExtras());
+        ChatParticipant participant = mapper.fromUserData(user);
         userProfileManager(context).save(participant);
         broadcaster(context).userInfoSynchronized(participant);
     }

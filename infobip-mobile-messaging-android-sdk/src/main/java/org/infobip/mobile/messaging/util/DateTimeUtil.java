@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * @author sslavin
@@ -116,5 +117,11 @@ public class DateTimeUtil {
 
         Date nowDate = new Date();
         return DateTimeUtil.compareTimes(startDate, nowDate) < 0 && DateTimeUtil.compareTimes(nowDate, endDate) < 0;
+    }
+
+    public static String getGMTTimeZoneOffset() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
+        String timeZone = new SimpleDateFormat("Z", Locale.getDefault()).format(calendar.getTime());
+        return String.format("GMT%s:%s", timeZone.substring(0, 3), timeZone.substring(3, 5));
     }
 }

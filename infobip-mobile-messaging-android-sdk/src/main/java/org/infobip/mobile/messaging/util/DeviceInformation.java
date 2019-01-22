@@ -57,4 +57,8 @@ public class DeviceInformation {
 
         return false;
     }
+
+    public static String getDeviceTimeZoneOffset() {
+        return DateTimeUtil.getGMTTimeZoneOffset();
+    }
 }

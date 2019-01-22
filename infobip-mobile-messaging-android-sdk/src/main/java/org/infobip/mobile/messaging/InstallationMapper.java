@@ -7,7 +7,7 @@ import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import static org.infobip.mobile.messaging.UserDataMapper.customAttsFromBackend;
+import static org.infobip.mobile.messaging.UserMapper.customAttsFromBackend;
 
 public class InstallationMapper {
 
@@ -26,8 +26,8 @@ public class InstallationMapper {
                 appInstance.getDeviceManufacturer(),
                 appInstance.getDeviceModel(),
                 appInstance.getDeviceSecure(),
-                appInstance.getOsLanguage(),
-                appInstance.getDeviceTimezoneId(),
+                appInstance.getLanguage(),
+                appInstance.getDeviceTimezoneOffset(),
                 appInstance.getApplicationUserId(),
                 appInstance.getDeviceName(),
                 appInstance.getIsPrimary(),
@@ -48,8 +48,8 @@ public class InstallationMapper {
         appInstance.setDeviceManufacturer(installation.getDeviceManufacturer());
         appInstance.setDeviceModel(installation.getDeviceModel());
         appInstance.setDeviceSecure(installation.getDeviceSecure());
-        appInstance.setOsLanguage(installation.getOsLanguage());
-        appInstance.setDeviceTimezoneId(installation.getDeviceTimezoneId());
+        appInstance.setLanguage(installation.getLanguage());
+        appInstance.setDeviceTimezoneOffset(installation.getDeviceTimezoneOffset());
         appInstance.setDeviceName(installation.getDeviceName());
         appInstance.setIsPrimary(installation.isPrimaryDevice());
         appInstance.setPushServiceType(pushServiceTypeToBackend(installation.getPushServiceType()));
