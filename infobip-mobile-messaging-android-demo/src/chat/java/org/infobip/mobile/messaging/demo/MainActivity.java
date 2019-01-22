@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("ConstantConditions")
     private void copyRegistrationIdToClipboard() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("Registration ID", MobileMessaging.getInstance(this).getPushRegistrationId());
+        ClipData clip = ClipData.newPlainText("Registration ID", MobileMessaging.getInstance(this).getInstallation().getPushRegistrationId());
         clipboard.setPrimaryClip(clip);
     }
 }
