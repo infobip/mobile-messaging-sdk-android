@@ -2,23 +2,17 @@ package org.infobip.mobile.messaging;
 
 import android.annotation.SuppressLint;
 
-import org.infobip.mobile.messaging.api.data.MobileApiData;
-import org.infobip.mobile.messaging.api.data.SystemDataReport;
-import org.infobip.mobile.messaging.api.data.UserDataReport;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
-import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
-import org.infobip.mobile.messaging.api.registration.PushServiceType;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
-import org.infobip.mobile.messaging.mobile.data.SystemDataReporter;
-import org.infobip.mobile.messaging.mobile.data.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
-import org.infobip.mobile.messaging.mobile.registration.RegistrationSynchronizer;
+import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DeviceInformation;
@@ -27,6 +21,7 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
 import org.junit.Test;
 
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -48,17 +43,14 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
 
     private Executor executor;
 
-    private SystemDataReporter systemDataReporter;
     private MessagesSynchronizer messagesSynchronizer;
-    private RegistrationSynchronizer registrationSynchronizer;
+    private InstallationSynchronizer installationSynchronizer;
     private UserDataReporter userDataReporter;
     private MRetryPolicy retryPolicy;
 
     private MobileMessageHandler mobileMessageHandler;
 
-    private MobileApiData mobileApiData;
     private MobileApiMessages mobileApiMessages;
-    private MobileApiRegistration mobileApiRegistration;
 
     @SuppressLint("CommitPrefEdits")
     @Override
@@ -72,22 +64,18 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
         mobileMessageHandler = mock(MobileMessageHandler.class);
-        mobileApiData = mock(MobileApiData.class);
         mobileApiMessages = mock(MobileApiMessages.class);
-        mobileApiRegistration = mock(MobileApiRegistration.class);
 
-        given(mobileApiData.reportUserData(anyString(), any(UserDataReport.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
-        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiData).reportSystemData(any(SystemDataReport.class));
+        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiAppInstance).patchUser(anyString(), anyBoolean(), any(Map.class));
         given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
-        given(mobileApiRegistration.upsert(anyString(), anyBoolean(), any(PushServiceType.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
 
         RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
         retryPolicy = retryPolicyProvider.DEFAULT();
         executor = Executors.newSingleThreadExecutor();
-        systemDataReporter = new SystemDataReporter(mobileMessagingCore, stats, retryPolicy, executor, broadcaster, mobileApiData);
         messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
-        registrationSynchronizer = new RegistrationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiRegistration);
-        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiData);
+        installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiAppInstance);
+        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiAppInstance);
     }
 
     @Test
@@ -97,11 +85,11 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         prepareSystemData();
 
         // When
-        systemDataReporter.synchronize();
+        installationSynchronizer.sync();
 
         // Then
         verify(broadcaster, after(3000).times(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiData, times(1 + retryPolicy.getMaxRetries())).reportSystemData(any(SystemDataReport.class));
+        verify(mobileApiAppInstance, times(1 + retryPolicy.getMaxRetries())).patchInstance(anyString(), anyBoolean(), any(Map.class));
     }
 
     private void prepareSystemData() {
@@ -115,7 +103,9 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
                 mobileMessagingCore.isGeofencingActivated(),
                 SoftwareInformation.areNotificationsEnabled(context),
                 DeviceInformation.isDeviceSecure(context),
-                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "");
+                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "",
+                reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "",
+                reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "");
 
         Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {
@@ -141,27 +131,27 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
 
         // When
-        registrationSynchronizer.sync();
+        installationSynchronizer.sync();
 
         // Then
         verify(broadcaster, after(3000).times(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiRegistration, times(1 + retryPolicy.getMaxRetries())).upsert(anyString(), anyBoolean(), any(PushServiceType.class));
+        verify(mobileApiAppInstance, times(1 + retryPolicy.getMaxRetries())).patchInstance(anyString(), anyBoolean(), any(Map.class));
     }
 
     @Test
     public void test_user_data_retry() {
 
         // Given
-        UserData userData = new UserData();
-        userData.setFirstName("Retry");
-        userData.setLastName("Everything");
+        User user = new User();
+        user.setFirstName("Retry");
+        user.setLastName("Everything");
 
         // When
-        userDataReporter.sync(null, userData);
+        userDataReporter.patch(null, user);
 
         // Then
         verify(broadcaster, after(3000).atLeast(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiData, times(1 + retryPolicy.getMaxRetries())).reportUserData(anyString(), any(UserDataReport.class));
+        verify(mobileApiAppInstance, times(1 + retryPolicy.getMaxRetries())).patchUser(anyString(), anyBoolean(), any(Map.class));
     }
 
     @Test
@@ -170,16 +160,16 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         // Given
         withoutStoringUserData();
 
-        UserData userData = new UserData();
-        userData.setFirstName("Retry");
-        userData.setLastName("Everything");
+        User user = new User();
+        user.setFirstName("Retry");
+        user.setLastName("Everything");
 
         // When
-        userDataReporter.sync(null, userData);
+        userDataReporter.patch(null, user);
 
         // Then
         verify(broadcaster, after(4000).times(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiData, times(1)).reportUserData(anyString(), any(UserDataReport.class));
+        verify(mobileApiAppInstance, times(1)).patchUser(anyString(), anyBoolean(), any(Map.class));
     }
 
     private void withoutStoringUserData() {

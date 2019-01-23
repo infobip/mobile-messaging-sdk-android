@@ -2,9 +2,9 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.support.test.runner.AndroidJUnit4;
 
-import org.infobip.mobile.messaging.CustomUserDataValue;
+import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.ChatMessage;
 import org.infobip.mobile.messaging.chat.ChatParticipant;
 import org.infobip.mobile.messaging.chat.repository.MJSONObject;
@@ -131,26 +131,26 @@ public class ObjectMapperTest {
 
     @Test
     public void should_map_user_data_to_participant() throws Exception {
-        UserData givenUserData = new UserData() {{
+        User givenUser = new User() {{
             setExternalUserId("userId");
             setFirstName("firstName");
             setLastName("lastName");
             setMiddleName("middleName");
-            setEmail("email@email.com");
-            setMsisdn("msisdn");
-            setCustomUserData(new HashMap<String, CustomUserDataValue>() {{
-                put("chatCustomData", new CustomUserDataValue(
+//            setEmail("email@email.com");
+//            setMsisdn("msisdn");
+            setCustomAttributes(new HashMap<String, CustomAttributeValue>() {{
+                put("chatCustomData", new CustomAttributeValue(
                         MJSONObject.create().add("key", "value").toString()));
             }});
         }};
 
-        ChatParticipant participant = objectMapper.fromUserData(givenUserData);
+        ChatParticipant participant = objectMapper.fromUserData(givenUser);
         assertEquals("userId", participant.getId());
         assertEquals("firstName", participant.getFirstName());
         assertEquals("lastName", participant.getLastName());
         assertEquals("middleName", participant.getMiddleName());
-        assertEquals("email@email.com", participant.getEmail());
-        assertEquals("msisdn", participant.getGsm());
+//        assertEquals("email@email.com", participant.getEmail());
+//        assertEquals("msisdn", participant.getGsm());
         JSONAssert.assertEquals(MJSONObject.create().add("key", "value"), participant.getCustomData(), false);
     }
 
@@ -161,18 +161,18 @@ public class ObjectMapperTest {
                 "firstName",
                 "lastName",
                 "middleName",
-                "participant@email.com",
-                "gsm",
+                null,
+                null,
                 MJSONObject.create().add("key", "value"));
 
-        UserData userData = objectMapper.toUserData(givenParticipant);
+        User user = objectMapper.toUserData(givenParticipant);
 
-        assertEquals("participantId", userData.getExternalUserId());
-        assertEquals("firstName", userData.getFirstName());
-        assertEquals("lastName",userData.getLastName());
-        assertEquals("middleName", userData.getMiddleName());
-        assertEquals("participant@email.com", userData.getEmail());
-        assertEquals("gsm", userData.getMsisdn());
-        assertEquals("{\"key\":\"value\"}", userData.getCustomUserData().get("chatCustomData").stringValue());
+        assertEquals("participantId", user.getExternalUserId());
+        assertEquals("firstName", user.getFirstName());
+        assertEquals("lastName", user.getLastName());
+        assertEquals("middleName", user.getMiddleName());
+//        assertEquals("participant@email.com", user.getEmail());
+//        assertEquals("gsm", user.getMsisdn());
+        assertEquals("{\"key\":\"value\"}", user.getCustomAttributes().get("chatCustomData").stringValue());
     }
 }

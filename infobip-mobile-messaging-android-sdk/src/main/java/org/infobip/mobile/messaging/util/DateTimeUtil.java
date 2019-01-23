@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * @author sslavin
@@ -12,7 +13,7 @@ import java.util.Locale;
  */
 public class DateTimeUtil {
 
-    private static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssX";
     private static final String GMT_TIME_ZONE = "+00:00";
@@ -116,5 +117,11 @@ public class DateTimeUtil {
 
         Date nowDate = new Date();
         return DateTimeUtil.compareTimes(startDate, nowDate) < 0 && DateTimeUtil.compareTimes(nowDate, endDate) < 0;
+    }
+
+    public static String getGMTTimeZoneOffset() {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
+        String timeZone = new SimpleDateFormat("Z", Locale.getDefault()).format(calendar.getTime());
+        return String.format("GMT%s:%s", timeZone.substring(0, 3), timeZone.substring(3, 5));
     }
 }

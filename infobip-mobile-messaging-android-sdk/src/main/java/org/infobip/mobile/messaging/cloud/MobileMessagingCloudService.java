@@ -98,7 +98,7 @@ public class MobileMessagingCloudService extends JobIntentService {
                 .putExtra(MobileMessagingCloudService.EXTRA_TOKEN, token));
     }
 
-    public static void enqueueNewMessage(Context context, Message message) {
+    public static void enqueueNewMessage(Context context, @NonNull Message message) {
         Bundle messageBundle = MessageBundleMapper.messageToBundle(message);
         enqueueWork(context, new Intent(MobileMessagingCloudService.ACTION_CLOUD_MESSAGE_RECEIVE)
                 .putExtras(messageBundle));

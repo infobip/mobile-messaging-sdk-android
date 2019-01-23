@@ -18,7 +18,7 @@ public class Participant implements DatabaseContract.DatabaseObject {
     String lastName;
     String middleName;
     String email;
-    String gsm;
+    String phone;
     String customData;
 
     @Override
@@ -38,7 +38,7 @@ public class Participant implements DatabaseContract.DatabaseObject {
         lastName = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.LAST_NAME));
         middleName = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.MIDDLE_NAME));
         email = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.EMAIL));
-        gsm = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.GSM));
+        phone = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.GSM));
         customData = cursor.getString(cursor.getColumnIndexOrThrow(ChatDatabaseContract.ParticipantColumns.CUSTOM_DATA));
     }
 
@@ -50,7 +50,7 @@ public class Participant implements DatabaseContract.DatabaseObject {
         contentValues.put(ChatDatabaseContract.ParticipantColumns.LAST_NAME, lastName);
         contentValues.put(ChatDatabaseContract.ParticipantColumns.MIDDLE_NAME, middleName);
         contentValues.put(ChatDatabaseContract.ParticipantColumns.EMAIL, email);
-        contentValues.put(ChatDatabaseContract.ParticipantColumns.GSM, gsm);
+        contentValues.put(ChatDatabaseContract.ParticipantColumns.GSM, phone);
         contentValues.put(ChatDatabaseContract.ParticipantColumns.CUSTOM_DATA, customData);
         return contentValues;
     }

@@ -36,7 +36,7 @@ public class UserProfileManager {
         this.participantRepository = new ParticipantRepositoryImpl(context);
         this.repositoryMapper = new RepositoryMapper();
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        this.pushRegistrationId = MobileMessaging.getInstance(context).getPushRegistrationId();
+        this.pushRegistrationId = MobileMessaging.getInstance(context).getInstallation().getPushRegistrationId();
     }
 
     @VisibleForTesting

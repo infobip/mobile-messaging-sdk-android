@@ -5,9 +5,9 @@ import android.os.Bundle;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.SystemData;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
@@ -76,31 +76,15 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_should_send_push_registration_enabled() {
-
+    public void test_should_send_push_token_received() {
         // When
-        broadcastSender.registrationEnabled("SomeCloudToken", "SomeDeviceInstanceId", false);
+        broadcastSender.tokenReceived("SomeCloudToken");
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.PUSH_REGISTRATION_ENABLED.getKey(), intent.getAction());
-        assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
-        assertEquals("SomeDeviceInstanceId", intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
-        assertEquals(false, intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED, true));
-    }
-
-    @Test
-    public void test_should_send_push_registration_acquired() {
-        // When
-        broadcastSender.registrationAcquired("SomeCloudToken");
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.REGISTRATION_ACQUIRED.getKey(), intent.getAction());
+        assertEquals(Event.TOKEN_RECEIVED.getKey(), intent.getAction());
         assertEquals("SomeCloudToken", intent.getStringExtra(BroadcastParameter.EXTRA_CLOUD_TOKEN));
     }
 
@@ -167,57 +151,82 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_should_send_user_data() {
+    public void test_should_send_user_updated_event() {
         // Given
-        UserData userData = new UserData();
-        userData.setFirstName("FirstName");
-        userData.setLastName("LastName");
+        User user = new User();
+        user.setFirstName("FirstName");
+        user.setLastName("LastName");
 
         // When
-        broadcastSender.userDataReported(userData);
+        broadcastSender.userUpdated(user);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.USER_DATA_REPORTED.getKey(), intent.getAction());
+        assertEquals(Event.USER_UPDATED.getKey(), intent.getAction());
 
-        UserData userDataAfter = UserData.createFrom(intent.getExtras());
-        assertNotSame(userData, userDataAfter);
-        assertEquals("FirstName", userDataAfter.getFirstName());
-        assertEquals("LastName", userDataAfter.getLastName());
+        User userAfter = User.createFrom(intent.getExtras());
+        assertNotSame(user, userAfter);
+        assertEquals("FirstName", userAfter.getFirstName());
+        assertEquals("LastName", userAfter.getLastName());
     }
 
     @Test
-    public void test_should_send_system_data() throws Exception {
+    public void test_should_send_installation_updated_event() throws Exception {
+
         // Given
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "someOsLanguage");
+        Installation installation = new Installation();
+        installation.setPrimaryDevice(true);
+        installation.setApplicationUserId("appUserID");
+        installation.setLanguage("hr");
+        installation.setPushRegistrationEnabled(true);
 
         // When
-        broadcastSender.systemDataReported(systemData);
+        broadcastSender.installationUpdated(installation);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.SYSTEM_DATA_REPORTED.getKey(), intent.getAction());
+        assertEquals(Event.INSTALLATION_UPDATED.getKey(), intent.getAction());
 
-        SystemData systemDataAfter = SystemData.createFrom(intent.getExtras());
-        assertNotSame(systemData, systemDataAfter);
-        assertJEquals(systemData, systemDataAfter);
+        Installation installationAfter = Installation.createFrom(intent.getExtras());
+        assertJEquals(installation, installationAfter);
     }
 
     @Test
-    public void test_should_send_logout_user_event() throws Exception {
+    public void test_should_send_depersonalize_event() throws Exception {
 
         // When
-        broadcastSender.userLoggedOut();
+        broadcastSender.depersonalized();
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
 
         Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.USER_LOGGED_OUT.getKey(), intent.getAction());
+        assertEquals(Event.DEPERSONALIZED.getKey(), intent.getAction());
+    }
+
+    @Test
+    public void test_should_send_personalize_event() throws Exception {
+
+        // Given
+        User user = new User();
+        user.setFirstName("FirstName");
+        user.setLastName("LastName");
+
+        // When
+        broadcastSender.personalized(user);
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.PERSONALIZED.getKey(), intent.getAction());
+
+        User userAfter = User.createFrom(intent.getExtras());
+        assertJEquals(user, userAfter);
     }
 
     @Test
@@ -251,20 +260,5 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Message messageAfter = Message.createFrom(intent.getExtras());
         assertNotSame(message, messageAfter);
         assertEquals("SomeMessageId", messageAfter.getMessageId());
-    }
-
-    @Test
-    public void test_send_primary_changed_event() throws Exception {
-        // When
-        broadcastSender.primarySettingChanged(true);
-
-        // Then
-        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
-
-        Intent intent = intentArgumentCaptor.getValue();
-        assertEquals(Event.PRIMARY_CHANGED.getKey(), intent.getAction());
-
-        Boolean intentPrimary = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_PRIMARY, false);
-        assertEquals(true, intentPrimary.booleanValue());
     }
 }

@@ -9,6 +9,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
  * @author mstipanov
@@ -44,7 +45,7 @@ public class JsonSerializer {
     }
 
     public JsonSerializer() {
-        gson = new GsonBuilder().serializeNulls().create();
+        gson = new GsonBuilder().create();
     }
 
     public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {
@@ -63,6 +64,10 @@ public class JsonSerializer {
     private final Gson gson;
 
     public <T> T deserialize(String s, Class<T> type) {
+        return gson.fromJson(s, type);
+    }
+
+    public <T> T deserialize(String s, Type type) {
         return gson.fromJson(s, type);
     }
 

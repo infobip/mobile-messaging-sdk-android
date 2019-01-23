@@ -1,8 +1,12 @@
 package org.infobip.mobile.messaging.api.support.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +20,36 @@ public abstract class MapUtils {
             hashMap.put(kvargs[i].toString(), Collections.singleton(kvargs[i + 1]));
         }
         return hashMap;
+    }
+
+    @SafeVarargs
+    public static <K, V> Map<K, V> concat(Map<K, V>... mps) {
+        return concat(null, mps);
+    }
+
+    @SafeVarargs
+    public static <K, V> Map<K, V> concatOrEmpty(Map<K, V>... mps) {
+        return MapUtils.concat(Collections.<K, V>emptyMap(), mps);
+    }
+
+    @SafeVarargs
+    private static <K, V> Map<K, V> concat(Map<K, V> valueIfEmpty, Map<K, V>... mps) {
+        List<Map<K, V>> maps = new LinkedList<>(Arrays.asList(mps));
+        for (Iterator<Map<K, V>> iterator = maps.iterator(); iterator.hasNext(); ) {
+            Map<K, V> map = iterator.next();
+            if (map == null) {
+                iterator.remove();
+            }
+        }
+
+        if (maps.isEmpty()) {
+            return valueIfEmpty;
+        }
+
+        Map<K, V> result = new HashMap<>();
+        for (int i = 0; i < maps.size(); i++) {
+            result.putAll(maps.get(i));
+        }
+        return result;
     }
 }

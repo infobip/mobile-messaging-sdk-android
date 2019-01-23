@@ -3,8 +3,8 @@ package org.infobip.mobile.messaging.platform;
 import android.content.Context;
 import android.support.annotation.VisibleForTesting;
 
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.registration.PushServiceType;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.cloud.RegistrationTokenHandler;
 import org.infobip.mobile.messaging.cloud.firebase.FirebaseRegistrationTokenHandler;
@@ -20,6 +20,8 @@ import org.infobip.mobile.messaging.util.ComponentUtil;
  * @since 03/09/2018.
  */
 public class Platform {
+
+    public static final String os = "Android";
 
     public static volatile Lazy<MobileMessagingCore, Context> mobileMessagingCore = createForConstructorAcceptingContext(MobileMessagingCore.class);
     public static volatile Lazy<AndroidBroadcaster, Context> broadcaster = createForConstructorAcceptingContext(AndroidBroadcaster.class);
@@ -41,8 +43,8 @@ public class Platform {
         }
     });
 
-    public static final PushServiceType usedPushServiceType = usedPushServiceType();
-    public static final boolean shouldUseGCM = PushServiceType.GCM.equals(usedPushServiceType);
+    public static final Installation.PushServiceType usedPushServiceType = usedPushServiceType();
+    public static final boolean shouldUseGCM = Installation.PushServiceType.GCM.equals(usedPushServiceType);
 
     public static <T> Lazy<T, Context> create(Lazy.Initializer<T, Context> initializer) {
         return Lazy.create(initializer);
@@ -81,11 +83,11 @@ public class Platform {
         }
     }
 
-    private static PushServiceType usedPushServiceType() {
-        PushServiceType usedPushServiceType = PushServiceType.Firebase;
+    private static Installation.PushServiceType usedPushServiceType() {
+        Installation.PushServiceType usedPushServiceType = Installation.PushServiceType.Firebase;
         try {
             Class.forName("com.google.android.gms.iid.InstanceIDListenerService");
-            usedPushServiceType = PushServiceType.GCM;
+            usedPushServiceType = Installation.PushServiceType.GCM;
         } catch (ClassNotFoundException ignored) {
         }
         MobileMessagingLogger.d("Will use " + usedPushServiceType.name() + " for messaging");

@@ -32,6 +32,7 @@ public class DefaultApiClient implements ApiClient {
     public static final int DEFAULT_READ_TIMEOUT = 60000;
 
     public static final JsonSerializer JSON_SERIALIZER = new JsonSerializer();
+    private static final JsonSerializer JSON_SERIALIZER_WITH_NULLS = new JsonSerializer(true);
 
     private final int connectTimeout;
     private final int readTimeout;
@@ -77,11 +78,19 @@ public class DefaultApiClient implements ApiClient {
             }
 
             urlConnection = (HttpURLConnection) new URL(request.uri + sb.toString()).openConnection();
-            urlConnection.setRequestMethod(request.httpMethod.name());
-            urlConnection.setUseCaches(false);
+
+            if (request.httpMethod == HttpMethod.PATCH) {
+                urlConnection.setRequestProperty("X-HTTP-Method-Override", HttpMethod.PATCH.name());
+                urlConnection.setRequestMethod(HttpMethod.POST.name());
+            } else {
+                urlConnection.setRequestMethod(request.httpMethod.name());
+            }
+
             if (request.httpMethod != HttpMethod.GET) {
                 urlConnection.setDoOutput(true);
             }
+
+            urlConnection.setUseCaches(false);
             urlConnection.setDoInput(true);
             urlConnection.setConnectTimeout(connectTimeout);
             urlConnection.setReadTimeout(readTimeout);
@@ -116,7 +125,7 @@ public class DefaultApiClient implements ApiClient {
             }
 
             if (null != request.body) {
-                byte[] bytes = JSON_SERIALIZER.serialize(request.body).getBytes("UTF-8");
+                byte[] bytes = jsonSerializer(method).serialize(request.body).getBytes("UTF-8");
                 urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 OutputStream outputStream = null;
@@ -136,7 +145,7 @@ public class DefaultApiClient implements ApiClient {
                 if (urlConnection.getContentLength() > 0) {
                     InputStream inputStream = urlConnection.getErrorStream();
                     String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
-                    apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
+                    apiResponse = jsonSerializer(method).deserialize(s, ApiResponse.class);
                 }
 
                 if (responseCode >= 500) {
@@ -160,10 +169,10 @@ public class DefaultApiClient implements ApiClient {
             String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
             inputStream.close();
 
-            R response = JSON_SERIALIZER.deserialize(s, responseType);
+            R response = jsonSerializer(method).deserialize(s, responseType);
             ApiResponse apiResponse = null;
             try {
-                apiResponse = JSON_SERIALIZER.deserialize(s, ApiResponse.class);
+                apiResponse = jsonSerializer(method).deserialize(s, ApiResponse.class);
             } catch (Exception ignored) {
             }
 
@@ -260,6 +269,13 @@ public class DefaultApiClient implements ApiClient {
                 s = "";
             }
             sb.append(sb.length() == 0 ? "?" : "&").append(URLEncoder.encode(entry.getKey(), "UTF-8")).append("=").append(URLEncoder.encode(s, "UTF-8"));
+        }
+    }
+
+    private static JsonSerializer jsonSerializer(HttpMethod httpMethod) {
+        switch (httpMethod) {
+            case PATCH: return JSON_SERIALIZER_WITH_NULLS;
+            default: return JSON_SERIALIZER;
         }
     }
 

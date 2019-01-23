@@ -74,21 +74,6 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 > 2. MobileMessaging library has geofencing service disabled by default. In order to opt-in the service, follow [this guide](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API).
 > 3. Keep in mind that some proprietary android versions may restrict network traffic for your app. It may in turn affect delivery of push notifications.
 
-## Mobile Messaging APIs
-
-### Events
-
-Library generates intents on the [events](infobip-mobile-messaging-android-sdk/src/main/java/org/infobip/mobile/messaging/Event.java) as described in [Events](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Events) wiki.
-
-### Linking MSISDN
-
-It is recommended that you link the GSM number (in [MSISDN](https://en.wikipedia.org/wiki/MSISDN) format).
-It will give an additional opportunity to target your application users and orchestrate your campaigns with [OMNI Messaging service](https://dev.infobip.com/docs/omni-introduction) including SMS fallback feature. 
-
-```java
-UserData userData = new UserData();
-userData.setMsisdn("385911234567");
-MobileMessaging.getInstance(context).syncUserData(userData);
-```
+Next steps: [User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)
 
 

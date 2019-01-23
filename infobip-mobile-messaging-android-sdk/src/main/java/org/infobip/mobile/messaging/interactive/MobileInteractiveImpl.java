@@ -221,7 +221,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     }
 
     @Override
-    public void logoutUser() {
+    public void depersonalize() {
         //do nothing
     }
 

@@ -9,8 +9,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
-import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -64,7 +64,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
     protected MobileApiResourceProvider mobileApiResourceProvider;
     protected MobileApiMessages mobileApiMessages;
-    protected MobileApiRegistration mobileApiRegistration;
+    protected MobileApiAppInstance mobileApiAppInstance;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -124,10 +124,10 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         notificationHandler = mock(NotificationHandler.class);
         coreBroadcaster = mock(Broadcaster.class);
         mobileApiMessages = mock(MobileApiMessages.class);
-        mobileApiRegistration = mock(MobileApiRegistration.class);
+        mobileApiAppInstance = mock(MobileApiAppInstance.class);
         mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
         given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
-        given(mobileApiResourceProvider.getMobileApiRegistration(any(Context.class))).willReturn(mobileApiRegistration);
+        given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);
         mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster, mobileApiResourceProvider);
         mobileMessaging = mobileMessagingCore;
         geofencingHelper = new GeofencingHelper(context);

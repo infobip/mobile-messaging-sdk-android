@@ -27,10 +27,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.infobip.mobile.messaging.Event;
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
+import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
 import org.infobip.mobile.messaging.geo.MobileGeo;
+import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                 .getInstance(this)
                 .registerReceiver(sdkBroadcastReceiver, new IntentFilter() {{
                     addAction(Event.MESSAGE_RECEIVED.getKey());
-                    addAction(Event.PRIMARY_CHANGED.getKey());
+                    addAction(Event.INSTALLATION_UPDATED.getKey());
                 }});
     }
 
@@ -115,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
                 actionErase();
                 return true;
 
-            case R.id.action_gsm:
-                actionGsm();
+            case R.id.action_phone:
+                actionPhone();
                 return true;
 
             case R.id.action_registration_id:
@@ -127,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
                 actionPrimary();
                 return true;
 
-            case R.id.action_logout:
-                actionLogout();
+            case R.id.action_depersonalize:
+                actionDepersonalize();
                 return true;
         }
 
@@ -136,19 +140,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionRegistrationId() {
-        showDialog(R.string.dialog_title_registration_id, mobileMessaging.getPushRegistrationId(), null);
+        showDialog(R.string.dialog_title_registration_id, mobileMessaging.getInstallation().getPushRegistrationId(), null);
     }
 
-    private void actionGsm() {
-        final UserData userData = mobileMessaging.getUserData() != null ? mobileMessaging.getUserData() : new UserData();
-        showDialog(R.string.dialog_title_gsm, userData.getMsisdn(), new RunnableWithParameter<String>() {
+    private void actionPhone() {
+        final User user = mobileMessaging.getUser() != null ? mobileMessaging.getUser() : new User();
+        String phone = user.getPhones() == null || user.getPhones().isEmpty() ? "" : user.getPhones().iterator().next();
+        showDialog(R.string.dialog_title_gsm, phone, new RunnableWithParameter<String>() {
             @Override
             public void run(String param) {
-                userData.setMsisdn(param);
-                mobileMessaging.syncUserData(userData, new MobileMessaging.ResultListener<UserData>() {
+                user.setPhones(CollectionUtils.setOf(param));
+                mobileMessaging.saveUser(user, new MobileMessaging.ResultListener<User>() {
                     @Override
-                    public void onResult(UserData result) {
-                        Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
+                    public void onResult(Result<User, MobileMessagingError> result) {
+                        if (result.isSuccess()) {
+                            Toast.makeText(MainActivity.this, R.string.toast_user_data_saved, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
             }
@@ -216,11 +223,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionPrimary() {
-        mobileMessaging.setAsPrimaryDevice(!mobileMessaging.isPrimaryDevice());
+        Installation installation = new Installation();
+        installation.setPrimaryDevice(!mobileMessaging.getInstallation().isPrimaryDevice());
+        mobileMessaging.saveInstallation(installation);
     }
 
-    private void actionLogout() {
-        mobileMessaging.logout();
+    private void actionDepersonalize() {
+        mobileMessaging.depersonalize();
     }
 
     private void updatePrimaryInMenu() {
@@ -229,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MenuItem item = menu.findItem(R.id.action_primary);
-        if (mobileMessaging.isPrimaryDevice()) {
+        if (mobileMessaging.getInstallation().isPrimaryDevice()) {
             item.setTitle(R.string.menu_action_disable_primary);
         } else {
             item.setTitle(R.string.menu_action_enable_primary);

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.repository.MJSONObject;
 import org.json.JSONException;
 import org.mockito.ArgumentMatcher;
@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.mockito.Matchers.argThat;
 
 /**
@@ -71,9 +72,9 @@ public abstract class TestBase {
                 MJSONObject.create("{'key':'value'}"));
     }
 
-    protected Intent givenIntentWithUserData(UserData userData) {
-        return new Intent(org.infobip.mobile.messaging.Event.USER_DATA_REPORTED.getKey())
-                .putExtra(BroadcastParameter.EXTRA_USER_DATA, userData.toString());
+    protected Intent givenIntentWithUserData(User user) {
+        return new Intent(org.infobip.mobile.messaging.Event.USER_UPDATED.getKey())
+                .putExtra(BroadcastParameter.EXTRA_USER, toJson(user));
     }
 
     protected void assertMessageEquals(ChatMessage expected, ChatMessage actual) throws JSONException {

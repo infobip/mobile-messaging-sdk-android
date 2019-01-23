@@ -31,6 +31,8 @@ public abstract class MAsyncTask<IN, OUT> {
         add(ApiErrorCode.INVALID_VALUE);
         add(ApiErrorCode.INVALID_EMAIL_FORMAT);
         add(ApiErrorCode.INVALID_BIRTHDATE_FORMAT);
+        add(ApiErrorCode.USER_MERGE_INTERRUPTED);
+        add(ApiErrorCode.USER_DATA_RESTRICTED);
     }};
 
     @SuppressLint("StaticFieldLeak")

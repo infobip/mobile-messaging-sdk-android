@@ -58,8 +58,7 @@ import android.content.BroadcastReceiver;
  * @author mstipanov
  * @see BroadcastReceiver
  * @see Event#MESSAGE_RECEIVED
- * @see Event#REGISTRATION_ACQUIRED
- * @see Event#REGISTRATION_CREATED
+ * @see Event#TOKEN_RECEIVED
  * @see Event#DELIVERY_REPORTS_SENT
  * @see Event#API_COMMUNICATION_ERROR
  * @since 01.03.2016.
@@ -75,21 +74,30 @@ public enum Event {
      * }
      * </pre>
      */
-    REGISTRATION_ACQUIRED("org.infobip.mobile.messaging.REGISTRATION_ACQUIRED"),
+    TOKEN_RECEIVED("org.infobip.mobile.messaging.TOKEN_RECEIVED"),
 
     /**
-     * It is triggered when GCM registration token successfully stored on the registration server.
+     * It is triggered when GCM registration token is successfully stored on the server.
      * <p>
-     * Contains the GCM registration token and Infobip device application instance ID
+     * Contains the GCM registration token, Infobip device application instance ID and system data in installation
      * (which identifies every application instance).
      * <pre>
      * {@code
-     * String registrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
-     * String pushRegistrationId = intent.getStringExtra({@link BroadcastParameter#EXTRA_INFOBIP_ID});
+     * Installation installation = Installation.createFrom(intent.getExtras());
      * }
      * </pre>
      */
     REGISTRATION_CREATED("org.infobip.mobile.messaging.REGISTRATION_CREATED"),
+
+    /**
+     * It is triggered when installation is successfully reported to the server.
+     * <pre>
+     * {@code
+     * Installation installation = Installation.createFrom(intent.getExtras());
+     * }
+     * </pre>
+     */
+    INSTALLATION_UPDATED("org.infobip.mobile.messaging.INSTALLATION_UPDATED"),
 
     /**
      * It is triggered when message is received.
@@ -168,29 +176,24 @@ public enum Event {
     NOTIFICATION_TAPPED("org.infobip.mobile.messaging.NOTIFICATION_TAPPED"),
 
     /**
-     * It is triggered when user data is successfully reported to the server.
+     * It is triggered when user is successfully reported to the server.
      * <pre>
      * {@code
-     * UserData userData = UserData.createFrom(intent.getExtras());
+     * User user = User.createFrom(intent.getExtras());
      * }
      * </pre>
      */
-    USER_DATA_REPORTED("org.infobip.mobile.messaging.USER_DATA_REPORTED"),
+    USER_UPDATED("org.infobip.mobile.messaging.USER_UPDATED"),
 
     /**
-     * It is triggered when system data is successfully reported to the server.
-     * <pre>
-     * {@code
-     * SystemData systemData = SystemData.createFrom(intent.getExtras());
-     * }
-     * </pre>
+     * It is triggered when user is depersonalized on the server.
      */
-    SYSTEM_DATA_REPORTED("org.infobip.mobile.messaging.SYSTEM_DATA_REPORTED"),
+    DEPERSONALIZED("org.infobip.mobile.messaging.DEPERSONALIZED"),
 
     /**
-     * It is triggered when user is successfully logged out from the server.
+     * It is triggered when user is personalized on the server.
      */
-    USER_LOGGED_OUT("org.infobip.mobile.messaging.USER_LOGGED_OUT"),
+    PERSONALIZED("org.infobip.mobile.messaging.PERSONALIZED"),
 
     /**
      * It is triggered when Google Play Services are not available.
@@ -200,27 +203,7 @@ public enum Event {
      * }
      * </pre>
      */
-    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR"),
-
-    /**
-     * It is triggered when push registration status is changed.
-     * <pre>
-     * {@code
-     * boolean isPushRegistrationEnabled = intent.getBooleanExtra(BroadcastParameter.EXTRA_PUSH_REGISTRATION_ENABLED);
-     * }
-     * </pre>
-     */
-    PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.PUSH_REGISTRATION_ENABLED"),
-
-    /**
-     * It is triggered when primary setting changes for device.
-     * <pre>
-     * {@code
-     * boolean isPrimary = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_PRIMARY);
-     * }
-     * </pre>
-     */
-    PRIMARY_CHANGED("org.infobip.mobile.messaging.PRIMARY_CHANGED");
+    GOOGLE_PLAY_SERVICES_ERROR("org.infobip.mobile.messaging.GOOGLE_PLAY_SERVICES_ERROR");
 
     private final String key;
 

@@ -6,14 +6,18 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.util.List;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
@@ -61,29 +65,6 @@ public abstract class MobileMessaging {
     }
 
     /**
-     * Enables the push registration so that the application can receive push notifications
-     * (regular push messages/geofencing campaign messages/messages fetched from the server).
-     * MobileMessaging SDK has the push registration enabled by default.
-     */
-    public abstract void enablePushRegistration();
-
-    /**
-     * Disables the push registration so that the application is no longer able to receive push notifications
-     * through MobileMessaging SDK (regular push messages/geofencing campaign messages/messages fetched from the server).
-     * MobileMessaging SDK has the push registration enabled by default.
-     */
-    public abstract void disablePushRegistration();
-
-    /**
-     * Push registration status defines whether the device is allowed to receive push notifications
-     * (regular push messages/geofencing campaign messages/messages fetched from the server).
-     * MobileMessaging SDK has the push registration enabled by default.
-     *
-     * @return Current push registration status.
-     */
-    public abstract boolean isPushRegistrationEnabled();
-
-    /**
      * Reports delivery of messages to Mobile Messaging servers.
      * <br>
      * This method has to be used only if you handle GCM message notifications
@@ -114,108 +95,167 @@ public abstract class MobileMessaging {
     public abstract MessageStore getMessageStore();
 
     /**
+     * Does a synchronization of installation with server.
+     * <br>
+     * This method will synchronize new installation data (such as setting of primary device, application user ID, custom atts...) with server
+     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
+     *
+     * @param installation installation object with desired changes
+     * @see Event#INSTALLATION_UPDATED
+     */
+    public abstract void saveInstallation(Installation installation);
+
+    /**
+     * Does a synchronization of installation with server.
+     * <br>
+     * This method will synchronize new installation data (such as setting of primary device, application user ID,...) with server
+     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
+     * The result of synchronization will be provided via listener.
+     *
+     * @param installation installation object with desired changes
+     * @param listener     listener to report the result on
+     * @see ResultListener
+     * @see Event#INSTALLATION_UPDATED
+     */
+    public abstract void saveInstallation(Installation installation, ResultListener<Installation> listener);
+
+    /**
+     * Gets instance of currently active installation from server.
+     *
+     * @param listener listener to report the result on
+     * @see ResultListener
+     */
+    public abstract void fetchInstallation(ResultListener<Installation> listener);
+
+    /**
+     * Gets local instance of currently active installation.
+     *
+     * @return installation installation data object with locally stored data
+     */
+    public abstract Installation getInstallation();
+
+    /**
+     * This method allows you to configure some other device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
+     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
+     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
+     * @param listener           listener to invoke when the operation is complete.
+     */
+    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, ResultListener<List<Installation>> listener);
+
+    /**
+     * This method allows you to configure this device as primary among others devices of a single user.
+     * Use this method to let SDK decide when it is best time to try to send request to server.
+     *
+     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
+     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
+     */
+    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary);
+
+    /**
      * Does a synchronization of user data with server.
      * <br>
-     * This method will synchronize new data with server and will also trigger {@link Event#USER_DATA_REPORTED}
-     * with all the data currently available on a server for this user.
+     * This method will synchronize new data with server and will also trigger {@link Event#USER_UPDATED}
+     * with the currently available data in local cache for this user.
      *
-     * @param userData user data object with desired changes
-     * @see Event#USER_DATA_REPORTED
+     * @param user user data object with desired changes
+     * @see Event#USER_UPDATED
      */
-    public abstract void syncUserData(UserData userData);
+    public abstract void saveUser(User user);
 
     /**
      * Does a synchronization of user data with server.
      * <br>
      * This method will synchronize new data with server. The result of synchronization will be provided via listener.
-     * It will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     * It will also trigger {@link Event#USER_UPDATED} with the currently available data in local cache for this user.
      *
-     * @param userData user data object with desired changes
+     * @param user     user data object with desired changes
      * @param listener listener to report the result on
      * @see ResultListener
-     * @see Event#USER_DATA_REPORTED
+     * @see Event#USER_UPDATED
      */
-    public abstract void syncUserData(UserData userData, ResultListener<UserData> listener);
+    public abstract void saveUser(User user, ResultListener<User> listener);
 
     /**
-     * Does a fetch of user data from the server.
+     * Does a fetching of user data from the server.
      * <br>
-     * This method will trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
-     *
-     * @see Event#USER_DATA_REPORTED
-     * @deprecated Use {@link MobileMessaging#fetchUserData(ResultListener)} instead.
-     */
-    @Deprecated
-    public abstract void fetchUserData();
-
-    /**
-     * Does a fetch of user data from the server.
-     * <br>
-     * The result of fetch operation will be provided via listener.
-     * This method will also trigger {@link Event#USER_DATA_REPORTED} with all the data currently available on a server for this user.
+     * The result of fetching operation will be provided via listener with all the data currently available on a server for this user.
      *
      * @see ResultListener
-     * @see Event#USER_DATA_REPORTED
      */
-    public abstract void fetchUserData(ResultListener<UserData> listener);
+    public abstract void fetchUser(@NonNull ResultListener<User> listener);
 
     /**
      * Reads user data that is currently stored in the library.
-     * <br>
-     * This method does not trigger {@link Event#USER_DATA_REPORTED}.
      *
-     * @return last synchronized UserData object
+     * @return last synchronized User object
      */
     @Nullable
-    public abstract UserData getUserData();
+    public abstract User getUser();
+
+
+    //TODO docs
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes);
+
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize);
+
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, ResultListener<User> listener);
+
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener);
 
     /**
-     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
+     * Erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
-     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
-     * registration. Logging out user means that push registration along with device specific data will remain, but user's data
-     * (such as first name, custom data,...) will be wiped out.
+     * User's data synced over MobileMessaging {@link #saveUser(User)} is by default associated with created installation (push
+     * registration). Depersonalizing an installation means that push registration along with device specific data will remain, but user's data
+     * (such as first name, custom attributes,...) will be wiped out.
      * <p>
-     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
-     * but you might want to sync new user data to target this user specifically.
+     * If you depersonalize an installation, there is a way to personalize it again by providing new user data (either by {@link MobileMessaging#saveUser(User)} )} setter
+     * or {@link MobileMessaging#personalize(UserIdentity, UserAttributes)} method) in order to target this user specifically.
      * <p>
      * Use this method if:
      * <ul>
      * <li>you're syncing user data to our server</li>
-     * <li>your application has logout option</li>
-     * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
-     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
+     * <li>your application has logout functionality</li>
+     * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
+     * <li>you want depersonalized installation to still receive broadcast notifications (otherwise, you need to call
+     * {@link Installation#setPushRegistrationEnabled(Boolean)} with <i>false</i> value to disable all messages)</li>
      * </ul>
      *
-     * @see Event#USER_LOGGED_OUT
+     * @see Event#DEPERSONALIZED
      */
-    public abstract void logout();
+    public abstract void depersonalize();
 
     /**
-     * Erases currently stored {@link UserData} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
+     * Erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <br>
-     * User's data synced over MobileMessaging {@link #syncUserData(UserData)} is by default associated with created push
+     * User's data synced over MobileMessaging {@link #saveUser(User)} is by default associated with created push
      * registration. Logging out user means that push registration along with device specific data will remain, but user's data
      * (such as first name, custom data,...) will be wiped out.
      * <br>
      * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
-     * but you might want to sync new user data to target this user specifically.
+     * but you might want to patch new user data to target this user specifically.
      * <br>
      * Use this method if:
      * <ul>
      * <li>you're syncing user data to our server</li>
-     * <li>your application has logout option</li>
+     * <li>your application has depersonalize option</li>
      * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
-     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call {@link #disablePushRegistration()})</li>
+     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call
+     * {@link Installation#setPushRegistrationEnabled(Boolean)} with <i>false</i> value to disable all messages)</li>
      * </ul>
      * <br>
-     * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with logout when network becomes available, {@link Event#USER_LOGGED_OUT} will be produced upon success.
+     * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with depersonalize when network becomes available,
+     * {@link Event#DEPERSONALIZED} will be produced upon success.
      *
      * @param listener listener to report the result on
      * @see ResultListener
-     * @see Event#USER_LOGGED_OUT
+     * @see Event#DEPERSONALIZED
      */
-    public abstract void logout(ResultListener<SuccessPending> listener);
+    public abstract void depersonalize(ResultListener<SuccessPending> listener);
+
+    public abstract void depersonalizeInstallation(String pushRegId, ResultListener<List<Installation>> listener);
 
     /**
      * Send mobile originated messages.
@@ -230,8 +270,8 @@ public abstract class MobileMessaging {
      * Send mobile originated messages.
      * <br>
      * Destination for each message is set inside {@link Message}.
-     * The result of fetch operation will be provided via listener.
-     * {@link ResultListener#onResult(Object)} will be called both in case of success and error,
+     * The result of fetchInstance operation will be provided via listener.
+     * {@link ResultListener#onResult(Result)}} will be called both in case of success and error,
      * separate status for each message can be retrieved via {@link Message#getStatus()} and {@link Message#getStatusMessage()}.
      *
      * @param listener listener to invoke when the operation is complete
@@ -239,43 +279,6 @@ public abstract class MobileMessaging {
      * @see ResultListener
      */
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
-
-    /**
-     * This method allows you to configure this device as primary among other devices of a single user.
-     * SDK will try to set this device as primary on a server and report result through the listener.
-     * @param isPrimary set to true to make this device primary or to false otherwise.
-     * @param listener listener to invoke when the operation is complete.
-     */
-    public abstract void setAsPrimaryDevice(boolean isPrimary, ResultListener<Boolean> listener);
-
-    /**
-     * This method allows you to configure this device as primary among others devices of a single user.
-     * Use this method to let SDK decide when it is best time to try to send request to server.
-     * @param isPrimary set to true to make this device primary or to false otherwise.
-     */
-    public abstract void setAsPrimaryDevice(boolean isPrimary);
-
-    /**
-     * Use this method to determine if this device is currently primary device or not.
-     * @return true if this device is primary or false otherwise. The value represents latest value synchronized with the server.
-     */
-    public abstract boolean isPrimaryDevice();
-
-    /**
-     * Use this method to determine if this device is currently primary device or not. Will trigger communication with server to get latest setting.
-     */
-    public abstract void getPrimaryDeviceSetting(ResultListener<Boolean> listener);
-
-    /**
-     * Use this method to trigger communication between SDK and server and to sync current primary setting for this device.
-     * <br>It will later on trigger {@link Event#PRIMARY_CHANGED} if the setting will be updated locally in SDK.
-     * <br><b>Note:</b> multiple invocations of this method within short period of time may not necessarily result in multiple calls to server,
-     * they will rather be optimized and throttled and number of network calls will be reduced by the library.
-     *
-     * @deprecated Use {@link MobileMessaging#getPrimaryDeviceSetting(ResultListener)} instead.
-     */
-    @Deprecated
-    public abstract void syncPrimaryDeviceSettingWithServer();
 
     /**
      * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
@@ -286,15 +289,6 @@ public abstract class MobileMessaging {
      * detect Application Code changes.
      */
     public abstract void cleanup();
-
-    /**
-     * Retrieves unique push registration identifier issued by server. This identifier matches one to one with FCM(GCM) cloud token
-     * of the particular application installation. This identifier is only available after {@link Event#REGISTRATION_CREATED}
-     * and does not change for the whole lifetime of the application installation.
-     *
-     * @return unique push registration id, null if no registration is available yet
-     */
-    public abstract String getPushRegistrationId();
 
     /**
      * Default result listener interface for asynchronous operations.
@@ -311,16 +305,7 @@ public abstract class MobileMessaging {
          *
          * @param result the result of operation
          */
-        public abstract void onResult(T result);
-
-        /**
-         * This method is invoked on listener in case of error.
-         *
-         * @param e object that contains error description
-         */
-        public void onError(MobileMessagingError e) {
-
-        }
+        public abstract void onResult(Result<T, MobileMessagingError> result);
     }
 
     /**
@@ -336,7 +321,7 @@ public abstract class MobileMessaging {
         /**
          * This method is invoked on listener when there's an unrecoverable error.
          *
-         * @param e internal SDK error describing the problem, see {@link InternalSdkError}
+         * @param e               internal SDK error describing the problem, see {@link InternalSdkError}
          * @param googleErrorCode optional error code provided by play services
          */
         void onError(InternalSdkError e, @Nullable Integer googleErrorCode);
@@ -489,7 +474,7 @@ public abstract class MobileMessaging {
         /**
          * When you want to take more care about privacy and don't want to store Application code in <i>infobip_application_code</i>
          * string resource nor in our persistent storage, but would like to use it only from memory. In this case, you should
-         * provide it on demand. For example, you should implement <b>sync</b> API call to your server where you store required
+         * provide it on demand. For example, you should implement <b>patch</b> API call to your server where you store required
          * Application code and provide it to {@link ApplicationCodeProvider#resolve()} method as a return type.
          * <p>
          * Sync (not async) API call is encouraged because we already handle your code in a background thread.
@@ -644,7 +629,7 @@ public abstract class MobileMessaging {
          * network information on all Android devices as some devices require the permission to be able to get SIM operator data
          * (needed for SIM country and network code).
          * <p>
-         *    <b>Note:</b> not using this method will result with some devices not being able to sync all network info.
+         * <b>Note:</b> not using this method will result with some devices not being able to patch all network info.
          *
          * @return {@link Builder}
          */
@@ -669,10 +654,10 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * It will not store {@link UserData} on device.
+         * It will not store {@link User} on device.
          * <p>
-         * <b>Note:</b> since {@link UserData} is not stored on device, automatic retries will not be applied.
-         * It should be handled manually using {@link MobileMessaging#syncUserData(UserData, ResultListener)}} method,
+         * <b>Note:</b> since {@link User} is not stored on device, automatic retries will not be applied.
+         * It should be handled manually using {@link MobileMessaging#saveUser(User, ResultListener)}} method,
          * where you can check error in callback and retry accordingly.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -688,7 +673,7 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
+         * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
          * @return {@link MobileMessaging}
@@ -698,11 +683,10 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * Builds the <i>MobileMessaging</i> configuration. Registration token sync is started by default.
+         * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
          * @param initListener provide listener to handle any errors during intialization
-         *
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build(@Nullable InitListener initListener) {

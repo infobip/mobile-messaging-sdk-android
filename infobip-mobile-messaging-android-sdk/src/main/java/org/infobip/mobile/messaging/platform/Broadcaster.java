@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging.platform;
 
+import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.SystemData;
-import org.infobip.mobile.messaging.UserData;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
 import java.util.List;
@@ -37,30 +37,6 @@ public interface Broadcaster {
     void error(MobileMessagingError error);
 
     /**
-     * Sends broadcast when new cloud token acquired
-     *
-     * @param cloudToken GCM/FCM cloud token
-     */
-    void registrationAcquired(String cloudToken);
-
-    /**
-     * Sends broadcast about new registration data
-     *
-     * @param cloudToken         GCM/FCM cloud token
-     * @param pushRegistrationId Infobip registration id
-     */
-    void registrationCreated(String cloudToken, String pushRegistrationId);
-
-    /**
-     * Sends broadcast when push registration enabled is available
-     *
-     * @param cloudToken          GCM/FCM cloud token
-     * @param deviceInstanceId    Infobip registration ID
-     * @param registrationEnabled true if registration enabled
-     */
-    void registrationEnabled(String cloudToken, String deviceInstanceId, Boolean registrationEnabled);
-
-    /**
      * Sends broadcast with message ids which were reported as delivered by the library
      *
      * @param messageIds ids of messages marked as delivered
@@ -82,28 +58,41 @@ public interface Broadcaster {
     void messagesSent(List<Message> messages);
 
     /**
+     * Sends broadcast when new cloud token is received
+     *
+     * @param cloudToken FCM/GCM cloud token
+     */
+    void tokenReceived(String cloudToken);
+
+    /**
+     * Sends broadcast about new registration data
+     *
+     * @param cloudToken         FCM/GCM cloud token
+     * @param pushRegistrationId Infobip registration id
+     */
+    void registrationCreated(String cloudToken, String pushRegistrationId);
+
+    /**
+     * Sends broadcast with installation data on installation update
+     *
+     * @param installation device instance
+     */
+    void installationUpdated(Installation installation);
+
+    /**
      * Sends broadcast with user data
      *
-     * @param userData user data
+     * @param user user data
      */
-    void userDataReported(UserData userData);
+    void userUpdated(User user);
 
     /**
-     * Sends broadcast with system data
-     *
-     * @param systemData system data
+     * Sends broadcast that current installation is depersonalized - user's specific data is detached the installation
      */
-    void systemDataReported(SystemData systemData);
+    void depersonalized();
 
     /**
-     * Sends broadcast that user is logged out
+     * Sends broadcast that current installation is personalized - user's specific data is added
      */
-    void userLoggedOut();
-
-    /**
-     * Sends broadcast indicating that primary setting has changed on server
-     *
-     * @param primary current value of the setting
-     */
-    void primarySettingChanged(boolean primary);
+    void personalized(User user);
 }

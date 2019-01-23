@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -98,7 +99,7 @@ public class MoMessageSender {
                 }
                 broadcaster.messagesSent(Arrays.asList(messages));
                 if (listener != null) {
-                    listener.onResult(messages);
+                    listener.onResult(new Result<>(messages));
                 }
             }
 

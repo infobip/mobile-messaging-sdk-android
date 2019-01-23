@@ -32,7 +32,7 @@ public abstract class RegistrationTokenHandler {
                 mobileMessagingCore.isPushServiceTypeChanged();
 
         if (saveNeeded) {
-            mobileMessagingCore.setRegistrationId(token);
+            mobileMessagingCore.setCloudToken(token);
         }
 
         mobileMessagingCore.sync();

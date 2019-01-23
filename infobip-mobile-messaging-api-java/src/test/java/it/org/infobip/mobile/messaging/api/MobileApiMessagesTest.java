@@ -194,7 +194,7 @@ public class MobileApiMessagesTest {
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages/");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);
@@ -237,7 +237,7 @@ public class MobileApiMessagesTest {
         SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
 
         // inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages/");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/5/messages");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(1);

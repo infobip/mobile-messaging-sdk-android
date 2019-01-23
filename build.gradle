@@ -51,6 +51,7 @@ allprojects {
 }
 
 subprojects {
+    apply plugin: "maven"
     apply plugin: "com.jfrog.artifactory"
 
     def repo = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'

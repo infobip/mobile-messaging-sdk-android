@@ -4,11 +4,9 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.api.data.MobileApiData;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
-import org.infobip.mobile.messaging.api.instance.MobileApiInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
-import org.infobip.mobile.messaging.api.registration.MobileApiRegistration;
 import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.support.Generator;
 import org.infobip.mobile.messaging.api.support.http.client.Logger;
@@ -79,22 +77,10 @@ public class MobileApiResourceProvider {
 
     private BaseUrlManager mobileMessagingRequestInterceptor;
     private Generator generator;
-    private MobileApiRegistration mobileApiRegistration;
     private MobileApiMessages mobileApiMessages;
-    private MobileApiData mobileApiData;
     private MobileApiVersion mobileApiVersion;
     private MobileApiGeo mobileApiGeo;
-    private MobileApiInstance mobileApiInstance;
-
-    public MobileApiRegistration getMobileApiRegistration(Context context) {
-        if (null != mobileApiRegistration) {
-            return mobileApiRegistration;
-        }
-
-        mobileApiRegistration = getGenerator(context).create(MobileApiRegistration.class);
-
-        return mobileApiRegistration;
-    }
+    private MobileApiAppInstance mobileApiAppInstance;
 
     public MobileApiMessages getMobileApiMessages(Context context) {
         if (null != mobileApiMessages) {
@@ -104,16 +90,6 @@ public class MobileApiResourceProvider {
         mobileApiMessages = getGenerator(context).create(MobileApiMessages.class);
 
         return mobileApiMessages;
-    }
-
-    public MobileApiData getMobileApiData(Context context) {
-        if (null != mobileApiData) {
-            return mobileApiData;
-        }
-
-        mobileApiData = getGenerator(context).create(MobileApiData.class);
-
-        return mobileApiData;
     }
 
     public MobileApiVersion getMobileApiVersion(Context context) {
@@ -136,14 +112,14 @@ public class MobileApiResourceProvider {
         return mobileApiGeo;
     }
 
-    public MobileApiInstance getMobileApiInstance(Context context) {
-        if (null != mobileApiInstance) {
-            return mobileApiInstance;
+    public MobileApiAppInstance getMobileApiAppInstance(Context context) {
+        if (null != mobileApiAppInstance) {
+            return mobileApiAppInstance;
         }
 
-        mobileApiInstance = getGenerator(context).create(MobileApiInstance.class);
+        mobileApiAppInstance = getGenerator(context).create(MobileApiAppInstance.class);
 
-        return mobileApiInstance;
+        return mobileApiAppInstance;
     }
 
     private String[] getUserAgentAdditions(Context context) {
@@ -156,8 +132,9 @@ public class MobileApiResourceProvider {
             userAgentAdditions.add(DeviceInformation.getDeviceManufacturer());
             userAgentAdditions.add(SoftwareInformation.getAppName(context));
             userAgentAdditions.add(SoftwareInformation.getAppVersion(context));
+            userAgentAdditions.add(SystemInformation.getAndroidDeviceName(context));
         } else {
-            String emptySystemInfo[] = {"", "", "", "", "", "", ""};
+            String emptySystemInfo[] = {"", "", "", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptySystemInfo));
         }
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO)) {
