@@ -111,10 +111,10 @@ public class UserSyncTest extends MobileMessagingTestCase {
     public void test_add_custom_element() throws Exception {
 
         User givenUser = new User();
-        givenUser.setCustomAttributeElement("myKey1", new CustomAttributeValue("Some string"));
-        givenUser.setCustomAttributeElement("myKey2", new CustomAttributeValue(12345));
-        givenUser.setCustomAttributeElement("myKey3", new CustomAttributeValue(new Date()));
-        givenUser.setCustomAttributeElement("myKey4", new CustomAttributeValue(false));
+        givenUser.setCustomAttribute("myKey1", new CustomAttributeValue("Some string"));
+        givenUser.setCustomAttribute("myKey2", new CustomAttributeValue(12345));
+        givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(new Date()));
+        givenUser.setCustomAttribute("myKey4", new CustomAttributeValue(false));
 
         mobileMessaging.saveUser(givenUser);
 
@@ -138,12 +138,12 @@ public class UserSyncTest extends MobileMessagingTestCase {
     public void test_remove_custom_element() throws Exception {
 
         User givenUser = new User();
-        givenUser.setCustomAttributeElement("myKey1", new CustomAttributeValue("Some string"));
-        givenUser.setCustomAttributeElement("myKey2", new CustomAttributeValue(12345));
-        givenUser.setCustomAttributeElement("myKey3", new CustomAttributeValue(new Date()));
+        givenUser.setCustomAttribute("myKey1", new CustomAttributeValue("Some string"));
+        givenUser.setCustomAttribute("myKey2", new CustomAttributeValue(12345));
+        givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(new Date()));
 
-        givenUser.removeCustomAttributeElement("myKey2");
-        givenUser.removeCustomAttributeElement("myKey3");
+        givenUser.removeCustomAttribute("myKey2");
+        givenUser.removeCustomAttribute("myKey3");
 
         mobileMessaging.saveUser(givenUser);
 

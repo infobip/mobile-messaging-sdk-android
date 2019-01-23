@@ -31,7 +31,7 @@ public class CustomAttributeHolder extends MapModel {
         return customAttributes;
     }
 
-    public void setCustomAttributeElement(String key, CustomAttributeValue customAttributeValue) {
+    public void setCustomAttribute(String key, CustomAttributeValue customAttributeValue) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
@@ -47,7 +47,7 @@ public class CustomAttributeHolder extends MapModel {
         return customAttributes.get(key);
     }
 
-    public void removeCustomAttributeElement(String key) {
+    public void removeCustomAttribute(String key) {
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }

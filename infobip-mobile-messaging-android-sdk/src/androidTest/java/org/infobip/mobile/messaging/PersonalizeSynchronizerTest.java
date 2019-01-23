@@ -117,7 +117,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     private void givenUserData() {
         User user = new User();
         user.setFirstName("John");
-        user.setCustomAttributeElement("someKey", new CustomAttributeValue("someValue"));
+        user.setCustomAttribute("someKey", new CustomAttributeValue("someValue"));
         HashMap<String, Object> customAttributes = new HashMap<>();
         customAttributes.put("key", "value");
         SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");

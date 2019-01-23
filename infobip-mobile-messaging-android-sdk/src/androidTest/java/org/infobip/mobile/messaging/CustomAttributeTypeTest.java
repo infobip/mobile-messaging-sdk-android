@@ -39,9 +39,9 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
     @Test
     public void test_save_user_custom_attributes() {
         User user = new User();
-        user.setCustomAttributeElement(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
-        user.setCustomAttributeElement(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
-        user.setCustomAttributeElement(KEY_FOR_DATE, new CustomAttributeValue(SOME_DATE_VALUE));
+        user.setCustomAttribute(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
+        user.setCustomAttribute(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
+        user.setCustomAttribute(KEY_FOR_DATE, new CustomAttributeValue(SOME_DATE_VALUE));
         mobileMessaging.saveUser(user);
 
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userUpdated(userCaptor.capture());
@@ -57,9 +57,9 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
     @Test
     public void test_save_installation_custom_attributes() {
         Installation installation = new Installation();
-        installation.setCustomAttributeElement(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
-        installation.setCustomAttributeElement(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
-        installation.setCustomAttributeElement(KEY_FOR_DATE, new CustomAttributeValue(SOME_DATE_VALUE));
+        installation.setCustomAttribute(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
+        installation.setCustomAttribute(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
+        installation.setCustomAttribute(KEY_FOR_DATE, new CustomAttributeValue(SOME_DATE_VALUE));
         mobileMessaging.saveInstallation(installation);
 
         Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).installationUpdated(installationCaptor.capture());

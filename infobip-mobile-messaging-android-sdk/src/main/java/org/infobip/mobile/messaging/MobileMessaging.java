@@ -13,10 +13,11 @@ import android.support.annotation.RequiresPermission;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
-import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.util.List;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.
@@ -141,7 +142,7 @@ public abstract class MobileMessaging {
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
      * @param listener           listener to invoke when the operation is complete.
      */
-    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, InstallationsActionListener listener);
+    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, ResultListener<List<Installation>> listener);
 
     /**
      * This method allows you to configure this device as primary among others devices of a single user.
@@ -254,7 +255,7 @@ public abstract class MobileMessaging {
      */
     public abstract void depersonalize(ResultListener<SuccessPending> listener);
 
-    public abstract void depersonalizeInstallation(String pushRegId, InstallationsActionListener listener);
+    public abstract void depersonalizeInstallation(String pushRegId, ResultListener<List<Installation>> listener);
 
     /**
      * Send mobile originated messages.

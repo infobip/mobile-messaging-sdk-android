@@ -19,11 +19,11 @@ import java.util.Map;
  * </ul>
  *
  * @see User#setCustomAttributes(Map)
- * @see User#setCustomAttributeElement(String, CustomAttributeValue)
+ * @see User#setCustomAttribute(String, CustomAttributeValue)
  * @see User#getCustomAttributes()
  * @see User#getCustomAttributeValue(String)
  * @see Installation#setCustomAttributes(Map)
- * @see Installation#setCustomAttributeElement(String, CustomAttributeValue)
+ * @see Installation#setCustomAttribute(String, CustomAttributeValue)
  * @see Installation#getCustomAttributes()
  * @see Installation#getCustomAttributeValue(String)
  */

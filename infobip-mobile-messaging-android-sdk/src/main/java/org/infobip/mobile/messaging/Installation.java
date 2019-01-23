@@ -90,7 +90,7 @@ public class Installation extends CustomAttributeHolder {
         return pushRegistrationId;
     }
 
-    public void setPushRegistrationId(String pushRegistrationId) {
+    protected void setPushRegistrationId(String pushRegistrationId) {
         this.pushRegistrationId = pushRegistrationId;
         setField(AppInstanceAtts.pushRegId, pushRegistrationId);
     }

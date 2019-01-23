@@ -36,7 +36,6 @@ import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.mobile.user.DepersonalizeActionListener;
 import org.infobip.mobile.messaging.mobile.user.DepersonalizeServerListener;
-import org.infobip.mobile.messaging.mobile.user.InstallationsActionListener;
 import org.infobip.mobile.messaging.mobile.user.PersonalizeSynchronizer;
 import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobile.version.VersionChecker;
@@ -445,20 +444,20 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setInstallationAsPrimary(final String pushRegistrationId, final boolean isPrimary, final InstallationsActionListener listener) {
+    public void setInstallationAsPrimary(final String pushRegistrationId, final boolean isPrimary, final ResultListener<List<Installation>> listener) {
         installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, new ResultListener<Installation>() {
             @Override
             public void onResult(Result<Installation, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
                     if (listener != null) {
-                        listener.onError(result.getError());
+                        listener.onResult(new Result<List<Installation>, MobileMessagingError>(result.getError()));
                     }
                     return;
                 }
 
                 List<Installation> installationsToReturn = performLocalSettingOfPrimary(pushRegistrationId, isPrimary);
                 if (listener != null) {
-                    listener.onSuccess(installationsToReturn);
+                    listener.onResult(new Result<>(installationsToReturn));
                 }
             }
         });
@@ -1285,28 +1284,29 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void depersonalizeInstallation(final String pushRegId, final InstallationsActionListener listener) {
+    public void depersonalizeInstallation(final String pushRegId, final ResultListener<List<Installation>> listener) {
         depersonalize(pushRegId, new ResultListener<SuccessPending>() {
 
             @Override
             public void onResult(Result<SuccessPending, MobileMessagingError> result) {
                 if (SuccessPending.Pending.name().equals(result.getData().name())) {
                     if (listener != null) {
-                        listener.onError(MobileMessagingError.createFrom(new IllegalStateException())); //TODO put something more convenient here or use different approach!
+                        //TODO put something more convenient here or use different approach!
+                        listener.onResult(new Result<List<Installation>, MobileMessagingError>(MobileMessagingError.createFrom(new IllegalStateException())));
                     }
                     return;
                 }
 
                 if (!result.isSuccess()) {
                     if (listener != null) {
-                        listener.onError(result.getError());
+                        listener.onResult(new Result<List<Installation>, MobileMessagingError>(result.getError()));
                     }
                     return;
                 }
 
                 List<Installation> installations = performLocalDepersonalization(pushRegId);
                 if (listener != null) {
-                    listener.onSuccess(installations);
+                    listener.onResult(new Result<>(installations));
                 }
             }
         });
