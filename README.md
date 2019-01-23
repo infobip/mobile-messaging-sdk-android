@@ -74,6 +74,6 @@ This guide is designed to get you up and running with Mobile Messaging SDK integ
 > 2. MobileMessaging library has geofencing service disabled by default. In order to opt-in the service, follow [this guide](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API).
 > 3. Keep in mind that some proprietary android versions may restrict network traffic for your app. It may in turn affect delivery of push notifications.
 
-[Next steps: User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)
+Next steps: [User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)
 
 
