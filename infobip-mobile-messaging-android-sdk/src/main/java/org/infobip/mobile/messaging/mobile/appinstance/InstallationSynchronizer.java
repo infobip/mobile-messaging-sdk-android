@@ -157,7 +157,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(), MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
                 }
             }
         }
@@ -195,10 +195,14 @@ public class InstallationSynchronizer {
                 MobileMessagingLogger.v("UPDATE INSTALLATION <<<");
 
                 updateInstallationReported(installation, myDevice);
-                broadcaster.installationUpdated(installation);
+                Installation installationToReturn = installation;
+                if (myDevice) {
+                    installationToReturn = mobileMessagingCore.getInstallation(true);
+                }
+                broadcaster.installationUpdated(installationToReturn);
 
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(installation));
+                    actionListener.onResult(new Result<>(installationToReturn));
                 }
             }
 
@@ -212,7 +216,7 @@ public class InstallationSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(), MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
                 }
             }
         }
@@ -288,7 +292,7 @@ public class InstallationSynchronizer {
             @Override
             public void error(Throwable error) {
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(), MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
                 }
                 MobileMessagingLogger.v("GET INSTALLATION ERROR <<<", error);
             }

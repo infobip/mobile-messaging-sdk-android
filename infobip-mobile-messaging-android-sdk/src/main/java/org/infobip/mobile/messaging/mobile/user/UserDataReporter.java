@@ -55,7 +55,7 @@ public class UserDataReporter {
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
-                listener.onResult(new Result(InternalSdkError.NO_VALID_REGISTRATION.getError()));
+                listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
             }
             return;
         }
@@ -63,7 +63,7 @@ public class UserDataReporter {
         if (!user.hasDataToReport()) {
             MobileMessagingLogger.w("Attempt to save empty user data, will do nothing");
             if (listener != null) {
-                listener.onResult(new Result(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
+                listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
             }
             return;
         }

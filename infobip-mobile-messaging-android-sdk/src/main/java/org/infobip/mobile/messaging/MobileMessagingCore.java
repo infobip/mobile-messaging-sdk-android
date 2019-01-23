@@ -871,6 +871,14 @@ public class MobileMessagingCore
 
     @Override
     public Installation getInstallation() {
+        return getInstallation(false);
+    }
+
+    public Installation getInstallation(boolean restrictData) {
+        boolean reportEnabled = false;
+        if (restrictData) {
+            reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
+        }
         Map<String, CustomAttributeValue> customAttsMap = new HashMap<>();
         String customAttributes = getCustomAttributes();
         if (customAttributes != null) {
@@ -882,16 +890,16 @@ public class MobileMessagingCore
                 isDisplayNotificationEnabled(),
                 isGeofencingActivated(),
                 SoftwareInformation.getSDKVersion(),
-                SoftwareInformation.getAppVersion(context),
+                reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
                 Platform.os,
-                SystemInformation.getAndroidSystemVersion(),
-                DeviceInformation.getDeviceManufacturer(),
-                DeviceInformation.getDeviceModel(),
-                DeviceInformation.isDeviceSecure(context),
-                SystemInformation.getAndroidSystemLanguage(),
-                DeviceInformation.getDeviceTimeZoneOffset(),
+                reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
+                reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
+                reportEnabled ? DeviceInformation.getDeviceModel() : "",
+                reportEnabled && DeviceInformation.isDeviceSecure(context),
+                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "",
+                reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "",
                 getApplicationUserId(),
-                DeviceInformation.getDeviceModel(),
+                reportEnabled ? DeviceInformation.getDeviceModel() : "",
                 isPrimaryDevice(),
                 Platform.usedPushServiceType,
                 getCloudToken(),

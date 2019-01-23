@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.mobile.instance;
 import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Installation;
+import org.infobip.mobile.messaging.InstallationMapper;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
@@ -15,6 +16,8 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -64,15 +67,22 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldCreateInstallationOnServer() {
+    public void shouldCreateInstallationOnServer() throws JSONException {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
         installationSynchronizer.sync(actionListener);
 
+        JSONObject bla = new JSONObject();
+        bla.put("isPushRegistrationEnabled", false);
+
+        InstallationMapper.fromJson(bla.toString());
+
         verifySuccess();
         verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
         verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
+
+
     }
 
     @Test

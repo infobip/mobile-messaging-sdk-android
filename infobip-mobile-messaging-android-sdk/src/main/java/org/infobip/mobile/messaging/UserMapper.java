@@ -172,7 +172,7 @@ public class UserMapper {
     }
 
     @NonNull
-    static Map<String, Object> customAttsToBackend(@NonNull Map<String, CustomAttributeValue> customAttributes) {
+    public static Map<String, Object> customAttsToBackend(@NonNull Map<String, CustomAttributeValue> customAttributes) {
         Map<String, Object> customAttributesToReport = new HashMap<>(customAttributes.size());
         for (Map.Entry<String, CustomAttributeValue> entry : customAttributes.entrySet()) {
             customAttributesToReport.put(entry.getKey(), customValueToBackend(entry.getValue()));
@@ -194,7 +194,7 @@ public class UserMapper {
         }
     }
 
-    static Map<String, CustomAttributeValue> customAttsFromBackend(Map<String, Object> customAttributes) {
+    public static Map<String, CustomAttributeValue> customAttsFromBackend(Map<String, Object> customAttributes) {
         Map<String, CustomAttributeValue> customUserDataValueMap = new HashMap<>();
         if (customAttributes == null) {
             return customUserDataValueMap;
@@ -306,7 +306,7 @@ public class UserMapper {
                 customAtts);
     }
 
-    private static User.Gender genderFromBackend(String gender) {
+    public static User.Gender genderFromBackend(String gender) {
         try {
             return gender != null ? User.Gender.valueOf(gender) : null;
         } catch (Exception e) {
