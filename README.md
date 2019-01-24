@@ -3,7 +3,7 @@
 [![Download](https://api.bintray.com/packages/infobip/maven/infobip-mobile-messaging-android-sdk/images/download.svg)](https://bintray.com/infobip/maven/infobip-mobile-messaging-android-sdk/_latestVersion)
 [![License](https://img.shields.io/github/license/infobip/mobile-messaging-sdk-android.svg?label=License)](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE)
 
-Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of [Infobip IP Messaging Platform](https://portal.infobip.com/push/). The document describes library integration steps. Additional information can be found in our [wiki](https://github.com/infobip/mobile-messaging-sdk-android/wiki).
+Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of <a href="https://www.infobip.com/en/products/mobile-app-messaging" target="_blank">Infobip Mobile Apps Messaging</a>. The document describes library integration steps. Additional information can be found in our <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki" target="_blank">Wiki</a>.
 
 ## Requirements
 
@@ -12,68 +12,59 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 
 ## Quick start guide
 
-This guide is designed to get you up and running with Mobile Messaging SDK integrated into your Android application.
-
-1. Prepare your [Cloud Messaging credentials](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging) to get Sender ID and Server API Key.
-2. Prepare your Infobip account (https://portal.infobip.com/push/) to get your Application Code:
-    1. [Create new application](https://dev.infobip.com/v1/docs/push-introduction-create-app) on Infobip Push portal.
-    2. Navigate to your Application where you will get the Application Code.
-    3. Mark the "Available on Android" checkbox.
-    4. Insert previously obtained GCM Server Key (Server API Key).
-
-    <center><img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/GCMAppSetup.png" alt="CUP Settings"/></center>
-3. Create new application in Android Studio
-    * You can find more info on this link http://developer.android.com/training/basics/firstapp/creating-project.html
-    
-4. Add dependencies to app/build.gradle
-
+1. Make sure to [setup application at Infobip portal](https://dev.infobip.com/push-messaging), if you haven't already.
+2. Add dependencies to `app/build.gradle`
     ```groovy
     dependencies {
         ...
-        compile ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:2.0.0@aar') {
-            transitive = true;
+        implementation ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:2.0.0@aar') {
+            transitive = true
         }
     }
     ```
-
-5. 1) Add GCM Sender ID, obtained in step 1 to values/strings.xml (can skip this if you're using [Google Services Gradle Plugin](https://developers.google.com/android/guides/google-services-plugin) - google-services.json)
-   2) Add Infobip Application Code, obtained in step 2, to values/strings.xml resource file
+    <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGGradle.png?raw=true" alt="Gradle dependencies"/>
+3. Add <a href="https://dev.infobip.com/push-messaging/firebase-cloud-messaging-fcm-server-api-key-setup" target="_blank">`Firebase Sender ID`</a> and Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
     ```groovy
     <resources>
-        <string name="google_app_id">YOUR GCM SENDER</string>
-        <string name="infobip_application_code">YOUR APPLICATION CODE</string>
+        <string name="google_app_id">SENDER ID</string>
+        <string name="infobip_application_code">APPLICATION CODE</string>
         ...
     </resources>
     ```
-
-6. Add code to MainActivity#onCreate
+    <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGStrings.png?raw=true" alt="String resources"/>
+    Do not add `google_app_id` if you're using [Google Services Gradle Plugin](https://developers.google.com/android/guides/google-services-plugin) and `google-services.json`.
+4. Add code to `MainActivity#onCreate`
 
     ```java
-    import android.os.Bundle;
-    import android.support.v7.app.AppCompatActivity;
-    import org.infobip.mobile.messaging.MobileMessaging;
-     
     public class MainActivity extends AppCompatActivity {
-     
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            
-            ...
-     
-            new MobileMessaging.Builder(getApplication())
-                            .build();
+            setContentView(R.layout.activity_main);
+
+            new MobileMessaging
+                    .Builder(getApplication())
+                    .build();
         }
-         
-        ...
     }
     ```
-    
-> ### Notice
+    <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGActivity.png?raw=true" alt="String resources"/>
+
+<br>
+<center>**NEXT STEPS: [User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)**</center>
+<br>
+
+> ### Notes
 > 1. All required manifest components are merged to application manifest automatically by manifest merger. Please include [push-related components](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Android-Manifest-components#push-notifications) to manifest manually if manifest merger was disabled.
 > 2. MobileMessaging library has geofencing service disabled by default. In order to opt-in the service, follow [this guide](https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API).
 > 3. Keep in mind that some proprietary android versions may restrict network traffic for your app. It may in turn affect delivery of push notifications.
 
-Next steps: [User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)
+<br>
+
+| If you have any questions or suggestions, feel free to send an email to support@infobip.com or create an <a href="https://github.com/infobip/mobile-messaging-sdk-android/issues" target="_blank">issue</a>. |
+|---|
+
+
 
 
