@@ -52,7 +52,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGActivity.png?raw=true" alt="String resources"/>
 
 <br>
-<center>**NEXT STEPS: [User profile](https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile)**</center>
+<p align="center"><b>NEXT STEPS: <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile">User profile</a></b></p>
 <br>
 
 > ### Notes
