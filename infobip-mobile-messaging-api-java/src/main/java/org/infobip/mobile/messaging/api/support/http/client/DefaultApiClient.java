@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging.api.support.http.client;
 
-import org.apache.commons.codec.binary.Base64;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiException;
@@ -8,6 +7,7 @@ import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.support.util.Base64Encoder;
 import org.infobip.mobile.messaging.api.support.util.StreamUtils;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
 
@@ -115,7 +115,7 @@ public class DefaultApiClient implements ApiClient {
             if (StringUtils.isNotBlank(request.apiKey)) {
                 urlConnection.setRequestProperty("Authorization", "App " + request.apiKey);
             } else if (request.credentials != null && StringUtils.isNotBlank(request.credentials.getLeft()) && StringUtils.isNotBlank(request.credentials.getRight())) {
-                String basicApiKey = new String(Base64.encodeBase64((request.credentials.getLeft() + ":" + request.credentials.getRight()).getBytes()));
+                String basicApiKey = Base64Encoder.encode(request.credentials.getLeft() + ":" + request.credentials.getRight());
                 urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
             }
             urlConnection.setRequestProperty("Accept", "application/json");

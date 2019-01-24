@@ -20,7 +20,6 @@ shadowJar {
     classifier = 'shaded'
     zip64 = true
     relocate('com.google.gson', 'org.infobip.mobile.messaging.api.shaded.google.gson')
-    relocate('org.apache.commons.codec', 'org.infobip.mobile.messaging.api.shaded.apache.commons.codec')
     manifest {
         attributes("Implementation-Title": "Gradle", "Implementation-Version": version)
     }
@@ -81,7 +80,6 @@ idea {
 
 dependencies {
     compile "com.google.code.gson:gson:2.8.2"
-    compile "commons-codec:commons-codec:1.10"
 
     provided "org.projectlombok:lombok:1.16.10"
 
