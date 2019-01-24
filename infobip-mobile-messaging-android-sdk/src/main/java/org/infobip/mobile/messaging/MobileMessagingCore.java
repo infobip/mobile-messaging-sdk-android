@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceAtts;
+import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
@@ -1208,7 +1209,28 @@ public class MobileMessagingCore
             return;
         }
 
+        if (forceDepersonalize) {
+            depersonalizeCurrentInstallation();
+        }
+        saveUnreportedPersonalizeFields(userIdentity, (User) userAttributes);
         personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
+    }
+
+    private void saveUnreportedPersonalizeFields(@NonNull UserIdentity userIdentity, @Nullable User userAttributes) {
+        User user = userAttributes;
+        if (user == null) {
+            user = new User();
+        }
+        if (userIdentity.containsField(UserAtts.emails)) {
+            user.setEmails(userIdentity.getEmails());
+        }
+        if (userIdentity.containsField(UserAtts.phones)) {
+            user.setPhones(userIdentity.getPhones());
+        }
+        if (userIdentity.containsField(UserAtts.externalUserId)) {
+            user.setExternalUserId(userIdentity.getExternalUserId());
+        }
+        saveUnreportedUserData(user);
     }
 
     private boolean areInstallationsExpired() {

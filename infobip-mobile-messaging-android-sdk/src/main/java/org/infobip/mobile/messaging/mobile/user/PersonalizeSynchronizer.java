@@ -64,8 +64,8 @@ public class PersonalizeSynchronizer {
         }
 
         final UserPersonalizeBody userPersonalizeBody = new UserPersonalizeBody();
-        userPersonalizeBody.setUserIdentity(userAttributes.getMap());
-        if (userAttributes.hasDataToReport()) {
+        userPersonalizeBody.setUserIdentity(userIdentity.getMap());
+        if (userAttributes != null && userAttributes.hasDataToReport()) {
             userPersonalizeBody.setUserAttributes(userAttributes.getMap());
         }
 

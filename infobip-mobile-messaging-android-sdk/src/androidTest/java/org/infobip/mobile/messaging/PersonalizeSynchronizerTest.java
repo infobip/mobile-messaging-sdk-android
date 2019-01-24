@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -10,7 +11,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.HashMap;
+import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,13 +28,61 @@ import static org.mockito.Mockito.verify;
 public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
     private MobileMessaging.ResultListener<SuccessPending> successPendingResultListener = mock(MobileMessaging.ResultListener.class);
+    private MobileMessaging.ResultListener<User> userResultListener = mock(MobileMessaging.ResultListener.class);
     private ArgumentCaptor<Result> captor = ArgumentCaptor.forClass(Result.class);
+    private ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
+    }
+
+    @Test
+    public void test_personalize_with_force_depersonalize_completed() {
+        //given
+        givenUserData();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setExternalUserId("extId");
+        userIdentity.setPhones(CollectionUtils.setOf("111", "222"));
+        userIdentity.setEmails(CollectionUtils.setOf("email1@mail.com", "email2@mail.com"));
+
+        //when
+        mobileMessaging.personalize(userIdentity, null, true, userResultListener);
+
+        //then
+        verify(broadcaster, after(300).atLeastOnce()).personalized(userCaptor.capture());
+        User returnedUser = userCaptor.getValue();
+        assertEquals(userIdentity.getEmails(), returnedUser.getEmails());
+        assertEquals(userIdentity.getPhones(), returnedUser.getPhones());
+        assertEquals(userIdentity.getExternalUserId(), returnedUser.getExternalUserId());
+        assertNull(returnedUser.getFirstName());
+        assertNull(returnedUser.getCustomAttributes());
+        verifyNeededPrefsCleanUp(false);
+    }
+
+    @Test
+    public void test_personalize_without_force_depersonalize_completed() {
+        //given
+        givenUserData();
+
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setExternalUserId("extId");
+        userIdentity.setPhones(CollectionUtils.setOf("111", "222"));
+        userIdentity.setEmails(CollectionUtils.setOf("email1@mail.com", "email2@mail.com"));
+
+        //when
+        mobileMessaging.personalize(userIdentity, null, false, userResultListener);
+
+        //then
+        verify(broadcaster, after(300).atLeastOnce()).personalized(userCaptor.capture());
+        User returnedUser = userCaptor.getValue();
+        assertEquals(userIdentity.getEmails(), returnedUser.getEmails());
+        assertEquals(userIdentity.getPhones(), returnedUser.getPhones());
+        assertEquals(userIdentity.getExternalUserId(), returnedUser.getExternalUserId());
+        assertEquals("John", returnedUser.getFirstName());
+        assertEquals(new Date(1999, 1, 1), returnedUser.getBirthday());
     }
 
     @Test
@@ -117,15 +166,15 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     private void givenUserData() {
         User user = new User();
         user.setFirstName("John");
+        user.setBirthday(new Date(1999, 1, 1));
         user.setCustomAttribute("someKey", new CustomAttributeValue("someValue"));
-        HashMap<String, Object> customAttributes = new HashMap<>();
-        customAttributes.put("key", "value");
         SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, user.toString());
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, user.toString());
-        PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(customAttributes));
+        String savedUser = UserMapper.toJson(user);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, savedUser);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, savedUser);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(user.getCustomAttributes()));
+        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, new JsonSerializer().serialize(user.getCustomAttributes()));
         PreferenceHelper.saveString(context, MobileMessagingProperty.APP_USER_ID, "appUserId");
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED, true);
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, systemData.toString());
@@ -135,27 +184,20 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(1, MobileMessaging.getInstance(context).getMessageStore().findAll(context).size());
     }
 
-    private void verifyNeededPrefsCleanUp() {
-        assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
+    private void verifyNeededPrefsCleanUp(boolean noUserData) {
+        if (noUserData) {
+            assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
+        }
         assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
         assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES));
         assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES));
         assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.APP_USER_ID));
         assertFalse(PreferenceHelper.contains(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED));
-        assertFalse(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA).isEmpty());
         assertEquals(0, PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS).length);
         assertEquals(0, MobileMessaging.getInstance(context).getMessageStore().findAll(context).size());
     }
 
-    private void verifyPrefs() {
-        assertNotNull(PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA));
-        assertNotNull(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_USER_DATA));
-        assertNotNull(PreferenceHelper.findString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES));
-        assertNotNull(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES));
-        assertNotNull(PreferenceHelper.findString(context, MobileMessagingProperty.APP_USER_ID));
-        assertTrue(PreferenceHelper.contains(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED));
-        assertFalse(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA).isEmpty());
-        assertEquals(1, PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS).length);
-        assertEquals(1, MobileMessaging.getInstance(context).getMessageStore().findAll(context).size());
+    private void verifyNeededPrefsCleanUp() {
+        verifyNeededPrefsCleanUp(true);
     }
 }
