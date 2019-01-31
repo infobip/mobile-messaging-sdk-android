@@ -33,6 +33,8 @@ public abstract class MAsyncTask<IN, OUT> {
         add(ApiErrorCode.INVALID_BIRTHDATE_FORMAT);
         add(ApiErrorCode.USER_MERGE_INTERRUPTED);
         add(ApiErrorCode.USER_DATA_RESTRICTED);
+        add(ApiErrorCode.PERSONALIZATION_IMPOSSIBLE);
+        add(ApiErrorCode.REQUEST_FORMAT_INVALID);
     }};
 
     @SuppressLint("StaticFieldLeak")

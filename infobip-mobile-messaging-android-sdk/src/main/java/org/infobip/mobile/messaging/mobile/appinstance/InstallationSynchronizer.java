@@ -105,6 +105,7 @@ public class InstallationSynchronizer {
         }
 
         if (mobileMessagingCore.isRegistrationUnavailable()) {
+            installation.setServiceType();
             if (cloudTokenPresentAndUnreported) createInstance(installation, actionListener);
         } else {
             if (installation.hasDataToReport()) patch(installation, actionListener);
@@ -150,8 +151,8 @@ public class InstallationSynchronizer {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.v("CREATE INSTALLATION ERROR <<<", error);
-                setCloudTokenReported(false);
 
+                setCloudTokenReported(false);
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
@@ -209,8 +210,8 @@ public class InstallationSynchronizer {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION ERROR <<<", error);
-                setCloudTokenReported(false);
 
+                setCloudTokenReported(false);
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));

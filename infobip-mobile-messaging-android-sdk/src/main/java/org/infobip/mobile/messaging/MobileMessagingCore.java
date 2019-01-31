@@ -387,14 +387,14 @@ public class MobileMessagingCore
         }
 
         if (pushRegId.equals(getPushRegistrationId())) {
-            depersonalizeCurrentInstallation();
+            depersonalizeCurrentInstallation(false);
             return;
         }
 
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, true);
     }
 
-    private void depersonalizeCurrentInstallation() {
+    private void depersonalizeCurrentInstallation(boolean forceDepersonalize) {
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
@@ -407,7 +407,9 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.APP_USER_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
 
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, true);
+        if (!forceDepersonalize) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, true);
+        }
         if (messageStore != null) {
             messageStore.deleteAll(context);
         }
@@ -1127,6 +1129,7 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
         PreferenceHelper.remove(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED);
     }
 
     private void resetCloudToken() {
@@ -1210,27 +1213,25 @@ public class MobileMessagingCore
         }
 
         if (forceDepersonalize) {
-            depersonalizeCurrentInstallation();
+            depersonalizeCurrentInstallation(true);
         }
-        saveUnreportedPersonalizeFields(userIdentity, (User) userAttributes);
-        personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
-    }
 
-    private void saveUnreportedPersonalizeFields(@NonNull UserIdentity userIdentity, @Nullable User userAttributes) {
-        User user = userAttributes;
-        if (user == null) {
-            user = new User();
+        if (!userIdentity.hasDataToReport()) {
+            MobileMessagingLogger.w("Attempt to save empty user identity, will do nothing");
+            if (listener != null) {
+                listener.onResult(new Result<>(getUser(), InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
+            }
+            return;
         }
-        if (userIdentity.containsField(UserAtts.emails)) {
-            user.setEmails(userIdentity.getEmails());
+
+        if (userAttributes != null && userAttributes.hasDataToReport()) {
+            // sanitizing user atts map if the object was initialized as a User, not UserAttributes
+            if (userAttributes.containsField(UserAtts.phones)) userAttributes.getMap().remove(UserAtts.phones);
+            if (userAttributes.containsField(UserAtts.emails)) userAttributes.getMap().remove(UserAtts.emails);
+            if (userAttributes.containsField(UserAtts.externalUserId)) userAttributes.getMap().remove(UserAtts.externalUserId);
         }
-        if (userIdentity.containsField(UserAtts.phones)) {
-            user.setPhones(userIdentity.getPhones());
-        }
-        if (userIdentity.containsField(UserAtts.externalUserId)) {
-            user.setExternalUserId(userIdentity.getExternalUserId());
-        }
-        saveUnreportedUserData(user);
+
+        personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
     }
 
     private boolean areInstallationsExpired() {

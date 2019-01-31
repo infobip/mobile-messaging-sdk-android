@@ -1,6 +1,8 @@
 package org.infobip.mobile.messaging;
 
 
+import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
@@ -19,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
@@ -40,7 +43,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_personalize_with_force_depersonalize_completed() {
+    public void test_personalize_without_user_atts_with_force_depersonalize_completed() {
         //given
         givenUserData();
         UserIdentity userIdentity = new UserIdentity();
@@ -59,6 +62,44 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(userIdentity.getExternalUserId(), returnedUser.getExternalUserId());
         assertNull(returnedUser.getFirstName());
         assertNull(returnedUser.getCustomAttributes());
+        assertNull(returnedUser.getTags());
+        assertNull(returnedUser.getGender());
+        assertNull(returnedUser.getBirthday());
+        assertNull(returnedUser.getFirstName());
+        assertNull(returnedUser.getMiddleName());
+        verifyNeededPrefsCleanUp(false);
+    }
+
+    @Test
+    public void test_personalize_with_user_atts_with_force_depersonalize_completed() {
+        //given
+        givenUserData();
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setExternalUserId("extId");
+        userIdentity.setPhones(CollectionUtils.setOf("111", "222"));
+        userIdentity.setEmails(CollectionUtils.setOf("email1@mail.com", "email2@mail.com"));
+        UserAttributes userAttributes = new UserAttributes();
+        userAttributes.setFirstName("Darth");
+        userAttributes.setLastName("Vader");
+        userAttributes.setMiddleName("Beloved");
+        userAttributes.setGender(UserAttributes.Gender.Male);
+
+        //when
+        mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
+
+        //then
+        verify(broadcaster, after(300).atLeastOnce()).personalized(userCaptor.capture());
+        User returnedUser = userCaptor.getValue();
+        assertEquals(userIdentity.getEmails(), returnedUser.getEmails());
+        assertEquals(userIdentity.getPhones(), returnedUser.getPhones());
+        assertEquals(userIdentity.getExternalUserId(), returnedUser.getExternalUserId());
+        assertEquals(userAttributes.getFirstName(), returnedUser.getFirstName());
+        assertEquals(userAttributes.getLastName(), returnedUser.getLastName());
+        assertEquals(userAttributes.getMiddleName(), returnedUser.getMiddleName());
+        assertEquals(userAttributes.getGender(), returnedUser.getGender());
+        assertNull(returnedUser.getCustomAttributes());
+        assertNull(returnedUser.getTags());
+        assertNull(returnedUser.getBirthday());
         verifyNeededPrefsCleanUp(false);
     }
 
@@ -96,6 +137,24 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         //then
         verify(broadcaster, after(300).atLeastOnce()).depersonalized();
         assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
+        verifyNeededPrefsCleanUp();
+    }
+
+    @Test
+    public void test_personalize_with_force_depersonalize_api_error() {
+
+        //given
+        doThrow(new ApiIOException(ApiErrorCode.PERSONALIZATION_IMPOSSIBLE, "Personalize impossible"))
+                .when(mobileApiAppInstance).personalize(anyString(), anyBoolean(), any(UserPersonalizeBody.class));
+
+        //when
+        UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setExternalUserId("extUserId");
+        mobileMessaging.personalize(userIdentity, new UserAttributes(), true);
+
+        //then
+        verify(broadcaster, after(300).never()).personalized(any(User.class));
+        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
         verifyNeededPrefsCleanUp();
     }
 

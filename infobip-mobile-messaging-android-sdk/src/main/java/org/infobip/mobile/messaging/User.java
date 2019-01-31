@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 
@@ -21,6 +22,36 @@ public class User extends UserAttributes {
 
     public User() {
 
+    }
+
+    public User(@Nullable UserAttributes userAttributes) {
+        setUserAtts(userAttributes);
+    }
+
+    public User(UserIdentity userIdentity) {
+        setUserIdentity(userIdentity);
+    }
+
+    public User(UserIdentity userIdentity, UserAttributes userAttributes) {
+        setUserIdentity(userIdentity);
+        setUserAtts(userAttributes);
+    }
+
+    private void setUserIdentity(UserIdentity userIdentity) {
+        if (userIdentity.containsField(UserAtts.externalUserId)) setExternalUserId(userIdentity.getExternalUserId());
+        if (userIdentity.containsField(UserAtts.emails)) setEmails(userIdentity.getEmails());
+        if (userIdentity.containsField(UserAtts.phones)) setPhones(userIdentity.getPhones());
+    }
+
+    private void setUserAtts(@Nullable UserAttributes userAttributes) {
+        if (userAttributes == null) return;
+
+        if (userAttributes.containsField(UserAtts.birthday)) setBirthdayString(userAttributes.getBirthdayString());
+        if (userAttributes.containsField(UserAtts.firstName)) setFirstName(userAttributes.getFirstName());
+        if (userAttributes.containsField(UserAtts.lastName)) setLastName(userAttributes.getLastName());
+        if (userAttributes.containsField(UserAtts.middleName)) setMiddleName(userAttributes.getMiddleName());
+        if (userAttributes.containsField(UserAtts.gender)) setGender(userAttributes.getGender());
+        if (userAttributes.containsField(UserAtts.tags)) setTags(userAttributes.getTags());
     }
 
     public User(String externalUserId,

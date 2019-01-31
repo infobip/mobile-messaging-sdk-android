@@ -19,7 +19,9 @@ public class ApiErrorCode {
     public static final String INVALID_EMAIL_FORMAT = "17";
     public static final String INVALID_BIRTHDATE_FORMAT = "18";
 
-    public static final String USER_MERGE_INTERRUPTED = "USER_MERGE_INTERRUPTED"; //TODO change/agree on unified error contract
-    public static final String USER_DATA_RESTRICTED = "USER_DATA_RESTRICTED"; //TODO change/agree on unified error contract
+    public static final String USER_MERGE_INTERRUPTED = "USER_MERGE_INTERRUPTED";
+    public static final String USER_DATA_RESTRICTED = "USER_DATA_RESTRICTED";
+    public static final String PERSONALIZATION_IMPOSSIBLE = "PERSONALIZATION_IMPOSSIBLE";
+    public static final String REQUEST_FORMAT_INVALID = "REQUEST_FORMAT_INVALID";
     //TODO revise all of these
 }

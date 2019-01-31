@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -57,12 +58,6 @@ public class PersonalizeSynchronizer {
             return;
         }
 
-        if (userIdentity == null || !userIdentity.hasDataToReport()) {
-            MobileMessagingLogger.w("Attempt to save empty user identity, will do nothing");
-            listener.onResult(new Result<>(mobileMessagingCore.getUser(), InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
-            return;
-        }
-
         final UserPersonalizeBody userPersonalizeBody = new UserPersonalizeBody();
         userPersonalizeBody.setUserIdentity(userIdentity.getMap());
         if (userAttributes != null && userAttributes.hasDataToReport()) {
@@ -81,9 +76,9 @@ public class PersonalizeSynchronizer {
             @Override
             public void after(Void aVoid) {
                 MobileMessagingLogger.v("PERSONALIZE <<<");
-                User userToReturn = mobileMessagingCore.getUser();
+                mobileMessagingCore.setUserDataReported(new User(userIdentity, userAttributes), true);
 
-                mobileMessagingCore.setUserDataReported(userToReturn, true);
+                User userToReturn = mobileMessagingCore.getUser();
                 broadcaster.personalized(userToReturn);
 
                 if (listener != null) {
@@ -95,12 +90,19 @@ public class PersonalizeSynchronizer {
             public void error(Throwable error) {
                 MobileMessagingLogger.v("PERSONALIZE ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+
+                broadcaster.error(mobileMessagingError);
+
                 if (listener != null) {
                     listener.onResult(new Result<>(mobileMessagingCore.getUser(), mobileMessagingError));
                 }
-                broadcaster.error(mobileMessagingError);
+
+                if (error instanceof BackendInvalidParameterException) {
+                    mobileMessagingCore.setUserDataReportedWithError();
+                }
             }
-        }.retryWith(policy)
+        }
+                .retryWith(policy)
                 .execute(executor, userPersonalizeBody);
     }
 
