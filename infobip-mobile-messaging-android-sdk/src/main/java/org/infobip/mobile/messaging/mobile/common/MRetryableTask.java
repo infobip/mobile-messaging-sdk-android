@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  * @since 23/07/2017.
  */
 
-public abstract class MRetryableTask<IN, OUT> {
+public abstract class MRetryableTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -34,47 +34,6 @@ public abstract class MRetryableTask<IN, OUT> {
                 this.retryPolicy = retryPolicy;
             }
         }
-    }
-
-    /**
-     * Executed on UI thread before background processing.
-     */
-    public void before() {
-    }
-
-    /**
-     * Main background work should be done in this method.
-     * @param ins input arguments
-     * @return result
-     */
-    public abstract OUT run(IN ins[]);
-
-    /**
-     * Executed on UI thread after successful processing.
-     * Not executed in case of error.
-     *
-     * @param out result of background operation.
-     */
-    public void after(OUT out) {
-
-    }
-
-    /**
-     * Executed after all retries were exhausted or no more retries planned
-     *
-     * @param error final error
-     */
-    public void error(Throwable error) {
-
-    }
-
-    /**
-     * Executed after all retries were exhausted or no more retries planned
-     * @param ins original input arguments
-     * @param error final error
-     */
-    public void error(IN ins[], Throwable error) {
-
     }
 
     /**
@@ -114,8 +73,18 @@ public abstract class MRetryableTask<IN, OUT> {
             }
 
             @Override
+            public boolean shouldCancel() {
+                return MRetryableTask.this.shouldCancel();
+            }
+
+            @Override
             public OUT run(IN[] ins) {
                 return MRetryableTask.this.run(ins);
+            }
+
+            @Override
+            public void afterBackground(OUT out) {
+                MRetryableTask.this.afterBackground(out);
             }
 
             @Override
@@ -139,6 +108,11 @@ public abstract class MRetryableTask<IN, OUT> {
                         MRetryableTask.this.execute();
                     }
                 }, TimeUnit.SECONDS.toMillis(executionContext.attempts * executionContext.attempts * executionContext.retryPolicy.getBackoffMultiplier()));
+            }
+
+            @Override
+            public void cancelled(IN[] ins) {
+                MRetryableTask.this.cancelled(ins);
             }
         };
 

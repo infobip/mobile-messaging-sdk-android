@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import java.util.concurrent.Executor;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 
 /**
@@ -25,26 +26,24 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
             runnable.run();
         }
     };
-    private MRetryableTaskTester tester;
-
-    interface MRetryableTaskTester {
-        void before();
-        String run(String s[]);
-        void after(String result);
-        void error(Throwable error);
-        void error(String s[], Throwable error);
-    }
+    private IMAsyncTask<String, String> tester;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        tester = Mockito.mock(MRetryableTaskTester.class);
+        //noinspection unchecked
+        tester = Mockito.mock(IMAsyncTask.class);
         retryableTask = new MRetryableTask<String, String>() {
 
             @Override
             public void before() {
                 tester.before();
+            }
+
+            @Override
+            public boolean shouldCancel() {
+                return tester.shouldCancel();
             }
 
             @Override
@@ -58,6 +57,11 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
             }
 
             @Override
+            public void afterBackground(String s) {
+                tester.afterBackground(s);
+            }
+
+            @Override
             public void error(Throwable error) {
                 tester.error(error);
             }
@@ -65,6 +69,11 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
             @Override
             public void error(String[] strings, Throwable error) {
                 tester.error(strings, error);
+            }
+
+            @Override
+            public void cancelled(String[] strings) {
+                tester.cancelled(strings);
             }
         };
     }
@@ -179,6 +188,25 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void shouldExecuteAfterBackgroundCallbackOnce() {
+
+        // Given
+        MRetryPolicy givenRetryPolicy = new MRetryPolicy.Builder()
+                .withMaxRetries(3)
+                .withBackoffMultiplier(0)
+                .build();
+
+        // When
+        retryableTask
+                .retryWith(givenRetryPolicy)
+                .execute(executor);
+
+        // Then
+        Mockito.verify(tester, Mockito.after(100).times(1))
+                .afterBackground(Mockito.anyString());
+    }
+
+    @Test
     public void shouldExecuteErrorOnce() {
 
         // Given
@@ -223,5 +251,29 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
 
         // Then
         Mockito.verify(tester, Mockito.after(100).times(1)).run(any(String[].class));
+    }
+
+    @Test
+    public void shouldBeAbleToCancelExecution() {
+        // Given
+        Mockito.when(tester.shouldCancel()).thenReturn(true);
+        MRetryPolicy givenRetryPolicy = new MRetryPolicy.Builder()
+                .withMaxRetries(3)
+                .withBackoffMultiplier(0)
+                .build();
+
+        // When
+        retryableTask
+                .retryWith(givenRetryPolicy)
+                .execute(executor);
+
+        // Then
+        Mockito.verify(tester, Mockito.after(100).times(1)).before();
+        Mockito.verify(tester, Mockito.times(1)).shouldCancel();
+        Mockito.verify(tester, Mockito.times(1)).cancelled(any(String[].class));
+        Mockito.verify(tester, Mockito.never()).run(any(String[].class));
+        Mockito.verify(tester, Mockito.never()).after(anyString());
+        Mockito.verify(tester, Mockito.never()).error(any(Throwable.class));
+        Mockito.verify(tester, Mockito.never()).error(any(String[].class), any(Throwable.class));
     }
 }

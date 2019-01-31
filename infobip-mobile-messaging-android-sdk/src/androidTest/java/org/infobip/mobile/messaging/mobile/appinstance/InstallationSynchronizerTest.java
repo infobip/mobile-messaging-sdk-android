@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.mobile.instance;
+package org.infobip.mobile.messaging.mobile.appinstance;
 
 import android.support.annotation.NonNull;
 
@@ -8,9 +8,9 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
-import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -23,7 +23,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -81,8 +83,38 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         verifySuccess();
         verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
         verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
+    }
 
+    @Test
+    public void shouldNotCreateInstallationTwice() throws Exception {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
+        PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
+        // we need same single thread executor here as we have it in release configuration
+        // otherwise it will run on local thread and will have as many threads as we use to call `sync`
+        final InstallationSynchronizer installationSynchronizer = new InstallationSynchronizer(
+                context,
+                mobileMessagingCore,
+                mobileMessagingCore.getStats(),
+                Executors.newSingleThreadExecutor(),
+                broadcaster,
+                new RetryPolicyProvider(context),
+                mobileApiAppInstance);
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                installationSynchronizer.sync(actionListener);
+            }
+        };
+
+        Set<Thread> threads = CollectionUtils.setOf(new Thread(runnable), new Thread(runnable), new Thread(runnable));
+        for (Thread thread : threads) thread.start();
+        for (Thread thread : threads) thread.join();
+
+        verifySuccess(threads.size());
+        verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
+        verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
     }
 
     @Test
@@ -134,7 +166,11 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     private void verifySuccess() {
-        verify(actionListener, after(300).times(1)).onResult(captor.capture());
+        verifySuccess(1);
+    }
+
+    private void verifySuccess(int numOfListenerInvocations) {
+        verify(actionListener, after(300).times(numOfListenerInvocations)).onResult(captor.capture());
         Result result = captor.getValue();
         assertTrue(result.isSuccess());
         assertNotNull(result.getData());

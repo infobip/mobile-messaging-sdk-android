@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.mobile.appinstance;
 
 import android.content.Context;
+import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Installation;
@@ -75,7 +76,9 @@ public class InstallationSynchronizer {
         sync(null);
     }
 
-    public void sync(MobileMessaging.ResultListener<Installation> actionListener) {
+    @SuppressWarnings({"SameParameterValue", "WeakerAccess"})
+    @VisibleForTesting
+    void sync(MobileMessaging.ResultListener<Installation> actionListener) {
         PushInstallation installation = new PushInstallation();
 
         SystemData systemDataForReport = systemDataForReport();
@@ -122,6 +125,11 @@ public class InstallationSynchronizer {
         new MRetryableTask<Void, AppInstance>() {
 
             @Override
+            public boolean shouldCancel() {
+                return !mobileMessagingCore.isRegistrationUnavailable();
+            }
+
+            @Override
             public AppInstance run(Void[] voids) {
                 MobileMessagingLogger.v("CREATE INSTALLATION >>>", installation);
                 setCloudTokenReported(true);
@@ -129,7 +137,7 @@ public class InstallationSynchronizer {
             }
 
             @Override
-            public void after(AppInstance appInstance) {
+            public void afterBackground(AppInstance appInstance) {
                 MobileMessagingLogger.v("CREATE INSTALLATION <<<", appInstance);
 
                 if (appInstance == null) {
@@ -140,9 +148,12 @@ public class InstallationSynchronizer {
                 Installation installation = InstallationMapper.fromBackend(appInstance);
                 setPushRegistrationId(installation.getPushRegistrationId());
                 updateInstallationReported(installation, true);
+            }
 
+            @Override
+            public void after(AppInstance appInstance) {
+                Installation installation = InstallationMapper.fromBackend(appInstance);
                 broadcaster.registrationCreated(installation.getPushServiceToken(), installation.getPushRegistrationId());
-
                 if (actionListener != null) {
                     actionListener.onResult(new Result<>(installation));
                 }
@@ -159,6 +170,14 @@ public class InstallationSynchronizer {
 
                 if (actionListener != null) {
                     actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
+                }
+            }
+
+            @Override
+            public void cancelled(Void[] voids) {
+                MobileMessagingLogger.v("CREATE INSTALLATION CANCELLED <<<");
+                if (actionListener != null) {
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true)));
                 }
             }
         }

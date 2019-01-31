@@ -9,6 +9,7 @@ class ResultWrapper<IN, OUT> {
     IN inputs[];
     OUT result;
     Throwable error;
+    boolean cancelled;
 
     ResultWrapper(OUT result) {
         this.result = result;
@@ -17,5 +18,10 @@ class ResultWrapper<IN, OUT> {
     ResultWrapper(IN inputs[], Throwable error) {
         this.inputs = inputs;
         this.error = error;
+    }
+
+    ResultWrapper(IN inputs[], boolean cancelled) {
+        this.inputs = inputs;
+        this.cancelled = cancelled;
     }
 }

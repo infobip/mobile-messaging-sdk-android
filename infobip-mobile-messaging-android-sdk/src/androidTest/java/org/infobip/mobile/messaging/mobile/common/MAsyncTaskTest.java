@@ -34,21 +34,14 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
             runnable.run();
         }
     };
-    private MAsyncTaskTester tester;
-
-    interface MAsyncTaskTester {
-        void before();
-        String run(Object s[]);
-        void after(Object result);
-        void error(Throwable error);
-        void error(Object s[], Throwable error);
-    }
+    private IMAsyncTask<Object, Object> tester;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        tester = Mockito.mock(MAsyncTaskTester.class);
+        //noinspection unchecked
+        tester = Mockito.mock(IMAsyncTask.class);
         asyncTask = new MAsyncTask<Object, Object>() {
 
             @Override
@@ -57,8 +50,18 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
             }
 
             @Override
-            public String run(Object[] strings) {
+            public boolean shouldCancel() {
+                return tester.shouldCancel();
+            }
+
+            @Override
+            public Object run(Object[] strings) {
                 return tester.run(strings);
+            }
+
+            @Override
+            public void afterBackground(Object o) {
+                tester.afterBackground(o);
             }
 
             @Override
@@ -74,6 +77,11 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
             @Override
             public void error(Object[] objects, Throwable error) {
                 tester.error(objects, error);
+            }
+
+            @Override
+            public void cancelled(Object[] objects) {
+                tester.cancelled(objects);
             }
         };
     }
@@ -233,6 +241,39 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
         Mockito.verify(tester, Mockito.after(100).times(1))
                 .error(any(Object[].class), eqInvalidParamErrorWithContent(givenError, givenContent));
         Mockito.verify(tester, Mockito.never()).after(Mockito.any());
+    }
+
+    @Test
+    public void shouldExecuteAfterInBackground() {
+        // Given
+        String givenResult = "result";
+        Mockito.when(tester.run(any(String[].class)))
+                .thenReturn(givenResult);
+
+        // When
+        asyncTask.execute(executor);
+
+        // Then
+        Mockito.verify(tester, Mockito.after(100).times(1)).afterBackground(givenResult);
+    }
+
+    @Test
+    public void shouldBeAbleToCancelExecution() {
+        // Given
+        Mockito.when(tester.shouldCancel()).thenReturn(true);
+
+        // When
+        asyncTask.execute(executor);
+
+        // Then
+        Mockito.verify(tester, Mockito.after(100).times(1)).before();
+        Mockito.verify(tester, Mockito.times(1)).shouldCancel();
+        Mockito.verify(tester, Mockito.times(1)).cancelled(any(Object[].class));
+        Mockito.verify(tester, Mockito.never()).run(any(Object[].class));
+        Mockito.verify(tester, Mockito.never()).after(any(Object.class));
+        Mockito.verify(tester, Mockito.never()).afterBackground(any(Object.class));
+        Mockito.verify(tester, Mockito.never()).error(any(Throwable.class));
+        Mockito.verify(tester, Mockito.never()).error(any(Object[].class), any(Throwable.class));
     }
 
     // region private methods

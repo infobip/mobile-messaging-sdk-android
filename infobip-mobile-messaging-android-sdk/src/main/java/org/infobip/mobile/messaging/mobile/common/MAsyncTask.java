@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationException;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendCommunicationExceptionWithContent;
 import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
@@ -24,7 +25,7 @@ import java.util.concurrent.Executor;
  * @author sslavin
  * @since 23/07/2017.
  */
-public abstract class MAsyncTask<IN, OUT> {
+public abstract class MAsyncTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
 
     private final static Set<String> invalidParameterErrorCodes = new HashSet<String>() {{
         add(ApiErrorCode.INVALID_MSISDN_FORMAT);
@@ -47,7 +48,13 @@ public abstract class MAsyncTask<IN, OUT> {
         @Override
         protected ResultWrapper<IN, OUT> doInBackground(IN[] ins) {
             try {
-                return new ResultWrapper<>(run(ins));
+                if (shouldCancel()) {
+                    return new ResultWrapper<>(ins, true);
+                } else {
+                    OUT out = run(ins);
+                    afterBackground(out);
+                    return new ResultWrapper<>(out);
+                }
             } catch (Throwable error) {
                 return new ResultWrapper<>(ins, error);
             }
@@ -55,6 +62,12 @@ public abstract class MAsyncTask<IN, OUT> {
 
         @Override
         protected void onPostExecute(ResultWrapper<IN, OUT> resultWrapper) {
+            MobileMessagingLogger.v("Result wrapper: ", resultWrapper);
+            if (resultWrapper.cancelled) {
+                cancelled(resultWrapper.inputs);
+                return;
+            }
+
             if (resultWrapper.error == null) {
                 after(resultWrapper.result);
                 return;
@@ -65,50 +78,6 @@ public abstract class MAsyncTask<IN, OUT> {
             error(resultWrapper.inputs, error);
         }
     };
-
-    /**
-     * Executed on UI thread before background processing.
-     */
-    public void before() {
-    }
-
-    /**
-     * Executed in background thread.
-     * If there is any exception in background callback,
-     * it will be propagated to {@link MAsyncTask#error(Throwable)}.
-     *
-     * @param ins input parameters
-     * @return result of operation
-     */
-    public abstract OUT run(IN ins[]);
-
-    /**
-     * Executed on UI thread after successful processing.
-     * Not executed in case of error.
-     *
-     * @param out result of background operation.
-     */
-    public void after(OUT out) {
-    }
-
-    /**
-     * Executed on UI thread in case of error.
-     *
-     * @param error error that happened during background execution.
-     */
-    public void error(Throwable error) {
-
-    }
-
-    /**
-     * Executed on UI thread in case of error.
-     *
-     * @param ins   original input parameters.
-     * @param error error that happened during background execution.
-     */
-    public void error(IN ins[], Throwable error) {
-
-    }
 
     /**
      * Starts execution of background task
