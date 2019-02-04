@@ -35,6 +35,7 @@ public abstract class MAsyncTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
         add(ApiErrorCode.USER_MERGE_INTERRUPTED);
         add(ApiErrorCode.USER_DATA_RESTRICTED);
         add(ApiErrorCode.PERSONALIZATION_IMPOSSIBLE);
+        add(ApiErrorCode.AMBIGUOUS_PERSONALIZE_CANDIDATES);
         add(ApiErrorCode.REQUEST_FORMAT_INVALID);
     }};
 
