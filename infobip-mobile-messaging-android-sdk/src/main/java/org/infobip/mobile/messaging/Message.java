@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
@@ -44,7 +46,9 @@ public class Message implements Comparable<Message> {
     }
 
     public enum InAppStyle {
+        @SerializedName(value = "MODAL", alternate = "0")
         MODAL,
+        @SerializedName(value = "BANNER", alternate = "1")
         BANNER
     }
 

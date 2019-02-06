@@ -26,7 +26,8 @@ public class FirebaseMessageMapperTest extends TestCase {
                 "   'category':'category'," +
                 "   'vibrate':false," +
                 "   'silent':true," +
-                "   'contentUrl':'contentUrl'" +
+                "   'contentUrl':'contentUrl'," +
+                "   'inAppStyle':0" +
                 "}," +
                 "'custom': {" +
                 "   'key':'value'," +
@@ -61,6 +62,30 @@ public class FirebaseMessageMapperTest extends TestCase {
         assertEquals(true, message.getCustomPayload().optBoolean("key3"));
         assertEquals(123L, message.getSentTimestamp());
         assertEquals("{\"sendDateTime\":123,\"key\":\"value\"}", message.getInternalData());
+        assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
+    }
+
+    public void test_shouldMapInAppStyleStringInRemoteMessage() {
+
+        final String ibData = dqjson("{" +
+                "'messageId':'messageId'," +
+                "'text':'text'," +
+                "'notification': {" +
+                "   'inAppStyle':'BANNER'" +
+                "}" +
+                "}");
+
+        // workaround start (RemoteMessage is final, cannot mock)
+        Bundle bundle = new Bundle();
+        bundle.putString("org_ib_d", ibData);
+        RemoteMessage remoteMessage = new RemoteMessage(bundle);
+        // workaround end
+
+        Message message = new FirebaseMessageMapper().createMessage(remoteMessage);
+
+        assertEquals("messageId", message.getMessageId());
+        assertEquals("text", message.getBody());
+        assertEquals(Message.InAppStyle.BANNER, message.getInAppStyle());
     }
 
     private static String dqjson(String sqjson) {

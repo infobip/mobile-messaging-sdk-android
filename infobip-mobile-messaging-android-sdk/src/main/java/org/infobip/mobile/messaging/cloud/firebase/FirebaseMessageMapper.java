@@ -60,7 +60,7 @@ public class FirebaseMessageMapper {
 
         NotificationSettings notificationSettings = data.notification != null ? data.notification : new NotificationSettings();
         long sentDateTime = data.internal != null ? data.internal.optLong("sendDateTime", System.currentTimeMillis()) : System.currentTimeMillis();
-        boolean inApp = data.internal.optBoolean("inApp"); // deprecated
+        boolean inApp = data.internal != null && data.internal.optBoolean("inApp"); // deprecated
         Message.InAppStyle inAppStyle = null;
         if (data.notification.inAppStyle != null) {
             inAppStyle = data.notification.inAppStyle;
