@@ -121,7 +121,6 @@ public class DateTimeUtil {
 
     public static String getGMTTimeZoneOffset() {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
-        String timeZone = new SimpleDateFormat("Z", Locale.getDefault()).format(calendar.getTime());
-        return String.format("GMT%s:%s", timeZone.substring(0, 3), timeZone.substring(3, 5));
+        return new SimpleDateFormat("ZZZZ", Locale.getDefault()).format(calendar.getTime());
     }
 }

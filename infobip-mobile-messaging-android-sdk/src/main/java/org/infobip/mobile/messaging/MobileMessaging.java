@@ -77,7 +77,7 @@ public abstract class MobileMessaging {
     public abstract void setMessagesDelivered(final String... messageIds);
 
     /**
-     * Reports seen status of messages to Mobile Messaging servers.
+     * Reports seen status of messages to Mobile Messaging servers asynchronously. If something went wrong, the library will repeat the request until it reaches the server.
      * <br>
      * This method shall be used to report seen status when user actually sees message content.
      *
@@ -95,10 +95,12 @@ public abstract class MobileMessaging {
     public abstract MessageStore getMessageStore();
 
     /**
-     * Does a synchronization of installation with server.
-     * <br>
+     * Asynchronously saves changed installation on the server.
+     * <p>
      * This method will synchronize new installation data (such as setting of primary device, application user ID, custom atts...) with server
      * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param installation installation object with desired changes
      * @see Event#INSTALLATION_UPDATED
@@ -106,11 +108,12 @@ public abstract class MobileMessaging {
     public abstract void saveInstallation(Installation installation);
 
     /**
-     * Does a synchronization of installation with server.
-     * <br>
-     * This method will synchronize new installation data (such as setting of primary device, application user ID,...) with server
-     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
-     * The result of synchronization will be provided via listener.
+     * Asynchronously saves changed installation on the server.
+     * <p>
+     * This method will save new installation data (such as setting of primary device, application user ID, custom atts...) with server
+     * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation. The result will be provided via listener.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param installation installation object with desired changes
      * @param listener     listener to report the result on
@@ -120,7 +123,9 @@ public abstract class MobileMessaging {
     public abstract void saveInstallation(Installation installation, ResultListener<Installation> listener);
 
     /**
-     * Gets instance of currently active installation from server.
+     * Asynchronously fetches the installation data from the server.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param listener listener to report the result on
      * @see ResultListener
@@ -128,25 +133,33 @@ public abstract class MobileMessaging {
     public abstract void fetchInstallation(ResultListener<Installation> listener);
 
     /**
-     * Gets local instance of currently active installation.
+     * Synchronously retrieves current installation data stored locally such as push registration ID, language, push token, etc.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @return installation installation data object with locally stored data
      */
     public abstract Installation getInstallation();
 
     /**
-     * This method allows you to configure some other device as primary among others devices of a single user.
-     * Use this method to let SDK decide when it is best time to try to send request to server.
+     * Asynchronously configures some other device as primary among others devices of a single user.
+     * <br>
+     * Use this method to let SDK decide when it is best time to try to send request to server. The result will be provided via listener.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
-     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
-     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
-     * @param listener           listener to invoke when the operation is complete.
+     * @param pushRegistrationId set the push registration ID to make some other device installation a primary one
+     * @param isPrimary          set to true to make the provided installation as primary or to false otherwise
+     * @param listener           listener to report the result on
      */
     public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, ResultListener<List<Installation>> listener);
 
     /**
-     * This method allows you to configure this device as primary among others devices of a single user.
+     * Asynchronously configures this device as primary among others devices of a single user.
+     * <br>
      * Use this method to let SDK decide when it is best time to try to send request to server.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
@@ -154,10 +167,12 @@ public abstract class MobileMessaging {
     public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary);
 
     /**
-     * Does a synchronization of user data with server.
+     * Asynchronously saves changed user data on the server.
      * <br>
-     * This method will synchronize new data with server and will also trigger {@link Event#USER_UPDATED}
+     * This method will save new data on server and will also trigger {@link Event#USER_UPDATED}
      * with the currently available data in local cache for this user.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param user user data object with desired changes
      * @see Event#USER_UPDATED
@@ -165,10 +180,12 @@ public abstract class MobileMessaging {
     public abstract void saveUser(User user);
 
     /**
-     * Does a synchronization of user data with server.
+     * Asynchronously saves changed user data on the server.
      * <br>
-     * This method will synchronize new data with server. The result of synchronization will be provided via listener.
+     * This method will save new data with server. The result will be provided via listener.
      * It will also trigger {@link Event#USER_UPDATED} with the currently available data in local cache for this user.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
      * @param user     user data object with desired changes
      * @param listener listener to report the result on
@@ -178,49 +195,114 @@ public abstract class MobileMessaging {
     public abstract void saveUser(User user, ResultListener<User> listener);
 
     /**
-     * Does a fetching of user data from the server.
+     * Asynchronously fetches user data from the server.
      * <br>
      * The result of fetching operation will be provided via listener with all the data currently available on a server for this user.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
      *
+     * @param listener listener to report the result on
      * @see ResultListener
      */
     public abstract void fetchUser(@NonNull ResultListener<User> listener);
 
     /**
-     * Reads user data that is currently stored in the library.
+     * Synchronously retrieves current user data stored locally such as tags, emails, first name, etc.
      *
-     * @return last synchronized User object
+     * @return last synchronized {@link User} object
      */
     @Nullable
     public abstract User getUser();
 
-
-    //TODO docs
+    /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * <b>NOTE:</b> This API doesn't depersonalize current installation from any person that it may be currently personalized with. In order to depersonalize
+     * current possible person from current installation and personalize it with another person at once, use another API
+     * {@link MobileMessaging#personalize(UserIdentity, UserAttributes, boolean, ResultListener)}
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity   required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes optional user data to be saved for the person
+     */
     public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes);
 
-    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize);
-
+    /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * <b>NOTE:</b> This API doesn't depersonalize current installation from any person that it may be currently personalized with. In order to depersonalize
+     * current possible person from current installation and personalize it with another person at once, use another API
+     * {@link MobileMessaging#personalize(UserIdentity, UserAttributes, boolean, ResultListener)}
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity   required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes optional user data to be saved for the person
+     * @param listener       listener to report the result on
+     */
     public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, ResultListener<User> listener);
 
+    /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes     optional user data to be saved for the person
+     * @param forceDepersonalize determines whether or not the depersonalization should be performed on our server in order to depersonalize the installation from previous user profile
+     */
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize);
+
+    /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes     optional user data to be saved for the person
+     * @param forceDepersonalize determines whether or not the depersonalization should be performed on our server in order to depersonalize the installation from previous user profile
+     * @param listener           listener to report the result on
+     */
     public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener);
 
     /**
-     * Erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
+     * Asynchronously erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
-     * User's data synced over MobileMessaging {@link #saveUser(User)} is by default associated with created installation (push
-     * registration). Depersonalizing an installation means that push registration along with device specific data will remain, but user's data
-     * (such as first name, custom attributes,...) will be wiped out.
+     * {@link User}'s data synced over MobileMessaging is by default associated with created push registration. Depersonalizing an installation means that a push registration and
+     * device specific data will remain, but user's data (such as first name, custom data, ...) will be wiped out.
+     * <br>
+     * If you depersonalize an installation from person, there is a way to personalize it again by providing new user data (either by {@link #saveUser(User)} setters or
+     * {@link #personalize(UserIdentity, UserAttributes, boolean, ResultListener)} method) in order to target this user specifically.
      * <p>
-     * If you depersonalize an installation, there is a way to personalize it again by providing new user data (either by {@link MobileMessaging#saveUser(User)} )} setter
-     * or {@link MobileMessaging#personalize(UserIdentity, UserAttributes)} method) in order to target this user specifically.
-     * <p>
-     * Use this method if:
+     * Use this method in following cases:
      * <ul>
+     * <li>you want to handle possible failures of server depersonalize request, retry and maintain pending depersonalize state by yourself</li>
      * <li>you're syncing user data to our server</li>
      * <li>your application has logout functionality</li>
      * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
-     * <li>you want depersonalized installation to still receive broadcast notifications (otherwise, you need to call
-     * {@link Installation#setPushRegistrationEnabled(Boolean)} with <i>false</i> value to disable all messages)</li>
+     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registrationvia {@link Installation#setPushRegistrationEnabled(Boolean)}
+     * with <i>false</i> value to disable all messages and {@link MobileMessaging#saveInstallation(Installation)} to update it to the server</li>
      * </ul>
      *
      * @see Event#DEPERSONALIZED
@@ -228,24 +310,27 @@ public abstract class MobileMessaging {
     public abstract void depersonalize();
 
     /**
-     * Erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
+     * Asynchronously erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
+     * <p>
+     * {@link User}'s data synced over MobileMessaging is by default associated with created push registration. Depersonalizing an installation means that a push registration and
+     * device specific data will remain, but user's data (such as first name, custom data, ...) will be wiped out.
      * <br>
-     * User's data synced over MobileMessaging {@link #saveUser(User)} is by default associated with created push
-     * registration. Logging out user means that push registration along with device specific data will remain, but user's data
-     * (such as first name, custom data,...) will be wiped out.
-     * <br>
-     * If you log out user, there is no mechanism to log him in again since he's already subscribed for broadcast notifications from your app,
-     * but you might want to patch new user data to target this user specifically.
-     * <br>
-     * Use this method if:
+     * If you depersonalize an installation from person, there is a way to personalize it again by providing new user data (either by {@link #saveUser(User)} setters or
+     * {@link #personalize(UserIdentity, UserAttributes, boolean, ResultListener)} method) in order to target this user specifically.
+     * <p>
+     * <b>NOTE:</b> There is another version of depersonalize method that doesn't require listener parameter which means the SDK will handle any unsuccessful depersonalize
+     * requests by itself. See the method documentation for more details.
+     * <p>
+     * Use this method in following cases:
      * <ul>
+     * <li>you want to handle possible failures of server depersonalize request, retry and maintain pending depersonalize state by yourself</li>
      * <li>you're syncing user data to our server</li>
-     * <li>your application has depersonalize option</li>
-     * <li>you don't want new logged in user to be targeted by other user's data, e.g. first name</li>
-     * <li>you want logged out user to still receive broadcast notifications (if not, you need to call
-     * {@link Installation#setPushRegistrationEnabled(Boolean)} with <i>false</i> value to disable all messages)</li>
+     * <li>your application has logout functionality</li>
+     * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
+     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registrationvia {@link Installation#setPushRegistrationEnabled(Boolean)}
+     * with <i>false</i> value to disable all messages and {@link MobileMessaging#saveInstallation(Installation)} to update it to the server</li>
      * </ul>
-     * <br>
+     * <p>
      * This method can be called in offline mode. In this case library will return {@link SuccessPending#Pending} and will proceed with depersonalize when network becomes available,
      * {@link Event#DEPERSONALIZED} will be produced upon success.
      *
@@ -255,11 +340,19 @@ public abstract class MobileMessaging {
      */
     public abstract void depersonalize(ResultListener<SuccessPending> listener);
 
-    public abstract void depersonalizeInstallation(String pushRegId, ResultListener<List<Installation>> listener);
+    /**
+     * Asynchronously depersonalizes some other device among others devices of a single user.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param pushRegistrationId push registration ID of the installation to be depersonalized
+     * @param listener           listener to report the result on
+     */
+    public abstract void depersonalizeInstallation(String pushRegistrationId, ResultListener<List<Installation>> listener);
 
     /**
      * Send mobile originated messages.
-     * <br>
+     * <p>
      * Destination for each message is set inside {@link Message}.
      *
      * @param messages messages to send
@@ -268,7 +361,7 @@ public abstract class MobileMessaging {
 
     /**
      * Send mobile originated messages.
-     * <br>
+     * <p>
      * Destination for each message is set inside {@link Message}.
      * The result of fetchInstance operation will be provided via listener.
      * {@link ResultListener#onResult(Result)}} will be called both in case of success and error,
@@ -281,7 +374,8 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
-     * Deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
+     * Synchronously cleans up all persisted data.
+     * This method deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
