@@ -28,15 +28,14 @@ import java.util.concurrent.Executor;
 public abstract class MAsyncTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
 
     private final static Set<String> invalidParameterErrorCodes = new HashSet<String>() {{
-        add(ApiErrorCode.INVALID_MSISDN_FORMAT);
-        add(ApiErrorCode.INVALID_VALUE);
-        add(ApiErrorCode.INVALID_EMAIL_FORMAT);
-        add(ApiErrorCode.INVALID_BIRTHDATE_FORMAT);
+        add(ApiErrorCode.EMAIL_INVALID);
+        add(ApiErrorCode.PHONE_INVALID);
+        add(ApiErrorCode.USER_IDENTITY_INVALID);
+        add(ApiErrorCode.REQUEST_FORMAT_INVALID);
         add(ApiErrorCode.USER_MERGE_INTERRUPTED);
         add(ApiErrorCode.USER_DATA_RESTRICTED);
         add(ApiErrorCode.PERSONALIZATION_IMPOSSIBLE);
         add(ApiErrorCode.AMBIGUOUS_PERSONALIZE_CANDIDATES);
-        add(ApiErrorCode.REQUEST_FORMAT_INVALID);
     }};
 
     @SuppressLint("StaticFieldLeak")

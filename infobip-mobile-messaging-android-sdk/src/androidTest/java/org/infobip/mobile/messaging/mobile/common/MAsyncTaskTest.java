@@ -146,9 +146,9 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldMapInvalidMsisdnToAppropriateException() {
+    public void shouldMapInvalidPhoneToAppropriateException() {
         // Given
-        ApiIOException givenError = new ApiIOException(ApiErrorCode.INVALID_MSISDN_FORMAT, "");
+        ApiIOException givenError = new ApiIOException(ApiErrorCode.PHONE_INVALID, "");
         Mockito.when(tester.run(any(Object[].class)))
                 .thenThrow(givenError);
 
@@ -164,7 +164,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     @Test
     public void shouldMapInvalidCustomValueToAppropriateException() {
         // Given
-        ApiIOException givenError = new ApiIOException(ApiErrorCode.INVALID_VALUE, "");
+        ApiIOException givenError = new ApiIOException(ApiErrorCode.REQUEST_FORMAT_INVALID, "");
         Mockito.when(tester.run(any(Object[].class)))
                 .thenThrow(givenError);
 
@@ -180,7 +180,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     @Test
     public void shouldMapInvalidEmailToAppropriateException() {
         // Given
-        ApiIOException givenError = new ApiIOException(ApiErrorCode.INVALID_EMAIL_FORMAT, "");
+        ApiIOException givenError = new ApiIOException(ApiErrorCode.EMAIL_INVALID, "");
         Mockito.when(tester.run(any(Object[].class)))
                 .thenThrow(givenError);
 
@@ -196,7 +196,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     @Test
     public void shouldMapInvalidBirthdateToAppropriateException() {
         // Given
-        ApiIOException givenError = new ApiIOException(ApiErrorCode.INVALID_BIRTHDATE_FORMAT, "");
+        ApiIOException givenError = new ApiIOException(ApiErrorCode.REQUEST_FORMAT_INVALID, "");
         Mockito.when(tester.run(any(Object[].class)))
                 .thenThrow(givenError);
 
@@ -210,27 +210,10 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldMapErrorWithContentToAppropriateException() {
-        // Given
-        String givenContent = "content";
-        ApiIOException givenError = new ApiBackendExceptionWithContent(ApiErrorCode.CONTACT_SERVICE_ERROR, "", givenContent);
-        Mockito.when(tester.run(any(Object[].class)))
-                .thenThrow(givenError);
-
-        // When
-        asyncTask.execute(executor);
-
-        // Then
-        Mockito.verify(tester, Mockito.after(100).times(1))
-                .error(any(Object[].class), eqErrorWithContent(givenError, givenContent));
-        Mockito.verify(tester, Mockito.never()).after(Mockito.any());
-    }
-
-    @Test
     public void shouldMapErrorWithContentAndInvalidParameterToAppropriateException() {
         // Given
         String givenContent = "content";
-        ApiIOException givenError = new ApiBackendExceptionWithContent(ApiErrorCode.INVALID_MSISDN_FORMAT, "", givenContent);
+        ApiIOException givenError = new ApiBackendExceptionWithContent(ApiErrorCode.PHONE_INVALID, "", givenContent);
         Mockito.when(tester.run(any(Object[].class)))
                 .thenThrow(givenError);
 

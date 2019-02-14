@@ -189,7 +189,8 @@ public class GCMMessageMapperTest extends TestCase {
                         "\"body\":\"silentBody\"," +
                         "\"sound\":\"silentSound\"," +
                         "\"category\":\"silentCategory\"" +
-                        "}" +
+                        "}," +
+                        "\"inApp\":false" +
                         "}";
 
         Bundle bundle = new Bundle();
@@ -209,6 +210,22 @@ public class GCMMessageMapperTest extends TestCase {
         assertEquals("notSilentBody", message.getBody());
         assertEquals("notSilentSound", message.getSound());
         assertEquals("notSilentCategory", message.getCategory());
+        assertEquals(null, message.getInAppStyle());
+    }
+
+    public void test_inApp_mapping_fromJson_to_message_inAppStyle() throws Exception {
+
+        String internalData =
+                "{" +
+                        "\"inApp\":true" +
+                        "}";
+
+        Bundle bundle = new Bundle();
+        bundle.putString("internalData", internalData);
+
+        Message message = GCMMessageMapper.fromCloudBundle(bundle);
+
+        assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
     }
 
     public void test_normalMessage_fromJson_withoutNormalData() throws Exception {

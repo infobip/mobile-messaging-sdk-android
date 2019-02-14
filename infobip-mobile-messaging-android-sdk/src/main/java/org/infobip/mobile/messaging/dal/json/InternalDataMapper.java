@@ -232,7 +232,7 @@ public class InternalDataMapper {
                 return internalData.inAppStyle;
             }
 
-            if (internalData.inApp != null) {
+            if (internalData.inApp == true) {
                 return Message.InAppStyle.MODAL;
             }
 

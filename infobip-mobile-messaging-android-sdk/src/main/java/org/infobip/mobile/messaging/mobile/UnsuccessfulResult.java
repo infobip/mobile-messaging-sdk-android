@@ -28,8 +28,6 @@ public class UnsuccessfulResult {
         }
 
         String code = ((ApiException) exception).getCode();
-        return ApiErrorCode.INVALID_MSISDN_FORMAT.equals(code) ||
-                ApiErrorCode.INVALID_VALUE.equals(code);
-
+        return ApiErrorCode.INVALID_VALUE.equals(code);
     }
 }
