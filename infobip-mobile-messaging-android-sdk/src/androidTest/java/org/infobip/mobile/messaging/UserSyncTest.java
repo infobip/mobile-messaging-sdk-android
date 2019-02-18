@@ -68,7 +68,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.tags, CollectionUtils.setOf("first", "second", "third"));
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 
@@ -102,7 +102,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
 
         mobileMessaging.saveUser(givenUser);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
@@ -127,7 +127,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 
@@ -155,7 +155,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), anyBoolean(), eq(report));
+        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 

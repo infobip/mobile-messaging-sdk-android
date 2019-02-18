@@ -88,7 +88,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
     @Test
     public void test_reportSystemData_repeatAfterError() {
 
-        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
 
         mobileMessagingCore.syncInstallation();
 
@@ -108,7 +108,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
         PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED);
         AppInstance appInstance = new AppInstance("pushRegId");
-        BDDMockito.given(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).willReturn(appInstance);
+        BDDMockito.given(mobileApiAppInstance.createInstance(any(AppInstance.class))).willReturn(appInstance);
 
         mobileMessagingCore.syncInstallation();
 

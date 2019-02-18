@@ -97,7 +97,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         // Given
         Map<String, Object> appInstance = new HashMap<>();
         appInstance.put(AppInstanceAtts.regEnabled, false);
-        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), eq(appInstance));
+        mobileApiAppInstance.patchInstance(anyString(), eq(appInstance));
 
         // Then
         verifyRegistrationStatusUpdate(after(1000).atLeastOnce(), false);
@@ -116,7 +116,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         // Given
         Map<String, Object> appInstance = new HashMap<>();
         appInstance.put(AppInstanceAtts.regEnabled, true);
-        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), eq(appInstance));
+        mobileApiAppInstance.patchInstance(anyString(), eq(appInstance));
 
         // Then
         verifyRegistrationStatusUpdate(after(1000).atLeastOnce(), true);
@@ -135,10 +135,10 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     public void test_push_registration_default_status() throws Exception {
 
         // Verify disable
-        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(Map.class));
+        mobileApiAppInstance.patchInstance(anyString(), any(Map.class));
 
         mobileMessagingCore.getInstallation();
-        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), any(Map.class));
         Installation installation = new Installation();
         installation.setPushRegistrationEnabled(false);
         verify(coreBroadcaster, times(1)).installationUpdated(eq(installation));
@@ -146,11 +146,11 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
 
         // Verify resync
         reset(mobileApiAppInstance);
-        mobileApiAppInstance.patchInstance(anyString(), anyBoolean(), any(Map.class));
+        mobileApiAppInstance.patchInstance(anyString(), any(Map.class));
 
         installationSynchronizer.setCloudTokenReported(false);
         installationSynchronizer.sync();
-        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        verify(mobileApiAppInstance, after(1000).times(1)).patchInstance(anyString(), any(Map.class));
         verify(coreBroadcaster, times(1)).registrationCreated(anyString(), anyString());
 
         // Verify final value of 'enabled'
@@ -208,7 +208,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
         installation.setPushRegistrationEnabled(enable);
         installationSynchronizer.patch(installation, null);
 
-        verify(mobileApiAppInstance, verificationMode).patchInstance(anyString(), anyBoolean(), captor.capture());
+        verify(mobileApiAppInstance, verificationMode).patchInstance(anyString(), captor.capture());
         Map instanceMap = captor.getValue();
         assertEquals(enable, instanceMap.get(AppInstanceAtts.regEnabled));
     }

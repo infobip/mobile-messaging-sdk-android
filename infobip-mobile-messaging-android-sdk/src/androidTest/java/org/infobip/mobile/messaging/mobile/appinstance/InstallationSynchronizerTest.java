@@ -64,7 +64,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         MobileMessagingStats stats = mobileMessagingCore.getStats();
         RetryPolicyProvider retryPolicy = new RetryPolicyProvider(context);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileApiAppInstance);
-        when(mobileApiAppInstance.createInstance(anyBoolean(), any(AppInstance.class))).thenReturn(new AppInstance("pushRegId"));
+        when(mobileApiAppInstance.createInstance(any(AppInstance.class))).thenReturn(new AppInstance("pushRegId"));
         when(mobileApiAppInstance.getInstance(anyString())).thenReturn(new AppInstance("pushRegId"));
     }
 
@@ -82,7 +82,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         verifySuccess();
         verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
-        verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
+        verify(mobileApiAppInstance, times(1)).createInstance(any(AppInstance.class));
     }
 
     @Test
@@ -114,14 +114,14 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         verifySuccess(threads.size());
         verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
-        verify(mobileApiAppInstance, times(1)).createInstance(anyBoolean(), any(AppInstance.class));
+        verify(mobileApiAppInstance, times(1)).createInstance(any(AppInstance.class));
     }
 
     @Test
     public void shouldReportErrorWhenCreatingOnServer() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, false);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
-        doThrow(new RuntimeException()).when(mobileApiAppInstance).createInstance(anyBoolean(), any(AppInstance.class));
+        doThrow(new RuntimeException()).when(mobileApiAppInstance).createInstance(any(AppInstance.class));
 
         installationSynchronizer.sync(actionListener);
 
@@ -135,12 +135,12 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         verifySuccess();
         verify(broadcaster, after(300).times(1)).installationUpdated(any(Installation.class));
-        verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), any(Map.class));
     }
 
     @Test
     public void shouldReportErrorWhenPatchingOnServer() {
-        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), anyBoolean(), any(Map.class));
+        doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
 
         installationSynchronizer.sync(actionListener);
 

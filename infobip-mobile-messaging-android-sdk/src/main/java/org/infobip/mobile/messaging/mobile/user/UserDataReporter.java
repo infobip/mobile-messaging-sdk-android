@@ -74,7 +74,7 @@ public class UserDataReporter {
             public Void run(User[] userData) {
                 Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
-                mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), false, request);
+                mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), request);
                 MobileMessagingLogger.v("USER DATA <<<");
                 return null;
             }

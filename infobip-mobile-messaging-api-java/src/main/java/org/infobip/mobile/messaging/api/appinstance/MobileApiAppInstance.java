@@ -29,13 +29,10 @@ public interface MobileApiAppInstance {
 
     @HttpRequest(method = HttpMethod.POST)
     @Query(name = "ri", value = "true")
-    AppInstance createInstance(@Query(name = "rt", value = "false") boolean returnToken,
-                               @Body AppInstance instance);
+    AppInstance createInstance(@Body AppInstance instance);
 
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}")
-    @Query(name = "rt", value = "false")
     void patchInstance(@Path(name = "regId") String regId,
-                       @Query(name = "ri", value = "false") boolean returnInstance,
                        @Body Map instance);
 
     @HttpRequest(method = HttpMethod.GET, value = "{regId}")
@@ -48,7 +45,6 @@ public interface MobileApiAppInstance {
 
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}/user")
     void patchUser(@Path(name = "regId") String regId,
-                   @Query(name = "ru", value = "false") boolean returnUser,
                    @Body Map user);
 
     @HttpRequest(method = HttpMethod.GET, value = "{regId}/user")

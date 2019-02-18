@@ -133,7 +133,7 @@ public class InstallationSynchronizer {
             public AppInstance run(Void[] voids) {
                 MobileMessagingLogger.v("CREATE INSTALLATION >>>", installation);
                 setCloudTokenReported(true);
-                return mobileApiAppInstance.createInstance(false, InstallationMapper.toBackend(installation));
+                return mobileApiAppInstance.createInstance(InstallationMapper.toBackend(installation));
             }
 
             @Override
@@ -206,7 +206,7 @@ public class InstallationSynchronizer {
             @Override
             public Void run(Void[] voids) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION >>>");
-                mobileApiAppInstance.patchInstance(pushRegIdToUpdate, true, new HashMap<>(installation.getMap()));
+                mobileApiAppInstance.patchInstance(pushRegIdToUpdate, new HashMap<>(installation.getMap()));
                 return null;
             }
 

@@ -62,14 +62,13 @@ public class MobileApiAppInstanceTest {
     public void create_instance_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.createInstance(false, new AppInstance());
+        mobileApiAppInstance.createInstance(new AppInstance());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
-        assertEquals(2, debugServer.getQueryParametersCount());
-        assertEquals("false", debugServer.getQueryParameter("rt"));
+        assertEquals(1, debugServer.getQueryParametersCount());
         assertEquals("true", debugServer.getQueryParameter("ri"));
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
     }
@@ -78,7 +77,7 @@ public class MobileApiAppInstanceTest {
     public void patch_instance_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.patchInstance(regId, false, new HashMap<String, Object>());
+        mobileApiAppInstance.patchInstance(regId, new HashMap<String, Object>());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567", debugServer.getUri());
@@ -86,9 +85,7 @@ public class MobileApiAppInstanceTest {
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(HttpMethod.PATCH.name(), debugServer.getHeader("X-HTTP-Method-Override"));
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
-        assertEquals("false", debugServer.getQueryParameter("ri"));
-        assertEquals("false", debugServer.getQueryParameter("rt"));
-        assertEquals(2, debugServer.getQueryParametersCount());
+        assertEquals(0, debugServer.getQueryParametersCount());
     }
 
     @Test
@@ -123,16 +120,15 @@ public class MobileApiAppInstanceTest {
     public void patch_userData_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        mobileApiAppInstance.patchUser(regId, false, new HashMap<String, Object>());
+        mobileApiAppInstance.patchUser(regId, new HashMap<String, Object>());
 
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567/user", debugServer.getUri());
         assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
         assertEquals(HttpMethod.PATCH.name(), debugServer.getHeader("X-HTTP-Method-Override"));
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
-        assertEquals("false", debugServer.getQueryParameter("ru"));
         assertEquals(1, debugServer.getRequestCount());
-        assertEquals(1, debugServer.getQueryParametersCount());
+        assertEquals(0, debugServer.getQueryParametersCount());
     }
 
     @Test
@@ -184,21 +180,21 @@ public class MobileApiAppInstanceTest {
         debugServer.stop();
         debugServer = null;
 
-        mobileApiAppInstance.createInstance(false, new AppInstance());
+        mobileApiAppInstance.createInstance(new AppInstance());
     }
 
     @Test(expected = ApiException.class)
     public void createInstance_onResponseError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some error!")));
 
-        mobileApiAppInstance.createInstance(false, new AppInstance());
+        mobileApiAppInstance.createInstance(new AppInstance());
     }
 
     @Test(expected = ApiBackendException.class)
     public void createInstance_onBackendError_throwsError() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.INTERNAL_ERROR, DefaultApiClient.JSON_SERIALIZER.serialize(new ApiResponse("XY", "Some internal error!")));
 
-        mobileApiAppInstance.createInstance(false, new AppInstance());
+        mobileApiAppInstance.createInstance(new AppInstance());
     }
 
     @Test
