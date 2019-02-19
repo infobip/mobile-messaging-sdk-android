@@ -49,7 +49,7 @@ public enum MobileMessagingProperty {
     NOTIFICATION_AUTO_CANCEL("org.infobip.mobile.messaging.notification.NOTIFICATION_AUTO_CANCEL", true),
     FOREGROUND_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.FOREGROUND_NOTIFICATION_ENABLED", true),
     MULTIPLE_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MULTIPLE_NOTIFICATIONS_ENABLED", false),
-    HEADSUP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MULTIPLE_NOTIFICATIONS_ENABLED", true),
+    HEADSUP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.HEADSUP_NOTIFICATIONS_ENABLED", true),
     MARK_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.MARK_SEEN_ON_NOTIFICATION_TAP", true),
     INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
 

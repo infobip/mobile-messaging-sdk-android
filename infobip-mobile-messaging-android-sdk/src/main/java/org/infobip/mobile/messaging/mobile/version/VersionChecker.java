@@ -42,7 +42,7 @@ public class VersionChecker {
     }
 
     public void sync() {
-        if (!SoftwareInformation.isDebuggableApplicationBuild(context)) {
+        if (!SoftwareInformation.isDebuggableApplicationBuild(context) || usedByPlugin()) {
             return;
         }
 
@@ -87,6 +87,10 @@ public class VersionChecker {
         }
         .retryWith(retryPolicyProvider.ONE_RETRY())
         .execute();
+    }
+
+    private boolean usedByPlugin() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.SYSTEM_DATA_VERSION_POSTFIX) != null;
     }
 
     private boolean shouldUpdate(String latest, String current) {

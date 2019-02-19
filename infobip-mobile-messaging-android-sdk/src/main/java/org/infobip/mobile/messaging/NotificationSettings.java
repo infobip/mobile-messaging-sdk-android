@@ -156,7 +156,7 @@ public class NotificationSettings {
         private int pendingIntentFlags = (int) MobileMessagingProperty.PENDING_INTENT_FLAGS.getDefaultValue();
         private boolean notificationAutoCancel = (boolean) MobileMessagingProperty.NOTIFICATION_AUTO_CANCEL.getDefaultValue();
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
-        private boolean multipleNotificationsEnabled;
+        private boolean multipleNotificationsEnabled = (boolean) MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED.getDefaultValue();
         private boolean headsUpNotificationsEnabled = (boolean) MobileMessagingProperty.HEADSUP_NOTIFICATIONS_ENABLED.getDefaultValue();
 
         public Builder(Context context) {
