@@ -151,6 +151,10 @@ public class MobileApiResourceProvider {
         return userAgentAdditions.toArray(new String[userAgentAdditions.size()]);
     }
 
+    private boolean shouldAllowUntrustedSSLOnError(Context context) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.ALLOW_UNTRUSTED_SSL_ON_ERROR);
+    }
+
     private Generator getGenerator(Context context) {
         if (null != generator) {
             return generator;
@@ -168,6 +172,7 @@ public class MobileApiResourceProvider {
                 .withRequestInterceptors(baseUrlManager(context))
                 .withResponseHeaderInterceptors(baseUrlManager(context))
                 .withLogger(new AndroidHTTPLogger())
+                .withAllowUntrustedSSLOnError(shouldAllowUntrustedSSLOnError(context))
                 .build();
 
         return generator;

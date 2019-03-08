@@ -455,6 +455,7 @@ public abstract class MobileMessaging {
         private boolean doMarkSeenOnNotificationTap = true;
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
+        private boolean allowUntrustedSSLOnError = false;
         private ApplicationCodeProvider applicationCodeProvider = null;
 
         @SuppressWarnings("unchecked")
@@ -767,6 +768,17 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Set `allowUntrustedSSLOnError` to true to allow connections to untrusted hosts when SSL error happens.
+         * <br>Regardless of the setting, SDK will first try to connect in ordinary mode.
+         * @param allowUntrustedSSLOnError setting to control SSL connections
+         * @return {@link Builder}
+         */
+        public Builder withHttpSettings(boolean allowUntrustedSSLOnError) {
+            this.allowUntrustedSSLOnError = allowUntrustedSSLOnError;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -794,6 +806,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
+            MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings);

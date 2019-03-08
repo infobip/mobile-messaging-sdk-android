@@ -61,6 +61,7 @@ public enum MobileMessagingProperty {
     REPORT_SYSTEM_INFO("org.infobip.mobile.messaging.infobip.REPORT_SYSTEM_INFO", true),
     SAVE_USER_DATA_ON_DISK("org.infobip.mobile.messaging.infobip.SAVE_USER_DATA_ON_DISK", true),
     SAVE_APP_CODE_ON_DISK("org.infobip.mobile.messaging.infobip.SAVE_APP_CODE_ON_DISK", true),
+    ALLOW_UNTRUSTED_SSL_ON_ERROR("org.infobip.mobile.messaging.infobip.ALLOW_UNTRUSTED_SSL_ON_ERROR", false),
     APP_CODE_PROVIDER_CANONICAL_CLASS_NAME("org.infobip.mobile.messaging.infobip.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME"),
     // END
 

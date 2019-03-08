@@ -1082,6 +1082,10 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK, shouldSaveAppCode);
     }
 
+    public static void setAllowUntrustedSSLOnError(Context context, boolean allowUntrustedSSLOnError) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.ALLOW_UNTRUSTED_SSL_ON_ERROR, allowUntrustedSSLOnError);
+    }
+
     static boolean shouldSaveApplicationCode(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK.getKey(), true);
     }

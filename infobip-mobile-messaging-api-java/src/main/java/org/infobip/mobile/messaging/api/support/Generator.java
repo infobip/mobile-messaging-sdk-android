@@ -59,13 +59,14 @@ public class Generator {
     private RequestInterceptor[] requestInterceptors = new RequestInterceptor[0];
     private ResponsePreProcessor[] responsePreProcessors = new ResponsePreProcessor[0];
     private Logger logger = new Logger();
+    private boolean allowUntrustedSSLOnError = false;
 
     private DefaultApiClient getApiClient() {
         if (null != apiClient) {
             return apiClient;
         }
         String libraryVersion = properties.getProperty("library.version");
-        apiClient = new DefaultApiClient(connectTimeout, readTimeout, libraryVersion, requestInterceptors, responsePreProcessors, logger, userAgentAdditions);
+        apiClient = new DefaultApiClient(connectTimeout, readTimeout, libraryVersion, requestInterceptors, responsePreProcessors, logger, allowUntrustedSSLOnError, userAgentAdditions);
         return apiClient;
     }
 
@@ -286,6 +287,16 @@ public class Generator {
          */
         public Builder withLogger(@NonNull Logger logger) {
             generator.logger = logger;
+            return this;
+        }
+
+        /**
+         * Will allow untrusted SSL if `true` supplied
+         * @param allowUntrustedSSLOnError setting
+         * @return {@link Builder}
+         */
+        public Builder withAllowUntrustedSSLOnError(boolean allowUntrustedSSLOnError) {
+            generator.allowUntrustedSSLOnError = allowUntrustedSSLOnError;
             return this;
         }
 

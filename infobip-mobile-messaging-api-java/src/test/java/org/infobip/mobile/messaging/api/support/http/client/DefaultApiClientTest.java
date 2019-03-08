@@ -69,7 +69,8 @@ public class DefaultApiClientTest {
                 null,
                 new RequestInterceptor[]{requestInterceptorMock},
                 new ResponsePreProcessor[]{responsePreProcessorMock},
-                new Logger());
+                new Logger(),
+                false);
 
         debugServer = new DebugServer();
         debugServer.start();
