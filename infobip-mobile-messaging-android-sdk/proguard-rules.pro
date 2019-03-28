@@ -74,6 +74,9 @@
 # Mobile Messaging API classes
 -keep class org.infobip.mobile.messaging.api.** { *; }
 
+# Fix for JobIntentService
+-keep class org.infobip.mobile.messaging.platform.JobIntentService$* { *; }
+
 # GSON-related
 
 # Gson specific classes

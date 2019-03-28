@@ -8,12 +8,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.JobIntentService;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.JobIntentService;
 import org.infobip.mobile.messaging.platform.Platform;
 
 import static org.infobip.mobile.messaging.MobileMessagingJob.CLOUD_INTENT_JOB_ID;

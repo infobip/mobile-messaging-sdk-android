@@ -3,9 +3,9 @@ package org.infobip.mobile.messaging.geo.transition;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.JobIntentService;
 
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
+import org.infobip.mobile.messaging.platform.JobIntentService;
 
 import static org.infobip.mobile.messaging.MobileMessagingJob.GEO_TRANSITION_JOB_ID;
 import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
