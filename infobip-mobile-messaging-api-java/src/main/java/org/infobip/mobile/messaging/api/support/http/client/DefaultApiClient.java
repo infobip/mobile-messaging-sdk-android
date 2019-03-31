@@ -77,21 +77,19 @@ public class DefaultApiClient implements ApiClient {
 
         logger.d("REQUEST: " + request);
 
-        HttpURLConnection urlConnection = null;
         try {
             StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, Collection<Object>> entry : request.queryParams.entrySet()) {
                 appendValue(sb, entry);
             }
 
-            urlConnection = (HttpURLConnection) new URL(request.uri + sb.toString()).openConnection();
             try {
-                return executeHTTP(urlConnection, request, responseType, false);
+                return executeHTTP(request, responseType, false);
             } catch (SSLHandshakeException ex) {
                 logger.w("Got SSL handshake exception " + ex);
                 if (allowUntrustedSSLOnError) {
                     logger.w("Will re-try in untrusted mode");
-                    return executeHTTP(urlConnection, request, responseType, true);
+                    return executeHTTP(request, responseType, true);
                 } else {
                     throw ex;
                 }
@@ -102,126 +100,135 @@ public class DefaultApiClient implements ApiClient {
                 throw (ApiIOException) e;
             }
             throw new ApiIOException(ErrorCode.API_IO_ERROR.value, ErrorCode.API_IO_ERROR.description + " : " + request.uri, e);
-        } finally {
-            if (null != urlConnection) {
-                try {
-                    urlConnection.disconnect();
-                } catch (Exception e) {
-                    //ignore
-                }
-            }
         }
     }
 
-    private <R> R executeHTTP(HttpURLConnection urlConnection, Request request, Class<R> responseType, boolean tryUntrustedSSL) throws IOException {
-
-        if (request.httpMethod == HttpMethod.PATCH) {
-            urlConnection.setRequestProperty("X-HTTP-Method-Override", HttpMethod.PATCH.name());
-            urlConnection.setRequestMethod(HttpMethod.POST.name());
-        } else {
-            urlConnection.setRequestMethod(request.httpMethod.name());
-        }
-
-        if (request.httpMethod != HttpMethod.GET) {
-            urlConnection.setDoOutput(true);
-        }
-
-        urlConnection.setUseCaches(false);
-        urlConnection.setDoInput(true);
-        urlConnection.setConnectTimeout(connectTimeout);
-        urlConnection.setReadTimeout(readTimeout);
-
-        if (tryUntrustedSSL && urlConnection instanceof HttpsURLConnection) {
-            UntrustedSSLHelper.trustAllCerts(((HttpsURLConnection) urlConnection));
-        }
-
-        if (null != request.headers) {
-            for (Map.Entry<String, Collection<Object>> entry : request.headers.entrySet()) {
-                Collection<Object> value = entry.getValue();
-                if (null == value || value.isEmpty()) {
-                    continue;
-                }
-
-                String key = entry.getKey().trim();
-                if (key.equalsIgnoreCase("Content-Length")) {
-                    continue;
-                }
-                for (Object v : value) {
-                    if (v == null) continue;
-                    urlConnection.setRequestProperty(key, v.toString());
-                }
-            }
-        }
-        if (StringUtils.isNotBlank(request.apiKey)) {
-            urlConnection.setRequestProperty("Authorization", "App " + request.apiKey);
-        } else if (request.credentials != null && StringUtils.isNotBlank(request.credentials.getLeft()) && StringUtils.isNotBlank(request.credentials.getRight())) {
-            String basicApiKey = Base64Encoder.encode(request.credentials.getLeft() + ":" + request.credentials.getRight());
-            urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
-        }
-        urlConnection.setRequestProperty("Accept", "application/json");
-        String userAgent = urlConnection.getRequestProperty("User-Agent");
-        if (null == userAgent) {
-            urlConnection.setRequestProperty("User-Agent", getUserAgent());
-        }
-
-        if (null != request.body) {
-            byte[] bytes = jsonSerializer(request.httpMethod).serialize(request.body).getBytes("UTF-8");
-            urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
-            urlConnection.setRequestProperty("Content-Type", "application/json");
-            OutputStream outputStream = null;
-            try {
-                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-                outputStream.write(bytes);
-                outputStream.flush();
-            } finally {
-                StreamUtils.closeSafely(outputStream);
-            }
-        }
-
-        int responseCode = urlConnection.getResponseCode();
-        interceptResponse(responseCode, urlConnection.getHeaderFields());
-        if (responseCode >= 400) {
-            ApiResponse apiResponse = new ApiResponse(ErrorCode.UNKNOWN_ERROR.value, ErrorCode.UNKNOWN_ERROR.description);
-            if (urlConnection.getContentLength() > 0) {
-                InputStream inputStream = urlConnection.getErrorStream();
-                String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
-                apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
-            }
-
-            if (responseCode >= 500) {
-                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
-                throw new ApiBackendException(tuple.getLeft(), tuple.getRight());
-            }
-
-            Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_ERROR.value, ErrorCode.UNKNOWN_API_ERROR.description);
-            throw new ApiException(tuple.getLeft(), tuple.getRight());
-        }
-
-        if (urlConnection.getContentLength() <= 0) {
-            return null;
-        }
-
-        if (Void.class.equals(responseType) || void.class.equals(responseType)) {
-            return null;
-        }
-
-        InputStream inputStream = urlConnection.getInputStream();
-        String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
-        inputStream.close();
-
-        R response = jsonSerializer(request.httpMethod).deserialize(s, responseType);
-        ApiResponse apiResponse = null;
+    private <R> R executeHTTP(Request request, Class<R> responseType, boolean tryUntrustedSSL) throws IOException {
+        HttpURLConnection urlConnection = null;
         try {
-            apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
-        } catch (Exception ignored) {
-        }
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, Collection<Object>> entry : request.queryParams.entrySet()) {
+                appendValue(sb, entry);
+            }
 
-        if (apiResponse != null && apiResponse.getRequestError() != null) {
-            Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
-            throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
-        }
+            urlConnection = (HttpURLConnection) new URL(request.uri + sb.toString()).openConnection();
 
-        return response;
+            if (request.httpMethod == HttpMethod.PATCH) {
+                urlConnection.setRequestProperty("X-HTTP-Method-Override", HttpMethod.PATCH.name());
+                urlConnection.setRequestMethod(HttpMethod.POST.name());
+            } else {
+                urlConnection.setRequestMethod(request.httpMethod.name());
+            }
+
+            if (request.httpMethod != HttpMethod.GET) {
+                urlConnection.setDoOutput(true);
+            }
+
+            urlConnection.setUseCaches(false);
+            urlConnection.setDoInput(true);
+            urlConnection.setConnectTimeout(connectTimeout);
+            urlConnection.setReadTimeout(readTimeout);
+
+            if (tryUntrustedSSL && urlConnection instanceof HttpsURLConnection) {
+                UntrustedSSLHelper.trustAllCerts(((HttpsURLConnection) urlConnection));
+            }
+
+            if (null != request.headers) {
+                for (Map.Entry<String, Collection<Object>> entry : request.headers.entrySet()) {
+                    Collection<Object> value = entry.getValue();
+                    if (null == value || value.isEmpty()) {
+                        continue;
+                    }
+
+                    String key = entry.getKey().trim();
+                    if (key.equalsIgnoreCase("Content-Length")) {
+                        continue;
+                    }
+                    for (Object v : value) {
+                        if (v == null) continue;
+                        urlConnection.setRequestProperty(key, v.toString());
+                    }
+                }
+            }
+            if (StringUtils.isNotBlank(request.apiKey)) {
+                urlConnection.setRequestProperty("Authorization", "App " + request.apiKey);
+            } else if (request.credentials != null && StringUtils.isNotBlank(request.credentials.getLeft()) && StringUtils.isNotBlank(request.credentials.getRight())) {
+                String basicApiKey = Base64Encoder.encode(request.credentials.getLeft() + ":" + request.credentials.getRight());
+                urlConnection.setRequestProperty("Authorization", "Basic " + basicApiKey);
+            }
+            urlConnection.setRequestProperty("Accept", "application/json");
+            String userAgent = urlConnection.getRequestProperty("User-Agent");
+            if (null == userAgent) {
+                urlConnection.setRequestProperty("User-Agent", getUserAgent());
+            }
+
+            if (null != request.body) {
+                byte[] bytes = jsonSerializer(request.httpMethod).serialize(request.body).getBytes("UTF-8");
+                urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                OutputStream outputStream = null;
+                try {
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+                    outputStream.write(bytes);
+                    outputStream.flush();
+                } finally {
+                    StreamUtils.closeSafely(outputStream);
+                }
+            }
+
+            int responseCode = urlConnection.getResponseCode();
+            interceptResponse(responseCode, urlConnection.getHeaderFields());
+            if (responseCode >= 400) {
+                ApiResponse apiResponse = new ApiResponse(ErrorCode.UNKNOWN_ERROR.value, ErrorCode.UNKNOWN_ERROR.description);
+                if (urlConnection.getContentLength() > 0) {
+                    InputStream inputStream = urlConnection.getErrorStream();
+                    String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
+                    apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
+                }
+
+                if (responseCode >= 500) {
+                    Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
+                    throw new ApiBackendException(tuple.getLeft(), tuple.getRight());
+                }
+
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_ERROR.value, ErrorCode.UNKNOWN_API_ERROR.description);
+                throw new ApiException(tuple.getLeft(), tuple.getRight());
+            }
+
+            if (urlConnection.getContentLength() <= 0) {
+                return null;
+            }
+
+            if (Void.class.equals(responseType) || void.class.equals(responseType)) {
+                return null;
+            }
+
+            InputStream inputStream = urlConnection.getInputStream();
+            String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
+            inputStream.close();
+
+            R response = jsonSerializer(request.httpMethod).deserialize(s, responseType);
+            ApiResponse apiResponse = null;
+            try {
+                apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
+            } catch (Exception ignored) {
+            }
+
+            if (apiResponse != null && apiResponse.getRequestError() != null) {
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
+                throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
+            }
+
+            return response;
+        } finally {
+            try {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            } catch (Exception ignored) {
+
+            }
+        }
     }
 
     private void interceptErrorResponse(Exception error) {
