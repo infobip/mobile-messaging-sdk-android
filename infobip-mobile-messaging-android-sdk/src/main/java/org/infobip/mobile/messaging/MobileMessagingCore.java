@@ -893,7 +893,7 @@ public class MobileMessagingCore
         return new Installation(
                 getPushRegistrationId(),
                 isPushRegistrationEnabled(),
-                isDisplayNotificationEnabled(),
+                SoftwareInformation.areNotificationsEnabled(context),
                 isGeofencingActivated(),
                 SoftwareInformation.getSDKVersion(),
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
