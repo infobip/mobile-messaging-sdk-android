@@ -77,6 +77,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
@@ -713,22 +714,25 @@ public class MobileMessagingCore
         return syncMessages.toArray(new String[syncMessages.size()]);
     }
 
-    private String[] filterOutGeneratedMessageIds(String[] messageIDs) {
-        String generatedMessageIDs[] = getGeneratedMessageIds();
-        if (generatedMessageIDs.length == 0) {
+    public String[] filterOutGeneratedMessageIds(String[] messageIDs) {
+        List<String> generatedMessageIDs = Arrays.asList(getGeneratedMessageIds());
+        if (generatedMessageIDs.size() == 0 && messageIDs.length == 0) {
             return messageIDs;
         }
 
         List<String> seenIds = getSeenMessageIdsFromReports(messageIDs);
         List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
-        for (String generatedMessageId : generatedMessageIDs) {
-            int idIndex = seenIds.indexOf(generatedMessageId);
-            if (idIndex >= 0) {
-                filteredSeenReports.remove(idIndex);
-                seenIds.remove(idIndex);
+        for (String seenMsgId : seenIds) {
+            if (generatedMessageIDs.contains(seenMsgId) || isInUuidFormat(seenMsgId)) {
+                filteredSeenReports.remove(seenMsgId);
             }
         }
         return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
+    }
+
+    private boolean isInUuidFormat(String msgIdToReport) {
+        Pattern p = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        return p.matcher(msgIdToReport).matches();
     }
 
     /**
@@ -1658,7 +1662,12 @@ public class MobileMessagingCore
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
-            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initListener);
+            if (mobileMessagingCore.isPushServiceTypeChanged()) {
+                // do the force invalidation of old push cloud token
+                mobileMessagingCore.resetCloudToken();
+            } else {
+                mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initListener);
+            }
 
             Platform.reset(mobileMessagingCore);
 
