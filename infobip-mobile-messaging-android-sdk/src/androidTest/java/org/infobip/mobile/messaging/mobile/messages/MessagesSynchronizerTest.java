@@ -77,6 +77,25 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void should_filter_generated_seen_ids() {
+        String randomUUID = UUID.randomUUID().toString();
+        String noUuidSeenId = randomUUID + randomUUID;
+
+        mobileMessagingCore.addGeneratedMessageIds(randomUUID);
+        String[] seenMsgIds = new String[5];
+        seenMsgIds[0] = noUuidSeenId;
+        seenMsgIds[1] = noUuidSeenId;
+        seenMsgIds[2] = randomUUID;
+        seenMsgIds[3] = noUuidSeenId;
+        seenMsgIds[4] = randomUUID;
+
+        String[] messageIDs = mobileMessagingCore.filterOutGeneratedMessageIds(seenMsgIds);
+
+        assertNotNull(messageIDs);
+        assertTrue(messageIDs.length == 3);
+    }
+
+    @Test
     public void should_find_all_no_duplicates_and_nulls() {
         String mockId = UUID.randomUUID().toString();
         String[] mockIDs = new String[10];
