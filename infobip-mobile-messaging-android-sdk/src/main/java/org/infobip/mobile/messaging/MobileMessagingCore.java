@@ -1662,12 +1662,10 @@ public class MobileMessagingCore
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
-            if (mobileMessagingCore.isPushServiceTypeChanged()) {
-                // do the force invalidation of old push cloud token
-                mobileMessagingCore.resetCloudToken();
-            } else {
-                mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), initListener);
-            }
+
+            // do the force invalidation of old push cloud tokens
+            boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged();
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), shouldResetToken, initListener);
 
             Platform.reset(mobileMessagingCore);
 
