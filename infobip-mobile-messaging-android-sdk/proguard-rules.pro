@@ -107,3 +107,5 @@
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.GCMRegistrationTokenHandler
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService
+
+-keep public enum org.infobip.mobile.messaging.** { *; }
