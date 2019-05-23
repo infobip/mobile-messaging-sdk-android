@@ -89,6 +89,7 @@ public class InstallationSynchronizer {
         boolean cloudTokenPresentAndUnreported = isCloudTokenPresentAndUnreported();
         if (cloudTokenPresentAndUnreported) {
             installation.setToken(mobileMessagingCore.getCloudToken());
+            installation.setServiceType();
         }
 
         if (mobileMessagingCore.isPushServiceTypeChanged()) {
@@ -108,7 +109,6 @@ public class InstallationSynchronizer {
         }
 
         if (mobileMessagingCore.isRegistrationUnavailable()) {
-            installation.setServiceType();
             if (cloudTokenPresentAndUnreported) createInstance(installation, actionListener);
         } else {
             if (installation.hasDataToReport()) patch(installation, actionListener);
