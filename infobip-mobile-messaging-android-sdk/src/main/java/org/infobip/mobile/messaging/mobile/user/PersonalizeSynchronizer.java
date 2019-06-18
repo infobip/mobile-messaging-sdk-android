@@ -8,6 +8,7 @@ import org.infobip.mobile.messaging.UserAttributes;
 import org.infobip.mobile.messaging.UserIdentity;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.BatchReporter;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
@@ -91,6 +92,7 @@ public class PersonalizeSynchronizer {
                 MobileMessagingLogger.v("PERSONALIZE ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
+                handleNoRegistrationError(mobileMessagingError);
                 broadcaster.error(mobileMessagingError);
 
                 if (listener != null) {
@@ -134,8 +136,10 @@ public class PersonalizeSynchronizer {
                     @Override
                     public void error(Throwable error) {
                         MobileMessagingLogger.v("DEPERSONALIZE ERROR <<<", error);
+                        MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
                         serverListener.onServerDepersonalizeFailed(error);
-                        broadcaster.error(MobileMessagingError.createFrom(error));
+                        broadcaster.error(mobileMessagingError);
+                        handleNoRegistrationError(mobileMessagingError);
                     }
                 }
                         .retryWith(policy)
@@ -174,5 +178,83 @@ public class PersonalizeSynchronizer {
         }
                 .retryWith(policy)
                 .execute(executor, unreportedDepersonalizedPushRegId);
+    }
+
+    public void repersonalize() {
+        final User reportedUser = mobileMessagingCore.getUser();
+        if (reportedUser == null) {
+            return;
+        }
+
+        final UserIdentity userIdentity = new UserIdentity();
+        userIdentity.setExternalUserId(reportedUser.getExternalUserId());
+        userIdentity.setEmails(reportedUser.getEmails());
+        userIdentity.setPhones(reportedUser.getPhones());
+        final UserAttributes userAttributes = new UserAttributes(
+                reportedUser.getFirstName(),
+                reportedUser.getLastName(),
+                reportedUser.getMiddleName(),
+                reportedUser.getGender(),
+                null,
+                reportedUser.getTags(),
+                reportedUser.getCustomAttributes());
+        userAttributes.setBirthday(reportedUser.getBirthday());
+
+        final UserPersonalizeBody userPersonalizeBody = new UserPersonalizeBody();
+        userPersonalizeBody.setUserIdentity(userIdentity.getMap());
+        if (userAttributes.hasDataToReport()) {
+            userPersonalizeBody.setUserAttributes(userAttributes.getMap());
+        }
+
+        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
+            MobileMessagingLogger.w("Registration not available yet, will repersonalize user later");
+            return;
+        }
+
+        new MRetryableTask<UserPersonalizeBody, Void>() {
+
+            @Override
+            public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
+                MobileMessagingLogger.v("REPERSONALIZE >>>", userPersonalizeBody);
+                mobileApiAppInstance.repersonalize(mobileMessagingCore.getPushRegistrationId(), userPersonalizeBody);
+                MobileMessagingLogger.v("REPERSONALIZE <<<");
+                return null;
+            }
+
+            @Override
+            public void after(Void aVoid) {
+                mobileMessagingCore.setShouldRepersonalize(false);
+                mobileMessagingCore.setUserDataReported(new User(userIdentity, userAttributes), true);
+
+                User userToReturn = mobileMessagingCore.getUser();
+                broadcaster.personalized(userToReturn);
+            }
+
+            @Override
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("MobileMessaging API returned error (repersonalize)! ", error);
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+
+                if (error instanceof BackendInvalidParameterException) {
+                    handleNoRegistrationError(mobileMessagingError);
+                    mobileMessagingCore.setUserDataReportedWithError();
+                } else {
+                    MobileMessagingLogger.v("Repersonalization will be postponed to a later time due to communication error");
+                }
+            }
+        }
+                .retryWith(policy)
+                .execute(executor, userPersonalizeBody);
+    }
+
+    private void handleNoRegistrationError(MobileMessagingError mobileMessagingError) {
+        if (ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
+            mobileMessagingCore.setCloudTokenUnreported();
+            mobileMessagingCore.setUnreportedCustomAttributes(mobileMessagingCore.getMergedUnreportedAndReportedCustomAtts());
+            mobileMessagingCore.setShouldRepersonalize(true);
+            mobileMessagingCore.removeReportedSystemData();
+            mobileMessagingCore.setUnreportedPrimarySetting();
+            mobileMessagingCore.setPushRegistrationEnabledReported(false);
+        }
     }
 }

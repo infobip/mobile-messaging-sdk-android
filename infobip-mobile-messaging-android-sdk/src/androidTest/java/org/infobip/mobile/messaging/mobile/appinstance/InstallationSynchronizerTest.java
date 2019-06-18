@@ -8,6 +8,8 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
+import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
@@ -32,7 +34,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
@@ -149,6 +150,20 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void shouldReportNoRegistrationErrorWhenPatchingOnServer() {
+        //given
+        doThrow(new ApiIOException(ApiErrorCode.NO_REGISTRATION, "No registration"))
+                .when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
+
+        //when
+        installationSynchronizer.sync(actionListener);
+
+        //then
+        verifyError();
+        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+    }
+
+    @Test
     public void shouldGetInstallationFromServer() {
         installationSynchronizer.fetchInstance(actionListener);
 
@@ -162,6 +177,19 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         installationSynchronizer.fetchInstance(actionListener);
 
+        verifyError();
+    }
+
+    @Test
+    public void shouldReportNoRegistrationErrorWhenFetchingFromServer() {
+        //given
+        doThrow(new ApiIOException(ApiErrorCode.NO_REGISTRATION, "No registration"))
+                .when(mobileApiAppInstance).getInstance(anyString());
+
+        //when
+        installationSynchronizer.fetchInstance(actionListener);
+
+        //then
         verifyError();
     }
 

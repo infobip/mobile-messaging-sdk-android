@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.v4.app.NotificationCompat;
 
@@ -75,6 +76,14 @@ public class NotificationSettings {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_ICON, defaultIcon);
     }
 
+    public int getColor() {
+        return PreferenceHelper.findInt(context, MobileMessagingProperty.DEFAULT_COLOR);
+    }
+
+    private void setColor(int color) {
+        PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_COLOR, color);
+    }
+
     public int getIntentFlags() {
         return PreferenceHelper.findInt(context, MobileMessagingProperty.INTENT_FLAGS);
     }
@@ -141,6 +150,7 @@ public class NotificationSettings {
      * @see Builder#withDefaultTitle(String)
      * @see Builder#withCallbackActivity(Class)
      * @see Builder#withDefaultIcon(int)
+     * @see Builder#withColor(int)
      * @see Builder#withIntentFlags(int)
      * @see Builder#withPendingIntentFlags(int)
      * @see Builder#withNotificationAutoCancel()
@@ -150,6 +160,7 @@ public class NotificationSettings {
     public static final class Builder {
         private final Context context;
         private int defaultIcon = (int) MobileMessagingProperty.DEFAULT_ICON.getDefaultValue();
+        private int color = (int) MobileMessagingProperty.DEFAULT_COLOR.getDefaultValue();
         private String defaultTitle = (String) MobileMessagingProperty.DEFAULT_TITLE.getDefaultValue();
         private Class<?> callbackActivity = (Class<?>) MobileMessagingProperty.CALLBACK_ACTIVITY.getDefaultValue();
         private int intentFlags = (int) MobileMessagingProperty.INTENT_FLAGS.getDefaultValue();
@@ -266,6 +277,26 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to set notification color. Available from Android 6, API 23 - {@link android.app.Notification#color}
+         * <br>
+         * Usage:
+         * <pre>
+         * {@code new Builder(this)
+         *     .withColor(ContextCompat.getColor(context, R.color.my_notification_color))
+         *     .build();
+         * }
+         * </pre>
+         * Needs to be overridden if color other than default system is used.
+         *
+         * @param color {@link ColorInt} to be delegated to NotificationCompat.Builder#setColor()
+         * @return {@link Builder}
+         */
+        public Builder withColor(@ColorInt int color) {
+            this.color = color;
+            return this;
+        }
+
+        /**
          * When you want to set notification intent flags. It is delegated to {@link Intent#addFlags(int)}
          * <br>
          * By default it will use <i>Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP</i>
@@ -351,6 +382,7 @@ public class NotificationSettings {
         /**
          * When you want to disable heads-up notifications.
          * <br>
+         *
          * @return {@link Builder}
          */
         public Builder withoutHeadsUpNotifications() {
@@ -368,6 +400,7 @@ public class NotificationSettings {
 
             notificationSettings.setDefaultTitle(defaultTitle);
             notificationSettings.setDefaultIcon(defaultIcon);
+            notificationSettings.setColor(color);
             notificationSettings.setCallbackActivity(callbackActivity);
             notificationSettings.setIntentFlags(intentFlags);
             notificationSettings.setPendingIntentFlags(pendingIntentFlags);

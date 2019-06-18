@@ -319,7 +319,11 @@ public class MobileMessagingCore
             return;
         }
 
-        userDataReporter().patch(null, getUnreportedUserData());
+        if (shouldRepersonalize()) {
+            personalizeSynchronizer().repersonalize();
+        } else {
+            userDataReporter().patch(null, getUnreportedUserData());
+        }
         messagesSynchronizer().sync();
         moMessageSender().sync();
         seenStatusReporter().sync();
@@ -339,6 +343,10 @@ public class MobileMessagingCore
                 return null;
             }
         });
+    }
+
+    public void setUnreportedPrimarySetting() {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
     }
 
     public boolean isRegistrationUnavailable() {
@@ -508,11 +516,25 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
     }
 
-    public String getUnreportedCustomAttributes() {
+    private String getUnreportedCustomAttributes() {
         if (PreferenceHelper.contains(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES)) {
             return PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES);
         }
         return null;
+    }
+
+    public Map<String, CustomAttributeValue> getMergedUnreportedAndReportedCustomAtts() {
+        String unreportedCustomAttributes = getUnreportedCustomAttributes();
+        String reportedCustomAtts = getCustomAttributes();
+        Map<String, CustomAttributeValue> unreportedCustomAttsMap = UserMapper.customAttsFrom(unreportedCustomAttributes);
+        Map<String, CustomAttributeValue> customAttsMap = UserMapper.customAttsFrom(reportedCustomAtts);
+        if (customAttsMap == null) {
+            customAttsMap = new HashMap<>();
+        }
+        if (unreportedCustomAttsMap != null) {
+            customAttsMap.putAll(unreportedCustomAttsMap);
+        }
+        return customAttsMap;
     }
 
     private boolean isPrimaryDevice() {
@@ -543,6 +565,15 @@ public class MobileMessagingCore
         return !PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED);
     }
 
+    public void setShouldRepersonalize(boolean shouldRepersonalize) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SHOULD_REPERSONALIZE, shouldRepersonalize);
+    }
+
+    public Boolean shouldRepersonalize() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SHOULD_REPERSONALIZE);
+    }
+
+    @SuppressWarnings("unchecked")
     private void reportErrorDepersonalizeInProgress(final ResultListener listener) {
         runOnUiThread(new Runnable() {
             @Override
@@ -554,6 +585,12 @@ public class MobileMessagingCore
         });
     }
 
+    public void setPushRegistrationEnabled(Boolean pushRegistrationEnabled) {
+        if (pushRegistrationEnabled != null) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, pushRegistrationEnabled);
+        }
+    }
+
     public boolean isPushRegistrationEnabled() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
     }
@@ -563,8 +600,8 @@ public class MobileMessagingCore
                 PreferenceHelper.findBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
     }
 
-    public void setPushRegistrationEnabledReported() {
-       PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, false);
+    public void setPushRegistrationEnabledReported(boolean reported) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, !reported);
     }
 
     public String getCloudToken() {
@@ -845,7 +882,7 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE, Platform.usedPushServiceType.name());
     }
 
-    private void setCloudTokenUnreported() {
+    public void setCloudTokenUnreported() {
 
         if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
             MobileMessagingLogger.w("Application code not found, check your setup");
@@ -1234,9 +1271,12 @@ public class MobileMessagingCore
 
         if (userAttributes != null && userAttributes.hasDataToReport()) {
             // sanitizing user atts map if the object was initialized as a User, not UserAttributes
-            if (userAttributes.containsField(UserAtts.phones)) userAttributes.getMap().remove(UserAtts.phones);
-            if (userAttributes.containsField(UserAtts.emails)) userAttributes.getMap().remove(UserAtts.emails);
-            if (userAttributes.containsField(UserAtts.externalUserId)) userAttributes.getMap().remove(UserAtts.externalUserId);
+            if (userAttributes.containsField(UserAtts.phones))
+                userAttributes.getMap().remove(UserAtts.phones);
+            if (userAttributes.containsField(UserAtts.emails))
+                userAttributes.getMap().remove(UserAtts.emails);
+            if (userAttributes.containsField(UserAtts.externalUserId))
+                userAttributes.getMap().remove(UserAtts.externalUserId);
         }
 
         personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
@@ -1432,6 +1472,10 @@ public class MobileMessagingCore
             return SystemData.fromJson(PreferenceHelper.findString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA));
         }
         return null;
+    }
+
+    public void removeReportedSystemData() {
+        PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
     }
 
     public void setSystemDataReported() {
@@ -1664,7 +1708,7 @@ public class MobileMessagingCore
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
 
             // do the force invalidation of old push cloud tokens
-            boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged();
+            boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;
             mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), shouldResetToken, initListener);
 
             Platform.reset(mobileMessagingCore);

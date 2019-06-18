@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.demo;
 
+import android.support.v4.content.ContextCompat;
+
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
@@ -20,6 +22,7 @@ public class Application extends android.app.Application {
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withMultipleNotifications()
                         .withDefaultIcon(R.drawable.ic_notification)
+                        .withColor(ContextCompat.getColor(this, R.color.red))
                         .build())
                 .build();
     }

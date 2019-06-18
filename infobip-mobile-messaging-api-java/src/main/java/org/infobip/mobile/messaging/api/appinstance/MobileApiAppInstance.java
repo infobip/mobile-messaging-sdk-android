@@ -42,7 +42,6 @@ public interface MobileApiAppInstance {
     @HttpRequest(method = HttpMethod.DELETE, value = "{regId}")
     void expireInstance(@Path(name = "regId") String regId);
 
-
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}/user")
     void patchUser(@Path(name = "regId") String regId,
                    @Body Map user);
@@ -50,6 +49,10 @@ public interface MobileApiAppInstance {
     @HttpRequest(method = HttpMethod.GET, value = "{regId}/user")
     @Query(name = "ri", value = "true")
     UserBody getUser(@Path(name = "regId") String regId);
+
+    @HttpRequest(method = HttpMethod.POST, value = "{regId}/repersonalize")
+    void repersonalize(@Path(name = "regId") String regId,
+                       @Body UserPersonalizeBody userPersonalizeBody);
 
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/depersonalize")
     void depersonalize(@Path(name = "regId") String regId);

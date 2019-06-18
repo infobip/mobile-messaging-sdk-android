@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 
 import java.util.List;
@@ -118,8 +119,12 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     private void send(Intent intent) {
-        context.sendBroadcast(intent);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        try {
+            context.sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        } catch (Exception ex) {
+            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage());
+        }
     }
 
     private Intent prepare(Event event) {

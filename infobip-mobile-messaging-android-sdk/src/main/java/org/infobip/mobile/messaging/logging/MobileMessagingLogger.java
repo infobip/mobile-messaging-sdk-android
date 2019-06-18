@@ -3,8 +3,8 @@ package org.infobip.mobile.messaging.logging;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 
-import org.infobip.mobile.messaging.api.shaded.google.gson.Gson;
-import org.infobip.mobile.messaging.api.shaded.google.gson.GsonBuilder;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.Arrays;
 
@@ -49,7 +49,7 @@ public final class MobileMessagingLogger {
         log(Level.VERBOSE, TAG, msg, o);
     }
 
-    public static void v(String msg, Object o, Object...os) {
+    public static void v(String msg, Object o, Object... os) {
         log(Level.VERBOSE, TAG, msg, Arrays.asList(o, os));
     }
 

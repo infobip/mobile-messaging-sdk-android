@@ -147,6 +147,20 @@ public class MobileApiAppInstanceTest {
     }
 
     @Test
+    public void repersonalize_success_examineResponse() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        mobileApiAppInstance.repersonalize(regId, new UserPersonalizeBody());
+
+        //inspect http context
+        assertEquals("/mobile/1/appinstance/1234regId567/repersonalize", debugServer.getUri());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(0, debugServer.getQueryParametersCount());
+    }
+
+    @Test
     public void personalize_success_examineResponse() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 

@@ -43,6 +43,7 @@ public enum MobileMessagingProperty {
     DISPLAY_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.DISPLAY_NOTIFICATION_ENABLED", true),
     CALLBACK_ACTIVITY("org.infobip.mobile.messaging.notification.CALLBACK_ACTIVITY"),
     DEFAULT_ICON("org.infobip.mobile.messaging.notification.DEFAULT_ICON", 0),
+    DEFAULT_COLOR("org.infobip.mobile.messaging.notification.DEFAULT_COLOR", 0),
     DEFAULT_TITLE("org.infobip.mobile.messaging.notification.DEFAULT_TITLE", "Message"),
     INTENT_FLAGS("org.infobip.mobile.messaging.notification.INTENT_FLAGS", Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
     PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", PendingIntent.FLAG_CANCEL_CURRENT),
@@ -87,6 +88,7 @@ public enum MobileMessagingProperty {
     UNREPORTED_PUSH_REGISTRATION_ENABLED("org.infobip.mobile.messaging.infobip.UNREPORTED_PUSH_REGISTRATION_ENABLED"),
 
     IS_DEPERSONALIZE_UNREPORTED("org.infobip.mobile.messaging.infobip.IS_DEPERSONALIZE_UNREPORTED", false),
+    SHOULD_REPERSONALIZE("org.infobip.mobile.messaging.infobip.SHOULD_REPERSONALIZE", false),
 
     UNREPORTED_USER_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
     USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA"),

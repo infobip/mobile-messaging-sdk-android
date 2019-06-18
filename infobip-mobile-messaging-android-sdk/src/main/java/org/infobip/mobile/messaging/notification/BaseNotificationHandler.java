@@ -103,6 +103,7 @@ public class BaseNotificationHandler {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, getChannelIdForNotification(notificationSettings, message))
                 .setContentTitle(title)
                 .setContentText(message.getBody())
+                .setColor(notificationSettings.getColor())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(createTapPendingIntent(notificationSettings, message))
                 .setWhen(message.getReceivedTimestamp());
@@ -126,12 +127,13 @@ public class BaseNotificationHandler {
             return;
         }
 
-        notificationBuilder.setLargeIcon(notificationPicture);
-        notificationBuilder.setStyle(new NotificationCompat.BigPictureStyle()
-                .bigPicture(notificationPicture)
-                .bigLargeIcon(null)
-                .setBigContentTitle(title)
-                .setSummaryText(message.getBody()));
+        notificationBuilder
+                .setLargeIcon(notificationPicture)
+                .setStyle(new NotificationCompat.BigPictureStyle()
+                        .bigPicture(notificationPicture)
+                        .bigLargeIcon(null)
+                        .setBigContentTitle(title)
+                        .setSummaryText(message.getBody()));
     }
 
     @Nullable
@@ -152,7 +154,8 @@ public class BaseNotificationHandler {
         }
     }
 
-    private static @Nullable Bitmap validateBitmap(@Nullable Bitmap bitmap) {
+    private static @Nullable
+    Bitmap validateBitmap(@Nullable Bitmap bitmap) {
         if (bitmap == null) {
             return null;
         }

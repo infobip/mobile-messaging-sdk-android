@@ -22,4 +22,5 @@ public class ApiErrorCode {
     public static final String USER_DATA_RESTRICTED = "USER_DATA_RESTRICTED";
     public static final String PERSONALIZATION_IMPOSSIBLE = "PERSONALIZATION_IMPOSSIBLE";
     public static final String AMBIGUOUS_PERSONALIZE_CANDIDATES = "AMBIGUOUS_PERSONALIZE_CANDIDATES";
+    public static final String NO_REGISTRATION = "NO_REGISTRATION";
 }

@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.mobile.appinstance;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
@@ -10,15 +11,16 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.SystemData;
-import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobile.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
@@ -152,10 +154,13 @@ public class InstallationSynchronizer {
 
             @Override
             public void after(AppInstance appInstance) {
-                Installation installation = InstallationMapper.fromBackend(appInstance);
-                broadcaster.registrationCreated(installation.getPushServiceToken(), installation.getPushRegistrationId());
+                String pushServiceToken = installation.getPushServiceToken();
+                String pushRegId = appInstance.getPushRegId();
+                appInstance.setPushServiceToken(pushServiceToken);
+                Installation backendInstallation = InstallationMapper.fromBackend(appInstance);
+                broadcaster.registrationCreated(pushServiceToken, pushRegId);
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(installation));
+                    actionListener.onResult(new Result<>(backendInstallation));
                 }
             }
 
@@ -189,11 +194,16 @@ public class InstallationSynchronizer {
     public void patch(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
         String pushRegId = mobileMessagingCore.getPushRegistrationId();
         final boolean myDevice = isMyDevice(installation, pushRegId);
-        if (!myDevice) {
+        if (!myDevice && installation != null) {
             pushRegId = installation.getPushRegistrationId();
         }
 
-        if (!installation.hasDataToReport()) {
+        SystemData systemDataForReport = systemDataForReport();
+        if (systemDataForReport != null) {
+            populateInstallationWithSystemData(systemDataForReport, installation);
+        }
+
+        if (installation != null && !installation.hasDataToReport()) {
             MobileMessagingLogger.w("Attempt to save empty installation data, will do nothing");
             if (actionListener != null) {
                 actionListener.onResult(new Result<Installation, MobileMessagingError>(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
@@ -229,14 +239,18 @@ public class InstallationSynchronizer {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION ERROR <<<", error);
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+
+                if (error instanceof BackendInvalidParameterException && ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
+                    handleNoRegistrationError();
+                }
 
                 setCloudTokenReported(false);
                 mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
-                broadcaster.error(MobileMessagingError.createFrom(error));
-
+                broadcaster.error(mobileMessagingError);
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), mobileMessagingError));
                 }
             }
         }
@@ -245,7 +259,8 @@ public class InstallationSynchronizer {
     }
 
     private boolean isMyDevice(Installation installation, String myPushRegId) {
-        return (installation.getPushRegistrationId() != null && myPushRegId.equals(installation.getPushRegistrationId())) || installation.getPushRegistrationId() == null;
+        return (installation != null && installation.getPushRegistrationId() != null && myPushRegId != null &&
+                myPushRegId.equals(installation.getPushRegistrationId())) || installation != null && installation.getPushRegistrationId() == null;
     }
 
     private void updateInstallationReported(Installation installation, boolean myDevice) {
@@ -260,25 +275,16 @@ public class InstallationSynchronizer {
             mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
         }
         if (installation.isPushRegistrationEnabled() != null) {
-            setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
-            mobileMessagingCore.setPushRegistrationEnabledReported();
+            mobileMessagingCore.setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
+            mobileMessagingCore.setPushRegistrationEnabledReported(true);
         }
         setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
-        String unreportedCustomAttributes = mobileMessagingCore.getUnreportedCustomAttributes();
-        if (unreportedCustomAttributes != null) {
-            mobileMessagingCore.setUnreportedCustomAttributes(null);
-            String reportedCustomAtts = mobileMessagingCore.getCustomAttributes();
-            Map<String, CustomAttributeValue> customAttsMap = UserMapper.customAttsFrom(reportedCustomAtts);
-            Map<String, CustomAttributeValue> unreportedCustomAttsMap = UserMapper.customAttsFrom(unreportedCustomAttributes);
-            if (customAttsMap == null) {
-                customAttsMap = new HashMap<>();
-            }
-            customAttsMap.putAll(unreportedCustomAttsMap);
+        Map<String, CustomAttributeValue> customAttsMap = mobileMessagingCore.getMergedUnreportedAndReportedCustomAtts();
+        mobileMessagingCore.setUnreportedCustomAttributes(null);
+        mobileMessagingCore.saveCustomAttributes(customAttsMap);
 
-            mobileMessagingCore.saveCustomAttributes(customAttsMap);
-        }
         mobileMessagingCore.setSystemDataReported();
         mobileMessagingCore.setReportedPushServiceType();
     }
@@ -301,6 +307,9 @@ public class InstallationSynchronizer {
                 if (installation.isPrimaryDevice() != null) {
                     mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
                 }
+                if (installation.isPushRegistrationEnabled() != null) {
+                    mobileMessagingCore.setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
+                }
                 mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 
                 if (actionListener != null) {
@@ -311,14 +320,29 @@ public class InstallationSynchronizer {
 
             @Override
             public void error(Throwable error) {
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+
+                if (error instanceof BackendInvalidParameterException && ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
+                    handleNoRegistrationError();
+                }
+
                 if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), MobileMessagingError.createFrom(error)));
+                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), mobileMessagingError));
                 }
                 MobileMessagingLogger.v("GET INSTALLATION ERROR <<<", error);
             }
         }
                 .retryWith(retryPolicyProvider.DEFAULT())
                 .execute(executor);
+    }
+
+    private void handleNoRegistrationError() {
+        setCloudTokenReported(false);
+        mobileMessagingCore.setUnreportedCustomAttributes(mobileMessagingCore.getMergedUnreportedAndReportedCustomAtts());
+        mobileMessagingCore.setShouldRepersonalize(true);
+        mobileMessagingCore.removeReportedSystemData();
+        mobileMessagingCore.setUnreportedPrimarySetting();
+        mobileMessagingCore.setPushRegistrationEnabledReported(false);
     }
 
     private boolean isCloudTokenPresentAndUnreported() {
@@ -349,12 +373,6 @@ public class InstallationSynchronizer {
         return null;
     }
 
-    private void setPushRegistrationEnabled(Boolean pushRegistrationEnabled) {
-        if (pushRegistrationEnabled != null) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, pushRegistrationEnabled);
-        }
-    }
-
     private void setPushRegistrationId(String registrationId) {
         if (registrationId != null) {
             PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
@@ -371,17 +389,24 @@ public class InstallationSynchronizer {
 
     private PushInstallation from(SystemData data) {
         PushInstallation installation = new PushInstallation();
+        return (PushInstallation) populateInstallationWithSystemData(data, installation);
+    }
+
+    @NonNull
+    private Installation populateInstallationWithSystemData(SystemData data, Installation installation) {
         installation.setSdkVersion(data.getSdkVersion());
         installation.setOsVersion(data.getOsVersion());
         installation.setDeviceManufacturer(data.getDeviceManufacturer());
         installation.setDeviceModel(data.getDeviceModel());
         installation.setAppVersion(data.getApplicationVersion());
-        installation.setGeoEnabled(data.isGeofencing());
-        installation.setNotificationsEnabled(data.areNotificationsEnabled());
+        if (installation.getGeoEnabled() == null) installation.setGeoEnabled(data.isGeofencing());
+        if (installation.getNotificationsEnabled() == null)
+            installation.setNotificationsEnabled(data.areNotificationsEnabled());
         installation.setDeviceSecure(data.isDeviceSecure());
-        installation.setLanguage(data.getLanguage());
-        installation.setDeviceTimezoneOffset(data.getDeviceTimeZoneOffset());
-        installation.setDeviceName(data.getDeviceName());
+        if (installation.getLanguage() == null) installation.setLanguage(data.getLanguage());
+        if (installation.getDeviceTimezoneOffset() == null)
+            installation.setDeviceTimezoneOffset(data.getDeviceTimeZoneOffset());
+        if (installation.getDeviceName() == null) installation.setDeviceName(data.getDeviceName());
         installation.setOs(Platform.os);
         return installation;
     }
