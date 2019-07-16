@@ -93,7 +93,7 @@ public class MobileMessagingCore
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
-    private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(4);
+    private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(3);
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
