@@ -93,6 +93,7 @@ public class MobileMessagingCore
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
+    private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(4);
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
@@ -128,6 +129,7 @@ public class MobileMessagingCore
     private final Context context;
     private Map<String, MessageHandlerModule> messageHandlerModules;
     private volatile boolean didSyncAtLeastOnce;
+    private volatile Long lastSyncTimeMillis;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context));
@@ -189,7 +191,7 @@ public class MobileMessagingCore
             if (userDataProperty == MobileMessagingProperty.UNREPORTED_USER_DATA) {
                 saveUnreportedUserData(userDataWithCustomAtts.first);
             } else if (userDataProperty == MobileMessagingProperty.USER_DATA) {
-                saveUser(userDataWithCustomAtts.first);
+                storeAndMergeUnreportedUserLocally(userDataWithCustomAtts.first);
             }
         }
 
@@ -289,6 +291,11 @@ public class MobileMessagingCore
 
     public void sync() {
         didSyncAtLeastOnce = true;
+
+        if (lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS) {
+            return;
+        }
+
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
             return;
@@ -299,6 +306,7 @@ public class MobileMessagingCore
             return;
         }
 
+        lastSyncTimeMillis = System.currentTimeMillis();
         versionChecker().sync();
         performSyncActions();
     }
@@ -1193,12 +1201,7 @@ public class MobileMessagingCore
 
     @Override
     public void saveUser(User user, final MobileMessaging.ResultListener<User> listener) {
-        User existingData = getUnreportedUserData();
-        User userToReport = UserMapper.merge(existingData, user);
-
-        if (userToReport != null) {
-            saveUnreportedUserData(userToReport);
-        }
+        User userToReport = storeAndMergeUnreportedUserLocally(user);
 
         if (isDepersonalizeInProgress()) {
             reportErrorDepersonalizeInProgress(listener);
@@ -1206,6 +1209,16 @@ public class MobileMessagingCore
         }
 
         userDataReporter().patch(listener, userToReport);
+    }
+
+    private User storeAndMergeUnreportedUserLocally(User user) {
+        User existingData = getUnreportedUserData();
+        User userToReport = UserMapper.merge(existingData, user);
+
+        if (userToReport != null) {
+            saveUnreportedUserData(userToReport);
+        }
+        return userToReport;
     }
 
     @Override
