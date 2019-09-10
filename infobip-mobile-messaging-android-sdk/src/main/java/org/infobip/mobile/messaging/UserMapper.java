@@ -88,7 +88,9 @@ public class UserMapper {
         return new Pair<>(newUser, customInstallationAtts);
     }
 
+    @Nullable
     public static User fromBackend(UserBody userResponseBody) {
+        if (userResponseBody == null) return null;
         return new User(
                 userResponseBody.getExternalUserId(),
                 userResponseBody.getFirstName(),

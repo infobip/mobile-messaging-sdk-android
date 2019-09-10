@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.geo.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.preference.PreferenceManager;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -108,7 +107,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getDefaultMMSharedPreferences(context).edit().clear().commit();
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");

@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
@@ -14,6 +13,7 @@ import org.infobip.mobile.messaging.chat.repository.Participant;
 import org.infobip.mobile.messaging.chat.repository.ParticipantRepository;
 import org.infobip.mobile.messaging.chat.repository.ParticipantRepositoryImpl;
 import org.infobip.mobile.messaging.chat.repository.RepositoryMapper;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import static android.support.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 
@@ -35,7 +35,7 @@ public class UserProfileManager {
     UserProfileManager(Context context) {
         this.participantRepository = new ParticipantRepositoryImpl(context);
         this.repositoryMapper = new RepositoryMapper();
-        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.sharedPreferences = PreferenceHelper.getDefaultMMSharedPreferences(context);
         this.pushRegistrationId = MobileMessaging.getInstance(context).getInstallation().getPushRegistrationId();
     }
 

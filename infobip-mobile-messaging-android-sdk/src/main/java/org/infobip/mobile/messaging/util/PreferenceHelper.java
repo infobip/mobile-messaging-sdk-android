@@ -5,13 +5,13 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,8 +19,10 @@ import java.util.Set;
  * @since 07.04.2016.
  */
 public abstract class PreferenceHelper {
+    private static final String MM_PREFS_PREFIX = "org.infobip.mobile.messaging";
     private static final Object LOCK = new Object();
     private static Cryptor cryptor = null;
+    private static Boolean usePrivateSharedPrefs = null;
 
     protected PreferenceHelper() {
     }
@@ -34,6 +36,25 @@ public abstract class PreferenceHelper {
         return cryptor;
     }
 
+    public static SharedPreferences getDefaultMMSharedPreferences(Context context) {
+        if (usePrivateSharedPrefs == null) {
+            usePrivateSharedPrefs = getPrivateMMSharedPreferences(context).getBoolean(MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS.getKey(), false);
+        }
+        if (usePrivateSharedPrefs) {
+            return getPrivateMMSharedPreferences(context);
+        } else {
+            return getPublicSharedPreferences(context);
+        }
+    }
+
+    public static SharedPreferences getPrivateMMSharedPreferences(Context context) {
+        return context.getSharedPreferences("MobileMessagingSDK", Context.MODE_PRIVATE);
+    }
+
+    public static SharedPreferences getPublicSharedPreferences(Context context) {
+        return PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
     public static String findString(Context context, MobileMessagingProperty property) {
         return findString(context, property.getKey(), (String) property.getDefaultValue(), property.isEncrypted());
     }
@@ -43,7 +64,7 @@ public abstract class PreferenceHelper {
     }
 
     public static String findString(Context context, String key, String defaultValue, boolean encrypted) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         if (!encrypted) {
             return sharedPreferences.getString(key, defaultValue);
         }
@@ -69,7 +90,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void saveString(Context context, String key, String value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         if (null == value) {
             remove(context, key);
             return;
@@ -86,7 +107,7 @@ public abstract class PreferenceHelper {
     }
 
     public static long findLong(Context context, String key, long defaultValue) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         String string = sharedPreferences.getString(key, String.valueOf(defaultValue));
         if (StringUtils.isBlank(string)) {
             return 0;
@@ -99,7 +120,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void saveLong(Context context, String key, long value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         sharedPreferences.edit().putString(key, String.valueOf(value)).apply();
     }
 
@@ -126,7 +147,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void saveClass(Context context, String key, Class<?> aClass) {
-        String value = null != aClass.getName() ? aClass.getName() : null;
+        String value = aClass.getName();
         saveString(context, key, value);
     }
 
@@ -134,18 +155,48 @@ public abstract class PreferenceHelper {
         return findBoolean(context, property.getKey(), Boolean.TRUE.equals(property.getDefaultValue()));
     }
 
+    public static boolean privatePrefsFindBoolean(Context context, MobileMessagingProperty property) {
+        return findBoolean(context, property.getKey(), Boolean.TRUE.equals(property.getDefaultValue()), true);
+    }
+
     public static boolean findBoolean(Context context, String key, boolean defaultValue) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean(key, defaultValue);
+        return getDefaultMMSharedPreferences(context).getBoolean(key, defaultValue);
+    }
+
+    public static boolean findBoolean(Context context, String key, boolean defaultValue, boolean privatePrefs) {
+        if (privatePrefs) {
+            return getPrivateMMSharedPreferences(context).getBoolean(key, defaultValue);
+        } else return getDefaultMMSharedPreferences(context).getBoolean(key, defaultValue);
     }
 
     public static void saveBoolean(Context context, MobileMessagingProperty property, boolean value) {
-        saveBoolean(context, property.getKey(), value);
+        saveBoolean(context, property.getKey(), value, false);
+    }
+
+    public static boolean isUsingPrivateSharedPrefs(Context context) {
+        return PreferenceHelper.privatePrefsFindBoolean(context, MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS);
+    }
+
+    public static boolean wasUsingPublicSharedPrefs(Context context) {
+        return !PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
+                && PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.SENDER_ID);
+    }
+
+    public static void saveUsePrivateSharedPrefs(Context context, boolean value) {
+        usePrivateSharedPrefs = value;
+        saveBoolean(context, MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS.getKey(), value, true);
     }
 
     public static void saveBoolean(Context context, String key, boolean value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putBoolean(key, value).apply();
+        saveBoolean(context, key, value, false);
+    }
+
+    public static void saveBoolean(Context context, String key, boolean value, boolean privatePrefs) {
+        if (privatePrefs) {
+            getPrivateMMSharedPreferences(context).edit().putBoolean(key, value).apply();
+        } else {
+            getDefaultMMSharedPreferences(context).edit().putBoolean(key, value).apply();
+        }
     }
 
     public static int findInt(Context context, MobileMessagingProperty property) {
@@ -158,8 +209,7 @@ public abstract class PreferenceHelper {
     }
 
     public static int findInt(Context context, String key, int defaultValue) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getInt(key, defaultValue);
+        return getDefaultMMSharedPreferences(context).getInt(key, defaultValue);
     }
 
     public static void saveInt(Context context, MobileMessagingProperty property, int value) {
@@ -167,48 +217,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void saveInt(Context context, String key, int value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putInt(key, value).apply();
-    }
-
-    public static long[] findLongArray(Context context, MobileMessagingProperty property) {
-        return findLongArray(context, property.getKey(), (long[]) property.getDefaultValue());
-    }
-
-    public static long[] findLongArray(Context context, String key, long[] defaultValue) {
-        String vibrate = findString(context, key, null);
-        if (null == vibrate) {
-            return defaultValue;
-        }
-        //TODO cache
-        try {
-            JSONArray jsonArray = new JSONArray(vibrate);
-            long[] vibratePattern = new long[jsonArray.length()];
-            for (int i = 0; i < jsonArray.length(); i++) {
-                vibratePattern[i] = jsonArray.getLong(i);
-            }
-            return vibratePattern;
-        } catch (JSONException e) {
-            //TODO log
-            return defaultValue;
-        }
-    }
-
-    public static void saveLongArray(Context context, MobileMessagingProperty property, long[] value) {
-        saveLongArray(context, property.getKey(), value);
-    }
-
-    public static void saveLongArray(Context context, String key, long[] value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        if (null == value) {
-            remove(context, key);
-            return;
-        }
-        JSONArray jsonArray = new JSONArray();
-        for (long aValue : value) {
-            jsonArray.put(aValue);
-        }
-        sharedPreferences.edit().putString(key, jsonArray.toString()).apply();
+        getDefaultMMSharedPreferences(context).edit().putInt(key, value).apply();
     }
 
     public static String[] findAndRemoveStringArray(Context context, MobileMessagingProperty property) {
@@ -238,8 +247,7 @@ public abstract class PreferenceHelper {
 
     public static <T> T find(Context context, String key, T defaultValue, SetConverter<T> converter) {
         synchronized (LOCK) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            Set<String> value = sharedPreferences.getStringSet(key, null);
+            Set<String> value = getDefaultMMSharedPreferences(context).getStringSet(key, null);
             if (null == value) {
                 return defaultValue;
             }
@@ -280,7 +288,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void saveStringArray(Context context, String key, final String... strings) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         final HashSet<String> stringSet = new HashSet<String>() {{
             addAll(Arrays.asList(strings));
         }};
@@ -317,7 +325,7 @@ public abstract class PreferenceHelper {
 
     public static void editSet(Context context, String key, SetMutator mutator) {
         synchronized (LOCK) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
             final Set<String> set = new HashSet<>(sharedPreferences.getStringSet(key, new HashSet<String>()));
             mutator.mutate(set);
             if (set.isEmpty()) {
@@ -337,7 +345,7 @@ public abstract class PreferenceHelper {
     }
 
     public static void remove(Context context, String key) {
-        PreferenceManager.getDefaultSharedPreferences(context)
+        getDefaultMMSharedPreferences(context)
                 .edit()
                 .remove(key)
                 .apply();
@@ -352,11 +360,70 @@ public abstract class PreferenceHelper {
     }
 
     public static boolean contains(Context context, String key) {
-        return PreferenceManager.getDefaultSharedPreferences(context).contains(key);
+        return getDefaultMMSharedPreferences(context).contains(key);
+    }
+
+    public static boolean publicPrefsContains(Context context, MobileMessagingProperty property) {
+        String key = property.getKey();
+        if (property.isEncrypted()) {
+            key = getCryptor(context).encrypt(key);
+        }
+        return getPublicSharedPreferences(context).contains(key);
+    }
+
+    public static void migrateToPrivatePrefs(Context context) {
+        SharedPreferences.Editor publicPrefsEditor = PreferenceHelper.getPublicSharedPreferences(context).edit();
+        SharedPreferences.Editor privatePrefsEditor = PreferenceHelper.getPrivateMMSharedPreferences(context).edit();
+        Set<? extends Map.Entry<String, ?>> allPublicPrefEntries = PreferenceHelper.getPublicSharedPreferences(context).getAll().entrySet();
+        for (Map.Entry<String, ?> pref : allPublicPrefEntries) {
+            final String key = pref.getKey();
+            if (key.startsWith(MM_PREFS_PREFIX)) {
+                final Object value = pref.getValue();
+                try {
+                    if (value instanceof String) {
+                        privatePrefsEditor.putString(key, (String) value);
+                    } else if (value instanceof Integer) {
+                        privatePrefsEditor.putInt(key, (Integer) value);
+                    } else if (value instanceof Long) {
+                        privatePrefsEditor.putLong(key, (Long) value);
+                    } else if (value instanceof Boolean) {
+                        privatePrefsEditor.putBoolean(key, (Boolean) value);
+                    } else if (value instanceof Float) {
+                        privatePrefsEditor.putFloat(key, (Float) value);
+                    } else if (value instanceof Set) {
+                        privatePrefsEditor.putStringSet(key, (Set<String>) value);
+                    }
+                } catch (Exception ignored) {
+                    MobileMessagingLogger.w(String.format("Failed to migrate key %s with value %s", key, value));
+                }
+                publicPrefsEditor.remove(key);
+            }
+        }
+        publicPrefsEditor.apply();
+        privatePrefsEditor.apply();
+
+        migrateCryptedEntriesFromPublicToPrivatePrefs(context,
+                MobileMessagingProperty.INFOBIP_REGISTRATION_ID,
+                MobileMessagingProperty.APPLICATION_CODE,
+                MobileMessagingProperty.SENDER_ID,
+                MobileMessagingProperty.CLOUD_TOKEN);
+    }
+
+    private static void migrateCryptedEntriesFromPublicToPrivatePrefs(Context context, MobileMessagingProperty... properties) {
+        SharedPreferences.Editor editor = getPublicSharedPreferences(context).edit();
+        for (MobileMessagingProperty property : properties) {
+            String encryptedKey = getCryptor(context).encrypt(property.getKey());
+            String encryptedValue = getPublicSharedPreferences(context).getString(encryptedKey, (String) property.getDefaultValue());
+            saveString(context, encryptedKey, encryptedValue);
+            // remove only app code as a required public property to keep backwards compatibility over push reg ID
+            if (property == MobileMessagingProperty.APPLICATION_CODE) {
+                editor.remove(encryptedKey).apply();
+            }
+        }
     }
 
     public static void registerOnSharedPreferenceChangeListener(Context context, SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
+        getDefaultMMSharedPreferences(context).registerOnSharedPreferenceChangeListener(listener);
     }
 
     public static <Result> Result runTransaction(Transaction<Result> transaction) {

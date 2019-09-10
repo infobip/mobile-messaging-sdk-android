@@ -42,7 +42,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.after;
@@ -206,7 +205,7 @@ public class PushUnregisteredTest extends MobileMessagingTestCase {
     private void verifyRegistrationStatusUpdate(VerificationMode verificationMode, boolean enable) throws InterruptedException {
         Installation installation = new Installation();
         installation.setPushRegistrationEnabled(enable);
-        installationSynchronizer.patch(installation, null);
+        installationSynchronizer.patchMyInstallation(installation, null);
 
         verify(mobileApiAppInstance, verificationMode).patchInstance(anyString(), captor.capture());
         Map instanceMap = captor.getValue();

@@ -31,7 +31,6 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -111,19 +110,19 @@ public class InstallationSynchronizer {
         }
 
         if (mobileMessagingCore.isRegistrationUnavailable()) {
-            if (cloudTokenPresentAndUnreported) createInstance(installation, actionListener);
+            if (cloudTokenPresentAndUnreported) createInstallation(installation, actionListener);
         } else {
-            if (installation.hasDataToReport()) patch(installation, actionListener);
+            if (installation.hasDataToReport()) patchMyInstallation(installation, actionListener);
         }
     }
 
     public void updatePrimaryStatus(String pushRegId, Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
         Installation installation = new Installation(pushRegId);
         installation.setPrimaryDevice(primary);
-        patch(installation, actionListener);
+        patchMyInstallation(installation, actionListener);
     }
 
-    private void createInstance(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
+    private void createInstallation(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
         new MRetryableTask<Void, AppInstance>() {
 
             @Override
@@ -135,7 +134,8 @@ public class InstallationSynchronizer {
             public AppInstance run(Void[] voids) {
                 MobileMessagingLogger.v("CREATE INSTALLATION >>>", installation);
                 setCloudTokenReported(true);
-                return mobileApiAppInstance.createInstance(InstallationMapper.toBackend(installation));
+                final AppInstance appInstance = InstallationMapper.toBackend(installation);
+                return mobileApiAppInstance.createInstance(appInstance);
             }
 
             @Override
@@ -186,24 +186,21 @@ public class InstallationSynchronizer {
                 }
             }
         }
-
                 .retryWith(retryPolicyProvider.DEFAULT())
                 .execute(executor);
     }
 
-    public void patch(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
-        String pushRegId = mobileMessagingCore.getPushRegistrationId();
-        final boolean myDevice = isMyDevice(installation, pushRegId);
-        if (!myDevice && installation != null) {
-            pushRegId = installation.getPushRegistrationId();
-        }
+    public void patchMyInstallation(@NonNull final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
+        patch(installation, actionListener, true);
+    }
 
+    public void patch(@NonNull final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener, final boolean myInstallation) {
         SystemData systemDataForReport = systemDataForReport();
         if (systemDataForReport != null) {
             populateInstallationWithSystemData(systemDataForReport, installation);
         }
 
-        if (installation != null && !installation.hasDataToReport()) {
+        if (!installation.hasDataToReport()) {
             MobileMessagingLogger.w("Attempt to save empty installation data, will do nothing");
             if (actionListener != null) {
                 actionListener.onResult(new Result<Installation, MobileMessagingError>(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
@@ -211,12 +208,30 @@ public class InstallationSynchronizer {
             return;
         }
 
+        String pushRegId = mobileMessagingCore.getPushRegistrationId();
+        if (!myInstallation) {
+            pushRegId = installation.getPushRegistrationId();
+        }
+
+        if (StringUtils.isBlank(pushRegId)) {
+            if (myInstallation)
+                MobileMessagingLogger.w("Push registration ID is not available from the provided context, will patch installation data later");
+            else
+                MobileMessagingLogger.w("Push registration ID is not provided, unable to patch installation data");
+
+            if (actionListener != null) {
+                actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
+            return;
+        }
+
         final String pushRegIdToUpdate = pushRegId;
+        final Map<String, Object> installationMap = installation.getMap();
         new MRetryableTask<Void, Void>() {
             @Override
             public Void run(Void[] voids) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION >>>");
-                mobileApiAppInstance.patchInstance(pushRegIdToUpdate, new HashMap<>(installation.getMap()));
+                mobileApiAppInstance.patchInstance(pushRegIdToUpdate, installationMap);
                 return null;
             }
 
@@ -224,9 +239,9 @@ public class InstallationSynchronizer {
             public void after(Void aVoid) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION <<<");
 
-                updateInstallationReported(installation, myDevice);
+                updateInstallationReported(installation, myInstallation);
                 Installation installationToReturn = installation;
-                if (myDevice) {
+                if (myInstallation) {
                     installationToReturn = mobileMessagingCore.getInstallation(true);
                 }
                 broadcaster.installationUpdated(installationToReturn);
@@ -256,11 +271,6 @@ public class InstallationSynchronizer {
         }
                 .retryWith(retryPolicyProvider.DEFAULT())
                 .execute(executor);
-    }
-
-    private boolean isMyDevice(Installation installation, String myPushRegId) {
-        return (installation != null && installation.getPushRegistrationId() != null && myPushRegId != null &&
-                myPushRegId.equals(installation.getPushRegistrationId())) || installation != null && installation.getPushRegistrationId() == null;
     }
 
     private void updateInstallationReported(Installation installation, boolean myDevice) {
@@ -364,7 +374,7 @@ public class InstallationSynchronizer {
                 reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "",
                 reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "");
 
-        Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        int hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
             return data;

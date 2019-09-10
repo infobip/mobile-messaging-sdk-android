@@ -160,13 +160,16 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
 
         initDefaultChannels();
-        migratePrefsIfNecessary();
+        migratePrefsIfNecessary(context);
     }
 
     /**
      * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of patch method
      */
-    private void migratePrefsIfNecessary() {
+    private void migratePrefsIfNecessary(Context context) {
+        if (shouldMigrateToPrivatePrefs(context)) {
+            PreferenceHelper.migrateToPrivatePrefs(context);
+        }
         if (PreferenceHelper.contains(context, MobileMessagingProperty.PERFORMED_USER_DATA_MIGRATION)) {
             return;
         }
@@ -174,6 +177,10 @@ public class MobileMessagingCore
         migrateUserData(MobileMessagingProperty.USER_DATA);
         migrateUserData(MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PERFORMED_USER_DATA_MIGRATION, true);
+    }
+
+    private boolean shouldMigrateToPrivatePrefs(Context context) {
+        return PreferenceHelper.wasUsingPublicSharedPrefs(context) && PreferenceHelper.isUsingPrivateSharedPrefs(context);
     }
 
     private void migrateUserData(MobileMessagingProperty userDataProperty) {
@@ -459,12 +466,12 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary) {
+    public void setInstallationAsPrimary(@NonNull String pushRegistrationId, boolean isPrimary) {
         setInstallationAsPrimary(pushRegistrationId, isPrimary, null);
     }
 
     @Override
-    public void setInstallationAsPrimary(final String pushRegistrationId, final boolean isPrimary, final ResultListener<List<Installation>> listener) {
+    public void setInstallationAsPrimary(@NonNull final String pushRegistrationId, final boolean isPrimary, final ResultListener<List<Installation>> listener) {
         installationSynchronizer().updatePrimaryStatus(pushRegistrationId, isPrimary, new ResultListener<Installation>() {
             @Override
             public void onResult(Result<Installation, MobileMessagingError> result) {
@@ -967,26 +974,30 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void saveInstallation(Installation installation) {
+    public void saveInstallation(@NonNull Installation installation) {
         saveInstallation(installation, null);
     }
 
     @Override
-    public void saveInstallation(Installation installation, ResultListener<Installation> listener) {
-        if (installation.containsField(AppInstanceAtts.regEnabled)) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, installation.isPushRegistrationEnabled());
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, true);
-        }
-        if (installation.containsField(AppInstanceAtts.customAttributes)) {
-            setUnreportedCustomAttributes(installation.getCustomAttributes());
-        }
-        if (installation.containsField(AppInstanceAtts.isPrimary)) {
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.isPrimaryDevice());
-            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
-        }
-        if (installation.containsField(AppInstanceAtts.applicationUserId)) {
-            setApplicationUserIdReported(false);
-            saveApplicationUserId(installation.getApplicationUserId());
+    public void saveInstallation(@NonNull Installation installation, ResultListener<Installation> listener) {
+        boolean isMyInstallation = isMyInstallation(installation);
+
+        if (isMyInstallation) {
+            if (installation.containsField(AppInstanceAtts.regEnabled)) {
+                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED, installation.isPushRegistrationEnabled());
+                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, true);
+            }
+            if (installation.containsField(AppInstanceAtts.customAttributes)) {
+                setUnreportedCustomAttributes(installation.getCustomAttributes());
+            }
+            if (installation.containsField(AppInstanceAtts.isPrimary)) {
+                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY, installation.isPrimaryDevice());
+                PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
+            }
+            if (installation.containsField(AppInstanceAtts.applicationUserId)) {
+                setApplicationUserIdReported(false);
+                saveApplicationUserId(installation.getApplicationUserId());
+            }
         }
 
         if (isDepersonalizeInProgress()) {
@@ -994,7 +1005,12 @@ public class MobileMessagingCore
             return;
         }
 
-        installationSynchronizer().patch(installation, listener);
+        installationSynchronizer().patch(installation, listener, isMyInstallation);
+    }
+
+    private boolean isMyInstallation(Installation installation) {
+        String myPushRegId = getPushRegistrationId();
+        return installation.getPushRegistrationId() == null || (myPushRegId != null && myPushRegId.equals(installation.getPushRegistrationId()));
     }
 
     @SuppressWarnings({"unchecked", "WeakerAccess"})
@@ -1040,13 +1056,15 @@ public class MobileMessagingCore
 
     public static String getApplicationCode(Context context) {
 
-        if (shouldSaveApplicationCode(context)) {
-            applicationCode = PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
+        if (applicationCode != null) {
             return applicationCode;
         }
 
-        if (applicationCode != null) {
-            return applicationCode;
+        if (shouldSaveApplicationCode(context)) {
+            applicationCode = getStoredApplicationCode(context);
+            if (applicationCode != null) {
+                return applicationCode;
+            }
         }
 
         if (applicationCodeProvider != null) {
@@ -1067,6 +1085,10 @@ public class MobileMessagingCore
         }
 
         return applicationCode;
+    }
+
+    private static String getStoredApplicationCode(Context context) {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
     public String getApplicationCode() {
@@ -1135,6 +1157,10 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.ALLOW_UNTRUSTED_SSL_ON_ERROR, allowUntrustedSSLOnError);
     }
 
+    public static void setSharedPrefsStorage(Context context, boolean usePrivateSharedPrefs) {
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, usePrivateSharedPrefs);
+    }
+
     static boolean shouldSaveApplicationCode(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK.getKey(), true);
     }
@@ -1195,12 +1221,12 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void saveUser(User user) {
+    public void saveUser(@NonNull User user) {
         saveUser(user, null);
     }
 
     @Override
-    public void saveUser(User user, final MobileMessaging.ResultListener<User> listener) {
+    public void saveUser(@NonNull User user, final MobileMessaging.ResultListener<User> listener) {
         User userToReport = storeAndMergeUnreportedUserLocally(user);
 
         if (isDepersonalizeInProgress()) {
@@ -1222,7 +1248,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void fetchUser(MobileMessaging.ResultListener<User> listener) {
+    public void fetchUser(@NonNull MobileMessaging.ResultListener<User> listener) {
         if (isDepersonalizeInProgress()) {
             reportErrorDepersonalizeInProgress(listener);
             return;
@@ -1326,7 +1352,7 @@ public class MobileMessagingCore
         depersonalize(getPushRegistrationId(), listener);
     }
 
-    public void depersonalize(String pushRegId, final ResultListener<SuccessPending> listener) {
+    public void depersonalize(@NonNull String pushRegId, final ResultListener<SuccessPending> listener) {
         if (isRegistrationUnavailable()) {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1372,7 +1398,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void depersonalizeInstallation(final String pushRegId, final ResultListener<List<Installation>> listener) {
+    public void depersonalizeInstallation(@NonNull final String pushRegId, final ResultListener<List<Installation>> listener) {
         depersonalize(pushRegId, new ResultListener<SuccessPending>() {
 
             @Override
@@ -1440,7 +1466,9 @@ public class MobileMessagingCore
             if (merge) {
                 dataForStoring = UserMapper.merge(getUser(), user);
             }
-            saveUserDataToPrefs(filterOutDeletedData(dataForStoring));
+            if (dataForStoring != null) {
+                saveUserDataToPrefs(filterOutDeletedData(dataForStoring));
+            }
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }
@@ -1705,8 +1733,8 @@ public class MobileMessagingCore
          */
         public MobileMessagingCore build(@Nullable final InitListener initListener) {
             if (shouldSaveApplicationCode(application.getApplicationContext())) {
-                String existingApplicationCode = MobileMessagingCore.getApplicationCode(application.getApplicationContext());
-                if (existingApplicationCode != null && !applicationCode.equals(existingApplicationCode)) {
+                String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(application.getApplicationContext());
+                if (existingApplicationCode != null && applicationCode != null && !applicationCode.equals(existingApplicationCode)) {
                     MobileMessagingCore.cleanup(application);
                 }
             }

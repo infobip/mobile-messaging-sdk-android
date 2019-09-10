@@ -105,7 +105,7 @@ public abstract class MobileMessaging {
      * @param installation installation object with desired changes
      * @see Event#INSTALLATION_UPDATED
      */
-    public abstract void saveInstallation(Installation installation);
+    public abstract void saveInstallation(@NonNull Installation installation);
 
     /**
      * Asynchronously saves changed installation on the server.
@@ -120,7 +120,7 @@ public abstract class MobileMessaging {
      * @see ResultListener
      * @see Event#INSTALLATION_UPDATED
      */
-    public abstract void saveInstallation(Installation installation, ResultListener<Installation> listener);
+    public abstract void saveInstallation(@NonNull Installation installation, ResultListener<Installation> listener);
 
     /**
      * Asynchronously fetches the installation data from the server.
@@ -152,7 +152,7 @@ public abstract class MobileMessaging {
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise
      * @param listener           listener to report the result on
      */
-    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary, ResultListener<List<Installation>> listener);
+    public abstract void setInstallationAsPrimary(@NonNull String pushRegistrationId, boolean isPrimary, ResultListener<List<Installation>> listener);
 
     /**
      * Asynchronously configures this device as primary among others devices of a single user.
@@ -164,7 +164,7 @@ public abstract class MobileMessaging {
      * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
      */
-    public abstract void setInstallationAsPrimary(String pushRegistrationId, boolean isPrimary);
+    public abstract void setInstallationAsPrimary(@NonNull String pushRegistrationId, boolean isPrimary);
 
     /**
      * Asynchronously saves changed user data on the server.
@@ -177,7 +177,7 @@ public abstract class MobileMessaging {
      * @param user user data object with desired changes
      * @see Event#USER_UPDATED
      */
-    public abstract void saveUser(User user);
+    public abstract void saveUser(@NonNull User user);
 
     /**
      * Asynchronously saves changed user data on the server.
@@ -192,7 +192,7 @@ public abstract class MobileMessaging {
      * @see ResultListener
      * @see Event#USER_UPDATED
      */
-    public abstract void saveUser(User user, ResultListener<User> listener);
+    public abstract void saveUser(@NonNull User user, ResultListener<User> listener);
 
     /**
      * Asynchronously fetches user data from the server.
@@ -348,7 +348,7 @@ public abstract class MobileMessaging {
      * @param pushRegistrationId push registration ID of the installation to be depersonalized
      * @param listener           listener to report the result on
      */
-    public abstract void depersonalizeInstallation(String pushRegistrationId, ResultListener<List<Installation>> listener);
+    public abstract void depersonalizeInstallation(@NonNull String pushRegistrationId, ResultListener<List<Installation>> listener);
 
     /**
      * Send mobile originated messages.
@@ -456,6 +456,7 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private boolean allowUntrustedSSLOnError = false;
+        private boolean usePrivateSharedPrefs = false;
         private ApplicationCodeProvider applicationCodeProvider = null;
 
         @SuppressWarnings("unchecked")
@@ -541,7 +542,7 @@ public abstract class MobileMessaging {
 
         /**
          * When you want to use a GCM/FCM sender that is not stored to <i>google_app_id</i> string resource or to google-services.json file.
-         * By default it will use <i>google_app_id</i> string resource
+         * <br>By default it will use <i>google_app_id</i> string resource
          *
          * @param senderId if you don't have one, you should <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging">get one</a>
          * @return {@link Builder}
@@ -553,8 +554,8 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * When you want to use the Application code that is not stored to <i>infobip_application_code</i> string resource
-         * By default it will use <i>infobip_application_code</i> string resource
+         * When you want to use the Application code that is not stored to <i>infobip_application_code</i> string resource.
+         * <br>By default it will use <i>infobip_application_code</i> string resource
          *
          * @param applicationCode if you don't have one, you should get one <a href="https://portal.infobip.com/push/applications">here</a>
          * @return {@link Builder}
@@ -770,11 +771,32 @@ public abstract class MobileMessaging {
         /**
          * Set `allowUntrustedSSLOnError` to true to allow connections to untrusted hosts when SSL error happens.
          * <br>Regardless of the setting, SDK will first try to connect in ordinary mode.
+         *
          * @param allowUntrustedSSLOnError setting to control SSL connections
          * @return {@link Builder}
          */
         public Builder withHttpSettings(boolean allowUntrustedSSLOnError) {
             this.allowUntrustedSSLOnError = allowUntrustedSSLOnError;
+            return this;
+        }
+
+        /**
+         * It will migrate all MobileMessaging data from public shared preferences to private storage under `MobileMessagingSDK` name maintaining the
+         * new private storage. Old public prefs will be deleted.
+         * <p>
+         * <b>NOTE:</b> switching from using this library version with private shared prefs back to MM SDK version < 2.2.0 is not backwards compatible
+         * since older SDK versions use just public prefs by default (and by using this method only private prefs are maintained)
+         *
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withPrivateSharedPrefs()
+         *       .build();}
+         * </pre>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withPrivateSharedPrefs() {
+            this.usePrivateSharedPrefs = true;
             return this;
         }
 
@@ -807,6 +829,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);
+            MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings);

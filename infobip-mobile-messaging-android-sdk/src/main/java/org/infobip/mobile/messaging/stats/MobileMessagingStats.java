@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging.stats;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 /**
  * @author mstipanov
@@ -21,8 +21,9 @@ public class MobileMessagingStats {
     }
 
     public long getErrorCount(MobileMessagingStatsError mobileMessagingStatsError) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getLong(getKey(mobileMessagingStatsError), 0);
+        return PreferenceHelper
+                .getDefaultMMSharedPreferences(context)
+                .getLong(getKey(mobileMessagingStatsError), 0);
     }
 
     public synchronized void reportError(MobileMessagingStatsError mobileMessagingStatsError) {
@@ -40,7 +41,8 @@ public class MobileMessagingStats {
     }
 
     private void saveLong(MobileMessagingStatsError mobileMessagingStatsError, long value) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        sharedPreferences.edit().putLong(getKey(mobileMessagingStatsError), value).apply();
+        PreferenceHelper
+                .getDefaultMMSharedPreferences(context).edit()
+                .putLong(getKey(mobileMessagingStatsError), value).apply();
     }
 }

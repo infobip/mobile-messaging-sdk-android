@@ -53,7 +53,8 @@ public class UserDataReporter {
             return;
         }
 
-        if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
+        final String pushRegistrationId = mobileMessagingCore.getPushRegistrationId();
+        if (StringUtils.isBlank(pushRegistrationId)) {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
                 listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
@@ -73,9 +74,9 @@ public class UserDataReporter {
 
             @Override
             public Void run(User[] userData) {
-                Map<String, Object> request = new HashMap<>(userData[0].getMap());
+                final Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
-                mobileApiAppInstance.patchUser(mobileMessagingCore.getPushRegistrationId(), request);
+                mobileApiAppInstance.patchUser(pushRegistrationId, request);
                 MobileMessagingLogger.v("USER DATA <<<");
                 return null;
             }
@@ -184,7 +185,7 @@ public class UserDataReporter {
     }
 
     private void saveLatestPrimaryToMyInstallation(User user) {
-        if (user.getInstallations() != null) {
+        if (user != null && user.getInstallations() != null) {
             for (Installation installation : user.getInstallations()) {
                 if (mobileMessagingCore.getPushRegistrationId() != null &&
                         mobileMessagingCore.getPushRegistrationId().equals(installation.getPushRegistrationId())) {

@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.interactive.tools;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -97,7 +96,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getDefaultMMSharedPreferences(context).edit().clear().commit();
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
