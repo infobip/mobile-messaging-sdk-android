@@ -290,9 +290,13 @@ public class MobileMessagingCore
     }
 
     public void sync() {
+        sync(false);
+    }
+
+    public void sync(boolean force) {
         didSyncAtLeastOnce = true;
 
-        if (lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS) {
+        if (!force && lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS) {
             return;
         }
 
@@ -766,10 +770,18 @@ public class MobileMessagingCore
         }
 
         List<String> seenIds = getSeenMessageIdsFromReports(messageIDs);
-        List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
+        List<String> seenIdsToRemove = new ArrayList<>();
         for (String seenMsgId : seenIds) {
             if (generatedMessageIDs.contains(seenMsgId) || isInUuidFormat(seenMsgId)) {
-                filteredSeenReports.remove(seenMsgId);
+                seenIdsToRemove.add(seenMsgId);
+            }
+        }
+
+        List<String> filteredSeenReports = new ArrayList<>(Arrays.asList(messageIDs));
+        for (String seenReport : messageIDs) {
+            String seenMessageIdFromReport = getSeenMessageIdFromReport(seenReport);
+            if (seenMessageIdFromReport != null && seenIdsToRemove.contains(seenMessageIdFromReport)) {
+                filteredSeenReports.remove(seenReport);
             }
         }
         return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
@@ -786,7 +798,7 @@ public class MobileMessagingCore
      * @param reports concatenated message id and timestamp
      * @return reports
      */
-    private List<String> getSeenMessageIdsFromReports(String[] reports) {
+    public List<String> getSeenMessageIdsFromReports(String[] reports) {
         List<String> ids = new ArrayList<>();
         for (String report : reports) {
             ids.add(getSeenMessageIdFromReport(report));
@@ -810,20 +822,26 @@ public class MobileMessagingCore
     }
 
     public void setMessagesDelivered(String... messageIds) {
-        addUnreportedMessageIds(messageIds);
-        addSyncMessagesIds(messageIds);
-        sync();
+        if (messageIds != null) {
+            addUnreportedMessageIds(messageIds);
+            addSyncMessagesIds(messageIds);
+            sync(true);
+        }
     }
 
     public void setMessagesSeen(String... messageIds) {
-        addUnreportedSeenMessageIds(messageIds);
-        updateStoredMessagesWithSeenStatus(messageIds);
-        sync();
+        if (messageIds != null) {
+            addUnreportedSeenMessageIds(messageIds);
+            updateStoredMessagesWithSeenStatus(messageIds);
+            sync(true);
+        }
     }
 
     public void setMessagesSeenDontStore(String... messageIds) {
-        addUnreportedSeenMessageIds(messageIds);
-        sync();
+        if (messageIds != null) {
+            addUnreportedSeenMessageIds(messageIds);
+            sync(true);
+        }
     }
 
     private void updateStoredMessagesWithSeenStatus(String[] messageIds) {

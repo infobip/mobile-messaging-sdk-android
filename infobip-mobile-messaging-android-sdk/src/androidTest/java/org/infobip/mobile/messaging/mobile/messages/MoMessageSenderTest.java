@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 public class MoMessageSenderTest extends MobileMessagingTestCase {
 
     private MoMessageSender moMessageSender;
-    private ArgumentCaptor<List<Message>> captor;
+    private ArgumentCaptor<List> messagesListCaptor;
     private ArgumentCaptor<Message[]> messageCaptor;
     private ArgumentCaptor<MoMessagesBody> bodyCaptor;
     private MobileApiMessages apiMock;
@@ -54,7 +54,7 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
         super.setUp();
 
         MRetryPolicy policy = new MRetryPolicy.Builder().withMaxRetries(0).build();
-        captor = new ArgumentCaptor<>();
+        messagesListCaptor = forClass(List.class);
         bodyCaptor = forClass(MoMessagesBody.class);
         messageCaptor = forClass(Message[].class);
         messageStoreWrapperMock = mock(MessageStoreWrapper.class);
@@ -109,8 +109,8 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
         moMessageSender.send(null, givenMessage(givenMessage1.getMessageId()), givenMessage(givenMessage2.getMessageId()));
 
         // Then
-        verify(broadcaster, after(1000).atLeastOnce()).messagesSent(captor.capture());
-        List<Message> messages = captor.getValue();
+        verify(broadcaster, after(1000).atLeastOnce()).messagesSent(messagesListCaptor.capture());
+        List<Message> messages = messagesListCaptor.getValue();
         assertEquals("myMessageId", messages.get(0).getMessageId());
         assertEquals(Message.Status.ERROR, messages.get(0).getStatus());
         assertEquals("Message not sent", messages.get(0).getStatusMessage());

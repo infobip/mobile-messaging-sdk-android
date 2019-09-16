@@ -35,6 +35,6 @@ public abstract class RegistrationTokenHandler {
             mobileMessagingCore.setCloudToken(token);
         }
 
-        mobileMessagingCore.sync();
+        mobileMessagingCore.sync(true);
     }
 }

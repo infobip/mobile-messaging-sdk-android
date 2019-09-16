@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -92,7 +93,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         String[] messageIDs = mobileMessagingCore.filterOutGeneratedMessageIds(seenMsgIds);
 
         assertNotNull(messageIDs);
-        assertTrue(messageIDs.length == 3);
+        assertEquals(3, messageIDs.length);
     }
 
     @Test
@@ -107,7 +108,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         String[] messageIDs = mobileMessagingCore.getSyncMessagesIds();
 
         assertNotNull(messageIDs);
-        assertTrue(messageIDs.length == 1);
+        assertEquals(1, messageIDs.length);
     }
 
     @Test
@@ -125,7 +126,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         mobileMessagingCore.setMessagesDelivered("5");
 
         // Then
-        verify(mobileApiMessages, after(500).atMost(5)).sync(any(SyncMessagesBody.class));
+        verify(mobileApiMessages, after(3000).atMost(5)).sync(any(SyncMessagesBody.class));
         assertEquals(5, syncBodyCaptor.getAllValues().size());
         List<String> reportedDlrs = getReportedDLRs(syncBodyCaptor.getAllValues());
         assertEquals(5, reportedDlrs.size());
@@ -163,13 +164,13 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         List<Message> actualMessages = messageArgumentCaptor.getAllValues();
         assertEquals("someMessageId1", actualMessages.get(0).getMessageId());
         assertEquals("someBody1", actualMessages.get(0).getBody());
-        assertEquals(true, actualMessages.get(0).isVibrate());
+        assertTrue(actualMessages.get(0).isVibrate());
         assertEquals("someMessageId2", actualMessages.get(1).getMessageId());
         assertEquals("someBody2", actualMessages.get(1).getBody());
-        assertEquals(true, actualMessages.get(1).isVibrate());
+        assertTrue(actualMessages.get(1).isVibrate());
         assertEquals("someMessageId3", actualMessages.get(2).getMessageId());
         assertEquals("someBody3", actualMessages.get(2).getBody());
-        assertEquals(false, actualMessages.get(2).isVibrate());
+        assertFalse(actualMessages.get(2).isVibrate());
     }
 
     private static List<String> getReportedDLRs(List<SyncMessagesBody> bodies) {

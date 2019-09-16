@@ -132,7 +132,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     @Test
     public void shouldExecuteErrorCallbackWithInputsOnException() {
         // Given
-        String givenInputs[] = {"string1", "string2"};
+        String[] givenInputs = new String[]{"string1", "string2"};
         RuntimeException givenError = new RuntimeException("Error in background");
         Mockito.when(tester.run(any(String[].class)))
                 .thenThrow(givenError);
