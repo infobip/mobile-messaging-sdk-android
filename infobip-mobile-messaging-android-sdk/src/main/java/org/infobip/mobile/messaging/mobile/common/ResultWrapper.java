@@ -6,7 +6,7 @@ package org.infobip.mobile.messaging.mobile.common;
  */
 
 class ResultWrapper<IN, OUT> {
-    IN inputs[];
+    IN[] inputs;
     OUT result;
     Throwable error;
     boolean cancelled;

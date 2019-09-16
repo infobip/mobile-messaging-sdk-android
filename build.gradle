@@ -19,13 +19,13 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7'
     }
 }
 
 plugins {
-    id 'net.researchgate.release' version '2.2.1'
+    id 'net.researchgate.release' version '2.8.1'
     id 'com.jfrog.artifactory' version '4.4.7'
 }
 
@@ -57,11 +57,13 @@ subprojects {
     def repo = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
     def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "https://oss.jfrog.org/artifactory"
 
-    task checkProperties << {
-        if (!"${artifactoryUsername}") {
-            throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
-        } else if (!"${artifactoryPassword}") {
-            throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
+    task checkProperties {
+        doLast {
+            if (!"${artifactoryUsername}") {
+                throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
+            } else if (!"${artifactoryPassword}") {
+                throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
+            }
         }
     }
 
@@ -95,18 +97,20 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-task updateVersionInReadme << {
-    def readmeFile = new File('README.md')
-    def text = readmeFile.text
-    readmeFile.withWriter { w ->
-        w << text.replaceFirst('infobip-mobile-messaging-android-sdk:\\d+\\.\\d+\\.\\S+@aar', "infobip-mobile-messaging-android-sdk:$version@aar")
+task updateVersionInReadme {
+    doLast {
+        def readmeFile = new File('README.md')
+        def text = readmeFile.text
+        readmeFile.withWriter { w ->
+            w << text.replaceFirst('infobip-mobile-messaging-android-sdk:\\d+\\.\\d+\\.\\S+@aar', "infobip-mobile-messaging-android-sdk:$version@aar")
+        }
     }
 }
 
 afterReleaseBuild.dependsOn updateVersionInReadme
 
 release {
-    buildTasks = ['clean', 'build', 'bintrayUpload']
+    buildTasks = ['clean']
     git {
         requireBranch = ''
         pushToRemote = 'origin'

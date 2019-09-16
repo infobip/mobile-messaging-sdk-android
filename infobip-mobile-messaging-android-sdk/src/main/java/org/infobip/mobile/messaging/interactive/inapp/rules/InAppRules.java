@@ -8,7 +8,6 @@ import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ public class InAppRules {
 
     private final MobileInteractive mobileInteractive;
     private final ForegroundStateMonitor foregroundStateMonitor;
-    private final NotificationAction defaultInAppActions[];
+    private final NotificationAction[] defaultInAppActions;
 
     public InAppRules(MobileInteractive mobileInteractive, ForegroundStateMonitor foregroundStateMonitor, PredefinedActionsProvider predefinedActionsProvider) {
         this.mobileInteractive = mobileInteractive;

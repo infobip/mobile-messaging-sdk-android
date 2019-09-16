@@ -12,8 +12,8 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 public class InAppViewCtx {
     private final InAppView inAppView;
     private final Message message;
-    private final NotificationCategory category;;
-    private final NotificationAction actions[];
+    private final NotificationCategory category;
+    private final NotificationAction[] actions;
 
     InAppViewCtx(InAppView inAppView, Message message, NotificationCategory category, NotificationAction[] actions) {
         this.inAppView = inAppView;

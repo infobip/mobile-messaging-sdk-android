@@ -138,7 +138,7 @@ public class ChatAdapter extends BaseAdapter implements ChatMessageStorage.Liste
         private TextView messageTextView;
         private TextView timeTextView;
         private TextView senderTextView;
-        private Button buttons[];
+        private Button[] buttons;
     }
 
     private String getUserName(ChatMessage message) {

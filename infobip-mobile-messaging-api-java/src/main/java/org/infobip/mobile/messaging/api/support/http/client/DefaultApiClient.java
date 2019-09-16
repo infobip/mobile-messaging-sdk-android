@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 
 /**
@@ -43,8 +42,8 @@ public class DefaultApiClient implements ApiClient {
     private final int readTimeout;
     private final String libraryVersion;
     private final String[] userAgentAdditions;
-    private final RequestInterceptor requestInterceptors[];
-    private final ResponsePreProcessor responsePreProcessors[];
+    private final RequestInterceptor[] requestInterceptors;
+    private final ResponsePreProcessor[] responsePreProcessors;
     private final Logger logger;
     private final boolean allowUntrustedSSLOnError;
     private String userAgent;

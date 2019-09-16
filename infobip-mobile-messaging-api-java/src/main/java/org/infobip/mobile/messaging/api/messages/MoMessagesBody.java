@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MoMessagesBody {
     String from;
-    MoMessage messages[];
+    MoMessage[] messages;
 }

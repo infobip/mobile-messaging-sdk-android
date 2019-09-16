@@ -42,5 +42,5 @@ public class SeenMessages {
     /**
      * Array of messages to report.
      */
-    private Message messages[];
+    private Message[] messages;
 }

@@ -1,9 +1,13 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
@@ -46,8 +50,16 @@ android {
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
     def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        dependsOn variant.javaCompiler
-        from variant.javaCompiler.destinationDir
+        Task javaCompileTask
+        if (variant.hasProperty('javaCompileProvider')) {
+            // Android 3.3.0+
+            javaCompileTask = variant.javaCompileProvider.get()
+        } else {
+            javaCompileTask = variant.javaCompile
+        }
+
+        dependsOn javaCompileTask
+        from javaCompileTask.destinationDir
 
         manifest {
             attributes(
@@ -84,7 +96,7 @@ bintray {
 }
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
@@ -94,7 +106,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
