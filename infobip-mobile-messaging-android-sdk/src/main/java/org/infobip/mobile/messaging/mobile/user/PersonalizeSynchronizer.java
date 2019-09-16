@@ -206,6 +206,10 @@ public class PersonalizeSynchronizer {
             userPersonalizeBody.setUserAttributes(userAttributes.getMap());
         }
 
+        if (!userIdentity.hasDataToReport() && !userAttributes.hasDataToReport()) {
+            return;
+        }
+
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will repersonalize user later");
             return;
