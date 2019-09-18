@@ -32,6 +32,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -117,7 +118,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
                     break;
 
                 default:
-                    assertTrue("Unexpected message id " + r.getMessageId(), false);
+                    fail("Unexpected message id " + r.getMessageId());
                     break;
             }
         }
@@ -134,7 +135,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
         assertTrue(messageIds.contains("signalingMessageId2"));
 
         assertEquals(3, body.getReports().size());
-        EventReport reports[] = body.getReports().toArray(new EventReport[body.getReports().size()]);
+        EventReport[] reports = body.getReports().toArray(new EventReport[0]);
         assertNotSame(reports[0].getTimestampDelta(), reports[1].getTimestampDelta());
         assertNotSame(reports[0].getTimestampDelta(), reports[2].getTimestampDelta());
         assertNotSame(reports[1].getTimestampDelta(), reports[2].getTimestampDelta());
@@ -167,7 +168,7 @@ public class GeoReporterTest extends MobileMessagingTestCase {
                     break;
 
                 default:
-                    assertTrue("Unexpected message id " + report.getMessageId(), false);
+                    fail("Unexpected message id " + report.getMessageId());
                     break;
             }
         }

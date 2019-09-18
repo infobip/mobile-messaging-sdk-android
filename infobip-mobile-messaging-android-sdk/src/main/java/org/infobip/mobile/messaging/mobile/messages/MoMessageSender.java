@@ -104,7 +104,7 @@ public class MoMessageSender {
             }
 
             @Override
-            public void error(Message messages[], Throwable error) {
+            public void error(Message[] messages, Throwable error) {
                 MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!");
                 stats.reportError(MobileMessagingStatsError.MESSAGE_SEND_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
@@ -127,7 +127,7 @@ public class MoMessageSender {
     }
 
     public void sync() {
-        Message messages[] = getAndRemoveMessages();
+        Message[] messages = getAndRemoveMessages();
         if (messages.length == 0) {
             return;
         }
@@ -135,7 +135,7 @@ public class MoMessageSender {
         new Task() {
 
             @Override
-            public void error(Message messages[], Throwable error) {
+            public void error(Message[] messages, Throwable error) {
                 MobileMessagingLogger.e("MobileMessaging API returned error (sending messages in retry)! ", error);
 
                 stats.reportError(MobileMessagingStatsError.MESSAGE_SEND_ERROR);
@@ -149,13 +149,13 @@ public class MoMessageSender {
     }
 
     private void saveMessages(Message... messages) {
-        String jsons[] = messagesToJson(excludeOutdatedMessages(messages));
+        String[] jsons = messagesToJson(excludeOutdatedMessages(messages));
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.UNSENT_MO_MESSAGES, jsons);
     }
 
     private Message[] getAndRemoveMessages() {
-        String jsons[] = PreferenceHelper.findAndRemoveStringArray(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
-        Message messages[] = messagesFromJson(jsons);
+        String[] jsons = PreferenceHelper.findAndRemoveStringArray(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
+        Message[] messages = messagesFromJson(jsons);
         return excludeOutdatedMessages(messages);
     }
 
@@ -168,7 +168,7 @@ public class MoMessageSender {
         for (Message message : messages) {
             jsons.add(jsonSerializer.serialize(message));
         }
-        return jsons.toArray(new String[jsons.size()]);
+        return jsons.toArray(new String[0]);
     }
 
     private Message[] messagesFromJson(String... jsons) {
@@ -180,10 +180,10 @@ public class MoMessageSender {
         for (String json : jsons) {
             messages.add(jsonSerializer.deserialize(json, Message.class));
         }
-        return messages.toArray(new Message[messages.size()]);
+        return messages.toArray(new Message[0]);
     }
 
-    private Message[] excludeOutdatedMessages(Message messages[]) {
+    private Message[] excludeOutdatedMessages(Message[] messages) {
         if (messages.length == 0) {
             return new Message[0];
         }
@@ -198,6 +198,6 @@ public class MoMessageSender {
 
             relevantMessages.add(message);
         }
-        return relevantMessages.toArray(new Message[relevantMessages.size()]);
+        return relevantMessages.toArray(new Message[0]);
     }
 }

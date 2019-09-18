@@ -18,7 +18,8 @@ import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.junit.Before;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -58,7 +59,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldShowDialogWhenInForeground() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
 
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
@@ -71,7 +72,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldShowMessageOnceWhenGoesToForeground() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message).thenReturn(null);
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
@@ -108,7 +109,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldGetMessageFromCacheAndShowItWhenAppGoesToForeground() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message);
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
@@ -123,7 +124,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldTriggerSdkActionsAndBroadcastWhenButtonIsPressed() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
 
         inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
@@ -135,7 +136,7 @@ public class InAppNotificationHandlerImplTest {
     @Test
     public void shouldStartCallbackActivityIfActionShouldBringAppToForegroundWhenButtonIsPressed() {
         Message message = message();
-        NotificationAction actions[] = new NotificationAction[]{new NotificationAction.Builder()
+        NotificationAction[] actions = new NotificationAction[]{new NotificationAction.Builder()
                 .withBringingAppToForeground(true)
                 .withId("id")
                 .withTitleResourceId(1)
@@ -144,19 +145,19 @@ public class InAppNotificationHandlerImplTest {
 
         inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
 
-        assertEquals(true, actions[0].bringsAppToForeground());
+        assertTrue(actions[0].bringsAppToForeground());
         verify(callbackActivityStarterWrapper, times(1)).startActivity(any(Intent.class));
     }
 
     @Test
     public void shouldNotStartCallbackActivityIfActionShouldNotBringAppToForegroundWhenButtonIsPressed() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
 
         inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
 
-        assertEquals(false, actions[0].bringsAppToForeground());
+        assertFalse(actions[0].bringsAppToForeground());
         verify(callbackActivityStarterWrapper, never()).startActivity(any(Intent.class));
     }
 

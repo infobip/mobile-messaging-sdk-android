@@ -59,7 +59,7 @@ public abstract class MobileMessagingBaseTestCase {
         Mockito.when(contextSpy.getSharedPreferences(Mockito.anyString(), Mockito.anyInt())).thenAnswer(new Answer<SharedPreferences>() {
             @Override
             public SharedPreferences answer(InvocationOnMock invocation) throws Throwable {
-                Object arguments[] = invocation.getArguments();
+                Object[] arguments = invocation.getArguments();
                 return realContext.getSharedPreferences((String) arguments[0], (Integer) arguments[1]);
             }
         });
@@ -112,7 +112,7 @@ public abstract class MobileMessagingBaseTestCase {
                 }
             }));
         }
-        JSONAssert.assertEquals(gson.toJson(expected), gson.toJson(actual), new CustomComparator(JSONCompareMode.STRICT, customizations.toArray(new Customization[customizations.size()])));
+        JSONAssert.assertEquals(gson.toJson(expected), gson.toJson(actual), new CustomComparator(JSONCompareMode.STRICT, customizations.toArray(new Customization[0])));
     }
 
     /**

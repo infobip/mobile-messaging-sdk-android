@@ -21,8 +21,8 @@ public class NotificationAction {
     private final boolean sendsMoMessage;
     private final Integer inputPlaceholderResourceId;
     private String inputText;
-    private String titleText;
-    private String inputPlaceholderText;
+    private final String titleText;
+    private final String inputPlaceholderText;
 
     private NotificationAction(
             String id,

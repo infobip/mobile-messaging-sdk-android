@@ -3,13 +3,12 @@ package org.infobip.mobile.messaging.geo;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,8 +24,8 @@ public class Geo extends InternalDataMapper.InternalData {
     private final String expiryTime;
     private final String startTime;
     private final String campaignId;
-    private List<Area> geo = new ArrayList<>();
-    private List<GeoEventSettings> event = new ArrayList<>();
+    private List<Area> geo;
+    private List<GeoEventSettings> event;
 
     public Geo(Double triggeringLatitude, Double triggeringLongitude, DeliveryTime deliveryTime, String expiryTime, String startTime, String campaignId,
                List<Area> areasList, List<GeoEventSettings> eventSettings, long sentDateTime, String contentUrl) {

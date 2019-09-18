@@ -50,7 +50,7 @@ public class InAppRules {
                 return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity(), defaultInAppActions);
             }
 
-            NotificationAction eligibleActions[] = filterActionsForInAppDialog(category.getNotificationActions());
+            NotificationAction[] eligibleActions = filterActionsForInAppDialog(category.getNotificationActions());
             if (eligibleActions.length == 0) {
                 return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity(), defaultInAppActions);
             }
@@ -61,7 +61,7 @@ public class InAppRules {
         }
     }
 
-    private NotificationAction[] filterActionsForInAppDialog(NotificationAction actions[]) {
+    private NotificationAction[] filterActionsForInAppDialog(NotificationAction[] actions) {
         List<NotificationAction> as = new ArrayList<>();
         for (NotificationAction action : actions) {
             // remove "input" actions
@@ -69,7 +69,7 @@ public class InAppRules {
                 as.add(action);
             }
         }
-        return as.toArray(new NotificationAction[as.size()]);
+        return as.toArray(new NotificationAction[0]);
     }
 
     private static boolean hasInAppEnabled(Message message) {

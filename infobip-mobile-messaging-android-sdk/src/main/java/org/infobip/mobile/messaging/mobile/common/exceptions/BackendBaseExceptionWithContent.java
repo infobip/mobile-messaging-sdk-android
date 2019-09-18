@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 
 public class BackendBaseExceptionWithContent extends BackendBaseException {
 
-    private Object content;
+    private final Object content;
 
     public BackendBaseExceptionWithContent(String message, ApiBackendExceptionWithContent cause) {
         super(message, cause);

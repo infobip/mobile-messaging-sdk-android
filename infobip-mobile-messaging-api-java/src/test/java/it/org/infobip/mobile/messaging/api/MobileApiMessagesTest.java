@@ -61,10 +61,8 @@ public class MobileApiMessagesTest {
     public void create_seenReport_success() throws Exception {
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
 
-        SeenMessages messages = new SeenMessages()
-        {{
-            setMessages(new ArrayList<Message>()
-            {{
+        SeenMessages messages = new SeenMessages() {{
+            setMessages(new ArrayList<Message>() {{
                 add(new Message("myMessageId", System.currentTimeMillis()));
             }}.toArray(new Message[1]));
         }};
@@ -82,55 +80,53 @@ public class MobileApiMessagesTest {
     public void create_sendMO_success() throws Exception {
 
         String serverResponse =
-        "{" +
-            "\"messages\":" +
-            "[" +
                 "{" +
-                    "\"status\" :       \"myStatusId\"," +
-                    "\"statusCode\" :   0," +
-                    "\"messageId\" :    \"myMessageId\"," +
-                    "\"destination\" :  \"myDestination\"," +
-                    "\"text\" :         \"myText\"," +
-                    "\"customPayload\":" +
-                    "{" +
+                        "\"messages\":" +
+                        "[" +
+                        "{" +
+                        "\"status\" :       \"myStatusId\"," +
+                        "\"statusCode\" :   0," +
+                        "\"messageId\" :    \"myMessageId\"," +
+                        "\"destination\" :  \"myDestination\"," +
+                        "\"text\" :         \"myText\"," +
+                        "\"customPayload\":" +
+                        "{" +
                         "\"myStringKey\" :   \"string\"," +
                         "\"myBooleanKey\":   true," +
                         "\"myNumberKey\" :   1" +
-                    "}" +
-                "}," +
-                "{" +
-                    "\"status\" :       \"myStatusId2\"," +
-                    "\"statusCode\" :   1," +
-                    "\"messageId\" :    \"myMessageId2\"," +
-                    "\"destination\" :  \"myDestination2\"," +
-                    "\"text\" :         \"myText2\"," +
-                    "\"customPayload\":" +
-                    "{" +
+                        "}" +
+                        "}," +
+                        "{" +
+                        "\"status\" :       \"myStatusId2\"," +
+                        "\"statusCode\" :   1," +
+                        "\"messageId\" :    \"myMessageId2\"," +
+                        "\"destination\" :  \"myDestination2\"," +
+                        "\"text\" :         \"myText2\"," +
+                        "\"customPayload\":" +
+                        "{" +
                         "\"myStringKey\" :   \"string2\"," +
                         "\"myBooleanKey\":   false," +
                         "\"myNumberKey\" :   2" +
-                    "}" +
-                "}" +
-            "]" +
-        "}";
+                        "}" +
+                        "}" +
+                        "]" +
+                        "}";
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, serverResponse);
 
-        MoMessage moMessages[] =
-        {
-            new MoMessage("myMessageId", "myDestination", "myText", "myInitialMessageId", "myBulkId", new HashMap<String, Object>()
-                {{
-                    put("myStringKey", "string1");
-                    put("myNubmberKey", 1);
-                    put("myBooleanKey", true);
-                }}),
-            new MoMessage("myMessageId2", "myDestination2", "myText2", null, "myBulkId2", new HashMap<String, Object>()
-                {{
-                    put("myStringKey", "string2");
-                    put("myNubmberKey", 2);
-                    put("myBooleanKey", false);
-                }})
-        };
+        MoMessage[] moMessages =
+                {
+                        new MoMessage("myMessageId", "myDestination", "myText", "myInitialMessageId", "myBulkId", new HashMap<String, Object>() {{
+                            put("myStringKey", "string1");
+                            put("myNubmberKey", 1);
+                            put("myBooleanKey", true);
+                        }}),
+                        new MoMessage("myMessageId2", "myDestination2", "myText2", null, "myBulkId2", new HashMap<String, Object>() {{
+                            put("myStringKey", "string2");
+                            put("myNubmberKey", 2);
+                            put("myBooleanKey", false);
+                        }})
+                };
 
         MoMessagesBody requestBody = new MoMessagesBody();
         requestBody.setFrom("fromTest");

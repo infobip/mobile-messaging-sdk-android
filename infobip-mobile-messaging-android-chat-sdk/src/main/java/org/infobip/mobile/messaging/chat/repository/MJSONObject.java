@@ -83,7 +83,7 @@ public class MJSONObject extends JSONObject {
                 values.add(value);
             }
         }
-        return values.toArray(new String[values.size()]);
+        return values.toArray(new String[0]);
     }
 
     private static Set<String> arrayToSet(String... values) {

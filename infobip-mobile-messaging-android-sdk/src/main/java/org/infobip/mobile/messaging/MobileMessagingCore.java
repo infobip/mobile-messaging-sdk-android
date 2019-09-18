@@ -109,7 +109,7 @@ public class MobileMessagingCore
     private final RetryPolicyProvider retryPolicyProvider;
     private final Broadcaster broadcaster;
     private final ModuleLoader moduleLoader;
-    private NotificationHandler notificationHandler;
+    private final NotificationHandler notificationHandler;
 
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
@@ -127,7 +127,7 @@ public class MobileMessagingCore
     private MessageStore messageStore;
     private MessageStoreWrapper messageStoreWrapper;
     private final Context context;
-    private Map<String, MessageHandlerModule> messageHandlerModules;
+    private final Map<String, MessageHandlerModule> messageHandlerModules;
     private volatile boolean didSyncAtLeastOnce;
     private volatile Long lastSyncTimeMillis;
 
@@ -656,6 +656,7 @@ public class MobileMessagingCore
             if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
                 messageIdsArrayList.remove(i);
                 shouldUpdateMessageIds = true;
+                i--;
             } else {
                 messageIdsToSync.add(messageIdWithTimestamp[0]);
             }
@@ -668,7 +669,7 @@ public class MobileMessagingCore
             PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS, messageIdsToUpdate);
         }
 
-        return messageIdsToSync.toArray(new String[messageIdsToSync.size()]);
+        return messageIdsToSync.toArray(new String[0]);
     }
 
     public boolean isMessageAlreadyProcessed(String messageId) {
@@ -699,7 +700,7 @@ public class MobileMessagingCore
                 }
 
                 for (int i = 0; i < reports.length; i++) {
-                    String messageIdAndTimestamp[] = reports[i].split(StringUtils.COMMA_WITH_SPACE);
+                    String[] messageIdAndTimestamp = reports[i].split(StringUtils.COMMA_WITH_SPACE);
                     String newMessageId = messageIdMap.get(messageIdAndTimestamp[0]);
                     if (newMessageId != null) {
                         reports[i] = StringUtils.concat(newMessageId, messageIdAndTimestamp[1], StringUtils.COMMA_WITH_SPACE);
@@ -760,7 +761,7 @@ public class MobileMessagingCore
             }
         }
 
-        return syncMessages.toArray(new String[syncMessages.size()]);
+        return syncMessages.toArray(new String[0]);
     }
 
     public String[] filterOutGeneratedMessageIds(String[] messageIDs) {
@@ -784,7 +785,7 @@ public class MobileMessagingCore
                 filteredSeenReports.remove(seenReport);
             }
         }
-        return filteredSeenReports.toArray(new String[filteredSeenReports.size()]);
+        return filteredSeenReports.toArray(new String[0]);
     }
 
     private boolean isInUuidFormat(String msgIdToReport) {
@@ -1015,7 +1016,7 @@ public class MobileMessagingCore
         installationSynchronizer().patch(installation, listener);
     }
 
-    @SuppressWarnings({"unchecked", "WeakerAccess"})
+    @SuppressWarnings({"WeakerAccess"})
     protected Class<? extends MessageStore> getMessageStoreClass() {
         return PreferenceHelper.findClass(context, MobileMessagingProperty.MESSAGE_STORE_CLASS);
     }
@@ -1240,7 +1241,7 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void fetchUser(MobileMessaging.ResultListener<User> listener) {
+    public void fetchUser(@NonNull MobileMessaging.ResultListener<User> listener) {
         if (isDepersonalizeInProgress()) {
             reportErrorDepersonalizeInProgress(listener);
             return;
@@ -1458,7 +1459,9 @@ public class MobileMessagingCore
             if (merge) {
                 dataForStoring = UserMapper.merge(getUser(), user);
             }
-            saveUserDataToPrefs(filterOutDeletedData(dataForStoring));
+            if (dataForStoring != null) {
+                saveUserDataToPrefs(filterOutDeletedData(dataForStoring));
+            }
         }
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
     }

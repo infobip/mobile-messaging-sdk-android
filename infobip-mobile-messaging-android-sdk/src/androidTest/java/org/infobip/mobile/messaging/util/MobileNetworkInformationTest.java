@@ -22,7 +22,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
 
     private TelephonyManager telephonyManager = mock(TelephonyManager.class);
     private Context context = mock(Context.class);
-    private String invalidOperatorCodes[] = new String[]{null, "", "1", "12"};
+    private String[] invalidOperatorCodes = new String[]{null, "", "1", "12"};
 
     @Override
     public void setUp() throws Exception {
@@ -68,7 +68,7 @@ public class MobileNetworkInformationTest extends MobileMessagingTestCase {
         }
     }
 
-    private void givenMethodWillReturn(String method, String values[]) {
+    private void givenMethodWillReturn(String method, String[] values) {
         BDDMockito.BDDMyOngoingStubbing<String> stubbing = given(method);
         for (String value : values) {
             stubbing = stubbing.willReturn(value);

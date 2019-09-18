@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void activateGeofencing() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            String permissions[] = {Manifest.permission.ACCESS_FINE_LOCATION};
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
             return;
         }

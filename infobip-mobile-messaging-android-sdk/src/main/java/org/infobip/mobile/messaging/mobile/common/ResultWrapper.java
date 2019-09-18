@@ -15,12 +15,12 @@ class ResultWrapper<IN, OUT> {
         this.result = result;
     }
 
-    ResultWrapper(IN inputs[], Throwable error) {
+    ResultWrapper(IN[] inputs, Throwable error) {
         this.inputs = inputs;
         this.error = error;
     }
 
-    ResultWrapper(IN inputs[], boolean cancelled) {
+    ResultWrapper(IN[] inputs, boolean cancelled) {
         this.inputs = inputs;
         this.cancelled = cancelled;
     }

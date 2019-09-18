@@ -291,12 +291,13 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
                 }
 
                 ApiIOException ioException = (ApiIOException) exception.getCause();
+                boolean isIoExceptionTheSameAsInnerException = ioException.toString().equals(innerException.toString());
                 if (!(argument instanceof BackendCommunicationExceptionWithContent) || content == null) {
-                    return ioException.toString().equals(innerException.toString());
+                    return isIoExceptionTheSameAsInnerException;
                 }
 
                 BackendCommunicationExceptionWithContent exceptionWithContent = (BackendCommunicationExceptionWithContent) argument;
-                return ioException.toString().equals(innerException.toString()) && exceptionWithContent.getContent().equals(content);
+                return isIoExceptionTheSameAsInnerException && exceptionWithContent.getContent().equals(content);
             }
         });
     }

@@ -48,7 +48,7 @@ public class InstallationSynchronizer {
 
     private static class PushInstallation extends Installation {
         void setServiceType() {
-            super.setPushServiceType(Platform.usedPushServiceType);
+            super.setPushServiceType();
         }
 
         void setToken(String token) {
@@ -192,9 +192,17 @@ public class InstallationSynchronizer {
     }
 
     public void patch(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
+        if (installation == null) {
+            MobileMessagingLogger.w("Attempt to save empty installation data, will do nothing");
+            if (actionListener != null) {
+                actionListener.onResult(new Result<Installation, MobileMessagingError>(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
+            }
+            return;
+        }
+
         String pushRegId = mobileMessagingCore.getPushRegistrationId();
         final boolean myDevice = isMyDevice(installation, pushRegId);
-        if (!myDevice && installation != null) {
+        if (!myDevice) {
             pushRegId = installation.getPushRegistrationId();
         }
 
@@ -203,7 +211,7 @@ public class InstallationSynchronizer {
             populateInstallationWithSystemData(systemDataForReport, installation);
         }
 
-        if (installation != null && !installation.hasDataToReport()) {
+        if (!installation.hasDataToReport()) {
             MobileMessagingLogger.w("Attempt to save empty installation data, will do nothing");
             if (actionListener != null) {
                 actionListener.onResult(new Result<Installation, MobileMessagingError>(InternalSdkError.ERROR_SAVING_EMPTY_OBJECT.getError()));
@@ -364,7 +372,7 @@ public class InstallationSynchronizer {
                 reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "",
                 reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "");
 
-        Integer hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        int hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
         if (hash != data.hashCode()) {
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
             return data;

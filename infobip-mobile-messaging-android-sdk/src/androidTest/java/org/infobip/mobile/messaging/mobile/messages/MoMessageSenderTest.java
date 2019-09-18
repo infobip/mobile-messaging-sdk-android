@@ -144,7 +144,7 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
 
         // Then
         verify(apiMock, after(200).atLeast(1)).sendMO(any(MoMessagesBody.class));
-        Message actualMessages[] = getSavedMessages();
+        Message[] actualMessages = getSavedMessages();
         assertEquals(1, actualMessages.length);
         assertEquals(givenMessageIdToRetry, actualMessages[0].getMessageId());
 
@@ -166,7 +166,7 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
 
         // Then
         verify(apiMock, after(200).atLeast(1)).sendMO(bodyCaptor.capture());
-        MoMessage actualMessages[] = bodyCaptor.getValue().getMessages();
+        MoMessage[] actualMessages = bodyCaptor.getValue().getMessages();
         assertEquals(1, actualMessages.length);
         assertEquals(givenRelevantMessage.getMessageId(), actualMessages[0].getMessageId());
     }
@@ -213,12 +213,12 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
     }
 
     private Message[] getSavedMessages() {
-        String jsons[] = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
+        String[] jsons = PreferenceHelper.findStringArray(context, MobileMessagingProperty.UNSENT_MO_MESSAGES);
         List<Message> messages = new ArrayList<>(jsons.length);
         for (String json : jsons) {
             messages.add(jsonSerializer.deserialize(json, Message.class));
         }
-        return messages.toArray(new Message[messages.size()]);
+        return messages.toArray(new Message[0]);
     }
 
     private Message givenMessage(String messageId) {

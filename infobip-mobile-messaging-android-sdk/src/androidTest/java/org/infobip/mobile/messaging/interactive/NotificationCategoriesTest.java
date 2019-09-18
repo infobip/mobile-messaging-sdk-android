@@ -40,7 +40,7 @@ public class NotificationCategoriesTest extends MobileMessagingTestCase {
         mobileInteractive = new MobileInteractiveImpl(contextMock, mmcMock, inAppNotificationHandlerMock, predefinedActionsProvider);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
         messageIdArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        predefinedNotificationCategories = new HashSet<NotificationCategory>();
+        predefinedNotificationCategories = new HashSet<>();
         predefinedNotificationCategories.add(givenCategory("p1", "p2", "predefined_category"));
 
         NotificationSettings notificationSettings = new NotificationSettings.Builder(context)

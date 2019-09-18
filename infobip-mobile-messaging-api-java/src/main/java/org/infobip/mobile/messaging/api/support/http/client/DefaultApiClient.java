@@ -52,7 +52,7 @@ public class DefaultApiClient implements ApiClient {
         this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, null, new RequestInterceptor[0], new ResponsePreProcessor[0], new Logger(), false);
     }
 
-    public DefaultApiClient(int connectTimeout, int readTimeout, String libraryVersion, RequestInterceptor interceptors[], ResponsePreProcessor responsePreProcessors[], Logger logger, boolean allowUntrustedSSLOnError, String... userAgentAdditions) {
+    public DefaultApiClient(int connectTimeout, int readTimeout, String libraryVersion, RequestInterceptor[] interceptors, ResponsePreProcessor[] responsePreProcessors, Logger logger, boolean allowUntrustedSSLOnError, String... userAgentAdditions) {
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
         this.libraryVersion = libraryVersion;
@@ -163,7 +163,7 @@ public class DefaultApiClient implements ApiClient {
 
             if (null != request.body) {
                 byte[] bytes = jsonSerializer(request.httpMethod).serialize(request.body).getBytes("UTF-8");
-                urlConnection.setRequestProperty("Content-Length", "" + Long.toString(bytes.length));
+                urlConnection.setRequestProperty("Content-Length", "" + bytes.length);
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 OutputStream outputStream = null;
                 try {
@@ -304,10 +304,10 @@ public class DefaultApiClient implements ApiClient {
     }
 
     private static JsonSerializer jsonSerializer(HttpMethod httpMethod) {
-        switch (httpMethod) {
-            case PATCH: return JSON_SERIALIZER_WITH_NULLS;
-            default: return JSON_SERIALIZER;
+        if (httpMethod == HttpMethod.PATCH) {
+            return JSON_SERIALIZER_WITH_NULLS;
         }
+        return JSON_SERIALIZER;
     }
 
     public enum ErrorCode {

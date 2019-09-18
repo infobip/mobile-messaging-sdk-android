@@ -214,7 +214,7 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
                 .withMaxRetries(3)
                 .withBackoffMultiplier(0)
                 .build();
-        String givenInputs[] = {"input1", "input2"};
+        String[] givenInputs = {"input1", "input2"};
         RuntimeException givenError = new RuntimeException("Run failed");
         Mockito.when(tester.run(any(String[].class)))
                 .thenThrow(givenError);

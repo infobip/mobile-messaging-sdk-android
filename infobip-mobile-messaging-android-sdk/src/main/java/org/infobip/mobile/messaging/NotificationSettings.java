@@ -68,7 +68,6 @@ public class NotificationSettings {
     private void setDefaultIcon(int defaultIcon) {
         //We can't use the suggested getDrawable(@DrawableRes int id, @Nullable Theme theme) method,
         //because it is introduced in API v21 and we need to support API v14
-        //noinspection deprecation
         if (null == context.getResources().getDrawable(defaultIcon)) {
             throw new IllegalArgumentException("defaultIcon doesn't exist: " + defaultIcon);
         }

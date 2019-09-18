@@ -134,7 +134,7 @@ public class MobileApiResourceProvider {
             userAgentAdditions.add(SoftwareInformation.getAppVersion(context));
             userAgentAdditions.add(SystemInformation.getAndroidDeviceName(context));
         } else {
-            String emptySystemInfo[] = {"", "", "", "", "", "", "", ""};
+            String[] emptySystemInfo = {"", "", "", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptySystemInfo));
         }
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_CARRIER_INFO)) {
@@ -145,10 +145,10 @@ public class MobileApiResourceProvider {
             userAgentAdditions.add(MobileNetworkInformation.getSIMNetworkCode(context));
             userAgentAdditions.add(MobileNetworkInformation.getSIMCountryCode(context));
         } else {
-            String emptyCarrierInfoAdditions[] = {"", "", "", "", "", ""};
+            String[] emptyCarrierInfoAdditions = {"", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptyCarrierInfoAdditions));
         }
-        return userAgentAdditions.toArray(new String[userAgentAdditions.size()]);
+        return userAgentAdditions.toArray(new String[0]);
     }
 
     private boolean shouldAllowUntrustedSSLOnError(Context context) {

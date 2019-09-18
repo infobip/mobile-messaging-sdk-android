@@ -100,7 +100,7 @@ public class GeoAreasHandler {
         logGeofences(messagesAndAreas.values(), transition.getEventType());
 
         geofencingHelper.addUnreportedGeoEvents(GeoReportHelper.createReportsForMultipleMessages(context, messagesAndAreas, transition.getEventType(), transition.getTriggeringLocation()));
-        GeoReport unreportedEvents[] = geofencingHelper.removeUnreportedGeoEvents();
+        GeoReport[] unreportedEvents = geofencingHelper.removeUnreportedGeoEvents();
         if (unreportedEvents.length == 0) {
             MobileMessagingLogger.d(TAG, "No geofencing events to report at current time");
             return;
@@ -141,7 +141,7 @@ public class GeoAreasHandler {
         }
 
         MessageStore messageStore = mobileMessagingCore.getMessageStore();
-        messageStore.save(context, generatedMessages.toArray(new Message[generatedMessages.size()]));
+        messageStore.save(context, generatedMessages.toArray(new Message[0]));
     }
 
     /**
@@ -188,7 +188,7 @@ public class GeoAreasHandler {
             message.setMessageId(newMessageId);
         }
         messageStore.deleteAll(context);
-        messageStore.save(context, allMessages.toArray(new Message[allMessages.size()]));
+        messageStore.save(context, allMessages.toArray(new Message[0]));
     }
 
     /**

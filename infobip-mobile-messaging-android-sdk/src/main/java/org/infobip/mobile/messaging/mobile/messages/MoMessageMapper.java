@@ -51,10 +51,10 @@ public class MoMessageMapper {
             messages.add(message);
         }
 
-        return messages.toArray(new Message[messages.size()]);
+        return messages.toArray(new Message[0]);
     }
 
-    static MoMessagesBody body(String pushRegistrationId, Message messages[]) {
+    static MoMessagesBody body(String pushRegistrationId, Message[] messages) {
         List<MoMessage> moMessages = new ArrayList<>();
         for (Message message : messages) {
             String customPayloadString = message.getCustomPayload() != null ? message.getCustomPayload().toString() : null;
@@ -65,7 +65,7 @@ public class MoMessageMapper {
 
         MoMessagesBody moMessagesBody = new MoMessagesBody();
         moMessagesBody.setFrom(pushRegistrationId);
-        moMessagesBody.setMessages(moMessages.toArray(new MoMessage[moMessages.size()]));
+        moMessagesBody.setMessages(moMessages.toArray(new MoMessage[0]));
 
         return moMessagesBody;
     }

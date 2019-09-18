@@ -89,7 +89,7 @@ public class InAppViewDialogTest {
     @Test
     public void shouldSetupViewsAccordingToMessageContents() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(actions);
 
         inAppViewDialog.showWithImage(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8), message, category, actions);
@@ -110,7 +110,7 @@ public class InAppViewDialogTest {
     @Test
     public void shouldSetupViewsAccordingToMessageContentsWithoutImage() {
         Message message = message();
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(actions);
 
         inAppViewDialog.show(message, category, actions);
@@ -133,7 +133,7 @@ public class InAppViewDialogTest {
         Message message = message();
         message.setTitle(null);
         message.setContentUrl(null);
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(actions);
 
         inAppViewDialog.show(message, category, actions);
@@ -156,7 +156,7 @@ public class InAppViewDialogTest {
         Message message = message();
         message.setTitle(null);
         message.setContentUrl(null);
-        NotificationAction actions[] = actions();
+        NotificationAction[] actions = actions();
         NotificationCategory category = category(actions);
 
         doThrow(new IllegalStateException("You need to use a Theme.AppCompat theme (or descendant) with this activity.")).doNothing().when(alertDialog).show();

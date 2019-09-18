@@ -91,7 +91,7 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
     private PropertyHelper propertyHelper;
     private ProgressDialog progressDialog;
 
-    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             ChatMessage message = ChatMessage.createFrom(intent);
@@ -104,7 +104,7 @@ public class ChatActivity extends AppCompatActivity implements ChatAdapter.Actio
             }
         }
     };
-    private BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)) {

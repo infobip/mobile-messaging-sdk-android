@@ -19,7 +19,7 @@ import org.infobip.mobile.messaging.chat.broadcast.ChatBroadcasterImpl;
 public class CoreBroadcastReceiver extends BroadcastReceiver {
 
     private ChatBroadcaster broadcaster;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
     private UserProfileManager userProfileManager;
 
     @SuppressWarnings("unused")
@@ -45,9 +45,11 @@ public class CoreBroadcastReceiver extends BroadcastReceiver {
         }
 
         User user = User.createFrom(intent.getExtras());
-        ChatParticipant participant = mapper.fromUserData(user);
-        userProfileManager(context).save(participant);
-        broadcaster(context).userInfoSynchronized(participant);
+        if (user != null) {
+            ChatParticipant participant = mapper.fromUserData(user);
+            userProfileManager(context).save(participant);
+            broadcaster(context).userInfoSynchronized(participant);
+        }
     }
 
     // region private methods

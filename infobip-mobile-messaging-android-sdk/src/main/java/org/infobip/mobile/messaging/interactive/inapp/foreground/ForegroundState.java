@@ -8,8 +8,8 @@ import android.app.Activity;
  */
 public class ForegroundState {
 
-    private boolean foreground;
-    private Activity foregroundActivity;
+    private final boolean foreground;
+    private final Activity foregroundActivity;
 
     private ForegroundState(boolean foreground, Activity foregroundActivity) {
         this.foreground = foreground;

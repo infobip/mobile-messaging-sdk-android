@@ -35,8 +35,8 @@ ext {
     mm_targetSdkVersion = 28
     mm_buildToolsVersion = "28.0.3"
     mm_supportLibrariesVersion = "28.0.0"
-    mm_firebaseMessagingVersion = "17.3.4"
-    mm_gcmVersion = "16.0.0"
+    mm_firebaseMessagingVersion = "17.6.0"
+    mm_gcmVersion = "16.1.0"
     mm_gmsLocationVersion = "16.0.0"
 }
 
