@@ -21,11 +21,11 @@ public abstract class MRetryableTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
 
     private class ExecutionContext {
         final Executor executor;
-        final IN args[];
+        final IN[] args;
         final MRetryPolicy retryPolicy;
         int attempts;
 
-        ExecutionContext(Executor executor, IN args[], MRetryPolicy retryPolicy) {
+        ExecutionContext(Executor executor, IN[] args, MRetryPolicy retryPolicy) {
             this.executor = executor;
             this.args = args;
             if (retryPolicy == null) {

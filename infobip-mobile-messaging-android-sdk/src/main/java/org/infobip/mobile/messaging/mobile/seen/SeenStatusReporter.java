@@ -62,7 +62,7 @@ public class SeenStatusReporter {
                             throw InternalSdkError.NO_VALID_REGISTRATION.getException();
                         }
 
-                        String messageIDs[] = mobileMessagingCore.getUnreportedSeenMessageIds();
+                        String[] messageIDs = mobileMessagingCore.getUnreportedSeenMessageIds();
                         if (messageIDs.length == 0) {
                             return messageIDs;
                         }
@@ -76,8 +76,9 @@ public class SeenStatusReporter {
                     }
 
                     @Override
-                    public void after(String[] messageIds) {
-                        broadcaster.seenStatusReported(messageIds);
+                    public void after(String[] messageIdsWithTimestamp) {
+                        String[] seenMessageIdsFromReports = mobileMessagingCore.getSeenMessageIdsFromReports(messageIdsWithTimestamp).toArray(new String[0]);
+                        broadcaster.seenStatusReported(seenMessageIdsFromReports);
                     }
 
                     @Override

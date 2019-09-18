@@ -20,16 +20,16 @@ public class JsonSerializerTest {
     public void execute_JSON_to_Map() throws Exception {
         String json =
                 "{" +
-                    "\"string\":\"String\"," +
-                    "\"boolean\":true," +
-                    "\"double\":1.0" +
-                "}";
+                        "\"string\":\"String\"," +
+                        "\"boolean\":true," +
+                        "\"double\":1.0" +
+                        "}";
 
-        Map<?,?> jsonMap = new JsonSerializer().deserialize(json, Map.class);
+        Map<?, ?> jsonMap = new JsonSerializer().deserialize(json, Map.class);
         Map<String, Object> map = new LinkedTreeMap<>();
         assertEquals(map.getClass(), jsonMap.getClass());
 
-        map = (Map<String, Object>)jsonMap;
+        map = (Map<String, Object>) jsonMap;
         Assert.assertTrue(getMessageForClassMismatch(String.class, map.get("string").getClass()), map.get("string") instanceof String);
         Assert.assertTrue(getMessageForClassMismatch(Boolean.class, map.get("boolean").getClass()), map.get("boolean") instanceof Boolean);
         Assert.assertTrue(getMessageForClassMismatch(Double.class, map.get("double").getClass()), map.get("double") instanceof Double);

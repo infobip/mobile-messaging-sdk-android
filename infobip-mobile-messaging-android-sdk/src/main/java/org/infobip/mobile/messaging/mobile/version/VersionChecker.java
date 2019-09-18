@@ -46,8 +46,8 @@ public class VersionChecker {
             return;
         }
 
-        Long lastCheckTime = PreferenceHelper.findLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME);
-        Integer minimumInterval = PreferenceHelper.findInt(context, MobileMessagingProperty.VERSION_CHECK_INTERVAL_DAYS);
+        long lastCheckTime = PreferenceHelper.findLong(context, MobileMessagingProperty.VERSION_CHECK_LAST_TIME);
+        int minimumInterval = PreferenceHelper.findInt(context, MobileMessagingProperty.VERSION_CHECK_INTERVAL_DAYS);
         if (TimeUnit.MILLISECONDS.toDays(Time.now() - lastCheckTime) < minimumInterval) {
             return;
         }

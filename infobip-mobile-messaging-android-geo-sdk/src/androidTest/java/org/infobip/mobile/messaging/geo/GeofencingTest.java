@@ -84,8 +84,8 @@ public class GeofencingTest extends MobileMessagingTestCase {
     @Test
     public void shouldCalculateRefreshDatesForGeoStartAndExpired() throws Exception {
         // Given
-        Long millis15MinAfterNow = now + 15 * 60 * 1000;
-        Long millis30MinAfterNow = now + 30 * 60 * 1000;
+        long millis15MinAfterNow = now + 15 * 60 * 1000;
+        long millis30MinAfterNow = now + 30 * 60 * 1000;
         String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
         String date30MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinAfterNow));
 
@@ -108,8 +108,8 @@ public class GeofencingTest extends MobileMessagingTestCase {
     @Test
     public void shouldNotCalculateRefreshDateForGeoStartIfGeoExpired() throws Exception {
         // Given
-        Long millis30MinBeforeNow = now - 30 * 60 * 1000;
-        Long millis15MinBeforeNow = now - 15 * 60 * 1000;
+        long millis30MinBeforeNow = now - 30 * 60 * 1000;
+        long millis15MinBeforeNow = now - 15 * 60 * 1000;
         String date30MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis30MinBeforeNow));
         String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
 
@@ -166,8 +166,8 @@ public class GeofencingTest extends MobileMessagingTestCase {
     @Test
     public void shouldCalculateRefreshDateForGeoExpiredIfGeoIsMonitoredNow() throws Exception {
         // Given
-        Long millis15MinBeforeNow = now - 15 * 60 * 1000;
-        Long millis15MinAfterNow = now + 15 * 60 * 1000;
+        long millis15MinBeforeNow = now - 15 * 60 * 1000;
+        long millis15MinAfterNow = now + 15 * 60 * 1000;
         String date15MinBeforeNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinBeforeNow));
         String date15MinAfterNow = DateTimeUtil.ISO8601DateToString(new Date(millis15MinAfterNow));
 

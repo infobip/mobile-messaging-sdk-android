@@ -122,7 +122,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
             @Override
             public GeoReportingResult answer(InvocationOnMock invocation) throws Throwable {
-                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[0];
+                final GeoReport[] reports = (GeoReport[]) invocation.getArguments()[0];
                 EventReportResponse eventReportResponse = new EventReportResponse();
                 eventReportResponse.setMessageIds(new HashMap<String, String>() {{
                     put(reports[0].getMessageId(), "SomeServerMessageId");
@@ -183,7 +183,7 @@ public class GeoAreasHandlerTests extends MobileMessagingTestCase {
         Mockito.when(geoReporter.reportSync(Mockito.any(GeoReport[].class))).thenAnswer(new Answer<GeoReportingResult>() {
             @Override
             public GeoReportingResult answer(InvocationOnMock invocation) throws Throwable {
-                final GeoReport reports[] = (GeoReport[]) invocation.getArguments()[0];
+                final GeoReport[] reports = (GeoReport[]) invocation.getArguments()[0];
                 EventReportResponse eventReportResponse = new EventReportResponse();
                 eventReportResponse.setMessageIds(new HashMap<String, String>() {{
                     put(reports[0].getMessageId(), "SomeServerMessageId");

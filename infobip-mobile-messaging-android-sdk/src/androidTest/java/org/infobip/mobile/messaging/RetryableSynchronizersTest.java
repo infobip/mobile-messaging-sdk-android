@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;

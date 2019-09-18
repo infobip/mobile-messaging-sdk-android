@@ -98,7 +98,7 @@ public class UserAttributes extends CustomAttributeHolder {
 
     public void setGender(Gender gender) {
         this.gender = gender;
-        setField(UserAtts.gender, gender != null ? gender.name() : gender);
+        setField(UserAtts.gender, gender != null ? gender.name() : null);
     }
 
     public Date getBirthday() {

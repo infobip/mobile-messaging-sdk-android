@@ -9,7 +9,7 @@ public class MapModel {
 
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
 
-    private Map<String, Object> map = new HashMap<>();
+    private final Map<String, Object> map = new HashMap<>();
 
     public Map<String, Object> getMap() {
         return map;

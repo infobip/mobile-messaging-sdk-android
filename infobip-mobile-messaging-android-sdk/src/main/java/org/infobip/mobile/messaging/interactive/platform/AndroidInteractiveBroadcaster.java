@@ -26,7 +26,7 @@ public class AndroidInteractiveBroadcaster implements InteractiveBroadcaster {
 
     @Override
     public Intent notificationActionTapped(Message message, NotificationCategory category, NotificationAction action) {
-        Intent actionTapped = prepareIntent(InteractiveEvent.NOTIFICATION_ACTION_TAPPED);
+        Intent actionTapped = prepareTappedIntent();
         actionTapped.putExtras(MessageBundleMapper.messageToBundle(message));
         actionTapped.putExtras(NotificationActionBundleMapper.notificationActionToBundle(action));
         actionTapped.putExtras(NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
@@ -37,12 +37,8 @@ public class AndroidInteractiveBroadcaster implements InteractiveBroadcaster {
         return actionTapped;
     }
 
-    private Intent prepareIntent(InteractiveEvent event) {
-        return prepareIntent(event.getKey());
-    }
-
-    private Intent prepareIntent(String event) {
-        return new Intent(event)
+    private Intent prepareTappedIntent() {
+        return new Intent(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey())
                 .setPackage(context.getPackageName());
     }
 }

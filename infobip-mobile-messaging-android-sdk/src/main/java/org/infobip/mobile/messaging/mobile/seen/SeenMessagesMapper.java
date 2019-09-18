@@ -13,7 +13,7 @@ import java.util.List;
  */
 class SeenMessagesMapper extends SeenMessages {
 
-    static SeenMessages fromMessageIds(String messageIds[]) {
+    static SeenMessages fromMessageIds(String[] messageIds) {
         List<Message> messages = new ArrayList<>();
         for (String seenMessage : messageIds) {
             String[] messageIdWithTimestamp = seenMessage.split(StringUtils.COMMA_WITH_SPACE);
@@ -26,6 +26,6 @@ class SeenMessagesMapper extends SeenMessages {
 
             messages.add(new Message(messageId, deltaInSeconds));
         }
-        return new SeenMessages(messages.toArray(new Message[messages.size()]));
+        return new SeenMessages(messages.toArray(new Message[0]));
     }
 }

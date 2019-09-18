@@ -218,12 +218,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         Date expiryDate = geo.getExpiryDate();
 
         if (expiryDate == null) {
-            if (oldCheckDate == null) {
-                return null;
-
-            } else {
-                return oldCheckDate;
-            }
+            return oldCheckDate;
         }
 
         if (oldCheckDate != null && oldCheckDate.before(expiryDate)) {
@@ -369,7 +364,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
             MobileMessagingLogger.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
 
         } else {
-            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " +  status.toString());
+            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " + status.toString());
         }
     }
 

@@ -6,7 +6,8 @@ import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author sslavin
@@ -61,12 +62,12 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
     public void test_shouldFindAndRemoveDeviceInstanceIdAsEncryptedProperty() throws Exception {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "StubStringValue");
 
-        assertEquals(true, PreferenceHelper.contains(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
+        assertTrue(PreferenceHelper.contains(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
         assertEquals("StubStringValue", PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
 
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
 
-        assertEquals(false, PreferenceHelper.contains(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
-        assertEquals(null, PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
+        assertFalse(PreferenceHelper.contains(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
+        assertNull(PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
     }
 }

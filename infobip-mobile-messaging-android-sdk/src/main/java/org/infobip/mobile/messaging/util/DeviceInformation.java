@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
+import android.annotation.SuppressLint;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
@@ -19,6 +20,7 @@ public class DeviceInformation {
     private DeviceInformation() {
     }
 
+    @SuppressLint("HardwareIds")
     static String getDeviceID(Context context) {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
@@ -40,7 +42,7 @@ public class DeviceInformation {
 
         try {
             String LOCKSCREEN_UTILS_CLASSNAME = "com.android.internal.widget.LockPatternUtils";
-            Class<?> lockUtilsClass = Class.forName(LOCKSCREEN_UTILS_CLASSNAME);
+            @SuppressLint("PrivateApi") Class<?> lockUtilsClass = Class.forName(LOCKSCREEN_UTILS_CLASSNAME);
             Object lockUtils = lockUtilsClass.getConstructor(Context.class).newInstance(context);
             Method method = lockUtilsClass.getMethod("getActivePasswordQuality");
 

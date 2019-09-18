@@ -25,7 +25,7 @@ public class EncryptUtil {
             return key;
         }
 
-        byte keyBytes[] = DeviceInformation.getDeviceID(context).getBytes();
+        byte[] keyBytes = DeviceInformation.getDeviceID(context).getBytes();
         key = new SecretKeySpec(keyBytes, algorithm);
         return key;
     }
@@ -35,7 +35,7 @@ public class EncryptUtil {
             return null;
         }
 
-        byte encoded[] = encodeAES128(context, data.getBytes());
+        byte[] encoded = encodeAES128(context, data.getBytes());
         return Base64.encodeToString(encoded, Base64.DEFAULT);
     }
 
@@ -44,12 +44,15 @@ public class EncryptUtil {
             return null;
         }
 
-        byte encrypted[] = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
-        byte decrypted[] = decodeAES128(context, encrypted);
+        byte[] encrypted = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
+        byte[] decrypted = decodeAES128(context, encrypted);
+        if (decrypted == null) {
+            return null;
+        }
         return new String(decrypted);
     }
 
-    private static byte[] encodeAES128(Context context, byte data[]) {
+    private static byte[] encodeAES128(Context context, byte[] data) {
         Key key = getKey(AES_ALGO, context);
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
@@ -61,7 +64,7 @@ public class EncryptUtil {
         }
     }
 
-    private static byte[] decodeAES128(Context context, byte data[]) {
+    private static byte[] decodeAES128(Context context, byte[] data) {
         Key key = getKey(AES_ALGO, context);
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);

@@ -38,7 +38,7 @@ public class SeenStatusReporterTest extends MobileMessagingTestCase {
     @Test
     public void test_seenReportBatch() throws Exception {
 
-        String messageIds[] = {"1", "2", "3", "4", "5"};
+        String[] messageIds = {"1", "2", "3", "4", "5"};
         for (String messageId : messageIds) {
             mobileMessagingCore.setMessagesSeen(messageId);
             seenStatusReporter.sync();

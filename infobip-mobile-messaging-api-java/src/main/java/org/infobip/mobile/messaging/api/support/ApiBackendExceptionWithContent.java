@@ -7,7 +7,7 @@ package org.infobip.mobile.messaging.api.support;
 
 public class ApiBackendExceptionWithContent extends ApiIOException {
 
-    private Object content;
+    private final Object content;
 
     public ApiBackendExceptionWithContent(String code, String message, Object content) {
         super(code, message);

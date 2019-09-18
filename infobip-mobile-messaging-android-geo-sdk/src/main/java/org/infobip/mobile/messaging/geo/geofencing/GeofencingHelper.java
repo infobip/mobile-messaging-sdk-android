@@ -43,7 +43,7 @@ public class GeofencingHelper {
         return PreferenceHelper.runTransaction(new PreferenceHelper.Transaction<GeoReport[]>() {
             @Override
             public GeoReport[] run() {
-                String unreportedGeoEventsJsons[] = PreferenceHelper.findStringArray(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey(), new String[0]);
+                String[] unreportedGeoEventsJsons = PreferenceHelper.findStringArray(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey(), new String[0]);
                 Set<GeoReport> reports = new HashSet<>();
                 for (String unreportedGeoEventJson : unreportedGeoEventsJsons) {
                     try {
@@ -53,7 +53,7 @@ public class GeofencingHelper {
                     }
                 }
                 PreferenceHelper.remove(context, MobileMessagingGeoProperty.UNREPORTED_GEO_EVENTS.getKey());
-                return reports.toArray(new GeoReport[reports.size()]);
+                return reports.toArray(new GeoReport[0]);
             }
         });
     }

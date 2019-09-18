@@ -47,6 +47,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
     protected MobileMessaging mobileMessaging;
     protected MobileMessagingTestable mobileMessagingCore;
+    protected MobileApiResourceProvider mobileApiResourceProvider;
     protected MessageStore geoStore;
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
@@ -138,7 +139,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         time = new TestTimeProvider();
         Time.reset(time);
 
-        MobileApiResourceProvider mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
+        mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
         mobileApiMessages = mock(MobileApiMessages.class);
         mobileApiAppInstance = mock(MobileApiAppInstance.class, withSettings().verboseLogging());
 

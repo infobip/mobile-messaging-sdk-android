@@ -132,7 +132,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     @Test
     public void shouldExecuteErrorCallbackWithInputsOnException() {
         // Given
-        String givenInputs[] = {"string1", "string2"};
+        String[] givenInputs = new String[]{"string1", "string2"};
         RuntimeException givenError = new RuntimeException("Error in background");
         Mockito.when(tester.run(any(String[].class)))
                 .thenThrow(givenError);
@@ -291,12 +291,13 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
                 }
 
                 ApiIOException ioException = (ApiIOException) exception.getCause();
+                boolean isIoExceptionTheSameAsInnerException = ioException.toString().equals(innerException.toString());
                 if (!(argument instanceof BackendCommunicationExceptionWithContent) || content == null) {
-                    return ioException.toString().equals(innerException.toString());
+                    return isIoExceptionTheSameAsInnerException;
                 }
 
                 BackendCommunicationExceptionWithContent exceptionWithContent = (BackendCommunicationExceptionWithContent) argument;
-                return ioException.toString().equals(innerException.toString()) && exceptionWithContent.getContent().equals(content);
+                return isIoExceptionTheSameAsInnerException && exceptionWithContent.getContent().equals(content);
             }
         });
     }

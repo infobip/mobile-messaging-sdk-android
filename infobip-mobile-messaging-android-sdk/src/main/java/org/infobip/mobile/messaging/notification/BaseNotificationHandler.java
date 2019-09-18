@@ -242,7 +242,7 @@ public class BaseNotificationHandler {
         int notificationDefaults = Notification.DEFAULT_ALL;
         if (!message.isVibrate()) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
-        } else if (message.isVibrate() && ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_DENIED) {
+        } else if (ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_DENIED) {
             notificationDefaults &= ~Notification.DEFAULT_VIBRATE;
             MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
         }

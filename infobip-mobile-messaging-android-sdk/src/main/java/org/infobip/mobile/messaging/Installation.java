@@ -7,6 +7,7 @@ import org.infobip.mobile.messaging.api.appinstance.AppInstanceAtts;
 import java.util.Map;
 
 import static org.infobip.mobile.messaging.InstallationMapper.fromBundle;
+import static org.infobip.mobile.messaging.platform.Platform.*;
 
 public class Installation extends CustomAttributeHolder {
 
@@ -257,9 +258,9 @@ public class Installation extends CustomAttributeHolder {
         return pushServiceType;
     }
 
-    protected void setPushServiceType(PushServiceType pushServiceType) {
-        this.pushServiceType = pushServiceType;
-        setField(AppInstanceAtts.pushServiceType, pushServiceType.name());
+    protected void setPushServiceType() {
+        this.pushServiceType = usedPushServiceType;
+        setField(AppInstanceAtts.pushServiceType, usedPushServiceType.name());
     }
 
     public String getPushServiceToken() {

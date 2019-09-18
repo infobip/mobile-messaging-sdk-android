@@ -9,7 +9,7 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
  * @since 25/04/2018.
  */
 public interface DialogStack {
-    void add(InAppView view, Message message, NotificationCategory category, NotificationAction actions[]);
+    void add(InAppView view, Message message, NotificationCategory category, NotificationAction[] actions);
     void remove(InAppView view);
     void clear();
 }

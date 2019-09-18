@@ -109,7 +109,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
             }
         };
 
-        Set<Thread> threads = CollectionUtils.setOf(new Thread(runnable), new Thread(runnable), new Thread(runnable));
+        Set<Thread> threads = CollectionUtils.setOf(new Thread(runnable), new Thread(runnable));
         for (Thread thread : threads) thread.start();
         for (Thread thread : threads) thread.join();
 

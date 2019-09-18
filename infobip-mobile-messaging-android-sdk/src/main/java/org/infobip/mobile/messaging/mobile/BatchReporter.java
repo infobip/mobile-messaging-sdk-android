@@ -14,7 +14,7 @@ public class BatchReporter {
 
     private final long delay;
     private final TimeProvider timeProvider;
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
     private volatile TimerTask timerTask = null;
     private volatile long lastSubmitted = 0;
 

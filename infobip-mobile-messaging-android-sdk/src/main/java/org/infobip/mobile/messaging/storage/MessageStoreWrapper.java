@@ -30,5 +30,5 @@ public interface MessageStoreWrapper {
      *
      * @param messages messages to save or create.
      */
-    void upsert(@NonNull Message messages[]);
+    void upsert(@NonNull Message[] messages);
 }

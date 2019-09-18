@@ -7,13 +7,14 @@ import org.infobip.mobile.messaging.storage.SharedPreferencesMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -79,28 +80,29 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
 
         // we are not removing messages from shared prefs
         // in case user still uses SharedPreferencesMessageStore
-        Assert.assertEquals(numberOfMessages, sharedPreferencesMessageStore.findAll(context).size());
-        Assert.assertEquals(numberOfMessages, map.size());
+        assertEquals(numberOfMessages, sharedPreferencesMessageStore.findAll(context).size());
+        assertEquals(numberOfMessages, map.size());
 
         for (int i = 0; i < numberOfMessages; i++) {
             String id = i + uuid.toString();
-            Assert.assertEquals(id, map.get(id).getMessageId());
-            Assert.assertEquals("SomeTitle" + i, map.get(id).getTitle());
-            Assert.assertEquals("SomeBody" + i, map.get(id).getBody());
-            Assert.assertEquals("SomeSound" + i, map.get(id).getSound());
-            Assert.assertEquals(true, map.get(id).isVibrate());
-            Assert.assertEquals("SomeIcon" + i, map.get(id).getIcon());
-            Assert.assertEquals(false, map.get(id).isSilent());
-            Assert.assertEquals("SomeCategory" + i, map.get(id).getCategory());
-            Assert.assertEquals("SomeFrom" + i, map.get(id).getFrom());
-            Assert.assertEquals(0, map.get(id).getReceivedTimestamp());
-            Assert.assertEquals(0, map.get(id).getSeenTimestamp());
-            Assert.assertEquals(null, map.get(id).getCustomPayload());
-            JSONAssert.assertEquals(internalData.toString(), map.get(id).getInternalData(), false);
-            Assert.assertEquals("SomeDestination" + i, map.get(id).getDestination());
-            Assert.assertEquals(Message.Status.SUCCESS, map.get(id).getStatus());
-            Assert.assertEquals("SomeStatusMessage" + i, map.get(id).getStatusMessage());
-            Assert.assertEquals("http://www.some-content.com.ru.hr", map.get(id).getContentUrl());
+            Message message = map.get(id);
+            assertEquals(id, message.getMessageId());
+            assertEquals("SomeTitle" + i, message.getTitle());
+            assertEquals("SomeBody" + i, message.getBody());
+            assertEquals("SomeSound" + i, message.getSound());
+            assertEquals(true, message.isVibrate());
+            assertEquals("SomeIcon" + i, message.getIcon());
+            assertEquals(false, message.isSilent());
+            assertEquals("SomeCategory" + i, message.getCategory());
+            assertEquals("SomeFrom" + i, message.getFrom());
+            assertEquals(0, message.getReceivedTimestamp());
+            assertEquals(0, message.getSeenTimestamp());
+            assertEquals(null, message.getCustomPayload());
+            JSONAssert.assertEquals(internalData.toString(), message.getInternalData(), false);
+            assertEquals("SomeDestination" + i, message.getDestination());
+            assertEquals(Message.Status.SUCCESS, message.getStatus());
+            assertEquals("SomeStatusMessage" + i, message.getStatusMessage());
+            assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
         }
     }
 }

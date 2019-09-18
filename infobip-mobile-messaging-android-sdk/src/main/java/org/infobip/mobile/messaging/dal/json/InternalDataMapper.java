@@ -30,7 +30,7 @@ public class InternalDataMapper {
     }
 
     public static class InternalData<VibrateValueType> {
-        Attachment atts[] = new Attachment[0];
+        Attachment[] atts = new Attachment[0];
         long sendDateTime;
         Silent<VibrateValueType> silent;
         String bulkId;
@@ -232,7 +232,7 @@ public class InternalDataMapper {
                 return internalData.inAppStyle;
             }
 
-            if (internalData.inApp == true) {
+            if (internalData.inApp) {
                 return Message.InAppStyle.MODAL;
             }
 
@@ -337,7 +337,7 @@ public class InternalDataMapper {
     }
 
     private static Attachment[] createAttachments(@NonNull String contentUrl) {
-        Attachment atts[] = new Attachment[1];
+        Attachment[] atts = new Attachment[1];
         atts[0] = new Attachment();
         atts[0].url = contentUrl;
         return atts;

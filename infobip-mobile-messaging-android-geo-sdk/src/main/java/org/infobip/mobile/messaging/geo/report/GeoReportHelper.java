@@ -87,9 +87,12 @@ public class GeoReportHelper {
     public static GeoReport[] createReportsForMultipleMessages(Context context, Map<Message, List<Area>> messagesAndAreas, @NonNull GeoEventType event, @NonNull GeoLatLng triggeringLocation) {
         List<GeoReport> reports = new ArrayList<>();
         for (Message message : messagesAndAreas.keySet()) {
-            reports.addAll(createReports(context, message, messagesAndAreas.get(message), event, triggeringLocation));
+            List<Area> areas = messagesAndAreas.get(message);
+            if (areas != null) {
+                reports.addAll(createReports(context, message, areas, event, triggeringLocation));
+            }
         }
-        return reports.toArray(new GeoReport[reports.size()]);
+        return reports.toArray(new GeoReport[0]);
     }
 
     /**

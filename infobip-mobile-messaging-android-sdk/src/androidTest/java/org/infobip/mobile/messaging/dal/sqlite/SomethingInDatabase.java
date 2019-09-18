@@ -33,7 +33,6 @@ class SomethingInDatabase implements DatabaseContract.DatabaseObject {
         return "string_value";
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void fillFromCursor(Cursor cursor) throws Exception {
         stringValue = cursor.getString(cursor.getColumnIndex("string_value"));

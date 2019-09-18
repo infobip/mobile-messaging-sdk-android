@@ -25,7 +25,7 @@ public abstract class IMAsyncTask<IN, OUT> {
      * @param ins input parameters
      * @return result of operation
      */
-    public abstract OUT run(IN ins[]);
+    public abstract OUT run(IN[] ins);
 
     /**
      * Executed on background thread right after main block
@@ -61,7 +61,7 @@ public abstract class IMAsyncTask<IN, OUT> {
      * @param ins   original input parameters.
      * @param error error that happened during background execution.
      */
-    public void error(IN ins[], Throwable error) {
+    public void error(IN[] ins, Throwable error) {
 
     }
 
@@ -69,7 +69,7 @@ public abstract class IMAsyncTask<IN, OUT> {
      * Executed on UI thread if execution was cancelled ({@link IMAsyncTask#shouldCancel()} returned `true`).
      * @param ins input parameters
      */
-    public void cancelled(IN ins[]) {
+    public void cancelled(IN[] ins) {
 
     }
 }

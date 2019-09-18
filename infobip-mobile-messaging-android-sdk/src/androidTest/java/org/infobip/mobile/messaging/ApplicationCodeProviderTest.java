@@ -17,7 +17,7 @@ public class ApplicationCodeProviderTest extends MobileMessagingTestCase {
     public void setUp() throws Exception {
         super.setUp();
         appCodeProviderMock = Mockito.mock(ApplicationCodeProvider.class);
-        Mockito.when(appCodeProviderMock.resolve()).thenReturn("app_code_from_memory");
+        Mockito.when(appCodeProviderMock.resolve()).thenReturn("TestApplicationCode");
         MobileMessagingCore.applicationCodeProvider = appCodeProviderMock;
     }
 
@@ -33,21 +33,22 @@ public class ApplicationCodeProviderTest extends MobileMessagingTestCase {
 
         // Then
         Mockito.verify(appCodeProviderMock, Mockito.after(1000).times(1)).resolve();
-        assertEquals("app_code_from_memory", applicationCode);
+        assertEquals("TestApplicationCode", applicationCode);
     }
 
     @Test
     public void shouldGetApplicationCodeFromDisk() throws Exception {
         // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK, true);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "app_code_from_disk");
 
         // When
         String applicationCode = MobileMessagingCore.getApplicationCode(context);
 
         // Then
         Mockito.verify(appCodeProviderMock, Mockito.after(1000).never()).resolve();
-        assertFalse("app_code_from_memory".equals(applicationCode));
-        assertEquals(applicationCode, "TestApplicationCode");
+        assertFalse("TestApplicationCode".equals(applicationCode));
+        assertEquals(applicationCode, "app_code_from_disk");
     }
 
 }

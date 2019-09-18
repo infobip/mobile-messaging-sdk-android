@@ -57,7 +57,7 @@ public class GeoReporter {
     }
 
     public void synchronize() {
-        final GeoReport reports[] = geofenceHelper.removeUnreportedGeoEvents();
+        final GeoReport[] reports = geofenceHelper.removeUnreportedGeoEvents();
         if (reports.length == 0 || !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
@@ -92,7 +92,7 @@ public class GeoReporter {
      * @return result that will contain lists of campaign ids and mappings between library generated message ids and IPCore ids
      */
     @NonNull
-    public GeoReportingResult reportSync(@NonNull GeoReport geoReports[]) {
+    public GeoReportingResult reportSync(@NonNull GeoReport[] geoReports) {
         EventReportBody eventReportBody = prepareEventReportBody(context, geofenceHelper.getMessageStoreForGeo(), geoReports);
         MobileMessagingLogger.v("GEO REPORT >>>", eventReportBody);
         EventReportResponse eventResponse = mobileApiGeo.report(eventReportBody);
@@ -108,7 +108,7 @@ public class GeoReporter {
      * @param geoReports reports that were sent to the server.
      * @param result     result from the server
      */
-    private void handleSuccess(Context context, GeoReport geoReports[], GeoReportingResult result) {
+    private void handleSuccess(Context context, GeoReport[] geoReports, GeoReportingResult result) {
         List<GeoReport> geoReportsToBroadcast = GeoReportHelper.filterOutNonActiveReports(context, Arrays.asList(geoReports), result);
         broadcaster.geoReported(geoReportsToBroadcast);
     }
@@ -119,7 +119,7 @@ public class GeoReporter {
      * @param error      error that happens
      * @param geoReports reports sent to server
      */
-    private void handleError(Context context, Throwable error, GeoReport geoReports[]) {
+    private void handleError(Context context, Throwable error, GeoReport[] geoReports) {
         MobileMessagingLogger.e("Error reporting geo areas: " + error);
         MobileMessagingCore.getInstance(context).setLastHttpException(error);
         stats.reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
@@ -136,7 +136,7 @@ public class GeoReporter {
      * @return request body for geo reporting.
      */
     @NonNull
-    private static EventReportBody prepareEventReportBody(Context context, MessageStore geoMessageStore, @NonNull GeoReport geoReports[]) {
+    private static EventReportBody prepareEventReportBody(Context context, MessageStore geoMessageStore, @NonNull GeoReport[] geoReports) {
         Set<MessagePayload> messagePayloads = new HashSet<>();
         Set<EventReport> eventReports = new HashSet<>();
 
@@ -162,7 +162,7 @@ public class GeoReporter {
                     InternalDataMapper.createInternalDataBasedOnMessageContents(m)
             ));
 
-            Long timestampDelta = Time.now() - r.getTimestampOccurred();
+            long timestampDelta = Time.now() - r.getTimestampOccurred();
             Long timestampDeltaSeconds = TimeUnit.MILLISECONDS.toSeconds(timestampDelta);
 
             eventReports.add(new EventReport(

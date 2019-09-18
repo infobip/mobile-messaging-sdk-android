@@ -210,7 +210,7 @@ public class GCMMessageMapperTest extends TestCase {
         assertEquals("notSilentBody", message.getBody());
         assertEquals("notSilentSound", message.getSound());
         assertEquals("notSilentCategory", message.getCategory());
-        assertEquals(null, message.getInAppStyle());
+        assertNull(message.getInAppStyle());
     }
 
     public void test_inApp_mapping_fromJson_to_message_inAppStyle() throws Exception {

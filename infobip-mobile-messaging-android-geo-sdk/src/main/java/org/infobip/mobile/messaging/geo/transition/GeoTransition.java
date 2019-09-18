@@ -1,9 +1,5 @@
 package org.infobip.mobile.messaging.geo.transition;
 
-/**
- * @author sslavin
- * @since 08/02/2017.
- */
 
 import android.support.annotation.NonNull;
 
@@ -13,6 +9,9 @@ import org.infobip.mobile.messaging.geo.GeoLatLng;
 import java.util.Set;
 
 /**
+ * @author sslavin
+ * @since 08/02/2017.
+ * <p>
  * Class that contains transition information
  */
 public class GeoTransition {

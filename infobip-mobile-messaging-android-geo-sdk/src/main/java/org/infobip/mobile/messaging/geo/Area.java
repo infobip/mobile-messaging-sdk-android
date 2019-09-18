@@ -48,7 +48,7 @@ public class Area {
     }
 
     public Geofence toGeofence(Date expiryDate) {
-        Long expirationDurationMillis = 0L;
+        long expirationDurationMillis = 0L;
         if (expiryDate != null) {
             expirationDurationMillis = expiryDate.getTime() - Time.now();
         }

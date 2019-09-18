@@ -34,11 +34,11 @@ public class ShowOrNot {
         return new ShowOrNot(Action.DontShow, null, new NotificationAction[0], null);
     }
 
-    public static ShowOrNot showNowWithDefaultActions(Activity activity, @NonNull @Size(min = 1) NotificationAction defaultActions[]) {
+    public static ShowOrNot showNowWithDefaultActions(Activity activity, @NonNull @Size(min = 1) NotificationAction[] defaultActions) {
         return new ShowOrNot(Action.ShowNow, null, defaultActions, activity);
     }
 
-    public static ShowOrNot showNow(NotificationCategory category, @NonNull @Size(min = 1) NotificationAction actions[], Activity activity) {
+    public static ShowOrNot showNow(NotificationCategory category, @NonNull @Size(min = 1) NotificationAction[] actions, Activity activity) {
         return new ShowOrNot(Action.ShowNow, category, actions, activity);
     }
 

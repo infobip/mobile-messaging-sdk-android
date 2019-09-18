@@ -15,6 +15,7 @@ import fi.iki.elonen.NanoHTTPD;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 /**
  * @author sslavin
@@ -22,8 +23,6 @@ import static junit.framework.Assert.assertTrue;
  */
 
 public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
-
-    private MobileApiResourceProvider mobileApiResourceProvider;
 
     @Override
     public void setUp() throws Exception {
@@ -50,7 +49,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         // when
         try {
             mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
-            assertTrue(false);
+            fail();
         } catch (ApiIOException ignored) {
         }
         String applicationCodeInHeaders = debugServer.getHeader(CustomApiHeaders.APPLICATION_CODE.getValue());
@@ -66,7 +65,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         // when
         try {
             mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
-            assertTrue(false);
+            fail();
         } catch (ApiIOException ignored) {
         }
 
@@ -84,7 +83,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         // when
         try {
             mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
-            assertTrue(false);
+            fail();
         } catch (ApiIOException ignored) {
         }
 
@@ -104,7 +103,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         givenMobileApiVersion.getLatestRelease();
         try {
             givenMobileApiVersion.getLatestRelease();
-            assertTrue(false);
+            fail();
         } catch (ApiIOException e) {
             assertTrue(e.getCause() instanceof UnknownHostException);
             assertTrue(e.getCause().getMessage().contains("customurl"));

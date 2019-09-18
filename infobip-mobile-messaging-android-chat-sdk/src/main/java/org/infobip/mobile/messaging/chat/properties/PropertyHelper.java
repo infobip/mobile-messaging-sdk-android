@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PropertyHelper extends PreferenceHelper {
 
-    private Context context;
+    private final Context context;
 
     public PropertyHelper(Context context) {
         this.context = context;
@@ -41,23 +41,23 @@ public class PropertyHelper extends PreferenceHelper {
             } catch (Exception ignored) {
             }
         }
-        return classes.toArray(new Class[classes.size()]);
+        return classes.toArray(new Class[0]);
     }
 
     public void saveClasses(MobileChatProperty property, Class... classes) {
+        if (classes == null) {
+            return;
+        }
+
         List<String> classNames = new ArrayList<>(classes.length);
         for (Class cls : classes) {
             if (cls == null) {
                 continue;
             }
             String value = cls.getName();
-            if (value == null) {
-                continue;
-            }
-
             classNames.add(value);
         }
-        saveStringArray(context, property.getKey(), classNames.toArray(new String[classNames.size()]));
+        saveStringArray(context, property.getKey(), classNames.toArray(new String[0]));
     }
 
     public void remove(MobileChatProperty property) {

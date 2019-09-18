@@ -20,11 +20,11 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class Cryptor {
 
-    private static String AES_ALGO = "AES/ECB/PKCS5Padding";
+    private static final String AES_ALGO = "AES/ECB/PKCS5Padding";
     private Key key = null;
 
     public Cryptor(@NonNull String keySecret) {
-        byte keyBytes[] = keySecret.getBytes();
+        byte[] keyBytes = keySecret.getBytes();
         MessageDigest sha;
         try {
             sha = MessageDigest.getInstance("SHA-1");
@@ -42,7 +42,7 @@ public class Cryptor {
             return null;
         }
 
-        byte encoded[] = encodeAES128(data.getBytes());
+        byte[] encoded = encodeAES128(data.getBytes());
         return Base64.encodeToString(encoded, Base64.NO_WRAP);
     }
 
@@ -51,12 +51,15 @@ public class Cryptor {
             return null;
         }
 
-        byte encrypted[] = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
-        byte decrypted[] = decodeAES128(encrypted);
+        byte[] encrypted = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
+        byte[] decrypted = decodeAES128(encrypted);
+        if (decrypted == null) {
+            return null;
+        }
         return new String(decrypted);
     }
 
-    private byte[] encodeAES128(byte data[]) {
+    private byte[] encodeAES128(byte[] data) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -67,7 +70,7 @@ public class Cryptor {
         }
     }
 
-    private byte[] decodeAES128(byte data[]) {
+    private byte[] decodeAES128(byte[] data) {
         try {
             Cipher cipher = Cipher.getInstance(AES_ALGO);
             cipher.init(Cipher.DECRYPT_MODE, key);

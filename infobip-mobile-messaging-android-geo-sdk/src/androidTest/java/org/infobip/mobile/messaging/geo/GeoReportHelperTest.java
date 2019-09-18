@@ -186,6 +186,6 @@ public class GeoReportHelperTest extends MobileMessagingTestCase {
         assertEquals(area1.getRadius(), filteredTriggeredAreasList.get(0).getRadius());
         assertEquals(area1, filteredTriggeredAreasList.get(0));
         assertEquals(1, filteredOverlappingAreasForMessages.keySet().size());
-        assertEquals(true, filteredOverlappingAreasForMessages.containsKey(message));
+        assertTrue(filteredOverlappingAreasForMessages.containsKey(message));
     }
 }

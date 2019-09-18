@@ -45,9 +45,9 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     private Context context;
     private MobileMessagingCore mobileMessagingCore;
     private MobileInteractive mobileInteractive;
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private RepositoryMapper repositoryMapper = new RepositoryMapper();
-    private ChatBundleMapper bundleMapper = new ChatBundleMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RepositoryMapper repositoryMapper = new RepositoryMapper();
+    private final ChatBundleMapper bundleMapper = new ChatBundleMapper();
     private ChatBroadcaster broadcaster;
     private UserProfileManager userProfileManager;
     private ChatMessageStorageImpl chatMessageStorage;
@@ -114,7 +114,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     @Override
     public void markAllMessagesRead() {
         Set<String> ids = chatMessageStorage().markAllRead();
-        mobileMessagingCore().setMessagesSeenDontStore(ids.toArray(new String[ids.size()]));
+        mobileMessagingCore().setMessagesSeenDontStore(ids.toArray(new String[0]));
     }
 
     @Override
@@ -312,7 +312,7 @@ public class MobileChatImpl extends MobileChat implements MessageHandlerModule {
     private TaskStackBuilder stackBuilderForNotificationTap(ChatMessage message) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         Bundle messageBundle = bundleMapper.chatMessageToBundle(message);
-        Class classes[] = propertyHelper().findClasses(MobileChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
+        Class[] classes = propertyHelper().findClasses(MobileChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
         if (classes != null) {
             for (Class cls : classes) {
                 stackBuilder.addNextIntent(new Intent(context, cls)

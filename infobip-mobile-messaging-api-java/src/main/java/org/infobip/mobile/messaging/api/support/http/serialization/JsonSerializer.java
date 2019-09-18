@@ -51,7 +51,7 @@ public class JsonSerializer {
     public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {
         GsonBuilder builder = new GsonBuilder();
         if (serializeNulls) {
-            builder = builder.serializeNulls();
+            builder.serializeNulls();
         }
         if (adapters.length > 0) {
             for (ObjectAdapter adapter : adapters) {

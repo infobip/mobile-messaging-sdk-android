@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -116,7 +117,7 @@ public class OneMessagePreferenceCacheTest {
 
         oneMessageCache.remove(message);
 
-        assertEquals(null, oneMessageCache.getAndRemove());
+        assertNull(oneMessageCache.getAndRemove());
     }
 
     @Test

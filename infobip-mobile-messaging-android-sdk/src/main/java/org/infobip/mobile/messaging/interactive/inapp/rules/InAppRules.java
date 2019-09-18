@@ -8,7 +8,6 @@ import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +21,7 @@ public class InAppRules {
 
     private final MobileInteractive mobileInteractive;
     private final ForegroundStateMonitor foregroundStateMonitor;
-    private final NotificationAction defaultInAppActions[];
+    private final NotificationAction[] defaultInAppActions;
 
     public InAppRules(MobileInteractive mobileInteractive, ForegroundStateMonitor foregroundStateMonitor, PredefinedActionsProvider predefinedActionsProvider) {
         this.mobileInteractive = mobileInteractive;
@@ -51,7 +50,7 @@ public class InAppRules {
                 return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity(), defaultInAppActions);
             }
 
-            NotificationAction eligibleActions[] = filterActionsForInAppDialog(category.getNotificationActions());
+            NotificationAction[] eligibleActions = filterActionsForInAppDialog(category.getNotificationActions());
             if (eligibleActions.length == 0) {
                 return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity(), defaultInAppActions);
             }
@@ -62,7 +61,7 @@ public class InAppRules {
         }
     }
 
-    private NotificationAction[] filterActionsForInAppDialog(NotificationAction actions[]) {
+    private NotificationAction[] filterActionsForInAppDialog(NotificationAction[] actions) {
         List<NotificationAction> as = new ArrayList<>();
         for (NotificationAction action : actions) {
             // remove "input" actions
@@ -70,7 +69,7 @@ public class InAppRules {
                 as.add(action);
             }
         }
-        return as.toArray(new NotificationAction[as.size()]);
+        return as.toArray(new NotificationAction[0]);
     }
 
     private static boolean hasInAppEnabled(Message message) {

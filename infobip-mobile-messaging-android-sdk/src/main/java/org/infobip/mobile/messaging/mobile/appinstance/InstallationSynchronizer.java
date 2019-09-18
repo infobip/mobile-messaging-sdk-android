@@ -47,7 +47,7 @@ public class InstallationSynchronizer {
 
     private static class PushInstallation extends Installation {
         void setServiceType() {
-            super.setPushServiceType(Platform.usedPushServiceType);
+            super.setPushServiceType();
         }
 
         void setToken(String token) {

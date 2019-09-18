@@ -7,6 +7,8 @@ import com.google.firebase.messaging.RemoteMessage;
 import junit.framework.TestCase;
 
 import org.infobip.mobile.messaging.Message;
+import org.json.JSONException;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * @author sslavin
@@ -14,7 +16,7 @@ import org.infobip.mobile.messaging.Message;
  */
 public class FirebaseMessageMapperTest extends TestCase {
 
-    public void test_shouldMapRemoteMessage() {
+    public void test_shouldMapRemoteMessage() throws JSONException {
 
         final String ibData = dqjson("{" +
                 "'messageId':'messageId'," +
@@ -61,7 +63,7 @@ public class FirebaseMessageMapperTest extends TestCase {
         assertEquals(1, message.getCustomPayload().optInt("key2"));
         assertEquals(true, message.getCustomPayload().optBoolean("key3"));
         assertEquals(123L, message.getSentTimestamp());
-        assertEquals("{\"sendDateTime\":123,\"key\":\"value\"}", message.getInternalData());
+        JSONAssert.assertEquals("{\"sendDateTime\":123,\"key\":\"value\"}", message.getInternalData(), false);
         assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
     }
 

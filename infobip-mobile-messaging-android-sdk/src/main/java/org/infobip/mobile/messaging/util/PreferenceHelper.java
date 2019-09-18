@@ -229,7 +229,7 @@ public abstract class PreferenceHelper {
                 set.clear();
             }
         });
-        return strings.toArray(new String[strings.size()]);
+        return strings.toArray(new String[0]);
     }
 
     public static String[] findStringArray(Context context, MobileMessagingProperty property) {
@@ -240,7 +240,7 @@ public abstract class PreferenceHelper {
         return find(context, key, defaultValue, new SetConverter<String[]>() {
             @Override
             public String[] convert(Set<String> set) {
-                return set.toArray(new String[set.size()]);
+                return set.toArray(new String[0]);
             }
         });
     }

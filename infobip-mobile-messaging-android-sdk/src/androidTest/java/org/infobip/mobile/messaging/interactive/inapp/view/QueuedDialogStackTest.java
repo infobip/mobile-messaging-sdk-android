@@ -30,7 +30,7 @@ public class QueuedDialogStackTest {
     public void shouldShowDialog() {
         InAppView view = mock(InAppView.class);
         Message message = mock(Message.class);
-        NotificationAction actions[] = new NotificationAction[]{mock(NotificationAction.class)};
+        NotificationAction[] actions = new NotificationAction[]{mock(NotificationAction.class)};
         NotificationCategory category = mock(NotificationCategory.class);
 
         queuedDialogStack.add(view, message, category, actions);
@@ -42,7 +42,7 @@ public class QueuedDialogStackTest {
     public void shouldNotShowDialogAgainIfClosed() {
         InAppView view = mock(InAppView.class);
         Message message = mock(Message.class);
-        NotificationAction actions[] = new NotificationAction[]{mock(NotificationAction.class)};
+        NotificationAction[] actions = new NotificationAction[]{mock(NotificationAction.class)};
         NotificationCategory category = mock(NotificationCategory.class);
 
         queuedDialogStack.add(view, message, category, actions);
@@ -59,9 +59,9 @@ public class QueuedDialogStackTest {
         Message message1 = mock(Message.class);
         Message message2 = mock(Message.class);
         Message message3 = mock(Message.class);
-        NotificationAction actions1[] = new NotificationAction[]{mock(NotificationAction.class)};
-        NotificationAction actions2[] = new NotificationAction[]{mock(NotificationAction.class)};
-        NotificationAction actions3[] = new NotificationAction[]{mock(NotificationAction.class)};
+        NotificationAction[] actions1 = new NotificationAction[]{mock(NotificationAction.class)};
+        NotificationAction[] actions2 = new NotificationAction[]{mock(NotificationAction.class)};
+        NotificationAction[] actions3 = new NotificationAction[]{mock(NotificationAction.class)};
         NotificationCategory category1 = mock(NotificationCategory.class);
         NotificationCategory category2 = mock(NotificationCategory.class);
         NotificationCategory category3 = mock(NotificationCategory.class);
