@@ -38,7 +38,7 @@ public abstract class PreferenceHelper {
 
     public static SharedPreferences getDefaultMMSharedPreferences(Context context) {
         if (usePrivateSharedPrefs == null) {
-            usePrivateSharedPrefs = getPrivateMMSharedPreferences(context).getBoolean(MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS.getKey(), false);
+            usePrivateSharedPrefs = shouldUsePrivateSharedPrefs(context);
         }
         if (usePrivateSharedPrefs) {
             return getPrivateMMSharedPreferences(context);
@@ -155,10 +155,6 @@ public abstract class PreferenceHelper {
         return findBoolean(context, property.getKey(), Boolean.TRUE.equals(property.getDefaultValue()));
     }
 
-    public static boolean privatePrefsFindBoolean(Context context, MobileMessagingProperty property) {
-        return findBoolean(context, property.getKey(), Boolean.TRUE.equals(property.getDefaultValue()), true);
-    }
-
     public static boolean findBoolean(Context context, String key, boolean defaultValue) {
         return getDefaultMMSharedPreferences(context).getBoolean(key, defaultValue);
     }
@@ -173,13 +169,21 @@ public abstract class PreferenceHelper {
         saveBoolean(context, property.getKey(), value, false);
     }
 
-    public static boolean isUsingPrivateSharedPrefs(Context context) {
-        return PreferenceHelper.privatePrefsFindBoolean(context, MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS);
+    public static boolean shouldMigrateToPrivatePrefs(Context context) {
+        return PreferenceHelper.shouldUsePrivateSharedPrefs(context)
+                && PreferenceHelper.publicPrefsAreNotMigratedToPrivatePrefs(context);
     }
 
-    public static boolean wasUsingPublicSharedPrefs(Context context) {
-        return !PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
-                && PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.SENDER_ID);
+    private static boolean publicPrefsAreNotMigratedToPrivatePrefs(Context context) {
+        return PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
+                && PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.SENDER_ID)
+                && !PreferenceHelper.privatePrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
+                && !PreferenceHelper.privatePrefsContains(context, MobileMessagingProperty.SENDER_ID);
+    }
+
+    private static boolean shouldUsePrivateSharedPrefs(Context context) {
+        MobileMessagingProperty property = MobileMessagingProperty.USE_PRIVATE_SHARED_PREFS;
+        return findBoolean(context, property.getKey(), Boolean.TRUE.equals(property.getDefaultValue()), true);
     }
 
     public static void saveUsePrivateSharedPrefs(Context context, boolean value) {
@@ -363,7 +367,7 @@ public abstract class PreferenceHelper {
         return getDefaultMMSharedPreferences(context).contains(key);
     }
 
-    public static boolean publicPrefsContains(Context context, MobileMessagingProperty property) {
+    static boolean publicPrefsContains(Context context, MobileMessagingProperty property) {
         String key = property.getKey();
         if (property.isEncrypted()) {
             key = getCryptor(context).encrypt(key);
@@ -371,10 +375,18 @@ public abstract class PreferenceHelper {
         return getPublicSharedPreferences(context).contains(key);
     }
 
+    static boolean privatePrefsContains(Context context, MobileMessagingProperty property) {
+        String key = property.getKey();
+        if (property.isEncrypted()) {
+            key = getCryptor(context).encrypt(key);
+        }
+        return getPrivateMMSharedPreferences(context).contains(key);
+    }
+
     public static void migrateToPrivatePrefs(Context context) {
-        SharedPreferences.Editor publicPrefsEditor = PreferenceHelper.getPublicSharedPreferences(context).edit();
-        SharedPreferences.Editor privatePrefsEditor = PreferenceHelper.getPrivateMMSharedPreferences(context).edit();
-        Set<? extends Map.Entry<String, ?>> allPublicPrefEntries = PreferenceHelper.getPublicSharedPreferences(context).getAll().entrySet();
+        SharedPreferences.Editor publicPrefsEditor = getPublicSharedPreferences(context).edit();
+        SharedPreferences.Editor privatePrefsEditor = getPrivateMMSharedPreferences(context).edit();
+        Set<? extends Map.Entry<String, ?>> allPublicPrefEntries = getPublicSharedPreferences(context).getAll().entrySet();
         for (Map.Entry<String, ?> pref : allPublicPrefEntries) {
             final String key = pref.getKey();
             if (key.startsWith(MM_PREFS_PREFIX)) {
@@ -410,15 +422,11 @@ public abstract class PreferenceHelper {
     }
 
     private static void migrateCryptedEntriesFromPublicToPrivatePrefs(Context context, MobileMessagingProperty... properties) {
-        SharedPreferences.Editor editor = getPublicSharedPreferences(context).edit();
         for (MobileMessagingProperty property : properties) {
             String encryptedKey = getCryptor(context).encrypt(property.getKey());
             String encryptedValue = getPublicSharedPreferences(context).getString(encryptedKey, (String) property.getDefaultValue());
             saveString(context, encryptedKey, encryptedValue);
-            // remove only app code as a required public property to keep backwards compatibility over push reg ID
-            if (property == MobileMessagingProperty.APPLICATION_CODE) {
-                editor.remove(encryptedKey).apply();
-            }
+            // don't remove required properties to keep backwards compatibility over push reg ID
         }
     }
 

@@ -167,7 +167,7 @@ public class MobileMessagingCore
      * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of patch method
      */
     private void migratePrefsIfNecessary(Context context) {
-        if (shouldMigrateToPrivatePrefs(context)) {
+        if (PreferenceHelper.shouldMigrateToPrivatePrefs(context)) {
             PreferenceHelper.migrateToPrivatePrefs(context);
         }
         if (PreferenceHelper.contains(context, MobileMessagingProperty.PERFORMED_USER_DATA_MIGRATION)) {
@@ -177,10 +177,6 @@ public class MobileMessagingCore
         migrateUserData(MobileMessagingProperty.USER_DATA);
         migrateUserData(MobileMessagingProperty.UNREPORTED_USER_DATA);
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.PERFORMED_USER_DATA_MIGRATION, true);
-    }
-
-    private boolean shouldMigrateToPrivatePrefs(Context context) {
-        return PreferenceHelper.wasUsingPublicSharedPrefs(context) && PreferenceHelper.isUsingPrivateSharedPrefs(context);
     }
 
     private void migrateUserData(MobileMessagingProperty userDataProperty) {

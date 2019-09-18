@@ -124,8 +124,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     public void setUp() throws Exception {
         super.setUp();
 
-        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().apply();
-        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().apply();
+        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, false);
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");

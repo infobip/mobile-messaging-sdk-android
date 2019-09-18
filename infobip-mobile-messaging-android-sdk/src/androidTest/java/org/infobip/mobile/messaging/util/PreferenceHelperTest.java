@@ -16,7 +16,7 @@ import static junit.framework.Assert.assertTrue;
 public class PreferenceHelperTest extends MobileMessagingTestCase {
 
     @Test
-    public void test_privateSharedPrefsNotDeletedOnClearingOfPublicAppPrefs() throws Exception {
+    public void test_privateSharedPrefsNotDeleted_onClearingOfPublicAppPrefs() throws Exception {
         MobileMessagingProperty key1 = MobileMessagingProperty.APP_USER_ID;
         MobileMessagingProperty key2 = MobileMessagingProperty.USER_DATA;
         MobileMessagingProperty key3 = MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES;
@@ -43,6 +43,77 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
         assertFalse(PreferenceHelper.getPublicSharedPreferences(context).contains(key3.getKey()));
         assertTrue(PreferenceHelper.getPrivateMMSharedPreferences(context).contains(key3.getKey()));
         assertEquals(value, PreferenceHelper.getPrivateMMSharedPreferences(context).getString(key3.getKey(), null));
+    }
+
+    @Test
+    public void test_shouldMigrateSharedPrefsFromPublicToPrivate_publicPrefsPresent() throws Exception {
+        MobileMessagingProperty key1 = MobileMessagingProperty.APPLICATION_CODE;
+        MobileMessagingProperty key2 = MobileMessagingProperty.SENDER_ID;
+        MobileMessagingProperty key3 = MobileMessagingProperty.PUSH_REGISTRATION_ENABLED;
+        String value = "some value";
+
+        // saving to public storage - per default
+        PreferenceHelper.saveString(context, key1, value);
+        PreferenceHelper.saveString(context, key2, value);
+        PreferenceHelper.saveBoolean(context, key3, true);
+
+        assertFalse(PreferenceHelper.shouldMigrateToPrivatePrefs(context));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key1));
+        assertEquals(value, PreferenceHelper.findString(context, key1));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key2));
+        assertEquals(value, PreferenceHelper.findString(context, key2));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key3));
+        assertTrue(PreferenceHelper.getPublicSharedPreferences(context).getBoolean(key3.getKey(), false));
+
+        // switching to private storage
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, true);
+        assertTrue(PreferenceHelper.shouldMigrateToPrivatePrefs(context));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key1));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key2));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key3));
+
+        // migrate
+        PreferenceHelper.migrateToPrivatePrefs(context);
+
+        assertTrue(PreferenceHelper.privatePrefsContains(context, key1));
+        assertEquals(value, PreferenceHelper.findString(context, key1));
+        assertTrue(PreferenceHelper.privatePrefsContains(context, key2));
+        assertEquals(value, PreferenceHelper.findString(context, key2));
+        assertTrue(PreferenceHelper.privatePrefsContains(context, key3));
+        assertTrue(PreferenceHelper.getPrivateMMSharedPreferences(context).getBoolean(key3.getKey(), false));
+
+        // should keep public encrypted prefs
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key1));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key2));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key3));
+    }
+
+    @Test
+    public void test_shouldNotMigrateSharedPrefsFromPublicToPrivate() throws Exception {
+        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
+
+        MobileMessagingProperty key1 = MobileMessagingProperty.APPLICATION_CODE;
+        MobileMessagingProperty key2 = MobileMessagingProperty.SENDER_ID;
+        MobileMessagingProperty key3 = MobileMessagingProperty.PUSH_REGISTRATION_ENABLED;
+        String value = "some value";
+
+        assertFalse(PreferenceHelper.shouldMigrateToPrivatePrefs(context));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key1));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key2));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key3));
+
+        PreferenceHelper.saveString(context, key1, value);
+        PreferenceHelper.saveString(context, key2, value);
+        PreferenceHelper.saveBoolean(context, key3, true);
+
+        assertFalse(PreferenceHelper.shouldMigrateToPrivatePrefs(context));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key1));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key2));
+        assertFalse(PreferenceHelper.privatePrefsContains(context, key3));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key1));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key2));
+        assertTrue(PreferenceHelper.publicPrefsContains(context, key3));
     }
 
     @Test
