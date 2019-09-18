@@ -21,12 +21,14 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
 plugins {
     id 'net.researchgate.release' version '2.8.1'
     id 'com.jfrog.artifactory' version '4.4.7'
+    id 'com.jfrog.bintray' version '1.7.3'
 }
 
 ext {
@@ -110,7 +112,7 @@ task updateVersionInReadme {
 afterReleaseBuild.dependsOn updateVersionInReadme
 
 release {
-    buildTasks = ['clean']
+    buildTasks = ['clean', 'build', 'bintrayUpload']
     git {
         requireBranch = ''
         pushToRemote = 'origin'
