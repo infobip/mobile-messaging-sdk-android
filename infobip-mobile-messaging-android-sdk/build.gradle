@@ -134,17 +134,17 @@ artifacts {
 
 // Remove this when Gradle bug is fixed.
 // https://github.com/gradle/gradle/issues/3170
-task modifyPomBeforeUpload {
-    doLast {
-        def pom = "${project.buildDir}/poms/pom-default.xml"
-        def project = new XmlParser().parse(pom)
-        project.dependencies
-                .dependency
-                .find { dependency -> dependency.artifactId[0].text() == 'infobip-mobile-messaging-android-resources' }
-                .appendNode('type', 'aar')
-        //noinspection UnnecessaryQualifiedReference
-        groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
-    }
-}
-artifactoryPublish.dependsOn(modifyPomBeforeUpload)
-bintrayUpload.dependsOn(modifyPomBeforeUpload)
+//task modifyPomBeforeUpload {
+//    doLast {
+//        def pom = "${project.buildDir}/poms/pom-default.xml"
+//        def project = new XmlParser().parse(pom)
+//        project.dependencies
+//                .dependency
+//                .find { dependency -> dependency.artifactId[0].text() == 'infobip-mobile-messaging-android-resources' }
+//                .appendNode('type', 'aar')
+//        //noinspection UnnecessaryQualifiedReference
+//        groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
+//    }
+//}
+//artifactoryPublish.dependsOn(modifyPomBeforeUpload)
+//bintrayUpload.dependsOn(modifyPomBeforeUpload)
