@@ -136,7 +136,7 @@ artifacts {
 // https://github.com/gradle/gradle/issues/3170
 task modifyPomBeforeUpload {
     doLast {
-        def pom = "${project.projectDir}/build/poms/pom-default.xml"
+        def pom = "${project.buildDir}/poms/pom-default.xml"
         def project = new XmlParser().parse(pom)
         project.dependencies
                 .dependency
