@@ -57,6 +57,7 @@ import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.ModuleLoader;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.SHA1;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -1069,12 +1070,21 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "");
     }
 
+    static String getApplicationCodeFromResources(Context context) {
+        int resource = ResourceLoader.loadResourceByName(context, "string", "infobip_application_code");
+        if (resource > 0) {
+            return context.getResources().getString(resource);
+        }
+        return null;
+    }
+
     public static String getApplicationCode(Context context) {
 
         if (applicationCode != null) {
             return applicationCode;
         }
 
+        // resolve from storage
         if (shouldSaveApplicationCode(context)) {
             applicationCode = getStoredApplicationCode(context);
             if (applicationCode != null) {
@@ -1082,6 +1092,7 @@ public class MobileMessagingCore
             }
         }
 
+        // resolve from app code provider
         if (applicationCodeProvider != null) {
             applicationCode = applicationCodeProvider.resolve();
             return applicationCode;
@@ -1097,6 +1108,11 @@ public class MobileMessagingCore
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if (applicationCode == null) {
+            // if still null fallback to check string resources if app code couldn't be resolved on storage or on app code provider
+            applicationCode = getApplicationCodeFromResources(context);
         }
 
         return applicationCode;

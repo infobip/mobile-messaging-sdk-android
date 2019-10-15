@@ -10,6 +10,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -44,6 +45,9 @@ public class MobileMessagingJobService extends JobService {
     public boolean onStartJob(JobParameters params) {
         int connectivityScheduleId = getScheduleId(this, ON_NETWORK_AVAILABLE_JOB_ID);
         if (params.getJobId() == connectivityScheduleId) {
+            if (TextUtils.isEmpty(mobileMessagingCore().getApplicationCode())) {
+                return false;
+            }
             MobileMessagingLogger.d(TAG, "Network available");
             mobileMessagingCore().retrySyncOnNetworkAvailable();
             return false;
@@ -71,7 +75,7 @@ public class MobileMessagingJobService extends JobService {
     @NonNull
     private MobileMessagingCore mobileMessagingCore() {
         if (mobileMessagingCore == null) {
-            mobileMessagingCore = MobileMessagingCore.getInstance(this);
+            mobileMessagingCore = MobileMessagingCore.getInstance(getApplicationContext());
         }
         return mobileMessagingCore;
     }

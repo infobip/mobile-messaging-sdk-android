@@ -470,7 +470,10 @@ public abstract class MobileMessaging {
 
             loadDefaultApiUri(application);
             loadGcmSenderId(application);
-            loadApplicationCode(application);
+            final String applicationCode = MobileMessagingCore.getApplicationCodeFromResources(application);
+            if (StringUtils.isNotBlank(applicationCode)) {
+                this.applicationCode = applicationCode;
+            }
             loadNotificationSettings(application);
         }
 
@@ -507,16 +510,6 @@ public abstract class MobileMessaging {
                 String senderId = context.getResources().getString(ibResource);
                 if (StringUtils.isNotBlank(senderId)) {
                     this.senderId = senderId;
-                }
-            }
-        }
-
-        private void loadApplicationCode(Context context) {
-            int resource = ResourceLoader.loadResourceByName(context, "string", "infobip_application_code");
-            if (resource > 0) {
-                String applicationCode = context.getResources().getString(resource);
-                if (StringUtils.isNotBlank(applicationCode)) {
-                    this.applicationCode = applicationCode;
                 }
             }
         }
