@@ -147,5 +147,6 @@ task modifyPomBeforeUpload {
         groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
     }
 }
+modifyPomBeforeUpload.dependsOn(install)
 artifactoryPublish.dependsOn(modifyPomBeforeUpload)
 bintrayUpload.dependsOn(modifyPomBeforeUpload)
