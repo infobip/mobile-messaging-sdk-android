@@ -17,6 +17,7 @@ import static org.infobip.mobile.messaging.MobileMessagingJob.ON_NETWORK_AVAILAB
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -44,6 +45,8 @@ public class MobileMessagingJobServiceTest {
         // Given
         PackageManager packageManagerMock = Mockito.mock(PackageManager.class);
         MobileMessagingJobService givenJobService = spy(new MobileMessagingJobService(mmcMock));
+
+        doReturn("123fgh").when(mmcMock).getApplicationCode();
         doReturn(packageManagerMock).when(givenJobService).getPackageManager();
         doReturn(givenJobScheduler).when(givenJobService).getSystemService(eq(Context.JOB_SCHEDULER_SERVICE));
         doReturn(getClass().getPackage().getName()).when(givenJobService).getPackageName();
@@ -54,5 +57,24 @@ public class MobileMessagingJobServiceTest {
 
         // Then
         verify(mmcMock, times(1)).retrySyncOnNetworkAvailable();
+    }
+
+    @Test
+    public void shouldNotInvokeResyncWhenJobStartsAndAppCodeDoesNotExist() throws Exception {
+        // Given
+        PackageManager packageManagerMock = Mockito.mock(PackageManager.class);
+        MobileMessagingJobService givenJobService = spy(new MobileMessagingJobService(mmcMock));
+
+        doReturn(null).when(mmcMock).getApplicationCode();
+        doReturn(packageManagerMock).when(givenJobService).getPackageManager();
+        doReturn(givenJobScheduler).when(givenJobService).getSystemService(eq(Context.JOB_SCHEDULER_SERVICE));
+        doReturn(getClass().getPackage().getName()).when(givenJobService).getPackageName();
+        doReturn(ON_NETWORK_AVAILABLE_JOB_ID + MM_JOB_SCHEDULER_START_ID).when(givenJobParameters).getJobId();
+
+        // When
+        givenJobService.onStartJob(givenJobParameters);
+
+        // Then
+        verify(mmcMock, never()).retrySyncOnNetworkAvailable();
     }
 }
