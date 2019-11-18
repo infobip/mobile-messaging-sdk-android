@@ -325,6 +325,7 @@ public class InstallationSynchronizer {
                 if (actionListener != null) {
                     actionListener.onResult(new Result<>(installation));
                 }
+                mobileMessagingCore.setShouldRepersonalize(false);
                 MobileMessagingLogger.v("GET INSTALLATION <<<");
             }
 

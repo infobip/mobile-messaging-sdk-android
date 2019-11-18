@@ -42,7 +42,8 @@ public class UserMapper {
             JSONObject userDataJsonObject = new JSONObject(existingUserDataSerialized);
 
             if (userDataJsonObject.has("externalUserId")) {
-                if (userDataJsonObject.opt("externalUserId") != null)
+                if (userDataJsonObject.opt("externalUserId") != null &&
+                        !"null".equals(userDataJsonObject.opt("externalUserId")))
                     newUser.setExternalUserId(userDataJsonObject.optString("externalUserId"));
             }
 

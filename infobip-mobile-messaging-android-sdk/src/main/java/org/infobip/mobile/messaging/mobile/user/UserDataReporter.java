@@ -147,6 +147,7 @@ public class UserDataReporter {
             public void after(UserBody userResponse) {
                 User user = UserMapper.fromBackend(userResponse);
                 mobileMessagingCore.setUserDataReported(user, false);
+                mobileMessagingCore.setShouldRepersonalize(false);
 
                 saveLatestPrimaryToMyInstallation(user);
 
