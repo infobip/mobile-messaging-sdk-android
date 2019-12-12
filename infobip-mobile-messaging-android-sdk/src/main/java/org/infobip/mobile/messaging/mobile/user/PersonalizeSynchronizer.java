@@ -183,6 +183,9 @@ public class PersonalizeSynchronizer {
     public void repersonalize() {
         final User reportedUser = mobileMessagingCore.getUser();
         if (reportedUser == null) {
+            // no user data is present on SDK storage, old token was invalidated by backend (push reg ID not registered), new token isn't provided
+            // forcing generating of new token to update it
+            mobileMessagingCore.resetCloudToken(false);
             return;
         }
 
@@ -207,6 +210,9 @@ public class PersonalizeSynchronizer {
         }
 
         if (!userIdentity.hasDataToReport() && !userAttributes.hasDataToReport()) {
+            // no user data is present on SDK storage, old token was invalidated by backend (push reg ID not registered), new token isn't provided
+            // forcing generating of new token to update it
+            mobileMessagingCore.resetCloudToken(false);
             return;
         }
 

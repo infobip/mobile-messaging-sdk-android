@@ -13,7 +13,7 @@ public class MobileMessagingSynchronizationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (LocalEvent.APPLICATION_FOREGROUND.getKey().equals(intent.getAction())) {
-            MobileMessagingCore.getInstance(context).sync();
+            MobileMessagingCore.getInstance(context.getApplicationContext()).sync();
         }
     }
 }

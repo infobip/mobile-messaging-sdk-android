@@ -53,6 +53,7 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+-keep public enum org.infobip.mobile.messaging.** { *; }
 
 # Explicitly preserve all serialization members. The Serializable interface
 # is only a marker interface, so it wouldn't save them.
@@ -82,6 +83,7 @@
 
 # Gson specific classes
 -keep class sun.misc.Unsafe { *; }
+-dontwarn sun.misc.Unsafe
 #-keep class com.google.gson.stream.** { *; }
 
 # Application classes that will be serialized/deserialized over Gson
@@ -91,6 +93,7 @@
 -keep class org.infobip.mobile.messaging.User { *; }
 -keep class org.infobip.mobile.messaging.CustomAttributeValue { *; }
 -keep class org.infobip.mobile.messaging.interactive.NotificationAction { *; }
+-keep class org.infobip.mobile.messaging.interactive.NotificationAction$* { *; }
 -keep class org.infobip.mobile.messaging.interactive.NotificationCategory { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper$* { *; }
@@ -108,5 +111,5 @@
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.GCMRegistrationTokenHandler
 -dontwarn org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService
-
--keep public enum org.infobip.mobile.messaging.** { *; }
+-dontwarn com.google.android.gms.iid.InstanceIDListenerService
+-dontwarn com.google.android.gms.gcm.GcmReceiver

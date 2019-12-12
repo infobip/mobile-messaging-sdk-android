@@ -126,8 +126,8 @@ public class UserDataReporter {
 
     public void fetch(final MobileMessaging.ResultListener listener) {
 
-        if (mobileMessagingCore.isRegistrationUnavailable()) {
-            MobileMessagingLogger.w("Registration not available yet, will fetch user data later");
+        if (!mobileMessagingCore.isRegistrationAvailable()) {
+            MobileMessagingLogger.w("Registration not available yet, you can fetch user data when push registration ID becomes available");
             if (listener != null) {
                 listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
             }

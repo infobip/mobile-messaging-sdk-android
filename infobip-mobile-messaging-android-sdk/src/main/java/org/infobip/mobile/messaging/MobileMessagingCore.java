@@ -300,7 +300,7 @@ public class MobileMessagingCore
     public void sync(boolean force) {
         didSyncAtLeastOnce = true;
 
-        if (!force && lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS) {
+        if (!force && didSyncRecently()) {
             return;
         }
 
@@ -319,11 +319,20 @@ public class MobileMessagingCore
         performSyncActions();
     }
 
+    private boolean didSyncRecently() {
+        return lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
+    }
+
     public void retrySyncOnNetworkAvailable() {
         if (!didSyncAtLeastOnce) {
             return;
         }
 
+        if (didSyncRecently()) {
+            return;
+        }
+
+        MobileMessagingLogger.d(">>> Retry sync on network available");
         performSyncActions();
     }
 
@@ -365,16 +374,16 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED, true);
     }
 
-    public boolean isRegistrationUnavailable() {
+    public boolean isRegistrationAvailable() {
         if (StringUtils.isBlank(getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration is not available yet");
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void depersonalizeOnServerIfNeeded() {
-        if (isRegistrationUnavailable()) {
+        if (!isRegistrationAvailable()) {
             return;
         }
 
@@ -403,7 +412,7 @@ public class MobileMessagingCore
     private void onDepersonalizeCompleted() {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED, false);
         broadcaster.depersonalized();
-        resetCloudToken();
+        resetCloudToken(true);
     }
 
     private void onDepersonalizeStarted(String pushRegId) {
@@ -838,14 +847,14 @@ public class MobileMessagingCore
         if (messageIds != null) {
             addUnreportedSeenMessageIds(messageIds);
             updateStoredMessagesWithSeenStatus(messageIds);
-            sync(true);
+            sync(false);
         }
     }
 
     public void setMessagesSeenDontStore(String... messageIds) {
         if (messageIds != null) {
             addUnreportedSeenMessageIds(messageIds);
-            sync(true);
+            sync(false);
         }
     }
 
@@ -1242,9 +1251,11 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED);
     }
 
-    private void resetCloudToken() {
+    public void resetCloudToken(boolean force) {
         String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-        MobileMessagingCloudService.enqueueTokenReset(context, gcmSenderID);
+        if (force || !didSyncRecently()) {
+            MobileMessagingCloudService.enqueueTokenReset(context, gcmSenderID);
+        }
     }
 
     public static void resetMobileApi() {
@@ -1318,7 +1329,7 @@ public class MobileMessagingCore
 
     @Override
     public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener) {
-        if (isRegistrationUnavailable()) {
+        if (!isRegistrationAvailable()) {
             return;
         }
 
@@ -1364,7 +1375,7 @@ public class MobileMessagingCore
 
     @Override
     public void depersonalize() {
-        if (isRegistrationUnavailable()) {
+        if (!isRegistrationAvailable()) {
             return;
         }
 
@@ -1384,7 +1395,7 @@ public class MobileMessagingCore
     }
 
     public void depersonalize(@NonNull String pushRegId, final ResultListener<SuccessPending> listener) {
-        if (isRegistrationUnavailable()) {
+        if (!isRegistrationAvailable()) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

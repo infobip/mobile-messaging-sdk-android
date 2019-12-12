@@ -17,12 +17,15 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author pandric
  * @since 09/09/16.
  */
 public class MessagesSynchronizer {
+
+    private static final long SYNC_MSGS_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(1);
 
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
@@ -31,6 +34,7 @@ public class MessagesSynchronizer {
     private final MobileMessageHandler mobileMessageHandler;
     private final MRetryPolicy retryPolicy;
     private final MobileApiMessages mobileApiMessages;
+    private volatile Long lastSyncTimeMillis;
 
     public MessagesSynchronizer(
             MobileMessagingCore mobileMessagingCore,
@@ -51,7 +55,8 @@ public class MessagesSynchronizer {
     }
 
     public void sync() {
-        if (!mobileMessagingCore.isPushRegistrationEnabled()) {
+        if (lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
+                !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
 
@@ -60,11 +65,11 @@ public class MessagesSynchronizer {
             return;
         }
 
+        lastSyncTimeMillis = System.currentTimeMillis();
         final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
             public List<Message> run(Void[] objects) {
-
                 String[] messageIds = mobileMessagingCore.getSyncMessagesIds();
 
                 SyncMessagesBody syncMessagesBody = SyncMessagesBody.make(messageIds, unreportedMessageIds);

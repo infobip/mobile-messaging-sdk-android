@@ -1,6 +1,11 @@
 package org.infobip.mobile.messaging.cloud.firebase;
 
+import android.support.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -44,14 +49,17 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
         }
     }
 
-    public void acquireNewToken(String senderId) {
-        try {
-            String token = FirebaseInstanceId
-                    .getInstance()
-                    .getToken(senderId, FirebaseMessaging.INSTANCE_ID_SCOPE);
-            handleNewToken(senderId, token);
-        } catch (IOException e) {
-            MobileMessagingLogger.e(TAG, "Error while acquiring token", e);
-        }
+    public void acquireNewToken(final String senderId) {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                handleNewToken(senderId, instanceIdResult.getToken());
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                MobileMessagingLogger.e(TAG, "Error while acquiring token", e);
+            }
+        });
     }
 }

@@ -33,9 +33,12 @@ import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 
 public class InstallationSynchronizer {
+
+    private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(1);
 
     private final Context context;
     private final MobileMessagingCore mobileMessagingCore;
@@ -44,6 +47,7 @@ public class InstallationSynchronizer {
     private final Broadcaster broadcaster;
     private final RetryPolicyProvider retryPolicyProvider;
     private final MobileApiAppInstance mobileApiAppInstance;
+    private volatile Long lastSyncTimeMillis;
 
     private static class PushInstallation extends Installation {
         void setServiceType() {
@@ -109,11 +113,18 @@ public class InstallationSynchronizer {
             installation.setPushRegistrationEnabled(mobileMessagingCore.isPushRegistrationEnabled());
         }
 
-        if (mobileMessagingCore.isRegistrationUnavailable()) {
-            if (cloudTokenPresentAndUnreported) createInstallation(installation, actionListener);
+        if (!mobileMessagingCore.isRegistrationAvailable()) {
+            if (cloudTokenPresentAndUnreported && !didSyncRecently())
+                createInstallation(installation, actionListener);
         } else {
-            if (installation.hasDataToReport()) patchMyInstallation(installation, actionListener);
+            if (installation.hasDataToReport() && !didSyncRecently())
+                patchMyInstallation(installation, actionListener);
         }
+        lastSyncTimeMillis = System.currentTimeMillis();
+    }
+
+    private boolean didSyncRecently() {
+        return lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
     }
 
     public void updatePrimaryStatus(String pushRegId, Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
@@ -127,7 +138,7 @@ public class InstallationSynchronizer {
 
             @Override
             public boolean shouldCancel() {
-                return !mobileMessagingCore.isRegistrationUnavailable();
+                return mobileMessagingCore.isRegistrationAvailable() || isSystemDataAbsent(installation);
             }
 
             @Override
@@ -190,6 +201,13 @@ public class InstallationSynchronizer {
                 .execute(executor);
     }
 
+    private boolean isSystemDataAbsent(Installation installation) {
+        return installation.getSdkVersion() == null ||
+                installation.getDeviceManufacturer() == null ||
+                installation.getOs() == null ||
+                installation.getOsVersion() == null;
+    }
+
     public void patchMyInstallation(@NonNull final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {
         patch(installation, actionListener, true);
     }
@@ -228,6 +246,7 @@ public class InstallationSynchronizer {
         final String pushRegIdToUpdate = pushRegId;
         final Map<String, Object> installationMap = installation.getMap();
         new MRetryableTask<Void, Void>() {
+
             @Override
             public Void run(Void[] voids) {
                 MobileMessagingLogger.v("UPDATE INSTALLATION >>>");
@@ -299,8 +318,13 @@ public class InstallationSynchronizer {
         mobileMessagingCore.setReportedPushServiceType();
     }
 
-    public void fetchInstance(final MobileMessaging.ResultListener<Installation> actionListener) {
-        if (mobileMessagingCore.isRegistrationUnavailable()) {
+    @SuppressWarnings("unchecked")
+    public void fetchInstance(final MobileMessaging.ResultListener<Installation> listener) {
+        if (!mobileMessagingCore.isRegistrationAvailable()) {
+            MobileMessagingLogger.w("Registration not available yet, you can fetch installation when push registration ID becomes available");
+            if (listener != null) {
+                listener.onResult(new Result(mobileMessagingCore.getInstallation(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
             return;
         }
 
@@ -322,8 +346,8 @@ public class InstallationSynchronizer {
                 }
                 mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 
-                if (actionListener != null) {
-                    actionListener.onResult(new Result<>(installation));
+                if (listener != null) {
+                    listener.onResult(new Result<>(installation));
                 }
                 mobileMessagingCore.setShouldRepersonalize(false);
                 MobileMessagingLogger.v("GET INSTALLATION <<<");
@@ -337,8 +361,8 @@ public class InstallationSynchronizer {
                     handleNoRegistrationError();
                 }
 
-                if (actionListener != null) {
-                    actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), mobileMessagingError));
+                if (listener != null) {
+                    listener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), mobileMessagingError));
                 }
                 MobileMessagingLogger.v("GET INSTALLATION ERROR <<<", error);
             }
