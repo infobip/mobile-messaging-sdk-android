@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.cloud.gcm;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 
 import com.google.android.gms.gcm.GcmReceiver;
 
@@ -35,16 +36,34 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 @Deprecated
 public class MobileMessagingGcmReceiver extends GcmReceiver {
 
+    private final static String TAG = MobileMessagingGcmReceiver.class.getSimpleName();
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        super.onReceive(context, intent);
 
         Message message = GCMMessageMapper.fromCloudBundle(intent.getExtras());
         MobileMessagingLogger.v("RECEIVED MESSAGE FROM GCM", message);
-        MobileMessagingCloudService.enqueueNewMessage(context, message);
 
-        if (isOrderedBroadcast()) {
-            abortBroadcast();
+        if (message == null) {
+            MobileMessagingLogger.e(TAG, "Cannot retrieve message data from bundle " + intent.getExtras().toString());
+
+        } else if (TextUtils.isEmpty(message.getMessageId())) {
+            MobileMessagingLogger.e(TAG, "Message ID is empty for bundle " + intent.getExtras().toString());
+
+        } else if (TextUtils.isEmpty(message.getBody())) {
+            MobileMessagingLogger.e(TAG, "Message text is empty for bundle " + intent.getExtras().toString());
+        }
+
+        if (message == null || TextUtils.isEmpty(message.getMessageId()) || TextUtils.isEmpty(message.getBody())) {
+            MobileMessagingLogger.w("Cannot process message");
+        } else {
+            MobileMessagingCloudService.enqueueNewMessage(context, message);
+        }
+
+        try {
+            if (isOrderedBroadcast())
+                abortBroadcast();
+        } catch (Exception ignored) {
         }
     }
 }

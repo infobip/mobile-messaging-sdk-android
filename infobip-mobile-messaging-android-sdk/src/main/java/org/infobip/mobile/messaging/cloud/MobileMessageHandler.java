@@ -44,6 +44,11 @@ public class MobileMessageHandler {
             return;
         }
 
+        if (StringUtils.isBlank(message.getBody())) {
+            MobileMessagingLogger.w("Ignoring message without text");
+            return;
+        }
+
         if (mobileMessagingCore.isMessageAlreadyProcessed(message.getMessageId())) {
             MobileMessagingLogger.w("Skipping message " + message.getMessageId() + " as already processed");
             return;

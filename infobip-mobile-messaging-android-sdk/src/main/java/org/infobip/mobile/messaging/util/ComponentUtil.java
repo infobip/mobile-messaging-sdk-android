@@ -65,6 +65,7 @@ public class ComponentUtil {
 
     /**
      * Verifies that manifest contains all components needed for normal operation of push.
+     *
      * @param context context object
      * @throws ConfigurationException if any of desired components is not registered in manifest
      */
@@ -73,11 +74,47 @@ public class ComponentUtil {
         verifyManifestService(context, MobileMessagingCloudService.class);
         if (!Platform.shouldUseGCM) {
             verifyManifestService(context, MobileMessagingFirebaseService.class);
+            enableComponent(context, MobileMessagingFirebaseService.class);
+            enableComponent(context, "com.google.firebase.iid.FirebaseInstanceIdReceiver");
+            disableComponent(context, "org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver");
+            disableComponent(context, "org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService");
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             verifyManifestService(context, MobileMessagingJobService.class);
         } else {
             verifyManifestReceiver(context, MobileMessagingConnectivityReceiver.class);
+        }
+    }
+
+    public static void disableComponent(Context context, Class componentClass) {
+        try {
+            ComponentUtil.setState(context, false, componentClass);
+            MobileMessagingLogger.w("Disabled " + componentClass.getName() + " for compatibility reasons");
+        } catch (Exception e) {
+            MobileMessagingLogger.d("Cannot disable " + componentClass.getName() + ": ", e);
+        }
+    }
+
+    public static void disableComponent(Context context, String fullClassName) {
+        try {
+            ComponentUtil.setState(context, false, Class.forName(fullClassName));
+        } catch (ClassNotFoundException ignored) {
+        }
+    }
+
+    public static void enableComponent(Context context, Class componentClass) {
+        try {
+            ComponentUtil.setState(context, true, componentClass);
+            MobileMessagingLogger.w("Enabled " + componentClass.getName() + " for compatibility reasons");
+        } catch (Exception e) {
+            MobileMessagingLogger.d("Cannot enable " + componentClass.getName() + ": ", e);
+        }
+    }
+
+    public static void enableComponent(Context context, String fullClassName) {
+        try {
+            enableComponent(context, Class.forName(fullClassName));
+        } catch (ClassNotFoundException ignored) {
         }
     }
 

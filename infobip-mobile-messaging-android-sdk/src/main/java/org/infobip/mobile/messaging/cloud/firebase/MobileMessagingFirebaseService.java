@@ -50,7 +50,7 @@ public class MobileMessagingFirebaseService extends FirebaseMessagingService {
     }
 
     public static void onNewToken(Context context, String token) {
-        MobileMessagingLogger.v(TAG, "RECEIVED TOKEN FROM FCM", token);
+        MobileMessagingLogger.v(TAG, "RECEIVED NEW FCM TOKEN", token);
         String senderId = MobileMessagingCore.getSenderId(context);
         MobileMessagingCloudService.enqueueNewToken(context, senderId, token);
     }

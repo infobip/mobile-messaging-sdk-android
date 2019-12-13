@@ -44,12 +44,12 @@ public class FirebaseMessageMapper {
     public Message createMessage(RemoteMessage remoteMessage) {
         IBData data = getIBData(remoteMessage);
         if (data == null) {
-            MobileMessagingLogger.e(TAG, "Cannot retrieve message data for " + remoteMessage);
+            MobileMessagingLogger.e(TAG, "Cannot retrieve message data for message ID " + remoteMessage.getMessageId());
             return null;
         }
 
         if (TextUtils.isEmpty(data.messageId)) {
-            MobileMessagingLogger.e(TAG, "Message id is empty for " + remoteMessage);
+            MobileMessagingLogger.e(TAG, "Message ID is empty for " + remoteMessage);
             return null;
         }
 
