@@ -9,9 +9,8 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 import org.infobip.mobile.messaging.cloud.RegistrationTokenHandler;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseManifestHelper;
 import org.infobip.mobile.messaging.cloud.firebase.FirebaseRegistrationTokenHandler;
-import org.infobip.mobile.messaging.cloud.gcm.GCMManifestHelper;
-import org.infobip.mobile.messaging.cloud.gcm.GCMRegistrationTokenHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ComponentUtil;
 
@@ -56,7 +55,6 @@ public class Platform {
     });
 
     public static final Installation.PushServiceType usedPushServiceType = usedPushServiceType();
-    public static final boolean shouldUseGCM = Installation.PushServiceType.GCM.equals(usedPushServiceType);
 
     public static <T> Lazy<T, Context> create(Lazy.Initializer<T, Context> initializer) {
         return Lazy.create(initializer);
@@ -72,9 +70,7 @@ public class Platform {
 
     public static void verify(Context context) {
         ComponentUtil.verifyManifestComponentsForPush(context);
-        if (shouldUseGCM) {
-            GCMManifestHelper.verifyAndConfigureManifest(context);
-        }
+        FirebaseManifestHelper.verifyAndConfigureManifest(context);
     }
 
     public static void executeInBackground(Runnable command) {
@@ -107,11 +103,7 @@ public class Platform {
     }
 
     private static RegistrationTokenHandler initializeTokenHandler(Context context) {
-        if (shouldUseGCM) {
-            return new GCMRegistrationTokenHandler(mobileMessagingCore.get(context), broadcaster.get(context), context);
-        } else {
-            return new FirebaseRegistrationTokenHandler(mobileMessagingCore.get(context), broadcaster.get(context));
-        }
+        return new FirebaseRegistrationTokenHandler(mobileMessagingCore.get(context), broadcaster.get(context));
     }
 
     private static Installation.PushServiceType usedPushServiceType() {

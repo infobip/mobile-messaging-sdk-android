@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.cloud.gcm;
+package org.infobip.mobile.messaging.storage;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -9,17 +9,13 @@ import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * @author sslavin
- * @since 29/12/2016.
- */
 @Deprecated
-public class GCMMessageMapper {
+public class StoredMessageMapper {
 
-    private static final String TAG = GCMMessageMapper.class.getSimpleName();
+    private static final String TAG = StoredMessageMapper.class.getSimpleName();
 
     /**
-     * De-serializes Push message from the Bundle we receive from GCM/FCM
+     * De-serializes Push message from the Bundle we receive by pulling messages from server
      *
      * @param bundle data from the intent
      * @return deserialized message
@@ -63,7 +59,7 @@ public class GCMMessageMapper {
     }
 
     /**
-     * Serializes message to the same bundle as we receive from GCM/FCM
+     * Serializes message to the same bundle as we receive if by pulling messages from server
      *
      * @param message message to serialize
      * @return bundle with message contents

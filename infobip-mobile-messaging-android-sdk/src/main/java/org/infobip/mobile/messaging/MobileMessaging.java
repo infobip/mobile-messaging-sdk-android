@@ -67,9 +67,9 @@ public abstract class MobileMessaging {
     /**
      * Reports delivery of messages to Mobile Messaging servers.
      * <br>
-     * This method has to be used only if you handle GCM message notifications
+     * This method has to be used only if you handle FCM message notifications
      * without Mobile Messaging library. In all other cases the library will
-     * send delivery report automatically whenever GCM push is delivered to device.
+     * send delivery report automatically whenever FCM push is delivered to device.
      *
      * @param messageIds ids of messages to report delivery for
      * @see Event#DELIVERY_REPORTS_SENT
@@ -469,7 +469,7 @@ public abstract class MobileMessaging {
             this.application = application;
 
             loadDefaultApiUri(application);
-            loadGcmSenderId(application);
+            loadSenderId(application);
             final String applicationCode = MobileMessagingCore.getApplicationCodeFromResources(application);
             if (StringUtils.isNotBlank(applicationCode)) {
                 this.applicationCode = applicationCode;
@@ -495,7 +495,7 @@ public abstract class MobileMessaging {
             }
         }
 
-        private void loadGcmSenderId(Context context) {
+        private void loadSenderId(Context context) {
             int googleServicesResource = ResourceLoader.loadResourceByName(context, "string", "gcm_defaultSenderId");
             if (googleServicesResource > 0) {
                 String senderId = context.getResources().getString(googleServicesResource);
@@ -534,7 +534,7 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * When you want to use a GCM/FCM sender that is not stored to <i>google_app_id</i> string resource or to google-services.json file.
+         * When you want to use a FCM sender that is not stored to <i>google_app_id</i> string resource or to google-services.json file.
          * <br>By default it will use <i>google_app_id</i> string resource
          *
          * @param senderId if you don't have one, you should <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging">get one</a>

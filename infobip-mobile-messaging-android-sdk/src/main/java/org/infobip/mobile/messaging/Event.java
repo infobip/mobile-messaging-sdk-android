@@ -65,21 +65,21 @@ import android.content.BroadcastReceiver;
  */
 public enum Event {
     /**
-     * It is triggered when GCM registration token is received.
+     * It is triggered when FCM registration token is received.
      * <p>
-     * Contains the GCM registration token.
+     * Contains the FCM registration token.
      * <pre>
      * {@code
-     * String gcmRegistrationToken = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
+     * String fcmRegistrationToken = intent.getStringExtra({@link BroadcastParameter#EXTRA_CLOUD_TOKEN });
      * }
      * </pre>
      */
     TOKEN_RECEIVED("org.infobip.mobile.messaging.TOKEN_RECEIVED"),
 
     /**
-     * It is triggered when GCM registration token is successfully stored on the server.
+     * It is triggered when FCM registration token is successfully stored on the server.
      * <p>
-     * Contains the GCM registration token, Infobip device application instance ID and system data in installation
+     * Contains the FCM registration token, Infobip device application instance ID and system data in installation
      * (which identifies every application instance).
      * <pre>
      * {@code

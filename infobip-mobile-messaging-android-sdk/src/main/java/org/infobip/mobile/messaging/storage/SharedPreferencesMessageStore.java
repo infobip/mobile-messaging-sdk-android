@@ -6,7 +6,6 @@ import android.os.Parcel;
 import android.util.Base64;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.cloud.gcm.GCMMessageMapper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class SharedPreferencesMessageStore implements MessageStore {
             public List<Message> convert(Set<String> set) {
                 List<Message> messages = new ArrayList<>();
                 for (String bundle : set) {
-                    messages.add(GCMMessageMapper.fromCloudBundle(deserialize(bundle)));
+                    messages.add(StoredMessageMapper.fromCloudBundle(deserialize(bundle)));
                 }
                 return messages;
             }
@@ -72,14 +71,14 @@ public class SharedPreferencesMessageStore implements MessageStore {
             public void mutate(Set<String> set) {
                 for (Message message : messages) {
                     for (String serializedBundle : new HashSet<>(set)) {
-                        Message messageInSet = GCMMessageMapper.fromCloudBundle(deserialize(serializedBundle));
+                        Message messageInSet = StoredMessageMapper.fromCloudBundle(deserialize(serializedBundle));
                         if (messageInSet.getMessageId().equals(message.getMessageId())) {
                             set.remove(serializedBundle);
                             break;
                         }
                     }
 
-                    set.add(serialize(GCMMessageMapper.toCloudBundle(message)));
+                    set.add(serialize(StoredMessageMapper.toCloudBundle(message)));
                 }
             }
         });

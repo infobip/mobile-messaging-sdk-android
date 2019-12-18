@@ -1223,8 +1223,8 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
         resetMobileApi();
 
-        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-        MobileMessagingCloudService.enqueueTokenCleanup(context, gcmSenderID);
+        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
+        MobileMessagingCloudService.enqueueTokenCleanup(context, senderID);
 
         PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
@@ -1252,9 +1252,9 @@ public class MobileMessagingCore
     }
 
     public void resetCloudToken(boolean force) {
-        String gcmSenderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
+        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
         if (force || !didSyncRecently()) {
-            MobileMessagingCloudService.enqueueTokenReset(context, gcmSenderID);
+            MobileMessagingCloudService.enqueueTokenReset(context, senderID);
         }
     }
 

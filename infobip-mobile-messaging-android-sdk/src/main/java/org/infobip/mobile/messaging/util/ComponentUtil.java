@@ -18,7 +18,6 @@ import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseServic
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.notification.NotificationTapReceiver;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
-import org.infobip.mobile.messaging.platform.Platform;
 
 /**
  * Utility class for component state management
@@ -72,33 +71,12 @@ public class ComponentUtil {
     public static void verifyManifestComponentsForPush(Context context) {
         verifyManifestReceiver(context, NotificationTapReceiver.class);
         verifyManifestService(context, MobileMessagingCloudService.class);
-        if (!Platform.shouldUseGCM) {
-            verifyManifestService(context, MobileMessagingFirebaseService.class);
-            enableComponent(context, MobileMessagingFirebaseService.class);
-            enableComponent(context, "com.google.firebase.iid.FirebaseInstanceIdReceiver");
-            disableComponent(context, "org.infobip.mobile.messaging.cloud.gcm.MobileMessagingGcmReceiver");
-            disableComponent(context, "org.infobip.mobile.messaging.cloud.gcm.MobileMessagingInstanceIDListenerService");
-        }
+        verifyManifestService(context, MobileMessagingFirebaseService.class);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             verifyManifestService(context, MobileMessagingJobService.class);
         } else {
             verifyManifestReceiver(context, MobileMessagingConnectivityReceiver.class);
-        }
-    }
-
-    public static void disableComponent(Context context, Class componentClass) {
-        try {
-            ComponentUtil.setState(context, false, componentClass);
-            MobileMessagingLogger.w("Disabled " + componentClass.getName() + " for compatibility reasons");
-        } catch (Exception e) {
-            MobileMessagingLogger.d("Cannot disable " + componentClass.getName() + ": ", e);
-        }
-    }
-
-    public static void disableComponent(Context context, String fullClassName) {
-        try {
-            ComponentUtil.setState(context, false, Class.forName(fullClassName));
-        } catch (ClassNotFoundException ignored) {
         }
     }
 

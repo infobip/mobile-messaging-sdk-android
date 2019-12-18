@@ -60,14 +60,14 @@ public interface Broadcaster {
     /**
      * Sends broadcast when new cloud token is received
      *
-     * @param cloudToken FCM/GCM cloud token
+     * @param cloudToken FCM cloud token
      */
     void tokenReceived(String cloudToken);
 
     /**
      * Sends broadcast about new registration data
      *
-     * @param cloudToken         FCM/GCM cloud token
+     * @param cloudToken         FCM cloud token
      * @param pushRegistrationId Infobip registration id
      */
     void registrationCreated(String cloudToken, String pushRegistrationId);
