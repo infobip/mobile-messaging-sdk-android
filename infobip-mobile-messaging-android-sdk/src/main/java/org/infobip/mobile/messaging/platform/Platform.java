@@ -108,11 +108,6 @@ public class Platform {
 
     private static Installation.PushServiceType usedPushServiceType() {
         Installation.PushServiceType usedPushServiceType = Installation.PushServiceType.Firebase;
-        try {
-            Class.forName("com.google.android.gms.iid.InstanceIDListenerService");
-            usedPushServiceType = Installation.PushServiceType.GCM;
-        } catch (ClassNotFoundException ignored) {
-        }
         MobileMessagingLogger.d("Will use " + usedPushServiceType.name() + " for messaging");
         return usedPushServiceType;
     }

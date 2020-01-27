@@ -177,11 +177,12 @@ public class DefaultApiClient implements ApiClient {
 
             int responseCode = urlConnection.getResponseCode();
             interceptResponse(responseCode, urlConnection.getHeaderFields());
+            int contentLength = urlConnection.getContentLength();
             if (responseCode >= 400) {
                 ApiResponse apiResponse = new ApiResponse(ErrorCode.UNKNOWN_ERROR.value, ErrorCode.UNKNOWN_ERROR.description);
                 if (urlConnection.getContentLength() > 0) {
                     InputStream inputStream = urlConnection.getErrorStream();
-                    String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
+                    String s = StreamUtils.readToString(inputStream, "UTF-8", contentLength);
                     apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
                 }
 
@@ -194,17 +195,17 @@ public class DefaultApiClient implements ApiClient {
                 throw new ApiException(tuple.getLeft(), tuple.getRight());
             }
 
-            if (urlConnection.getContentLength() <= 0) {
-                return null;
-            }
-
             if (Void.class.equals(responseType) || void.class.equals(responseType)) {
                 return null;
             }
 
             InputStream inputStream = urlConnection.getInputStream();
-            String s = StreamUtils.readToString(inputStream, "UTF-8", Long.parseLong(urlConnection.getHeaderField("Content-Length")));
+            String s = StreamUtils.readToString(inputStream, "UTF-8", contentLength);
             inputStream.close();
+
+            if (s.length() <= 0) {
+                return null;
+            }
 
             R response = jsonSerializer(request.httpMethod).deserialize(s, responseType);
             ApiResponse apiResponse = null;

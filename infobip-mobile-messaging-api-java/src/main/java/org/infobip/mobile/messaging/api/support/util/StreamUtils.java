@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging.api.support.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 /**
@@ -13,24 +13,18 @@ public abstract class StreamUtils {
     private StreamUtils() {
     }
 
-    public static String readToString(InputStream inputStream, String charsetName, long length) throws IOException {
-        if (length < 1) {
-            return "";
-        }
-
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        int result = inputStream.read();
-        long count = 1;
-        while (result != -1) {
-            byte b = (byte) result;
-            buf.write(b);
-            if (count == length) {
-                break;
+    public static String readToString(InputStream inputStream, String charsetName, int contentLength) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(inputStream, charsetName)) {
+            StringBuilder sb = (contentLength != -1)
+                    ? new StringBuilder(contentLength)
+                    : new StringBuilder();
+            char[] buf = new char[1024];
+            int read;
+            while ((read = reader.read(buf)) != -1) {
+                sb.append(buf, 0, read);
             }
-            result = inputStream.read();
-            count++;
+            return sb.toString();
         }
-        return buf.toString(charsetName);
     }
 
     public static long write(String s, OutputStream outputStream, String charsetName) throws IOException {

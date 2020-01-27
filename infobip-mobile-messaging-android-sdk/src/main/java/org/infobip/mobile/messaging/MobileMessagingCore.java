@@ -1110,11 +1110,12 @@ public class MobileMessagingCore
         String appCodeProviderCanonicalClassName = getApplicationCodeProviderClassName(context);
 
         try {
-            Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
-            Object applicationCodeProvider = c.newInstance();
-            Method resolve = ApplicationCodeProvider.class.getMethod("resolve");
-            applicationCode = String.valueOf(resolve.invoke(applicationCodeProvider));
-
+            if (StringUtils.isNotBlank(appCodeProviderCanonicalClassName)) {
+                Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
+                Object applicationCodeProvider = c.newInstance();
+                Method resolve = ApplicationCodeProvider.class.getMethod("resolve");
+                applicationCode = String.valueOf(resolve.invoke(applicationCodeProvider));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1445,7 +1446,8 @@ public class MobileMessagingCore
 
             @Override
             public void onResult(Result<SuccessPending, MobileMessagingError> result) {
-                if (SuccessPending.Pending.name().equals(result.getData().name())) {
+                SuccessPending resultData = result.getData();
+                if (resultData != null && SuccessPending.Pending.name().equals(resultData.name())) {
                     if (listener != null) {
                         //TODO put something more convenient here or use different approach!
                         listener.onResult(new Result<List<Installation>, MobileMessagingError>(MobileMessagingError.createFrom(new IllegalStateException())));
