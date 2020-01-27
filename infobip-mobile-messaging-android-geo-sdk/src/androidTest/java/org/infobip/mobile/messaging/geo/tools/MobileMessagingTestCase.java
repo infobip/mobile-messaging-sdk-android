@@ -187,6 +187,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         Message message = new Message();
         message.setMessageId(messageId);
         message.setSentTimestamp(0);
+        message.setBody("some text");
 
         boolean isGeo = geo.length > 0 && geo[0] != null && geo[0].getAreasList() != null && !geo[0].getAreasList().isEmpty();
         if (isGeo) {

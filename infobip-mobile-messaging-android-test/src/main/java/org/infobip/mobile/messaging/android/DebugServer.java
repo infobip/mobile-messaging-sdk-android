@@ -154,10 +154,6 @@ public class DebugServer extends NanoHTTPD {
     }
 
     private String readToString(InputStream inputStream, String charsetName, long length) throws IOException {
-        if (length < 1) {
-            return "";
-        }
-
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         int result = inputStream.read();
         long count = 1;
@@ -170,6 +166,11 @@ public class DebugServer extends NanoHTTPD {
             result = inputStream.read();
             count++;
         }
-        return buf.toString(charsetName);
+
+        String stringFromStream = buf.toString(charsetName);
+        if (stringFromStream.length() < 1) {
+            return "";
+        }
+        return stringFromStream;
     }
 }

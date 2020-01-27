@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -57,6 +58,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
     protected MobileApiMessages mobileApiMessages;
     protected MobileApiAppInstance mobileApiAppInstance;
+    protected MobileApiVersion mobileApiVersion;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -141,11 +143,13 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         Time.reset(time);
 
         mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
-        mobileApiMessages = mock(MobileApiMessages.class);
         mobileApiAppInstance = mock(MobileApiAppInstance.class, withSettings().verboseLogging());
+        mobileApiMessages = mock(MobileApiMessages.class);
+        mobileApiVersion = mock(MobileApiVersion.class);
 
-        given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
         given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);
+        given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
+        given(mobileApiResourceProvider.getMobileApiVersion(any(Context.class))).willReturn(mobileApiVersion);
 
         notificationHandler = mock(NotificationHandler.class);
         broadcaster = mock(Broadcaster.class);
@@ -184,6 +188,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected static Message createMessage(Context context, String messageId, boolean saveToStorage) {
         Message message = new Message();
         message.setMessageId(messageId);
+        message.setBody("some text");
         if (saveToStorage) {
             MobileMessagingCore.getInstance(context).getMessageStore().save(context, message);
         }
