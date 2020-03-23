@@ -39,6 +39,7 @@ import org.infobip.mobile.messaging.geo.storage.GeoSQLiteMessageStore;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService;
 import org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsReceiver;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ComponentUtil;
 
@@ -92,7 +93,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     static void scheduleRefresh(Context context) {
-        scheduleRefresh(context, new Date());
+        scheduleRefresh(context, Time.date());
     }
 
     private static void scheduleRefresh(Context context, Date when) {
@@ -113,7 +114,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         GeoSQLiteMessageStore messageStoreForGeo = (GeoSQLiteMessageStore) geofencingHelper.getMessageStoreForGeo();
         List<Message> messages = messageStoreForGeo.findAll(context);
         List<String> messageIdsToDelete = new ArrayList<>(messages.size());
-        Date now = new Date();
+        Date now = Time.date();
 
         for (Message message : messages) {
             Geo geo = GeoDataMapper.geoFromInternalData(message.getInternalData());
@@ -195,7 +196,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     private static Date calculateNextCheckDateForGeoStart(Geo geo, Date oldCheckDate) {
-        Date now = new Date();
+        Date now = Time.date();
         Date expiryDate = geo.getExpiryDate();
         if (expiryDate != null && expiryDate.before(now)) {
             return oldCheckDate;
@@ -214,7 +215,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     }
 
     private static Date calculateNextCheckDateForGeoExpiry(Geo geo, Date oldCheckDate) {
-        Date now = new Date();
+        Date now = Time.date();
         Date expiryDate = geo.getExpiryDate();
 
         if (expiryDate == null) {

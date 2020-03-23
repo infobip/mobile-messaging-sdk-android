@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.mobile;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -43,18 +45,23 @@ public class MobileMessagingError implements Serializable {
         this.tr = tr;
     }
 
+    @NonNull
     public String getCode() {
         return code;
     }
 
+    @NonNull
     public String getMessage() {
+        if (message == null) return "";
         return message;
     }
 
+    @NonNull
     public Type getType() {
         return type;
     }
 
+    @Nullable
     public String getStacktrace() {
         return tr != null ? Log.getStackTraceString(tr) : null;
     }

@@ -12,8 +12,8 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.JobIntentService;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import static org.infobip.mobile.messaging.MobileMessagingJob.GEO_CONSISTENCY_JOB_ID;
-import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.GEO_CONSISTENCY_JOB_ID;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getScheduleId;
 
 /**
  * This class handles persisting of geo monitoring consistency. Consistency can be broken in several cases, referring to

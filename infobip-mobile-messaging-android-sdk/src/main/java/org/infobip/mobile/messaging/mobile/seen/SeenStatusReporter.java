@@ -70,7 +70,7 @@ public class SeenStatusReporter {
                         SeenMessages seenMessages = SeenMessagesMapper.fromMessageIds(messageIDs);
                         MobileMessagingLogger.v("SEEN >>>", seenMessages);
                         mobileApiMessages.reportSeen(seenMessages);
-                        MobileMessagingLogger.v("SEEN <<<");
+                        MobileMessagingLogger.v("SEEN DONE <<<");
                         mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
                         return messageIDs;
                     }

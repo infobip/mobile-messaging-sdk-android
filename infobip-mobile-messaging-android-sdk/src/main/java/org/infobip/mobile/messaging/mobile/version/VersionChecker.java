@@ -57,7 +57,7 @@ public class VersionChecker {
             public VersionCheckResult run(Void[] voids) {
                 MobileMessagingLogger.v("VERSION >>>");
                 LatestReleaseResponse response = mobileApiVersion.getLatestRelease();
-                MobileMessagingLogger.v("VERSION <<<", response);
+                MobileMessagingLogger.v("VERSION DONE <<<", response);
                 return new VersionCheckResult(response);
             }
 

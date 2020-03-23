@@ -41,6 +41,7 @@ public class StoredMessageMapper {
         String category = silent ? InternalDataMapper.getInternalDataCategory(internalDataJson) : bundle.getString(BundleField.CATEGORY.getKey());
         String contentUrl = InternalDataMapper.getInternalDataContentUrl(internalDataJson);
         long sentDateTime = InternalDataMapper.getInternalDataSendDateTime(internalDataJson);
+        long inAppExpiryDateTime = InternalDataMapper.getInternalDataInAppExpiryDateTime(internalDataJson);
 
         String destination = bundle.getString(BundleField.DESTINATION.getKey());
         String statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
@@ -55,7 +56,7 @@ public class StoredMessageMapper {
                 vibrate, icon, silent, category, from,
                 receivedTs, seenTs, sentDateTime, customPayload,
                 internalDataJson, destination, status, statusMessage,
-                contentUrl, inAppStyle);
+                contentUrl, inAppStyle, inAppExpiryDateTime);
     }
 
     /**

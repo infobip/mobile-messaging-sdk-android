@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.json.JSONObjectAdapter;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
 
 /**
@@ -59,7 +60,8 @@ public class FirebaseMessageMapper {
         }
 
         NotificationSettings notificationSettings = data.notification != null ? data.notification : new NotificationSettings();
-        long sentDateTime = data.internal != null ? data.internal.optLong("sendDateTime", System.currentTimeMillis()) : System.currentTimeMillis();
+        long sentDateTime = data.internal != null ? data.internal.optLong("sendDateTime", Time.now()) : Time.now();
+        long inAppExpiryDateTime = data.internal != null ? data.internal.optLong("inAppExpiryDateTime", 0) : 0;
         boolean inApp = data.internal != null && data.internal.optBoolean("inApp"); // deprecated
         Message.InAppStyle inAppStyle = null;
         if (data.notification.inAppStyle != null) {
@@ -77,7 +79,7 @@ public class FirebaseMessageMapper {
                 orDefault(notificationSettings.silent, false),
                 notificationSettings.category,
                 "",
-                System.currentTimeMillis(),
+                Time.now(),
                 0,
                 sentDateTime,
                 data.custom,
@@ -86,7 +88,8 @@ public class FirebaseMessageMapper {
                 Message.Status.UNKNOWN,
                 "",
                 notificationSettings.contentUrl,
-                inAppStyle);
+                inAppStyle,
+                inAppExpiryDateTime);
     }
 
     private static IBData getIBData(RemoteMessage remoteMessage) {

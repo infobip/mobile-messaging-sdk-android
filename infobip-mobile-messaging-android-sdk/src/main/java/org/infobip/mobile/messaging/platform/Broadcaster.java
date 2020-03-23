@@ -95,4 +95,14 @@ public interface Broadcaster {
      * Sends broadcast that current installation is personalized - user's specific data is added
      */
     void personalized(User user);
+
+    /**
+     * Sends broadcast that user's sessions are reported
+     */
+    void userSessionsReported();
+
+    /**
+     * Sends broadcast that user's custom events are reported
+     */
+    void customEventsReported();
 }

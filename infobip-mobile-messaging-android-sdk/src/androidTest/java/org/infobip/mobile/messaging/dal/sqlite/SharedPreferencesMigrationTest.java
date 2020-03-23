@@ -69,7 +69,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     Message.Status.SUCCESS,
                     "SomeStatusMessage" + i,
                     "http://www.some-content.com.ru.hr",
-                    null
+                    null,
+                    0
             ));
         }
 
@@ -103,6 +104,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             assertEquals(Message.Status.SUCCESS, message.getStatus());
             assertEquals("SomeStatusMessage" + i, message.getStatusMessage());
             assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
+            assertEquals(0, message.getInAppExpiryTimestamp());
         }
     }
 }

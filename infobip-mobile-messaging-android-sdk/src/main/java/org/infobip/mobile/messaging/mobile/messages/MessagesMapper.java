@@ -60,7 +60,8 @@ class MessagesMapper {
                 Message.Status.UNKNOWN,
                 null,
                 InternalDataMapper.getInternalDataContentUrl(response.getInternalData()),
-                InternalDataMapper.getInternalDataInAppStyle(response.getInternalData())
+                InternalDataMapper.getInternalDataInAppStyle(response.getInternalData()),
+                InternalDataMapper.getInternalDataInAppExpiryDateTime(response.getInternalData())
         );
 
         InternalDataMapper.updateMessageWithInternalData(message, response.getInternalData());

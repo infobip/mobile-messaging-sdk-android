@@ -47,7 +47,8 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
                 Message.Status.SUCCESS,
                 "SomeStatusMessage",
                 "http://www.some-content.com.ru.hr",
-                Message.InAppStyle.MODAL
+                Message.InAppStyle.MODAL,
+                1881L
         );
 
         databaseHelper.save(new SqliteMessage(message));

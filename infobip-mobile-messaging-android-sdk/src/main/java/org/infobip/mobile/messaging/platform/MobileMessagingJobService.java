@@ -15,8 +15,8 @@ import android.text.TextUtils;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
-import static org.infobip.mobile.messaging.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
-import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getScheduleId;
 
 /**
  * Service that handles scheduled jobs

@@ -7,8 +7,8 @@ import android.support.annotation.NonNull;
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
 import org.infobip.mobile.messaging.platform.JobIntentService;
 
-import static org.infobip.mobile.messaging.MobileMessagingJob.GEO_TRANSITION_JOB_ID;
-import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.GEO_TRANSITION_JOB_ID;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getScheduleId;
 
 public class GeofenceTransitionsIntentService extends JobIntentService {
 

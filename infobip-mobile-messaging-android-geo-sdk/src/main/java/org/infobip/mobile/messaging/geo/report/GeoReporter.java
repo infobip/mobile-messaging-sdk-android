@@ -96,7 +96,7 @@ public class GeoReporter {
         EventReportBody eventReportBody = prepareEventReportBody(context, geofenceHelper.getMessageStoreForGeo(), geoReports);
         MobileMessagingLogger.v("GEO REPORT >>>", eventReportBody);
         EventReportResponse eventResponse = mobileApiGeo.report(eventReportBody);
-        MobileMessagingLogger.v("GEO REPORT <<<", eventResponse);
+        MobileMessagingLogger.v("GEO REPORT DONE <<<", eventResponse);
         GeoReportingResult result = new GeoReportingResult(eventResponse);
         handleSuccess(context, geoReports, result);
         return result;

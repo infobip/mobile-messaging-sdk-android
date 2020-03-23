@@ -17,6 +17,7 @@ import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
@@ -61,7 +62,7 @@ public class MoMessageSender {
 
             MobileMessagingLogger.v("SEND MO >>>", moMessagesBody);
             MoMessagesResponse moMessagesResponse = mobileApiMessages.sendMO(moMessagesBody);
-            MobileMessagingLogger.v("SEND MO <<<", moMessagesResponse);
+            MobileMessagingLogger.v("SEND MO DONE <<<", moMessagesResponse);
 
             return MoMessageMapper.messages(moMessagesResponse);
         }
@@ -188,7 +189,7 @@ public class MoMessageSender {
             return new Message[0];
         }
 
-        Date now = new Date();
+        Date now = Time.date();
         List<Message> relevantMessages = new ArrayList<>();
         for (Message message : messages) {
             long expirationTimestamp = message.getReceivedTimestamp() + MESSAGE_MAX_RETRY_LIFETIME;

@@ -261,4 +261,28 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         assertNotSame(message, messageAfter);
         assertEquals("SomeMessageId", messageAfter.getMessageId());
     }
+
+    @Test
+    public void test_should_send_user_sessions_reported_event() throws Exception {
+        // When
+        broadcastSender.userSessionsReported();
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.USER_SESSIONS_SENT.getKey(), intent.getAction());
+    }
+
+    @Test
+    public void test_should_send_user_custom_events_reported_event() throws Exception {
+        // When
+        broadcastSender.customEventsReported();
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.CUSTOM_EVENTS_SENT.getKey(), intent.getAction());
+    }
 }

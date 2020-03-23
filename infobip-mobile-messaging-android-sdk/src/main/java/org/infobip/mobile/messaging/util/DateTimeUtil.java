@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.util;
 
+import org.infobip.mobile.messaging.platform.Time;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,6 +18,7 @@ public class DateTimeUtil {
     public static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssX";
+    private static final String DATE_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final String GMT_TIME_ZONE = "+00:00";
     private static final String ISO8601_GMT_Z_MATCHER = "Z$";
 
@@ -57,6 +60,27 @@ public class DateTimeUtil {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.getDefault());
         return simpleDateFormat.format(date);
+    }
+
+    /**
+     * Returns ISO8601-compliant string for the supplied date.
+     * 2020-02-26T09:41:57Z
+     *
+     * @param date date object
+     * @return String representation of Date object
+     */
+    public static String ISO8601DateUTCToString(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(date);
+        Date utcDate = calendar.getTime();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
+        return simpleDateFormat.format(utcDate);
     }
 
     /**
@@ -115,7 +139,7 @@ public class DateTimeUtil {
         Calendar timeEnd = Calendar.getInstance();
         timeEnd.setTime(endDate);
 
-        Date nowDate = new Date();
+        Date nowDate = Time.date();
         return DateTimeUtil.compareTimes(startDate, nowDate) < 0 && DateTimeUtil.compareTimes(nowDate, endDate) < 0;
     }
 

@@ -37,6 +37,7 @@ public class InternalDataMapper {
         String initialMessageId;
         @Deprecated Boolean inApp;
         Message.InAppStyle inAppStyle;
+        long inAppExpiryDateTime;
 
         public InternalData() {
         }
@@ -192,6 +193,20 @@ public class InternalDataMapper {
     public static long getInternalDataSendDateTime(String json) {
         try {
             return serializer.deserialize(json, InternalData.class).sendDateTime;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Returns in-app expiration time from internal data
+     *
+     * @param json internal data json
+     * @return timestamp if present or 0 otherwise
+     */
+    public static long getInternalDataInAppExpiryDateTime(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).inAppExpiryDateTime;
         } catch (Exception e) {
             return 0;
         }

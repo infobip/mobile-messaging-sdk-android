@@ -6,6 +6,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ISO8601DateParseException;
 
@@ -76,7 +77,7 @@ public class Geo extends InternalDataMapper.InternalData {
      * @return true if geo campaign can be monitored
      */
     public boolean isEligibleForMonitoring() {
-        Date now = new Date();
+        Date now = Time.date();
         return (getStartDate() == null || getStartDate().before(now)) &&
                 !isExpired();
     }
@@ -87,7 +88,7 @@ public class Geo extends InternalDataMapper.InternalData {
      * @return true if geo campaign is expired
      */
     public boolean isExpired() {
-        Date now = new Date();
+        Date now = Time.date();
         Date expiryDate = getExpiryDate();
         return expiryDate != null && expiryDate.before(now);
     }

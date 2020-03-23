@@ -118,6 +118,16 @@ public class AndroidBroadcaster implements Broadcaster {
                 .putExtras(UserMapper.toBundle(BroadcastParameter.EXTRA_USER, user)));
     }
 
+    @Override
+    public void userSessionsReported() {
+        send(prepare(Event.USER_SESSIONS_SENT));
+    }
+
+    @Override
+    public void customEventsReported() {
+        send(prepare(Event.CUSTOM_EVENTS_SENT));
+    }
+
     private void send(Intent intent) {
         try {
             context.sendBroadcast(intent);

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging;
+package org.infobip.mobile.messaging.platform;
 
 import android.app.job.JobScheduler;
 import android.content.Context;

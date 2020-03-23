@@ -12,6 +12,7 @@ import org.infobip.mobile.messaging.api.messages.MoMessagesResponse;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -156,7 +157,7 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
         // Given
         Message givenRelevantMessage = new Message();
         Message givenTooOldMessage = new Message() {{
-            setReceivedTimestamp(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(73));
+            setReceivedTimestamp(Time.now() - TimeUnit.HOURS.toMillis(73));
         }};
         given(apiMock.sendMO(any(MoMessagesBody.class)))
                 .willThrow(new RuntimeException());

@@ -60,11 +60,13 @@ public class UserMapper {
                     Set<String> set = new HashSet<>();
                     set.add(predefinedUserData.optString("msisdn"));
                     newUser.setPhones(set);
-                } if (predefinedUserData.opt("email") != null) {
+                }
+                if (predefinedUserData.opt("email") != null) {
                     Set<String> set = new HashSet<>();
                     set.add(predefinedUserData.optString("email"));
                     newUser.setEmails(set);
-                } if (predefinedUserData.opt("birthdate") != null)
+                }
+                if (predefinedUserData.opt("birthdate") != null)
                     newUser.setBirthday(DateTimeUtil.DateFromYMDString(predefinedUserData.optString("birthdate")));
 
                 Object gender = predefinedUserData.opt("gender");
@@ -183,17 +185,22 @@ public class UserMapper {
         return customAttributesToReport;
     }
 
-    static Object customValueToBackend(CustomAttributeValue value) {
+    public static Object customValueToBackend(CustomAttributeValue value) {
         if (value == null) {
             return null;
         }
 
         switch (value.getType()) {
-            case Date: return DateTimeUtil.DateToYMDString(value.dateValue());
-            case Number: return value.numberValue();
-            case String: return value.stringValue();
-            case Boolean: return value.booleanValue();
-            default: return null;
+            case Date:
+                return DateTimeUtil.DateToYMDString(value.dateValue());
+            case Number:
+                return value.numberValue();
+            case String:
+                return value.stringValue();
+            case Boolean:
+                return value.booleanValue();
+            default:
+                return null;
         }
     }
 

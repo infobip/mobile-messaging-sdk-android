@@ -204,7 +204,7 @@ public class GeoAreasHandler {
         }
 
         MobileMessagingCore.getInstance(context).updateUnreportedSeenMessageIds(reportingResult.getMessageIds());
-        MobileMessagingCore.getInstance(context).updatedGeneratedMessageIDs(reportingResult.getMessageIds());
+        MobileMessagingCore.getInstance(context).updateGeneratedMessageIds(reportingResult.getMessageIds());
     }
 
     /**

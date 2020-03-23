@@ -34,6 +34,7 @@ public class Message implements Comparable<Message> {
     private long receivedTimestamp;
     private long seenTimestamp;
     private long sentTimestamp;
+    private long inAppExpiryTimestamp;
     private JSONObject customPayload;
     private String internalData;
     private String contentUrl;
@@ -68,7 +69,8 @@ public class Message implements Comparable<Message> {
                    boolean vibrate, String icon, boolean silent, String category,
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
-                   String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle) {
+                   String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle,
+                   long inAppExpiryTimestamp) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -88,6 +90,7 @@ public class Message implements Comparable<Message> {
         this.statusMessage = statusMessage;
         this.contentUrl = contentUrl;
         this.inAppStyle = inAppStyle;
+        this.inAppExpiryTimestamp = inAppExpiryTimestamp;
     }
 
     public Message() {
@@ -219,6 +222,14 @@ public class Message implements Comparable<Message> {
 
     public void setSentTimestamp(long sentTimestamp) {
         this.sentTimestamp = sentTimestamp;
+    }
+
+    public long getInAppExpiryTimestamp() {
+        return inAppExpiryTimestamp;
+    }
+
+    public void setInAppExpiryTimestamp(long inAppExpiryTimestamp) {
+        this.inAppExpiryTimestamp = inAppExpiryTimestamp;
     }
 
     public JSONObject getCustomPayload() {

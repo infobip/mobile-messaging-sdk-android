@@ -7,6 +7,7 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
@@ -30,12 +31,13 @@ public class InAppRules {
     }
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
-        if (!hasInAppEnabled(message)) {
+        long inAppExpiryTimestamp = message.getInAppExpiryTimestamp();
+        if (!hasInAppEnabled(message) || (inAppExpiryTimestamp != 0 && inAppExpiryTimestamp < Time.now())) {
             return ShowOrNot.not();
         }
 
         ForegroundState state = foregroundStateMonitor.isInForeground();
-        if (state.isForeground()) {
+        if (state.isForeground() && state.getForegroundActivity() != null && !state.getForegroundActivity().isFinishing()) {
             if (StringUtils.isBlank(message.getCategory())) {
                 return ShowOrNot.showNowWithDefaultActions(state.getForegroundActivity(), defaultInAppActions);
             }

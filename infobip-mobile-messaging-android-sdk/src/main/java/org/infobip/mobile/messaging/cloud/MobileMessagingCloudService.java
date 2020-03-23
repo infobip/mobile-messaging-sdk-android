@@ -16,8 +16,8 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.JobIntentService;
 import org.infobip.mobile.messaging.platform.Platform;
 
-import static org.infobip.mobile.messaging.MobileMessagingJob.CLOUD_INTENT_JOB_ID;
-import static org.infobip.mobile.messaging.MobileMessagingJob.getScheduleId;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.CLOUD_INTENT_JOB_ID;
+import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getScheduleId;
 import static org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler.ACTION_CLOUD_MESSAGE_RECEIVE;
 import static org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler.ACTION_NEW_TOKEN;
 import static org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler.ACTION_TOKEN_ACQUIRE;
@@ -73,7 +73,7 @@ public class MobileMessagingCloudService extends JobIntentService {
             return;
         }
 
-        if (TextUtils.isEmpty(senderId)) {
+        if (TextUtils.isEmpty(token)) {
             MobileMessagingLogger.e("Cannot process new token, token is empty");
             return;
         }

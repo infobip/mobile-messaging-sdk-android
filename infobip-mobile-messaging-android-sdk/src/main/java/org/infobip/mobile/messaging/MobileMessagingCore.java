@@ -12,6 +12,8 @@ import android.util.Pair;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceAtts;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
+import org.infobip.mobile.messaging.api.appinstance.UserCustomEventBody;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
@@ -32,6 +34,9 @@ import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobile.events.CustomEvent;
+import org.infobip.mobile.messaging.mobile.events.UserEventsRequestMapper;
+import org.infobip.mobile.messaging.mobile.events.UserEventsSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
 import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
@@ -52,6 +57,7 @@ import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapperImpl;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ComponentUtil;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
@@ -82,6 +88,7 @@ import java.util.regex.Pattern;
 
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
+import static org.infobip.mobile.messaging.mobile.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
 
 /**
@@ -95,6 +102,7 @@ public class MobileMessagingCore
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
     private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(3);
+    private static final long FOREGROUND_SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(10);
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
@@ -116,6 +124,7 @@ public class MobileMessagingCore
     private UserDataReporter userDataReporter;
     private InstallationSynchronizer installationSynchronizer;
     private PersonalizeSynchronizer personalizeSynchronizer;
+    private UserEventsSynchronizer userEventsSynchronizer;
 
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
@@ -131,6 +140,7 @@ public class MobileMessagingCore
     private final Map<String, MessageHandlerModule> messageHandlerModules;
     private volatile boolean didSyncAtLeastOnce;
     private volatile Long lastSyncTimeMillis;
+    private volatile Long lastForegroundSyncMillis;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context));
@@ -294,13 +304,21 @@ public class MobileMessagingCore
     }
 
     public void sync() {
-        sync(false);
+        sync(true, false);
     }
 
-    public void sync(boolean force) {
+    public void lazySync() {
+        sync(false, false);
+    }
+
+    void foregroundSync() {
+        sync(false, true);
+    }
+
+    private void sync(boolean required, boolean foreground) {
         didSyncAtLeastOnce = true;
 
-        if (!force && didSyncRecently()) {
+        if (!required && (didSyncRecently() || (foreground && didSyncInForegroundRecently()))) {
             return;
         }
 
@@ -314,13 +332,24 @@ public class MobileMessagingCore
             return;
         }
 
-        lastSyncTimeMillis = System.currentTimeMillis();
+        lastSyncTimeMillis = Time.now();
+        if (foreground) {
+            lastForegroundSyncMillis = lastSyncTimeMillis;
+            userEventsSynchronizer().reportSessions();
+            performSyncActions();
+            return;
+        }
+
         versionChecker().sync();
         performSyncActions();
     }
 
     private boolean didSyncRecently() {
-        return lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
+        return lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
+    }
+
+    private boolean didSyncInForegroundRecently() {
+        return lastForegroundSyncMillis != null && Time.now() - lastForegroundSyncMillis < FOREGROUND_SYNC_THROTTLE_INTERVAL_MILLIS;
     }
 
     public void retrySyncOnNetworkAvailable() {
@@ -726,7 +755,7 @@ public class MobileMessagingCore
         });
     }
 
-    public void updatedGeneratedMessageIDs(final Map<String, String> messageIdMap) {
+    public void updateGeneratedMessageIds(final Map<String, String> messageIdMap) {
         if (messageIdMap == null || messageIdMap.isEmpty()) {
             return;
         }
@@ -839,7 +868,7 @@ public class MobileMessagingCore
         if (messageIds != null) {
             addUnreportedMessageIds(messageIds);
             addSyncMessagesIds(messageIds);
-            sync(true);
+            sync();
         }
     }
 
@@ -847,14 +876,14 @@ public class MobileMessagingCore
         if (messageIds != null) {
             addUnreportedSeenMessageIds(messageIds);
             updateStoredMessagesWithSeenStatus(messageIds);
-            sync(false);
+            lazySync();
         }
     }
 
     public void setMessagesSeenDontStore(String... messageIds) {
         if (messageIds != null) {
             addUnreportedSeenMessageIds(messageIds);
-            sync(false);
+            lazySync();
         }
     }
 
@@ -923,12 +952,6 @@ public class MobileMessagingCore
     }
 
     public void setCloudTokenUnreported() {
-
-        if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
-            MobileMessagingLogger.w("Application code not found, check your setup");
-            return;
-        }
-
         installationSynchronizer().setCloudTokenReported(false);
     }
 
@@ -1365,7 +1388,7 @@ public class MobileMessagingCore
     }
 
     private boolean areInstallationsExpired() {
-        Date now = new Date();
+        Date now = Time.date();
         long expiryTimestamp = PreferenceHelper.findLong(context, MobileMessagingProperty.USER_INSTALLATIONS_EXPIRE_AT);
         if (expiryTimestamp != 0) {
             Date expiryDate = new Date(expiryTimestamp);
@@ -1470,6 +1493,75 @@ public class MobileMessagingCore
         });
     }
 
+    @Override
+    public void submitEvent(@NonNull CustomEvent customEvent) {
+        addUnreportedUserCustomEvent(customEvent);
+        userEventsSynchronizer().reportCustomEvents();
+    }
+
+    @Override
+    public void submitEvent(@NonNull CustomEvent customEvent, ResultListener<CustomEvent> listener) {
+        if (TextUtils.isEmpty(customEvent.getDefinitionId())) {
+            listener.onResult(new Result<>(customEvent, MobileMessagingError.createFrom(new RuntimeException("Definition ID needs to be provided"))));
+            return;
+        }
+        userEventsSynchronizer().reportCustomEvent(customEvent, listener);
+    }
+
+    public void addUnreportedUserCustomEvent(CustomEvent customEvent) {
+        UserCustomEventBody customEventRequest = UserEventsRequestMapper.createCustomEventRequest(customEvent);
+        if (customEventRequest == null) return;
+        UserCustomEventBody.CustomEvent customEvents = customEventRequest.getEvents()[0];
+        String customEventRequestJsonString = UserEventsRequestMapper.toJson(customEvents);
+        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.USER_CUSTOM_EVENTS, customEventRequestJsonString);
+    }
+
+    public UserCustomEventBody.CustomEvent[] getUnreportedUserCustomEvents() {
+        String[] customEventsStringArray = PreferenceHelper.findStringArray(context, MobileMessagingProperty.USER_CUSTOM_EVENTS);
+        List<UserCustomEventBody.CustomEvent> customEvents = new ArrayList<>();
+        for (String eventJsonString : customEventsStringArray) {
+            customEvents.add(UserEventsRequestMapper.fromJson(eventJsonString));
+        }
+        return customEvents.toArray(new UserCustomEventBody.CustomEvent[0]);
+    }
+
+    public void setUserCustomEventsReported() {
+        PreferenceHelper.remove(context, MobileMessagingProperty.USER_CUSTOM_EVENTS);
+    }
+
+    public void saveSessionBounds(Context context, long sessionStartTimeMillis, long sessionEndTimeMillis) {
+        String sessionStartDateTime = DateTimeUtil.ISO8601DateUTCToString(new Date(sessionStartTimeMillis));
+        String sessionEndDateTime = DateTimeUtil.ISO8601DateUTCToString(new Date(sessionEndTimeMillis));
+        String sessionBound = sessionStartDateTime + SESSION_BOUNDS_DELIMITER + sessionEndDateTime;
+
+        PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.SESSION_BOUNDS, sessionBound);
+    }
+
+    public String[] getStoredSessionBounds() {
+        return PreferenceHelper.findStringArray(context, MobileMessagingProperty.SESSION_BOUNDS);
+    }
+
+    public void setUserSessionReported() {
+        PreferenceHelper.remove(context, MobileMessagingProperty.SESSION_BOUNDS);
+    }
+
+    public long getActiveSessionStartTime() {
+        return PreferenceHelper.findLong(context, MobileMessagingProperty.ACTIVE_SESSION_START_TIME_MILLIS);
+    }
+
+    public long getActiveSessionEndTime() {
+        return PreferenceHelper.findLong(context, MobileMessagingProperty.ACTIVE_SESSION_END_TIME_MILLIS);
+    }
+
+    public String getSessionIdHeader() {
+        final String pushRegistrationId = getPushRegistrationId();
+        final long activeSessionStartTime = getActiveSessionStartTime();
+        if (pushRegistrationId != null && activeSessionStartTime != 0) {
+            return pushRegistrationId + "_" + activeSessionStartTime;
+        }
+        return null;
+    }
+
     private List<Installation> performLocalDepersonalization(String pushRegId) {
         User user = getUser();
         if (user == null) {
@@ -1559,6 +1651,53 @@ public class MobileMessagingCore
         return null;
     }
 
+    public SystemData systemDataForReport(boolean forceSend) {
+        boolean reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
+
+        SystemData data = new SystemData(SoftwareInformation.getSDKVersionWithPostfixForSystemData(context),
+                reportEnabled ? SystemInformation.getAndroidSystemVersion() : "",
+                reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
+                reportEnabled ? DeviceInformation.getDeviceModel() : "",
+                reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
+                isGeofencingActivated(),
+                SoftwareInformation.areNotificationsEnabled(context),
+                reportEnabled && DeviceInformation.isDeviceSecure(context),
+                reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "",
+                reportEnabled ? SystemInformation.getAndroidDeviceName(context) : "",
+                reportEnabled ? DeviceInformation.getDeviceTimeZoneOffset() : "");
+
+        if (forceSend) {
+            return data;
+        }
+
+        int hash = PreferenceHelper.findInt(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        if (hash != data.hashCode()) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA, data.toString());
+            return data;
+        }
+
+        return null;
+    }
+
+    @NonNull
+    public Installation populateInstallationWithSystemData(SystemData data, Installation installation) {
+        installation.setSdkVersion(data.getSdkVersion());
+        installation.setOsVersion(data.getOsVersion());
+        installation.setDeviceManufacturer(data.getDeviceManufacturer());
+        installation.setDeviceModel(data.getDeviceModel());
+        installation.setAppVersion(data.getApplicationVersion());
+        if (installation.getGeoEnabled() == null) installation.setGeoEnabled(data.isGeofencing());
+        if (installation.getNotificationsEnabled() == null)
+            installation.setNotificationsEnabled(data.areNotificationsEnabled());
+        installation.setDeviceSecure(data.isDeviceSecure());
+        if (installation.getLanguage() == null) installation.setLanguage(data.getLanguage());
+        if (installation.getDeviceTimezoneOffset() == null)
+            installation.setDeviceTimezoneOffset(data.getDeviceTimeZoneOffset());
+        if (installation.getDeviceName() == null) installation.setDeviceName(data.getDeviceName());
+        installation.setOs(Platform.os);
+        return installation;
+    }
+
     public void removeReportedSystemData() {
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
     }
@@ -1587,6 +1726,22 @@ public class MobileMessagingCore
         if (shouldSaveUserData()) {
             PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_USER_DATA);
             PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_USER_DATA, toJson(user));
+        }
+    }
+
+    /**
+     * This method handles issues with absent registration and forces library to get back to the working state
+     *
+     * @param mobileMessagingError
+     */
+    public void handleNoRegistrationError(MobileMessagingError mobileMessagingError) {
+        if (ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
+            setCloudTokenUnreported();
+            setUnreportedCustomAttributes(getMergedUnreportedAndReportedCustomAtts());
+            setShouldRepersonalize(true);
+            removeReportedSystemData();
+            setUnreportedPrimarySetting();
+            setPushRegistrationEnabledReported(false);
         }
     }
 
@@ -1686,6 +1841,20 @@ public class MobileMessagingCore
                     mobileApiResourceProvider().getMobileApiAppInstance(context));
         }
         return installationSynchronizer;
+    }
+
+    @NonNull
+    private UserEventsSynchronizer userEventsSynchronizer() {
+        if (userEventsSynchronizer == null) {
+            userEventsSynchronizer = new UserEventsSynchronizer(
+                    this,
+                    broadcaster,
+                    mobileApiResourceProvider().getMobileApiAppInstance(context),
+                    retryPolicyProvider.DEFAULT(),
+                    registrationAlignedExecutor,
+                    new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)));
+        }
+        return userEventsSynchronizer;
     }
 
     /**

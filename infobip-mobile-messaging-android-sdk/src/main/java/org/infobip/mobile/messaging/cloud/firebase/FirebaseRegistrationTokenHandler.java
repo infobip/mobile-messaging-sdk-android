@@ -53,7 +53,8 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
-                handleNewToken(senderId, instanceIdResult.getToken());
+                final String token = instanceIdResult.getToken();
+                if (StringUtils.isNotBlank(token)) handleNewToken(senderId, token);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

@@ -196,6 +196,16 @@ public enum Event {
     PERSONALIZED("org.infobip.mobile.messaging.PERSONALIZED"),
 
     /**
+     * It is triggered when user's session is sent to the server.
+     */
+    USER_SESSIONS_SENT("org.infobip.mobile.messaging.USER_SESSIONS_SENT"),
+
+    /**
+     * It is triggered when user's custom event is sent to the server.
+     */
+    CUSTOM_EVENTS_SENT("org.infobip.mobile.messaging.CUSTOM_EVENTS_SENT"),
+
+    /**
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code

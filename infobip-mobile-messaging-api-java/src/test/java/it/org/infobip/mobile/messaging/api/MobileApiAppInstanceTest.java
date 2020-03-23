@@ -3,7 +3,9 @@ package it.org.infobip.mobile.messaging.api;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
+import org.infobip.mobile.messaging.api.appinstance.UserCustomEventBody;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
+import org.infobip.mobile.messaging.api.appinstance.UserSessionEventBody;
 import org.infobip.mobile.messaging.api.support.ApiBackendException;
 import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -97,20 +99,6 @@ public class MobileApiAppInstanceTest {
         //inspect http context
         assertEquals("/mobile/1/appinstance/1234regId567", debugServer.getUri());
         assertEquals(NanoHTTPD.Method.GET, debugServer.getRequestMethod());
-        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
-        assertEquals(1, debugServer.getRequestCount());
-        assertEquals(0, debugServer.getQueryParametersCount());
-    }
-
-    @Test
-    public void expire_instance_success_examineResponse() throws Exception {
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
-
-        mobileApiAppInstance.expireInstance(regId);
-
-        //inspect http context
-        assertEquals("/mobile/1/appinstance/1234regId567", debugServer.getUri());
-        assertEquals(NanoHTTPD.Method.DELETE, debugServer.getRequestMethod());
         assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(0, debugServer.getQueryParametersCount());
@@ -339,5 +327,67 @@ public class MobileApiAppInstanceTest {
         assertEquals("pushRegId", response.getPushRegId());
         assertEquals(true, response.getRegEnabled());
         assertEquals("1.18.0", response.getSdkVersion());
+    }
+
+    @Test
+    public void send_user_session_report__success_examineResponse() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        mobileApiAppInstance.sendUserSessionReport(regId, new UserSessionEventBody());
+
+        //inspect http context
+        assertEquals("/mobile/1/appinstance/1234regId567/user/events/session", debugServer.getUri());
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals(0, debugServer.getQueryParametersCount());
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+    }
+
+    @Test
+    public void send_user_custom_event__success_examineReqAndResponse() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        String userCustomEventRequest =
+                "{\"events\":[" +
+                        "{\"definitionId\":\"123\",\"date\":\"2.2.22\",\"properties\":{}}" +
+                        "]}";
+        UserCustomEventBody.CustomEvent customEvent = new UserCustomEventBody.CustomEvent("123", "2.2.22", new HashMap<String, Object>());
+        UserCustomEventBody userCustomEventBody = new UserCustomEventBody(new UserCustomEventBody.CustomEvent[]{customEvent});
+
+        mobileApiAppInstance.sendUserCustomEvents(regId, false, userCustomEventBody);
+
+        //inspect http context
+        assertEquals("/mobile/1/appinstance/1234regId567/user/events/custom", debugServer.getUri());
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals(1, debugServer.getQueryParametersCount());
+        assertEquals("false", debugServer.getQueryParameter("validate"));
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertEquals(userCustomEventBody.toString(), userCustomEventRequest);
+        assertEquals(userCustomEventBody.toString(), debugServer.getBody());
+    }
+
+    @Test
+    public void send_user_custom_event_with_validation__success_examineReqAndResponse() throws Exception {
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, null);
+
+        String userCustomEventRequest =
+                "{\"events\":[" +
+                        "{\"definitionId\":\"123\",\"date\":\"2.2.22\",\"properties\":{}}" +
+                        "]}";
+        UserCustomEventBody.CustomEvent customEvent = new UserCustomEventBody.CustomEvent("123", "2.2.22", new HashMap<String, Object>());
+        UserCustomEventBody userCustomEventBody = new UserCustomEventBody(new UserCustomEventBody.CustomEvent[]{customEvent});
+
+        mobileApiAppInstance.sendUserCustomEvents(regId, true, userCustomEventBody);
+
+        //inspect http context
+        assertEquals("/mobile/1/appinstance/1234regId567/user/events/custom", debugServer.getUri());
+        assertEquals(1, debugServer.getRequestCount());
+        assertEquals(NanoHTTPD.Method.POST, debugServer.getRequestMethod());
+        assertEquals(1, debugServer.getQueryParametersCount());
+        assertEquals("true", debugServer.getQueryParameter("validate"));
+        assertEquals("App my_API_key", debugServer.getHeader("Authorization"));
+        assertEquals(userCustomEventBody.toString(), userCustomEventRequest);
+        assertEquals(userCustomEventBody.toString(), debugServer.getBody());
     }
 }

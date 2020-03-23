@@ -38,10 +38,6 @@ public interface MobileApiAppInstance {
     @HttpRequest(method = HttpMethod.GET, value = "{regId}")
     AppInstance getInstance(@Path(name = "regId") String regId);
 
-    //TODO NOT USED (used in showcase) - delete?
-    @HttpRequest(method = HttpMethod.DELETE, value = "{regId}")
-    void expireInstance(@Path(name = "regId") String regId);
-
     @HttpRequest(method = HttpMethod.PATCH, value = "{regId}/user")
     void patchUser(@Path(name = "regId") String regId,
                    @Body Map user);
@@ -61,4 +57,13 @@ public interface MobileApiAppInstance {
     void personalize(@Path(name = "regId") String regId,
                      @Query(name = "forceDepersonalize", value = "false") boolean forceDepersonalize,
                      @Body UserPersonalizeBody userPersonalizeBody);
+
+    @HttpRequest(method = HttpMethod.POST, value = "{regId}/user/events/session")
+    void sendUserSessionReport(@Path(name = "regId") String regId,
+                               @Body UserSessionEventBody userSessionEventBody);
+
+    @HttpRequest(method = HttpMethod.POST, value = "{regId}/user/events/custom")
+    void sendUserCustomEvents(@Path(name = "regId") String regId,
+                              @Query(name = "validate", value = "false") boolean validate,
+                              @Body UserCustomEventBody userCustomEventBody);
 }

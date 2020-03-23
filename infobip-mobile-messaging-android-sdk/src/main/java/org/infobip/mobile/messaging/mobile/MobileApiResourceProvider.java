@@ -46,7 +46,14 @@ public class MobileApiResourceProvider {
 
         @Override // request interceptor
         public Request intercept(Request request) {
-            request.getHeaders().put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(ActivityLifecycleMonitor.isForeground()));
+            boolean foreground = ActivityLifecycleMonitor.isForeground();
+            request.getHeaders().put(CustomApiHeaders.FOREGROUND.getValue(), Collections.<Object>singletonList(foreground));
+            if (foreground) {
+                String sessionIdHeader = MobileMessagingCore.getInstance(context).getSessionIdHeader();
+                if (StringUtils.isNotBlank(sessionIdHeader)) {
+                    request.getHeaders().put(CustomApiHeaders.SESSION_ID.getValue(), Collections.<Object>singletonList(sessionIdHeader));
+                }
+            }
             request.getHeaders().put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getPushRegistrationId()));
             request.getHeaders().put(CustomApiHeaders.APPLICATION_CODE.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getApplicationCodeHash(context)));
             return request;

@@ -7,7 +7,6 @@ import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
-import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
@@ -77,7 +76,7 @@ public class UserDataReporter {
                 final Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
                 mobileApiAppInstance.patchUser(pushRegistrationId, request);
-                MobileMessagingLogger.v("USER DATA <<<");
+                MobileMessagingLogger.v("USER DATA DONE <<<");
                 return null;
             }
 
@@ -111,7 +110,7 @@ public class UserDataReporter {
                     BackendBaseExceptionWithContent errorWithContent = (BackendBaseExceptionWithContent) error;
                     mobileMessagingCore.setUserDataReported(errorWithContent.getContent(User.class), true);
                 } else if (error instanceof BackendInvalidParameterException) {
-                    handleNoRegistrationError(mobileMessagingError);
+                    mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                     mobileMessagingCore.setUserDataReportedWithError();
                 } else {
                     MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
@@ -163,7 +162,7 @@ public class UserDataReporter {
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
-                handleNoRegistrationError(mobileMessagingError);
+                mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
 
                 if (listener != null) {
                     listener.onResult(new Result(mobileMessagingCore.getUser(), mobileMessagingError));
@@ -172,17 +171,6 @@ public class UserDataReporter {
         }
                 .retryWith(retryPolicy(listener))
                 .execute(executor);
-    }
-
-    private void handleNoRegistrationError(MobileMessagingError mobileMessagingError) {
-        if (ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
-            mobileMessagingCore.setCloudTokenUnreported();
-            mobileMessagingCore.setUnreportedCustomAttributes(mobileMessagingCore.getMergedUnreportedAndReportedCustomAtts());
-            mobileMessagingCore.setShouldRepersonalize(true);
-            mobileMessagingCore.removeReportedSystemData();
-            mobileMessagingCore.setUnreportedPrimarySetting();
-            mobileMessagingCore.setPushRegistrationEnabledReported(false);
-        }
     }
 
     private void saveLatestPrimaryToMyInstallation(User user) {

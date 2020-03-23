@@ -9,8 +9,11 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
+import org.infobip.mobile.messaging.platform.Time;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -64,6 +67,26 @@ public class InAppRulesTest {
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
         assertEquals(false, showOrNot.shouldShowNow());
         assertEquals(false, showOrNot.shouldShowWhenInForeground());
+    }
+
+    @Test
+    public void shouldNotDisplayIfInAppIsExpired() {
+        long inAppMessageExpiredTwoDaysAgo = Time.now() - TimeUnit.DAYS.toMillis(2);
+        when(message.getInAppExpiryTimestamp()).thenReturn(inAppMessageExpiredTwoDaysAgo);
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+        assertEquals(false, showOrNot.shouldShowNow());
+        assertEquals(false, showOrNot.shouldShowWhenInForeground());
+    }
+
+    @Test
+    public void shouldDisplayIfInAppIsNotExpired() {
+        long inAppMessageExpiresInTwoDays = Time.now() + TimeUnit.DAYS.toMillis(2);
+        when(message.getInAppExpiryTimestamp()).thenReturn(inAppMessageExpiresInTwoDays);
+        when(foregroundStateMonitor.isInForeground()).thenReturn(ForegroundState.foreground(activity));
+
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+
+        assertEquals(true, showOrNot.shouldShowNow());
     }
 
     @Test

@@ -13,6 +13,7 @@ import android.support.annotation.RequiresPermission;
 import org.infobip.mobile.messaging.mobile.InternalSdkError;
 import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.Result;
+import org.infobip.mobile.messaging.mobile.events.CustomEvent;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -349,6 +350,30 @@ public abstract class MobileMessaging {
      * @param listener           listener to report the result on
      */
     public abstract void depersonalizeInstallation(@NonNull String pushRegistrationId, ResultListener<List<Installation>> listener);
+
+    /**
+     * Asynchronously submits custom events without validation. Custom event should be registered by definition ID and optional properties.
+     * Validation will not be performed. If wrong definition is provided event will be considered as invalid and won't be visible on user.
+     * <p>
+     * This method will report custom event on server and will also trigger {@link Event#CUSTOM_EVENTS_SENT} event with the provided event.
+     *
+     * @param customEvent custom event to report
+     * @see Event#CUSTOM_EVENTS_SENT
+     */
+    public abstract void submitEvent(@NonNull CustomEvent customEvent);
+
+    /**
+     * Synchronously submits custom event and validates it on backend. Custom event should be registered by definition ID and optional properties.
+     * In case of validation or network issues error will be returned and you'd need to manually retry sending of the event.
+     * <p>
+     * This method will report and validate custom event on server and will also trigger {@link Event#CUSTOM_EVENTS_SENT} event with the provided event.
+     *
+     * @param customEvent custom event to report
+     * @param listener    listener to report the result on
+     * @see ResultListener
+     * @see Event#CUSTOM_EVENTS_SENT
+     */
+    public abstract void submitEvent(@NonNull CustomEvent customEvent, ResultListener<CustomEvent> listener);
 
     /**
      * Send mobile originated messages.

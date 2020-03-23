@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.mobile.events.UserSessionTracker;
 
 import java.util.Collection;
 
@@ -46,6 +47,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
         if (!foregroundBefore && foreground) {
             dispatchEventToCore(context);
             dispatchEventToModules(context);
+            UserSessionTracker.startSessionTracking(context);
         }
     }
 
@@ -86,6 +88,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     public void onActivityPaused(Activity activity) {
         foregroundActivity = null;
         setForeground(null, false);
+        if (activity != null) UserSessionTracker.stopSessionTracking(activity);
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.mobile.MobileMessagingError;
 import org.infobip.mobile.messaging.mobile.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobile.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -55,7 +56,7 @@ public class MessagesSynchronizer {
     }
 
     public void sync() {
-        if (lastSyncTimeMillis != null && System.currentTimeMillis() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
+        if (lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
                 !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
@@ -65,7 +66,7 @@ public class MessagesSynchronizer {
             return;
         }
 
-        lastSyncTimeMillis = System.currentTimeMillis();
+        lastSyncTimeMillis = Time.now();
         final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
@@ -75,7 +76,7 @@ public class MessagesSynchronizer {
                 SyncMessagesBody syncMessagesBody = SyncMessagesBody.make(messageIds, unreportedMessageIds);
                 MobileMessagingLogger.v("SYNC MESSAGES >>>", syncMessagesBody);
                 SyncMessagesResponse syncMessagesResponse = mobileApiMessages.sync(syncMessagesBody);
-                MobileMessagingLogger.v("SYNC MESSAGES <<<", syncMessagesResponse);
+                MobileMessagingLogger.v("SYNC MESSAGES DONE <<<", syncMessagesResponse);
                 return MessagesMapper.mapResponseToMessages(syncMessagesResponse.getPayloads());
             }
 
