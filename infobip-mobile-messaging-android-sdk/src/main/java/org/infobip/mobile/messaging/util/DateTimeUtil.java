@@ -15,6 +15,7 @@ import java.util.TimeZone;
  */
 public class DateTimeUtil {
 
+    public static final int DATE_TIME_LENGTH_DATE_FORMAT3 = 20;  // example: 2020-02-26T09:41:57Z
     public static final String DATE_YMD_FORMAT = "yyyy-MM-dd";
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_FORMAT2 = "yyyy-MM-dd'T'HH:mm:ssX";

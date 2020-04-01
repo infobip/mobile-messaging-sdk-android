@@ -64,11 +64,18 @@ public class CustomAttributesMapper {
                 String stringValue = (String) value;
 
                 if (isPossiblyDate(stringValue)) {
+                    Date dateValue;
                     try {
-                        Date dateValue = DateTimeUtil.dateFromYMDString(stringValue);
+                        dateValue = DateTimeUtil.dateFromISO8601DateUTCString((String) value);
                         customUserDataValueMap.put(key, new CustomAttributeValue(dateValue));
                         continue;
-                    } catch (ParseException ignored) {
+                    } catch (ParseException ex1) {
+                        try {
+                            dateValue = DateTimeUtil.dateFromYMDString((String) value);
+                            customUserDataValueMap.put(key, new CustomAttributeValue(dateValue));
+                            continue;
+                        } catch (ParseException ignored) {
+                        }
                     }
                 }
                 customUserDataValueMap.put(key, new CustomAttributeValue(stringValue));
@@ -84,7 +91,9 @@ public class CustomAttributesMapper {
     }
 
     private static boolean isPossiblyDate(String stringValue) {
-        return Character.isDigit(stringValue.charAt(0)) && stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length();
+        return Character.isDigit(stringValue.charAt(0)) &&
+                (stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length() ||
+                stringValue.length() == DateTimeUtil.DATE_TIME_LENGTH_DATE_FORMAT3);
     }
 
 }
