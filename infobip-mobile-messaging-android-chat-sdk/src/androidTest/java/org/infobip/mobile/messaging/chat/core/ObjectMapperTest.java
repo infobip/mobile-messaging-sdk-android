@@ -56,7 +56,8 @@ public class ObjectMapperTest {
                 Message.Status.ERROR,
                 "statusMessage",
                 "contentUrl",
-                null
+                null,
+                0
         );
 
         ChatMessage message = objectMapper.fromBaseMessage(givenMessage, true);
