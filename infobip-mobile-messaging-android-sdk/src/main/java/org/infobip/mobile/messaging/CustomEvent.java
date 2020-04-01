@@ -1,8 +1,7 @@
-package org.infobip.mobile.messaging.mobile.events;
+package org.infobip.mobile.messaging;
 
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.api.appinstance.UserCustomEventAtts;
 
 import java.util.Map;

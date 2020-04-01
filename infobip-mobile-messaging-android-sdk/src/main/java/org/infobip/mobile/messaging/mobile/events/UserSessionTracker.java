@@ -64,17 +64,19 @@ public class UserSessionTracker {
         long now = Time.now();
 
         if (shouldBeNewSession(activeSessionStartTimeMillis, activeSessionEndTimeMillis, now)) {
-            if (sessionExistedBefore(activeSessionEndTimeMillis)) {
-                mobileMessagingCore.saveSessionBounds(context, activeSessionStartTimeMillis, activeSessionEndTimeMillis);
-            }
             saveActiveSessionStartTime(context, now);
+
+            if (sessionExistedBefore(activeSessionStartTimeMillis, activeSessionEndTimeMillis)) {
+                mobileMessagingCore.saveSessionBounds(context, activeSessionStartTimeMillis, activeSessionEndTimeMillis);
+                mobileMessagingCore.reportSessions();
+            }
         }
 
         saveActiveSessionEndTime(context, now);
     }
 
-    private static boolean sessionExistedBefore(long activeSessionEndTimeMillis) {
-        return activeSessionEndTimeMillis != 0;
+    private static boolean sessionExistedBefore(long activeSessionStartTimeMillis, long activeSessionEndTimeMillis) {
+        return activeSessionStartTimeMillis != 0 && activeSessionEndTimeMillis != 0;
     }
 
     // we have brand new session or we've tracked session at least once in 5 seconds but it's outdated

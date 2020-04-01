@@ -50,7 +50,7 @@ public class CustomAttributeValue {
     }
 
     public CustomAttributeValue(Date someDate) {
-        this.value = DateTimeUtil.DateToYMDString(someDate);
+        this.value = DateTimeUtil.dateToISO8601String(someDate);
         this.type = Type.Date;
     }
 
@@ -77,7 +77,7 @@ public class CustomAttributeValue {
                 this.value = NumberFormat.getNumberInstance(Locale.getDefault()).parse(stringValue);
                 break;
             case Date:
-                DateTimeUtil.DateFromYMDString(stringValue);
+                DateTimeUtil.dateFromYMDString(stringValue);  // here for validation
                 this.value = stringValue;
                 break;
             case Boolean:
@@ -133,9 +133,13 @@ public class CustomAttributeValue {
         }
 
         try {
-            return DateTimeUtil.DateFromYMDString((String) value);
-        } catch (ParseException e) {
-            throw new ClassCastException(e.getMessage());
+            return DateTimeUtil.dateFromISO8601DateUTCString((String) value);
+        } catch (ParseException ex1) {
+            try {
+                return DateTimeUtil.dateFromYMDString((String) value);
+            } catch (ParseException ex2) {
+                throw new ClassCastException(ex2.getMessage());
+            }
         }
     }
 
@@ -171,7 +175,7 @@ public class CustomAttributeValue {
             case String:
                 return stringValue();
             case Date:
-                return DateTimeUtil.DateToYMDString(dateValue());
+                return DateTimeUtil.dateToYMDString(dateValue());
             case Number:
                 return "" + numberValue();
             case Boolean:

@@ -34,7 +34,6 @@ import org.infobip.mobile.messaging.mobile.Result;
 import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
-import org.infobip.mobile.messaging.mobile.events.CustomEvent;
 import org.infobip.mobile.messaging.mobile.events.UserEventsRequestMapper;
 import org.infobip.mobile.messaging.mobile.events.UserEventsSynchronizer;
 import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
@@ -101,7 +100,7 @@ public class MobileMessagingCore
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
-    private static final long SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(3);
+    private static final long LAZY_SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final long FOREGROUND_SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(10);
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
@@ -311,7 +310,7 @@ public class MobileMessagingCore
         sync(false, false);
     }
 
-    void foregroundSync() {
+    public void foregroundSync() {
         sync(false, true);
     }
 
@@ -337,21 +336,22 @@ public class MobileMessagingCore
             lastForegroundSyncMillis = lastSyncTimeMillis;
             userEventsSynchronizer().reportSessions();
             performSyncActions();
+            versionChecker().sync();
             return;
         }
 
-        versionChecker().sync();
         performSyncActions();
     }
 
     private boolean didSyncRecently() {
-        return lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
+        return lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < LAZY_SYNC_THROTTLE_INTERVAL_MILLIS;
     }
 
     private boolean didSyncInForegroundRecently() {
         return lastForegroundSyncMillis != null && Time.now() - lastForegroundSyncMillis < FOREGROUND_SYNC_THROTTLE_INTERVAL_MILLIS;
     }
 
+    // this method is invoked by successful connectivity invocation - it initiates the job for creating push reg ID and other sync actions
     public void retrySyncOnNetworkAvailable() {
         if (!didSyncAtLeastOnce) {
             return;
@@ -580,8 +580,8 @@ public class MobileMessagingCore
     public Map<String, CustomAttributeValue> getMergedUnreportedAndReportedCustomAtts() {
         String unreportedCustomAttributes = getUnreportedCustomAttributes();
         String reportedCustomAtts = getCustomAttributes();
-        Map<String, CustomAttributeValue> unreportedCustomAttsMap = UserMapper.customAttsFrom(unreportedCustomAttributes);
-        Map<String, CustomAttributeValue> customAttsMap = UserMapper.customAttsFrom(reportedCustomAtts);
+        Map<String, CustomAttributeValue> unreportedCustomAttsMap = CustomAttributesMapper.customAttsFrom(unreportedCustomAttributes);
+        Map<String, CustomAttributeValue> customAttsMap = CustomAttributesMapper.customAttsFrom(reportedCustomAtts);
         if (customAttsMap == null) {
             customAttsMap = new HashMap<>();
         }
@@ -992,7 +992,7 @@ public class MobileMessagingCore
         Map<String, CustomAttributeValue> customAttsMap = new HashMap<>();
         String customAttributes = getCustomAttributes();
         if (customAttributes != null) {
-            customAttsMap = UserMapper.customAttsFrom(customAttributes);
+            customAttsMap = CustomAttributesMapper.customAttsFrom(customAttributes);
         }
         return new Installation(
                 getPushRegistrationId(),
@@ -1530,23 +1530,34 @@ public class MobileMessagingCore
     }
 
     public void saveSessionBounds(Context context, long sessionStartTimeMillis, long sessionEndTimeMillis) {
-        String sessionStartDateTime = DateTimeUtil.ISO8601DateUTCToString(new Date(sessionStartTimeMillis));
-        String sessionEndDateTime = DateTimeUtil.ISO8601DateUTCToString(new Date(sessionEndTimeMillis));
+        String sessionStartDateTime = DateTimeUtil.dateToISO8601UTCString(new Date(sessionStartTimeMillis));
+        String sessionEndDateTime = DateTimeUtil.dateToISO8601UTCString(new Date(sessionEndTimeMillis));
         String sessionBound = sessionStartDateTime + SESSION_BOUNDS_DELIMITER + sessionEndDateTime;
 
         PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.SESSION_BOUNDS, sessionBound);
+    }
+
+    public void reportSessions() {
+        userEventsSynchronizer().reportSessions();
     }
 
     public String[] getStoredSessionBounds() {
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.SESSION_BOUNDS);
     }
 
-    public void setUserSessionReported() {
-        PreferenceHelper.remove(context, MobileMessagingProperty.SESSION_BOUNDS);
+    public void setUserSessionsReported(String[] storedSessionBounds, long sessionStartsMillis) {
+        if (storedSessionBounds != null && storedSessionBounds.length != 0) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.SESSION_BOUNDS);
+        }
+        PreferenceHelper.saveLong(context, MobileMessagingProperty.LAST_REPORTED_ACTIVE_SESSION_START_TIME_MILLIS, sessionStartsMillis);
     }
 
     public long getActiveSessionStartTime() {
         return PreferenceHelper.findLong(context, MobileMessagingProperty.ACTIVE_SESSION_START_TIME_MILLIS);
+    }
+
+    public long getLastReportedActiveSessionStartTime() {
+        return PreferenceHelper.findLong(context, MobileMessagingProperty.LAST_REPORTED_ACTIVE_SESSION_START_TIME_MILLIS);
     }
 
     public long getActiveSessionEndTime() {

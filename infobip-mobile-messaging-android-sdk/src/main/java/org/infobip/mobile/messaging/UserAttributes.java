@@ -103,14 +103,14 @@ public class UserAttributes extends CustomAttributeHolder {
 
     public Date getBirthday() {
         try {
-            return DateTimeUtil.DateFromYMDString(birthday);
+            return DateTimeUtil.dateFromYMDString(birthday);
         } catch (ParseException e) {
             return null;
         }
     }
 
     public void setBirthday(Date birthday) {
-        this.birthday = DateTimeUtil.DateToYMDString(birthday);
+        this.birthday = DateTimeUtil.dateToYMDString(birthday);
         setField(UserAtts.birthday, this.birthday);
     }
 

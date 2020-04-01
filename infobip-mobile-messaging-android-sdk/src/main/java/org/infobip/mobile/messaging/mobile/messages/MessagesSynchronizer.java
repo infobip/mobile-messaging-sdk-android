@@ -56,17 +56,17 @@ public class MessagesSynchronizer {
     }
 
     public void sync() {
-        if (lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
-                !mobileMessagingCore.isPushRegistrationEnabled()) {
-            return;
-        }
-
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will patch messages later");
             return;
         }
 
+        if (lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
+                !mobileMessagingCore.isPushRegistrationEnabled()) {
+            return;
+        }
         lastSyncTimeMillis = Time.now();
+
         final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
@@ -103,7 +103,7 @@ public class MessagesSynchronizer {
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }
         }
-        .retryWith(retryPolicy)
-        .execute(executor);
+                .retryWith(retryPolicy)
+                .execute(executor);
     }
 }

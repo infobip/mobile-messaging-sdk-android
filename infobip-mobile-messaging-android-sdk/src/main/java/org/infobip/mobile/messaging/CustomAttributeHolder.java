@@ -6,7 +6,9 @@ import org.infobip.mobile.messaging.api.support.MapModel;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.infobip.mobile.messaging.UserMapper.customAttsToBackend;
+import static org.infobip.mobile.messaging.CustomAttributesMapper.customAttsToBackend;
+import static org.infobip.mobile.messaging.CustomAttributesMapper.customValueToBackend;
+
 
 public class CustomAttributeHolder extends MapModel {
 
@@ -64,7 +66,7 @@ public class CustomAttributeHolder extends MapModel {
         if (customAtts == null) {
             customAtts = new HashMap<>();
         }
-        customAtts.put(key, UserMapper.customValueToBackend(customAttributeValue));
+        customAtts.put(key, customValueToBackend(customAttributeValue));
         setField(UserAtts.customAttributes, customAtts);
     }
 

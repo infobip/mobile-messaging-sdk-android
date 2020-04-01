@@ -2,7 +2,8 @@ package org.infobip.mobile.messaging.mobile.events;
 
 import android.support.annotation.NonNull;
 
-import org.infobip.mobile.messaging.UserMapper;
+import org.infobip.mobile.messaging.CustomEvent;
+import org.infobip.mobile.messaging.EventPropertiesMapper;
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserCustomEventBody;
 import org.infobip.mobile.messaging.api.appinstance.UserSessionEventBody;
@@ -39,20 +40,20 @@ public class UserEventsRequestMapper {
             return null;
         }
         if (customEvent.getProperties() != null) {
-            payload = UserMapper.customAttsToBackend(customEvent.getProperties());
+            payload = EventPropertiesMapper.eventPropertiesToBackend(customEvent.getProperties());
         }
         UserCustomEventBody.CustomEvent customEventRequestBody = new UserCustomEventBody.CustomEvent(
                 customEvent.getDefinitionId(),
-                DateTimeUtil.ISO8601DateUTCToString(Time.date()),
+                DateTimeUtil.dateToISO8601UTCString(Time.date()),
                 payload
         );
         UserCustomEventBody.CustomEvent[] customEvents = {customEventRequestBody};
         return new UserCustomEventBody(customEvents);
     }
 
-    public static UserSessionEventBody createUserSessionEventRequest(long sessionStartsMillis, String[] storedSessionBounds, AppInstance systemData) {
+    static UserSessionEventBody createUserSessionEventRequest(long sessionStartsMillis, String[] storedSessionBounds, AppInstance systemData) {
         HashMap<String, String> sessionBounds = getSessionBounds(storedSessionBounds);
-        if (sessionBounds.size() == 0 || systemData == null) {
+        if (systemData == null) {
             return null;
         }
 
@@ -81,7 +82,7 @@ public class UserEventsRequestMapper {
     static Set<String> getSessionStarts(long sessionStartsMillis) {
         Set<String> sessionStarts = new HashSet<>();
         if (sessionStartsMillis != 0) {
-            String sessionStartsDate = DateTimeUtil.ISO8601DateUTCToString(new Date(sessionStartsMillis));
+            String sessionStartsDate = DateTimeUtil.dateToISO8601UTCString(new Date(sessionStartsMillis));
             sessionStarts = CollectionUtils.setOf(sessionStartsDate);
         }
         return sessionStarts;

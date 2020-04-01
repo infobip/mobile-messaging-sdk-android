@@ -63,24 +63,40 @@ public class DateTimeUtil {
     }
 
     /**
-     * Returns ISO8601-compliant string for the supplied date.
+     * Returns ISO8601-compliant string in UTC time for the supplied date.
      * 2020-02-26T09:41:57Z
      *
      * @param date date object
      * @return String representation of Date object
      */
-    public static String ISO8601DateUTCToString(Date date) {
+    public static String dateToISO8601UTCString(Date date) {
         if (date == null) {
             return null;
         }
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(date);
-        Date utcDate = calendar.getTime();
+        long timeInUtc = date.getTime();
+        int offset = calendar.getTimeZone().getOffset(timeInUtc);
+        timeInUtc -= offset;
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
-        return simpleDateFormat.format(utcDate);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
+        return simpleDateFormat.format(timeInUtc);
+    }
+
+    /**
+     * Returns ISO8601-compliant string in UTC time for the supplied date.
+     * 2020-02-26T09:41:57Z
+     *
+     * @param date date object
+     * @return String representation of Date object
+     */
+    public static String dateToISO8601String(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
+        return simpleDateFormat.format(date.getTime());
     }
 
     /**
@@ -89,7 +105,7 @@ public class DateTimeUtil {
      * @param date string representation of date
      * @return Date object
      */
-    public static Date DateFromYMDString(String date) throws ParseException {
+    public static Date dateFromYMDString(String date) throws ParseException {
         if (date == null) {
             return null;
         }
@@ -98,12 +114,27 @@ public class DateTimeUtil {
     }
 
     /**
+     * Converts "yyyy-MM-dd'T'HH:mm:ss'Z'" ISO8601-compliant string to Date object.
+     * Example of input: 2020-02-26T09:41:57Z
+     *
+     * @param date string representation of date
+     * @return Date object
+     */
+    public static Date dateFromISO8601DateUTCString(String date) throws ParseException {
+        if (date == null) {
+            return null;
+        }
+
+        return new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault()).parse(date);
+    }
+
+    /**
      * Returns "yyyy-MM-dd" string for the supplied date.
      *
      * @param date date object
      * @return String representation of Date object
      */
-    public static String DateToYMDString(Date date) {
+    public static String dateToYMDString(Date date) {
         if (date == null) {
             return null;
         }

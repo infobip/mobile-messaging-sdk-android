@@ -1,14 +1,14 @@
-package org.infobip.mobile.messaging.mobile.events;
+package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.CustomAttributeValue;
-import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.UserCustomEventAtts;
 import org.infobip.mobile.messaging.api.support.MapModel;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.infobip.mobile.messaging.UserMapper.customAttsToBackend;
+import static org.infobip.mobile.messaging.EventPropertiesMapper.eventPropertiesToBackend;
+import static org.infobip.mobile.messaging.EventPropertiesMapper.eventPropertyToBackend;
+
 
 public class EventPropertiesHolder extends MapModel {
 
@@ -26,7 +26,7 @@ public class EventPropertiesHolder extends MapModel {
 
     public void setProperties(Map<String, CustomAttributeValue> properties) {
         this.properties = properties;
-        setField(UserCustomEventAtts.properties, properties != null ? customAttsToBackend(properties) : null);
+        setField(UserCustomEventAtts.properties, properties != null ? eventPropertiesToBackend(properties) : null);
     }
 
     public Map<String, CustomAttributeValue> getProperties() {
@@ -53,7 +53,7 @@ public class EventPropertiesHolder extends MapModel {
         if (properties == null) {
             properties = new HashMap<>();
         }
-        properties.put(key, null);
+        properties.remove(key);
         setPropertyField(key, null);
     }
 
@@ -66,7 +66,7 @@ public class EventPropertiesHolder extends MapModel {
         if (eventProperties == null) {
             eventProperties = new HashMap<>();
         }
-        eventProperties.put(key, UserMapper.customValueToBackend(propertyValue));
+        eventProperties.put(key, eventPropertyToBackend(propertyValue));
         setField(UserCustomEventAtts.properties, eventProperties);
     }
 

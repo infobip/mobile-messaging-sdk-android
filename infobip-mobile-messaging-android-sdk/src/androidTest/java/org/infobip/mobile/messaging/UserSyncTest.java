@@ -120,7 +120,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> customAtts = new HashMap<>();
         customAtts.put("myKey1", "Some string");
         customAtts.put("myKey2", 12345);
-        customAtts.put("myKey3", DateTimeUtil.DateToYMDString(new Date()));
+        customAtts.put("myKey3", DateTimeUtil.dateToYMDString(new Date()));
         customAtts.put("myKey4", false);
 
         HashMap<String, Object> report = new HashMap<>();

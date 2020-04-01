@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.mobile.events;
 
+import org.infobip.mobile.messaging.CustomEvent;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -36,7 +37,8 @@ public class UserEventsSynchronizer {
             Broadcaster broadcaster,
             MobileApiAppInstance mobileApiAppInstance,
             MRetryPolicy policy,
-            Executor executor, BatchReporter batchReporter) {
+            Executor executor,
+            BatchReporter batchReporter) {
 
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
@@ -57,12 +59,16 @@ public class UserEventsSynchronizer {
             return;
         }
 
-        String[] storedSessionBounds = mobileMessagingCore.getStoredSessionBounds();
+        final long sessionStartsMillis = mobileMessagingCore.getActiveSessionStartTime();
+        long lastReportedSessionStartTime = mobileMessagingCore.getLastReportedActiveSessionStartTime();
+        final String[] storedSessionBounds = mobileMessagingCore.getStoredSessionBounds();
         AppInstance systemData = getSystemDataForBackend();
-        long sessionStartsMillis = mobileMessagingCore.getActiveSessionStartTime();
         final UserSessionEventBody userSessionEventBody = UserEventsRequestMapper.createUserSessionEventRequest(sessionStartsMillis, storedSessionBounds, systemData);
 
-        if (userSessionEventBody == null) {
+        // if request cannot be created (missing params) or
+        // if we already reported the active session and session bounds are also reported (absent) we don't send a request
+        if (userSessionEventBody == null ||
+                sessionStartsMillis == lastReportedSessionStartTime && userSessionEventBody.getSessionBounds().size() == 0) {
             return;
         }
 
@@ -78,7 +84,7 @@ public class UserEventsSynchronizer {
             @Override
             public void after(Void aVoid) {
                 MobileMessagingLogger.v("USER SESSION REPORT DONE <<<");
-                mobileMessagingCore.setUserSessionReported();
+                mobileMessagingCore.setUserSessionsReported(storedSessionBounds, sessionStartsMillis);
                 broadcaster.userSessionsReported();
             }
 

@@ -96,6 +96,7 @@ public enum MobileMessagingProperty {
     USER_INSTALLATIONS_EXPIRE_AT("org.infobip.mobile.messaging.infobip.USER_INSTALLATIONS_EXPIRE_AT"),
 
     USER_CUSTOM_EVENTS("org.infobip.mobile.messaging.infobip.USER_CUSTOM_EVENTS"),
+    LAST_REPORTED_ACTIVE_SESSION_START_TIME_MILLIS("org.infobip.mobile.messaging.infobip.LAST_REPORTED_ACTIVE_SESSION_START_TIME_MILLIS", 0L),
     ACTIVE_SESSION_START_TIME_MILLIS("org.infobip.mobile.messaging.infobip.ACTIVE_SESSION_START_TIME_MILLIS", 0L),
     ACTIVE_SESSION_END_TIME_MILLIS("org.infobip.mobile.messaging.infobip.ACTIVE_SESSION_END_TIME_MILLIS", 0L),
     SESSION_BOUNDS("org.infobip.mobile.messaging.infobip.SESSION_BOUNDS");

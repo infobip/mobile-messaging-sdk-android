@@ -7,7 +7,7 @@ import org.infobip.mobile.messaging.api.appinstance.PushServiceType;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import static org.infobip.mobile.messaging.UserMapper.customAttsFromBackend;
+import static org.infobip.mobile.messaging.CustomAttributesMapper.customAttsFromBackend;
 
 public class InstallationMapper {
 

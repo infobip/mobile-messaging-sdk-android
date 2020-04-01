@@ -48,7 +48,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         User userResponse = userCaptor.getValue();
         assertEquals(SOME_STRING_VALUE, userResponse.getCustomAttributeValue(KEY_FOR_STRING).stringValue());
         assertEquals(SOME_NUMBER_VALUE, userResponse.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue().intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(SOME_DATE_VALUE), DateTimeUtil.DateToYMDString(userResponse.getCustomAttributeValue(KEY_FOR_DATE).dateValue()));
+        assertEquals(DateTimeUtil.dateToYMDString(SOME_DATE_VALUE), DateTimeUtil.dateToYMDString(userResponse.getCustomAttributeValue(KEY_FOR_DATE).dateValue()));
         assertEquals(CustomAttributeValue.Type.String, userResponse.getCustomAttributeValue(KEY_FOR_STRING).getType());
         assertEquals(CustomAttributeValue.Type.Number, userResponse.getCustomAttributeValue(KEY_FOR_NUMBER).getType());
         assertEquals(CustomAttributeValue.Type.Date, userResponse.getCustomAttributeValue(KEY_FOR_DATE).getType());
@@ -66,7 +66,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         Installation installationResponse = installationCaptor.getValue();
         assertEquals(SOME_STRING_VALUE, installationResponse.getCustomAttributeValue(KEY_FOR_STRING).stringValue());
         assertEquals(SOME_NUMBER_VALUE, installationResponse.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue().intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(SOME_DATE_VALUE), DateTimeUtil.DateToYMDString(installationResponse.getCustomAttributeValue(KEY_FOR_DATE).dateValue()));
+        assertEquals(DateTimeUtil.dateToYMDString(SOME_DATE_VALUE), DateTimeUtil.dateToYMDString(installationResponse.getCustomAttributeValue(KEY_FOR_DATE).dateValue()));
         assertEquals(CustomAttributeValue.Type.String, installationResponse.getCustomAttributeValue(KEY_FOR_STRING).getType());
         assertEquals(CustomAttributeValue.Type.Number, installationResponse.getCustomAttributeValue(KEY_FOR_NUMBER).getType());
         assertEquals(CustomAttributeValue.Type.Date, installationResponse.getCustomAttributeValue(KEY_FOR_DATE).getType());
@@ -78,7 +78,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         Map<String, Object> customAtts = new HashMap<>();
         customAtts.put(KEY_FOR_STRING, SOME_STRING_VALUE);
-        customAtts.put(KEY_FOR_DATE, DateTimeUtil.DateToYMDString(SOME_DATE_VALUE));
+        customAtts.put(KEY_FOR_DATE, DateTimeUtil.dateToYMDString(SOME_DATE_VALUE));
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
         serverResponse.setCustomAttributes(customAtts);
 
@@ -89,7 +89,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         assertEquals(SOME_STRING_VALUE, keyForString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(SOME_DATE_VALUE), DateTimeUtil.DateToYMDString(keyForDate));
+        assertEquals(DateTimeUtil.dateToYMDString(SOME_DATE_VALUE), DateTimeUtil.dateToYMDString(keyForDate));
 
         Map<String, CustomAttributeValue> customUserData = user.getCustomAttributes();
         assertEquals(3, customUserData.size());
@@ -101,18 +101,18 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         Map<String, Object> customAtts = new HashMap<>();
         customAtts.put(KEY_FOR_STRING, SOME_STRING_VALUE);
-        customAtts.put(KEY_FOR_DATE, DateTimeUtil.DateToYMDString(SOME_DATE_VALUE));
+        customAtts.put(KEY_FOR_DATE, DateTimeUtil.dateToYMDString(SOME_DATE_VALUE));
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
         serverResponse.setCustomAttributes(customAtts);
 
-        Map<String, CustomAttributeValue> customAttsFromBackend = UserMapper.customAttsFromBackend(serverResponse.getCustomAttributes());
+        Map<String, CustomAttributeValue> customAttsFromBackend = CustomAttributesMapper.customAttsFromBackend(serverResponse.getCustomAttributes());
         String keyForString = customAttsFromBackend.get(KEY_FOR_STRING).stringValue();
         Number keyForNumber = customAttsFromBackend.get(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = customAttsFromBackend.get(KEY_FOR_DATE).dateValue();
 
         assertEquals(SOME_STRING_VALUE, keyForString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(SOME_DATE_VALUE), DateTimeUtil.DateToYMDString(keyForDate));
+        assertEquals(DateTimeUtil.dateToYMDString(SOME_DATE_VALUE), DateTimeUtil.dateToYMDString(keyForDate));
 
         assertEquals(3, customAttsFromBackend.size());
     }
@@ -134,7 +134,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         assertEquals(SOME_STRING_VALUE, keyForString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(date), DateTimeUtil.DateToYMDString(keyForDate));
+        assertEquals(DateTimeUtil.dateToYMDString(date), DateTimeUtil.dateToYMDString(keyForDate));
 
         Map<String, CustomAttributeValue> customUserAtts = user.getCustomAttributes();
         assertEquals(3, customUserAtts.size());
@@ -157,7 +157,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         assertEquals(SOME_STRING_VALUE, keyForString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
-        assertEquals(DateTimeUtil.DateToYMDString(date), DateTimeUtil.DateToYMDString(keyForDate));
+        assertEquals(DateTimeUtil.dateToYMDString(date), DateTimeUtil.dateToYMDString(keyForDate));
 
         Map<String, CustomAttributeValue> customInstallationAtts = installation.getCustomAttributes();
         assertEquals(3, customInstallationAtts.size());

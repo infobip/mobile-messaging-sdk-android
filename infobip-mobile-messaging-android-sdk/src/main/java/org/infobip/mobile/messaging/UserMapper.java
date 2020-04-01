@@ -1,11 +1,8 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
-
-import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
@@ -18,10 +15,7 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,7 +61,7 @@ public class UserMapper {
                     newUser.setEmails(set);
                 }
                 if (predefinedUserData.opt("birthdate") != null)
-                    newUser.setBirthday(DateTimeUtil.DateFromYMDString(predefinedUserData.optString("birthdate")));
+                    newUser.setBirthday(DateTimeUtil.dateFromYMDString(predefinedUserData.optString("birthdate")));
 
                 Object gender = predefinedUserData.opt("gender");
                 if (gender instanceof String) {
@@ -80,7 +74,7 @@ public class UserMapper {
             }
 
             if (userDataJsonObject.optString("customUserData") != null) {
-                customInstallationAtts = customAttsFrom(userDataJsonObject.optString("customUserData"));
+                customInstallationAtts = CustomAttributesMapper.customAttsFrom(userDataJsonObject.optString("customUserData"));
             }
 
         } catch (Exception e) {
@@ -105,7 +99,7 @@ public class UserMapper {
                 destinationsFromBackend(userResponseBody.getEmails()),
                 userResponseBody.getTags(),
                 installationsFromBackend(userResponseBody),
-                customAttsFromBackend(userResponseBody.getCustomAttributes()));
+                CustomAttributesMapper.customAttsFromBackend(userResponseBody.getCustomAttributes()));
     }
 
     public static User fromJson(String userDataJson) {
@@ -134,12 +128,6 @@ public class UserMapper {
         Bundle bundle = new Bundle();
         bundle.putString(key, toJson(user));
         return bundle;
-    }
-
-    public static Map<String, CustomAttributeValue> customAttsFrom(String json) {
-        Type type = new TypeToken<Map<String, CustomAttributeValue>>() {
-        }.getType();
-        return nullSerializer.deserialize(json, type);
     }
 
     static List<Map<String, Object>> mapPhonesToBackend(Set<String> phones) {
@@ -174,71 +162,6 @@ public class UserMapper {
             installations.add(InstallationMapper.fromBackend(instance));
         }
         return installations;
-    }
-
-    @NonNull
-    public static Map<String, Object> customAttsToBackend(@NonNull Map<String, CustomAttributeValue> customAttributes) {
-        Map<String, Object> customAttributesToReport = new HashMap<>(customAttributes.size());
-        for (Map.Entry<String, CustomAttributeValue> entry : customAttributes.entrySet()) {
-            customAttributesToReport.put(entry.getKey(), customValueToBackend(entry.getValue()));
-        }
-        return customAttributesToReport;
-    }
-
-    public static Object customValueToBackend(CustomAttributeValue value) {
-        if (value == null) {
-            return null;
-        }
-
-        switch (value.getType()) {
-            case Date:
-                return DateTimeUtil.DateToYMDString(value.dateValue());
-            case Number:
-                return value.numberValue();
-            case String:
-                return value.stringValue();
-            case Boolean:
-                return value.booleanValue();
-            default:
-                return null;
-        }
-    }
-
-    public static Map<String, CustomAttributeValue> customAttsFromBackend(Map<String, Object> customAttributes) {
-        Map<String, CustomAttributeValue> customUserDataValueMap = new HashMap<>();
-        if (customAttributes == null) {
-            return customUserDataValueMap;
-        }
-
-        for (Map.Entry<String, Object> entry : customAttributes.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-
-            if (value instanceof String) {
-                String stringValue = (String) value;
-
-                if (isPossiblyDate(stringValue)) {
-                    try {
-                        Date dateValue = DateTimeUtil.DateFromYMDString(stringValue);
-                        customUserDataValueMap.put(key, new CustomAttributeValue(dateValue));
-                        continue;
-                    } catch (ParseException ignored) {
-                    }
-                }
-                customUserDataValueMap.put(key, new CustomAttributeValue(stringValue));
-
-            } else if (value instanceof Number) {
-                customUserDataValueMap.put(key, new CustomAttributeValue((Number) value));
-            } else if (value instanceof Boolean) {
-                customUserDataValueMap.put(key, new CustomAttributeValue((Boolean) value));
-            }
-        }
-
-        return customUserDataValueMap;
-    }
-
-    private static boolean isPossiblyDate(String stringValue) {
-        return Character.isDigit(stringValue.charAt(0)) && stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length();
     }
 
     @Nullable

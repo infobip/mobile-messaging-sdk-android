@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.mobile.events;
 import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
+import org.infobip.mobile.messaging.CustomEvent;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
@@ -24,8 +25,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
@@ -56,6 +59,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
             command.run();
         }
     };
+    private final long date = System.currentTimeMillis();
 
     @Override
     public void setUp() throws Exception {
@@ -82,22 +86,19 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
 
         userEventsSynchronizer.reportSessions();
 
+        verify(broadcaster, after(300).times(1)).userSessionsReported();
+        verify(mobileApiAppInstance, times(1)).sendUserSessionReport(anyString(), userSessionEventCaptor.capture());
         assertEquals(sessionStartMillis, mobileMessagingCore.getActiveSessionStartTime());
         assertEquals(sessionEndMillis, mobileMessagingCore.getActiveSessionEndTime());
         assertEquals(0, UserEventsRequestMapper.getSessionBounds(mobileMessagingCore.getStoredSessionBounds()).size());
-
-        verify(mobileApiAppInstance, times(1)).sendUserSessionReport(anyString(), userSessionEventCaptor.capture());
         UserSessionEventBody userSessionEventBody = userSessionEventCaptor.getValue();
         assertEquals(sessionBounds, userSessionEventBody.getSessionBounds());
-        assertEquals(CollectionUtils.setOf(DateTimeUtil.ISO8601DateUTCToString(new Date(sessionStartMillis))), userSessionEventBody.getSessionStarts());
-        verify(broadcaster, after(300).times(1)).userSessionsReported();
+        assertEquals(CollectionUtils.setOf(DateTimeUtil.dateToISO8601UTCString(new Date(sessionStartMillis))), userSessionEventBody.getSessionStarts());
     }
 
     @Test
     public void shouldReportOneCustomEventOnServerWithValidationSync() throws Exception {
-        CustomEvent customEvent = new CustomEvent();
-        customEvent.setProperty("key", new CustomAttributeValue(true));
-        customEvent.setDefinitionId("12345");
+        CustomEvent customEvent = setupCustomEventWithProperties();
 
         userEventsSynchronizer.reportCustomEvent(customEvent, eventResultListener);
 
@@ -110,9 +111,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
 
     @Test
     public void shouldPropagateValidationErrorOnReportingOneCustomEventOnServerSync() throws Exception {
-        CustomEvent customEvent = new CustomEvent();
-        customEvent.setProperty("key", new CustomAttributeValue(true));
-        customEvent.setDefinitionId("12345");
+        CustomEvent customEvent = setupCustomEventWithProperties();
         doThrow(new ApiIOException(ApiErrorCode.INVALID_VALUE, "Request is invalid"))
                 .when(mobileApiAppInstance).sendUserCustomEvents(anyString(), anyBoolean(), any(UserCustomEventBody.class));
 
@@ -127,9 +126,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
 
     @Test
     public void shouldReportOneCustomEventOnServerAsync() throws Exception {
-        CustomEvent customEvent = new CustomEvent();
-        customEvent.setProperty("key", new CustomAttributeValue(true));
-        customEvent.setDefinitionId("12345");
+        CustomEvent customEvent = setupCustomEventWithProperties();
         mobileMessagingCore.addUnreportedUserCustomEvent(customEvent);
         assertEquals(1, PreferenceHelper.findStringArray(context, MobileMessagingProperty.USER_CUSTOM_EVENTS).length);
 
@@ -143,9 +140,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
 
     @Test
     public void shouldReportMultipleCustomEventsOnServerAsync() throws Exception {
-        CustomEvent customEvent = new CustomEvent();
-        customEvent.setProperty("key", new CustomAttributeValue(true));
-        customEvent.setDefinitionId("12345");
+        CustomEvent customEvent = setupCustomEventWithProperties();
         CustomEvent customEvent2 = new CustomEvent();
         customEvent2.setProperty("yay", new CustomAttributeValue("kk"));
         customEvent2.setDefinitionId("9876");
@@ -162,10 +157,31 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
         assertNull(PreferenceHelper.findStringArray(context, MobileMessagingProperty.USER_CUSTOM_EVENTS));
     }
 
-    private void verifyCustomEventRequestBody(CustomEvent customEvent) {
+    @NonNull
+    private CustomEvent setupCustomEventWithProperties() {
+        CustomEvent customEvent = new CustomEvent();
+        customEvent.setProperty("someBool", new CustomAttributeValue(true));
+        customEvent.setProperty("someString", new CustomAttributeValue("string"));
+        customEvent.setProperty("someDate", new CustomAttributeValue(new Date(date)));
+        customEvent.setProperty("someNumber", new CustomAttributeValue(1.1));
+        customEvent.setDefinitionId("12345");
+        return customEvent;
+    }
+
+    private void verifyCustomEventRequestBody(CustomEvent customEvent) throws ParseException {
         UserCustomEventBody userCustomEventBody = customEventCaptor.getValue();
         assertEquals(customEvent.getDefinitionId(), userCustomEventBody.getEvents()[0].getDefinitionId());
         assertEquals(customEvent.getProperties().keySet(), userCustomEventBody.getEvents()[0].getProperties().keySet());
-        assertEquals(customEvent.getProperties().get("key").booleanValue(), userCustomEventBody.getEvents()[0].getProperties().get("key"));
+        assertEquals(customEvent.getProperties().get("someBool").booleanValue(), userCustomEventBody.getEvents()[0].getProperties().get("someBool"));
+        assertEquals(customEvent.getProperties().get("someString").stringValue(), userCustomEventBody.getEvents()[0].getProperties().get("someString"));
+        assertEquals(customEvent.getProperties().get("someNumber").numberValue(), userCustomEventBody.getEvents()[0].getProperties().get("someNumber"));
+
+        Date someDateInUtc = DateTimeUtil.dateFromISO8601DateUTCString((String) userCustomEventBody.getEvents()[0].getProperties().get("someDate"));
+        Date someDate = customEvent.getProperties().get("someDate").dateValue();
+
+        int offsetUtcDate = TimeZone.getDefault().getOffset(someDateInUtc.getTime());
+        int offsetLocalDate = TimeZone.getDefault().getOffset(someDate.getTime());
+
+        assertEquals(someDate.getTime() - offsetLocalDate, someDateInUtc.getTime());
     }
 }
