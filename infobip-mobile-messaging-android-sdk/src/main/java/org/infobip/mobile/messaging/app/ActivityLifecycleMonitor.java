@@ -12,7 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.mobile.events.UserSessionTracker;
+import org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker;
 
 import java.util.Collection;
 

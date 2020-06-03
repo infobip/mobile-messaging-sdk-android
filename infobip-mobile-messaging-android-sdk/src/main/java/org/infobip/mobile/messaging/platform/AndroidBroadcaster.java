@@ -15,7 +15,7 @@ import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 
 import java.util.List;
 

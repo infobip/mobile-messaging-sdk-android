@@ -12,10 +12,11 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
  * @author sslavin
@@ -26,16 +27,16 @@ public class NotificationTapReceiver extends BroadcastReceiver {
 
     private Broadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
+    private ActivityStarterWrapper activityStarterWrapper;
 
     public NotificationTapReceiver() {
     }
 
     @VisibleForTesting
-    public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore, CallbackActivityStarterWrapper callbackActivityStarterWrapper) {
+    public NotificationTapReceiver(Broadcaster broadcaster, MobileMessagingCore mobileMessagingCore, ActivityStarterWrapper activityStarterWrapper) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
-        this.callbackActivityStarterWrapper = callbackActivityStarterWrapper;
+        this.activityStarterWrapper = activityStarterWrapper;
     }
 
     @Override
@@ -67,7 +68,11 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         Intent callbackIntent = new Intent(intent);
         callbackIntent.setAction(Event.NOTIFICATION_TAPPED.getKey());
 
-        callbackActivityStarterWrapper(context).startActivity(callbackIntent);
+        if (StringUtils.isNotBlank(message.getWebViewUrl())) {
+            activityStarterWrapper(context).startWebViewActivity(callbackIntent, message.getWebViewUrl());
+        } else {
+            activityStarterWrapper(context).startCallbackActivity(callbackIntent);
+        }
     }
 
     private Broadcaster broadcaster(Context context) {
@@ -84,10 +89,10 @@ public class NotificationTapReceiver extends BroadcastReceiver {
         return mobileMessagingCore;
     }
 
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper(Context context) {
-        if (callbackActivityStarterWrapper == null) {
-            callbackActivityStarterWrapper = new CallbackActivityStarterWrapper(context, mobileMessagingCore(context));
+    private ActivityStarterWrapper activityStarterWrapper(Context context) {
+        if (activityStarterWrapper == null) {
+            activityStarterWrapper = new ActivityStarterWrapper(context, mobileMessagingCore(context));
         }
-        return callbackActivityStarterWrapper;
+        return activityStarterWrapper;
     }
 }

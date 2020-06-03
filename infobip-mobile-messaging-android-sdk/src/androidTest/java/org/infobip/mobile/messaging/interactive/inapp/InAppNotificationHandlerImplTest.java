@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -45,7 +45,7 @@ public class InAppNotificationHandlerImplTest {
     private InAppView inAppView = mock(InAppView.class);
     private DialogStack dialogStack = mock(DialogStack.class);
     private InteractiveBroadcaster interactiveBroadcaster = mock(InteractiveBroadcaster.class);
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper = mock(CallbackActivityStarterWrapper.class);
+    private ActivityStarterWrapper activityStarterWrapper = mock(ActivityStarterWrapper.class);
 
     private Activity activity = mock(Activity.class);
 
@@ -53,7 +53,7 @@ public class InAppNotificationHandlerImplTest {
     public void before() {
         reset(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, inAppView);
         when(inAppViewFactory.create(eq(activity), any(InAppView.Callback.class))).thenReturn(inAppView);
-        inAppNotificationHandler = new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster, callbackActivityStarterWrapper);
+        inAppNotificationHandler = new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster, activityStarterWrapper);
     }
 
     @Test
@@ -146,7 +146,7 @@ public class InAppNotificationHandlerImplTest {
         inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
 
         assertTrue(actions[0].bringsAppToForeground());
-        verify(callbackActivityStarterWrapper, times(1)).startActivity(any(Intent.class));
+        verify(activityStarterWrapper, times(1)).startCallbackActivity(any(Intent.class));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class InAppNotificationHandlerImplTest {
         inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
 
         assertFalse(actions[0].bringsAppToForeground());
-        verify(callbackActivityStarterWrapper, never()).startActivity(any(Intent.class));
+        verify(activityStarterWrapper, never()).startCallbackActivity(any(Intent.class));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class InAppNotificationHandlerImplTest {
 
         verify(mobileInteractive, times(1)).triggerSdkActionsFor(eq(action), eq(message));
         verify(interactiveBroadcaster, times(1)).notificationActionTapped(eq(message), eq(category), eq(action));
-        verify(callbackActivityStarterWrapper, times(1)).startActivity(any(Intent.class));
+        verify(activityStarterWrapper, times(1)).startCallbackActivity(any(Intent.class));
     }
 
     @Test

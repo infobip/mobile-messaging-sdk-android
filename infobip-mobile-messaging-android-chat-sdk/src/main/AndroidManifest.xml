@@ -3,20 +3,14 @@
 
     <application>
 
-        <receiver
-            android:name="org.infobip.mobile.messaging.chat.core.CoreBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.USER_DATA_REPORTED"/>
-            </intent-filter>
-        </receiver>
-
         <activity
-            android:name="org.infobip.mobile.messaging.chat.view.ChatActivity"
+            android:name="org.infobip.mobile.messaging.chat.view.InAppChatActivity"
+            android:noHistory="false"
+            android:screenOrientation="portrait"
             android:theme="@style/IB_AppTheme"/>
 
         <meta-data
-            android:name="org.infobip.mobile.messaging.chat.core.MobileChatImpl"
+            android:name="org.infobip.mobile.messaging.chat.InAppChatImpl"
             android:value="org.infobip.mobile.messaging.MessageHandlerModule" />
 
     </application>

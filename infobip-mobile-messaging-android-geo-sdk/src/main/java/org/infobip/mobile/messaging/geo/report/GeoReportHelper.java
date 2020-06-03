@@ -200,7 +200,9 @@ public class GeoReportHelper {
                 originalMessage.getStatusMessage(),
                 originalMessage.getContentUrl(),
                 originalMessage.getInAppStyle(),
-                originalMessage.getInAppExpiryTimestamp()
+                originalMessage.getInAppExpiryTimestamp(),
+                originalMessage.getWebViewUrl(),
+                originalMessage.getMessageType()
         );
     }
 

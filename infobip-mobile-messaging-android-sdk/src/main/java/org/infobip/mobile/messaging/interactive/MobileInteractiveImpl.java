@@ -225,6 +225,11 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         //do nothing
     }
 
+    @Override
+    public void performSyncActions() {
+        // do nothing
+    }
+
     private MobileMessagingCore mobileMessagingCore(Context context) {
         if (mobileMessagingCore == null) {
             mobileMessagingCore = MobileMessagingCore.getInstance(context);

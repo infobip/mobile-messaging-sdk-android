@@ -1,5 +1,25 @@
 <resources>
+
     <style name="InAppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <style name="IB_AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@android:color/black</item> <!-- color of toolbar background and send chat button tint -->
+        <item name="colorPrimaryDark">@android:color/black</item> <!-- color of status / notification bar -->
+        <item name="colorControlNormal">@android:color/black</item> <!-- color of navigation icon in toolbar -->
+        <item name="titleTextColor">@android:color/black</item> <!-- color of toolbar title text -->
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <style name="IB_AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="IB_AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="IB_WebViewTheme" parent="IB_AppTheme">
+        <item name="colorPrimary">@android:color/white</item>
+    </style>
+
+    <style name="IB_WebViewTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

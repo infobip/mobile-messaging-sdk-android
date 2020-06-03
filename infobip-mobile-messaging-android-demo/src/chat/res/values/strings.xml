@@ -2,7 +2,7 @@
 <resources>
 
     <string name="main_activity_title">Chat Example</string>
-    <string name="main_activity_button_send_title">SEND</string>
+    <string name="main_activity_button_open_title">Go to chat screen</string>
     <string name="main_activity_new_message_hint">Write your message</string>
 
     <string name="action_registration_id_copy">Registration ID</string>

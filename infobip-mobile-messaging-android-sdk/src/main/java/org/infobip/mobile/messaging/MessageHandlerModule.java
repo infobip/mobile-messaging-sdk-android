@@ -46,4 +46,9 @@ public interface MessageHandlerModule {
      * Called on module when user depersonalize is performed on the core library
      */
     void depersonalize();
+
+    /**
+     * Called on module when network availability changes
+     */
+    void performSyncActions();
 }

@@ -1,0 +1,81 @@
+package org.infobip.mobile.messaging.chat.mobileapi;
+
+import android.content.Context;
+
+import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.api.chat.MobileApiChat;
+import org.infobip.mobile.messaging.api.chat.WidgetInfo;
+import org.infobip.mobile.messaging.chat.MobileMessagingChatProperty;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.common.MRetryPolicy;
+import org.infobip.mobile.messaging.mobileapi.common.MRetryableTask;
+import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterException;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
+
+
+public class InAppChatSynchronizer {
+
+    private final Context context;
+    private final MobileMessagingCore mobileMessagingCore;
+    private final AndroidBroadcaster broadcaster;
+    private final MobileApiChat mobileApiChat;
+    private final MRetryPolicy retryPolicy;
+
+    public InAppChatSynchronizer(Context context,
+                                 MobileMessagingCore mobileMessagingCore,
+                                 AndroidBroadcaster broadcaster,
+                                 MobileApiChat mobileApiChat) {
+        this.context = context;
+        this.mobileMessagingCore = mobileMessagingCore;
+        this.broadcaster = broadcaster;
+        this.mobileApiChat = mobileApiChat;
+        this.retryPolicy = new RetryPolicyProvider(context).DEFAULT();
+    }
+
+    public void getWidgetConfiguration() {
+        if (!mobileMessagingCore.isRegistrationAvailable()) {
+            return;
+        }
+
+        if (mobileMessagingCore.isDepersonalizeInProgress()) {
+            MobileMessagingLogger.w("Depersonalization is in progress, will report custom event later");
+            return;
+        }
+
+        new MRetryableTask<Void, WidgetInfo>() {
+
+            @Override
+            public WidgetInfo run(Void[] voids) {
+                MobileMessagingLogger.v("GET WIDGET CONFIGURATION >>>");
+                return mobileApiChat.getWidgetConfiguration();
+            }
+
+            @Override
+            public void after(WidgetInfo widgetInfo) {
+                MobileMessagingLogger.v("GET WIDGET CONFIGURATION DONE <<<");
+                PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.getKey(), widgetInfo.getId());
+                PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.getKey(), widgetInfo.getTitle());
+                PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey(), widgetInfo.getPrimaryColor());
+                PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), widgetInfo.getBackgroundColor());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                MobileMessagingLogger.v("GET WIDGET CONFIGURATION ERROR <<<", error);
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+
+                if (error instanceof BackendInvalidParameterException) {
+                    mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
+                }
+
+                MobileMessagingCore.getInstance(context).setLastHttpException(error);
+                broadcaster.error(MobileMessagingError.createFrom(error));
+            }
+        }
+                .retryWith(retryPolicy)
+                .execute();
+    }
+}

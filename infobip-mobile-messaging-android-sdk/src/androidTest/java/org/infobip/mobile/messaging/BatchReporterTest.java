@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import org.infobip.mobile.messaging.mobile.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.BatchReporter;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.Mockito;

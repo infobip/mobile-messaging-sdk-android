@@ -80,7 +80,7 @@ public class DateTimeUtil {
         int offset = calendar.getTimeZone().getOffset(timeInUtc);
         timeInUtc -= offset;
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
         return simpleDateFormat.format(timeInUtc);
     }
 

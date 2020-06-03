@@ -1,0 +1,66 @@
+<html lang="En">
+<head>
+    <script>
+          (function(I,n,f,o,b,i,p){
+            I[b]=I[b]||function(){(I[b].q=I[b].q||[]).push(arguments)};
+            I[b].t=1*new Date();i=n.createElement(f);i.async=1;i.src=o;
+            p=n.getElementsByTagName(f)[0];p.parentNode.insertBefore(i,p)})
+          (window,document,'script','https://livechat.infobip.com/widget.js','liveChat');
+    </script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #ib-widget-container {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="ib-widget-container"></div>
+    <script>
+        // Api call naming section
+        const CONFIG = 'config';
+        const IDENTIFY = 'identify';
+        const INIT = 'init';
+        const SHOW = 'show';
+        const SEND = 'send';
+
+        window.handleMessageSend = function(message) {
+            liveChat(SEND, message);
+        }
+
+        // Override widget config
+        liveChat(CONFIG, {
+            widgetId: getQueryParameter('widgetId'),
+            container: document.getElementById('ib-widget-container'),
+            showHeader: false,
+            showFooter: false,
+            showFab: false
+        });
+
+        // Try identify user by pushRegId
+		liveChat(IDENTIFY, {'pushRegistrationId' : getQueryParameter('pushRegId')}, function(error, result) {
+		    if (error) {
+		        window.InAppChatMobile.onError(error);
+			} else {
+				init();
+			}
+		});
+
+		// If all is OK -> initialize widget, enable native controls and show widget
+		function init() {
+		    liveChat(INIT);
+			liveChat(SHOW);
+			window.InAppChatMobile.setControlsEnabled(true);
+		}
+
+		function getQueryParameter(name){
+           if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
+               return decodeURIComponent(name[1]);
+           }
+        }
+    </script>
+</body>
+</html>

@@ -13,7 +13,7 @@ import org.infobip.mobile.messaging.geo.GeoMessage;
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
 import org.infobip.mobile.messaging.geo.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;

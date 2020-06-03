@@ -11,7 +11,7 @@ import android.support.v4.app.RemoteInput;
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
@@ -29,17 +29,17 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
     private InteractiveBroadcaster broadcaster;
     private MobileMessagingCore mobileMessagingCore;
     private MobileInteractive mobileInteractive;
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
+    private ActivityStarterWrapper activityStarterWrapper;
 
     public NotificationActionTapReceiver() {
     }
 
     @VisibleForTesting
-    public NotificationActionTapReceiver(InteractiveBroadcaster broadcaster, MobileMessagingCore mobileMessagingCore, MobileInteractive mobileInteractive, CallbackActivityStarterWrapper callbackActivityStarterWrapper) {
+    public NotificationActionTapReceiver(InteractiveBroadcaster broadcaster, MobileMessagingCore mobileMessagingCore, MobileInteractive mobileInteractive, ActivityStarterWrapper activityStarterWrapper) {
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.mobileInteractive = mobileInteractive;
-        this.callbackActivityStarterWrapper = callbackActivityStarterWrapper;
+        this.activityStarterWrapper = activityStarterWrapper;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         mobileInteractive(context).triggerSdkActionsFor(notificationAction, message);
 
         if (notificationAction.bringsAppToForeground()) {
-            callbackActivityStarterWrapper(context).startActivity(callbackIntent);
+            activityStarterWrapper(context).startCallbackActivity(callbackIntent);
         }
     }
 
@@ -126,10 +126,10 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
         return mobileInteractive;
     }
 
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper(Context context) {
-        if (callbackActivityStarterWrapper == null) {
-            callbackActivityStarterWrapper = new CallbackActivityStarterWrapper(context, mobileMessagingCore(context));
+    private ActivityStarterWrapper activityStarterWrapper(Context context) {
+        if (activityStarterWrapper == null) {
+            activityStarterWrapper = new ActivityStarterWrapper(context, mobileMessagingCore(context));
         }
-        return callbackActivityStarterWrapper;
+        return activityStarterWrapper;
     }
 }

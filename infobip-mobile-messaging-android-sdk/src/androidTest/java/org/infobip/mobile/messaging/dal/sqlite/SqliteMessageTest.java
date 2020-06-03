@@ -46,9 +46,11 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
                 "SomeDestination",
                 Message.Status.SUCCESS,
                 "SomeStatusMessage",
-                "http://www.some-content.com.ru.hr",
+                "http://www.some-content.com.ru.hr/image.jpg",
                 Message.InAppStyle.MODAL,
-                1881L
+                1881L,
+                "http://www.some-content.com.ru.hr",
+                "some msg type"
         );
 
         databaseHelper.save(new SqliteMessage(message));
@@ -75,7 +77,9 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
         assertEquals("SomeDestination", message.getDestination());
         assertEquals(Message.Status.SUCCESS, message.getStatus());
         assertEquals("SomeStatusMessage", message.getStatusMessage());
-        assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
+        assertEquals("http://www.some-content.com.ru.hr/image.jpg", message.getContentUrl());
+        assertEquals("http://www.some-content.com.ru.hr", message.getWebViewUrl());
+        assertEquals("some msg type", message.getMessageType());
         assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
     }
 

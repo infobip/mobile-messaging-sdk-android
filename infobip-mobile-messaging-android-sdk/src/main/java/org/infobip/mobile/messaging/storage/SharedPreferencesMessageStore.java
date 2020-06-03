@@ -27,11 +27,12 @@ import java.util.Set;
  *        }
  *    }}
  * </pre>
- *
+ * <p>
  * Overwrite SharedPreferencesMessageStore#getStoreTag(String)
  * to provide alternate key to store data shared preferences.
- *
+ * <p>
  * Deprecated, use {@link SQLiteMessageStore} instead.
+ *
  * @author mstipanov
  * @since 29.03.2016.
  */
@@ -72,13 +73,16 @@ public class SharedPreferencesMessageStore implements MessageStore {
                 for (Message message : messages) {
                     for (String serializedBundle : new HashSet<>(set)) {
                         Message messageInSet = StoredMessageMapper.fromCloudBundle(deserialize(serializedBundle));
-                        if (messageInSet.getMessageId().equals(message.getMessageId())) {
+                        if (messageInSet != null && messageInSet.getMessageId().equals(message.getMessageId()) || message.isChatMessage()) {
                             set.remove(serializedBundle);
                             break;
                         }
                     }
 
-                    set.add(serialize(StoredMessageMapper.toCloudBundle(message)));
+                    Bundle cloudBundle = StoredMessageMapper.toCloudBundle(message);
+                    if (!message.isChatMessage() && cloudBundle != null) {
+                        set.add(serialize(cloudBundle));
+                    }
                 }
             }
         });

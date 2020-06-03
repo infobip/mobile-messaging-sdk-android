@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author sslavin
@@ -49,6 +50,9 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         internalData.put("atts", attachments);
         internalData.put("silent", new JSONObject());
 
+        internalData.put("webViewUrl", "http://www.bla.com");
+        internalData.put("messageType", "some msg type");
+
         for (int i = 0; i < numberOfMessages; i++) {
             sharedPreferencesMessageStore.save(context, new Message(
                     i + uuid.toString(),
@@ -70,7 +74,9 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     "SomeStatusMessage" + i,
                     "http://www.some-content.com.ru.hr",
                     null,
-                    0
+                    0,
+                    "http://www.bla.com",
+                    "some msg type"
             ));
         }
 
@@ -105,6 +111,63 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             assertEquals("SomeStatusMessage" + i, message.getStatusMessage());
             assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
             assertEquals(0, message.getInAppExpiryTimestamp());
+            assertEquals("http://www.bla.com", message.getWebViewUrl());
+            assertEquals("some msg type", message.getMessageType());
+        }
+    }
+
+    @Test
+    public void test_shouldNotMigrateChatMessagesToSqlite() throws Exception {
+
+        UUID uuid = UUID.randomUUID();
+        int numberOfMessages = 10;
+
+        JSONObject internalData = new JSONObject();
+
+        internalData.put("webViewUrl", "http://www.bla.com");
+        internalData.put("messageType", "chat");
+
+        for (int i = 0; i < numberOfMessages; i++) {
+            sharedPreferencesMessageStore.save(context, new Message(
+                    i + uuid.toString(),
+                    "SomeTitle" + i,
+                    "SomeBody" + i,
+                    "SomeSound" + i,
+                    true,
+                    "SomeIcon" + i,
+                    false,
+                    "SomeCategory" + i,
+                    "SomeFrom" + i,
+                    0,
+                    0,
+                    0,
+                    null,
+                    internalData.toString(),
+                    "SomeDestination" + i,
+                    Message.Status.SUCCESS,
+                    "SomeStatusMessage" + i,
+                    "http://www.some-content.com.ru.hr",
+                    null,
+                    0,
+                    "http://www.bla.com",
+                    "chat"
+            ));
+        }
+
+        MessageStore store = new SQLiteMessageStore();
+        List<Message> messages = store.findAll(context);
+        HashMap<String, Message> map = new HashMap<>();
+        for (Message m : messages) map.put(m.getMessageId(), m);
+
+        // we are not removing messages from shared prefs
+        // in case user still uses SharedPreferencesMessageStore
+        assertEquals(0, sharedPreferencesMessageStore.findAll(context).size());
+        assertEquals(0, map.size());
+
+        for (int i = 0; i < numberOfMessages; i++) {
+            String id = i + uuid.toString();
+            Message message = map.get(id);
+            assertNull(message);
         }
     }
 }

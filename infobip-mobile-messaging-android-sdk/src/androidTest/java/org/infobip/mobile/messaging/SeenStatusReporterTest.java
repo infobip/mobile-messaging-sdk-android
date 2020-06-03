@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging;
 
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
-import org.infobip.mobile.messaging.mobile.BatchReporter;
-import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
+import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.seen.SeenStatusReporter;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;

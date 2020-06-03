@@ -6,7 +6,7 @@ import android.content.Context;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
-import org.infobip.mobile.messaging.mobile.InternalSdkError;
+import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.storage.MessageStore;
 
 public class PushMessageHandler {

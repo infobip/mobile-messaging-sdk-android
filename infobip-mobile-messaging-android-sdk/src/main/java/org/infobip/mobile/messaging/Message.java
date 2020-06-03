@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class Message implements Comparable<Message> {
 
+    public static final String MESSAGE_TYPE_CHAT = "chat";
     private String messageId;
     private String title;
     private String body;
@@ -38,7 +40,9 @@ public class Message implements Comparable<Message> {
     private JSONObject customPayload;
     private String internalData;
     private String contentUrl;
+    private String webViewUrl;
     private InAppStyle inAppStyle;
+    private String messageType;
 
     public enum Status {
         SUCCESS,
@@ -70,7 +74,7 @@ public class Message implements Comparable<Message> {
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle,
-                   long inAppExpiryTimestamp) {
+                   long inAppExpiryTimestamp, String webViewUrl, String messageType) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -91,6 +95,8 @@ public class Message implements Comparable<Message> {
         this.contentUrl = contentUrl;
         this.inAppStyle = inAppStyle;
         this.inAppExpiryTimestamp = inAppExpiryTimestamp;
+        this.webViewUrl = webViewUrl;
+        this.messageType = messageType;
     }
 
     public Message() {
@@ -270,5 +276,25 @@ public class Message implements Comparable<Message> {
 
     public void setInAppStyle(InAppStyle inAppStyle) {
         this.inAppStyle = inAppStyle;
+    }
+
+    public String getWebViewUrl() {
+        return webViewUrl;
+    }
+
+    public void setWebViewUrl(String webViewUrl) {
+        this.webViewUrl = webViewUrl;
+    }
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
+    public boolean isChatMessage() {
+        return StringUtils.isNotBlank(messageType) && MESSAGE_TYPE_CHAT.equals(messageType);
     }
 }

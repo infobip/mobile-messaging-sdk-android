@@ -15,7 +15,7 @@ import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.InternalSdkError;
+import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 
 /**
  * @author mstipanov

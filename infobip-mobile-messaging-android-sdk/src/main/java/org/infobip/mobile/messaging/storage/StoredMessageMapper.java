@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +42,8 @@ public class StoredMessageMapper {
         String contentUrl = InternalDataMapper.getInternalDataContentUrl(internalDataJson);
         long sentDateTime = InternalDataMapper.getInternalDataSendDateTime(internalDataJson);
         long inAppExpiryDateTime = InternalDataMapper.getInternalDataInAppExpiryDateTime(internalDataJson);
+        String webViewUrl = InternalDataMapper.getInternalDataWebViewUrl(internalDataJson);
+        String messageType = InternalDataMapper.getInternalDataMessageType(internalDataJson);
 
         String destination = bundle.getString(BundleField.DESTINATION.getKey());
         String statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
@@ -56,7 +58,7 @@ public class StoredMessageMapper {
                 vibrate, icon, silent, category, from,
                 receivedTs, seenTs, sentDateTime, customPayload,
                 internalDataJson, destination, status, statusMessage,
-                contentUrl, inAppStyle, inAppExpiryDateTime);
+                contentUrl, inAppStyle, inAppExpiryDateTime, webViewUrl, messageType);
     }
 
     /**

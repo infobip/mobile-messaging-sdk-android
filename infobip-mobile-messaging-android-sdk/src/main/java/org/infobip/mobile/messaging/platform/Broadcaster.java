@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.platform;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.User;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 
 import java.util.List;
 

@@ -1,31 +1,15 @@
 <resources>
+    <string name="ib_inappchat_widget_uri" translatable="false">file:///android_asset/inappchat-widget.html</string>
+
     <!-- Chat conversation screen -->
     <string name="connected">Connected</string>
     <string name="no_connection">No connection</string>
     <string name="no_internet_connection">No internet connection</string>
-    <string name="dialog_text_mo_route_not_enabled">Chat demo is not available for your account. Please contact your account manager.</string>
-    <string name="type_a_message">Type a message…</string>
-    <string name="progress_title_wait">Please wait</string>
-    <string name="progress_processing_messages">Processing messages…</string>
-    <string name="message_sent">Message sent</string>
-    <string name="sending_message_failed_no_connection">Failed to send a message. No internet connection</string>
-    <string name="enter_your_name">Enter your name</string>
-    <string name="chat_selected">%d Selected</string>
-    <string name="action_delete">Delete</string>
-    <string name="message_user_name_default">User name</string>
-    <string name="message_text_default">Message text</string>
-    <string name="time_default">12:31</string>
-
-    <!-- Chat screen menu -->
-    <string name="action_clear_chat">Clear Chat</string>
-    <string name="action_mark_seen">Mark All as Seen</string>
-
-    <!-- Toast messages -->
-    <string name="toast_message_received">Message received: %s</string>
-    <string name="send_message_icon_description">Send message</string>
 
     <!-- Default resources for customizable strings -->
-    <string name="IB_chat_view_title">Chat</string>
-    <string name="IB_chat_view_empty_state_text">Welcome to in-app messaging.\nAll incoming and outgoing messages will appear on this screen.\nVisit <![CDATA[<a href="https://dev.infobip.com/docs/receive-push-message">Infobip website</a>]]> for more details.</string>
+    <string name="ib_chat_view_title">""</string>
+    <string name="ib_chat_message_hint">Send a message…</string>
+    <string name="ib_chat_not_available">Chat is not available</string>
+    <string name="ib_iv_btn_send_desc">Send chat message</string>
 
 </resources>

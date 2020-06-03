@@ -38,6 +38,8 @@ public class InternalDataMapper {
         @Deprecated Boolean inApp;
         Message.InAppStyle inAppStyle;
         long inAppExpiryDateTime;
+        String webViewUrl;
+        String messageType;
 
         public InternalData() {
         }
@@ -209,6 +211,34 @@ public class InternalDataMapper {
             return serializer.deserialize(json, InternalData.class).inAppExpiryDateTime;
         } catch (Exception e) {
             return 0;
+        }
+    }
+
+    /**
+     * Returns web view URL from internal data
+     *
+     * @param json internal data json
+     * @return web view URL if present or null otherwise
+     */
+    public static String getInternalDataWebViewUrl(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).webViewUrl;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns message type from internal data
+     *
+     * @param json internal data json
+     * @return message type if present or null otherwise
+     */
+    public static String getInternalDataMessageType(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).messageType;
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -1,11 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.infobip.mobile.messaging">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <application>
+    <application
+        android:usesCleartextTraffic="true"
+        tools:targetApi="m">
 
         <service
             android:name="org.infobip.mobile.messaging.cloud.MobileMessagingCloudService"
@@ -40,6 +43,15 @@
         </receiver>
 
         <receiver android:name="org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver" />
+
+        <activity
+            android:name=".view.WebViewActivity"
+            android:theme="@style/IB_WebViewTheme"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED"/>
+            </intent-filter>
+        </activity>
 
     </application>
 </manifest>

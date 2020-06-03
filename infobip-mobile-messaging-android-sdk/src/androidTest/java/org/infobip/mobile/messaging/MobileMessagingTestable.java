@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.util.ModuleLoader;

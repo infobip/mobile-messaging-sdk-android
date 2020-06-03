@@ -12,7 +12,7 @@ import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.GeoMessage;
 import org.infobip.mobile.messaging.geo.mapper.GeoBundleMapper;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 
 import java.util.HashMap;
 import java.util.List;

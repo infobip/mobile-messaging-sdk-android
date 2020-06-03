@@ -9,7 +9,7 @@ buildscript {
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion mm_compileSdkVersion
+    compileSdkVersion 29
     buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {

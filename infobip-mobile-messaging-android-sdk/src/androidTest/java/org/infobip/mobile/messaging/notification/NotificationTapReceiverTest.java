@@ -8,7 +8,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MockActivity;
@@ -28,7 +28,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
     private NotificationTapReceiver notificationTapReceiver;
     private Broadcaster broadcastSender;
     private MobileMessagingCore mobileMessagingCore;
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
+    private ActivityStarterWrapper activityStarterWrapper;
 
     @Override
     public void setUp() throws Exception {
@@ -36,10 +36,10 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
 
         broadcastSender = Mockito.mock(Broadcaster.class);
         mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
-        callbackActivityStarterWrapper = Mockito.mock(CallbackActivityStarterWrapper.class);
+        activityStarterWrapper = Mockito.mock(ActivityStarterWrapper.class);
         intentArgumentCaptor = ArgumentCaptor.forClass(Intent.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
-        notificationTapReceiver = new NotificationTapReceiver(broadcastSender, mobileMessagingCore, callbackActivityStarterWrapper);
+        notificationTapReceiver = new NotificationTapReceiver(broadcastSender, mobileMessagingCore, activityStarterWrapper);
 
         notificationSettings = new NotificationSettings.Builder(context)
                 .withDefaultIcon(android.R.drawable.ic_dialog_alert) // if not set throws -> IllegalArgumentException("defaultIcon doesn't exist");
@@ -63,7 +63,7 @@ public class NotificationTapReceiverTest extends MobileMessagingTestCase {
         // Then
         Intent expectedIntent = new Intent(Event.NOTIFICATION_TAPPED.getKey());
         expectedIntent.putExtras(givenIntent);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(intentArgumentCaptor.capture());
+        Mockito.verify(activityStarterWrapper, Mockito.times(1)).startCallbackActivity(intentArgumentCaptor.capture());
         Intent intent = intentArgumentCaptor.getValue();
 
         assertEquals(notificationSettings.getIntentFlags(), intent.getFlags());

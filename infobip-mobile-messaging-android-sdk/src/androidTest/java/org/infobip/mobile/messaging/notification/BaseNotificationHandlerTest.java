@@ -174,7 +174,9 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
                 "SomeStatusMessage",
                 "http://www.some-content.com.ru.hr",
                 Message.InAppStyle.BANNER,
-                0
+                0,
+                null,
+                null
         );
     }
 

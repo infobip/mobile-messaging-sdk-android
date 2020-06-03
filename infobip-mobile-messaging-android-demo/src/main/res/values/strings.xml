@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Mobile Messaging Example</string>
+    <string name="app_name" translatable="false">Mobile Messaging Example</string>
+
 </resources>

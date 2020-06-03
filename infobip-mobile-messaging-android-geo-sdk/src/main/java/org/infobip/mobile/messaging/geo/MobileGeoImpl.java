@@ -88,6 +88,11 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
     }
 
     @Override
+    public void performSyncActions() {
+        // do nothing
+    }
+
+    @Override
     public void init(Context appContext) {
         this.context = appContext;
     }

@@ -5,7 +5,7 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
 import org.infobip.mobile.messaging.geo.report.GeoReporter;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 
 class GeoReportSynchronization {
 

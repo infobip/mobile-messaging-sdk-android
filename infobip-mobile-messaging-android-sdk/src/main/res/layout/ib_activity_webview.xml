@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.WebViewActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/ib_toolbar_webview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/IB_WebViewTheme.PopupOverlay">
+
+        <TextView
+            android:id="@+id/ib_tv_webview_toolbar_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingStart="40dp"
+            android:paddingLeft="40dp"
+            android:paddingEnd="0dp"
+            android:paddingRight="0dp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <WebView
+        android:id="@+id/ib_webview"
+        android:layout_below="@+id/ib_toolbar_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/ib_pb_webview"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/ib_toolbar_webview"
+        android:layout_height="50dp"
+        android:layout_marginTop="70dp"
+        android:visibility="visible" />
+
+</RelativeLayout>

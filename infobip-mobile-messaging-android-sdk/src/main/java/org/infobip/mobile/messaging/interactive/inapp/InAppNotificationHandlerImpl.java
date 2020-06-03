@@ -8,7 +8,7 @@ import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -24,6 +24,7 @@ import org.infobip.mobile.messaging.interactive.inapp.view.QueuedDialogStack;
 import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
  * @author sslavin
@@ -38,17 +39,17 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     private final OneMessageCache oneMessageCache;
     private final DialogStack dialogStack;
     private final InteractiveBroadcaster interactiveBroadcaster;
-    private final CallbackActivityStarterWrapper callbackActivityStarterWrapper;
+    private final ActivityStarterWrapper activityStarterWrapper;
 
     @VisibleForTesting
-    InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack, InteractiveBroadcaster interactiveBroadcaster, CallbackActivityStarterWrapper callbackActivityStarterWrapper) {
+    InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack, InteractiveBroadcaster interactiveBroadcaster, ActivityStarterWrapper activityStarterWrapper) {
         this.mobileInteractive = mobileInteractive;
         this.inAppViewFactory = inAppViewFactory;
         this.inAppRules = inAppRules;
         this.oneMessageCache = oneMessageCache;
         this.dialogStack = dialogStack;
         this.interactiveBroadcaster = interactiveBroadcaster;
-        this.callbackActivityStarterWrapper = callbackActivityStarterWrapper;
+        this.activityStarterWrapper = activityStarterWrapper;
     }
 
     public InAppNotificationHandlerImpl(Context context) {
@@ -62,7 +63,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 new OneMessagePreferenceCache(context),
                 new QueuedDialogStack(),
                 new AndroidInteractiveBroadcaster(context),
-                new CallbackActivityStarterWrapper(context,
+                new ActivityStarterWrapper(context,
                         MobileMessagingCore.getInstance(context))
         );
     }
@@ -113,7 +114,11 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         Intent callbackIntent = interactiveBroadcaster.notificationActionTapped(message, category, action);
 
         if (PredefinedActionsProvider.isOpenAction(action.getId()) || action.bringsAppToForeground()) {
-            callbackActivityStarterWrapper.startActivity(callbackIntent);
+            if (StringUtils.isNotBlank(message.getWebViewUrl())) {
+                activityStarterWrapper.startWebViewActivity(callbackIntent, message.getWebViewUrl());
+            } else {
+                activityStarterWrapper.startCallbackActivity(callbackIntent);
+            }
         }
     }
 

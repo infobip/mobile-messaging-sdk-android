@@ -26,24 +26,24 @@ import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.mobile.BatchReporter;
-import org.infobip.mobile.messaging.mobile.InternalSdkError;
-import org.infobip.mobile.messaging.mobile.MobileApiResourceProvider;
-import org.infobip.mobile.messaging.mobile.MobileMessagingError;
-import org.infobip.mobile.messaging.mobile.Result;
-import org.infobip.mobile.messaging.mobile.appinstance.InstallationSynchronizer;
-import org.infobip.mobile.messaging.mobile.common.MAsyncTask;
-import org.infobip.mobile.messaging.mobile.common.RetryPolicyProvider;
-import org.infobip.mobile.messaging.mobile.events.UserEventsRequestMapper;
-import org.infobip.mobile.messaging.mobile.events.UserEventsSynchronizer;
-import org.infobip.mobile.messaging.mobile.messages.MessagesSynchronizer;
-import org.infobip.mobile.messaging.mobile.messages.MoMessageSender;
-import org.infobip.mobile.messaging.mobile.seen.SeenStatusReporter;
-import org.infobip.mobile.messaging.mobile.user.DepersonalizeActionListener;
-import org.infobip.mobile.messaging.mobile.user.DepersonalizeServerListener;
-import org.infobip.mobile.messaging.mobile.user.PersonalizeSynchronizer;
-import org.infobip.mobile.messaging.mobile.user.UserDataReporter;
-import org.infobip.mobile.messaging.mobile.version.VersionChecker;
+import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
+import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.Result;
+import org.infobip.mobile.messaging.mobileapi.appinstance.InstallationSynchronizer;
+import org.infobip.mobile.messaging.mobileapi.common.MAsyncTask;
+import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobileapi.events.UserEventsRequestMapper;
+import org.infobip.mobile.messaging.mobileapi.events.UserEventsSynchronizer;
+import org.infobip.mobile.messaging.mobileapi.messages.MessagesSynchronizer;
+import org.infobip.mobile.messaging.mobileapi.messages.MoMessageSender;
+import org.infobip.mobile.messaging.mobileapi.seen.SeenStatusReporter;
+import org.infobip.mobile.messaging.mobileapi.user.DepersonalizeActionListener;
+import org.infobip.mobile.messaging.mobileapi.user.DepersonalizeServerListener;
+import org.infobip.mobile.messaging.mobileapi.user.PersonalizeSynchronizer;
+import org.infobip.mobile.messaging.mobileapi.user.UserDataReporter;
+import org.infobip.mobile.messaging.mobileapi.version.VersionChecker;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
@@ -87,7 +87,7 @@ import java.util.regex.Pattern;
 
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
-import static org.infobip.mobile.messaging.mobile.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
 
 /**
@@ -371,6 +371,10 @@ public class MobileMessagingCore
 
         if (isDepersonalizeInProgress()) {
             return;
+        }
+
+        for (MessageHandlerModule module : messageHandlerModules.values()) {
+            module.performSyncActions();
         }
 
         if (shouldRepersonalize()) {

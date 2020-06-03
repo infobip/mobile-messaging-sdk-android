@@ -7,7 +7,7 @@ import android.content.Intent;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.app.CallbackActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -32,7 +32,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
     private ArgumentCaptor<NotificationCategory> notificationCategoryArgumentCaptor;
     private ArgumentCaptor<Message> messageArgumentCaptor;
     private NotificationActionTapReceiver notificationActionTapReceiver;
-    private CallbackActivityStarterWrapper callbackActivityStarterWrapper;
+    private ActivityStarterWrapper activityStarterWrapper;
 
     @Override
     public void setUp() throws Exception {
@@ -42,11 +42,11 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         notificationManagerMock = Mockito.mock(NotificationManager.class);
         mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
         mobileInteractive = Mockito.mock(MobileInteractiveImpl.class);
-        callbackActivityStarterWrapper = Mockito.mock(CallbackActivityStarterWrapper.class);
+        activityStarterWrapper = Mockito.mock(ActivityStarterWrapper.class);
         notificationCategoryArgumentCaptor = ArgumentCaptor.forClass(NotificationCategory.class);
         notificationActionArgumentCaptor = ArgumentCaptor.forClass(NotificationAction.class);
         messageArgumentCaptor = ArgumentCaptor.forClass(Message.class);
-        notificationActionTapReceiver = new NotificationActionTapReceiver(broadcastSender, mobileMessagingCore, mobileInteractive, callbackActivityStarterWrapper);
+        notificationActionTapReceiver = new NotificationActionTapReceiver(broadcastSender, mobileMessagingCore, mobileInteractive, activityStarterWrapper);
 
         NotificationSettings notificationSettings = new NotificationSettings.Builder(context)
                 .withDefaultIcon(android.R.drawable.ic_dialog_alert) // if not set throws -> IllegalArgumentException("defaultIcon doesn't exist");
@@ -106,7 +106,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
                 notificationActionArgumentCaptor.capture());
 
         verifyProperPayloadWasSentAndActionsTriggered(givenTappedNotificationAction, givenNotificationCategory, givenMessage);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.times(1)).startActivity(givenIntent);
+        Mockito.verify(activityStarterWrapper, Mockito.times(1)).startCallbackActivity(givenIntent);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
                 notificationActionArgumentCaptor.capture());
 
         verifyProperPayloadWasSentAndActionsTriggered(givenTappedNotificationAction, givenNotificationCategory, givenMessage);
-        Mockito.verify(callbackActivityStarterWrapper, Mockito.never()).startActivity(givenIntent);
+        Mockito.verify(activityStarterWrapper, Mockito.never()).startCallbackActivity(givenIntent);
     }
 
     @Test

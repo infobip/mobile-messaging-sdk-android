@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.geo.report;
 
 
 import org.infobip.mobile.messaging.api.geo.EventReportResponse;
-import org.infobip.mobile.messaging.mobile.UnsuccessfulResult;
+import org.infobip.mobile.messaging.mobileapi.UnsuccessfulResult;
 
 import java.util.Map;
 import java.util.Set;

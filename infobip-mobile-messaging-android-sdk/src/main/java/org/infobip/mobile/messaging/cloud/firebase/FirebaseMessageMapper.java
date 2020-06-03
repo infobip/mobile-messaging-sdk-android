@@ -62,6 +62,8 @@ public class FirebaseMessageMapper {
         NotificationSettings notificationSettings = data.notification != null ? data.notification : new NotificationSettings();
         long sentDateTime = data.internal != null ? data.internal.optLong("sendDateTime", Time.now()) : Time.now();
         long inAppExpiryDateTime = data.internal != null ? data.internal.optLong("inAppExpiryDateTime", 0) : 0;
+        String webViewUrl = data.internal != null ? data.internal.optString("webViewUrl") : null;
+        String messageType = data.internal != null ? data.internal.optString("messageType") : null;
         boolean inApp = data.internal != null && data.internal.optBoolean("inApp"); // deprecated
         Message.InAppStyle inAppStyle = null;
         if (data.notification.inAppStyle != null) {
@@ -89,7 +91,9 @@ public class FirebaseMessageMapper {
                 "",
                 notificationSettings.contentUrl,
                 inAppStyle,
-                inAppExpiryDateTime);
+                inAppExpiryDateTime,
+                webViewUrl,
+                messageType);
     }
 
     private static IBData getIBData(RemoteMessage remoteMessage) {
