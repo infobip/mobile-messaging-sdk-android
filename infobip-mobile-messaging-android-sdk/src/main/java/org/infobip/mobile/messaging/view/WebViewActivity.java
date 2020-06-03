@@ -105,6 +105,9 @@ public class WebViewActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.ib_menu_cancel) {
             goBack();
+            webView.freeMemory();
+            webView.removeAllViews();
+            webView.destroy();
         }
         return true;
     }

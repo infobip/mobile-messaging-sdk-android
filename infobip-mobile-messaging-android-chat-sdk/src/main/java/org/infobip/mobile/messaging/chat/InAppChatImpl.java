@@ -14,7 +14,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
-import org.infobip.mobile.messaging.chat.properties.InAppChatProperty;
+import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -31,7 +31,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private WebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
-    private boolean syncedChatWidgetConfig;
+    private static boolean isChatWidgetConfigSynced;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
@@ -78,7 +78,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void setActivitiesToStartOnMessageTap(Class... activityClasses) {
-        propertyHelper().saveClasses(InAppChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
+        propertyHelper().saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
     }
 
     // region private methods
@@ -124,15 +124,15 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void applicationInForeground() {
-        if (!syncedChatWidgetConfig) {
+        if (!isChatWidgetConfigSynced) {
             inAppChatSynchronizer().getWidgetConfiguration(); //need to know the failed state
-            syncedChatWidgetConfig = true; // review no internet state
+            isChatWidgetConfigSynced = true; // review no internet state
         }
     }
 
     @Override
     public void cleanup() {
-        syncedChatWidgetConfig = false;
+        isChatWidgetConfigSynced = false;
         webView().clearHistory();
         webView().clearCache(true);
         PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.getKey());
@@ -143,16 +143,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void depersonalize() {
-        syncedChatWidgetConfig = false;
+        isChatWidgetConfigSynced = false;
         webView().clearHistory();
         webView().clearCache(true);
     }
 
     @Override
     public void performSyncActions() {
-        if (!syncedChatWidgetConfig) {
+        if (!isChatWidgetConfigSynced) {
             inAppChatSynchronizer().getWidgetConfiguration();
-            syncedChatWidgetConfig = true;
+            isChatWidgetConfigSynced = true;
         }
     }
 
@@ -160,7 +160,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private TaskStackBuilder stackBuilderForNotificationTap(Message message) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         Bundle messageBundle = MessageBundleMapper.messageToBundle(message);
-        Class[] classes = propertyHelper().findClasses(InAppChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
+        Class[] classes = propertyHelper().findClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
         if (classes != null) {
             for (Class cls : classes) {
                 stackBuilder.addNextIntent(new Intent(context, cls)

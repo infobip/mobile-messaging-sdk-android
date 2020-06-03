@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 
 import org.infobip.mobile.messaging.chat.InAppChatView;
-import org.infobip.mobile.messaging.chat.properties.InAppChatProperty;
+import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -31,7 +31,7 @@ public class InAppChatViewImpl implements InAppChatView {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void show() {
-        propertyHelper.saveClasses(InAppChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, getTapActivityClasses());
+        propertyHelper.saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, getTapActivityClasses());
         context.startActivity(new Intent(context, InAppChatActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 

@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.chat.properties;
 
 import android.content.Context;
 
-import org.infobip.mobile.messaging.chat.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -21,15 +20,15 @@ public class PropertyHelper extends PreferenceHelper {
         this.context = context;
     }
 
-    public boolean findBoolean(InAppChatProperty property) {
+    public boolean findBoolean(MobileMessagingChatProperty property) {
         return findBoolean(context, property.getKey(), (Boolean) property.getDefaultValue());
     }
 
-    public void saveBoolean(InAppChatProperty property, boolean value) {
+    public void saveBoolean(MobileMessagingChatProperty property, boolean value) {
         saveBoolean(context, property.getKey(), value);
     }
 
-    public Class[] findClasses(InAppChatProperty property) {
+    public Class[] findClasses(MobileMessagingChatProperty property) {
         String[] classNames = findStringArray(context, property.getKey(), new String[0]);
         if (classNames == null) {
             return (Class[]) property.getDefaultValue();
@@ -45,7 +44,7 @@ public class PropertyHelper extends PreferenceHelper {
         return classes.toArray(new Class[0]);
     }
 
-    public void saveClasses(InAppChatProperty property, Class... classes) {
+    public void saveClasses(MobileMessagingChatProperty property, Class... classes) {
         if (classes == null) {
             return;
         }
@@ -61,7 +60,7 @@ public class PropertyHelper extends PreferenceHelper {
         saveStringArray(context, property.getKey(), classNames.toArray(new String[0]));
     }
 
-    public void remove(InAppChatProperty property) {
+    public void remove(MobileMessagingChatProperty property) {
         remove(context, property.getKey());
     }
 
