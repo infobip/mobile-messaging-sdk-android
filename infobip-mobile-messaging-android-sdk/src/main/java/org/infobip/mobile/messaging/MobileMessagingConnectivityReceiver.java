@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 
 /**
+ * Connectivity receiver for pre-7.0 Nougat devices
  * @author tjuric
  * @since 31/08/2017.
  */

@@ -8,5 +8,5 @@ public interface InAppChatWebViewManager {
     void onPageStarted();
     void onPageFinished();
     void setControlsEnabled(boolean enabled);
-    void setInvisible();
+    void onJSError();
 }

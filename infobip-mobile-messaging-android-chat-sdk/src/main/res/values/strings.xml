@@ -1,15 +1,10 @@
 <resources>
     <string name="ib_inappchat_widget_uri" translatable="false">file:///android_asset/inappchat-widget.html</string>
 
-    <!-- Chat conversation screen -->
-    <string name="connected">Connected</string>
-    <string name="no_connection">No connection</string>
-    <string name="no_internet_connection">No internet connection</string>
-
     <!-- Default resources for customizable strings -->
     <string name="ib_chat_view_title">""</string>
     <string name="ib_chat_message_hint">Send a message…</string>
-    <string name="ib_chat_not_available">Chat is not available</string>
+    <string name="ib_chat_no_connection">No connection</string>
     <string name="ib_iv_btn_send_desc">Send chat message</string>
 
 </resources>

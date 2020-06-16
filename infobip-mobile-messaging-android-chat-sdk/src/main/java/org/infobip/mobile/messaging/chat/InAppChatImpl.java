@@ -10,14 +10,19 @@ import android.webkit.WebView;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.api.chat.WidgetInfo;
+import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 
@@ -25,13 +30,14 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     private static InAppChatImpl instance;
     private Context context;
-    private AndroidBroadcaster broadcaster;
+    private AndroidBroadcaster coreBroadcaster;
+    private InAppChatBroadcasterImpl inAppChatBroadcaster;
     private InAppChatViewImpl inAppChatView;
     private PropertyHelper propertyHelper;
     private WebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
-    private static boolean isChatWidgetConfigSynced;
+    private static Boolean isChatWidgetConfigSynced = null;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
@@ -53,7 +59,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!message.isChatMessage()) {
             return false;
         }
-        broadcaster().messageReceived(message);
+        coreBroadcaster().messageReceived(message);
         MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
         return true;
     }
@@ -63,7 +69,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!message.isChatMessage()) {
             return false;
         }
-        broadcaster().notificationTapped(message);
+        coreBroadcaster().notificationTapped(message);
         doCoreTappedActions(message);
         return true;
     }
@@ -81,13 +87,24 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
     }
 
+    public static Boolean getIsChatWidgetConfigSynced() {
+        return isChatWidgetConfigSynced;
+    }
+
     // region private methods
 
-    synchronized private AndroidBroadcaster broadcaster() {
-        if (broadcaster == null) {
-            broadcaster = new AndroidBroadcaster(context);
+    synchronized private AndroidBroadcaster coreBroadcaster() {
+        if (coreBroadcaster == null) {
+            coreBroadcaster = new AndroidBroadcaster(context);
         }
-        return broadcaster;
+        return coreBroadcaster;
+    }
+
+    synchronized private InAppChatBroadcasterImpl inAppChatBroadcaster() {
+        if (inAppChatBroadcaster == null) {
+            inAppChatBroadcaster = new InAppChatBroadcasterImpl(context);
+        }
+        return inAppChatBroadcaster;
     }
 
     private MobileApiResourceProvider mobileApiResourceProvider() {
@@ -102,7 +119,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             inAppChatSynchronizer = new InAppChatSynchronizer(
                     context,
                     MobileMessagingCore.getInstance(context),
-                    broadcaster(),
+                    coreBroadcaster(),
+                    inAppChatBroadcaster(),
                     mobileApiResourceProvider().getMobileApiChat(context));
         }
         return inAppChatSynchronizer;
@@ -124,10 +142,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void applicationInForeground() {
-        if (!isChatWidgetConfigSynced) {
-            inAppChatSynchronizer().getWidgetConfiguration(); //need to know the failed state
-            isChatWidgetConfigSynced = true; // review no internet state
-        }
+        performSyncActions();
     }
 
     @Override
@@ -150,9 +165,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void performSyncActions() {
-        if (!isChatWidgetConfigSynced) {
-            inAppChatSynchronizer().getWidgetConfiguration();
-            isChatWidgetConfigSynced = true;
+        if (isChatWidgetConfigSynced == null || !isChatWidgetConfigSynced) {
+            inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
+                @Override
+                public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
+                    isChatWidgetConfigSynced = result.isSuccess();
+                }
+            });
         }
     }
 

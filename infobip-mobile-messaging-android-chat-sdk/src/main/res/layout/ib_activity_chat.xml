@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,6 +8,7 @@
     tools:context="org.infobip.mobile.messaging.chat.view.InAppChatActivity">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/IB_AppTheme.AppBarOverlay">
@@ -20,29 +21,23 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <TextView
-        android:id="@+id/ib_tv_chat_not_available"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="40dp"
-        android:gravity="center_horizontal"
-        android:text="@string/ib_chat_not_available"
-        android:textSize="16sp"
-        android:visibility="gone" />
-
     <ProgressBar
         android:id="@+id/ib_pb_chat"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="70dp"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:layout_centerInParent="true"/>
 
     <WebView
         android:id="@+id/ib_wv_in_app_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="invisible" />
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:visibility="invisible"
+        android:layout_below="@+id/appBarLayout"
+        android:layout_above="@+id/ib_rl_send_message"/>
 
     <RelativeLayout
         android:id="@+id/ib_rl_send_message"
@@ -50,7 +45,9 @@
         android:layout_height="45dp"
         android:background="@drawable/light_border"
         android:orientation="horizontal"
-        android:padding="3dp">
+        android:padding="3dp"
+        android:layout_alignParentBottom="true"
+        app:layout_anchorGravity="center">
 
         <EditText
             android:id="@+id/ib_et_message_text"
@@ -86,4 +83,15 @@
             android:src="@drawable/ib_chat_send_btn_icon" />
 
     </RelativeLayout>
-</LinearLayout>
+    <TextView
+        android:id="@+id/ib_tv_chat_not_connected"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@android:color/darker_gray"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/ib_chat_no_connection"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:visibility="visible"
+        android:layout_alignBottom="@+id/appBarLayout"/>
+</RelativeLayout>
