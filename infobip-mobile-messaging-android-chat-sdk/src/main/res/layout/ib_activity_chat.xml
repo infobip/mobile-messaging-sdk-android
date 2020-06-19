@@ -86,7 +86,7 @@
     <TextView
         android:id="@+id/ib_tv_chat_not_connected"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="@dimen/chat_not_available_tv_height"
         android:background="@android:color/darker_gray"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/ib_chat_no_connection"

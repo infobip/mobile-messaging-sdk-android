@@ -83,6 +83,7 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
     private Boolean chatNotAvailableViewShown = false;
     private String widgetUri;
     private boolean isWebViewLoaded = false;
+    private float chatNotAvailableViewHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,6 +137,7 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
         progressBar = findViewById(R.id.ib_pb_chat);
         relativeLayout = findViewById(R.id.ib_rl_send_message);
         chatNotAvailableView = findViewById(R.id.ib_tv_chat_not_connected);
+        chatNotAvailableViewHeight = getResources().getDimension(R.dimen.chat_not_available_tv_height);
         initToolbar();
         initWebView();
         initTextBar();
@@ -419,26 +421,14 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
 
     private void showChatNotAvailableView() {
         if (!chatNotAvailableViewShown) {
-            chatNotAvailableView.animate().translationY(chatNotAvailableView.getHeight()).setDuration(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    chatNotAvailableView.setVisibility(View.VISIBLE);
-                    super.onAnimationStart(animation);
-                }
-            });
+            chatNotAvailableView.animate().translationY(chatNotAvailableViewHeight).setDuration(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
         }
         chatNotAvailableViewShown = true;
     }
 
     private void hideChatNotAvailableView() {
         if (chatNotAvailableViewShown) {
-            chatNotAvailableView.animate().translationY(0).setDuration(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    chatNotAvailableView.setVisibility(View.GONE);
-                    super.onAnimationEnd(animation);
-                }
-            });
+            chatNotAvailableView.animate().translationY(0).setDuration(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
         }
         chatNotAvailableViewShown = false;
     }
