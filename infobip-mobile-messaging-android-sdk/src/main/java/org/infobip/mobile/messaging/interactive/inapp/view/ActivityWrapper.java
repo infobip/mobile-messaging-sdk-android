@@ -28,6 +28,6 @@ public class ActivityWrapper {
     }
 
     public View inflateView(int layoutResId) {
-        return layoutInflater.inflate(layoutResId, null);
+        return layoutInflater.inflate(layoutResId, null, false);
     }
 }
