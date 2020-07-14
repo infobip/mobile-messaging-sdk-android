@@ -9,7 +9,8 @@ public enum InternalSdkError {
     DEVICE_NOT_SUPPORTED("20005", "Device is not supported"),
     NO_VALID_REGISTRATION("20006", "There is no valid registration"),
     DEPERSONALIZATION_IN_PROGRESS("20007", "Depersonalization is currently in progress"),
-    ERROR_SAVING_EMPTY_OBJECT("20008", "Cannot save object without changes");
+    ERROR_SAVING_EMPTY_OBJECT("20008", "Cannot save object without changes"),
+    NETWORK_UNAVAILABLE("20009", "Network unavailable");
 
     private final String code;
     private final String message;

@@ -1356,13 +1356,19 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener) {
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, final ResultListener<User> listener) {
         if (!isRegistrationAvailable()) {
+            if (listener != null) {
+                listener.onResult(new Result<>(getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
             return;
         }
 
         if (!MobileNetworkInformation.isNetworkAvailableSafely(context)) {
             registerForNetworkAvailability();
+            if (listener != null) {
+                listener.onResult(new Result<>(getUser(), InternalSdkError.NETWORK_UNAVAILABLE.getError()));
+            }
             return;
         }
 
