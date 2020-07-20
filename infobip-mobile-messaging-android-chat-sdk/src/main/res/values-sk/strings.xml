@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Žiadne spojenie</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Bola prekročená maximálna povolená veľkosť prílohy</string>
+    <string name="ib_chat_button_settings">nastavenie</string>
+    <string name="ib_chat_permissions_not_granted_title">Povolenia neboli udelené</string>
+    <string name="ib_chat_permissions_not_granted_message">Môžete ich udeliť v nastaveniach aplikácie.</string>
 </resources>

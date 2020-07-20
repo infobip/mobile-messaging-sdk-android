@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Sem conexão</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Tamanho máximo de anexo permitido excedido</string>
+    <string name="ib_chat_button_settings">Configurações</string>
+    <string name="ib_chat_permissions_not_granted_title">Permissões não concedidas</string>
+    <string name="ib_chat_permissions_not_granted_message">Você pode concedê-los nas configurações do aplicativo.</string>
 </resources>

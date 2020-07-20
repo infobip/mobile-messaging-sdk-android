@@ -51,7 +51,8 @@ public class MobileApiChatTest {
                 "  'id':'widgetId123'," +
                 "  'title':'widgetTitle'," +
                 "  'primaryColor':'widgetPrimaryColor'," +
-                "  'backgroundColor':'widgetBackgroundColor'" +
+                "  'backgroundColor':'widgetBackgroundColor'," +
+                "  'maxUploadContentSize':1024" +
                 "}";
 
         debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
@@ -68,5 +69,6 @@ public class MobileApiChatTest {
         assertThat(response.getTitle()).isEqualTo("widgetTitle");
         assertThat(response.getPrimaryColor()).isEqualTo("widgetPrimaryColor");
         assertThat(response.getBackgroundColor()).isEqualTo("widgetBackgroundColor");
+        assertThat(response.getMaxUploadContentSize()).isEqualTo(1024L);
     }
 }

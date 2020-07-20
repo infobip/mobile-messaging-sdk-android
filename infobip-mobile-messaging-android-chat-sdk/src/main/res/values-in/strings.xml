@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Tidak ada koneksi</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Ukuran lampiran maksimum yang diizinkan terlampaui</string>
+    <string name="ib_chat_button_settings">Pengaturan</string>
+    <string name="ib_chat_permissions_not_granted_title">Izin tidak diberikan</string>
+    <string name="ib_chat_permissions_not_granted_message">Anda dapat memberi mereka dalam pengaturan aplikasi.</string>
 </resources>

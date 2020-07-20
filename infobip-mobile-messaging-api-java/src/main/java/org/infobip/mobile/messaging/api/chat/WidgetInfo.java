@@ -12,4 +12,5 @@ public class WidgetInfo {
     private String title;
     private String primaryColor;
     private String backgroundColor;
+    private long maxUploadContentSize;
 }

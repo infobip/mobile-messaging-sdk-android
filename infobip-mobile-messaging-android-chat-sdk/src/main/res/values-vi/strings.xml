@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Không có kết nối</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Vượt quá kích thước tệp đính kèm tối đa</string>
+    <string name="ib_chat_button_settings">Cài đặt</string>
+    <string name="ib_chat_permissions_not_granted_title">Quyền không được cấp</string>
+    <string name="ib_chat_permissions_not_granted_message">Bạn có thể cấp chúng trong cài đặt ứng dụng.</string>
 </resources>

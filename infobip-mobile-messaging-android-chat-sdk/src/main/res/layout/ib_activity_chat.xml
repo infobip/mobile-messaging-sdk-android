@@ -51,15 +51,12 @@
 
         <EditText
             android:id="@+id/ib_et_message_text"
-            android:layout_width="315dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginStart="44dp"
-            android:layout_marginLeft="44dp"
             android:layout_toStartOf="@+id/ib_btn_send"
             android:layout_toLeftOf="@+id/ib_btn_send"
+            android:layout_toEndOf="@+id/ib_btn_send_attachment"
+            android:layout_toRightOf="@+id/ib_btn_send_attachment"
             android:background="@null"
             android:enabled="false"
             android:hint="@string/ib_chat_message_hint"
@@ -67,7 +64,8 @@
             android:maxLines="4"
             android:minHeight="30dp"
             android:scrollbars="vertical"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_width="315dp" />
 
         <ImageView
             android:id="@+id/ib_btn_send"
@@ -81,6 +79,19 @@
             android:contentDescription="@string/ib_iv_btn_send_desc"
             android:enabled="false"
             android:src="@drawable/ib_chat_send_btn_icon" />
+
+        <ImageView
+            android:id="@+id/ib_btn_send_attachment"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="0dp"
+            android:contentDescription="@string/ib_iv_btn_send_attachment_desc"
+            android:enabled="false"
+            android:src="@drawable/ib_chat_attachment_btn_icon"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="0dp" />
 
     </RelativeLayout>
     <TextView

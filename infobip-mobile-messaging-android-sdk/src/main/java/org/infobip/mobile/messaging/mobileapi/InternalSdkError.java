@@ -10,6 +10,7 @@ public enum InternalSdkError {
     NO_VALID_REGISTRATION("20006", "There is no valid registration"),
     DEPERSONALIZATION_IN_PROGRESS("20007", "Depersonalization is currently in progress"),
     ERROR_SAVING_EMPTY_OBJECT("20008", "Cannot save object without changes"),
+    ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED("20010", "Maximum allowed attachment size exceeded"),
     NETWORK_UNAVAILABLE("20009", "Network unavailable");
 
     private final String code;
@@ -21,7 +22,7 @@ public enum InternalSdkError {
     }
 
     /**
-     * Creates new instance of {@link MobileMessagingError} and returns it's <i>toString()</i> method
+     * Creates new instance of {@link MobileMessagingError} and returns its <i>toString()</i> method
      *
      * @return {@link MobileMessagingError#toString()} with specific error code and description message
      */

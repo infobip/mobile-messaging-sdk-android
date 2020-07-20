@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Nema veze</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Premašena je najveća dopuštena veličina privitka</string>
+    <string name="ib_chat_button_settings">Postavke</string>
+    <string name="ib_chat_permissions_not_granted_title">Dozvole nisu odobrene</string>
+    <string name="ib_chat_permissions_not_granted_message">Možete ih odobriti u postavkama programa.</string>
 </resources>

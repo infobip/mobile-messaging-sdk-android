@@ -31,6 +31,13 @@
             liveChat(SEND, message);
         }
 
+        window.handleMessageWithAttachmentSend = function(message, attachment) {
+            liveChat(SEND, {
+                'message': message,
+                'attachment': attachment
+            });
+        }
+
         // Override widget config
         liveChat(CONFIG, {
             widgetId: getQueryParameter('widgetId'),
@@ -52,14 +59,21 @@
 		// If all is OK -> initialize widget, enable native controls and show widget
 		function init() {
 		    liveChat(INIT);
-			liveChat(SHOW);
-			window.InAppChatMobile.setControlsEnabled(true);
+			liveChat(SHOW, null, () => onShowCallback());
 		}
 
 		function getQueryParameter(name){
            if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
                return decodeURIComponent(name[1]);
            }
+        }
+
+        function onShowCallback(error, result) {
+            if (error) {
+                window.InAppChatMobile.onError(error);
+            } else {
+                window.InAppChatMobile.setControlsEnabled(true);
+            }
         }
     </script>
 </body>

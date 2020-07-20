@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">无连接</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">超过允许的最大附件大小</string>
+    <string name="ib_chat_permissions_not_granted_message">您可以在应用程序设置中授予它们。</string>
+    <string name="ib_chat_permissions_not_granted_title">权限未授予</string>
+    <string name="ib_chat_button_settings">设定值</string>
 </resources>
