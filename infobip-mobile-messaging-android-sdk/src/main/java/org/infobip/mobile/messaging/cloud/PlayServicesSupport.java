@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -16,6 +15,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
+import org.infobip.mobile.messaging.mobileapi.apiavailability.ApiAvailability;
 
 /**
  * @author mstipanov
@@ -28,14 +28,15 @@ public class PlayServicesSupport {
     private static Boolean isPlayServicesAvailable;
     private final Handler handler = new Handler(Looper.getMainLooper());
 
+    private static ApiAvailability apiAvailability = new ApiAvailability();
+
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
     public void checkPlayServicesAndTryToAcquireToken(final Context context, boolean shouldResetToken, @Nullable MobileMessaging.InitListener initListener) {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int errorCode = apiAvailability.isGooglePlayServicesAvailable(context);
+        int errorCode = apiAvailability.checkServicesStatus(context);
         isPlayServicesAvailable = errorCode == ConnectionResult.SUCCESS;
         if (errorCode != ConnectionResult.SUCCESS) {
 
@@ -85,8 +86,7 @@ public class PlayServicesSupport {
             return isPlayServicesAvailable;
         }
 
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        isPlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
+        isPlayServicesAvailable = apiAvailability.isServicesAvailable(context);
         return isPlayServicesAvailable;
     }
 }
