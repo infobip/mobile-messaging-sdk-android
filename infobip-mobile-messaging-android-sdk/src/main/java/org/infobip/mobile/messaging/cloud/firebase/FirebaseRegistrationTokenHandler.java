@@ -54,7 +54,7 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 final String token = instanceIdResult.getToken();
-                if (StringUtils.isNotBlank(token)) handleNewToken(senderId, token);
+                if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(mobileMessagingCore.getApplicationCode())) handleNewToken(senderId, token);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

@@ -148,6 +148,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void cleanup() {
         isChatWidgetConfigSynced = false;
+        mobileApiResourceProvider = null;
+        inAppChatSynchronizer = null;
         webView().clearHistory();
         webView().clearCache(true);
         PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.getKey());

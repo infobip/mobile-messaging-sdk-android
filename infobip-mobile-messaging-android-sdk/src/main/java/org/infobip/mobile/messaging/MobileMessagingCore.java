@@ -18,6 +18,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContextHelper;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
+import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
 import org.infobip.mobile.messaging.cloud.PlayServicesSupport;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -1244,15 +1245,14 @@ public class MobileMessagingCore
         }
 
         applicationCode = null;
+        PreferenceHelper.remove(context, MobileMessagingProperty.APPLICATION_CODE);
+
         if (mobileMessagingSynchronizationReceiver != null) {
             ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
             mobileMessagingSynchronizationReceiver = null;
         }
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
         resetMobileApi();
-
-        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-        MobileMessagingCloudService.enqueueTokenCleanup(context, senderID);
 
         PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN);
         PreferenceHelper.remove(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
@@ -1277,6 +1277,27 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED);
+
+        MobileMessagingCore mmCore = Platform.mobileMessagingCore.get(context);
+        mmCore.messagesSynchronizer = null;
+        mmCore.userDataReporter = null;
+        mmCore.installationSynchronizer = null;
+        mmCore.personalizeSynchronizer = null;
+        mmCore.userEventsSynchronizer = null;
+        mmCore.moMessageSender = null;
+        mmCore.seenStatusReporter = null;
+        mmCore.versionChecker = null;
+
+        mmCore.didSyncAtLeastOnce = false;
+        mmCore.lastForegroundSyncMillis = null;
+        mmCore.lastSyncTimeMillis = null;
+
+        ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
+        ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
+
+        //it's needed for MobileMessagingCore.Build, when user uses different appCode
+        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
+        MobileMessagingCloudService.enqueueTokenCleanup(context, senderID);
     }
 
     public void resetCloudToken(boolean force) {
@@ -1987,6 +2008,8 @@ public class MobileMessagingCore
             mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), shouldResetToken, initListener);
 
             Platform.reset(mobileMessagingCore);
+            MobileMessagingCloudHandler cloudHandler = Platform.initializeMobileMessagingCloudHandler(application);
+            Platform.reset(cloudHandler);
 
             return mobileMessagingCore;
         }

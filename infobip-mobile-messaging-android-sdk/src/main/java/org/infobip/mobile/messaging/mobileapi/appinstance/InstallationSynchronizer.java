@@ -110,13 +110,16 @@ public class InstallationSynchronizer {
         }
 
         if (!mobileMessagingCore.isRegistrationAvailable()) {
-            if (cloudTokenPresentAndUnreported && !didSyncRecently())
+            if (cloudTokenPresentAndUnreported && !didSyncRecently()) {
                 createInstallation(installation, actionListener);
+                lastSyncTimeMillis = Time.now();
+            }
         } else {
-            if (installation.hasDataToReport() && !didSyncRecently())
+            if (installation.hasDataToReport() && !didSyncRecently()) {
                 patchMyInstallation(installation, actionListener);
+                lastSyncTimeMillis = Time.now();
+            }
         }
-        lastSyncTimeMillis = Time.now();
     }
 
     private boolean didSyncRecently() {
