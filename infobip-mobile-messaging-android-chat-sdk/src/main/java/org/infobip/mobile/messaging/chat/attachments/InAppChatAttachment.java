@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Base64;
+import android.webkit.MimeTypeMap;
 
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -14,6 +15,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 import static com.google.android.gms.common.util.JsonUtils.escapeString;
 
@@ -22,10 +24,12 @@ public class InAppChatAttachment {
 
     String base64;
     String mimeType;
+    String fileName;
 
-    public InAppChatAttachment(String mimeType, String base64) {
+    public InAppChatAttachment(String mimeType, String base64, String filename) {
         this.base64 = base64;
         this.mimeType = mimeType;
+        this.fileName = filename;
     }
 
     public static InAppChatAttachment makeAttachment(Context context, Intent data) throws InternalSdkError.InternalSdkException {
@@ -42,8 +46,22 @@ public class InAppChatAttachment {
         String mimeType = getMimeType(context, data);
         String encodedString = Base64.encodeToString(bytesArray, Base64.DEFAULT);
 
+        String fileName;
+        Uri uri = data.getData();
+        if (uri != null) {
+            fileName = uri.getLastPathSegment();
+        } else {
+            fileName = UUID.randomUUID().toString();
+        }
+
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String extension = mime.getExtensionFromMimeType(mimeType);
+        if (extension != null) {
+            fileName += "." + extension;
+        }
+
         if (encodedString != null && mimeType != null) {
-            return new InAppChatAttachment(mimeType, encodedString);
+            return new InAppChatAttachment(mimeType, encodedString, fileName);
         }
         return null;
     }
@@ -61,6 +79,10 @@ public class InAppChatAttachment {
             mimeType = "image/jpeg";
         }
         return mimeType;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     private static byte[] getBytes(Context context, Intent data) {

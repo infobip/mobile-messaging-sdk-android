@@ -31,10 +31,11 @@
             liveChat(SEND, message);
         }
 
-        window.handleMessageWithAttachmentSend = function(message, attachment) {
+        window.handleMessageWithAttachmentSend = function(message, attachment, fileName) {
             liveChat(SEND, {
                 'message': message,
-                'attachment': attachment
+                'attachment': attachment,
+                'fileName': fileName,
             });
         }
 

@@ -26,11 +26,12 @@ public class InAppChatClientImpl implements InAppChatClient {
     public void sendChatMessage(String message, InAppChatAttachment attachment) {
         // message can be null - its OK
         String base64UrlString = attachment.base64UrlString();
+        String fileName = attachment.getFileName();
         if (webView != null && isNotBlank(base64UrlString)) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                webView.evaluateJavascript(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString).replaceFirst("javascript:","")+";", null);
+                webView.evaluateJavascript(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString, fileName).replaceFirst("javascript:","")+";", null);
             } else {
-                webView.loadUrl(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString));
+                webView.loadUrl(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString, fileName));
             }
         } else {
             MobileMessagingLogger.e("[InAppChat] can't send attachment, base64 is empty");
