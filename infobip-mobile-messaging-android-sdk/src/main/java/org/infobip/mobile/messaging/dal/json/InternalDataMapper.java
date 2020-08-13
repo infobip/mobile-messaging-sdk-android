@@ -40,6 +40,7 @@ public class InternalDataMapper {
         long inAppExpiryDateTime;
         String webViewUrl;
         String messageType;
+        String deeplink;
 
         public InternalData() {
         }
@@ -282,6 +283,20 @@ public class InternalDataMapper {
             }
 
             return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns Deeplink URI from internal data
+     *
+     * @param json internal data json
+     * @return Deeplink URI if present or null otherwise
+     */
+    public static String getInternalDataDeeplinkUri(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).deeplink;
         } catch (Exception e) {
             return null;
         }

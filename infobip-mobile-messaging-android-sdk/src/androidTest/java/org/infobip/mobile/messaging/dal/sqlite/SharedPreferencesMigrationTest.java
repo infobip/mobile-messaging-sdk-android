@@ -76,7 +76,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     null,
                     0,
                     "http://www.bla.com",
-                    "some msg type"
+                    "some msg type",
+                    "app://deep/link"
             ));
         }
 
@@ -112,6 +113,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
             assertEquals(0, message.getInAppExpiryTimestamp());
             assertEquals("http://www.bla.com", message.getWebViewUrl());
+            assertEquals("app://deep/link", message.getDeeplink());
             assertEquals("some msg type", message.getMessageType());
         }
     }
@@ -150,7 +152,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     null,
                     0,
                     "http://www.bla.com",
-                    "chat"
+                    "chat",
+                    "app://deep/link"
             ));
         }
 

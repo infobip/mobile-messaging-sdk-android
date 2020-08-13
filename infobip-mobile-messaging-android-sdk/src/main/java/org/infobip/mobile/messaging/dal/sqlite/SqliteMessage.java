@@ -17,7 +17,7 @@ import org.json.JSONObject;
 public class SqliteMessage extends Message implements DatabaseContract.DatabaseObject {
 
     public SqliteMessage() {
-        super(null, null, null, null, true, null, false, null, null, 0, 0, 0, null, null, null, Status.UNKNOWN, null, null, null, 0, null, null);
+        super(null, null, null, null, true, null, false, null, null, 0, 0, 0, null, null, null, Status.UNKNOWN, null, null, null, 0, null, null, null);
     }
 
     public SqliteMessage(Message m) {
@@ -43,7 +43,8 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
                 m.getInAppStyle(),
                 m.getInAppExpiryTimestamp(),
                 m.getWebViewUrl(),
-                m.getMessageType()
+                m.getMessageType(),
+                m.getDeeplink()
         );
     }
 
@@ -81,6 +82,7 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         setSentTimestamp(InternalDataMapper.getInternalDataSendDateTime(dataJson));
         setInAppExpiryTimestamp(InternalDataMapper.getInternalDataInAppExpiryDateTime(dataJson));
         setWebViewUrl(InternalDataMapper.getInternalDataWebViewUrl(dataJson));
+        setDeeplink(InternalDataMapper.getInternalDataDeeplinkUri(dataJson));
         setMessageType(InternalDataMapper.getInternalDataMessageType(dataJson));
 
         dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));

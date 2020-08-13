@@ -43,6 +43,7 @@ public class Message implements Comparable<Message> {
     private String webViewUrl;
     private InAppStyle inAppStyle;
     private String messageType;
+    private String deeplink;
 
     public enum Status {
         SUCCESS,
@@ -74,7 +75,7 @@ public class Message implements Comparable<Message> {
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle,
-                   long inAppExpiryTimestamp, String webViewUrl, String messageType) {
+                   long inAppExpiryTimestamp, String webViewUrl, String messageType, String deeplink) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -97,6 +98,7 @@ public class Message implements Comparable<Message> {
         this.inAppExpiryTimestamp = inAppExpiryTimestamp;
         this.webViewUrl = webViewUrl;
         this.messageType = messageType;
+        this.deeplink = deeplink;
     }
 
     public Message() {
@@ -296,5 +298,13 @@ public class Message implements Comparable<Message> {
 
     public boolean isChatMessage() {
         return StringUtils.isNotBlank(messageType) && MESSAGE_TYPE_CHAT.equals(messageType);
+    }
+
+    public String getDeeplink() {
+        return deeplink;
+    }
+
+    public void setDeeplink(String deeplink) {
+        this.deeplink = deeplink;
     }
 }
