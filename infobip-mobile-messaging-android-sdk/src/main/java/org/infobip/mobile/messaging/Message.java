@@ -41,6 +41,7 @@ public class Message implements Comparable<Message> {
     private String internalData;
     private String contentUrl;
     private String webViewUrl;
+    private String browserUrl;
     private InAppStyle inAppStyle;
     private String messageType;
     private String deeplink;
@@ -75,7 +76,7 @@ public class Message implements Comparable<Message> {
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle,
-                   long inAppExpiryTimestamp, String webViewUrl, String messageType, String deeplink) {
+                   long inAppExpiryTimestamp, String webViewUrl, String browserUrl, String messageType, String deeplink) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -97,6 +98,7 @@ public class Message implements Comparable<Message> {
         this.inAppStyle = inAppStyle;
         this.inAppExpiryTimestamp = inAppExpiryTimestamp;
         this.webViewUrl = webViewUrl;
+        this.browserUrl = browserUrl;
         this.messageType = messageType;
         this.deeplink = deeplink;
     }
@@ -286,6 +288,14 @@ public class Message implements Comparable<Message> {
 
     public void setWebViewUrl(String webViewUrl) {
         this.webViewUrl = webViewUrl;
+    }
+
+    public String getBrowserUrl() {
+        return browserUrl;
+    }
+
+    public void setBrowserUrl(String browserUrl) {
+        this.browserUrl = browserUrl;
     }
 
     public String getMessageType() {

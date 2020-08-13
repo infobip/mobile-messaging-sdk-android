@@ -51,6 +51,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         internalData.put("silent", new JSONObject());
 
         internalData.put("webViewUrl", "http://www.bla.com");
+        internalData.put("browserUrl", "http://www.openinbrowser.com");
+        internalData.put("deeplink", "app://deep/link");
         internalData.put("messageType", "some msg type");
 
         for (int i = 0; i < numberOfMessages; i++) {
@@ -76,6 +78,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     null,
                     0,
                     "http://www.bla.com",
+                    "http://www.openinbrowser.com",
                     "some msg type",
                     "app://deep/link"
             ));
@@ -113,6 +116,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
             assertEquals("http://www.some-content.com.ru.hr", message.getContentUrl());
             assertEquals(0, message.getInAppExpiryTimestamp());
             assertEquals("http://www.bla.com", message.getWebViewUrl());
+            assertEquals("http://www.openinbrowser.com", message.getBrowserUrl());
             assertEquals("app://deep/link", message.getDeeplink());
             assertEquals("some msg type", message.getMessageType());
         }
@@ -127,6 +131,8 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
         JSONObject internalData = new JSONObject();
 
         internalData.put("webViewUrl", "http://www.bla.com");
+        internalData.put("browserUrl", "http://www.openinbrowser.com");
+        internalData.put("deeplink", "app://deep/link");
         internalData.put("messageType", "chat");
 
         for (int i = 0; i < numberOfMessages; i++) {
@@ -152,6 +158,7 @@ public class SharedPreferencesMigrationTest extends MobileMessagingTestCase {
                     null,
                     0,
                     "http://www.bla.com",
+                    "http://www.openinbrowser.com",
                     "chat",
                     "app://deep/link"
             ));

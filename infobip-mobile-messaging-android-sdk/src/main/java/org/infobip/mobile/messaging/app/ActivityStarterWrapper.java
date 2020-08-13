@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -55,5 +56,16 @@ public class ActivityStarterWrapper {
         webViewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         webViewIntent.setClass(context, WebViewActivity.class);
         context.startActivity(webViewIntent);
+    }
+
+    /**
+     * Starts available browser
+     */
+    public void startBrowser(@NonNull String browserUrl) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+        }
     }
 }

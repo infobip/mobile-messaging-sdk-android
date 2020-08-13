@@ -38,4 +38,9 @@ public class MockMessageHandlerModule implements MessageHandlerModule {
     public void depersonalize() {
 
     }
+
+    @Override
+    public void performSyncActions() {
+
+    }
 }

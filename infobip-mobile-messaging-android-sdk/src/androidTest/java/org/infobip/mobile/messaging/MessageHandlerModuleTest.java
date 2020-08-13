@@ -36,6 +36,7 @@ public class MessageHandlerModuleTest {
             public void applicationInForeground() {}
             public void cleanup() {}
             public void depersonalize() {}
+            public void performSyncActions() {}
         }
 
         // When

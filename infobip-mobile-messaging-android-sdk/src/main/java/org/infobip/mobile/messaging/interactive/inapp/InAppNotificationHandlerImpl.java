@@ -116,6 +116,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         if (PredefinedActionsProvider.isOpenAction(action.getId()) || action.bringsAppToForeground()) {
             if (StringUtils.isNotBlank(message.getWebViewUrl())) {
                 activityStarterWrapper.startWebViewActivity(callbackIntent, message.getWebViewUrl());
+            } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
+                activityStarterWrapper.startBrowser(message.getBrowserUrl());
             } else {
                 activityStarterWrapper.startCallbackActivity(callbackIntent);
             }

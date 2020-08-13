@@ -63,6 +63,7 @@ public class FirebaseMessageMapper {
         long sentDateTime = data.internal != null ? data.internal.optLong("sendDateTime", Time.now()) : Time.now();
         long inAppExpiryDateTime = data.internal != null ? data.internal.optLong("inAppExpiryDateTime", 0) : 0;
         String webViewUrl = data.internal != null ? data.internal.optString("webViewUrl") : null;
+        String browserUrl = data.internal != null ? data.internal.optString("browserUrl") : null;
         String deeplink = data.internal != null ? data.internal.optString("deeplink") : null;
         String messageType = data.internal != null ? data.internal.optString("messageType") : null;
         boolean inApp = data.internal != null && data.internal.optBoolean("inApp"); // deprecated
@@ -94,6 +95,7 @@ public class FirebaseMessageMapper {
                 inAppStyle,
                 inAppExpiryDateTime,
                 webViewUrl,
+                browserUrl,
                 messageType,
                 deeplink);
     }

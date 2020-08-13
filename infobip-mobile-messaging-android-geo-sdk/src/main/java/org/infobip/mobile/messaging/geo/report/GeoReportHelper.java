@@ -202,6 +202,7 @@ public class GeoReportHelper {
                 originalMessage.getInAppStyle(),
                 originalMessage.getInAppExpiryTimestamp(),
                 originalMessage.getWebViewUrl(),
+                originalMessage.getBrowserUrl(),
                 originalMessage.getMessageType(),
                 originalMessage.getDeeplink()
         );

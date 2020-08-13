@@ -39,6 +39,7 @@ public class InternalDataMapper {
         Message.InAppStyle inAppStyle;
         long inAppExpiryDateTime;
         String webViewUrl;
+        String browserUrl;
         String messageType;
         String deeplink;
 
@@ -224,6 +225,20 @@ public class InternalDataMapper {
     public static String getInternalDataWebViewUrl(String json) {
         try {
             return serializer.deserialize(json, InternalData.class).webViewUrl;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns browser URL from internal data
+     *
+     * @param json internal data json
+     * @return browser URL if present or null otherwise
+     */
+    public static String getInternalDataBrowserUrl(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).browserUrl;
         } catch (Exception e) {
             return null;
         }

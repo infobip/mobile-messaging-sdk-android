@@ -17,7 +17,7 @@ public class GeoMessage extends Message {
         return new GeoMessage(message.getMessageId(), message.getTitle(), message.getBody(), message.getSound(), message.isVibrate(), message.getIcon(),
                 message.isSilent(), message.getCategory(), message.getFrom(), message.getReceivedTimestamp(), message.getSeenTimestamp(), message.getSentTimestamp(),
                 message.getCustomPayload(), message.getInternalData(), message.getDestination(), message.getStatus(), message.getStatusMessage(), message.getContentUrl(),
-                geo, message.getInAppStyle(), message.getInAppExpiryTimestamp(), message.getWebViewUrl(), message.getMessageType(), message.getDeeplink());
+                geo, message.getInAppStyle(), message.getInAppExpiryTimestamp(), message.getWebViewUrl(), message.getBrowserUrl(), message.getMessageType(), message.getDeeplink());
     }
 
     public static GeoMessage createFrom(Bundle bundle) {
@@ -28,15 +28,15 @@ public class GeoMessage extends Message {
         return new Message(geoMessage.getMessageId(), geoMessage.getTitle(), geoMessage.getBody(), geoMessage.getSound(), geoMessage.isVibrate(), geoMessage.getIcon(),
                 geoMessage.isSilent(), geoMessage.getCategory(), geoMessage.getFrom(), geoMessage.getReceivedTimestamp(), geoMessage.getSeenTimestamp(), geoMessage.getSentTimestamp(),
                 geoMessage.getCustomPayload(), geoMessage.getInternalData(), geoMessage.getDestination(), geoMessage.getStatus(), geoMessage.getStatusMessage(), geoMessage.getContentUrl(),
-                geoMessage.getInAppStyle(), geoMessage.getInAppExpiryTimestamp(), geoMessage.getWebViewUrl(), geoMessage.getMessageType(), geoMessage.getDeeplink());
+                geoMessage.getInAppStyle(), geoMessage.getInAppExpiryTimestamp(), geoMessage.getWebViewUrl(), geoMessage.getBrowserUrl(), geoMessage.getMessageType(), geoMessage.getDeeplink());
     }
 
     private GeoMessage(String messageId, String title, String body, String sound, boolean vibrate, String icon, boolean silent, String category,
                        String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp, JSONObject customPayload, String internalData,
                        String destination, Status status, String statusMessage, String contentUrl, Geo geo, InAppStyle inAppStyle, long expiryTime,
-                       String webViewUrl, String messageType, String deeplink) {
+                       String webViewUrl, String browserUrl, String messageType, String deeplink) {
         super(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTimestamp, seenTimestamp, seenTimestamp, customPayload,
-                internalData, destination, status, statusMessage, contentUrl, inAppStyle, expiryTime, webViewUrl, messageType, deeplink);
+                internalData, destination, status, statusMessage, contentUrl, inAppStyle, expiryTime, webViewUrl, browserUrl, messageType, deeplink);
         this.geo = geo;
     }
 

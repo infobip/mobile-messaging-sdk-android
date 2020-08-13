@@ -271,7 +271,13 @@ public abstract class JobIntentService extends Service {
             public void complete() {
                 synchronized (mLock) {
                     if (mParams != null) {
-                        mParams.completeWork(mJobWork);
+                        try {
+                            mParams.completeWork(mJobWork);
+                        } catch (SecurityException e) {
+                            Log.e(TAG, "SecurityException: Failed to run mParams.completeWork(mJobWork)!", e);
+                        } catch(IllegalArgumentException e) {
+                            Log.e(TAG, "IllegalArgumentException: Failed to run mParams.completeWork(mJobWork)!", e);
+                        }
                     }
                 }
             }

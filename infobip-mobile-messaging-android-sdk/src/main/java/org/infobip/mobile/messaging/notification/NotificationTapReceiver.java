@@ -70,6 +70,8 @@ public class NotificationTapReceiver extends BroadcastReceiver {
 
         if (StringUtils.isNotBlank(message.getWebViewUrl())) {
             activityStarterWrapper(context).startWebViewActivity(callbackIntent, message.getWebViewUrl());
+        } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
+            activityStarterWrapper(context).startBrowser(message.getBrowserUrl());
         } else {
             activityStarterWrapper(context).startCallbackActivity(callbackIntent);
         }

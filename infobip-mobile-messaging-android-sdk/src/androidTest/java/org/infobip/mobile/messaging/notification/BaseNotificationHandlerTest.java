@@ -176,6 +176,8 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
                 Message.InAppStyle.BANNER,
                 0,
                 null,
+                null,
+                null,
                 null
         );
     }
