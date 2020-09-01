@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -10,10 +11,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
-import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
@@ -101,17 +103,17 @@ public class InAppViewDialog implements InAppView {
 
             switch (actions.length) {
                 case 1:
-                    builder.setPositiveButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]));
+                    builder.setPositiveButton(getPositiveButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]));
                     break;
                 case 2:
-                    builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
-                            .setPositiveButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]));
+                    builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                            .setPositiveButton(getPositiveButtonText(message, 1, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[1]));
                     break;
                 case 3:
                 default:
-                    builder.setNegativeButton(actions[0].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                    builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
                             .setNeutralButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]))
-                            .setPositiveButton(actions[2].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[2]));
+                            .setPositiveButton(getPositiveButtonText(message, 2, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[2]));
                     break;
             }
 
@@ -121,5 +123,29 @@ public class InAppViewDialog implements InAppView {
         } catch (Exception e) {
             MobileMessagingLogger.e("Failed to build in-app view due to " + e.getMessage());
         }
+    }
+
+    private String getPositiveButtonText(Message message, int i, @NonNull NotificationAction[] actions) {
+        if (StringUtils.isNotBlank(message.getInAppOpenTitle())) {
+            return message.getInAppOpenTitle();
+        }
+        Activity activity = activityWrapper.getActivity();
+        if (activity != null) {
+            return activity.getResources().getString(actions[i].getTitleResourceId());
+        }
+        // this should never happen as we have activity context when in-app is being built
+        return "";
+    }
+
+    private String getNegativeButtonText(Message message, int i, @NonNull NotificationAction[] actions) {
+        if (StringUtils.isNotBlank(message.getInAppDismissTitle())) {
+            return message.getInAppDismissTitle();
+        }
+        Activity activity = activityWrapper.getActivity();
+        if (activity != null) {
+            return activity.getResources().getString(actions[i].getTitleResourceId());
+        }
+        // this should never happen as we have activity context when in-app is being built
+        return "";
     }
 }

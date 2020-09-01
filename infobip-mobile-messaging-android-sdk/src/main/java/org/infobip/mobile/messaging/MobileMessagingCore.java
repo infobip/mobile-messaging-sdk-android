@@ -119,6 +119,7 @@ public class MobileMessagingCore
     private final Broadcaster broadcaster;
     private final ModuleLoader moduleLoader;
     private final NotificationHandler notificationHandler;
+    private String installationId;
 
     private MessagesSynchronizer messagesSynchronizer;
     private UserDataReporter userDataReporter;
@@ -172,6 +173,8 @@ public class MobileMessagingCore
 
         initDefaultChannels();
         migratePrefsIfNecessary(context);
+
+        this.installationId = getUniversalInstallationId();
     }
 
     /**
@@ -917,6 +920,14 @@ public class MobileMessagingCore
 
         notificationSettings = new NotificationSettings(context);
         return notificationSettings;
+    }
+
+    public String getUniversalInstallationId() {
+        if (this.installationId == null) {
+            this.installationId = PreferenceHelper.findString(context, MobileMessagingProperty.UNIVERSAL_INSTALLATION_ID);
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNIVERSAL_INSTALLATION_ID, installationId);
+        }
+        return this.installationId;
     }
 
     private void setNotificationSettings(NotificationSettings notificationSettings) {

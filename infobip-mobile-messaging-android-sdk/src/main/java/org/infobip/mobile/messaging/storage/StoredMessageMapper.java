@@ -46,6 +46,8 @@ public class StoredMessageMapper {
         String browserUrl = InternalDataMapper.getInternalDataBrowserUrl(internalDataJson);
         String deeplink = InternalDataMapper.getInternalDataDeeplinkUri(internalDataJson);
         String messageType = InternalDataMapper.getInternalDataMessageType(internalDataJson);
+        String inAppOpenTitle = InternalDataMapper.getInternalDataInAppOpenTitle(internalDataJson);
+        String inAppDismissTitle = InternalDataMapper.getInternalDataInAppDismissTitle(internalDataJson);
 
         String destination = bundle.getString(BundleField.DESTINATION.getKey());
         String statusMessage = bundle.getString(BundleField.STATUS_MESSAGE.getKey());
@@ -60,8 +62,8 @@ public class StoredMessageMapper {
                 vibrate, icon, silent, category, from,
                 receivedTs, seenTs, sentDateTime, customPayload,
                 internalDataJson, destination, status, statusMessage,
-                contentUrl, inAppStyle, inAppExpiryDateTime, webViewUrl,
-                browserUrl, messageType, deeplink);
+                contentUrl, inAppStyle, inAppExpiryDateTime, webViewUrl, browserUrl,
+                messageType, deeplink, inAppOpenTitle, inAppDismissTitle);
     }
 
     /**

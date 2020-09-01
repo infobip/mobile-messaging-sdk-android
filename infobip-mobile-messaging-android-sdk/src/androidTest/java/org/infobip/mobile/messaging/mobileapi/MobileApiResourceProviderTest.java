@@ -70,9 +70,10 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         }
 
         // then
-        assertEquals("0690db1eb3",  debugServer.getHeader(CustomApiHeaders.APPLICATION_CODE.getValue()));
+        assertEquals("0690db1eb3", debugServer.getHeader(CustomApiHeaders.APPLICATION_CODE.getValue()));
         assertEquals("false", debugServer.getHeader(CustomApiHeaders.FOREGROUND.getValue()));
         assertEquals("TestDeviceInstanceId", debugServer.getHeader(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue()));
+        assertEquals("UniversalInstallationId", debugServer.getHeader(CustomApiHeaders.INSTALLATION_ID.getValue()));
     }
 
     @Test

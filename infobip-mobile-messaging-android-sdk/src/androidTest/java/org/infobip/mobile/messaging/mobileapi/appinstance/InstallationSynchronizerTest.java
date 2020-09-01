@@ -82,7 +82,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         InstallationMapper.fromJson(bla.toString());
 
         verifySuccess();
-        verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
+        verify(broadcaster, after(1000).times(1)).registrationCreated(anyString(), anyString());
         verify(mobileApiAppInstance, times(1)).createInstance(any(AppInstance.class));
     }
 
@@ -114,7 +114,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         for (Thread thread : threads) thread.join();
 
         verifySuccess(threads.size());
-        verify(broadcaster, after(300).times(1)).registrationCreated(anyString(), anyString());
+        verify(broadcaster, after(1000).times(1)).registrationCreated(anyString(), anyString());
         verify(mobileApiAppInstance, times(1)).createInstance(any(AppInstance.class));
     }
 
@@ -127,7 +127,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         installationSynchronizer.sync(actionListener);
 
         verifyError();
-        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+        verify(broadcaster, after(1000).times(1)).error(any(MobileMessagingError.class));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         installationSynchronizer.sync(actionListener);
 
         verifySuccess();
-        verify(broadcaster, after(300).times(1)).installationUpdated(any(Installation.class));
+        verify(broadcaster, after(1000).times(1)).installationUpdated(any(Installation.class));
         verify(mobileApiAppInstance, times(1)).patchInstance(anyString(), any(Map.class));
     }
 
@@ -146,7 +146,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         installationSynchronizer.sync(actionListener);
 
         verifyError();
-        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+        verify(broadcaster, after(1000).times(1)).error(any(MobileMessagingError.class));
     }
 
     @Test
@@ -160,7 +160,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verifyError();
-        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+        verify(broadcaster, after(1000).times(1)).error(any(MobileMessagingError.class));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     private void verifySuccess(int numOfListenerInvocations) {
-        verify(actionListener, after(300).times(numOfListenerInvocations)).onResult(captor.capture());
+        verify(actionListener, after(1000).times(numOfListenerInvocations)).onResult(captor.capture());
         Result result = captor.getValue();
         assertTrue(result.isSuccess());
         assertNotNull(result.getData());
@@ -206,7 +206,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     private void verifyError() {
-        verify(actionListener, after(300).times(1)).onResult(captor.capture());
+        verify(actionListener, after(1000).times(1)).onResult(captor.capture());
         Result result = captor.getValue();
         assertFalse(result.isSuccess());
         assertNotNull(result.getData());

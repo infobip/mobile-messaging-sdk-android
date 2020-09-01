@@ -204,7 +204,9 @@ public class GeoReportHelper {
                 originalMessage.getWebViewUrl(),
                 originalMessage.getBrowserUrl(),
                 originalMessage.getMessageType(),
-                originalMessage.getDeeplink()
+                originalMessage.getDeeplink(),
+                originalMessage.getInAppOpenTitle(),
+                originalMessage.getInAppDismissTitle()
         );
     }
 

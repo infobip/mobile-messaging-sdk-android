@@ -8,6 +8,7 @@ public enum CustomApiHeaders {
     FOREGROUND("foreground"),
     SESSION_ID("sessionId"),
     PUSH_REGISTRATION_ID("pushregistrationid"),
+    INSTALLATION_ID("installationid"),
     NEW_BASE_URL("newbaseurl"),
     APPLICATION_CODE("applicationcode");
 

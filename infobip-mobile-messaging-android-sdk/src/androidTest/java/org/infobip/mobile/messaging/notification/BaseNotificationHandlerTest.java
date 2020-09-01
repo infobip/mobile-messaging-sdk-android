@@ -178,6 +178,8 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
     }

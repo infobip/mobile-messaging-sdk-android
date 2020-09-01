@@ -52,7 +52,9 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
                 "http://www.some-content.com.ru.hr",
                 "http://www.openinbrowser.com",
                 "some msg type",
-                "app://deep/link"
+                "app://deep/link",
+                "in-app open title",
+                "in-app dismiss title"
         );
 
         databaseHelper.save(new SqliteMessage(message));
@@ -84,6 +86,8 @@ public class SqliteMessageTest extends MobileMessagingTestCase {
         assertEquals("http://www.openinbrowser.com", message.getBrowserUrl());
         assertEquals("app://deep/link", message.getDeeplink());
         assertEquals("some msg type", message.getMessageType());
+        assertEquals("in-app open title", message.getInAppOpenTitle());
+        assertEquals("in-app dismiss title", message.getInAppDismissTitle());
         assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
     }
 

@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging;
 import android.app.PendingIntent;
 import android.content.Intent;
 
+import java.util.UUID;
+
 /**
  * @author mstipanov
  * @since 07.04.2016.
@@ -68,6 +70,8 @@ public enum MobileMessagingProperty {
     // END
 
     // START: installation (primary, app user ID, system, ...) and user related prefs
+    UNIVERSAL_INSTALLATION_ID("org.infobip.mobile.messaging.infobip.UNIVERSAL_INSTALLATION_ID", UUID.randomUUID().toString()),
+
     MOBILE_CARRIER_NAME("org.infobip.mobile.messaging.infobip.MOBILE_CARRIER_NAME", ""),
     MOBILE_COUNTRY_CODE("org.infobip.mobile.messaging.infobip.MCC", ""),
     MOBILE_NETWORK_CODE("org.infobip.mobile.messaging.infobip.MNC", ""),

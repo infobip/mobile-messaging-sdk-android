@@ -35,13 +35,16 @@ public class InternalDataMapper {
         Silent<VibrateValueType> silent;
         String bulkId;
         String initialMessageId;
-        @Deprecated Boolean inApp;
+        @Deprecated
+        Boolean inApp;
         Message.InAppStyle inAppStyle;
         long inAppExpiryDateTime;
         String webViewUrl;
         String browserUrl;
         String messageType;
         String deeplink;
+        String inAppOpenTitle;
+        String inAppDismissTitle;
 
         public InternalData() {
         }
@@ -287,7 +290,7 @@ public class InternalDataMapper {
     }
 
     public static Message.InAppStyle getInternalDataInAppStyle(String json) {
-       try {
+        try {
             InternalData internalData = serializer.deserialize(json, InternalData.class);
             if (internalData.inAppStyle != null) {
                 return internalData.inAppStyle;
@@ -312,6 +315,34 @@ public class InternalDataMapper {
     public static String getInternalDataDeeplinkUri(String json) {
         try {
             return serializer.deserialize(json, InternalData.class).deeplink;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns in-app open title from internal data
+     *
+     * @param json internal data json
+     * @return Title for in-app open button if present or null otherwise
+     */
+    public static String getInternalDataInAppOpenTitle(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).inAppOpenTitle;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns in-app dismiss title from internal data
+     *
+     * @param json internal data json
+     * @return Title for in-app dismiss button if present or null otherwise
+     */
+    public static String getInternalDataInAppDismissTitle(String json) {
+        try {
+            return serializer.deserialize(json, InternalData.class).inAppDismissTitle;
         } catch (Exception e) {
             return null;
         }

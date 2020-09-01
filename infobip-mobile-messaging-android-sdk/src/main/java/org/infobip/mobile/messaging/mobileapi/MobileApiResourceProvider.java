@@ -55,6 +55,7 @@ public class MobileApiResourceProvider {
                     request.getHeaders().put(CustomApiHeaders.SESSION_ID.getValue(), Collections.<Object>singletonList(sessionIdHeader));
                 }
             }
+            request.getHeaders().put(CustomApiHeaders.INSTALLATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getUniversalInstallationId()));
             request.getHeaders().put(CustomApiHeaders.PUSH_REGISTRATION_ID.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getInstance(context).getPushRegistrationId()));
             request.getHeaders().put(CustomApiHeaders.APPLICATION_CODE.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getApplicationCodeHash(context)));
             return request;

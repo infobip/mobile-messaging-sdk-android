@@ -66,7 +66,9 @@ class MessagesMapper {
                 InternalDataMapper.getInternalDataWebViewUrl(internalData),
                 InternalDataMapper.getInternalDataBrowserUrl(internalData),
                 InternalDataMapper.getInternalDataMessageType(internalData),
-                InternalDataMapper.getInternalDataDeeplinkUri(internalData)
+                InternalDataMapper.getInternalDataDeeplinkUri(internalData),
+                InternalDataMapper.getInternalDataInAppOpenTitle(internalData),
+                InternalDataMapper.getInternalDataInAppDismissTitle(internalData)
         );
 
         InternalDataMapper.updateMessageWithInternalData(message, internalData);

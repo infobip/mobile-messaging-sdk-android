@@ -45,6 +45,8 @@ public class Message implements Comparable<Message> {
     private InAppStyle inAppStyle;
     private String messageType;
     private String deeplink;
+    private String inAppOpenTitle;
+    private String inAppDismissTitle;
 
     public enum Status {
         SUCCESS,
@@ -76,7 +78,8 @@ public class Message implements Comparable<Message> {
                    String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp,
                    JSONObject customPayload, String internalData,
                    String destination, Status status, String statusMessage, String contentUrl, InAppStyle inAppStyle,
-                   long inAppExpiryTimestamp, String webViewUrl, String browserUrl, String messageType, String deeplink) {
+                   long inAppExpiryTimestamp, String webViewUrl, String browserUrl, String messageType, String deeplink,
+                   String inAppOpenTitle, String inAppDismissTitle) {
         this.messageId = messageId;
         this.title = title;
         this.body = body;
@@ -101,6 +104,8 @@ public class Message implements Comparable<Message> {
         this.browserUrl = browserUrl;
         this.messageType = messageType;
         this.deeplink = deeplink;
+        this.inAppOpenTitle = inAppOpenTitle;
+        this.inAppDismissTitle = inAppDismissTitle;
     }
 
     public Message() {
@@ -316,5 +321,21 @@ public class Message implements Comparable<Message> {
 
     public void setDeeplink(String deeplink) {
         this.deeplink = deeplink;
+    }
+
+    public String getInAppOpenTitle() {
+        return inAppOpenTitle;
+    }
+
+    public void setInAppOpenTitle(String inAppOpenTitle) {
+        this.inAppOpenTitle = inAppOpenTitle;
+    }
+
+    public String getInAppDismissTitle() {
+        return inAppDismissTitle;
+    }
+
+    public void setInAppDismissTitle(String inAppDismissTitle) {
+        this.inAppDismissTitle = inAppDismissTitle;
     }
 }
