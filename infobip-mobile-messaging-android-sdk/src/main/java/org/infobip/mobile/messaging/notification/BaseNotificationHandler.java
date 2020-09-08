@@ -218,7 +218,7 @@ public class BaseNotificationHandler {
             return null;
         }
 
-        if (ActivityLifecycleMonitor.isForeground() && notificationSettings.isForegroundNotificationDisabled()) {
+        if (ActivityLifecycleMonitor.isForeground() && notificationSettings.isForegroundNotificationDisabled() && !message.isChatMessage()) {
             return null;
         }
 
