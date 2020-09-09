@@ -21,6 +21,13 @@
         <item name="titleTextColor">@android:color/white</item>
     </style>
 
+    <style name="IB_AppTheme.ChatAttach">
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="titleTextColor">@android:color/white</item>
+    </style>
+
     <style name="IB_AppTheme.WebView">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

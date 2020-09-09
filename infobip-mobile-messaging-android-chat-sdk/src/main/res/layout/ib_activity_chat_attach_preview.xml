@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.InAppChatAttachmentPreviewActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/ib_chat_attach_tb"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/IB_WebViewTheme.PopupOverlay">
+
+        <TextView
+            android:id="@+id/ib_chat_attach_tb_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingStart="40dp"
+            android:paddingLeft="40dp"
+            android:paddingEnd="0dp"
+            android:paddingRight="0dp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <WebView
+        android:id="@+id/ib_chat_attach_wv"
+        android:layout_below="@+id/ib_chat_attach_tb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/ib_chat_attach_pb"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/ib_chat_attach_tb"
+        android:layout_height="50dp"
+        android:layout_marginTop="70dp"
+        android:visibility="visible" />
+</RelativeLayout>

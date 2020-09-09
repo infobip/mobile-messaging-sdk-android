@@ -77,6 +77,9 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
+    private static final int CONTENT_SELECTION_INTENT_CODE = 100;
+    private static final int CHAT_CAMERA_PERMISSIONS_REQUEST_CODE = 101;
+    private static final int OPEN_SETTINGS_INTENT_CODE = 102;
 
     private boolean sendButtonIsColored;
     private WidgetInfo widgetInfo;
@@ -90,17 +93,15 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
     private Toolbar toolbar;
     private RelativeLayout relativeLayout;
     private TextView chatNotAvailableView;
+
     private InAppChatClient inAppChatClient;
     private InAppChatViewSettingsResolver inAppChatViewSettingsResolver;
     private Boolean shouldUseWidgetConfig = null;
     private boolean receiversRegistered = false;
-    private Boolean chatNotAvailableViewShown = false;
+    private boolean chatNotAvailableViewShown = false;
     private String widgetUri;
     private boolean isWebViewLoaded = false;
     private float chatNotAvailableViewHeight;
-    private static final int CONTENT_SELECTION_INTENT_CODE = 100;
-    private static final int CHAT_CAMERA_PERMISSIONS_REQUEST_CODE = 101;
-    private static final int OPEN_SETTINGS_INTENT_CODE = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -387,6 +388,16 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
         webView.setVisibility(View.GONE);
         progressBar.setVisibility(View.GONE);
         relativeLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void openAttachmentPreview(String url, String type, String caption) {
+        Intent intent = new Intent(this, InAppChatAttachmentPreviewActivity.class);
+        intent.putExtra(InAppChatAttachmentPreviewActivity.EXTRA_URL, url);
+        intent.putExtra(InAppChatAttachmentPreviewActivity.EXTRA_TYPE, type);
+        intent.putExtra(InAppChatAttachmentPreviewActivity.EXTRA_CAPTION, caption);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     /*

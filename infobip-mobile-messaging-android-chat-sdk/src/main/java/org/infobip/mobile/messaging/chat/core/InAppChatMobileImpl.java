@@ -52,4 +52,18 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         };
         handler.post(myRunnable);
     }
+
+    @Override
+    @JavascriptInterface
+    public void openAttachmentPreview(final String url, final String type, final String caption) {
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (inAppChatWebViewManager != null) {
+                    inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
+                }
+            }
+        };
+        handler.post(myRunnable);
+    }
 }

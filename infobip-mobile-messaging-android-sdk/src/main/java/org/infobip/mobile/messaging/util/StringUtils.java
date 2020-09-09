@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.util;
 
+import android.support.annotation.NonNull;
+
 import java.util.Locale;
 
 /**
@@ -27,5 +29,28 @@ public abstract class StringUtils {
 
     public static String concat(String s1, String s2, String separator) {
         return String.format(Locale.getDefault(), "%s%s%s", s1, separator, s2);
+    }
+
+    public static String join(CharSequence delimiter, CharSequence... values) {
+        return join(delimiter, "", "", values);
+    }
+
+    // Can be performed by StringJoiner logic from jdk 9
+    public static String join(@NonNull CharSequence delimiter,
+                              @NonNull CharSequence prefix,
+                              @NonNull CharSequence suffix,
+                              @NonNull CharSequence... values) {
+        StringBuilder joiner = new StringBuilder().append(prefix);
+
+        if (values.length > 0) {
+            joiner.append(values[0]);
+            int valuesLen = values.length;
+            for (int i = 1; i < valuesLen; i++) {
+                joiner.append(delimiter).append(values[i]);
+            }
+        }
+        joiner.append(suffix);
+
+        return joiner.toString();
     }
 }

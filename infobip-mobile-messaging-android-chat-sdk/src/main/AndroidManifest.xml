@@ -1,19 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.infobip.mobile.messaging.chat">
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application>
-
         <activity
-            android:name="org.infobip.mobile.messaging.chat.view.InAppChatActivity"
+            android:name=".view.InAppChatAttachmentPreviewActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/IB_AppTheme" />
+        <activity
+            android:name=".view.InAppChatActivity"
             android:noHistory="false"
             android:screenOrientation="portrait"
-            android:theme="@style/IB_AppTheme"/>
+            android:theme="@style/IB_AppTheme" />
 
         <meta-data
             android:name="org.infobip.mobile.messaging.chat.InAppChatImpl"
             android:value="org.infobip.mobile.messaging.MessageHandlerModule" />
 
     </application>
-
 </manifest>

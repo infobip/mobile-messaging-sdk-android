@@ -4,6 +4,7 @@ import android.webkit.WebView;
 
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
 
@@ -27,9 +28,11 @@ public class InAppChatClientImpl implements InAppChatClient {
         // message can be null - its OK
         String base64UrlString = attachment.base64UrlString();
         String fileName = attachment.getFileName();
+        // FIXME [CHAT-821]: for old version of Android attachment`s max size is very small
         if (webView != null && isNotBlank(base64UrlString)) {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                webView.evaluateJavascript(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString, fileName).replaceFirst("javascript:","")+";", null);
+                String script = buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), false, message, base64UrlString, fileName);
+                webView.evaluateJavascript(script, null);
             } else {
                 webView.loadUrl(buildWidgetMethodInvocation(InAppChatWidgetMethods.handleMessageWithAttachmentSend.name(), message, base64UrlString, fileName));
             }
@@ -39,22 +42,20 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     private String buildWidgetMethodInvocation(String methodName, String... params) {
+        return this.buildWidgetMethodInvocation(methodName, true, params);
+    }
+
+    private String buildWidgetMethodInvocation(String methodName, boolean withPrefix, String... params) {
         StringBuilder builder = new StringBuilder();
-        builder
-                .append("javascript:")
-                .append(methodName)
-                .append("(");
-        if (params.length > 0) {
-            for (String param : params) {
-                builder
-                        .append("'")
-                        .append(param)
-                        .append("'")
-                        .append(", ");
-            }
+        if (withPrefix) {
+            builder.append("javascript:");
         }
-        builder.delete(builder.lastIndexOf(","), builder.length());
-        builder.append(")");
+        builder.append(methodName);
+
+        if (params.length > 0) {
+            String resultParamsStr = StringUtils.join("','", "('", "')", params);
+            builder.append(resultParamsStr);
+        }
         return builder.toString();
     }
 }

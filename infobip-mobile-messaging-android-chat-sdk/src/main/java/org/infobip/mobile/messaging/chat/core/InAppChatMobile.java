@@ -20,4 +20,12 @@ interface InAppChatMobile {
      * @param errorMessage description of an error
      */
     void onError(String errorMessage);
+
+    /**
+     * Open attachment preview in new webView window
+     * @param url link to cdn
+     * @param type IMAGE, VIDEO, DOCUMENT (pdf file)
+     * @param caption name of preview file
+     */
+    void openAttachmentPreview(String url, String type, String caption);
 }

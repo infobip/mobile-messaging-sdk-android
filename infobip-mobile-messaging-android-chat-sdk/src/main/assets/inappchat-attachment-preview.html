@@ -1,0 +1,96 @@
+<html lang="En">
+<head>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+        }
+
+        #ib-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #ib-attachment {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+        }
+
+        .button-wrapper {
+            width: 35px;
+            height: 35px;
+        }
+
+        img, video {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .footer {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: end;
+            padding: 5% 5% 0 5%;
+        }
+    </style>
+</head>
+<body>
+<div id="ib-container">
+    <div id="ib-attachment">
+        <img src="./cat-height.png" alt="">
+    </div>
+    <div class="footer">
+        <div class="button-wrapper">
+            <a id="download-image" href="">
+                <img src="./download-button.png"/>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+        const url = getQueryParameter('attachmentUrl');
+        const type = getQueryParameter('attachmentType');
+        const caption = getQueryParameter('attachmentCaption');
+
+        document.getElementById('download-image').href = url;
+
+        (function() {
+            const attachmentContainer = document.getElementById('ib-attachment');
+            const attachElement = resolveAttachElement(type, url);
+            attachmentContainer.appendChild(attachElement);
+        })();
+
+        function resolveAttachElement(type, url) {
+            let attachElement;
+
+            switch (type) {
+                case "IMAGE": {
+                    attachElement = new Image();
+                    attachElement.target = '_blank';
+                } break;
+
+                case "VIDEO": {
+                    attachElement = document.createElement('video');
+                    attachElement.setAttribute("controls","controls");
+                } break;
+
+                case "DOCUMENT": {
+                    attachElement = document.createElement('img');
+                    attachElement.type = 'application/pdf';
+                    url = './file-not-found.png';
+                } break;
+            }
+            attachElement.src = url;
+            return attachElement;
+        }
+
+        function getQueryParameter(name) {
+           if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
+               return decodeURIComponent(name[1]);
+           }
+        }
+    </script>
+</body>
+</html>
