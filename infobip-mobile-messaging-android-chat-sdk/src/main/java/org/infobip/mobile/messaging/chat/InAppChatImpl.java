@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.chat;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.TaskStackBuilder;
 import android.webkit.WebView;
@@ -20,6 +22,7 @@ import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -160,14 +163,19 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         isChatWidgetConfigSynced = false;
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                webView().clearHistory();
-                webView().clearCache(true);
-            }
-        };
-        webView().post(runnable);
+        try {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    webView().clearHistory();
+                    webView().clearCache(true);
+                    MobileMessagingLogger.d("Deleted local widget history");
+                }
+            });
+        } catch (Exception e) {
+            MobileMessagingLogger.w("Failed to delete local widget history due to " + e.getMessage());
+        }
     }
 
     @Override
