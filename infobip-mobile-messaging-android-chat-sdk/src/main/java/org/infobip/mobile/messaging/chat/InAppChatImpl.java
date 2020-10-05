@@ -58,6 +58,11 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    public void activate() {
+        propertyHelper().saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
+    }
+
+    @Override
     public boolean handleMessage(Message message) {
         if (!message.isChatMessage()) {
             return false;
@@ -81,6 +86,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public InAppChatViewImpl inAppChatView() {
         if (inAppChatView == null) {
             inAppChatView = new InAppChatViewImpl(context);
+        }
+        if (!isActivated()) {
+            MobileMessagingLogger.e("In-app chat wasn't activated, call activate()");
         }
         return inAppChatView;
     }
@@ -185,7 +193,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void performSyncActions() {
-        if (isChatWidgetConfigSynced == null || !isChatWidgetConfigSynced) {
+        if (isActivated() && (isChatWidgetConfigSynced == null || !isChatWidgetConfigSynced)) {
             inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
                 @Override
                 public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
@@ -223,6 +231,10 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (stackBuilder.getIntentCount() != 0) {
             stackBuilder.startActivities();
         }
+    }
+
+    public boolean isActivated() {
+        return propertyHelper().findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
     }
 
     // endregion

@@ -19,6 +19,11 @@ public abstract class InAppChat {
     }
 
     /**
+     * Activates In-app chat service.
+     */
+    public abstract void activate();
+
+    /**
      * Creates in-app chat view activity
      *
      * @return chat view object
