@@ -13,7 +13,7 @@ public class InAppChatAttachmentHelper {
             @Override
             public void run() {
                 try {
-                    final InAppChatAttachment attachment = InAppChatAttachment.makeAttachment(context, data);
+                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data);
                     context.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -33,7 +33,7 @@ public class InAppChatAttachmentHelper {
     }
 
     public interface InAppChatAttachmentHelperListener {
-        void onAttachmentCreated(InAppChatAttachment attachment);
+        void onAttachmentCreated(InAppChatMobileAttachment attachment);
         void onError(Context context, InternalSdkError.InternalSdkException exception);
     }
 }

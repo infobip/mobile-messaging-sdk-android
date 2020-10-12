@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
-import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
@@ -72,8 +71,7 @@ public class InAppChatPermissionsHelper {
     }
 
     private static boolean isFirstTimeAsking(@NonNull Context context, @NonNull String permission) {
-        Boolean isFirstTime = PreferenceHelper.findBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_PERMISSION_FIRST_TIME_ASK.getKey() + permission, true);
-        return isFirstTime;
+        return PreferenceHelper.findBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_PERMISSION_FIRST_TIME_ASK.getKey() + permission, true);
     }
 
     private static void setFirstTimeAsking(@NonNull Context context, @NonNull String permission, Boolean isFirstTime) {

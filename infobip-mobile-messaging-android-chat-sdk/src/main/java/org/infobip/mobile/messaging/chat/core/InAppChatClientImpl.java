@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.webkit.WebView;
 
-import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment;
+import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -24,7 +24,7 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     @Override
-    public void sendChatMessage(String message, InAppChatAttachment attachment) {
+    public void sendChatMessage(String message, InAppChatMobileAttachment attachment) {
         // message can be null - its OK
         String base64UrlString = attachment.base64UrlString();
         String fileName = attachment.getFileName();

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.chat.core;
 
-import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment;
+import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 
 /**
  * Declaration of interaction with client-side.
@@ -19,5 +19,5 @@ public interface InAppChatClient {
      * @param message user message
      * @param attachment IMAGE, VIDEO, DOCUMENT
      */
-    void sendChatMessage(String message, InAppChatAttachment attachment);
+    void sendChatMessage(String message, InAppChatMobileAttachment attachment);
 }

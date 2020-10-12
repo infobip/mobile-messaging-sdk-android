@@ -2,10 +2,8 @@ package org.infobip.mobile.messaging.chat.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -22,10 +20,8 @@ import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,13 +47,13 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.chat.InAppChatErrors;
 import org.infobip.mobile.messaging.chat.InAppChatImpl;
 import org.infobip.mobile.messaging.chat.R;
-import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment;
+import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper;
+import org.infobip.mobile.messaging.chat.attachments.PermissionsRequesterActivity;
 import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
-import org.infobip.mobile.messaging.chat.attachments.InAppChatPermissionsHelper;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
@@ -72,14 +68,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class InAppChatActivity extends AppCompatActivity implements InAppChatWebViewManager {
+public class InAppChatActivity extends PermissionsRequesterActivity implements InAppChatWebViewManager {
 
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
     private static final int CONTENT_SELECTION_INTENT_CODE = 100;
-    private static final int CHAT_CAMERA_PERMISSIONS_REQUEST_CODE = 101;
-    private static final int OPEN_SETTINGS_INTENT_CODE = 102;
 
     private boolean sendButtonIsColored;
     private WidgetInfo widgetInfo;
@@ -147,7 +141,7 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
         String widgetPrimaryColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey(), null);
         String widgetBackgroundColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), null);
         String maxUploadContentSizeStr = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), null);
-        long maxUploadContentSize = InAppChatAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE;
+        long maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE;
 
         if (StringUtils.isNotBlank(maxUploadContentSizeStr)) {
             maxUploadContentSize = Long.parseLong(maxUploadContentSizeStr);
@@ -500,14 +494,14 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
     }
 
     private void chooseFile() {
-        if (checkRequiredPermissions(getApplicationContext())) {
-            Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
-            chooserIntent.putExtra(Intent.EXTRA_INTENT, prepareIntentForChooser());
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser());
-            startActivityForResult(chooserIntent, CONTENT_SELECTION_INTENT_CODE);
-        } else {
+        if (!isRequiredPermissionsGranted()) {
             MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.CAMERA).getMessage());
+            return;
         }
+        Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
+        chooserIntent.putExtra(Intent.EXTRA_INTENT, prepareIntentForChooser());
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser());
+        startActivityForResult(chooserIntent, CONTENT_SELECTION_INTENT_CODE);
     }
 
     private Intent prepareIntentForChooser() {
@@ -532,77 +526,24 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
         return intentsArray;
     }
 
-    private boolean hasCamera() {
-        return android.hardware.Camera.getNumberOfCameras() > 0;
+    @NonNull
+    @Override
+    public String requiredPermission() {
+        return Manifest.permission.CAMERA;
     }
 
-    private boolean checkRequiredPermissions(@NonNull Context context) {
-        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
-                !hasCamera() ||
-                !InAppChatPermissionsHelper.hasPermissionInManifest(context, Manifest.permission.CAMERA))
-            return false;
-
-        final List<String> permissionsToAsk = new ArrayList<String>();
-        final List<String> neverAskPermissions = new ArrayList<String>();
-        checkPermission(Manifest.permission.CAMERA, permissionsToAsk, neverAskPermissions);
-
-        if (neverAskPermissions.size() > 0) {
-            showSettingsDialog(neverAskPermissions);
+    @Override
+    public boolean isRequiredPermissionsGranted() {
+        if (!this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
+                android.hardware.Camera.getNumberOfCameras() == 0) {
             return false;
         }
-        String[] permissionsToAskArray = new String[permissionsToAsk.size()];
-        permissionsToAsk.toArray(permissionsToAskArray);
-        if (permissionsToAsk.size() > 0) {
-            ActivityCompat.requestPermissions(this, permissionsToAskArray, CHAT_CAMERA_PERMISSIONS_REQUEST_CODE);
-            return false;
-        }
-        return true;
+        return super.isRequiredPermissionsGranted();
     }
 
-    private void checkPermission(String permission, final List<String> permissionsToAsk, final List<String> neverAskPermissions) {
-        InAppChatPermissionsHelper.checkPermission(this, permission, new InAppChatPermissionsHelper.InAppChatPermissionAskListener() {
-            @Override
-            public void onNeedPermission(Context context, String permission) {
-                permissionsToAsk.add(permission);
-            }
-
-            @Override
-            public void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission) {
-                neverAskPermissions.add(permission);
-            }
-
-            @Override
-            public void onPermissionGranted(Context context, String permission) {
-            }
-        });
-    }
-
-    private void showSettingsDialog(List<String> permissions) {
-        //TODO: localize
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.ib_chat_permissions_not_granted_title);
-        builder.setMessage(R.string.ib_chat_permissions_not_granted_message);
-        builder.setPositiveButton(R.string.ib_chat_button_settings, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                openSettings();
-            }
-        });
-        builder.setNegativeButton(R.string.mm_button_cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
-    }
-    // navigating user to app settings
-    private void openSettings() {
-        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-        Uri uri = Uri.fromParts("package", getPackageName(), null);
-        intent.setData(uri);
-        startActivityForResult(intent, OPEN_SETTINGS_INTENT_CODE);
+    @Override
+    public void onPermissionGranted() {
+        chooseFile();
     }
 
     @Override
@@ -612,7 +553,7 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
 
                 InAppChatAttachmentHelper.makeAttachment(this, data, new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
                     @Override
-                    public void onAttachmentCreated(final InAppChatAttachment attachment) {
+                    public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
                         if (attachment != null) {
                             MobileMessagingLogger.w("[InAppChat] Attachment created, will send Attachment");
                             inAppChatClient.sendChatMessage(null, attachment);
@@ -630,15 +571,5 @@ public class InAppChatActivity extends AppCompatActivity implements InAppChatWeb
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CHAT_CAMERA_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { //Permission was granted.
-                chooseFile();
-            }
-        }
     }
 }

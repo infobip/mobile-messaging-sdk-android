@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat.view;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
@@ -12,33 +13,34 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.ColorUtils;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.DownloadListener;
-import android.webkit.URLUtil;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.chat.R;
+import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachment;
+import org.infobip.mobile.messaging.chat.attachments.PermissionsRequesterActivity;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 
-public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
+
+public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActivity {
 
     public static final String EXTRA_URL = "ib_chat_attachment_url";
     public static final String EXTRA_TYPE = "ib_chat_attachment_type";
@@ -51,6 +53,7 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
     private TextView toolbarTitle;
     private Toolbar toolbar;
     private Intent webViewIntent;
+    private InAppChatWebAttachment attachment;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,6 +111,15 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
         actionBar.setDisplayShowTitleEnabled(false);
     }
 
+    @NonNull
+    public String requiredPermission() {
+        return Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    }
+
+    public void onPermissionGranted() {
+        downloadFile();
+    }
+
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
     private void initWebView() {
         webView = findViewById(R.id.ib_chat_attach_wv);
@@ -126,17 +138,14 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 progressBar.setVisibility(View.VISIBLE);
-                webView.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
-                webView.setVisibility(View.VISIBLE);
                 toolbarTitle.setText(title);
             }
         });
-        // TODO: rewrite this
         webView.setDownloadListener(new DownloadListener() {
 
             @Override
@@ -144,14 +153,8 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
                                         String contentDisposition, String mimetype,
                                         long contentLength) {
                 progressBar.setVisibility(View.VISIBLE);
-                DownloadManager.Request request = new DownloadManager.Request(
-                        Uri.parse(url));
-                final String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
-                request.allowScanningByMediaScanner();
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                dm.enqueue(request);
+                attachment = new InAppChatWebAttachment(url, contentDisposition, mimetype);
+                downloadFile();
             }
         });
 
@@ -163,6 +166,20 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity {
         };
 
         registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    private void downloadFile() {
+        if (!isRequiredPermissionsGranted()) {
+            MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            return;
+        }
+        DownloadManager.Request request = new DownloadManager.Request(
+                Uri.parse(attachment.getUrl()));
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, attachment.getFileName());
+        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        dm.enqueue(request);
     }
 
     private void loadPreviewPage() {

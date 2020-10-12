@@ -19,20 +19,20 @@ import java.util.UUID;
 
 import static com.google.android.gms.common.util.JsonUtils.escapeString;
 
-public class InAppChatAttachment {
+public class InAppChatMobileAttachment {
     public static final long DEFAULT_MAX_UPLOAD_CONTENT_SIZE = 10_485_760; //10 MiB
 
     String base64;
     String mimeType;
     String fileName;
 
-    public InAppChatAttachment(String mimeType, String base64, String filename) {
+    public InAppChatMobileAttachment(String mimeType, String base64, String filename) {
         this.base64 = base64;
         this.mimeType = mimeType;
         this.fileName = filename;
     }
 
-    public static InAppChatAttachment makeAttachment(Context context, Intent data) throws InternalSdkError.InternalSdkException {
+    public static InAppChatMobileAttachment makeAttachment(Context context, Intent data) throws InternalSdkError.InternalSdkException {
         byte[] bytesArray = getBytes(context, data);
 
         if (bytesArray == null) {
@@ -61,7 +61,7 @@ public class InAppChatAttachment {
         }
 
         if (encodedString != null && mimeType != null) {
-            return new InAppChatAttachment(mimeType, encodedString, fileName);
+            return new InAppChatMobileAttachment(mimeType, encodedString, fileName);
         }
         return null;
     }
