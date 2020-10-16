@@ -12,9 +12,11 @@ class InAppChatViewSettingsResolver {
 
     private static final String RES_ID_CHAT_VIEW_TITLE = "ib_in_app_chat_view_title";
     private static final String RES_ID_CHAT_VIEW_THEME = "IB_AppTheme.Chat";
+    private static final String RES_ID_CHAT_ATTACH_THEME = "IB_AppTheme.ChatAttach";
 
     private static String chatViewTitle;
     private static int chatViewTheme;
+    private static int chatAttachPreviewTheme;
 
     private final Context context;
 
@@ -38,6 +40,15 @@ class InAppChatViewSettingsResolver {
 
         chatViewTheme = getThemeResourceByName(RES_ID_CHAT_VIEW_THEME, R.style.IB_AppTheme);
         return chatViewTheme;
+    }
+
+    int getChatAttachPreviewTheme() {
+        if (chatAttachPreviewTheme != 0) {
+            return chatAttachPreviewTheme;
+        }
+
+        chatAttachPreviewTheme = getThemeResourceByName(RES_ID_CHAT_ATTACH_THEME, R.style.IB_ChatAttachmentPreviewDefaultTheme);
+        return chatAttachPreviewTheme;
     }
 
     // region private methods

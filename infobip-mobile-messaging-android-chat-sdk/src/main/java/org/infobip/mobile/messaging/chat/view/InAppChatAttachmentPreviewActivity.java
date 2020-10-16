@@ -57,13 +57,19 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        InAppChatAttachmentsPreviewSettingsResolver settingsResolver = new InAppChatAttachmentsPreviewSettingsResolver(this);
+        InAppChatViewSettingsResolver settingsResolver = new InAppChatViewSettingsResolver(this);
         setTheme(settingsResolver.getChatAttachPreviewTheme());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ib_activity_chat_attach_preview);
         webViewIntent = getIntent();
         initViews();
         loadPreviewPage();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(onFileDownloadingComplete);
     }
 
     private void initViews() {
@@ -158,15 +164,15 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
             }
         });
 
-        BroadcastReceiver onComplete = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                progressBar.setVisibility(View.GONE);
-            }
-        };
-
-        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(onFileDownloadingComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
+
+    BroadcastReceiver onFileDownloadingComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            progressBar.setVisibility(View.GONE);
+        }
+    };
 
     private void downloadFile() {
         if (!isRequiredPermissionsGranted()) {

@@ -10,8 +10,7 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/ib_chat_attach_tb"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:minHeight="?attr/actionBarSize"
+        android:layout_height="?attr/actionBarSize"
         android:theme="@style/IB_WebViewTheme.PopupOverlay">
 
         <TextView
@@ -32,7 +31,10 @@
         android:id="@+id/ib_chat_attach_wv"
         android:layout_below="@+id/ib_chat_attach_tb"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp"
+        android:layout_alignParentBottom="true"
+        android:layout_height="0dp" />
 
     <ProgressBar
         android:id="@+id/ib_chat_attach_pb"
