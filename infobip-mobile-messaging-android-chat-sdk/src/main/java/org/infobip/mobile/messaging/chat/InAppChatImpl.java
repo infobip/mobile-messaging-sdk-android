@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,11 +17,13 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
+import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
+import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -68,8 +71,19 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             return false;
         }
         coreBroadcaster().messageReceived(message);
-        MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
+        if (!isChatWidgetActivityForeground()) {
+            MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
+        }
         return true;
+    }
+
+    private boolean isChatWidgetActivityForeground() {
+        Activity activity = null;
+        ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(context).getActivityLifecycleMonitor();
+        if (activityLifecycleMonitor != null) {
+            activity = activityLifecycleMonitor.getForegroundActivity();
+        }
+        return activity != null && activity.getClass().toString().equals(InAppChatActivity.class.toString());
     }
 
     @Override
