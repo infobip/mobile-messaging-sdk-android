@@ -22,6 +22,7 @@ public class DateTimeUtil {
     private static final String DATE_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final String GMT_TIME_ZONE = "+00:00";
     private static final String ISO8601_GMT_Z_MATCHER = "Z$";
+    private static final String DATE_YMD_HMS_FORMAT = "yy-MM-dd-hh-mm-ss";
 
     /**
      * Android's SimpleDateFormat cannot properly parse 'Z' (ISO8601 GMT) time zone.
@@ -141,6 +142,20 @@ public class DateTimeUtil {
         }
 
         return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.getDefault()).format(date);
+    }
+
+    /**
+     * Returns "yy-MM-dd-hh-mm-ss" string for the supplied date.
+     *
+     * @param date date object
+     * @return String representation of Date object
+     */
+    public static String dateToYMDHMSString(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return new SimpleDateFormat(DATE_YMD_HMS_FORMAT, Locale.getDefault()).format(date);
     }
 
     /**

@@ -3,12 +3,14 @@ package org.infobip.mobile.messaging.chat.view;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -16,6 +18,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -25,6 +28,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
@@ -61,17 +65,27 @@ import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.ResourceLoader;
+import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class InAppChatActivity extends PermissionsRequesterActivity implements InAppChatWebViewManager {
 
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
+    private static final String JPEG_FILE_PREFIX = "IMG_";
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+    private static final String OUTPUT_MEDIA_PATH = "/InAppChat";
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
     private static final int CONTENT_SELECTION_INTENT_CODE = 100;
 
@@ -96,6 +110,7 @@ public class InAppChatActivity extends PermissionsRequesterActivity implements I
     private String widgetUri;
     private boolean isWebViewLoaded = false;
     private float chatNotAvailableViewHeight;
+    private Uri capturedImageUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -495,7 +510,7 @@ public class InAppChatActivity extends PermissionsRequesterActivity implements I
 
     private void chooseFile() {
         if (!isRequiredPermissionsGranted()) {
-            MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.CAMERA).getMessage());
+            MobileMessagingLogger.e("[InAppChat]", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.CAMERA + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
             return;
         }
         Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
@@ -514,7 +529,9 @@ public class InAppChatActivity extends PermissionsRequesterActivity implements I
     private Intent[] prepareInitialIntentsForChooser() {
         List<Intent> intentsForChooser = new ArrayList<Intent>();
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+        capturedImageUri = getOutputMediaUri();
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null && capturedImageUri != null) {
             intentsForChooser.add(takePictureIntent);
         }
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -526,10 +543,31 @@ public class InAppChatActivity extends PermissionsRequesterActivity implements I
         return intentsArray;
     }
 
+    @Nullable
+    private Uri getOutputMediaUri() {
+        String appName = SoftwareInformation.getAppName(getApplicationContext());
+        File picturesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File outputPicturesDirectory = new File(picturesDirectory.getPath() + File.separator + appName + OUTPUT_MEDIA_PATH);
+        if (!outputPicturesDirectory.exists() && !outputPicturesDirectory.mkdirs()) {
+            return null;
+        }
+
+        String fileName = JPEG_FILE_PREFIX + DateTimeUtil.dateToYMDHMSString(new Date()) + JPEG_FILE_SUFFIX;
+        File pictureFile = new File(outputPicturesDirectory.getPath() + File.separator + fileName);
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DATA, pictureFile.getPath());
+        return getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    }
+
     @NonNull
     @Override
-    public String requiredPermission() {
-        return Manifest.permission.CAMERA;
+    public String[] requiredPermissions() {
+        return new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
     }
 
     @Override
@@ -549,27 +587,37 @@ public class InAppChatActivity extends PermissionsRequesterActivity implements I
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK && requestCode == CONTENT_SELECTION_INTENT_CODE) {
-            if (data != null) {
-
-                InAppChatAttachmentHelper.makeAttachment(this, data, new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
-                    @Override
-                    public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
-                        if (attachment != null) {
-                            MobileMessagingLogger.w("[InAppChat] Attachment created, will send Attachment");
-                            inAppChatClient.sendChatMessage(null, attachment);
-                        } else {
-                            MobileMessagingLogger.e("[InAppChat] Can't create attachment");
-                        }
+            InAppChatAttachmentHelper.makeAttachment(this, data, getUriFromMediaStoreURI(capturedImageUri), new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
+                @Override
+                public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
+                    if (attachment != null) {
+                        MobileMessagingLogger.w("[InAppChat] Attachment created, will send Attachment");
+                        inAppChatClient.sendChatMessage(null, attachment);
+                    } else {
+                        MobileMessagingLogger.e("[InAppChat] Can't create attachment");
                     }
+                }
 
-                    @Override
-                    public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
-                        MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
-                        Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+                @Override
+                public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
+                    MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
+                    Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Nullable
+    private Uri getUriFromMediaStoreURI(Uri mediaStoreUri) {
+        if (mediaStoreUri == null) {
+            return null;
+        }
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery(mediaStoreUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return Uri.fromFile(new File(cursor.getString(column_index)));
     }
 }

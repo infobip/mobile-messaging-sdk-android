@@ -28,24 +28,27 @@ public abstract class PermissionsRequesterActivity extends AppCompatActivity {
     }
 
     /**
-    This method will be called when required permission granted.
+    This method will be called when required permissions granted.
      **/
     public abstract void onPermissionGranted();
 
     /**
-    Provide permission which you need to request.
-    For example: Manifest.permission.CAMERA
+    Provide permissions which you need to request.
+    For example: new String[]{Manifest.permission.CAMERA}
      **/
     @NonNull
-    public abstract String requiredPermission();
+    public abstract String[] requiredPermissions();
 
     public boolean isRequiredPermissionsGranted() {
-        if (!InAppChatPermissionsHelper.hasPermissionInManifest(this, requiredPermission()))
-            return false;
-
         final Set<String> permissionsToAsk = new ArraySet<String>();
         final Set<String> neverAskPermissions = new ArraySet<String>();
-        checkPermission(requiredPermission(), permissionsToAsk, neverAskPermissions);
+
+        for (String permission : requiredPermissions()) {
+            if (!InAppChatPermissionsHelper.hasPermissionInManifest(this, permission)) {
+                return false;
+            }
+            checkPermission(permission, permissionsToAsk, neverAskPermissions);
+        }
 
         if (neverAskPermissions.size() > 0) {
             showSettingsDialog(neverAskPermissions);

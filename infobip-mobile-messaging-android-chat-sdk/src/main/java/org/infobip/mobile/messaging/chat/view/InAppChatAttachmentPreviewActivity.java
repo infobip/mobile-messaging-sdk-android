@@ -118,8 +118,8 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
     }
 
     @NonNull
-    public String requiredPermission() {
-        return Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    public String[] requiredPermissions() {
+        return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     }
 
     public void onPermissionGranted() {
