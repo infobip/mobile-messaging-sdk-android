@@ -7,11 +7,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.support.media.ExifInterface;
 import android.net.Uri;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
-
-import androidx.exifinterface.media.ExifInterface;
 
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
