@@ -18,21 +18,6 @@
 
         </activity>
 
-        <activity
-            android:name=".WebViewActivity"
-            android:label="@string/web_view_activity_title"
-            android:theme="@style/AppTheme.NoActionBar"/>
-
-        <receiver
-            android:name=".MainActivity$NotificationTappedReceiver"
-            android:exported="false">
-
-            <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED"/>
-            </intent-filter>
-
-        </receiver>
-
     </application>
 
 </manifest>

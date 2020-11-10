@@ -19,13 +19,15 @@ public class NotificationTappedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Message message = Message.createFrom(intent.getExtras());
-        JSONObject customPayload = message.getCustomPayload();
-        String deepLink = customPayload != null ? customPayload.optString("deeplink") : "";
+        if (message == null) return;
+        String deepLink = message.getDeeplink();
+        if (deepLink.isEmpty()) return;
 
-        if (!deepLink.isEmpty()) {
-            Intent deepLinkIntent = new Intent(Intent.ACTION_VIEW);
-            deepLinkIntent.setData(Uri.parse(deepLink));
-            deepLinkIntent.putExtras(messageToBundle(message));
+        Intent deepLinkIntent = new Intent(Intent.ACTION_VIEW);
+        deepLinkIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        deepLinkIntent.setData(Uri.parse(deepLink));
+        deepLinkIntent.putExtras(messageToBundle(message));
+        if (deepLinkIntent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(deepLinkIntent);
         }
     }
