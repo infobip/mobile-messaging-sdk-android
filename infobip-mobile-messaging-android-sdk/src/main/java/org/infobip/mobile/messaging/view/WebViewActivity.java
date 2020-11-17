@@ -1,9 +1,11 @@
 package org.infobip.mobile.messaging.view;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -24,6 +26,10 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.app.WebViewSettingsResolver;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.util.StringUtils;
+
+import java.net.URISyntaxException;
 
 
 public class WebViewActivity extends AppCompatActivity {
@@ -66,7 +72,7 @@ public class WebViewActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String innerUrl) {
-                return false;
+                return WebViewActivity.this.shouldOverrideUrlLoading(innerUrl);
             }
 
             public void onPageFinished(WebView view, String url) {
@@ -79,6 +85,65 @@ public class WebViewActivity extends AppCompatActivity {
             }
         });
         webView.loadUrl(url);
+    }
+
+    /**
+     * Starts resolved activity (in another app) if:
+     * <ul>
+     *     <li>URL starts with "intent://" scheme (In this case if it cannot be opened it falls back to "browser_fallback_url" which is
+     *     provided within parsedUri intent or Google Play / App Gallery is opened with the package name to install the app)</li>
+     *     <li>parsed URI from http(s) URL or any other scheme can be loaded</li>
+     * </ul>
+     * e.g. Parsed URI starts with "intent://" when "https://play.google.com/store/apps/details?id=com.infobip.pushdemo" was received
+     * as a webviewUrl and default webview action to open it in app (Play Store) was clicked
+     */
+    private boolean shouldOverrideUrlLoading(String innerUrl) {
+        if (StringUtils.isBlank(innerUrl)) return false;
+
+        final PackageManager packageManager = getPackageManager();
+        // try to open intent scheme
+        if (innerUrl.startsWith("intent://")) {
+            try {
+                Intent intent = Intent.parseUri(innerUrl, Intent.URI_INTENT_SCHEME);
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent);
+                    return true;
+                }
+                // no resolved activity, try to find fallback URL
+                String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                if (fallbackUrl != null) {
+                    webView.loadUrl(fallbackUrl);
+                    return true;
+                }
+                // invite to install app on Google Play
+                Intent marketIntent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("market://details?id=" + intent.getPackage()));
+                if (marketIntent.resolveActivity(packageManager) != null) {
+                    startActivity(marketIntent);
+                    return true;
+                }
+                // invite to install app on App Gallery
+                Intent appMarketIntent = new Intent(Intent.ACTION_VIEW).setData(Uri.parse("appmarket://details?id=" + intent.getPackage()));
+                if (appMarketIntent.resolveActivity(packageManager) != null) {
+                    startActivity(appMarketIntent);
+                    return true;
+                }
+            } catch (URISyntaxException e) {
+                // not an intent URI
+                MobileMessagingLogger.w("Failed to resolve intent:// for web view URL " + innerUrl, e);
+            }
+        }
+
+        // try to open any scheme/activity that can be resolved
+        Uri parsedUri = Uri.parse(innerUrl);
+        if (parsedUri != null) {
+            Intent parsedUriIntent = new Intent(Intent.ACTION_VIEW, parsedUri);
+            if (parsedUriIntent.resolveActivity(packageManager) != null) {
+                startActivity(parsedUriIntent);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void applyStylesFromConfig(Toolbar toolbar, TextView tvToolbarTitle) {
