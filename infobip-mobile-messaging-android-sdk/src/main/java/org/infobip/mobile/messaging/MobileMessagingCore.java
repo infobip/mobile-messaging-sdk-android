@@ -1072,7 +1072,7 @@ public class MobileMessagingCore
         installationSynchronizer().patch(installation, listener, isMyInstallation);
     }
 
-    private boolean isMyInstallation(Installation installation) {
+    public boolean isMyInstallation(Installation installation) {
         String myPushRegId = getPushRegistrationId();
         return installation.getPushRegistrationId() == null || (myPushRegId != null && myPushRegId.equals(installation.getPushRegistrationId()));
     }

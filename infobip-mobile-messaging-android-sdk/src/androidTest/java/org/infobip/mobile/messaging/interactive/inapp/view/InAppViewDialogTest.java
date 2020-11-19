@@ -1,6 +1,8 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -10,9 +12,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
-import org.infobip.mobile.messaging.R;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +24,7 @@ import java.util.concurrent.Executor;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -49,6 +52,8 @@ public class InAppViewDialogTest {
     private ImageView image = mock(ImageView.class);
     private AlertDialog alertDialog = mock(AlertDialog.class);
     private AlertDialog.Builder alertDialogBuilder = mock(AlertDialog.Builder.class);
+    private Activity activity = mock(Activity.class);
+    private Resources resources = mock(Resources.class);
 
     private Executor syncExecutor = new Executor() {
         @Override
@@ -67,12 +72,14 @@ public class InAppViewDialogTest {
         when(dialogView.findViewById(R.id.iv_dialog)).thenReturn(image);
         when(alertDialogBuilder.setOnDismissListener(any(DialogInterface.OnDismissListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.setView(eq(dialogView))).thenReturn(alertDialogBuilder);
-        when(alertDialogBuilder.setPositiveButton(anyInt(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
-        when(alertDialogBuilder.setNegativeButton(anyInt(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
+        when(alertDialogBuilder.setPositiveButton(anyString(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
+        when(alertDialogBuilder.setNegativeButton(anyString(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.setNeutralButton(anyInt(), any(InAppViewDialogClickListener.class))).thenReturn(alertDialogBuilder);
         when(alertDialogBuilder.create()).thenReturn(alertDialog);
         when(activityWrapper.createAlertDialogBuilder(anyBoolean())).thenReturn(alertDialogBuilder);
         when(activityWrapper.inflateView(eq(R.layout.in_app_dialog_image))).thenReturn(dialogView);
+        when(activityWrapper.getActivity()).thenReturn(activity);
+        when(activity.getResources()).thenReturn(resources);
         inAppViewDialog = new InAppViewDialog(callback, syncExecutor, activityWrapper);
     }
 
@@ -157,6 +164,7 @@ public class InAppViewDialogTest {
         message.setTitle(null);
         message.setContentUrl(null);
         NotificationAction[] actions = actions();
+        when(activityWrapper.getActivity().getResources().getString(actions[0].getTitleResourceId())).thenReturn("action1");
         NotificationCategory category = category(actions);
 
         doThrow(new IllegalStateException("You need to use a Theme.AppCompat theme (or descendant) with this activity.")).doNothing().when(alertDialog).show();
@@ -174,10 +182,11 @@ public class InAppViewDialogTest {
         Message message = message();
         NotificationAction action = action();
         NotificationCategory category = category(action);
+        when(activityWrapper.getActivity().getResources().getString(action.getTitleResourceId())).thenReturn("action1");
 
         inAppViewDialog.show(message, category, action);
 
-        verify(alertDialogBuilder, times(1)).setPositiveButton(eq(action.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setPositiveButton(eq("action1"), any(InAppViewDialogClickListener.class));
     }
 
     @Test
@@ -185,12 +194,14 @@ public class InAppViewDialogTest {
         Message message = message();
         NotificationAction action1 = action();
         NotificationAction action2 = action();
+        when(activityWrapper.getActivity().getResources().getString(action1.getTitleResourceId())).thenReturn("action1");
+        when(activityWrapper.getActivity().getResources().getString(action2.getTitleResourceId())).thenReturn("action2");
         NotificationCategory category = category(action1, action2);
 
         inAppViewDialog.show(message, category, action1, action2);
 
-        verify(alertDialogBuilder, times(1)).setNegativeButton(eq(action1.getTitleResourceId()), any(InAppViewDialogClickListener.class));
-        verify(alertDialogBuilder, times(1)).setPositiveButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setNegativeButton(eq("action1"), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setPositiveButton(eq("action2"), any(InAppViewDialogClickListener.class));
     }
 
     @Test
@@ -200,12 +211,49 @@ public class InAppViewDialogTest {
         NotificationAction action2 = action();
         NotificationAction action3 = action();
         NotificationCategory category = category(action1, action2, action3);
+        when(activityWrapper.getActivity().getResources().getString(action1.getTitleResourceId())).thenReturn("action1");
+        when(activityWrapper.getActivity().getResources().getString(action3.getTitleResourceId())).thenReturn("action3");
 
         inAppViewDialog.show(message, category, action1, action2, action3);
 
-        verify(alertDialogBuilder, times(1)).setNegativeButton(eq(action1.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setNegativeButton(eq("action1"), any(InAppViewDialogClickListener.class));
         verify(alertDialogBuilder, times(1)).setNeutralButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
-        verify(alertDialogBuilder, times(1)).setPositiveButton(eq(action3.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setPositiveButton(eq("action3"), any(InAppViewDialogClickListener.class));
+    }
+
+    @Test
+    public void shouldSetupButtonsWithInAppOpenAndDismissTitleInMessage() {
+        Message message = message();
+        message.setInAppDismissTitle("inAppDismissTitle");
+        message.setInAppOpenTitle("inAppOpenTitle");
+        NotificationAction action1 = action();
+        NotificationAction action2 = action();
+        NotificationAction action3 = action();
+        NotificationCategory category = category(action1, action2, action3);
+        when(activityWrapper.getActivity().getResources().getString(action2.getTitleResourceId())).thenReturn("action1");
+
+        inAppViewDialog.show(message, category, action1, action2, action3);
+
+        verify(alertDialogBuilder, times(1)).setNegativeButton(eq(message.getInAppDismissTitle()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setNeutralButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setPositiveButton(eq(message.getInAppOpenTitle()), any(InAppViewDialogClickListener.class));
+    }
+
+    @Test
+    public void shouldSetupButtonWithInAppOpenTitleInMessageWhenDismissTitleNotProvided() {
+        Message message = message();
+        message.setInAppOpenTitle("inAppOpenTitle");
+        NotificationAction action1 = action();
+        NotificationAction action2 = action();
+        NotificationAction action3 = action();
+        NotificationCategory category = category(action1, action2, action3);
+        when(activityWrapper.getActivity().getResources().getString(action1.getTitleResourceId())).thenReturn("action1");
+
+        inAppViewDialog.show(message, category, action1, action2, action3);
+
+        verify(alertDialogBuilder, times(1)).setNegativeButton(eq("action1"), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setNeutralButton(eq(action2.getTitleResourceId()), any(InAppViewDialogClickListener.class));
+        verify(alertDialogBuilder, times(1)).setPositiveButton(eq(message.getInAppOpenTitle()), any(InAppViewDialogClickListener.class));
     }
 
     private Message message() {

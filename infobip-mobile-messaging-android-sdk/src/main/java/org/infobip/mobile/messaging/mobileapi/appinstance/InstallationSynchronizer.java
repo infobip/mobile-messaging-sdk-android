@@ -77,9 +77,14 @@ public class InstallationSynchronizer {
         sync(null);
     }
 
+    /**
+     * @param actionListener needed only for tests
+     */
     @SuppressWarnings({"SameParameterValue", "WeakerAccess"})
     @VisibleForTesting
     void sync(MobileMessaging.ResultListener<Installation> actionListener) {
+        if (didSyncRecently()) return;
+
         PushInstallation installation = new PushInstallation();
 
         SystemData systemDataForReport = mobileMessagingCore.systemDataForReport(false);
@@ -110,12 +115,12 @@ public class InstallationSynchronizer {
         }
 
         if (!mobileMessagingCore.isRegistrationAvailable()) {
-            if (cloudTokenPresentAndUnreported && !didSyncRecently()) {
+            if (cloudTokenPresentAndUnreported) {
                 createInstallation(installation, actionListener);
                 lastSyncTimeMillis = Time.now();
             }
         } else {
-            if (installation.hasDataToReport() && !didSyncRecently()) {
+            if (installation.hasDataToReport()) {
                 patchMyInstallation(installation, actionListener);
                 lastSyncTimeMillis = Time.now();
             }
@@ -129,7 +134,7 @@ public class InstallationSynchronizer {
     public void updatePrimaryStatus(String pushRegId, Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
         Installation installation = new Installation(pushRegId);
         installation.setPrimaryDevice(primary);
-        patchMyInstallation(installation, actionListener);
+        patch(installation, actionListener, mobileMessagingCore.isMyInstallation(installation));
     }
 
     private void createInstallation(final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener) {

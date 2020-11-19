@@ -64,12 +64,13 @@ public class InAppViewDialog implements InAppView {
             public void run() {
                 try {
                     showOnUiThreadWithAppTheme(bitmap, message, category, actions);
-                } catch (IllegalStateException e) {
-                    if (e.getMessage().contains("You need to use a Theme.AppCompat theme")) {
+                } catch (Exception e) {
+                    if (e instanceof IllegalStateException && e.getMessage().contains("You need to use a Theme.AppCompat theme")) {
                         showOnUiThreadWithOwnTheme(bitmap, message, category, actions);
-                    } else {
-                        throw e;
+                        return;
                     }
+                    // better not displaying in-app than crashing UI
+                    MobileMessagingLogger.e("Failed to build in-app view due to " + e.getMessage());
                 }
             }
         });
@@ -96,33 +97,28 @@ public class InAppViewDialog implements InAppView {
         }
         tvMessageText.setText(message.getBody());
 
-        try {
-            final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder(useAppTheme)
-                    .setOnDismissListener(new InAppViewDialogDismissListener(this, callback))
-                    .setView(dialogView);
+        final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder(useAppTheme)
+                .setOnDismissListener(new InAppViewDialogDismissListener(this, callback))
+                .setView(dialogView);
 
-            switch (actions.length) {
-                case 1:
-                    builder.setPositiveButton(getPositiveButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]));
-                    break;
-                case 2:
-                    builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
-                            .setPositiveButton(getPositiveButtonText(message, 1, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[1]));
-                    break;
-                case 3:
-                default:
-                    builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
-                            .setNeutralButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]))
-                            .setPositiveButton(getPositiveButtonText(message, 2, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[2]));
-                    break;
-            }
-
-            builder.create()
-                    .show();
-
-        } catch (Exception e) {
-            MobileMessagingLogger.e("Failed to build in-app view due to " + e.getMessage());
+        switch (actions.length) {
+            case 1:
+                builder.setPositiveButton(getPositiveButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]));
+                break;
+            case 2:
+                builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                        .setPositiveButton(getPositiveButtonText(message, 1, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[1]));
+                break;
+            case 3:
+            default:
+                builder.setNegativeButton(getNegativeButtonText(message, 0, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[0]))
+                        .setNeutralButton(actions[1].getTitleResourceId(), new InAppViewDialogClickListener(this, callback, message, category, actions[1]))
+                        .setPositiveButton(getPositiveButtonText(message, 2, actions), new InAppViewDialogClickListener(this, callback, message, category, actions[2]));
+                break;
         }
+
+        builder.create()
+                .show();
     }
 
     private String getPositiveButtonText(Message message, int i, @NonNull NotificationAction[] actions) {

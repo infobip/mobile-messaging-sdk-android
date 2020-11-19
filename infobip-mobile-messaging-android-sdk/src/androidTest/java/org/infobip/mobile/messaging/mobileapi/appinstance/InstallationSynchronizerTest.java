@@ -35,6 +35,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -65,8 +66,8 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
         MobileMessagingStats stats = mobileMessagingCore.getStats();
         RetryPolicyProvider retryPolicy = new RetryPolicyProvider(context);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileApiAppInstance);
-        when(mobileApiAppInstance.createInstance(any(AppInstance.class))).thenReturn(new AppInstance("pushRegId"));
-        when(mobileApiAppInstance.getInstance(anyString())).thenReturn(new AppInstance("pushRegId"));
+        when(mobileApiAppInstance.createInstance(any(AppInstance.class))).thenReturn(new AppInstance(myDeviceRegId));
+        when(mobileApiAppInstance.getInstance(anyString())).thenReturn(new AppInstance(myDeviceRegId));
     }
 
     @Test
@@ -140,6 +141,27 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void shouldUpdateMyPrimaryStatus() {
+        installationSynchronizer.updatePrimaryStatus(myDeviceRegId, true, actionListener);
+
+        verifySuccess();
+        assertTrue(mobileMessagingCore.isMyInstallation(new Installation(myDeviceRegId)));
+        verify(broadcaster, after(1000).times(1)).installationUpdated(any(Installation.class));
+        verify(mobileApiAppInstance, times(1)).patchInstance(eq(myDeviceRegId), any(Map.class));
+    }
+
+    @Test
+    public void shouldUpdatOtherPushRegPrimaryStatus() {
+        String someOtherPushRegId = "id5678";
+        installationSynchronizer.updatePrimaryStatus(someOtherPushRegId, true, actionListener);
+
+        verifySuccess();
+        assertFalse(mobileMessagingCore.isMyInstallation(new Installation(someOtherPushRegId)));
+        verify(broadcaster, after(1000).times(1)).installationUpdated(any(Installation.class));
+        verify(mobileApiAppInstance, times(1)).patchInstance(eq(someOtherPushRegId), any(Map.class));
+    }
+
+    @Test
     public void shouldReportErrorWhenPatchingOnServer() {
         doThrow(new RuntimeException()).when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
 
@@ -198,7 +220,7 @@ public class InstallationSynchronizerTest extends MobileMessagingTestCase {
     }
 
     private void verifySuccess(int numOfListenerInvocations) {
-        verify(actionListener, after(1000).times(numOfListenerInvocations)).onResult(captor.capture());
+        verify(actionListener, after(2000).times(numOfListenerInvocations)).onResult(captor.capture());
         Result result = captor.getValue();
         assertTrue(result.isSuccess());
         assertNotNull(result.getData());
