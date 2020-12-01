@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
+import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.platform.Time;
 
 import java.text.ParseException;
@@ -89,6 +90,17 @@ public class DateTimeUtil {
      * Returns ISO8601-compliant string in UTC time for the supplied date.
      * 2020-02-26T09:41:57Z
      *
+     * @param dateTime date object
+     * @return String representation of Date object
+     */
+    public static String dateTimeToISO8601UTCString(CustomAttributeValue.DateTime dateTime) {
+        return dateToISO8601UTCString(dateTime.getDate());
+    }
+
+    /**
+     * Returns ISO8601-compliant string in UTC time for the supplied date.
+     * 2020-02-26T09:41:57Z
+     *
      * @param date date object
      * @return String representation of Date object
      */
@@ -99,6 +111,17 @@ public class DateTimeUtil {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
         return simpleDateFormat.format(date.getTime());
+    }
+
+    /**
+     * Returns ISO8601-compliant string in UTC time for the supplied date.
+     * 2020-02-26T09:41:57Z
+     *
+     * @param dateTime dateTime object
+     * @return String representation of Date object
+     */
+    public static String dateTimeToISO8601String(CustomAttributeValue.DateTime dateTime) {
+        return dateToISO8601String(dateTime.getDate());
     }
 
     /**
@@ -127,7 +150,24 @@ public class DateTimeUtil {
             return null;
         }
 
-        return new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault()).parse(date);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return simpleDateFormat.parse(date);
+    }
+
+    /**
+     * Converts "yyyy-MM-dd'T'HH:mm:ss'Z'" ISO8601-compliant string to Date object.
+     * Example of input: 2020-02-26T09:41:57Z
+     *
+     * @param dateTime string representation of datetime
+     * @return Date object
+     */
+    public static CustomAttributeValue.DateTime dateTimeFromISO8601DateUTCString(String dateTime) throws ParseException {
+        if (dateTime == null) {
+            return null;
+        }
+
+        return new CustomAttributeValue.DateTime(dateFromISO8601DateUTCString(dateTime));
     }
 
     /**

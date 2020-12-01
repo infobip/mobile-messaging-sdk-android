@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -114,14 +115,22 @@ public class UserSyncTest extends MobileMessagingTestCase {
         givenUser.setCustomAttribute("myKey2", new CustomAttributeValue(12345));
         givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(new Date()));
         givenUser.setCustomAttribute("myKey4", new CustomAttributeValue(false));
+        givenUser = setListCustomAttributes(givenUser);
 
         mobileMessaging.saveUser(givenUser);
+
+        List<ListCustomAttributeItem> items = getListCustomValueItems();
+        List<Map<String, Object>> listMap = new LinkedList<>();
+        for (ListCustomAttributeItem item: items) {
+            listMap.add(item.getMap());
+        }
 
         HashMap<String, Object> customAtts = new HashMap<>();
         customAtts.put("myKey1", "Some string");
         customAtts.put("myKey2", 12345);
         customAtts.put("myKey3", DateTimeUtil.dateToYMDString(new Date()));
         customAtts.put("myKey4", false);
+        customAtts.put(KEY_FOR_LIST, listMap);
 
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
@@ -140,9 +149,11 @@ public class UserSyncTest extends MobileMessagingTestCase {
         givenUser.setCustomAttribute("myKey1", new CustomAttributeValue("Some string"));
         givenUser.setCustomAttribute("myKey2", new CustomAttributeValue(12345));
         givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(new Date()));
+        setListCustomAttributes(givenUser, KEY_FOR_LIST);
 
         givenUser.removeCustomAttribute("myKey2");
         givenUser.removeCustomAttribute("myKey3");
+        givenUser.removeCustomAttribute(KEY_FOR_LIST);
 
         mobileMessaging.saveUser(givenUser);
 
@@ -150,6 +161,8 @@ public class UserSyncTest extends MobileMessagingTestCase {
         customAtts.put("myKey1", "Some string");
         customAtts.put("myKey2", null);
         customAtts.put("myKey3", null);
+        customAtts.put("myKey3", null);
+        customAtts.put(KEY_FOR_LIST, null);
 
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);

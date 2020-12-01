@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
-public class UserAttributes extends CustomAttributeHolder {
+public class UserAttributes extends UserCustomAttributeHolder {
 
     String firstName;
     String lastName;
@@ -22,7 +22,7 @@ public class UserAttributes extends CustomAttributeHolder {
     }
 
     public UserAttributes() {
-
+        super();
     }
 
     public UserAttributes(Map<String, CustomAttributeValue> customAttributes) {

@@ -5,7 +5,9 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import java.security.InvalidParameterException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -33,7 +35,9 @@ public class CustomAttributeValue {
         String,
         Number,
         Date,
-        Boolean
+        Boolean,
+        CustomList,
+        DateTime
     }
 
     private Object value;
@@ -54,9 +58,23 @@ public class CustomAttributeValue {
         this.type = Type.Date;
     }
 
+    public CustomAttributeValue(DateTime someDateTime) {
+        this.value = DateTimeUtil.dateTimeToISO8601UTCString(someDateTime);
+        this.type = Type.DateTime;
+    }
+
     public CustomAttributeValue(Boolean someBoolean) {
         this.value = someBoolean;
         this.type = Type.Boolean;
+    }
+
+    protected CustomAttributeValue(List<ListCustomAttributeItem> list) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (ListCustomAttributeItem item: list) {
+            result.add(item.getMap());
+        }
+        this.value = result;
+        this.type = Type.CustomList;
     }
 
     /**
@@ -80,9 +98,15 @@ public class CustomAttributeValue {
                 DateTimeUtil.dateFromYMDString(stringValue);  // here for validation
                 this.value = stringValue;
                 break;
+            case DateTime:
+                DateTimeUtil.dateTimeFromISO8601DateUTCString(stringValue);  // here for validation
+                this.value = stringValue;
+                break;
             case Boolean:
                 this.value = Boolean.valueOf(stringValue);
                 break;
+            case CustomList:
+                throw new InvalidParameterException("You aren't able to create CustomAttributeValue with Type.CustomList");
             default:
                 throw new InvalidParameterException();
         }
@@ -144,6 +168,24 @@ public class CustomAttributeValue {
     }
 
     /**
+     * Return the value of specified {@code CustomAttributeValue} as {@link DateTime}.
+     *
+     * @return {@link DateTime}
+     * @throws ClassCastException if {@code CustomAttributeValue} is not of {@link DateTime} type.
+     */
+    public DateTime dateTimeValue() {
+        if (!(value instanceof String) || type != Type.DateTime) {
+            throw new ClassCastException();
+        }
+
+        try {
+            return DateTimeUtil.dateTimeFromISO8601DateUTCString((String) value);
+        } catch (ParseException ex1) {
+            throw new ClassCastException(ex1.getMessage());
+        }
+    }
+
+    /**
      * Return the value of specified {@code CustomAttributeValue} as {@link Boolean}.
      *
      * @return {@link Boolean}
@@ -155,6 +197,13 @@ public class CustomAttributeValue {
         }
 
         return Boolean.valueOf("" + value);
+    }
+
+    protected List<Map<String, Object>> listMapValue() {
+        if (!(value instanceof List) || type != Type.CustomList) {
+            throw new ClassCastException();
+        }
+        return (List<Map<String, Object>>) value;
     }
 
     public Type getType() {
@@ -176,6 +225,8 @@ public class CustomAttributeValue {
                 return stringValue();
             case Date:
                 return DateTimeUtil.dateToYMDString(dateValue());
+            case DateTime:
+                return DateTimeUtil.dateTimeToISO8601UTCString(dateTimeValue());
             case Number:
                 return "" + numberValue();
             case Boolean:
@@ -184,4 +235,28 @@ public class CustomAttributeValue {
                 return super.toString();
         }
     }
+
+    public static class DateTime {
+        private Date date;
+
+        public DateTime(Date date) {
+            this.date = date;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
+        }
+
+        @Override
+        public String toString() {
+            return "DateTime{" +
+                    "date=" + getDate() +
+                    '}';
+        }
+    }
+
 }

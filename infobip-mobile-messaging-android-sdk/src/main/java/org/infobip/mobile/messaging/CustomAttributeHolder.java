@@ -12,7 +12,7 @@ import static org.infobip.mobile.messaging.CustomAttributesMapper.customValueToB
 
 public class CustomAttributeHolder extends MapModel {
 
-    private Map<String, CustomAttributeValue> customAttributes;
+    protected Map<String, CustomAttributeValue> customAttributes;
 
     public CustomAttributeHolder() {
 
@@ -61,7 +61,7 @@ public class CustomAttributeHolder extends MapModel {
 
     /// region PRIVATE METHODS
 
-    private void setCustomAttField(String key, CustomAttributeValue customAttributeValue) {
+    protected void setCustomAttField(String key, CustomAttributeValue customAttributeValue) {
         Map<String, Object> customAtts = getField(UserAtts.customAttributes);
         if (customAtts == null) {
             customAtts = new HashMap<>();

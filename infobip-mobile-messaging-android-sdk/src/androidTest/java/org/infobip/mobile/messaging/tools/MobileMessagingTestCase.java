@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.infobip.mobile.messaging.ListCustomAttributeItem;
+import org.infobip.mobile.messaging.ListCustomAttributeValue;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.MobileMessagingTestable;
+import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
@@ -28,6 +31,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +64,18 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileApiAppInstance mobileApiAppInstance;
     protected MobileApiVersion mobileApiVersion;
     protected String myDeviceRegId = "TestDeviceRegId";
+
+    protected static final String KEY_FOR_LIST_PARAM_1 = "param1";
+    protected static final String KEY_FOR_LIST_PARAM_2 = "param2";
+    protected static final String KEY_FOR_LIST_PARAM_3 = "param3";
+    protected static final String KEY_FOR_LIST_PARAM_4 = "param4";
+
+    protected final String LIST_SOME_STRING_VALUE = "bla";
+    protected final int LIST_SOME_NUMBER_VALUE = 1111;
+    protected final Boolean LIST_SOME_BOOLEAN_VALUE = true;
+    protected final Date LIST_SOME_DATE_VALUE = new Date();
+
+    protected static final String KEY_FOR_LIST = "keyForList";
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -179,6 +195,26 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         databaseProvider.deleteDatabase();
     }
 
+    protected User setListCustomAttributes(User user) {
+        return setListCustomAttributes(user, KEY_FOR_LIST);
+    }
+
+    protected User setListCustomAttributes(User user, String key) {
+        ListCustomAttributeValue list = new ListCustomAttributeValue(getListCustomValueItems());
+        user.setListCustomAttribute(key, list);
+        return user;
+    }
+
+    protected List<ListCustomAttributeItem> getListCustomValueItems() {
+        ListCustomAttributeItem.Builder customMapBuilder = ListCustomAttributeItem.builder();
+        customMapBuilder.putNumber(KEY_FOR_LIST_PARAM_1, LIST_SOME_NUMBER_VALUE);
+        customMapBuilder.putBoolean(KEY_FOR_LIST_PARAM_2, LIST_SOME_BOOLEAN_VALUE);
+        customMapBuilder.putString(KEY_FOR_LIST_PARAM_3, LIST_SOME_STRING_VALUE);
+        customMapBuilder.putDate(KEY_FOR_LIST_PARAM_4, LIST_SOME_DATE_VALUE);
+        List<ListCustomAttributeItem> customList = new ArrayList<>();
+        customList.add(customMapBuilder.build());
+        return customList;
+    }
 
     /**
      * Generates messages with provided ids and geo campaign object

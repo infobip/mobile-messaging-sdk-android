@@ -28,7 +28,6 @@ import org.mockito.Mockito;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TimeZone;
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
@@ -176,12 +175,9 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(customEvent.getProperties().get("someString").stringValue(), userCustomEventBody.getEvents()[0].getProperties().get("someString"));
         assertEquals(customEvent.getProperties().get("someNumber").numberValue(), userCustomEventBody.getEvents()[0].getProperties().get("someNumber"));
 
-        Date someDateInUtc = DateTimeUtil.dateFromISO8601DateUTCString((String) userCustomEventBody.getEvents()[0].getProperties().get("someDate"));
-        Date someDate = customEvent.getProperties().get("someDate").dateValue();
+        Date requestBodyDate = DateTimeUtil.dateFromISO8601DateUTCString((String) userCustomEventBody.getEvents()[0].getProperties().get("someDate"));
+        Date expectedDate = customEvent.getProperties().get("someDate").dateValue();
 
-        int offsetUtcDate = TimeZone.getDefault().getOffset(someDateInUtc.getTime());
-        int offsetLocalDate = TimeZone.getDefault().getOffset(someDate.getTime());
-
-        assertEquals(someDate.getTime() - offsetLocalDate, someDateInUtc.getTime());
+        assertEquals(expectedDate.getTime(), requestBodyDate.getTime());
     }
 }

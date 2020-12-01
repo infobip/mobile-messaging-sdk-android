@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,13 +46,14 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     private String givenExternalUserId = "extId";
     private Set<String> givenPhones = CollectionUtils.setOf("111", "222");
     private Set<String> givenEmails = CollectionUtils.setOf("email1@mail.com", "email2@mail.com");
-    private Map<String, CustomAttributeValue> givenCustomAtts = Collections.singletonMap("someKey", new CustomAttributeValue("someValue"));
+    private Map<String, CustomAttributeValue> givenCustomAtts = new HashMap<>();
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
+        givenCustomAtts.put("someKey", new CustomAttributeValue("someValue"));
     }
 
     @Test
@@ -70,6 +72,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         verifyIdentity(returnedUser);
         assertNull(returnedUser.getFirstName());
         assertNull(returnedUser.getCustomAttributes());
+        assertNull(returnedUser.getListCustomAttributeItems(KEY_FOR_LIST));
         assertNull(returnedUser.getTags());
         assertNull(returnedUser.getGender());
         assertNull(returnedUser.getBirthday());
@@ -108,6 +111,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(newMiddleName, returnedUser.getMiddleName());
         assertEquals(newGender, returnedUser.getGender());
         assertNull(returnedUser.getCustomAttributes());
+        assertNull(returnedUser.getListCustomAttributeItems(KEY_FOR_LIST));
         assertNull(returnedUser.getTags());
         assertNull(returnedUser.getBirthday());
 
@@ -259,6 +263,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         user.setFirstName(givenFirstName);
         user.setBirthday(givenBirthday);
         user.setCustomAttributes(givenCustomAtts);
+        user.setListCustomAttribute(KEY_FOR_LIST, new ListCustomAttributeValue(getListCustomValueItems()));
         SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
 
         String savedUser = UserMapper.toJson(user);
