@@ -40,3 +40,6 @@ captures/
 
 #OSX stuff
 .DS_Store
+
+#Jenkins
+.android/
