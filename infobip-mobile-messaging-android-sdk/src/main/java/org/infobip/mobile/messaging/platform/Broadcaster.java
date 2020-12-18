@@ -23,6 +23,14 @@ public interface Broadcaster {
     void messageReceived(Message message);
 
     /**
+     * Sends broadcast that notification is displayed. e.g. Silent notifications will never be displayed.
+     *
+     * @param message        displayed message
+     * @param notificationId notification ID. -1 if notification wasn't displayed
+     */
+    void notificationDisplayed(Message message, int notificationId);
+
+    /**
      * Sends broadcast that notification is tapped
      *
      * @param message received message

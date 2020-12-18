@@ -10,8 +10,8 @@ import org.infobip.mobile.messaging.Message;
 public class MockNotificationHandler implements NotificationHandler {
 
     @Override
-    public void displayNotification(Message message) {
-
+    public int displayNotification(Message message) {
+        return 12345;
     }
 
     @Override

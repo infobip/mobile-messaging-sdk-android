@@ -21,6 +21,7 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
+import static org.infobip.mobile.messaging.BroadcastParameter.NOTIFICATION_NOT_DISPLAYED_ID;
 
 
 public class InteractiveNotificationHandler implements NotificationHandler {
@@ -34,13 +35,15 @@ public class InteractiveNotificationHandler implements NotificationHandler {
     }
 
     @Override
-    public void displayNotification(Message message) {
-        if (context == null) return;
+    public int displayNotification(Message message) {
+        if (context == null) return NOTIFICATION_NOT_DISPLAYED_ID;
 
         int notificationId = baseNotificationHandler.getNotificationId(message);
         NotificationCompat.Builder builder = getNotificationBuilder(message, notificationId);
+        boolean displayed = baseNotificationHandler.displayNotification(builder, message, notificationId);
 
-        baseNotificationHandler.displayNotification(builder, message, notificationId);
+        if (!displayed) return NOTIFICATION_NOT_DISPLAYED_ID;
+        return notificationId;
     }
 
     @Override

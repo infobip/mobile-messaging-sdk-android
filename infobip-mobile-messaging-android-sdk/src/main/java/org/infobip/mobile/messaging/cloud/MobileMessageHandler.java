@@ -69,7 +69,8 @@ public class MobileMessageHandler {
 
         MobileMessagingLogger.d("Message is silent: " + message.isSilent());
         if (!message.isSilent()) {
-            notificationHandler.displayNotification(message);
+            int notificationId = notificationHandler.displayNotification(message);
+            broadcaster.notificationDisplayed(message, notificationId);
         }
     }
 

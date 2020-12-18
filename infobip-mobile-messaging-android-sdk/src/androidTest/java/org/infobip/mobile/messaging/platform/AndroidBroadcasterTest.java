@@ -41,10 +41,10 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     @Test
     public void test_should_send_message_broadcast() {
         // Given
-        Message message = createMessage(context, "SomeMessageId", false);
+        Message expectedMessage = createMessage(context, "SomeMessageId", false);
 
         // When
-        broadcastSender.messageReceived(message);
+        broadcastSender.messageReceived(expectedMessage);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -52,18 +52,18 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.MESSAGE_RECEIVED.getKey(), intent.getAction());
 
-        Message messageAfter = Message.createFrom(intent.getExtras());
-        assertNotSame(message, messageAfter);
-        assertEquals("SomeMessageId", messageAfter.getMessageId());
+        Message message = Message.createFrom(intent.getExtras());
+        assertNotSame(expectedMessage, message);
+        assertEquals(expectedMessage.getMessageId(), message.getMessageId());
     }
 
     @Test
     public void test_should_send_error() throws Exception {
         // Given
-        MobileMessagingError error = new MobileMessagingError("SomeCode", "SomeMessage");
+        MobileMessagingError expectedError = new MobileMessagingError("SomeCode", "SomeMessage");
 
         // When
-        broadcastSender.error(error);
+        broadcastSender.error(expectedError);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -71,8 +71,8 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.API_COMMUNICATION_ERROR.getKey(), intent.getAction());
 
-        MobileMessagingError errorAfter = (MobileMessagingError) intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION);
-        assertJEquals(error, errorAfter);
+        MobileMessagingError error = (MobileMessagingError) intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION);
+        assertJEquals(expectedError, error);
     }
 
     @Test
@@ -133,10 +133,10 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     @Test
     public void test_should_send_mo_messages() {
         // Given
-        Message message = createMessage(context, "SomeMessageId", false);
+        Message expectedMessage = createMessage(context, "SomeMessageId", false);
 
         // When
-        broadcastSender.messagesSent(Collections.singletonList(message));
+        broadcastSender.messagesSent(Collections.singletonList(expectedMessage));
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -144,21 +144,21 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.MESSAGES_SENT.getKey(), intent.getAction());
 
-        List<Message> messagesAfter = Message.createFrom(intent.<Bundle>getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES));
-        assertEquals(1, messagesAfter.size());
-        assertEquals("SomeMessageId", messagesAfter.get(0).getMessageId());
+        List<Message> messages = Message.createFrom(intent.<Bundle>getParcelableArrayListExtra(BroadcastParameter.EXTRA_MESSAGES));
+        assertEquals(1, messages.size());
+        assertEquals(expectedMessage.getMessageId(), messages.get(0).getMessageId());
 
     }
 
     @Test
     public void test_should_send_user_updated_event() {
         // Given
-        User user = new User();
-        user.setFirstName("FirstName");
-        user.setLastName("LastName");
+        User expectedUser = new User();
+        expectedUser.setFirstName("FirstName");
+        expectedUser.setLastName("LastName");
 
         // When
-        broadcastSender.userUpdated(user);
+        broadcastSender.userUpdated(expectedUser);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -166,24 +166,24 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.USER_UPDATED.getKey(), intent.getAction());
 
-        User userAfter = User.createFrom(intent.getExtras());
-        assertNotSame(user, userAfter);
-        assertEquals("FirstName", userAfter.getFirstName());
-        assertEquals("LastName", userAfter.getLastName());
+        User user = User.createFrom(intent.getExtras());
+        assertNotSame(expectedUser, user);
+        assertEquals(expectedUser.getFirstName(), user.getFirstName());
+        assertEquals(expectedUser.getLastName(), user.getLastName());
     }
 
     @Test
     public void test_should_send_installation_updated_event() throws Exception {
 
         // Given
-        Installation installation = new Installation();
-        installation.setPrimaryDevice(true);
-        installation.setApplicationUserId("appUserID");
-        installation.setLanguage("hr");
-        installation.setPushRegistrationEnabled(true);
+        Installation expectedInstallation = new Installation();
+        expectedInstallation.setPrimaryDevice(true);
+        expectedInstallation.setApplicationUserId("appUserID");
+        expectedInstallation.setLanguage("hr");
+        expectedInstallation.setPushRegistrationEnabled(true);
 
         // When
-        broadcastSender.installationUpdated(installation);
+        broadcastSender.installationUpdated(expectedInstallation);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -191,8 +191,8 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.INSTALLATION_UPDATED.getKey(), intent.getAction());
 
-        Installation installationAfter = Installation.createFrom(intent.getExtras());
-        assertJEquals(installation, installationAfter);
+        Installation installation = Installation.createFrom(intent.getExtras());
+        assertJEquals(expectedInstallation, installation);
     }
 
     @Test
@@ -212,12 +212,12 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     public void test_should_send_personalize_event() throws Exception {
 
         // Given
-        User user = new User();
-        user.setFirstName("FirstName");
-        user.setLastName("LastName");
+        User expectedUser = new User();
+        expectedUser.setFirstName("FirstName");
+        expectedUser.setLastName("LastName");
 
         // When
-        broadcastSender.personalized(user);
+        broadcastSender.personalized(expectedUser);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -225,8 +225,8 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.PERSONALIZED.getKey(), intent.getAction());
 
-        User userAfter = User.createFrom(intent.getExtras());
-        assertJEquals(user, userAfter);
+        User user = User.createFrom(intent.getExtras());
+        assertJEquals(expectedUser, user);
     }
 
     @Test
@@ -244,12 +244,34 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_should_send_notification_tapped_event() throws Exception {
+    public void test_should_send_notification_displayed_event() throws Exception {
         // Given
-        Message message = createMessage(context, "SomeMessageId", false);
+        Message expectedMessage = createMessage(context, "SomeMessageId", false);
+        int expectedNotificationId = 12345;
 
         // When
-        broadcastSender.notificationTapped(message);
+        broadcastSender.notificationDisplayed(expectedMessage, expectedNotificationId);
+
+        // Then
+        Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
+
+        Intent intent = intentArgumentCaptor.getValue();
+        assertEquals(Event.NOTIFICATION_DISPLAYED.getKey(), intent.getAction());
+
+        Message message = Message.createFrom(intent.getExtras());
+        int notificationId = intent.getIntExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, -1);
+        assertNotSame(expectedMessage, message);
+        assertEquals(expectedMessage.getMessageId(), message.getMessageId());
+        assertEquals(expectedNotificationId, notificationId);
+    }
+
+    @Test
+    public void test_should_send_notification_tapped_event() throws Exception {
+        // Given
+        Message expectedMessage = createMessage(context, "SomeMessageId", false);
+
+        // When
+        broadcastSender.notificationTapped(expectedMessage);
 
         // Then
         Mockito.verify(contextMock, Mockito.times(1)).sendBroadcast(intentArgumentCaptor.capture());
@@ -257,9 +279,9 @@ public class AndroidBroadcasterTest extends MobileMessagingTestCase {
         Intent intent = intentArgumentCaptor.getValue();
         assertEquals(Event.NOTIFICATION_TAPPED.getKey(), intent.getAction());
 
-        Message messageAfter = Message.createFrom(intent.getExtras());
-        assertNotSame(message, messageAfter);
-        assertEquals("SomeMessageId", messageAfter.getMessageId());
+        Message message = Message.createFrom(intent.getExtras());
+        assertNotSame(expectedMessage, message);
+        assertEquals(expectedMessage.getMessageId(), message.getMessageId());
     }
 
     @Test

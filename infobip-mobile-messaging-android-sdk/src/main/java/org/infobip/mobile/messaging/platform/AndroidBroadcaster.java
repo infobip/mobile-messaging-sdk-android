@@ -39,6 +39,13 @@ public class AndroidBroadcaster implements Broadcaster {
     }
 
     @Override
+    public void notificationDisplayed(Message message, int notificationId) {
+        send(prepare(Event.NOTIFICATION_DISPLAYED)
+                .putExtras(MessageBundleMapper.messageToBundle(message))
+                .putExtra(BroadcastParameter.EXTRA_NOTIFICATION_ID, notificationId));
+    }
+
+    @Override
     public void notificationTapped(Message message) {
         send(prepare(Event.NOTIFICATION_TAPPED)
                 .putExtras(MessageBundleMapper.messageToBundle(message)));

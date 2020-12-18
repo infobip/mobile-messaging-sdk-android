@@ -12,8 +12,10 @@ public interface NotificationHandler {
     /**
      * Displays native android notification for the provided message.
      * @param message message to display notification for.
+     *
+     * @return notification ID. -1 if notification wasn't displayed
      */
-    void displayNotification(Message message);
+    int displayNotification(Message message);
 
     /**
      * Cancels all outstanding notifications.

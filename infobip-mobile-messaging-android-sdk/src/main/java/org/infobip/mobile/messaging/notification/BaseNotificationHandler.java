@@ -70,22 +70,25 @@ public class BaseNotificationHandler {
      * @see #createNotificationCompatBuilder(Message)
      * @see #getNotificationId(Message)
      */
-    public void displayNotification(NotificationCompat.Builder builder, Message message, int notificationId) {
-        if (builder == null) return;
+    public boolean displayNotification(NotificationCompat.Builder builder, Message message, int notificationId) {
+        if (builder == null) return false;
 
         //issue: http://stackoverflow.com/questions/13602190/java-lang-securityexception-requires-vibrate-permission-on-jelly-bean-4-2
         try {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager == null) {
                 MobileMessagingLogger.e("Unable to get notification manager and display notification");
-                return;
+                return false;
             }
             Notification notification = builder.build();
             MobileMessagingLogger.v("NOTIFY FOR MESSAGE", message);
             notificationManager.notify(notificationId, notification);
+            return true;
+
         } catch (SecurityException se) {
             MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
             MobileMessagingLogger.d(Log.getStackTraceString(se));
+            return false;
         }
     }
 
