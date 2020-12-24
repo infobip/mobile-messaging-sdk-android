@@ -98,7 +98,6 @@ public class UserDataReporter {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
-                mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
@@ -158,7 +157,6 @@ public class UserDataReporter {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
-                mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);

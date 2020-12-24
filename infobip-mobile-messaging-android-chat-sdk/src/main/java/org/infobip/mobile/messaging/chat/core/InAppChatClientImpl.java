@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.chat.core;
 import android.webkit.WebView;
 
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
+import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -10,9 +11,9 @@ import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
 
 public class InAppChatClientImpl implements InAppChatClient {
 
-    private final WebView webView;
+    private final InAppChatWebView webView;
 
-    public InAppChatClientImpl(WebView webView) {
+    public InAppChatClientImpl(InAppChatWebView webView) {
         this.webView = webView;
     }
 

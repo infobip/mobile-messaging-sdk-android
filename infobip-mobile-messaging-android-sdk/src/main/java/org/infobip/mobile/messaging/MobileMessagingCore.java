@@ -1097,15 +1097,6 @@ public class MobileMessagingCore
         return stats;
     }
 
-    public void setLastHttpException(Throwable lastHttpException) {
-        PreferenceHelper.saveString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION, ExceptionUtils.stacktrace(lastHttpException));
-    }
-
-    @SuppressWarnings("unused")
-    public String getLastHttpException() {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.LAST_HTTP_EXCEPTION);
-    }
-
     private void setApplicationCode(String applicationCode) {
         if (shouldSaveApplicationCode(context)) {
             if (StringUtils.isBlank(applicationCode)) {

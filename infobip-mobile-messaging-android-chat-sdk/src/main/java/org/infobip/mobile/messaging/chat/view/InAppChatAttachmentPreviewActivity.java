@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -35,12 +36,12 @@ import android.widget.TextView;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.chat.R;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachment;
-import org.infobip.mobile.messaging.chat.attachments.PermissionsRequesterActivity;
+import org.infobip.mobile.messaging.chat.attachments.PermissionsRequestManager;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 
 
-public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActivity {
+public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implements PermissionsRequestManager.PermissionsRequester {
 
     public static final String EXTRA_URL = "ib_chat_attachment_url";
     public static final String EXTRA_TYPE = "ib_chat_attachment_type";
@@ -54,9 +55,11 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
     private Toolbar toolbar;
     private Intent webViewIntent;
     private InAppChatWebAttachment attachment;
+    private PermissionsRequestManager permissionsRequestManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        permissionsRequestManager = new PermissionsRequestManager(this, this);
         InAppChatViewSettingsResolver settingsResolver = new InAppChatViewSettingsResolver(this);
         setTheme(settingsResolver.getChatAttachPreviewTheme());
         super.onCreate(savedInstanceState);
@@ -117,14 +120,26 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
         actionBar.setDisplayShowTitleEnabled(false);
     }
 
+    /* PermissionsRequester */
+
     @NonNull
+    @Override
     public String[] requiredPermissions() {
         return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     }
 
+    @Override
     public void onPermissionGranted() {
         downloadFile();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        permissionsRequestManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    /* PermissionsRequester endregion */
 
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
     private void initWebView() {
@@ -175,7 +190,7 @@ public class InAppChatAttachmentPreviewActivity extends PermissionsRequesterActi
     };
 
     private void downloadFile() {
-        if (!isRequiredPermissionsGranted()) {
+        if (!permissionsRequestManager.isRequiredPermissionsGranted()) {
             MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
             return;
         }

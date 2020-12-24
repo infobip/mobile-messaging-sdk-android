@@ -4,7 +4,6 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.SuccessPending;
 import org.infobip.mobile.messaging.api.chat.MobileApiChat;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcaster;
@@ -90,7 +89,6 @@ public class InAppChatSynchronizer {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                 }
 
-                MobileMessagingCore.getInstance(context).setLastHttpException(error);
                 coreBroadcaster.error(MobileMessagingError.createFrom(error));
                 if (listener != null) {
                     listener.onResult(new Result<WidgetInfo, MobileMessagingError>(MobileMessagingError.createFrom(error)));

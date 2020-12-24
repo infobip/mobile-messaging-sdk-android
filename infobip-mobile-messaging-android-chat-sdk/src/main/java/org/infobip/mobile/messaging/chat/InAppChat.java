@@ -1,6 +1,8 @@
 package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 
 /**
  * Main interface for in-app chat communication
@@ -49,4 +51,18 @@ public abstract class InAppChat {
      * <p>NOTE: There is no need to invoke this method manually as library manages web view data</p>
      */
     public abstract void cleanup();
+
+    /**
+     * Adds in-app Chat Fragment to the Activity or shows it if it was already added and hidden.
+     * @param fragmentManager manager to make interactions with Fragment
+     * @param containerId identifier of the container in-app Chat Fragment is to be placed in
+     */
+    public abstract void showInAppChatFragment(FragmentManager fragmentManager, int containerId);
+
+    /**
+     * Hides in-app Chat Fragment, so that all views, especially in-app Chat webView, stays in memory.
+     * @param fragmentManager manager to make interactions with Fragment
+     */
+    public abstract void hideInAppChatFragment(FragmentManager fragmentManager);
+
 }

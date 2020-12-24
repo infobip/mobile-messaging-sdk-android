@@ -184,7 +184,6 @@ public class InstallationSynchronizer {
                 MobileMessagingLogger.v("CREATE INSTALLATION ERROR <<<", error);
 
                 setCloudTokenReported(false);
-                mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
@@ -284,7 +283,6 @@ public class InstallationSynchronizer {
                 }
 
                 setCloudTokenReported(false);
-                mobileMessagingCore.setLastHttpException(error);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(mobileMessagingError);
                 if (actionListener != null) {

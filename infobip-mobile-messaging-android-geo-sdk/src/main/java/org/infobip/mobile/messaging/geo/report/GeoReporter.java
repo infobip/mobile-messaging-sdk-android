@@ -121,7 +121,6 @@ public class GeoReporter {
      */
     private void handleError(Context context, Throwable error, GeoReport[] geoReports) {
         MobileMessagingLogger.e("Error reporting geo areas: " + error);
-        MobileMessagingCore.getInstance(context).setLastHttpException(error);
         stats.reportError(MobileMessagingStatsError.GEO_REPORTING_ERROR);
 
         geofenceHelper.addUnreportedGeoEvents(geoReports);

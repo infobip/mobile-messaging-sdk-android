@@ -80,7 +80,6 @@ public class VersionChecker {
 
             @Override
             public void error(Throwable error) {
-                mobileMessagingCore.setLastHttpException(error);
                 MobileMessagingLogger.e("Error while checking version!");
                 stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
             }

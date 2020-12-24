@@ -7,8 +7,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.TaskStackBuilder;
-import android.webkit.WebView;
+import android.support.v7.app.AppCompatActivity;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -24,6 +27,8 @@ import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
+import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
+import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -40,10 +45,11 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatBroadcasterImpl inAppChatBroadcaster;
     private InAppChatViewImpl inAppChatView;
     private PropertyHelper propertyHelper;
-    private WebView webView;
+    private InAppChatWebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
     private static Boolean isChatWidgetConfigSynced = null;
+    private static Boolean isWebViewCacheCleaned = false;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
@@ -71,19 +77,29 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             return false;
         }
         coreBroadcaster().messageReceived(message);
-        if (!isChatWidgetActivityForeground()) {
+        if (!isChatWidgetOnForeground()) {
             MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
         }
         return true;
     }
 
-    private boolean isChatWidgetActivityForeground() {
+    private boolean isChatWidgetOnForeground() {
         Activity activity = null;
         ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(context).getActivityLifecycleMonitor();
         if (activityLifecycleMonitor != null) {
             activity = activityLifecycleMonitor.getForegroundActivity();
         }
-        return activity != null && activity.getClass().toString().equals(InAppChatActivity.class.toString());
+        if (activity == null) return false;
+
+        //InAppChatActivity is on foreground
+        if (activity.getClass().toString().equals(InAppChatActivity.class.toString())) return true;
+
+        AppCompatActivity compatActivity = (AppCompatActivity)activity;
+        if (compatActivity == null) return false;
+
+        //InAppChatFragment is visible and resumed
+        Fragment inAppChatFragment = compatActivity.getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+        return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
     }
 
     @Override
@@ -114,6 +130,14 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     public static Boolean getIsChatWidgetConfigSynced() {
         return isChatWidgetConfigSynced;
+    }
+
+    public static Boolean getIsWebViewCacheCleaned() {
+        return isWebViewCacheCleaned;
+    }
+
+    public static void setIsWebViewCacheCleaned(Boolean webViewCacheCleaned) {
+        isWebViewCacheCleaned = webViewCacheCleaned;
     }
 
     // region private methods
@@ -158,9 +182,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         return propertyHelper;
     }
 
-    synchronized private WebView webView() {
+    synchronized private InAppChatWebView webView() {
         if (webView == null) {
-            webView = new WebView(context);
+            webView = new InAppChatWebView(context);
         }
         return webView;
     }
@@ -185,6 +209,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         isChatWidgetConfigSynced = false;
+        isWebViewCacheCleaned = true;
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(new Runnable() {
@@ -249,6 +274,27 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     public boolean isActivated() {
         return propertyHelper().findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
+    }
+
+    private InAppChatFragment inAppChatWVFragment;
+    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
+
+    public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
+        if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
+
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        if (fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG) == null) {
+            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
+        } else {
+            fragmentTransaction.show(inAppChatWVFragment);
+        }
+        fragmentTransaction.commit();
+    }
+
+    public void hideInAppChatFragment(FragmentManager fragmentManager) {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.hide(inAppChatWVFragment);
+        fragmentTransaction.commit();
     }
 
     // endregion

@@ -25,7 +25,10 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/main_activity_button_open_title" />
-
     </RelativeLayout>
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </android.support.design.widget.CoordinatorLayout>

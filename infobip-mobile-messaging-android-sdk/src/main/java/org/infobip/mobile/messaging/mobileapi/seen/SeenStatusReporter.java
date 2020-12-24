@@ -83,8 +83,6 @@ public class SeenStatusReporter {
 
                     @Override
                     public void error(Throwable error) {
-                        mobileMessagingCore.setLastHttpException(error);
-
                         MobileMessagingLogger.e("Error reporting seen status!");
                         stats.reportError(MobileMessagingStatsError.SEEN_REPORTING_ERROR);
                         broadcaster.error(MobileMessagingError.createFrom(error));
