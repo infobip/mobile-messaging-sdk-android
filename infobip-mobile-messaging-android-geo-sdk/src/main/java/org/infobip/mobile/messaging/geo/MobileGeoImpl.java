@@ -105,6 +105,7 @@ public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
         PushMessageHandler pushMessageHandler = new PushMessageHandler();
         pushMessageHandler.handleGeoMessage(context, message);
+        MobileMessagingLogger.d("Message with id: " + message.getMessageId() + " will be handled by Geo MessageHandler");
         return true;
     }
 

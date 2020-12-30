@@ -24,6 +24,7 @@ import java.util.UUID;
 public class Message implements Comparable<Message> {
 
     public static final String MESSAGE_TYPE_CHAT = "chat";
+    public static final String MESSAGE_TYPE_GEO = "geo";
     private String messageId;
     private String title;
     private String body;

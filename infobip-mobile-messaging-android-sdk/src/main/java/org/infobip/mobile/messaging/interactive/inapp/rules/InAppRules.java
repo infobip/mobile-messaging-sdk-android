@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.infobip.mobile.messaging.Message.MESSAGE_TYPE_GEO;
+
 /**
  * @author sslavin
  * @since 15/04/2018.
@@ -32,7 +34,7 @@ public class InAppRules {
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
         long inAppExpiryTimestamp = message.getInAppExpiryTimestamp();
-        if (!hasInAppEnabled(message) || (inAppExpiryTimestamp != 0 && inAppExpiryTimestamp < Time.now())) {
+        if (!hasInAppEnabled(message) || isGeoSignaling(message) || (inAppExpiryTimestamp != 0 && inAppExpiryTimestamp < Time.now())) {
             return ShowOrNot.not();
         }
 
@@ -76,5 +78,10 @@ public class InAppRules {
 
     private static boolean hasInAppEnabled(Message message) {
         return message.getInAppStyle() == Message.InAppStyle.MODAL;
+    }
+
+    private static boolean isGeoSignaling(Message message) {
+        String messageType = message.getMessageType();
+        return StringUtils.isNotBlank(messageType) && MESSAGE_TYPE_GEO.equals(messageType) && message.isSilent();
     }
 }

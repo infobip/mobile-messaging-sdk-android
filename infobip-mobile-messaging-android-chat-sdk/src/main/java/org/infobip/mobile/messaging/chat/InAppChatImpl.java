@@ -80,6 +80,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!isChatWidgetOnForeground()) {
             MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
         }
+        MobileMessagingLogger.d("Message with id: " + message.getMessageId() + " will be handled by inAppChat MessageHandler");
         return true;
     }
 
