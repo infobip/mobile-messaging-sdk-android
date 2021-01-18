@@ -18,7 +18,7 @@
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:foregroundGravity="center"
-            android:maxHeight="150dp"
+            android:maxHeight="225dp"
             android:scaleType="centerCrop"
             android:src="@android:color/white"
             android:visibility="gone" />
