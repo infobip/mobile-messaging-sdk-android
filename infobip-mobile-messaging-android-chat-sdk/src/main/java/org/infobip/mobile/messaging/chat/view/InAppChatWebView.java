@@ -4,17 +4,19 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
-import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.InAppChatImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.util.ResourceLoader;
+
+import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
 
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
@@ -66,4 +68,12 @@ public class InAppChatWebView extends WebView {
         }
     }
 
+    public void evaluateJavascriptMethod(String script, ValueCallback<String> resultCallback) {
+        if (isOSOlderThanKitkat()) {
+            // FIXME: not safety call. Can be reason of invisible OutOfMemory error (data transfer limit). More info: [CHAT-821]
+            this.loadUrl(script);
+        } else {
+            this.evaluateJavascript(script, resultCallback);
+        }
+    }
 }

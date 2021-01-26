@@ -20,4 +20,10 @@ public interface InAppChatClient {
      * @param attachment IMAGE, VIDEO, DOCUMENT
      */
     void sendChatMessage(String message, InAppChatMobileAttachment attachment);
+
+    /**
+     * Send intermediate state of message input component
+     * @param draft user message draft
+     */
+    void sendInputDraft(String draft);
 }

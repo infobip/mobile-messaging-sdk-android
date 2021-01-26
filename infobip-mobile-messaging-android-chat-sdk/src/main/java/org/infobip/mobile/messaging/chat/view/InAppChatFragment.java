@@ -21,6 +21,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -89,6 +91,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private static final String OUTPUT_MEDIA_PATH = "/InAppChat";
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
     private static final int CONTENT_SELECTION_INTENT_CODE = 100;
+    private static final int USER_INPUT_CHECKER_DELAY_MS = 250;
 
     private boolean sendButtonIsColored;
     private WidgetInfo widgetInfo;
@@ -106,6 +109,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private InAppChatClient inAppChatClient;
     private InAppChatViewSettingsResolver inAppChatViewSettingsResolver;
+    private final Handler inputCheckerHandler = new Handler(Looper.getMainLooper());
+    private InAppChatInputFinishChecker inputFinishChecker;
     private Boolean shouldUseWidgetConfig = null;
     private boolean receiversRegistered = false;
     private boolean chatNotAvailableViewShown = false;
@@ -198,6 +203,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void fragmentPaused() {
         if (!fragmentCouldBePaused) return;
+        sendInputDraftImmediately();
         unregisterReceivers();
         hideChatNotAvailableView(0);
         webView.onPause();
@@ -237,6 +243,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
         updateToolbarConfigs();
         fillButtonByPrimaryColor(btnSendAttachment);
+    }
+
+    private void sendInputDraftImmediately() {
+        inputCheckerHandler.removeCallbacks(inputFinishChecker);
+        inputCheckerHandler.post(inputFinishChecker);
     }
 
     private WidgetInfo prepareWidgetInfo() {
@@ -305,6 +316,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void initTextBar() {
         editText = containerView.findViewById(R.id.ib_et_message_text);
+        inputFinishChecker = new InAppChatInputFinishChecker(inAppChatClient);
+
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -313,6 +326,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                inputCheckerHandler.removeCallbacks(inputFinishChecker);
                 if (s.length() > 0 && !sendButtonIsColored) {
                     fillButtonByPrimaryColor(btnSend);
                     sendButtonIsColored = true;
@@ -324,7 +338,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
             @Override
             public void afterTextChanged(Editable s) {
-                // nothing
+                inputFinishChecker.setInputValue(s.toString());
+                inputCheckerHandler.postDelayed(inputFinishChecker, USER_INPUT_CHECKER_DELAY_MS);
             }
         });
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {

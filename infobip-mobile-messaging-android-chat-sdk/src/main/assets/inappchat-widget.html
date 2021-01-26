@@ -1,5 +1,6 @@
 <html lang="En">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script>
           (function(I,n,f,o,b,i,p){
             I[b]=I[b]||function(){(I[b].q=I[b].q||[]).push(arguments)};
@@ -36,6 +37,14 @@
                 'message': message,
                 'attachment': attachment,
                 'fileName': fileName,
+                'type': 'BASIC'
+            });
+        }
+
+        window.handleMessageDraftSend = function(draft) {
+            liveChat(SEND, {
+                'message': draft,
+                'type': 'DRAFT'
             });
         }
 
