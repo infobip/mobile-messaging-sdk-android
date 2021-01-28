@@ -121,6 +121,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private PermissionsRequestManager permissionsRequestManager;
     private boolean fragmentCouldBePaused = true;
     private boolean fragmentCouldBeResumed = true;
+    private boolean isToolbarHidden = false;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -286,31 +287,43 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         toolbar = containerView.findViewById(R.id.ib_toolbar_chat_fragment);
         if (toolbar == null) return;
 
-        //If Activity has it's own ActionBar, it should be hidden.
-        InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
-        if (actionBarProvider != null) {
-            ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
-            if (ab != null) {
-                ab.hide();
+        if (isToolbarHidden) {
+            toolbar.setVisibility(View.GONE);
+        } else {
+            //If Activity has it's own ActionBar, it should be hidden.
+            try {
+                InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
+                if (actionBarProvider != null) {
+                    ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
+                    if (ab != null) {
+                        ab.hide();
+                    }
+                }
+            } catch (Exception e) {
+                MobileMessagingLogger.e("[InAppChat] can't get actionBarProvider", e);
             }
+            toolbar.setNavigationIcon(R.drawable.ic_chat_arrow_back);
+            toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    closeChatPage();
+                }
+            });
         }
-        toolbar.setNavigationIcon(R.drawable.ic_chat_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                closeChatPage();
-            }
-        });
     }
 
     public void closeChatPage() {
-        InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
-        if (actionBarProvider != null) {
-            ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
-            if (ab != null) {
-                ab.show();
+        try {
+            InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
+            if (actionBarProvider != null) {
+                ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
+                if (ab != null) {
+                    ab.show();
+                }
+                actionBarProvider.onInAppChatBackPressed();
             }
-            actionBarProvider.onInAppChatBackPressed();
+        } catch (Exception e) {
+            MobileMessagingLogger.e("[InAppChat] can't get actionBarProvider", e);
         }
     }
 
@@ -368,7 +381,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void updateToolbarConfigs() {
-        if (toolbar == null || widgetInfo == null) {
+        if (toolbar == null || widgetInfo == null || isToolbarHidden) {
             return;
         }
 
@@ -816,4 +829,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         return theme;
     }
 
+    public void setIsToolbarHidden(Boolean hidden) {
+        isToolbarHidden = hidden;
+    }
 }
