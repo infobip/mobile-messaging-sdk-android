@@ -43,7 +43,7 @@
     <RelativeLayout
         android:id="@+id/ib_rl_send_message"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/light_border"
         android:orientation="horizontal"
         android:padding="3dp"
@@ -61,11 +61,11 @@
             android:background="@null"
             android:enabled="false"
             android:hint="@string/ib_chat_message_hint"
-            android:inputType="text"
-            android:maxLines="4"
+            android:inputType="textMultiLine"
+            android:maxLines="5"
             android:minHeight="30dp"
             android:scrollbars="vertical"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:layout_width="315dp" />
 
         <ImageView
