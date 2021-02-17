@@ -27,6 +27,8 @@ public enum MobileMessagingProperty {
     BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 5000L),
     VERSION_CHECK_INTERVAL_DAYS("org.infobip.mobile.messaging.notification.VERSION_CHECK_INTERVAL_DAYS", 1),
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),
+    BASEURL_CHECK_INTERVAL_HOURS("org.infobip.mobile.messaging.notification.BASEURL_CHECK_INTERVAL_HOURS", 24),
+    BASEURL_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.BASEURL_CHECK_LAST_TIME", 0L),
 
     DEFAULT_MAX_RETRY_COUNT("org.infobip.mobile.messaging.infobip.DEFAULT_MAX_RETRY_COUNT", 3),
     DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.DEFAULT_EXP_BACKOFF_MULTIPLIER", 2),

@@ -5,6 +5,7 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.baseurl.MobileApiBaseUrl;
 import org.infobip.mobile.messaging.api.chat.MobileApiChat;
 import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
@@ -91,6 +92,7 @@ public class MobileApiResourceProvider {
     private MobileApiGeo mobileApiGeo;
     private MobileApiAppInstance mobileApiAppInstance;
     private MobileApiChat mobileApiChat;
+    private MobileApiBaseUrl mobileApiBaseUrl;
 
     public MobileApiMessages getMobileApiMessages(Context context) {
         if (null != mobileApiMessages) {
@@ -142,6 +144,16 @@ public class MobileApiResourceProvider {
         return mobileApiChat;
     }
 
+    public MobileApiBaseUrl getMobileApiBaseUrl(Context context) {
+        if (null != mobileApiBaseUrl) {
+            return mobileApiBaseUrl;
+        }
+
+        mobileApiBaseUrl = getGenerator(context).create(MobileApiBaseUrl.class);
+
+        return mobileApiBaseUrl;
+    }
+
     private String[] getUserAgentAdditions(Context context) {
         List<String> userAgentAdditions = new ArrayList<>();
         if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO)) {
@@ -176,6 +188,10 @@ public class MobileApiResourceProvider {
     }
 
     private Generator getGenerator(Context context) {
+        return getGenerator(context, false);
+    }
+
+    private Generator getGenerator(Context context, boolean useDefaultBaseUrl) {
         if (null != generator) {
             return generator;
         }
@@ -186,7 +202,7 @@ public class MobileApiResourceProvider {
         properties.put("library.version", SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context));
 
         generator = new Generator.Builder()
-                .withBaseUrl(MobileMessagingCore.getApiUri(context))
+                .withBaseUrl(MobileMessagingCore.getApiUri(context, useDefaultBaseUrl))
                 .withProperties(properties)
                 .withUserAgentAdditions(getUserAgentAdditions(context))
                 .withRequestInterceptors(baseUrlManager(context))

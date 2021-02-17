@@ -9,7 +9,7 @@ public enum CustomApiHeaders {
     SESSION_ID("sessionId"),
     PUSH_REGISTRATION_ID("pushregistrationid"),
     INSTALLATION_ID("installationid"),
-    NEW_BASE_URL("newbaseurl"),
+    NEW_BASE_URL("New-Base-URL"),
     APPLICATION_CODE("applicationcode");
 
     private final String value;

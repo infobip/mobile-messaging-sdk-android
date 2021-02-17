@@ -33,6 +33,7 @@ import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.mobileapi.appinstance.InstallationSynchronizer;
+import org.infobip.mobile.messaging.mobileapi.baseurl.BaseUrlChecker;
 import org.infobip.mobile.messaging.mobileapi.common.MAsyncTask;
 import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobileapi.events.UserEventsRequestMapper;
@@ -59,7 +60,6 @@ import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ComponentUtil;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
-import org.infobip.mobile.messaging.util.ExceptionUtils;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.ModuleLoader;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -130,6 +130,7 @@ public class MobileMessagingCore
     private MoMessageSender moMessageSender;
     private SeenStatusReporter seenStatusReporter;
     private VersionChecker versionChecker;
+    private BaseUrlChecker baseUrlChecker;
     private ActivityLifecycleMonitor activityLifecycleMonitor;
     @SuppressWarnings("unused")
     private MobileNetworkStateListener mobileNetworkStateListener;
@@ -336,6 +337,7 @@ public class MobileMessagingCore
         }
 
         lastSyncTimeMillis = Time.now();
+        baseUrlChecker().sync();
         if (foreground) {
             lastForegroundSyncMillis = lastSyncTimeMillis;
             userEventsSynchronizer().reportSessions();
@@ -1196,7 +1198,8 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, (String) MobileMessagingProperty.API_URI.getDefaultValue());
     }
 
-    public static String getApiUri(Context context) {
+    public static String getApiUri(Context context, boolean defaultValue) {
+        if (defaultValue) return MobileMessagingProperty.API_URI.getDefaultValue().toString();
         return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
     }
 
@@ -1279,6 +1282,8 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME);
+        PreferenceHelper.remove(context, MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS);
 
         MobileMessagingCore mmCore = Platform.mobileMessagingCore.get(context);
         mmCore.messagesSynchronizer = null;
@@ -1289,6 +1294,7 @@ public class MobileMessagingCore
         mmCore.moMessageSender = null;
         mmCore.seenStatusReporter = null;
         mmCore.versionChecker = null;
+        mmCore.baseUrlChecker = null;
 
         mmCore.didSyncAtLeastOnce = false;
         mmCore.lastForegroundSyncMillis = null;
@@ -1870,6 +1876,14 @@ public class MobileMessagingCore
             versionChecker = new VersionChecker(context, this, stats, mobileApiResourceProvider().getMobileApiVersion(context), retryPolicyProvider);
         }
         return versionChecker;
+    }
+
+    @NonNull
+    private BaseUrlChecker baseUrlChecker() {
+        if (baseUrlChecker == null) {
+            baseUrlChecker = new BaseUrlChecker(context, registrationAlignedExecutor, mobileApiResourceProvider().getMobileApiBaseUrl(context));
+        }
+        return baseUrlChecker;
     }
 
     @NonNull

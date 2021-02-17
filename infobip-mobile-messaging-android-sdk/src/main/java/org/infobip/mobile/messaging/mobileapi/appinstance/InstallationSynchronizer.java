@@ -44,6 +44,7 @@ public class InstallationSynchronizer {
     private final RetryPolicyProvider retryPolicyProvider;
     private final MobileApiAppInstance mobileApiAppInstance;
     private volatile Long lastSyncTimeMillis;
+    private volatile boolean isSyncStarting;
 
     private static class PushInstallation extends Installation {
         void setServiceType() {
@@ -83,7 +84,13 @@ public class InstallationSynchronizer {
     @SuppressWarnings({"SameParameterValue", "WeakerAccess"})
     @VisibleForTesting
     void sync(MobileMessaging.ResultListener<Installation> actionListener) {
-        if (didSyncRecently()) return;
+        if (didSyncRecently()) {
+            if (actionListener != null) {
+                actionListener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), InternalSdkError.INSTALLATION_SYNC_IN_PROGRESS.getError()));
+            }
+            return;
+        }
+        isSyncStarting = true;
 
         PushInstallation installation = new PushInstallation();
 
@@ -125,10 +132,11 @@ public class InstallationSynchronizer {
                 lastSyncTimeMillis = Time.now();
             }
         }
+        isSyncStarting = false;
     }
 
     private boolean didSyncRecently() {
-        return lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
+        return isSyncStarting || lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_THROTTLE_INTERVAL_MILLIS;
     }
 
     public void updatePrimaryStatus(String pushRegId, Boolean primary, MobileMessaging.ResultListener<Installation> actionListener) {
