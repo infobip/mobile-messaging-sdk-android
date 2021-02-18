@@ -13,6 +13,7 @@ import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
+import org.infobip.mobile.messaging.chat.utils.CommonUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -21,8 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
-
-import static com.google.android.gms.common.util.JsonUtils.escapeString;
 
 public class InAppChatMobileAttachment {
     public static final long DEFAULT_MAX_UPLOAD_CONTENT_SIZE = 10_485_760; //10 MiB
@@ -68,7 +67,7 @@ public class InAppChatMobileAttachment {
     }
 
     public String base64UrlString() {
-        return "data:" + mimeType + ";base64," + escapeString(base64);
+        return "data:" + mimeType + ";base64," + CommonUtils.escapeJsonString(base64);
     }
 
     public String getFileName() {

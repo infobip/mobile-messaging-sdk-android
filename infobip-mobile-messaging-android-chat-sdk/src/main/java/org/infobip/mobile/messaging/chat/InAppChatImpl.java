@@ -95,12 +95,12 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         //InAppChatActivity is on foreground
         if (activity.getClass().toString().equals(InAppChatActivity.class.toString())) return true;
 
-        AppCompatActivity compatActivity = (AppCompatActivity)activity;
-        if (compatActivity == null) return false;
-
-        //InAppChatFragment is visible and resumed
-        Fragment inAppChatFragment = compatActivity.getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
+        if (activity instanceof AppCompatActivity) {
+            //InAppChatFragment is visible and resumed
+            Fragment inAppChatFragment =  ((AppCompatActivity)activity).getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+            return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
+        }
+        return false;
     }
 
     @Override
