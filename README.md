@@ -17,7 +17,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     ```groovy
     dependencies {
         ...
-        implementation ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:4.3.5@aar') {
+        implementation ('org.infobip.mobile.messaging.api:infobip-mobile-messaging-android-sdk:4.3.6@aar') {
             transitive = true
         }
     }
