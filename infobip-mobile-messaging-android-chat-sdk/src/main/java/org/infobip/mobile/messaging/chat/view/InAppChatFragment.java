@@ -98,14 +98,14 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     /* View components */
     private InAppChatWebView webView;
-    private EditText editText;
-    private ImageView btnSend;
-    private ImageView btnSendAttachment;
-    private ProgressBar progressBar;
+    private EditText messageInput;
+    private ImageView sendButton;
+    private ImageView sendAttachmentButton;
+    private ProgressBar spinner;
     private Toolbar toolbar;
-    private RelativeLayout relativeLayout;
-    private RelativeLayout mainChatRelativeLayout;
-    private TextView chatNotAvailableView;
+    private RelativeLayout msgInputWrapper;
+    private RelativeLayout mainWindow;
+    private TextView errorToast;
 
     private InAppChatClient inAppChatClient;
     private InAppChatViewSettingsResolver inAppChatViewSettingsResolver;
@@ -184,7 +184,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @Override
     public void onDestroy() {
         unregisterReceivers();
-        mainChatRelativeLayout.removeView(webView);
+        mainWindow.removeView(webView);
         webView.removeAllViews();
         webView.destroy();
         super.onDestroy();
@@ -243,7 +243,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         if (widgetInfo == null) return;
 
         updateToolbarConfigs();
-        fillButtonByPrimaryColor(btnSendAttachment);
+        fillButtonByPrimaryColor(sendAttachmentButton);
     }
 
     private void sendInputDraftImmediately() {
@@ -271,10 +271,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void initViews() {
-        progressBar = containerView.findViewById(R.id.ib_pb_chat);
-        relativeLayout = containerView.findViewById(R.id.ib_rl_send_message);
-        mainChatRelativeLayout = containerView.findViewById(R.id.ib_chat_relative_layout);
-        chatNotAvailableView = containerView.findViewById(R.id.ib_tv_chat_not_connected);
+        spinner = containerView.findViewById(R.id.ib_lc_pb_spinner);
+        msgInputWrapper = containerView.findViewById(R.id.ib_lc_rl_msg_input_wrapper);
+        mainWindow = containerView.findViewById(R.id.ib_lc_rl_main_window);
+        errorToast = containerView.findViewById(R.id.ib_lc_tv_error_toast);
         chatNotAvailableViewHeight = getResources().getDimension(R.dimen.chat_not_available_tv_height);
         initToolbar();
         initWebView();
@@ -328,10 +328,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void initTextBar() {
-        editText = containerView.findViewById(R.id.ib_et_message_text);
+        messageInput = containerView.findViewById(R.id.ib_lc_et_msg_input);
         inputFinishChecker = new InAppChatInputFinishChecker(inAppChatClient);
 
-        editText.addTextChangedListener(new TextWatcher() {
+        messageInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // nothing
@@ -341,10 +341,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 inputCheckerHandler.removeCallbacks(inputFinishChecker);
                 if (s.length() > 0 && !sendButtonIsColored) {
-                    fillButtonByPrimaryColor(btnSend);
+                    fillButtonByPrimaryColor(sendButton);
                     sendButtonIsColored = true;
                 } else if (s.length() == 0) {
-                    btnSend.getDrawable().clearColorFilter();
+                    sendButton.getDrawable().clearColorFilter();
                     sendButtonIsColored = false;
                 }
             }
@@ -355,7 +355,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                 inputCheckerHandler.postDelayed(inputFinishChecker, USER_INPUT_CHECKER_DELAY_MS);
             }
         });
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        messageInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 FragmentActivity activity = getFragmentActivity();
@@ -415,7 +415,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
         // set colors to views
         try {
-            progressBar.getIndeterminateDrawable().setColorFilter(primaryDarkColor, PorterDuff.Mode.SRC_IN);
+            spinner.getIndeterminateDrawable().setColorFilter(primaryDarkColor, PorterDuff.Mode.SRC_IN);
         } catch (Exception ignored) {
         }
         toolbar.setBackgroundColor(primaryColor);
@@ -474,17 +474,17 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
     private void initWebView() {
-        webView = containerView.findViewById(R.id.ib_wv_in_app_chat);
+        webView = containerView.findViewById(R.id.ib_lc_wv_in_app_chat);
         webView.setup(this);
         inAppChatClient = new InAppChatClientImpl(webView);
     }
 
     private void initSendButton() {
-        btnSend = containerView.findViewById(R.id.ib_btn_send);
-        btnSend.setOnClickListener(new View.OnClickListener() {
+        sendButton = containerView.findViewById(R.id.ib_lc_iv_send_btn);
+        sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Editable text = editText.getText();
+                Editable text = messageInput.getText();
                 if (text != null) {
                     inAppChatClient.sendChatMessage(CommonUtils.escapeJsonString(text.toString()));
                     text.clear();
@@ -500,21 +500,21 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     @Override
     public void onPageStarted() {
-        progressBar.setVisibility(View.VISIBLE);
+        spinner.setVisibility(View.VISIBLE);
         webView.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onPageFinished() {
-        progressBar.setVisibility(View.GONE);
+        spinner.setVisibility(View.GONE);
         webView.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void setControlsEnabled(boolean isEnabled) {
-        editText.setEnabled(isEnabled);
-        btnSend.setEnabled(isEnabled);
-        btnSendAttachment.setEnabled(isEnabled);
+        messageInput.setEnabled(isEnabled);
+        sendButton.setEnabled(isEnabled);
+        sendAttachmentButton.setEnabled(isEnabled);
         isWebViewLoaded = isEnabled;
     }
 
@@ -522,8 +522,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     public void onJSError() {
         chatErrors().insertError(InAppChatErrors.JS_ERROR);
         webView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.GONE);
-        relativeLayout.setVisibility(View.GONE);
+        spinner.setVisibility(View.GONE);
+        msgInputWrapper.setVisibility(View.GONE);
     }
 
     @Override
@@ -605,11 +605,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void showChatNotAvailableView(int duration) {
         if (!chatNotAvailableViewShown) {
-            chatNotAvailableView.setVisibility(View.VISIBLE);
-            chatNotAvailableView.animate().translationY(chatNotAvailableViewHeight).setDuration(duration).setListener(new AnimatorListenerAdapter() {
+            errorToast.setVisibility(View.VISIBLE);
+            errorToast.animate().translationY(chatNotAvailableViewHeight).setDuration(duration).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    chatNotAvailableView.setVisibility(View.VISIBLE);
+                    errorToast.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -618,10 +618,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void hideChatNotAvailableView(int duration) {
         if (chatNotAvailableViewShown) {
-            chatNotAvailableView.animate().translationY(0).setDuration(duration).setListener(new AnimatorListenerAdapter() {
+            errorToast.animate().translationY(0).setDuration(duration).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    chatNotAvailableView.setVisibility(View.INVISIBLE);
+                    errorToast.setVisibility(View.INVISIBLE);
                 }
             });
         }
@@ -658,8 +658,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void initAttachmentButton() {
-        btnSendAttachment = containerView.findViewById(R.id.ib_btn_send_attachment);
-        btnSendAttachment.setOnClickListener(new View.OnClickListener() {
+        sendAttachmentButton = containerView.findViewById(R.id.ib_lc_iv_send_attachment_btn);
+        sendAttachmentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 chooseFile();
