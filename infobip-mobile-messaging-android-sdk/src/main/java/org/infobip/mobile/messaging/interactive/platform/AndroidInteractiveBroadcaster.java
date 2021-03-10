@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 /**
  * @author tjuric
@@ -26,19 +27,37 @@ public class AndroidInteractiveBroadcaster implements InteractiveBroadcaster {
 
     @Override
     public Intent notificationActionTapped(Message message, NotificationCategory category, NotificationAction action) {
-        Intent actionTapped = prepareTappedIntent();
+        Intent actionTapped = prepare(InteractiveEvent.NOTIFICATION_ACTION_TAPPED);
         actionTapped.putExtras(MessageBundleMapper.messageToBundle(message));
         actionTapped.putExtras(NotificationActionBundleMapper.notificationActionToBundle(action));
         actionTapped.putExtras(NotificationCategoryBundleMapper.notificationCategoryToBundle(category));
 
-        context.sendBroadcast(actionTapped);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(actionTapped);
+        send(actionTapped);
 
         return actionTapped;
     }
 
-    private Intent prepareTappedIntent() {
-        return new Intent(InteractiveEvent.NOTIFICATION_ACTION_TAPPED.getKey())
+    @Override
+    public void inAppNotificationIsReadyToDisplay(Message message) {
+        Intent intent = prepare(InteractiveEvent.MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY).putExtras(MessageBundleMapper.messageToBundle(message));
+        send(intent);
+    }
+
+    private void send(Intent intent) {
+        try {
+            context.sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        } catch (Exception ex) {
+            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage());
+        }
+    }
+
+    private Intent prepare(InteractiveEvent event) {
+        return prepare(event.getKey());
+    }
+
+    private Intent prepare(String event) {
+        return new Intent(event)
                 .setPackage(context.getPackageName());
     }
 }

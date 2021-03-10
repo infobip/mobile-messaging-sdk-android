@@ -11,4 +11,5 @@ public interface InAppNotificationHandler {
     void userPressedNotificationButtonForMessage(Message message);
     void userTappedNotificationForMessage(Message message);
     void appWentToForeground();
+    void displayDialogFor(Message message);
 }

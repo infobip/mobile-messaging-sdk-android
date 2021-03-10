@@ -63,6 +63,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationCategory category = category(message.getCategory(), actions);
 
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
 
         inAppNotificationHandler.handleMessage(message);
 
@@ -76,6 +77,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message).thenReturn(null);
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
 
         inAppNotificationHandler.appWentToForeground();
         inAppNotificationHandler.appWentToForeground();
@@ -88,6 +90,7 @@ public class InAppNotificationHandlerImplTest {
     public void shouldNotShowDialogWhenProhibitedByRules() {
         Message message = message();
         when(inAppRules.shouldDisplayDialogFor(any(Message.class))).thenReturn(ShowOrNot.not());
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
 
         inAppNotificationHandler.handleMessage(message);
 
@@ -98,6 +101,7 @@ public class InAppNotificationHandlerImplTest {
     public void shouldSaveMessageToCacheWhenInBackground() {
         Message message = message();
         when(inAppRules.shouldDisplayDialogFor(any(Message.class))).thenReturn(ShowOrNot.showWhenInForeground());
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
 
         inAppNotificationHandler.handleMessage(message);
 
@@ -113,6 +117,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationCategory category = category(message.getCategory(), actions);
         when(oneMessageCache.getAndRemove()).thenReturn(message);
         when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
 
         inAppNotificationHandler.appWentToForeground();
 
@@ -214,6 +219,20 @@ public class InAppNotificationHandlerImplTest {
         inAppNotificationHandler.appWentToForeground();
 
         verify(dialogStack, times(1)).clear();
+    }
+
+    @Test
+    public void shouldSendBroadcastNotificationIfInAppsDisabled() {
+        Message message = message();
+        NotificationAction[] actions = actions();
+        NotificationCategory category = category(message.getCategory(), actions);
+
+        when(inAppRules.shouldDisplayDialogFor(eq(message))).thenReturn(ShowOrNot.showNow(category, actions, activity));
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(false);
+
+        inAppNotificationHandler.handleMessage(message);
+
+        verify(interactiveBroadcaster, times(1)).inAppNotificationIsReadyToDisplay(message);
     }
 
     private NotificationCategory category(String categoryId, NotificationAction... actions) {

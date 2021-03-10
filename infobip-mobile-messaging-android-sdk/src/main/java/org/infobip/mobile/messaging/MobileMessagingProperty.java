@@ -57,6 +57,7 @@ public enum MobileMessagingProperty {
     HEADSUP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.HEADSUP_NOTIFICATIONS_ENABLED", true),
     MARK_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.MARK_SEEN_ON_NOTIFICATION_TAP", true),
     INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
+    MODAL_IN_APP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MODAL_IN_APP_NOTIFICATIONS_ENABLED", true),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false),
     // END

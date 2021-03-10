@@ -20,4 +20,10 @@ public interface InteractiveBroadcaster {
      * @param notificationAction   tapped action
      */
     Intent notificationActionTapped(Message message, NotificationCategory notificationCategory, NotificationAction notificationAction);
+
+    /**
+     * Sends broadcast that in-app notification is ready to be displayed
+     * @param message to display as in-app notification
+     */
+    void inAppNotificationIsReadyToDisplay(Message message);
 }

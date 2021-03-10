@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.interactive.inapp.rules;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -25,11 +26,16 @@ public class InAppRules {
     private final MobileInteractive mobileInteractive;
     private final ForegroundStateMonitor foregroundStateMonitor;
     private final NotificationAction[] defaultInAppActions;
+    private final NotificationSettings notificationSettings;
 
-    public InAppRules(MobileInteractive mobileInteractive, ForegroundStateMonitor foregroundStateMonitor, PredefinedActionsProvider predefinedActionsProvider) {
+    public InAppRules(MobileInteractive mobileInteractive,
+                      ForegroundStateMonitor foregroundStateMonitor,
+                      PredefinedActionsProvider predefinedActionsProvider,
+                      NotificationSettings notificationSettings) {
         this.mobileInteractive = mobileInteractive;
         this.foregroundStateMonitor = foregroundStateMonitor;
         this.defaultInAppActions = predefinedActionsProvider.getDefaultInAppActions();
+        this.notificationSettings = notificationSettings;
     }
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
@@ -63,6 +69,10 @@ public class InAppRules {
         } else {
             return ShowOrNot.showWhenInForeground();
         }
+    }
+
+    public Boolean areModalInAppNotificationsEnabled() {
+        return notificationSettings != null && notificationSettings.areModalInAppNotificationsEnabled();
     }
 
     private NotificationAction[] filterActionsForInAppDialog(NotificationAction[] actions) {

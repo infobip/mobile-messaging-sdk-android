@@ -11,7 +11,19 @@ public enum InteractiveEvent {
      * NotificationCategory notificationCategory = NotificationCategory.createFrom(intent.getExtras());
      * </pre>
      */
-    NOTIFICATION_ACTION_TAPPED("org.infobip.mobile.messaging.interactive.NOTIFICATION_ACTION_TAPPED");
+    NOTIFICATION_ACTION_TAPPED("org.infobip.mobile.messaging.interactive.NOTIFICATION_ACTION_TAPPED"),
+
+    /**
+     * It is triggered when in-app notification is ready to be shown.
+     * <p>
+     * Contains message.
+     * <pre>
+     * {@code
+     * Message message = Message.createFrom(intent.getExtras());
+     * }
+     * </pre>
+     */
+    MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY("org.infobip.mobile.messaging.interactive.MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY");
 
     private final String key;
 

@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.infobip.mobile.messaging.demo">
+
+    <application>
+        <receiver
+            android:name=".InAppReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.interactive.MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY"/>
+            </intent-filter>
+        </receiver>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/main_activity_title"
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+    </application>
+
+</manifest>
