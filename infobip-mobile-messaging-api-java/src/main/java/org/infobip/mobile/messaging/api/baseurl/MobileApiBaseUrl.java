@@ -18,7 +18,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
  * @see Generator.Builder
  */
 @ApiKey("${api.key}")
-@HttpRequest("/mobile/{version}/baseUrl")
+@HttpRequest("/mobile/{version}/baseurl")
 @Version("1")
 public interface MobileApiBaseUrl {
 

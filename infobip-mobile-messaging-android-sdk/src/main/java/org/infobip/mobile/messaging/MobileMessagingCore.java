@@ -182,6 +182,8 @@ public class MobileMessagingCore
      * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of patch method
      */
     private void migratePrefsIfNecessary(Context context) {
+        PreferenceHelper.migrateCryptorIfNeeded(context);
+
         if (PreferenceHelper.shouldMigrateToPrivatePrefs(context)) {
             PreferenceHelper.migrateToPrivatePrefs(context);
         }

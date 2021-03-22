@@ -56,7 +56,7 @@ public class MobileApiBaseUrlTest {
         BaseUrlResponse response = mobileApiBaseUrl.getBaseUrl();
 
         //inspect http context
-        assertEquals("/mobile/1/baseUrl", debugServer.getUri());
+        assertEquals("/mobile/1/baseurl", debugServer.getUri());
         assertEquals(1, debugServer.getRequestCount());
         assertEquals(NanoHTTPD.Method.GET, debugServer.getRequestMethod());
         assertEquals(0, debugServer.getQueryParametersCount());

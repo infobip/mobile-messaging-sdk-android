@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -21,7 +22,7 @@ import java.util.Set;
 public abstract class PreferenceHelper {
     private static final String MM_PREFS_PREFIX = "org.infobip.mobile.messaging";
     private static final Object LOCK = new Object();
-    private static Cryptor cryptor = null;
+    protected static Cryptor cryptor = null;
     private static Boolean usePrivateSharedPrefs = null;
 
     protected PreferenceHelper() {
@@ -32,8 +33,12 @@ public abstract class PreferenceHelper {
             return cryptor;
         }
 
-        cryptor = new Cryptor(DeviceInformation.getDeviceID(context));
+        cryptor = new CryptorImpl(keySecretForCryptor(context));
         return cryptor;
+    }
+
+    private static String keySecretForCryptor(Context context) {
+        return DeviceInformation.getDeviceID(context);
     }
 
     public static SharedPreferences getDefaultMMSharedPreferences(Context context) {
@@ -64,28 +69,36 @@ public abstract class PreferenceHelper {
     }
 
     public static String findString(Context context, String key, String defaultValue, boolean encrypted) {
+        return findString(context, key, defaultValue, encrypted, getCryptor(context));
+    }
+
+    private static String findString(Context context, String key, String defaultValue, boolean encrypted, Cryptor cryptor) {
         SharedPreferences sharedPreferences = getDefaultMMSharedPreferences(context);
         if (!encrypted) {
             return sharedPreferences.getString(key, defaultValue);
         }
 
-        String encryptedKey = getCryptor(context).encrypt(key);
+        String encryptedKey = cryptor.encrypt(key);
         String encryptedValue = sharedPreferences.getString(encryptedKey, defaultValue);
-        return getCryptor(context).decrypt(encryptedValue);
+        return cryptor.decrypt(encryptedValue);
     }
 
     public static void saveString(Context context, MobileMessagingProperty property, String value) {
         saveString(context, property.getKey(), value, property.isEncrypted());
     }
 
-    public static void saveString(Context context, String key, String value, boolean encrypted) {
+    protected static void saveString(Context context, String key, String value, boolean encrypted) {
+        saveString(context, key, value, encrypted, getCryptor(context));
+    }
+
+    private static void saveString(Context context, String key, String value, boolean encrypted, Cryptor cryptor) {
         if (!encrypted) {
             saveString(context, key, value);
             return;
         }
 
-        String encryptedKey = getCryptor(context).encrypt(key);
-        String encryptedValue = getCryptor(context).encrypt(value);
+        String encryptedKey = cryptor.encrypt(key);
+        String encryptedValue = cryptor.encrypt(value);
         saveString(context, encryptedKey, encryptedValue);
     }
 
@@ -341,9 +354,13 @@ public abstract class PreferenceHelper {
     }
 
     public static void remove(Context context, MobileMessagingProperty property) {
+        remove(context, property, getCryptor(context));
+    }
+
+    private static void remove(Context context, MobileMessagingProperty property, Cryptor cryptor) {
         String key = property.getKey();
         if (property.isEncrypted()) {
-            key = getCryptor(context).encrypt(key);
+            key = cryptor.encrypt(key);
         }
         remove(context, key);
     }
@@ -414,14 +431,50 @@ public abstract class PreferenceHelper {
         publicPrefsEditor.apply();
         privatePrefsEditor.apply();
 
-        migrateCryptedEntriesFromPublicToPrivatePrefs(context,
+        migrateCryptedEntriesFromPublicToPrivatePrefs(context, cryptedProperties());
+    }
+
+    public static void migrateCryptorIfNeeded(Context context) {
+        Cryptor oldCryptor = new ECBCryptorImpl(keySecretForCryptor(context));
+        if (shouldMigrateFromCryptor(oldCryptor, context)) {
+            migrate(oldCryptor, getCryptor(context), cryptedProperties(), context);
+        }
+    }
+
+    protected static Boolean shouldMigrateFromCryptor(Cryptor fromCryptor, Context context) {
+        MobileMessagingProperty[] cryptedProperties = cryptedProperties();
+        for (MobileMessagingProperty property : cryptedProperties) {
+            String oldEncryptedKey = fromCryptor.encrypt(property.getKey());
+            if (contains(context, oldEncryptedKey)) return true;
+        }
+        return false;
+    }
+
+    private static void migrate(Cryptor fromCryptor, Cryptor toCryptor, MobileMessagingProperty[] cryptedProperties, Context context) {
+        MobileMessagingLogger.d("Migrating preferences from deprecated Cryptor");
+        for (MobileMessagingProperty property : cryptedProperties) {
+            String oldEncryptedKey = fromCryptor.encrypt(property.getKey());
+            if (!contains(context, oldEncryptedKey)) continue;
+
+            String value = findString(context, property.getKey(), (String) property.getDefaultValue(), property.isEncrypted(), fromCryptor);
+            if (StringUtils.isBlank(value)) continue;
+
+            remove(context, oldEncryptedKey);
+            saveString(context, property.getKey(), value, property.isEncrypted(), toCryptor);
+        }
+    }
+
+    private static MobileMessagingProperty[] cryptedProperties() {
+        return new MobileMessagingProperty[]{
                 MobileMessagingProperty.INFOBIP_REGISTRATION_ID,
                 MobileMessagingProperty.APPLICATION_CODE,
                 MobileMessagingProperty.SENDER_ID,
-                MobileMessagingProperty.CLOUD_TOKEN);
+                MobileMessagingProperty.CLOUD_TOKEN
+        };
     }
 
-    private static void migrateCryptedEntriesFromPublicToPrivatePrefs(Context context, MobileMessagingProperty... properties) {
+    private static void migrateCryptedEntriesFromPublicToPrivatePrefs(Context context, MobileMessagingProperty[] properties) {
+        MobileMessagingLogger.d("Migrating preferences from public to private");
         for (MobileMessagingProperty property : properties) {
             String encryptedKey = getCryptor(context).encrypt(property.getKey());
             String encryptedValue = getPublicSharedPreferences(context).getString(encryptedKey, (String) property.getDefaultValue());
