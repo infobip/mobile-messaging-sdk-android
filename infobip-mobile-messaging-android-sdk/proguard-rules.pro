@@ -53,7 +53,7 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
--keep public enum org.infobip.mobile.messaging.* { *; }
+-keep public enum org.infobip.mobile.messaging.** { *; }
 
 # Explicitly preserve all serialization members. The Serializable interface
 # is only a marker interface, so it wouldn't save them.
@@ -74,7 +74,7 @@
 -dontwarn lombok.NonNull
 
 # Mobile Messaging API classes
--keep class org.infobip.mobile.messaging.api.* { *; }
+-keep class org.infobip.mobile.messaging.api.** { *; }
 
 # Fix for JobIntentService
 -keep class org.infobip.mobile.messaging.platform.JobIntentService$* { *; }
@@ -82,12 +82,12 @@
 # GSON-related
 
 # Gson specific classes
--keep class sun.misc.Unsafe.* { *; }
+-keep class sun.misc.Unsafe.** { *; }
 #-dontwarn sun.misc.Unsafe
 #-keep class com.google.gson.stream.** { *; }
 
 # Application classes that will be serialized/deserialized over Gson
--keep class org.infobip.mobile.messaging.dal.json.* { *; }
+-keep class org.infobip.mobile.messaging.dal.json.** { *; }
 -keep class org.infobip.mobile.messaging.Installation { *; }
 -keep class org.infobip.mobile.messaging.Message { *; }
 -keep class org.infobip.mobile.messaging.User { *; }
@@ -97,7 +97,7 @@
 -keep class org.infobip.mobile.messaging.interactive.NotificationCategory { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper$* { *; }
--keep class org.infobip.mobile.messaging.mobile.* { *; }
+-keep class org.infobip.mobile.messaging.mobile.** { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
