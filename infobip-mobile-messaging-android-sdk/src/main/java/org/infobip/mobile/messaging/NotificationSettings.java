@@ -139,6 +139,14 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MARK_SEEN_ON_NOTIFICATION_TAP);
     }
 
+    public void setInAppNotificationsEnabled(boolean inAppNotificationsEnabled) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.MODAL_IN_APP_NOTIFICATIONS_ENABLED, inAppNotificationsEnabled);
+    }
+
+    public boolean areModalInAppNotificationsEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MODAL_IN_APP_NOTIFICATIONS_ENABLED);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
@@ -168,6 +176,7 @@ public class NotificationSettings {
         private boolean foregroundNotificationEnabled = (boolean) MobileMessagingProperty.FOREGROUND_NOTIFICATION_ENABLED.getDefaultValue();
         private boolean multipleNotificationsEnabled = (boolean) MobileMessagingProperty.MULTIPLE_NOTIFICATIONS_ENABLED.getDefaultValue();
         private boolean headsUpNotificationsEnabled = (boolean) MobileMessagingProperty.HEADSUP_NOTIFICATIONS_ENABLED.getDefaultValue();
+        private boolean modalInAppNotificationsEnabled = (boolean) MobileMessagingProperty.MODAL_IN_APP_NOTIFICATIONS_ENABLED.getDefaultValue();
 
         public Builder(Context context) {
             if (null == context) {
@@ -390,6 +399,17 @@ public class NotificationSettings {
         }
 
         /**
+         * When you want to disable automatic {@link org.infobip.mobile.messaging.Message.InAppStyle#MODAL} in-app notifications.
+         * <br>
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutModalInAppNotifications() {
+            this.modalInAppNotificationsEnabled = false;
+            return this;
+        }
+
+        /**
          * Builds the <i>NotificationSettings</i> configuration.
          *
          * @return {@link NotificationSettings}
@@ -407,7 +427,7 @@ public class NotificationSettings {
             notificationSettings.setForegroundNotificationEnabled(foregroundNotificationEnabled);
             notificationSettings.setMultipleNotificationsEnabled(multipleNotificationsEnabled);
             notificationSettings.setHeadsUpNotificationsEnabled(headsUpNotificationsEnabled);
-
+            notificationSettings.setInAppNotificationsEnabled(modalInAppNotificationsEnabled);
             return notificationSettings;
         }
     }

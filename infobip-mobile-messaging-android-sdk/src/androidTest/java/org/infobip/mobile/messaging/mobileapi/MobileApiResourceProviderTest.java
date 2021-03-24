@@ -41,7 +41,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
 
         // then
-        assertEquals("customUrl", MobileMessagingCore.getApiUri(context));
+        assertEquals("customUrl", MobileMessagingCore.getApiUri(context, false));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         }
 
         // then
-        assertEquals(MobileMessagingProperty.API_URI.getDefaultValue(), MobileMessagingCore.getApiUri(context));
+        assertEquals(MobileMessagingProperty.API_URI.getDefaultValue(), MobileMessagingCore.getApiUri(context, false));
     }
 
     @Test

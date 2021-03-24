@@ -58,7 +58,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 new InAppRules(
                         MobileInteractive.getInstance(context),
                         new ForegroundStateMonitorImpl(context),
-                        new PredefinedActionsProvider(context)
+                        new PredefinedActionsProvider(context),
+                        MobileMessagingCore.getInstance(context).getNotificationSettings()
                 ),
                 new OneMessagePreferenceCache(context),
                 new QueuedDialogStack(),
@@ -71,18 +72,13 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     @Override
     public void handleMessage(Message message) {
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
-        if (showOrNot.shouldShowNow()) {
-            dialogStack.add(
-                    inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this),
-                    message,
-                    showOrNot.getCategory(),
-                    showOrNot.getActionsToShowFor());
+
+        if (!showOrNot.shouldShowNow() && showOrNot.shouldShowWhenInForeground()) {
+            oneMessageCache.save(message);
             return;
         }
 
-        if (showOrNot.shouldShowWhenInForeground()) {
-            oneMessageCache.save(message);
-        }
+        displayDialogFor(message, inAppRules.areModalInAppNotificationsEnabled());
     }
 
     @Override
@@ -94,6 +90,28 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         }
 
         handleMessage(message);
+    }
+
+    @Override
+    public void displayDialogFor(Message message) {
+        displayDialogFor(message, true);
+    }
+
+    private void displayDialogFor(Message message, Boolean displayingEnabled) {
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+        if (!showOrNot.shouldShowNow()) {
+            return;
+        }
+
+        if (displayingEnabled) {
+            dialogStack.add(
+                        inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this),
+                        message,
+                        showOrNot.getCategory(),
+                        showOrNot.getActionsToShowFor());
+        } else {
+            interactiveBroadcaster.inAppNotificationIsReadyToDisplay(message);
+        }
     }
 
     @Override

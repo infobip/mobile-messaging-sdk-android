@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.chat.view;
 
 import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 
-public class InAppChatInputFinishChecker implements Runnable{
+public class InAppChatInputFinishChecker implements Runnable {
 
     private final InAppChatClient chatClient;
     private String inputValue;

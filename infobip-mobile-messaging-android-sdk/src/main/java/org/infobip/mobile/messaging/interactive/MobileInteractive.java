@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.interactive;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 
@@ -18,7 +19,7 @@ public abstract class MobileInteractive {
      * If the app was killed and there is no instance available, it will return a temporary instance based on current context.
      *
      * @param context android context object.
-     * @return instance of MobileGeo.
+     * @return instance of MobileInteractive.
      */
     public synchronized static MobileInteractive getInstance(Context context) {
         return MobileInteractiveImpl.getInstance(context);
@@ -81,4 +82,11 @@ public abstract class MobileInteractive {
      * Cleans up MobileInteractive installation and removes custom categories.
      */
     public abstract void cleanup();
+
+    /**
+     * Displays in-app notification for provided message, if it's not expired yet.
+     * {@link Message#getInAppStyle()} should be {@link org.infobip.mobile.messaging.Message.InAppStyle#MODAL}.
+     * @param message   Message object
+     */
+    public abstract void displayInAppDialogFor(@NonNull Message message);
 }

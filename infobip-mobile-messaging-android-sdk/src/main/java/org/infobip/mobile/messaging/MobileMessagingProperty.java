@@ -27,6 +27,8 @@ public enum MobileMessagingProperty {
     BATCH_REPORTING_DELAY("org.infobip.mobile.messaging.notification.BATCH_REPORTING_DELAY", 5000L),
     VERSION_CHECK_INTERVAL_DAYS("org.infobip.mobile.messaging.notification.VERSION_CHECK_INTERVAL_DAYS", 1),
     VERSION_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.VERSION_CHECK_LAST_TIME", 0L),
+    BASEURL_CHECK_INTERVAL_HOURS("org.infobip.mobile.messaging.notification.BASEURL_CHECK_INTERVAL_HOURS", 24),
+    BASEURL_CHECK_LAST_TIME("org.infobip.mobile.messaging.notification.BASEURL_CHECK_LAST_TIME", 0L),
 
     DEFAULT_MAX_RETRY_COUNT("org.infobip.mobile.messaging.infobip.DEFAULT_MAX_RETRY_COUNT", 3),
     DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.DEFAULT_EXP_BACKOFF_MULTIPLIER", 2),
@@ -55,6 +57,7 @@ public enum MobileMessagingProperty {
     HEADSUP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.HEADSUP_NOTIFICATIONS_ENABLED", true),
     MARK_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.MARK_SEEN_ON_NOTIFICATION_TAP", true),
     INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
+    MODAL_IN_APP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MODAL_IN_APP_NOTIFICATIONS_ENABLED", true),
 
     GEOFENCING_ACTIVATED("org.infobip.mobile.messaging.geo.GEOFENCING_ACTIVATED", false),
     // END

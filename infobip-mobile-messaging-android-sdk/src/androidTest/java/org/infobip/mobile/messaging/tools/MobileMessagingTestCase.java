@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.baseurl.MobileApiBaseUrl;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
@@ -63,6 +64,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileApiMessages mobileApiMessages;
     protected MobileApiAppInstance mobileApiAppInstance;
     protected MobileApiVersion mobileApiVersion;
+    protected MobileApiBaseUrl mobileApiBaseUrl;
     protected String myDeviceRegId = "TestDeviceRegId";
 
     protected static final String KEY_FOR_LIST_PARAM_1 = "param1";
@@ -164,10 +166,12 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         mobileApiAppInstance = mock(MobileApiAppInstance.class, withSettings().verboseLogging());
         mobileApiMessages = mock(MobileApiMessages.class);
         mobileApiVersion = mock(MobileApiVersion.class);
+        mobileApiBaseUrl = mock(MobileApiBaseUrl.class);
 
         given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);
         given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
         given(mobileApiResourceProvider.getMobileApiVersion(any(Context.class))).willReturn(mobileApiVersion);
+        given(mobileApiResourceProvider.getMobileApiBaseUrl(any(Context.class))).willReturn(mobileApiBaseUrl);
 
         notificationHandler = mock(NotificationHandler.class);
         broadcaster = mock(Broadcaster.class);

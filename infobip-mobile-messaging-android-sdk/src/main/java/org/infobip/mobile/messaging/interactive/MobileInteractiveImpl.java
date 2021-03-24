@@ -221,6 +221,12 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     }
 
     @Override
+    public void displayInAppDialogFor(@NonNull Message message) {
+        inAppNotificationHandler(context).displayDialogFor(message);
+    }
+
+
+    @Override
     public void depersonalize() {
         //do nothing
     }

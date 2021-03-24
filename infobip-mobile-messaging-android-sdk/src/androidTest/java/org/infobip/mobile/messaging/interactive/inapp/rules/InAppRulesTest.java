@@ -3,11 +3,14 @@ package org.infobip.mobile.messaging.interactive.inapp.rules;
 import android.app.Activity;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
+import org.infobip.mobile.messaging.interactive.platform.MockActivity;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.platform.Time;
 import org.junit.Before;
@@ -28,7 +31,7 @@ import static org.mockito.Mockito.when;
  * @author sslavin
  * @since 18/04/2018.
  */
-public class InAppRulesTest {
+public class InAppRulesTest extends MobileMessagingBaseTestCase {
 
     private InAppRules inAppRules;
 
@@ -49,8 +52,14 @@ public class InAppRulesTest {
                         .withTitleText("Title")
                         .build()
         };
+
+        NotificationSettings notificationSettings = new NotificationSettings.Builder(context)
+                .withDefaultIcon(android.R.drawable.ic_dialog_alert)
+                .withCallbackActivity(MockActivity.class)
+                .build();
+
         when(predefinedActionsProvider.getDefaultInAppActions()).thenReturn(defaultActions);
-        inAppRules = new InAppRules(mobileInteractive, foregroundStateMonitor, predefinedActionsProvider);
+        inAppRules = new InAppRules(mobileInteractive, foregroundStateMonitor, predefinedActionsProvider, notificationSettings);
     }
 
     @Test
