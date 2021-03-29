@@ -19,7 +19,6 @@ android {
         versionName version
         applicationId "org.infobip.mobile.messaging.demo"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        manifestPlaceholders.applicationClass = "Application"
     }
 
     compileOptions {
@@ -76,7 +75,6 @@ android {
 
         customInApp {
             dimension "default"
-            manifestPlaceholders.applicationClass = "InAppApplication"
         }
     }
 }
