@@ -43,3 +43,4 @@ captures/
 
 #Jenkins
 .android/
+*.gpg

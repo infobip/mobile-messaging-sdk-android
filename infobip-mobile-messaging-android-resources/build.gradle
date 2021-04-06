@@ -9,14 +9,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
     }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'idea'
-apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion mm_compileSdkVersion
@@ -80,20 +78,6 @@ android.libraryVariants.all { variant ->
     }
 }
 
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
-    configurations = ['archives']
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = project.name
-        userOrg = 'infobip'
-        vcsUrl = "https://github.com/infobip/mobile-messaging-sdk-android"
-        licenses = ['Apache-2.0']
-        labels = ['aar', 'android']
-    }
-}
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     archiveClassifier.set('sources')
@@ -114,4 +98,9 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
+
+ext {
+    PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-resources'
+}
+apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
 

@@ -1,34 +1,22 @@
 buildscript {
-    ext {
-        artifactoryUsername = project.hasProperty('artifactoryUsername') ? project['artifactoryUsername'] : System.getenv('ARTIFACTORY_USERNAME')
-        artifactoryPassword = project.hasProperty('artifactoryPassword') ? project['artifactoryPassword'] : System.getenv('ARTIFACTORY_PASSWORD')
-    }
 
     repositories {
         jcenter()
         maven {
-            url 'https://oss.jfrog.org/artifactory/plugins-release'
-            credentials {
-                username = "${artifactoryUsername}"
-                password = "${artifactoryPassword}"
-            }
-        }
-        maven {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.7'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.0'
     }
 }
 
 plugins {
     id 'net.researchgate.release' version '2.8.1'
-    id 'com.jfrog.artifactory' version '4.4.7'
-    id 'com.jfrog.bintray' version '1.7.3'
+    id 'maven-publish'
 }
 
 ext {
@@ -45,6 +33,7 @@ ext {
 allprojects {
     repositories {
         jcenter()
+        mavenCentral()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -52,47 +41,11 @@ allprojects {
     }
 }
 
+apply plugin: 'io.codearte.nexus-staging'
+
 subprojects {
     apply plugin: "maven"
-    apply plugin: "com.jfrog.artifactory"
-
-    def repo = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
-    def artifactoryUrl = System.getenv('ARTIFACTORY_URL') ? System.getenv('ARTIFACTORY_URL') : "https://oss.jfrog.org/artifactory"
-
-    task checkProperties {
-        doLast {
-            if (!"${artifactoryUsername}") {
-                throw new RuntimeException("Couldn't find artifactoryUsername property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_USERNAME?")
-            } else if (!"${artifactoryPassword}") {
-                throw new RuntimeException("Couldn't find artifactoryPassword property. Did you forget to specify it in ~/.gradle/gradle.properties or env.ARTIFACTORY_PASSWORD?")
-            }
-        }
-    }
-
-    artifactoryPublish.dependsOn(checkProperties)
-
-    artifactory {
-        contextUrl = artifactoryUrl
-        publish {
-            repository {
-                repoKey = "${repo}"
-                username = "${artifactoryUsername}"
-                password = "${artifactoryPassword}"
-                maven = true
-            }
-            defaults {
-                publishConfigs('archives')
-            }
-        }
-        resolve {
-            repository {
-                repoKey = 'libs-release'
-                username = "${artifactoryUsername}"
-                password = "${artifactoryPassword}"
-                maven = true
-            }
-        }
-    }
+    apply plugin: "maven-publish"
 }
 
 task clean(type: Delete) {
@@ -111,8 +64,15 @@ task updateVersionInReadme {
 
 afterReleaseBuild.dependsOn updateVersionInReadme
 
+// workaround for `net.researchgate.release` plugin issue:
+// https://github.com/researchgate/gradle-release/issues/186
+task build {}
+build.dependsOn subprojects.findAll {!it.name.contains("demo")}.build
+
+afterReleaseBuild.dependsOn subprojects.publish
+
 release {
-    buildTasks = ['clean', 'build', 'bintrayUpload']
+    buildTasks = ['clean', 'build']
     git {
         requireBranch = ''
         pushToRemote = 'origin'

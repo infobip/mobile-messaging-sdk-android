@@ -1,0 +1,95 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+//for signing artifacts
+ext["signing.keyId"] = project.hasProperty('signing.keyId') ? project.property('signing.keyId') : System.getenv('SIGNING_KEY_ID')
+ext["signing.password"] = project.hasProperty('signing.password') ? project.property('signing.password') : System.getenv('SIGNING_PASSWORD')
+ext["signing.secretKeyRingFile"] = project.hasProperty('signing.secretKeyRingFile') ? project.property('signing.secretKeyRingFile') : System.getenv('SIGNING_SECRET_KEY_RING_FILE')
+
+//for connecting to https://oss.sonatype.org/
+ext["ossrhUsername"] = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : System.getenv('OSSRH_USERNAME')
+ext["ossrhPassword"] = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : System.getenv('OSSRH_PASSWORD')
+
+//for auto close and release staging repository
+ext["sonatypeStagingProfileId"] = project.hasProperty('sonatypeStagingProfileId') ? project.property('sonatypeStagingProfileId') : System.getenv('SONATYPE_STAGING_PROFILE_ID')
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId group
+            artifactId PUBLISH_ARTIFACT_ID
+            if (System.getenv('RELEASE_VERSION') != null) {
+                version System.getenv('RELEASE_VERSION')
+            } else {
+                version version
+            }
+            if (project.plugins.findPlugin("com.android.library")) {
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            } else {
+                artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+            }
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = PUBLISH_ARTIFACT_ID
+                description = 'Mobile Messaging SDK for Android'
+                url = 'https://github.com/infobip/mobile-messaging-sdk-android'
+                licenses {
+                    license {
+                        name = 'Apache License 2.0'
+                        url = 'https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'infobip'
+                        name = 'Infobip'
+                        email = 'support@infobip.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:github.com/infobip/mobile-messaging-sdk-android.git'
+                    developerConnection = 'scm:git:ssh://github.com/infobip/mobile-messaging-sdk-android.git'
+                    url = 'https://github.com/infobip/mobile-messaging-sdk-android'
+                }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    project.configurations.implementation.allDependencies.each {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "SonatypeReleases"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications
+}
+
+//will work only if not more than one staging repo is opened.
+nexusStaging {
+    packageGroup = group
+    stagingProfileId = sonatypeStagingProfileId
+    username = ossrhUsername
+    password = ossrhPassword
+}
+
+
