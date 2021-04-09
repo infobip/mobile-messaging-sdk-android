@@ -99,7 +99,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     /* View components */
     private InAppChatWebView webView;
     private EditText messageInput;
-    private ImageView sendButton;
+    private ImageView sendMessageButton;
     private ImageView sendAttachmentButton;
     private ProgressBar spinner;
     private Toolbar toolbar;
@@ -244,6 +244,13 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
         updateToolbarConfigs();
         fillButtonByPrimaryColor(sendAttachmentButton);
+        updateBackgroundColor();
+    }
+
+    private void updateBackgroundColor() {
+        @ColorInt int backgroundColor = Color.parseColor(widgetInfo.getBackgroundColor());
+        mainWindow.setBackgroundColor(backgroundColor);
+        webView.setBackgroundColor(backgroundColor);
     }
 
     private void sendInputDraftImmediately() {
@@ -341,10 +348,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 inputCheckerHandler.removeCallbacks(inputFinishChecker);
                 if (s.length() > 0 && !sendButtonIsColored) {
-                    fillButtonByPrimaryColor(sendButton);
+                    fillButtonByPrimaryColor(sendMessageButton);
                     sendButtonIsColored = true;
                 } else if (s.length() == 0) {
-                    sendButton.getDrawable().clearColorFilter();
+                    sendMessageButton.getDrawable().clearColorFilter();
                     sendButtonIsColored = false;
                 }
             }
@@ -480,8 +487,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void initSendButton() {
-        sendButton = containerView.findViewById(R.id.ib_lc_iv_send_btn);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        sendMessageButton = containerView.findViewById(R.id.ib_lc_iv_send_btn);
+        sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Editable text = messageInput.getText();
@@ -513,7 +520,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @Override
     public void setControlsEnabled(boolean isEnabled) {
         messageInput.setEnabled(isEnabled);
-        sendButton.setEnabled(isEnabled);
+        sendMessageButton.setEnabled(isEnabled);
         sendAttachmentButton.setEnabled(isEnabled);
         isWebViewLoaded = isEnabled;
     }
