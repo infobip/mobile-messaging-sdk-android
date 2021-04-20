@@ -86,10 +86,11 @@ signing {
 
 //will work only if not more than one staging repo is opened.
 nexusStaging {
+    serverUrl = "https://s01.oss.sonatype.org/service/local/"
     packageGroup = group
     stagingProfileId = sonatypeStagingProfileId
     username = ossrhUsername
     password = ossrhPassword
+    numberOfRetries = 50
+    delayBetweenRetriesInMillis = 3000
 }
-
-
