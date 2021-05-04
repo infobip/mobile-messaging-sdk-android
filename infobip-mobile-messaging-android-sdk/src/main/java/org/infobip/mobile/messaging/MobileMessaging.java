@@ -554,7 +554,7 @@ public abstract class MobileMessaging {
                 return;
             }
 
-            throw new IllegalArgumentException("Application code is not provided to the library, make sure it is available in resources, builder or via app code provider");
+            throw new IllegalArgumentException("Application code is not provided to MobileMessaging library, make sure it is available in resources, builder or via app code provider");
         }
 
         /**

@@ -1,7 +1,8 @@
 package org.infobip.mobile.messaging.cloud;
 
+import android.support.annotation.NonNull;
+
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 /**
  * @author sslavin
@@ -19,11 +20,7 @@ public abstract class RegistrationTokenHandler {
     public abstract void cleanupToken(String senderId);
     public abstract void acquireNewToken(String senderId);
 
-    protected void sendRegistrationToServer(String token) {
-        if (StringUtils.isBlank(token)) {
-            return;
-        }
-
+    protected void sendRegistrationToServer(@NonNull String token) {
         String registrationId = mobileMessagingCore.getPushRegistrationId();
         boolean saveNeeded = null == registrationId ||
                 null == mobileMessagingCore.getCloudToken() ||

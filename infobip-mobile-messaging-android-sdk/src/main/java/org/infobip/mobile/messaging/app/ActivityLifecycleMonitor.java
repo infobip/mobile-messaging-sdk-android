@@ -44,7 +44,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     private static synchronized void setForeground(Context context, boolean foreground) {
         boolean foregroundBefore = ActivityLifecycleMonitor.foreground;
         ActivityLifecycleMonitor.foreground = foreground;
-        if (!foregroundBefore && foreground) {
+        if (!foregroundBefore && foreground && context != null) {
             dispatchEventToCore(context);
             dispatchEventToModules(context);
             UserSessionTracker.startSessionTracking(context);

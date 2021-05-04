@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -165,7 +166,7 @@ public class CustomAttributesMapper {
     }
 
     private static boolean isPossiblyDateOrDateTime(String stringValue) {
-        return Character.isDigit(stringValue.charAt(0)) &&
+        return StringUtils.isNotBlank(stringValue) && Character.isDigit(stringValue.charAt(0)) &&
                 (stringValue.length() == DateTimeUtil.DATE_YMD_FORMAT.length() ||
                         stringValue.length() == DateTimeUtil.DATE_TIME_LENGTH_DATE_FORMAT3);
     }

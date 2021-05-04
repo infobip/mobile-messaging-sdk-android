@@ -156,7 +156,7 @@ public class InstallationSynchronizer {
             @Override
             public AppInstance run(Void[] voids) {
                 MobileMessagingLogger.v("CREATE INSTALLATION >>>", installation);
-                setCloudTokenReported(true);
+                mobileMessagingCore.setCloudTokenReported(true);
                 final AppInstance appInstance = InstallationMapper.toBackend(installation);
                 return mobileApiAppInstance.createInstance(appInstance);
             }
@@ -166,7 +166,7 @@ public class InstallationSynchronizer {
                 MobileMessagingLogger.v("CREATE INSTALLATION DONE <<<", appInstance);
 
                 if (appInstance == null) {
-                    setCloudTokenReported(false);
+                    mobileMessagingCore.setCloudTokenReported(false);
                     return;
                 }
 
@@ -191,7 +191,7 @@ public class InstallationSynchronizer {
             public void error(Throwable error) {
                 MobileMessagingLogger.v("CREATE INSTALLATION ERROR <<<", error);
 
-                setCloudTokenReported(false);
+                mobileMessagingCore.setCloudTokenReported(false);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
 
@@ -290,7 +290,7 @@ public class InstallationSynchronizer {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                 }
 
-                setCloudTokenReported(false);
+                mobileMessagingCore.setCloudTokenReported(false);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
                 broadcaster.error(mobileMessagingError);
                 if (actionListener != null) {
@@ -317,7 +317,7 @@ public class InstallationSynchronizer {
             mobileMessagingCore.setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
             mobileMessagingCore.setPushRegistrationEnabledReported(true);
         }
-        setCloudTokenReported(true);
+        mobileMessagingCore.setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
         Map<String, CustomAttributeValue> customAttsMap = mobileMessagingCore.getMergedUnreportedAndReportedCustomAtts();
@@ -389,10 +389,6 @@ public class InstallationSynchronizer {
         if (registrationId != null) {
             PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, registrationId);
         }
-    }
-
-    public void setCloudTokenReported(boolean reported) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, reported);
     }
 
     public boolean isCloudTokenReported() {

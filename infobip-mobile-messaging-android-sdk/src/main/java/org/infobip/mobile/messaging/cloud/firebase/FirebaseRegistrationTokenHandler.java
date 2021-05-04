@@ -32,6 +32,10 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
     }
 
     public void handleNewToken(String senderId, String token) {
+        if (StringUtils.isBlank(token)) {
+            MobileMessagingLogger.w("Not processing empty FCM token");
+            return;
+        }
         MobileMessagingLogger.v(TAG, "RECEIVED FCM TOKEN", token);
         broadcaster.tokenReceived(token);
         sendRegistrationToServer(token);
@@ -54,7 +58,7 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 final String token = instanceIdResult.getToken();
-                if (StringUtils.isNotBlank(token) && StringUtils.isNotBlank(mobileMessagingCore.getApplicationCode())) handleNewToken(senderId, token);
+                handleNewToken(senderId, token);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

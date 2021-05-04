@@ -334,7 +334,7 @@ public class MobileMessagingCore
         }
 
         if (TextUtils.isEmpty(MobileMessagingCore.getApplicationCode(context))) {
-            MobileMessagingLogger.w("Application code is not found, check your setup");
+            MobileMessagingLogger.w("Application code is not found, check your MobileMessaging setup");
             return;
         }
 
@@ -676,7 +676,7 @@ public class MobileMessagingCore
 
     public void setCloudToken(String registrationId) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.CLOUD_TOKEN, registrationId);
-        setCloudTokenUnreported();
+        setCloudTokenReported(false);
     }
 
     public String[] getAndRemoveUnreportedMessageIds() {
@@ -704,7 +704,7 @@ public class MobileMessagingCore
 
             String strTimeMessageReceived = messageIdWithTimestamp[1];
 
-            long timeMessageReceived = Long.valueOf(strTimeMessageReceived);
+            long timeMessageReceived = Long.parseLong(strTimeMessageReceived);
             long timeInterval = Time.now() - timeMessageReceived;
 
             if (timeInterval > MESSAGE_EXPIRY_TIME || i >= MESSAGE_ID_PARAMETER_LIMIT) {
@@ -971,8 +971,8 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE, Platform.usedPushServiceType.name());
     }
 
-    public void setCloudTokenUnreported() {
-        installationSynchronizer().setCloudTokenReported(false);
+    public void setCloudTokenReported(boolean reported) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED, reported);
     }
 
     public static void setMessageStoreClass(Context context, Class<? extends MessageStore> messageStoreClass) {
@@ -1166,6 +1166,7 @@ public class MobileMessagingCore
         return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
+    @Nullable
     public String getApplicationCode() {
         return getApplicationCode(context);
     }
@@ -1579,6 +1580,10 @@ public class MobileMessagingCore
     }
 
     public void reportSessions() {
+        if (StringUtils.isBlank(getApplicationCode(context))) {
+            MobileMessagingLogger.d("Postponing session sync until app code is available");
+            return;
+        }
         userEventsSynchronizer().reportSessions();
     }
 
@@ -1788,7 +1793,7 @@ public class MobileMessagingCore
      */
     public void handleNoRegistrationError(MobileMessagingError mobileMessagingError) {
         if (ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
-            setCloudTokenUnreported();
+            setCloudTokenReported(false);
             setUnreportedCustomAttributes(getMergedUnreportedAndReportedCustomAtts());
             setShouldRepersonalize(true);
             removeReportedSystemData();

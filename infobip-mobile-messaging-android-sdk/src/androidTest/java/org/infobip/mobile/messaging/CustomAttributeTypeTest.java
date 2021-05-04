@@ -26,11 +26,13 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
     private ArgumentCaptor<Installation> installationCaptor;
 
     private static final String KEY_FOR_STRING = "keyForString";
+    private static final String KEY_FOR_EMPTY_STRING = "keyForEmptyString";
     private static final String KEY_FOR_NUMBER = "keyForNumber";
     private static final String KEY_FOR_DATE = "keyForDate";
     private static final String KEY_FOR_DATETIME = "keyForDateTime";
 
     private final String SOME_STRING_VALUE = "bla";
+    private final String EMPTY_STRING_VALUE = "";
     private final int SOME_NUMBER_VALUE = 1111;
     private final Boolean SOME_BOOLEAN_VALUE = true;
     private final Date SOME_DATE_VALUE = new Date();
@@ -150,6 +152,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         tempUser = setListCustomAttributes(tempUser);
         Map<String, Object> customAtts = new HashMap<>();
         customAtts.put(KEY_FOR_STRING, SOME_STRING_VALUE);
+        customAtts.put(KEY_FOR_EMPTY_STRING, EMPTY_STRING_VALUE);
         customAtts.put(KEY_FOR_DATE, DateTimeUtil.dateToYMDString(SOME_DATE_VALUE));
         customAtts.put(KEY_FOR_DATETIME, DateTimeUtil.dateTimeToISO8601UTCString(SOME_DATETIME_VALUE));
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
@@ -161,6 +164,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         User user = UserMapper.fromBackend(serverResponse);
         String keyForString = user.getCustomAttributeValue(KEY_FOR_STRING).stringValue();
+        String keyForEmptyString = user.getCustomAttributeValue(KEY_FOR_EMPTY_STRING).stringValue();
         Number keyForNumber = user.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = user.getCustomAttributeValue(KEY_FOR_DATE).dateValue();
         CustomAttributeValue.DateTime keyForDateTime = user.getCustomAttributeValue(KEY_FOR_DATETIME).dateTimeValue();
@@ -174,12 +178,13 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         }
 
         assertEquals(SOME_STRING_VALUE, keyForString);
+        assertEquals(EMPTY_STRING_VALUE, keyForEmptyString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
         assertEquals(DateTimeUtil.dateToYMDString(SOME_DATE_VALUE), DateTimeUtil.dateToYMDString(keyForDate));
         assertEquals(DateTimeUtil.dateTimeToISO8601UTCString(SOME_DATETIME_VALUE), DateTimeUtil.dateTimeToISO8601UTCString(keyForDateTime));
 
         Map<String, CustomAttributeValue> customUserData = user.getCustomAttributes();
-        assertEquals(5, customUserData.size());
+        assertEquals(6, customUserData.size());
     }
 
     @Test
@@ -190,6 +195,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         Map<String, Object> customAtts = new HashMap<>();
         customAtts.put(KEY_FOR_STRING, SOME_STRING_VALUE);
+        customAtts.put(KEY_FOR_EMPTY_STRING, EMPTY_STRING_VALUE);
         customAtts.put(KEY_FOR_DATE, expectedDateValue);
         customAtts.put(KEY_FOR_DATETIME, expectedDateTimeValue);
         customAtts.put(KEY_FOR_NUMBER, SOME_NUMBER_VALUE);
@@ -197,16 +203,18 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         Map<String, CustomAttributeValue> customAttsFromBackend = CustomAttributesMapper.customAttsFromBackend(serverResponse.getCustomAttributes());
         String keyForString = customAttsFromBackend.get(KEY_FOR_STRING).stringValue();
+        String keyForEmptyString = customAttsFromBackend.get(KEY_FOR_EMPTY_STRING).stringValue();
         Number keyForNumber = customAttsFromBackend.get(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = customAttsFromBackend.get(KEY_FOR_DATE).dateValue();
         CustomAttributeValue.DateTime keyForDateTime = customAttsFromBackend.get(KEY_FOR_DATETIME).dateTimeValue();
 
         assertEquals(SOME_STRING_VALUE, keyForString);
+        assertEquals(EMPTY_STRING_VALUE, keyForEmptyString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
         assertEquals(expectedDateValue, DateTimeUtil.dateToYMDString(keyForDate));
         assertEquals(expectedDateTimeValue, DateTimeUtil.dateTimeToISO8601UTCString(keyForDateTime));
 
-        assertEquals(4, customAttsFromBackend.size());
+        assertEquals(5, customAttsFromBackend.size());
     }
 
     @Test
@@ -214,6 +222,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         Date date = new Date();
         HashMap<String, CustomAttributeValue> customAttsValueHashMap = new HashMap<>();
         customAttsValueHashMap.put(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
+        customAttsValueHashMap.put(KEY_FOR_EMPTY_STRING, new CustomAttributeValue(EMPTY_STRING_VALUE));
         customAttsValueHashMap.put(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
         customAttsValueHashMap.put(KEY_FOR_DATE, new CustomAttributeValue(date));
         customAttsValueHashMap.put(KEY_FOR_DATETIME, new CustomAttributeValue(SOME_DATETIME_VALUE));
@@ -222,17 +231,19 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         user.setCustomAttributes(customAttsValueHashMap);
 
         String keyForString = user.getCustomAttributeValue(KEY_FOR_STRING).stringValue();
+        String keyForEmptyString = user.getCustomAttributeValue(KEY_FOR_EMPTY_STRING).stringValue();
         Number keyForNumber = user.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = user.getCustomAttributeValue(KEY_FOR_DATE).dateValue();
         CustomAttributeValue.DateTime keyForDateTime = user.getCustomAttributeValue(KEY_FOR_DATETIME).dateTimeValue();
 
         assertEquals(SOME_STRING_VALUE, keyForString);
+        assertEquals(EMPTY_STRING_VALUE, keyForEmptyString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
         assertEquals(DateTimeUtil.dateToYMDString(date), DateTimeUtil.dateToYMDString(keyForDate));
         assertEquals(DateTimeUtil.dateTimeToISO8601UTCString(SOME_DATETIME_VALUE), DateTimeUtil.dateTimeToISO8601UTCString(keyForDateTime));
 
         Map<String, CustomAttributeValue> customUserAtts = user.getCustomAttributes();
-        assertEquals(4, customUserAtts.size());
+        assertEquals(5, customUserAtts.size());
     }
 
     @Test
@@ -240,6 +251,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         Date date = new Date();
         HashMap<String, CustomAttributeValue> customAttsValueHashMap = new HashMap<>();
         customAttsValueHashMap.put(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
+        customAttsValueHashMap.put(KEY_FOR_EMPTY_STRING, new CustomAttributeValue(EMPTY_STRING_VALUE));
         customAttsValueHashMap.put(KEY_FOR_NUMBER, new CustomAttributeValue(SOME_NUMBER_VALUE));
         customAttsValueHashMap.put(KEY_FOR_DATE, new CustomAttributeValue(date));
         customAttsValueHashMap.put(KEY_FOR_DATETIME, new CustomAttributeValue(SOME_DATETIME_VALUE));
@@ -248,16 +260,18 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         installation.setCustomAttributes(customAttsValueHashMap);
 
         String keyForString = installation.getCustomAttributeValue(KEY_FOR_STRING).stringValue();
+        String keyForEmptyString = installation.getCustomAttributeValue(KEY_FOR_EMPTY_STRING).stringValue();
         Number keyForNumber = installation.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue();
         Date keyForDate = installation.getCustomAttributeValue(KEY_FOR_DATE).dateValue();
         CustomAttributeValue.DateTime keyForDateTime = installation.getCustomAttributeValue(KEY_FOR_DATETIME).dateTimeValue();
 
         assertEquals(SOME_STRING_VALUE, keyForString);
+        assertEquals(EMPTY_STRING_VALUE, keyForEmptyString);
         assertEquals(SOME_NUMBER_VALUE, keyForNumber.intValue());
         assertEquals(DateTimeUtil.dateToYMDString(date), DateTimeUtil.dateToYMDString(keyForDate));
         assertEquals(DateTimeUtil.dateTimeToISO8601UTCString(SOME_DATETIME_VALUE), DateTimeUtil.dateTimeToISO8601UTCString(keyForDateTime));
 
         Map<String, CustomAttributeValue> customInstallationAtts = installation.getCustomAttributes();
-        assertEquals(4, customInstallationAtts.size());
+        assertEquals(5, customInstallationAtts.size());
     }
 }
