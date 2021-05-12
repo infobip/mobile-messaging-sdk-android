@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.util.ArraySet;
-import android.support.v7.app.AppCompatActivity;
 
 import org.infobip.mobile.messaging.chat.R;
 
@@ -56,8 +55,8 @@ public class PermissionsRequestManager {
     }
 
     public boolean isRequiredPermissionsGranted() {
-        final Set<String> permissionsToAsk = new ArraySet<String>();
-        final Set<String> neverAskPermissions = new ArraySet<String>();
+        final Set<String> permissionsToAsk = new ArraySet<>();
+        final Set<String> neverAskPermissions = new ArraySet<>();
 
         for (String permission : permissionsRequester.requiredPermissions()) {
             if (!InAppChatPermissionsHelper.hasPermissionInManifest(context, permission)) {

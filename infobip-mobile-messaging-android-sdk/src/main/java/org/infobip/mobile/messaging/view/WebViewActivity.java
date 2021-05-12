@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.view;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -39,6 +40,7 @@ public class WebViewActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private WebView webView;
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         WebViewSettingsResolver webViewSettingsResolver = new WebViewSettingsResolver(this);

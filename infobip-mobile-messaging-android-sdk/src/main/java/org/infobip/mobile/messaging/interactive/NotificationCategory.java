@@ -73,6 +73,7 @@ public class NotificationCategory {
         this.notificationActions = notificationActions;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return jsonSerializer.serialize(this);

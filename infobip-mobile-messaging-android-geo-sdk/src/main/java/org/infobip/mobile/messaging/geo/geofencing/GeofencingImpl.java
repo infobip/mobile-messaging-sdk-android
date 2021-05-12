@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.geo.geofencing;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -54,6 +55,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
 
     private static final String TAG = "GeofencingImpl";
 
+    @SuppressLint("StaticFieldLeak")
     private static GeofencingImpl instance;
     private final Context context;
     private static GeoEnabledConsistencyReceiver geoEnabledConsistencyReceiver;

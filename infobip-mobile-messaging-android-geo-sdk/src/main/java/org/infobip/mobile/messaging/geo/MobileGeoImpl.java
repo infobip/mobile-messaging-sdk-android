@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.geo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import org.infobip.mobile.messaging.Message;
@@ -16,6 +17,7 @@ import org.json.JSONObject;
 
 public class MobileGeoImpl extends MobileGeo implements MessageHandlerModule {
 
+    @SuppressLint("StaticFieldLeak")
     private static MobileGeoImpl instance;
     private Context context;
     private Geofencing geofencing;

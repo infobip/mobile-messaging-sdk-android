@@ -161,7 +161,6 @@ public class UserSyncTest extends MobileMessagingTestCase {
         customAtts.put("myKey1", "Some string");
         customAtts.put("myKey2", null);
         customAtts.put("myKey3", null);
-        customAtts.put("myKey3", null);
         customAtts.put(KEY_FOR_LIST, null);
 
         HashMap<String, Object> report = new HashMap<>();

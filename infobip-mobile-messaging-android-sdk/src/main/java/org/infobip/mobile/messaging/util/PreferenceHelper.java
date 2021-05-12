@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;

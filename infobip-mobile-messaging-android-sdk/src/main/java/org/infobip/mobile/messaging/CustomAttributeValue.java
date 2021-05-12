@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging;
 
+import android.support.annotation.NonNull;
+
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 
 import java.security.InvalidParameterException;
@@ -214,6 +216,7 @@ public class CustomAttributeValue {
         return value;
     }
 
+    @NonNull
     @Override
     public String toString() {
         if (this.type == null) {
@@ -251,6 +254,7 @@ public class CustomAttributeValue {
             this.date = date;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "DateTime{" +

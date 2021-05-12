@@ -208,7 +208,8 @@ public class PersonalizeSynchronizer {
             userPersonalizeBody.setUserAttributes(userAttributes.getMap());
         }
 
-        if (!userIdentity.hasDataToReport() && !userAttributes.hasDataToReport()) {
+        if (!userIdentity.hasDataToReport() && !userAttributes.hasDataToReport() ||
+                userPersonalizeBody.getUserIdentity().isEmpty() && userPersonalizeBody.getUserAttributes().isEmpty()) {
             // no user data is present on SDK storage, old token was invalidated by backend (push reg ID not registered), new token isn't provided
             // forcing generating of new token to update it
             mobileMessagingCore.resetCloudToken(false);

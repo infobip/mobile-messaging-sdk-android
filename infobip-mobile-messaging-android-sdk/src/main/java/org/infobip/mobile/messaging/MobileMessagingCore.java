@@ -695,7 +695,7 @@ public class MobileMessagingCore
     public String[] getSyncMessagesIds() {
         String[] messageIds = PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_SYNC_MESSAGES_IDS);
         ArrayList<String> messageIdsArrayList = new ArrayList<>(Arrays.asList(messageIds));
-        Set<String> messageIdsToSync = new HashSet<>(messageIdsArrayList.size() <= MESSAGE_ID_PARAMETER_LIMIT ? messageIdsArrayList.size() : MESSAGE_ID_PARAMETER_LIMIT);
+        Set<String> messageIdsToSync = new HashSet<>(Math.min(messageIdsArrayList.size(), MESSAGE_ID_PARAMETER_LIMIT));
         boolean shouldUpdateMessageIds = false;
 
         for (int i = 0; i < messageIdsArrayList.size(); i++) {

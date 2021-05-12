@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="main_activity_title">Chat Example</string>
-    <string name="main_activity_button_open_title">Go to chat screen</string>
-    <string name="main_activity_new_message_hint">Write your message</string>
+    <string name="main_activity_title" tools:ignore="MissingTranslation">Chat Example</string>
+    <string name="main_activity_button_open_title" tools:ignore="MissingTranslation">Go to chat screen</string>
 
-    <string name="action_registration_id_copy">Registration ID</string>
+    <string name="action_registration_id_copy" tools:ignore="MissingTranslation">Registration ID</string>
 
-    <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
+    <string name="toast_registration_id_copy" tools:ignore="MissingTranslation">Registration ID copied to clipboard</string>
 </resources>

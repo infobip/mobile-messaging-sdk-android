@@ -23,7 +23,7 @@ public class JsonSerializer {
         String serialize(T value);
     }
 
-    private class CustomTypeAdapter extends TypeAdapter<Object> {
+    private static class CustomTypeAdapter extends TypeAdapter<Object> {
 
         private final ObjectAdapter adapter;
 

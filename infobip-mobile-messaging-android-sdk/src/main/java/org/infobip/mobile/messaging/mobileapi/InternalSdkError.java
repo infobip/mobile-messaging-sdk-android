@@ -39,7 +39,7 @@ public enum InternalSdkError {
         return new MobileMessagingError(code, message);
     }
 
-    public class InternalSdkException extends RuntimeException {
+    public static class InternalSdkException extends RuntimeException {
         InternalSdkException(String message) {
             super(message);
         }

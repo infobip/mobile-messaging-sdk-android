@@ -221,7 +221,7 @@ public class MobileApiResourceProvider {
         return mobileMessagingRequestInterceptor;
     }
 
-    class AndroidHTTPLogger extends Logger {
+    static class AndroidHTTPLogger extends Logger {
 
         private static final String TAG = "MMHTTP";
 

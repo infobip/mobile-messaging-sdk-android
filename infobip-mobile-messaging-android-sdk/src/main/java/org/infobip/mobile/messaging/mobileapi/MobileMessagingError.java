@@ -66,6 +66,7 @@ public class MobileMessagingError implements Serializable {
         return tr != null ? Log.getStackTraceString(tr) : null;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(Locale.getDefault(), "%s, %s, %s", type.name(), code, message);

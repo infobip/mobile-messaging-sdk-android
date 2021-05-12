@@ -85,7 +85,7 @@ public class CustomAttributesMapper {
                 for (Map.Entry<String, Object> listEntry: map.entrySet()) {
                     CustomAttributeValue value = parseValue(listEntry.getValue());
                     CustomAttributeValue existedValue = valuesMap.get(listEntry.getKey());
-                    if (!existedValue.getType().equals(value.getType())) {
+                    if (existedValue != null && !existedValue.getType().equals(value.getType())) {
                         return false;
                     }
                 }

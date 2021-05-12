@@ -22,6 +22,7 @@
 
 package org.infobip.mobile.messaging.platform;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -58,7 +59,7 @@ import java.util.HashMap;
  * dispatched to and handled by your service.  It will be executed in
  * {@link #onHandleWork(Intent)}.</p>
  * <p>
- * <p>You do not need to use {@link androidx.legacy.content.WakefulBroadcastReceiver}
+ * <p>You do not need to use {androidx.legacy.content.WakefulBroadcastReceiver}
  * when using this class.  When running on {@link android.os.Build.VERSION_CODES#O Android O},
  * the JobScheduler will take care of wake locks for you (holding a wake lock from the time
  * you enqueue work until the job has been dispatched and while it is running).  When running
@@ -401,6 +402,7 @@ public abstract class JobIntentService extends Service {
     /**
      * This is a task to dequeue and process work in the background.
      */
+    @SuppressLint("StaticFieldLeak")
     final class CommandProcessor extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {

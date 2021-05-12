@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -22,6 +23,7 @@ import java.util.Collection;
  */
 public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCallbacks {
     private static volatile boolean foreground = false;
+    @SuppressLint("StaticFieldLeak")
     private static volatile Activity foregroundActivity = null;
 
     public ActivityLifecycleMonitor(@NonNull Application application) {

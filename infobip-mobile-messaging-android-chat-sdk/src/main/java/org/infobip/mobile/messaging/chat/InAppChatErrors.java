@@ -23,7 +23,7 @@ public class InAppChatErrors {
     }
 
     private OnChangeListener listener;
-    private Set<String> errors = new HashSet<String>();
+    private Set<String> errors = new HashSet<>();
 
     public void insertError(@ChatErrorsDef String error) {
         if (!errors.contains(error)) {

@@ -53,7 +53,7 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
         Cursor cursor = db().rawQuery("SELECT * FROM " + getTableName(cls) + " WHERE " + getPrimaryKeyColumn(cls) + " = ?", new String[]{primaryKey});
         List<T> objects = loadFromCursor(cursor, cls);
         cursor.close();
-        return objects != null && !objects.isEmpty() ? objects.get(0) : null;
+        return !objects.isEmpty() ? objects.get(0) : null;
     }
 
     @Override
@@ -112,6 +112,7 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
         return emptyInstance;
     }
 
+    @NonNull
     private <T extends DatabaseContract.DatabaseObject> List<T> loadFromCursor(Cursor cursor, Class<T> cls) {
         if (cursor.getCount() == 0) {
             cursor.close();

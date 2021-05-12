@@ -15,7 +15,6 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

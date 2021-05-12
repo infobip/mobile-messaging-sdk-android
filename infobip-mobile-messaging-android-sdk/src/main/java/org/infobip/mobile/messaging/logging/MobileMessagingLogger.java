@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.logging;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 
@@ -12,6 +13,7 @@ public final class MobileMessagingLogger {
 
     public static final String TAG = "MobileMessaging";
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    @SuppressLint("StaticFieldLeak")
     private static Context context;
     private static Writer writer = new LogcatWriter();
     private static boolean isEnforced = false;

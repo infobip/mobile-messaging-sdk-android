@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("ConstantConditions")
     private void copyRegistrationIdToClipboard() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("Registration ID", MobileMessaging.getInstance(this).getInstallation().getPushRegistrationId());

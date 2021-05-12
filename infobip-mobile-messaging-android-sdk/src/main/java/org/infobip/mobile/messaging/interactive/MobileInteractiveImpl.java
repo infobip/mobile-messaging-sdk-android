@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.interactive;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
@@ -28,6 +29,7 @@ import java.util.Set;
  */
 public class MobileInteractiveImpl extends MobileInteractive implements MessageHandlerModule {
 
+    @SuppressLint("StaticFieldLeak")
     private static MobileInteractiveImpl instance;
     private Context context;
     private final JsonSerializer serializer = new JsonSerializer(false);

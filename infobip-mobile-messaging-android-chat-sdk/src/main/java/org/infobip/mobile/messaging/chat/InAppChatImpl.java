@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,7 @@ import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
+    @SuppressLint("StaticFieldLeak")
     private static InAppChatImpl instance;
     private Context context;
     private AndroidBroadcaster coreBroadcaster;
