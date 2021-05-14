@@ -115,8 +115,7 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
     public void should_not_report_dlr_with_duplicate_messageIds() {
         // Given
         mobileMessagingCore.getAndRemoveUnreportedMessageIds();
-        given(mobileApiMessages.sync(syncBodyCaptor.capture()))
-                .willReturn(new SyncMessagesResponse());
+        given(mobileApiMessages.sync(syncBodyCaptor.capture())).willReturn(new SyncMessagesResponse());
 
         // When
         mobileMessagingCore.setMessagesDelivered("1");
@@ -126,11 +125,8 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
         mobileMessagingCore.setMessagesDelivered("5");
 
         // Then
-        verify(mobileApiMessages, after(3000).times(1)).sync(any(SyncMessagesBody.class));
-        mobileMessagingCore.setMessagesDelivered("3", "4");
-
-        verify(mobileApiMessages, after(3000).times(2)).sync(any(SyncMessagesBody.class));
-        assertEquals(2, syncBodyCaptor.getAllValues().size());
+        verify(mobileApiMessages, after(2000).times(5)).sync(any(SyncMessagesBody.class));
+        assertEquals(5, syncBodyCaptor.getAllValues().size());
         List<String> reportedDlrs = getReportedDLRs(syncBodyCaptor.getAllValues());
         assertEquals(5, reportedDlrs.size());
         assertTrue(reportedDlrs.containsAll(asList("1", "2", "3", "4", "5")));

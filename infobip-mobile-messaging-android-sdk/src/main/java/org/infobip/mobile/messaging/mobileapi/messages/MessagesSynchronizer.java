@@ -61,13 +61,14 @@ public class MessagesSynchronizer {
             return;
         }
 
-        if (lastSyncTimeMillis != null && Time.now() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
+        final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
+        if (unreportedMessageIds.length == 0 && lastSyncTimeMillis != null &&
+                Time.now() - lastSyncTimeMillis < SYNC_MSGS_THROTTLE_INTERVAL_MILLIS ||
                 !mobileMessagingCore.isPushRegistrationEnabled()) {
             return;
         }
         lastSyncTimeMillis = Time.now();
 
-        final String[] unreportedMessageIds = mobileMessagingCore.getAndRemoveUnreportedMessageIds();
         new MRetryableTask<Void, List<Message>>() {
             @Override
             public List<Message> run(Void[] objects) {

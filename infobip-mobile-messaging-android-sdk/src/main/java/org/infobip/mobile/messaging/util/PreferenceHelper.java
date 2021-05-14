@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -236,6 +237,7 @@ public abstract class PreferenceHelper {
         getDefaultMMSharedPreferences(context).edit().putInt(key, value).apply();
     }
 
+    @NonNull
     public static String[] findAndRemoveStringArray(Context context, MobileMessagingProperty property) {
         final List<String> strings = new ArrayList<>();
         editSet(context, property.getKey(), new SetMutator() {

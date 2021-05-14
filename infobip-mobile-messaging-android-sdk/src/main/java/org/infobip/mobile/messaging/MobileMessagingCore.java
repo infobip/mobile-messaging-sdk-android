@@ -679,6 +679,7 @@ public class MobileMessagingCore
         setCloudTokenReported(false);
     }
 
+    @NonNull
     public String[] getAndRemoveUnreportedMessageIds() {
         return PreferenceHelper.findAndRemoveStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_MESSAGE_IDS);
     }
