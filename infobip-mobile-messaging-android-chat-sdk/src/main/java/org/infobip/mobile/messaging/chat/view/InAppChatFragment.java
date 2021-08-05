@@ -721,6 +721,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         File picturesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         File outputPicturesDirectory = new File(picturesDirectory.getPath() + File.separator + appName + OUTPUT_MEDIA_PATH);
         if (!outputPicturesDirectory.exists() && !outputPicturesDirectory.mkdirs()) {
+            MobileMessagingLogger.e("[InAppChat]", "Can't create directory for temporary saving attachment");
             return null;
         }
 

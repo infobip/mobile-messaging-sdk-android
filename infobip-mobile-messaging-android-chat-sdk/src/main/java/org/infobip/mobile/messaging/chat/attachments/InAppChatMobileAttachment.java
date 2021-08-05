@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.support.media.ExifInterface;
 import android.net.Uri;
 import android.util.Base64;
@@ -19,14 +17,13 @@ import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
 public class InAppChatMobileAttachment {
     public static final long DEFAULT_MAX_UPLOAD_CONTENT_SIZE = 10_485_760; //10 MiB
-    public static final float DEFAULT_IMAGE_MAX_HEIGHT = 1280.0f;
-    public static final float DEFAULT_IMAGE_MAX_WIDTH = 720.0f;
 
     String base64;
     String mimeType;
@@ -94,89 +91,57 @@ public class InAppChatMobileAttachment {
         }
         //Ony images captured by camera are scaled for now
         if (mimeType.equals("image/jpeg") && uri == capturedImageUri) {
-            return getBytesWithBitmapScaling(uri);
+            return getBytesWithBitmapScaling(context, uri);
         } else {
             return getBytes(context, uri);
         }
     }
 
-    public static byte[] getBytesWithBitmapScaling(Uri imageUri) {
+    public static byte[] getBytesWithBitmapScaling(Context context, Uri imageUri) {
         if (imageUri == null) {
             return null;
         }
-        String filePath = imageUri.getPath();
-        BitmapFactory.Options options = new BitmapFactory.Options();
 
-        //  just the bounds of image are loaded, not actual bitmap pixels
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, options);
-
-        float actualHeight = options.outHeight;
-        float actualWidth = options.outWidth;
-
-        float maxHeight = DEFAULT_IMAGE_MAX_HEIGHT;
-        float maxWidth = DEFAULT_IMAGE_MAX_WIDTH;
-        float imgRatio = actualWidth / actualHeight;
-        float maxRatio = maxWidth / maxHeight;
-
-        //  width and height values are set maintaining the aspect ratio of the image
-        if (actualHeight > maxHeight || actualWidth > maxWidth) {
-            if (imgRatio < maxRatio) {
-                imgRatio = maxHeight / actualHeight;
-                actualWidth = imgRatio * actualWidth;
-                actualHeight = maxHeight;
-            } else if (imgRatio > maxRatio) {
-                imgRatio = maxWidth / actualWidth;
-                actualHeight = imgRatio * actualHeight;
-                actualWidth = maxWidth;
-            } else {
-                actualHeight = maxHeight;
-                actualWidth = maxWidth;
-            }
+        long fileSize;
+        String filePath;
+        try {
+            filePath = imageUri.getPath();
+            fileSize = (new File(filePath)).length();
+        } catch (Exception exception) {
+            MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
+            return null;
         }
 
-        //  setting inSampleSize value allows to load a scaled down version of the original image
-        options.inSampleSize = calculateInSampleSize(options, (int) actualWidth, (int) actualHeight);
+        boolean shouldScaleImage = fileSize > getAttachmentMaxSize(context);
+        int imageQuality = fileSize > DEFAULT_MAX_UPLOAD_CONTENT_SIZE / 2 ? 80 : 100;
 
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        //  setting inSampleSize value allows to load a scaled down version of the original image
+        options.inSampleSize = shouldScaleImage ? 2 : 1;
         // set to false to load the actual bitmap
         options.inJustDecodeBounds = false;
-
         //  this options allow android to claim the bitmap memory if it runs low on memory
         options.inPurgeable = true;
         options.inInputShareable = true;
         options.inTempStorage = new byte[16 * 1024];
 
         Bitmap bitmap;
-        Bitmap scaledBitmap;
         try {
             bitmap = BitmapFactory.decodeFile(filePath, options);
-            scaledBitmap = Bitmap.createBitmap((int) actualWidth, (int) actualHeight, Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError exception) {
             MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
             return null;
         }
 
-        float ratioX = actualWidth / (float) options.outWidth;
-        float ratioY = actualHeight / (float) options.outHeight;
-        float middleX = actualWidth / 2.0f;
-        float middleY = actualHeight / 2.0f;
-
-        Matrix scaleMatrix = new Matrix();
-        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
-        Canvas canvas = new Canvas(scaledBitmap);
-        canvas.setMatrix(scaleMatrix);
-        canvas.drawBitmap(bitmap, middleX - bitmap.getWidth() / 2, middleY - bitmap.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
-
         //  check the rotation of the image and display it properly
         int orientationDegree = getExifOrientationDegree(filePath);
         Matrix rotationMatrix = new Matrix();
         rotationMatrix.postRotate(orientationDegree);
-        scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotationMatrix, true);
+        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotationMatrix, true);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
         bitmap.recycle();
-        scaledBitmap.recycle();
         return outputStream.toByteArray();
     }
 
@@ -208,25 +173,6 @@ public class InAppChatMobileAttachment {
         }
 
         return degree;
-    }
-
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-            final int heightRatio = Math.round((float) height / (float) reqHeight);
-            final int widthRatio = Math.round((float) width / (float) reqWidth);
-            inSampleSize = Math.min(heightRatio, widthRatio);
-        }
-        final float totalPixels = width * height;
-        final float totalReqPixelsCap = reqWidth * reqHeight * 2;
-        while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
-            inSampleSize++;
-        }
-
-        return inSampleSize;
     }
 
     private static byte[] getBytes(Context context, Uri uri) {
