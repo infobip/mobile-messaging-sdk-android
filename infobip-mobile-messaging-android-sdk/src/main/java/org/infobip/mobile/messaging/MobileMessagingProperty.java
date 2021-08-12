@@ -14,6 +14,7 @@ public enum MobileMessagingProperty {
     // START: prefs required for successfully connected Firebase registration with Push server
     API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://mobile.infobip.com/"),
     APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE", null, true),
+    APPLICATION_CODE_HASH("org.infobip.mobile.messaging.infobip.APPLICATION_CODE_HASH", null, true),
     SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID", null, true),
     CLOUD_TOKEN("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),

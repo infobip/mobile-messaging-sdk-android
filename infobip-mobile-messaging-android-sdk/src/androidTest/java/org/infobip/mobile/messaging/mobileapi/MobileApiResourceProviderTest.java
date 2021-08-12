@@ -57,7 +57,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         // then
         assertEquals(10, applicationCodeInHeaders.length());
         assertEquals("0690db1eb3", applicationCodeInHeaders);
-        assertEquals("0690db1eb3", MobileMessagingCore.getApplicationCodeHash("TestApplicationCode"));
+        assertEquals("0690db1eb3", MobileMessagingCore.getApplicationCodeHash(context, "TestApplicationCode"));
     }
 
     @Test

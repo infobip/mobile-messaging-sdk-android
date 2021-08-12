@@ -182,8 +182,6 @@ public class MobileMessagingCore
      * There is no need to migrate system data fields - they'll be newly fetched/synced on the first call of patch method
      */
     private void migratePrefsIfNecessary(Context context) {
-        PreferenceHelper.migrateCryptorIfNeeded(context);
-
         if (PreferenceHelper.shouldMigrateToPrivatePrefs(context)) {
             PreferenceHelper.migrateToPrivatePrefs(context);
         }
@@ -1123,7 +1121,6 @@ public class MobileMessagingCore
     }
 
     public static String getApplicationCode(Context context) {
-
         if (applicationCode != null) {
             return applicationCode;
         }
@@ -1137,23 +1134,7 @@ public class MobileMessagingCore
         }
 
         // resolve from app code provider
-        if (applicationCodeProvider != null) {
-            applicationCode = applicationCodeProvider.resolve();
-            return applicationCode;
-        }
-
-        String appCodeProviderCanonicalClassName = getApplicationCodeProviderClassName(context);
-
-        try {
-            if (StringUtils.isNotBlank(appCodeProviderCanonicalClassName)) {
-                Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
-                Object applicationCodeProvider = c.newInstance();
-                Method resolve = ApplicationCodeProvider.class.getMethod("resolve");
-                applicationCode = String.valueOf(resolve.invoke(applicationCodeProvider));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        applicationCode = resolveApplicationCodeFromAppCodeProvider(context, applicationCodeProvider);
 
         if (applicationCode == null) {
             // if still null fallback to check string resources if app code couldn't be resolved on storage or on app code provider
@@ -1163,8 +1144,38 @@ public class MobileMessagingCore
         return applicationCode;
     }
 
+    @Nullable
+    private static String resolveApplicationCodeFromAppCodeProvider(Context context, @Nullable ApplicationCodeProvider applicationCodeProvider) {
+        if (applicationCodeProvider != null) {
+            applicationCode = applicationCodeProvider.resolve();
+            String applicationCodeHash = getApplicationCodeHash(context, applicationCode);
+            PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE_HASH, applicationCodeHash);
+            return applicationCode;
+        }
+
+        String appCodeProviderCanonicalClassName = getApplicationCodeProviderClassName(context);
+
+        try {
+            if (StringUtils.isNotBlank(appCodeProviderCanonicalClassName)) {
+                Class<?> c = Class.forName(appCodeProviderCanonicalClassName);
+                Object applicationCodeProviderInstance = c.newInstance();
+                Method resolve = ApplicationCodeProvider.class.getMethod("resolve");
+                applicationCode = String.valueOf(resolve.invoke(applicationCodeProviderInstance));
+                String applicationCodeHash = getApplicationCodeHash(context, applicationCode);
+                PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE_HASH, applicationCodeHash);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return applicationCode;
+    }
+
     private static String getStoredApplicationCode(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE);
+    }
+
+    private static String getStoredApplicationCodeHash(Context context) {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.APPLICATION_CODE_HASH);
     }
 
     @Nullable
@@ -1173,10 +1184,10 @@ public class MobileMessagingCore
     }
 
     public static String getApplicationCodeHash(Context context) {
-        return getApplicationCodeHash(getApplicationCode(context));
+        return getApplicationCodeHash(context, getApplicationCode(context));
     }
 
-    public static String getApplicationCodeHash(String applicationCode) {
+    public static String getApplicationCodeHash(Context context, String applicationCode) {
         if (StringUtils.isBlank(applicationCode)) {
             return null;
         }
@@ -1185,10 +1196,16 @@ public class MobileMessagingCore
             return applicationCodeHashMap.get(applicationCode);
         }
 
-        String appCodeHash = SHA1.calc(applicationCode).substring(0, 10);
+        String appCodeHash = calculateAppCodeHash(applicationCode);
         applicationCodeHashMap = Collections.singletonMap(applicationCode, appCodeHash);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE_HASH, appCodeHash);
 
         return appCodeHash;
+    }
+
+    @NonNull
+    private static String calculateAppCodeHash(String applicationCode) {
+        return SHA1.calc(applicationCode).substring(0, 10);
     }
 
     public static void setApiUri(Context context, String apiUri) {
@@ -1229,6 +1246,7 @@ public class MobileMessagingCore
 
     public static void setShouldSaveAppCode(Context context, boolean shouldSaveAppCode) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK, shouldSaveAppCode);
+        if (!shouldSaveAppCode) PreferenceHelper.remove(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
     public static void setAllowUntrustedSSLOnError(Context context, boolean allowUntrustedSSLOnError) {
@@ -1255,6 +1273,7 @@ public class MobileMessagingCore
 
         applicationCode = null;
         PreferenceHelper.remove(context, MobileMessagingProperty.APPLICATION_CODE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.APPLICATION_CODE_HASH);
 
         if (mobileMessagingSynchronizationReceiver != null) {
             ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, false);
@@ -2011,12 +2030,8 @@ public class MobileMessagingCore
          * @return {@link MobileMessagingCore}
          */
         public MobileMessagingCore build(@Nullable final InitListener initListener) {
-            if (shouldSaveApplicationCode(application.getApplicationContext())) {
-                String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(application.getApplicationContext());
-                if (existingApplicationCode != null && applicationCode != null && !applicationCode.equals(existingApplicationCode)) {
-                    MobileMessagingCore.cleanup(application);
-                }
-            }
+            final Context applicationContext = application.getApplicationContext();
+            cleanupLibraryDataIfAppCodeWasChanged(applicationContext);
 
             Platform.verify(application);
 
@@ -2029,13 +2044,38 @@ public class MobileMessagingCore
 
             // do the force invalidation of old push cloud tokens
             boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;
-            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(application.getApplicationContext(), shouldResetToken, initListener);
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(applicationContext, shouldResetToken, initListener);
 
             Platform.reset(mobileMessagingCore);
             MobileMessagingCloudHandler cloudHandler = Platform.initializeMobileMessagingCloudHandler(application);
             Platform.reset(cloudHandler);
 
             return mobileMessagingCore;
+        }
+
+        private void cleanupLibraryDataIfAppCodeWasChanged(Context applicationContext) {
+            PreferenceHelper.migrateCryptorIfNeeded(applicationContext);
+            String existingApplicationCodeHash = MobileMessagingCore.getStoredApplicationCodeHash(applicationContext);
+            if (shouldSaveApplicationCode(applicationContext)) {
+                String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(applicationContext);
+                if (applicationCode != null) {
+                    String resolvedApplicationCodeHash = MobileMessagingCore.calculateAppCodeHash(applicationCode);
+                    if ((existingApplicationCode != null && !applicationCode.equals(existingApplicationCode) ||
+                            existingApplicationCodeHash != null && !resolvedApplicationCodeHash.equals(existingApplicationCodeHash))) {
+                        MobileMessagingLogger.d("Cleaning up push registration data because application code has changed");
+                        MobileMessagingCore.cleanup(application);
+                    }
+                }
+            } else {
+                String resolvedApplicationCode = MobileMessagingCore.resolveApplicationCodeFromAppCodeProvider(applicationContext, applicationCodeProvider);
+                if (existingApplicationCodeHash != null && resolvedApplicationCode != null) {
+                    String resolvedApplicationCodeHash = MobileMessagingCore.calculateAppCodeHash(resolvedApplicationCode);
+                    if (!existingApplicationCodeHash.equals(resolvedApplicationCodeHash)) {
+                        MobileMessagingLogger.d("Cleaning up push registration data because application code has changed");
+                        MobileMessagingCore.cleanup(application);
+                    }
+                }
+            }
         }
     }
 }

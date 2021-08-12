@@ -32,9 +32,9 @@ public class BaseUrlChecker {
         if (isSyncInProgress) return;
         isSyncInProgress = true;
 
-        long lastCheckTime = PreferenceHelper.findLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME);
+        long lastCheckTimeMillis = PreferenceHelper.findLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME);
         int minimumIntervalHours = PreferenceHelper.findInt(context, MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS);
-        long lastBaseUrlCheckHours = TimeUnit.MILLISECONDS.toHours(Time.now() - lastCheckTime);
+        long lastBaseUrlCheckHours = TimeUnit.MILLISECONDS.toHours(Time.now() - lastCheckTimeMillis);
         if (lastBaseUrlCheckHours < minimumIntervalHours) {
             isSyncInProgress = false;
             return;
@@ -56,8 +56,8 @@ public class BaseUrlChecker {
                     if (StringUtils.isNotBlank(baseUrl)) {
                         MobileMessagingCore.setApiUri(context, baseUrl);
                     }
-                    PreferenceHelper.saveLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME, Time.now());
                 }
+                PreferenceHelper.saveLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME, Time.now());
                 isSyncInProgress = false;
             }
 

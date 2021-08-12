@@ -317,6 +317,9 @@ public class InstallationSynchronizer {
             mobileMessagingCore.setPushRegistrationEnabled(installation.isPushRegistrationEnabled());
             mobileMessagingCore.setPushRegistrationEnabledReported(true);
         }
+        if (installation.getPushServiceToken() != null) {
+            mobileMessagingCore.setCloudToken(installation.getPushServiceToken());
+        }
         mobileMessagingCore.setCloudTokenReported(true);
         mobileMessagingCore.setApplicationUserIdReported(true);
 
