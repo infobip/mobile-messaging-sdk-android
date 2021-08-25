@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.support.media.ExifInterface;
+import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
+import android.support.media.ExifInterface;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
@@ -17,7 +20,6 @@ import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
@@ -35,9 +37,9 @@ public class InAppChatMobileAttachment {
         this.fileName = filename;
     }
 
-    public static InAppChatMobileAttachment makeAttachment(Context context, Intent data, Uri capturedImageUri) throws InternalSdkError.InternalSdkException {
+    public static InAppChatMobileAttachment makeAttachment(Context context, Intent data, Uri mediaStoreUri, Uri capturedImageUri, ParcelFileDescriptor fileDescriptor) throws InternalSdkError.InternalSdkException {
         String mimeType = getMimeType(context, data, capturedImageUri);
-        byte[] bytesArray = getBytes(context, data, capturedImageUri, mimeType);
+        byte[] bytesArray = getBytes(context, data, mediaStoreUri, capturedImageUri, fileDescriptor, mimeType);
 
         if (bytesArray == null) {
             return null;
@@ -84,29 +86,28 @@ public class InAppChatMobileAttachment {
         return mimeType;
     }
 
-    private static byte[] getBytes(Context context, Intent data, Uri capturedImageUri, String mimeType) {
+    private static byte[] getBytes(Context context, Intent data, Uri mediaStoreUri, Uri capturedImageUri, ParcelFileDescriptor fileDescriptor, String mimeType) {
         Uri uri = capturedImageUri;
         if (data != null && data.getData() != null) {
             uri = data.getData();
         }
         //Ony images captured by camera are scaled for now
         if (mimeType.equals("image/jpeg") && uri == capturedImageUri) {
-            return getBytesWithBitmapScaling(context, uri);
+            return getBytesWithBitmapScaling(context, mediaStoreUri, uri, fileDescriptor);
         } else {
             return getBytes(context, uri);
         }
     }
 
-    public static byte[] getBytesWithBitmapScaling(Context context, Uri imageUri) {
+    public static byte[] getBytesWithBitmapScaling(Context context, Uri mediaStoreUri, Uri imageUri, ParcelFileDescriptor fileDescriptor) {
         if (imageUri == null) {
             return null;
         }
 
-        long fileSize;
+        long fileSize = fileDescriptor.getStatSize();
         String filePath;
         try {
             filePath = imageUri.getPath();
-            fileSize = (new File(filePath)).length();
         } catch (Exception exception) {
             MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
             return null;
@@ -127,14 +128,17 @@ public class InAppChatMobileAttachment {
 
         Bitmap bitmap;
         try {
-            bitmap = BitmapFactory.decodeFile(filePath, options);
-        } catch (OutOfMemoryError exception) {
+//            bitmap = BitmapFactory.decodeFile(filePath, options);
+//            if (bitmap == null) {
+                bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), new Rect(-1, -1, -1, -1), options);
+//            }
+        } catch (Exception exception) {
             MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
             return null;
         }
 
         //  check the rotation of the image and display it properly
-        int orientationDegree = getExifOrientationDegree(filePath);
+        int orientationDegree = getExifOrientationDegree(context, filePath, mediaStoreUri);
         Matrix rotationMatrix = new Matrix();
         rotationMatrix.postRotate(orientationDegree);
         bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotationMatrix, true);
@@ -145,13 +149,25 @@ public class InAppChatMobileAttachment {
         return outputStream.toByteArray();
     }
 
-    private static int getExifOrientationDegree(String filepath) {
+    private static int getExifOrientationDegree(Context context, String filepath, Uri mediaStoreUri) {
         int degree = 0;
         ExifInterface exif = null;
+        InputStream inputStream = null;
         try {
-            exif = new ExifInterface(filepath);
+            if (Build.VERSION.SDK_INT >= 24) {
+                inputStream = context.getContentResolver().openInputStream(mediaStoreUri);
+                exif = new ExifInterface(inputStream);
+            } else {
+                exif = new ExifInterface(filepath);
+            }
         } catch (IOException exception) {
             MobileMessagingLogger.e("[InAppChat] can't get image orientation", exception);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException ignored) {}
+            }
         }
         if (exif != null) {
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);

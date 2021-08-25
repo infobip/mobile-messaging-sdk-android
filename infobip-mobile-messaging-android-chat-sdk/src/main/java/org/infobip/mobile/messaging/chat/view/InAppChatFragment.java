@@ -5,14 +5,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -20,7 +18,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
@@ -72,13 +69,9 @@ import org.infobip.mobile.messaging.chat.utils.CommonUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
-import org.infobip.mobile.messaging.util.DateTimeUtil;
-import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -86,9 +79,6 @@ import static android.app.Activity.RESULT_OK;
 
 public class InAppChatFragment extends Fragment implements InAppChatWebViewManager, PermissionsRequestManager.PermissionsRequester {
 
-    private static final String JPEG_FILE_PREFIX = "IMG_";
-    private static final String JPEG_FILE_SUFFIX = ".jpg";
-    private static final String OUTPUT_MEDIA_PATH = "/InAppChat";
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
     private static final int CONTENT_SELECTION_INTENT_CODE = 100;
     private static final int USER_INPUT_CHECKER_DELAY_MS = 250;
@@ -696,7 +686,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private Intent[] prepareInitialIntentsForChooser() {
         List<Intent> intentsForChooser = new ArrayList<>();
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        capturedImageUri = getOutputMediaUri();
+        if (Build.VERSION.SDK_INT < 29) {
+            capturedImageUri = InAppChatAttachmentHelper.getOutputMediaUri(getFragmentActivity());
+        } else {
+            capturedImageUri = InAppChatAttachmentHelper.getOutputMediaUrlAPI29(getFragmentActivity());
+        }
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
         PackageManager packageManager = getPackageManager();
         if (packageManager != null && takePictureIntent.resolveActivity(packageManager) != null && capturedImageUri != null) {
@@ -711,33 +705,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         return intentsArray;
     }
 
-    @Nullable
-    private Uri getOutputMediaUri() {
-        FragmentActivity activity = getFragmentActivity();
-        if (activity == null) {
-            return null;
-        }
-        String appName = SoftwareInformation.getAppName(activity.getApplicationContext());
-        File picturesDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File outputPicturesDirectory = new File(picturesDirectory.getPath() + File.separator + appName + OUTPUT_MEDIA_PATH);
-        if (!outputPicturesDirectory.exists() && !outputPicturesDirectory.mkdirs()) {
-            MobileMessagingLogger.e("[InAppChat]", "Can't create directory for temporary saving attachment");
-            return null;
-        }
-
-        String fileName = JPEG_FILE_PREFIX + DateTimeUtil.dateToYMDHMSString(new Date()) + JPEG_FILE_SUFFIX;
-        File pictureFile = new File(outputPicturesDirectory.getPath() + File.separator + fileName);
-
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.DATA, pictureFile.getPath());
-        return activity.getContentResolver().insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK && requestCode == CONTENT_SELECTION_INTENT_CODE) {
-            InAppChatAttachmentHelper.makeAttachment(getActivity(), data, getUriFromMediaStoreURI(capturedImageUri), new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
+            InAppChatAttachmentHelper.makeAttachment(getFragmentActivity(), data, capturedImageUri, new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
                 @Override
                 public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
                     if (attachment != null) {
@@ -756,20 +727,6 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             });
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Nullable
-    private Uri getUriFromMediaStoreURI(Uri mediaStoreUri) {
-        FragmentActivity activity = getFragmentActivity();
-        if (activity == null || mediaStoreUri == null) {
-            return null;
-        }
-        String[] proj = {MediaStore.Images.Media.DATA};
-        Cursor cursor = activity.managedQuery(mediaStoreUri, proj, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return Uri.fromFile(new File(cursor.getString(column_index)));
     }
 
     /* PermissionsRequester */
