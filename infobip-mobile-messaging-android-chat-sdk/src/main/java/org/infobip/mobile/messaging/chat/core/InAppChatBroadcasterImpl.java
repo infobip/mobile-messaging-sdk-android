@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
@@ -17,6 +18,12 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
     @Override
     public void chatConfigurationSynced() {
         send(prepare(InAppChatEvent.CHAT_CONFIGURATION_SYNCED));
+    }
+
+    @Override
+    public void unreadMessagesCounterUpdated(int unreadMessagesCount) {
+        send(prepare(InAppChatEvent.UNREAD_MESSAGES_COUNTER_UPDATED)
+                .putExtra(BroadcastParameter.EXTRA_UNREAD_CHAT_MESSAGES_COUNT, unreadMessagesCount));
     }
 
     private void send(Intent intent) {

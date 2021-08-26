@@ -28,6 +28,14 @@ public class PropertyHelper extends PreferenceHelper {
         saveBoolean(context, property.getKey(), value);
     }
 
+    public int findInt(MobileMessagingChatProperty property) {
+        return findInt(context, property.getKey(), (int) property.getDefaultValue());
+    }
+
+    public void saveInt(MobileMessagingChatProperty property, int value) {
+        saveInt(context, property.getKey(), value);
+    }
+
     public Class[] findClasses(MobileMessagingChatProperty property) {
         String[] classNames = findStringArray(context, property.getKey(), new String[0]);
         if (classNames == null) {

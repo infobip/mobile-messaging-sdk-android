@@ -7,4 +7,10 @@ public interface InAppChatBroadcaster {
      */
     void chatConfigurationSynced();
 
+    /**
+     * Called whenever a new chat push message arrives, contains current unread message counter value
+     * @param unreadMessagesCount new unread message count
+     */
+    void unreadMessagesCounterUpdated(int unreadMessagesCount);
+
 }

@@ -28,8 +28,8 @@ import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
-import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
+import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -78,6 +78,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!message.isChatMessage()) {
             return false;
         }
+        int unreadChatMessageCount = propertyHelper().findInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT) + 1;
+        propertyHelper().saveInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT, unreadChatMessageCount);
+        inAppChatBroadcaster().unreadMessagesCounterUpdated(unreadChatMessageCount);
         coreBroadcaster().messageReceived(message);
         if (!isChatWidgetOnForeground()) {
             MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
@@ -99,7 +102,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
         if (activity instanceof AppCompatActivity) {
             //InAppChatFragment is visible and resumed
-            Fragment inAppChatFragment =  ((AppCompatActivity)activity).getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+            Fragment inAppChatFragment = ((AppCompatActivity) activity).getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
             return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
         }
         return false;
@@ -202,11 +205,12 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
         cleanupWidgetData();
-        PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.getKey());
-        PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.getKey());
-        PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey());
-        PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey());
-        PropertyHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey());
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
+        resetMessageCounter();
     }
 
     // must be done on separate thread if it's not invoked by UI thread
@@ -231,6 +235,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void depersonalize() {
         cleanupWidgetData();
+        resetMessageCounter();
     }
 
     @Override
@@ -300,5 +305,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         fragmentTransaction.commit();
     }
 
+    @Override
+    public void resetMessageCounter() {
+        MobileMessagingLogger.d("Resetting unread message counter to 0");
+        propertyHelper().remove(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
+        inAppChatBroadcaster().unreadMessagesCounterUpdated(0);
+    }
+
+    @Override
+    public int getMessageCounter() {
+        return propertyHelper().findInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
+    }
     // endregion
 }

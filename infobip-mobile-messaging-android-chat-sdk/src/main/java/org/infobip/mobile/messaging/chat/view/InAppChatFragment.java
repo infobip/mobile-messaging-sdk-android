@@ -513,6 +513,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         sendMessageButton.setEnabled(isEnabled);
         sendAttachmentButton.setEnabled(isEnabled);
         isWebViewLoaded = isEnabled;
+        if (isEnabled) InAppChatImpl.getInstance(getContext()).resetMessageCounter();
     }
 
     @Override

@@ -20,6 +20,8 @@ public final class BroadcastParameter {
     public static final String EXTRA_NOTIFICATION_ID = "org.infobip.mobile.messaging.notification.id";
     public static final String EXTRA_INSTALLATION = "org.infobip.mobile.messaging.installation";
 
+    public static final String EXTRA_UNREAD_CHAT_MESSAGES_COUNT = "org.infobip.mobile.messaging.unread.chat.messages.count";
+
     public static final int NOTIFICATION_NOT_DISPLAYED_ID = -1;
 
     private BroadcastParameter() {

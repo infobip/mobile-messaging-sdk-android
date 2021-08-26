@@ -64,4 +64,14 @@ public abstract class InAppChat {
      */
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager);
 
+    /**
+     * Resets current unread chat push message counter to zero. MM SDK automatically resets the counter when InAppChatFragment/Activity appears on screen.
+     */
+    public abstract void resetMessageCounter();
+
+    /**
+     * Returns current unread chat push message counter.
+     */
+    public abstract int getMessageCounter();
+
 }
