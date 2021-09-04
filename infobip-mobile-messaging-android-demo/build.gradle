@@ -43,6 +43,7 @@ android {
             property(project, 'infobip_application_code', 'INFOBIP_APPLICATION_CODE')?.with { resValue "string", "infobip_application_code", delegate }
             property(project, 'infobip_api_uri', 'INFOBIP_API_URI')?.with { resValue "string", "infobip_api_uri", delegate }
         }
+
         release {
             minifyEnabled true
             debuggable false
