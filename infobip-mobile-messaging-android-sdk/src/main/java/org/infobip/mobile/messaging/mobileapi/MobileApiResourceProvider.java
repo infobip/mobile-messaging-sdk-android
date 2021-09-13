@@ -180,7 +180,11 @@ public class MobileApiResourceProvider {
             String[] emptyCarrierInfoAdditions = {"", "", "", "", "", ""};
             userAgentAdditions.addAll(Arrays.asList(emptyCarrierInfoAdditions));
         }
-        return userAgentAdditions.toArray(new String[0]);
+        List<String> userAgentAdditionsCleaned = new ArrayList<>();
+        for (String addition: userAgentAdditions) {
+            userAgentAdditionsCleaned.add(removeNotSupportedChars(addition));
+        }
+        return userAgentAdditionsCleaned.toArray(new String[0]);
     }
 
     private boolean shouldAllowUntrustedSSLOnError(Context context) {
@@ -244,5 +248,22 @@ public class MobileApiResourceProvider {
         public void d(String message) {
             MobileMessagingLogger.d(TAG, message);
         }
+    }
+
+    /**
+     * Related to bug: Caused by: java.lang.IllegalArgumentException: Unexpected char 0x11 at 100 in header value:
+     *
+     * @param str
+     * @return
+     */
+    public String removeNotSupportedChars(String str) {
+        if (str == null) {
+            return null;
+        }
+        String result = str.replaceAll("[^\\x20-\\x7F]", "");
+        if (!str.equals(result)) {
+            MobileMessagingLogger.i("SPEC_CHAR", "Removed special char at string: " + str);
+        }
+        return result;
     }
 }
