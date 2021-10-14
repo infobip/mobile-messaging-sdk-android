@@ -22,6 +22,13 @@ interface InAppChatMobile {
     void onError(String errorMessage);
 
     /**
+     * Show/Hide input field
+     *
+     * @param isVisible
+     */
+    void setControlsVisibility(boolean isVisible);
+
+    /**
      * Open attachment preview in new webView window
      * @param url link to cdn
      * @param type IMAGE, VIDEO, DOCUMENT (pdf file)

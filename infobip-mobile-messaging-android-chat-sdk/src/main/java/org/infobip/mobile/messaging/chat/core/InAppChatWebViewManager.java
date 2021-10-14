@@ -9,5 +9,6 @@ public interface InAppChatWebViewManager {
     void onPageFinished();
     void setControlsEnabled(boolean enabled);
     void onJSError();
+    void setControlsVisibility(boolean isVisible);
     void openAttachmentPreview(String url, String type, String caption);
 }

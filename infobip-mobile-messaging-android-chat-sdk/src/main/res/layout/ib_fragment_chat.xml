@@ -8,7 +8,20 @@
     android:background="@android:color/white"
     android:orientation="vertical"
     android:paddingBottom="10dp"
+    android:animateLayoutChanges="true"
     tools:context=".view.InAppChatFragment">
+
+    <TextView
+        android:id="@+id/ib_lc_tv_error_toast"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_not_available_tv_height"
+        android:layout_alignBottom="@+id/appBarLayout"
+        android:background="@android:color/darker_gray"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/ib_chat_no_connection"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:visibility="invisible" />
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -35,89 +48,83 @@
     <org.infobip.mobile.messaging.chat.view.InAppChatWebView
         android:id="@+id/ib_lc_wv_in_app_chat"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         android:layout_above="@+id/ib_lc_rl_msg_input_wrapper"
         android:layout_below="@+id/appBarLayout"
         android:visibility="invisible" />
 
-    <ImageView
-        android:id="@+id/ib_lc_iv_send_attachment_btn"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:contentDescription="@string/ib_iv_btn_send_attachment_desc"
-        android:enabled="false"
-        android:src="@drawable/ib_chat_attachment_btn_icon" />
-
-    <ImageView
-        android:id="@+id/ib_lc_iv_input_top_border"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_above="@id/ib_lc_rl_msg_input_wrapper"
-        android:contentDescription="@string/ib_iv_input_border_desc"
-        android:src="@drawable/light_top_border" />
-
     <RelativeLayout
         android:id="@+id/ib_lc_rl_msg_input_wrapper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@+id/ib_lc_iv_send_btn"
-        android:layout_toLeftOf="@+id/ib_lc_iv_send_btn"
-        android:layout_toEndOf="@+id/ib_lc_iv_send_attachment_btn"
-        android:layout_toRightOf="@+id/ib_lc_iv_send_attachment_btn"
-        android:minHeight="30dp"
-        android:orientation="horizontal"
-        android:paddingTop="10dp"
-        app:layout_anchorGravity="center">
+        android:layout_height="40dp"
+        android:layout_width="wrap_content">
 
-        <EditText
-            android:id="@+id/ib_lc_et_msg_input"
+        <ImageView
+            android:id="@+id/ib_lc_iv_input_top_border"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:contentDescription="@string/ib_iv_input_border_desc"
+            android:src="@drawable/light_top_border" />
+
+        <ImageView
+            android:id="@+id/ib_lc_iv_send_attachment_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:contentDescription="@string/ib_iv_btn_send_attachment_desc"
+            android:enabled="false"
+            android:src="@drawable/ib_chat_attachment_btn_icon" />
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginLeft="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:background="@null"
-            android:enabled="false"
-            android:hint="@string/ib_chat_message_hint"
-            android:importantForAutofill="no"
-            android:inputType="textMultiLine"
-            android:maxLines="5"
+            android:layout_alignParentBottom="true"
+            android:layout_toStartOf="@+id/ib_lc_iv_send_btn"
+            android:layout_toLeftOf="@+id/ib_lc_iv_send_btn"
+            android:layout_toEndOf="@+id/ib_lc_iv_send_attachment_btn"
+            android:layout_toRightOf="@+id/ib_lc_iv_send_attachment_btn"
             android:minHeight="30dp"
-            android:scrollbars="vertical"
-            android:textSize="16sp" />
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            app:layout_anchorGravity="center">
+
+            <EditText
+                android:id="@+id/ib_lc_et_msg_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@null"
+                android:enabled="false"
+                android:hint="@string/ib_chat_message_hint"
+                android:importantForAutofill="no"
+                android:inputType="textMultiLine"
+                android:maxLines="5"
+                android:minHeight="30dp"
+                android:scrollbars="vertical"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/ib_lc_iv_send_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:contentDescription="@string/ib_iv_btn_send_desc"
+            android:enabled="false"
+            android:src="@drawable/ib_chat_send_btn_icon" />
 
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/ib_lc_iv_send_btn"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
-        android:contentDescription="@string/ib_iv_btn_send_desc"
-        android:enabled="false"
-        android:src="@drawable/ib_chat_send_btn_icon" />
-
-    <TextView
-        android:id="@+id/ib_lc_tv_error_toast"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_not_available_tv_height"
-        android:layout_alignBottom="@+id/appBarLayout"
-        android:background="@android:color/darker_gray"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="@string/ib_chat_no_connection"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:visibility="invisible" />
-
 </RelativeLayout>

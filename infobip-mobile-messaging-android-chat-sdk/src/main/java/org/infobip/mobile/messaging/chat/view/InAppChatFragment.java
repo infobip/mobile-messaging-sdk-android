@@ -80,6 +80,7 @@ import static android.app.Activity.RESULT_OK;
 public class InAppChatFragment extends Fragment implements InAppChatWebViewManager, PermissionsRequestManager.PermissionsRequester {
 
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
+    private static final int CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS = 300;
     private static final int CONTENT_SELECTION_INTENT_CODE = 100;
     private static final int USER_INPUT_CHECKER_DELAY_MS = 250;
 
@@ -112,6 +113,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private boolean fragmentCouldBePaused = true;
     private boolean fragmentCouldBeResumed = true;
     private boolean isToolbarHidden = false;
+    private boolean isInputControlsVisible = true;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -522,6 +524,28 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         webView.setVisibility(View.GONE);
         spinner.setVisibility(View.GONE);
         msgInputWrapper.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void setControlsVisibility(boolean isVisible) {
+        if (isInputControlsVisible == isVisible) {
+            return;
+        } else if (isVisible) {
+            msgInputWrapper.animate().translationY(0).setDuration(CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    msgInputWrapper.setVisibility(View.VISIBLE);
+                }
+            });
+        } else {
+            msgInputWrapper.animate().translationY(msgInputWrapper.getHeight()).setDuration(CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    msgInputWrapper.setVisibility(View.GONE);
+                }
+            });
+        }
+        isInputControlsVisible = isVisible;
     }
 
     @Override

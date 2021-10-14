@@ -55,6 +55,19 @@ public class InAppChatMobileImpl implements InAppChatMobile {
 
     @Override
     @JavascriptInterface
+    public void setControlsVisibility(final boolean isVisible) {
+        Runnable myRunnable = new Runnable() {
+            @Override
+            public void run() {
+                MobileMessagingLogger.d("WebView input visible: " + isVisible);
+                if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsVisibility(isVisible);
+            }
+        };
+        handler.post(myRunnable);
+    }
+
+    @Override
+    @JavascriptInterface
     public void openAttachmentPreview(final String url, final String type, final String caption) {
         Runnable myRunnable = new Runnable() {
             @Override
