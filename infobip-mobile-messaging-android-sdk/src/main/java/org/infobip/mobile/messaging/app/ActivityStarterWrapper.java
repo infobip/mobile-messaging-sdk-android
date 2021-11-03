@@ -52,6 +52,7 @@ public class ActivityStarterWrapper {
      * @param webViewIntent Intent with extras/actions etc. to forward to the web view activity
      */
     public void startWebViewActivity(@NonNull Intent webViewIntent, @NonNull String url) {
+        if (WebViewActivity.canOpenURLWithOtherApp(url, context)) return;
         webViewIntent.putExtra(WebViewActivity.EXTRA_URL, url);
         webViewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         webViewIntent.setClass(context, WebViewActivity.class);

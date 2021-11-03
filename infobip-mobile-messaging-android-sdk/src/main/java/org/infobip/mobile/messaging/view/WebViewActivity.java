@@ -1,12 +1,19 @@
 package org.infobip.mobile.messaging.view;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -17,6 +24,7 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -31,6 +39,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 public class WebViewActivity extends AppCompatActivity {
@@ -72,6 +81,13 @@ public class WebViewActivity extends AppCompatActivity {
         settings.setJavaScriptEnabled(true);
 
         webView.setWebViewClient(new WebViewClient() {
+
+            @TargetApi(Build.VERSION_CODES.N)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return WebViewActivity.this.shouldOverrideUrlLoading(request.getUrl().toString());
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String innerUrl) {
                 return WebViewActivity.this.shouldOverrideUrlLoading(innerUrl);
@@ -135,16 +151,47 @@ public class WebViewActivity extends AppCompatActivity {
             }
         }
 
-        // try to open any scheme/activity that can be resolved
-        Uri parsedUri = Uri.parse(innerUrl);
-        if (parsedUri != null) {
-            Intent parsedUriIntent = new Intent(Intent.ACTION_VIEW, parsedUri);
-            if (parsedUriIntent.resolveActivity(packageManager) != null) {
-                startActivity(parsedUriIntent);
+        return canOpenURLWithOtherApp(innerUrl, this);
+    }
+
+    /**
+     * Opens URL in its default application unless it needs to be opened in a browser. Links which should be opened by default in browser app are trying to be opened directly in this web view. Returns `true` if URL is opened in another application, `false` if in this web view.
+     */
+    public static boolean canOpenURLWithOtherApp(String url, Context context) {
+        Uri parsedUri = Uri.parse(url);
+        if (parsedUri == null) return false;
+
+        Intent parsedUriIntent = new Intent(Intent.ACTION_VIEW, parsedUri);
+        int flags = Intent.FLAG_ACTIVITY_NEW_TASK |
+                Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED |
+                Intent.FLAG_ACTIVITY_CLEAR_TOP;
+        if (Build.VERSION.SDK_INT > 29) {
+            flags = flags | (int) 1024; // FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+            parsedUriIntent.addFlags(flags);
+            try {
+                context.startActivity(parsedUriIntent);
+                return true;
+            } catch (ActivityNotFoundException e) {
+                MobileMessagingLogger.d("Browser is the default app for this intent, URL will be opened in webView");
+                return false;
+            }
+        } else {
+            final List<ResolveInfo> otherApps = context.getPackageManager().queryIntentActivities(parsedUriIntent, 0);
+            for (ResolveInfo otherApp : otherApps) {
+                ActivityInfo otherAppActivity = otherApp.activityInfo;
+                ComponentName componentName = new ComponentName(
+                        otherAppActivity.applicationInfo.packageName,
+                        otherAppActivity.name
+                );
+                if (otherApp.activityInfo.applicationInfo.packageName.equals("com.android.chrome")) {
+                    return false;
+                }
+                parsedUriIntent.addFlags(flags);
+                parsedUriIntent.setComponent(componentName);
+                context.startActivity(parsedUriIntent);
                 return true;
             }
         }
-
         return false;
     }
 
