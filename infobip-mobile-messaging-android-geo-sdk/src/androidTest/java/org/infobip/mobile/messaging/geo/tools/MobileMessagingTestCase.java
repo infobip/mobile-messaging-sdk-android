@@ -11,6 +11,7 @@ import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -34,6 +35,7 @@ import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+
+import com.google.firebase.FirebaseOptions;
 
 /**
  * @author sslavin
@@ -64,6 +68,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileApiResourceProvider mobileApiResourceProvider;
     protected MobileApiMessages mobileApiMessages;
     protected MobileApiAppInstance mobileApiAppInstance;
+    protected FirebaseAppProvider firebaseAppProvider;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -127,7 +132,14 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         mobileApiResourceProvider = mock(MobileApiResourceProvider.class);
         given(mobileApiResourceProvider.getMobileApiMessages(any(Context.class))).willReturn(mobileApiMessages);
         given(mobileApiResourceProvider.getMobileApiAppInstance(any(Context.class))).willReturn(mobileApiAppInstance);
-        mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster, mobileApiResourceProvider);
+
+        firebaseAppProvider = mock(FirebaseAppProvider.class);
+        FirebaseOptions firebaseOptions = new FirebaseOptions.Builder().setProjectId("project_id").setApiKey("api_key").setApplicationId("application_id").build();
+        Mockito.when(firebaseAppProvider.getFirebaseApp()).thenCallRealMethod();
+        Mockito.when(firebaseAppProvider.getContext()).thenReturn(context);
+        Mockito.when(firebaseAppProvider.loadFirebaseOptions(Mockito.any(Context.class))).thenReturn(firebaseOptions);
+
+        mobileMessagingCore = MobileMessagingTestable.create(context, coreBroadcaster, mobileApiResourceProvider, firebaseAppProvider);
         mobileMessaging = mobileMessagingCore;
         geofencingHelper = new GeofencingHelper(context);
 

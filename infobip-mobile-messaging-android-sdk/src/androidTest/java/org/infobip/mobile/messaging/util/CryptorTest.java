@@ -45,7 +45,6 @@ public class CryptorTest extends MobileMessagingTestCase {
     public void test_ThatCryptedPropertiesMigrated() throws Exception {
 
         MobileMessagingProperty key1 = MobileMessagingProperty.APPLICATION_CODE;
-        MobileMessagingProperty key2 = MobileMessagingProperty.SENDER_ID;
         MobileMessagingProperty key3 = MobileMessagingProperty.INFOBIP_REGISTRATION_ID;
         MobileMessagingProperty key4 = MobileMessagingProperty.CLOUD_TOKEN;
 
@@ -55,11 +54,9 @@ public class CryptorTest extends MobileMessagingTestCase {
         Cryptor oldCryptor =  new ECBCryptorImpl(DeviceInformation.getDeviceID(context));
         PreferenceHelper.cryptor = oldCryptor;
         PreferenceHelper.saveString(context, key1, value);
-        PreferenceHelper.saveString(context, key2, value);
         PreferenceHelper.saveString(context, key3, value);
         PreferenceHelper.saveString(context, key4, value);
         assertEquals(PreferenceHelper.findString(context, key1), value);
-        assertEquals(PreferenceHelper.findString(context, key2), value);
         assertEquals(PreferenceHelper.findString(context, key3), value);
         assertEquals(PreferenceHelper.findString(context, key4), value);
 
@@ -73,7 +70,6 @@ public class CryptorTest extends MobileMessagingTestCase {
         assertFalse(PreferenceHelper.shouldMigrateFromCryptor(oldCryptor, context));
 
         assertEquals(PreferenceHelper.findString(context, key1), value);
-        assertEquals(PreferenceHelper.findString(context, key2), value);
         assertEquals(PreferenceHelper.findString(context, key3), value);
         assertEquals(PreferenceHelper.findString(context, key4), value);
     }

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;

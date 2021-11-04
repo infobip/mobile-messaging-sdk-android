@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.cloud;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import junit.framework.TestCase;
 
@@ -50,42 +50,38 @@ public class MobileMessagingCloudHandlerTest extends TestCase {
     @Test
     public void test_shouldHandleNewToken() {
         Intent intent = new Intent("org.infobip.mobile.messaging.cloud.NEW_TOKEN")
-                .putExtra("org.infobip.mobile.messaging.cloud.TOKEN", "token")
-                .putExtra("org.infobip.mobile.messaging.cloud.SENDER_ID", "senderId");
+                .putExtra("org.infobip.mobile.messaging.cloud.TOKEN", "token");
 
         handler.handleWork(context, intent);
 
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).handleNewToken(Mockito.eq("senderId"), Mockito.eq("token"));
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).handleNewToken(Mockito.eq("token"));
     }
 
     @Test
     public void test_shouldHandleTokenCleanup() {
-        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_CLEANUP")
-                .putExtra("org.infobip.mobile.messaging.cloud.SENDER_ID", "senderId");
+        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_CLEANUP");
 
         handler.handleWork(context, intent);
 
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).cleanupToken(Mockito.eq("senderId"));
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).cleanupToken();
     }
 
     @Test
     public void test_shouldHandleTokenReset() {
-        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_RESET")
-                .putExtra("org.infobip.mobile.messaging.cloud.SENDER_ID", "senderId");
+        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_RESET");
 
         handler.handleWork(context, intent);
 
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).cleanupToken(Mockito.eq("senderId"));
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).acquireNewToken(Mockito.eq("senderId"));
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).cleanupToken();
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).acquireNewToken();
     }
 
     @Test
     public void test_shouldHandleTokenAcquisition() {
-        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_ACQUIRE")
-                .putExtra("org.infobip.mobile.messaging.cloud.SENDER_ID", "senderId");
+        Intent intent = new Intent("org.infobip.mobile.messaging.cloud.TOKEN_ACQUIRE");
 
         handler.handleWork(context, intent);
 
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).acquireNewToken(Mockito.eq("senderId"));
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).acquireNewToken();
     }
 }

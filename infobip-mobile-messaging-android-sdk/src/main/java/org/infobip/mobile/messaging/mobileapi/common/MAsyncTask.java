@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.mobileapi.common;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.appinstance;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.events;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.CustomEvent;
 import org.infobip.mobile.messaging.EventPropertiesMapper;

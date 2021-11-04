@@ -2,8 +2,8 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.app.Activity;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import android.webkit.JavascriptInterface;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;

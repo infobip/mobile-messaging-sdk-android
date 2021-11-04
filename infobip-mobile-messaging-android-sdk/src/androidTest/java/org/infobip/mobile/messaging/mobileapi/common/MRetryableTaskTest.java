@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.common;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;

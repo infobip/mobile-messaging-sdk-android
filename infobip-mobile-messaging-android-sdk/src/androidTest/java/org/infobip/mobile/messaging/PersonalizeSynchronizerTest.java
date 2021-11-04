@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;

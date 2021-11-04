@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.geo.transition;
 
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.geo.GeoEventType;
 import org.infobip.mobile.messaging.geo.GeoLatLng;

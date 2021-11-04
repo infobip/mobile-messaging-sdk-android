@@ -6,9 +6,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
@@ -37,7 +37,6 @@ import java.util.List;
  *
  * @author mstipanov
  * @see Builder
- * @see Builder#withSenderId(String)
  * @see Builder#withoutDisplayNotification()
  * @see Builder#withMessageStore(Class)
  * @see Builder#withApiUri(String)
@@ -452,7 +451,6 @@ public abstract class MobileMessaging {
      * @see MobileMessaging
      * @see NotificationSettings.Builder
      * @see NotificationSettings
-     * @see Builder#withSenderId(String)
      * @see Builder#withApiUri(String)
      * @see Builder#withMessageStore(Class)
      * @see Builder#withoutMessageStore()
@@ -469,7 +467,6 @@ public abstract class MobileMessaging {
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
         private final Application application;
-        private String senderId = (String) MobileMessagingProperty.SENDER_ID.getDefaultValue();
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
         private String apiUri = (String) MobileMessagingProperty.API_URI.getDefaultValue();
         private NotificationSettings notificationSettings = null;
@@ -493,7 +490,6 @@ public abstract class MobileMessaging {
             this.application = application;
 
             loadDefaultApiUri(application);
-            loadSenderId(application);
             final String applicationCode = MobileMessagingCore.getApplicationCodeFromResources(application);
             if (StringUtils.isNotBlank(applicationCode)) {
                 this.applicationCode = applicationCode;
@@ -519,25 +515,6 @@ public abstract class MobileMessaging {
             }
         }
 
-        private void loadSenderId(Context context) {
-            int googleServicesResource = ResourceLoader.loadResourceByName(context, "string", "gcm_defaultSenderId");
-            if (googleServicesResource > 0) {
-                String senderId = context.getResources().getString(googleServicesResource);
-                if (StringUtils.isNotBlank(senderId)) {
-                    this.senderId = senderId;
-                    return;
-                }
-            }
-
-            int ibResource = ResourceLoader.loadResourceByName(context, "string", "google_app_id");
-            if (ibResource > 0) {
-                String senderId = context.getResources().getString(ibResource);
-                if (StringUtils.isNotBlank(senderId)) {
-                    this.senderId = senderId;
-                }
-            }
-        }
-
         private void validateWithParam(Object o) {
             if (null != o) {
                 return;
@@ -558,15 +535,10 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * When you want to use a FCM sender that is not stored to <i>google_app_id</i> string resource or to google-services.json file.
-         * <br>By default it will use <i>google_app_id</i> string resource
-         *
-         * @param senderId if you don't have one, you should <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging">get one</a>
-         * @return {@link Builder}
+         * @deprecated Starting from the version 6.0.0 either provide values for registering in Firebase using google-services.json or set them in strings.xml
          */
+        @Deprecated
         public Builder withSenderId(String senderId) {
-            validateWithParam(senderId);
-            this.senderId = senderId;
             return this;
         }
 
@@ -838,7 +810,6 @@ public abstract class MobileMessaging {
             validateApplicationCodeAvailability();
 
             MobileMessagingCore.setApiUri(application, apiUri);
-            MobileMessagingCore.setSenderId(application, senderId);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);

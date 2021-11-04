@@ -5,8 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -21,6 +21,7 @@ import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
 import org.infobip.mobile.messaging.cloud.PlayServicesSupport;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -143,12 +144,13 @@ public class MobileMessagingCore
     private volatile boolean didSyncAtLeastOnce;
     private volatile Long lastSyncTimeMillis;
     private volatile Long lastForegroundSyncMillis;
+    private FirebaseAppProvider firebaseAppProvider;
 
     protected MobileMessagingCore(Context context) {
-        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context));
+        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
     }
 
-    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor, ModuleLoader moduleLoader) {
+    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor, ModuleLoader moduleLoader, FirebaseAppProvider firebaseAppProvider) {
         MobileMessagingLogger.init(context);
 
         this.context = context;
@@ -176,6 +178,7 @@ public class MobileMessagingCore
         migratePrefsIfNecessary(context);
 
         this.installationId = getUniversalInstallationId();
+        this.firebaseAppProvider = firebaseAppProvider;
     }
 
     /**
@@ -942,17 +945,6 @@ public class MobileMessagingCore
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
-    static void setSenderId(Context context, String senderId) {
-        if (StringUtils.isBlank(senderId)) {
-            throw new IllegalArgumentException("senderId is mandatory! Get one here: https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging");
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.SENDER_ID, senderId);
-    }
-
-    public static String getSenderId(Context context) {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-    }
-
     public boolean isRegistrationIdReported() {
         return installationSynchronizer().isCloudTokenReported();
     }
@@ -1327,14 +1319,12 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
 
         //it's needed for MobileMessagingCore.Build, when user uses different appCode
-        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-        MobileMessagingCloudService.enqueueTokenCleanup(context, senderID);
+        MobileMessagingCloudService.enqueueTokenCleanup(context, mmCore.firebaseAppProvider);
     }
 
     public void resetCloudToken(boolean force) {
-        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
         if (force || !didSyncRecently()) {
-            MobileMessagingCloudService.enqueueTokenReset(context, senderID);
+            MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProvider);
         }
     }
 
@@ -2044,7 +2034,7 @@ public class MobileMessagingCore
 
             // do the force invalidation of old push cloud tokens
             boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;
-            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(applicationContext, shouldResetToken, initListener);
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(applicationContext, shouldResetToken, initListener, mobileMessagingCore.firebaseAppProvider);
 
             Platform.reset(mobileMessagingCore);
             MobileMessagingCloudHandler cloudHandler = Platform.initializeMobileMessagingCloudHandler(application);

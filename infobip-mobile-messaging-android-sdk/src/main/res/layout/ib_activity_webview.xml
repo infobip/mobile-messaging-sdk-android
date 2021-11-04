@@ -7,12 +7,12 @@
     android:orientation="vertical"
     tools:context=".view.WebViewActivity">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/ib_toolbar_webview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        app:theme="@style/IB_WebViewTheme.PopupOverlay">
+        android:theme="@style/IB_WebViewTheme.PopupOverlay">
 
         <TextView
             android:id="@+id/ib_tv_webview_toolbar_title"
@@ -26,7 +26,7 @@
             android:paddingEnd="0dp"
             android:paddingRight="0dp" />
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <WebView
         android:id="@+id/ib_webview"

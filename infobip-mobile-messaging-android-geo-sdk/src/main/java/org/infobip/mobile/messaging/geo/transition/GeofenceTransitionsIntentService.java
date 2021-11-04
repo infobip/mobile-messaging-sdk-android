@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.geo.transition;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.geo.platform.AndroidGeoBroadcaster;
 import org.infobip.mobile.messaging.platform.JobIntentService;

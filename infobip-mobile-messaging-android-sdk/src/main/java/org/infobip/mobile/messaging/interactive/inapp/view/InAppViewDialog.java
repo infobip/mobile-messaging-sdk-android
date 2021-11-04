@@ -2,8 +2,8 @@ package org.infobip.mobile.messaging.interactive.inapp.view;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;

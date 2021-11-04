@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;

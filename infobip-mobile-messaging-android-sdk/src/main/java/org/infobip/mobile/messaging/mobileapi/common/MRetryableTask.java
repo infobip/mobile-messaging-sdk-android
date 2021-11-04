@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.mobileapi.common;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;

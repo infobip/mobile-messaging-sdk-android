@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Locale;
 

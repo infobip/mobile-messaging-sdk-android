@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.geo.mapper;
 
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.geo.Geo;

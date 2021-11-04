@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.interactive;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 

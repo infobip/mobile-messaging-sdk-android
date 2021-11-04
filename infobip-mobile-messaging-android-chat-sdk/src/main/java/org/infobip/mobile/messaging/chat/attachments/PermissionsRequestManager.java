@@ -7,9 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.util.ArraySet;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.collection.ArraySet;
 
 import org.infobip.mobile.messaging.chat.R;
 

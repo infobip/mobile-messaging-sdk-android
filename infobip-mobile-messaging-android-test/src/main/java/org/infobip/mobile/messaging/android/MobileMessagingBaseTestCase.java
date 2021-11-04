@@ -2,7 +2,8 @@ package org.infobip.mobile.messaging.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,7 +25,7 @@ import java.util.List;
 
 import fi.iki.elonen.NanoHTTPD;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * @author sslavin

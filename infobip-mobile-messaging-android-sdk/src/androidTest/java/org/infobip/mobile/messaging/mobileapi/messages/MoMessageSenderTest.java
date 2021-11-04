@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.messages;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;

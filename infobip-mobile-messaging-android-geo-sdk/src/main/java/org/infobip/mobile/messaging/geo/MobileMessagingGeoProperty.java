@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.geo;
 
 
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 
 public enum MobileMessagingGeoProperty {
 

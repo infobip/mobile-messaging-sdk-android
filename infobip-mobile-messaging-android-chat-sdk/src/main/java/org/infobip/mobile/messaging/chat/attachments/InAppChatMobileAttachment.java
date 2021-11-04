@@ -9,7 +9,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.support.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 

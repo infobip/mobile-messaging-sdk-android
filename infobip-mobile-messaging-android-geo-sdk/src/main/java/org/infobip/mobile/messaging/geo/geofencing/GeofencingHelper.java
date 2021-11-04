@@ -6,8 +6,8 @@ import android.content.Context;
 import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.util.ArraySet;
+import androidx.annotation.NonNull;
+import androidx.collection.ArraySet;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;

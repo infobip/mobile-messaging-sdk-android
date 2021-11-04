@@ -3,8 +3,8 @@ package org.infobip.mobile.messaging.cloud;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -15,7 +15,6 @@ public class MobileMessagingCloudHandler {
 
     private static final String PREFIX = "org.infobip.mobile.messaging.cloud.";
 
-    static final String EXTRA_SENDER_ID = PREFIX + "SENDER_ID";
     static final String EXTRA_TOKEN = PREFIX + "TOKEN";
 
     static final String ACTION_CLOUD_MESSAGE_RECEIVE = PREFIX + "MESSAGE_RECEIVE";
@@ -64,26 +63,22 @@ public class MobileMessagingCloudHandler {
     }
 
     private void handleNewToken(Context context, @NonNull Intent intent) {
-        String senderId = intent.getStringExtra(EXTRA_SENDER_ID);
         String token = intent.getStringExtra(EXTRA_TOKEN);
-        registrationTokenHandler.get(context).handleNewToken(senderId, token);
+        registrationTokenHandler.get(context).handleNewToken(token);
     }
 
     private void handleTokenAcquire(Context context, @NonNull Intent intent) {
-        String senderId = intent.getStringExtra(EXTRA_SENDER_ID);
-        registrationTokenHandler.get(context).acquireNewToken(senderId);
+        registrationTokenHandler.get(context).acquireNewToken();
     }
 
     private void handleTokenCleanup(Context context, @NonNull Intent intent) {
-        String senderId = intent.getStringExtra(EXTRA_SENDER_ID);
-        registrationTokenHandler.get(context).cleanupToken(senderId);
+        registrationTokenHandler.get(context).cleanupToken();
     }
 
     private void handleTokenReset(Context context, @NonNull Intent intent) {
-        String senderId = intent.getStringExtra(EXTRA_SENDER_ID);
         RegistrationTokenHandler handler = registrationTokenHandler.get(context);
-        handler.cleanupToken(senderId);
-        handler.acquireNewToken(senderId);
+        handler.cleanupToken();
+        handler.acquireNewToken();
     }
 
     private void handleMessage(Context context, @NonNull Intent intent) {

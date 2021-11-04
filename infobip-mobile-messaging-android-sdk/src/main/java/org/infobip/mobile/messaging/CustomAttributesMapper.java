@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.gson.reflect.TypeToken;
 

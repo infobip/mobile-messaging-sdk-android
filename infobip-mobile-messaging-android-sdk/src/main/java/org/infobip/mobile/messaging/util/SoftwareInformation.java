@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationManagerCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.BuildConfig;
