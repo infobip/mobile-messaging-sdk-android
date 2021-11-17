@@ -21,9 +21,9 @@ plugins {
 
 ext {
     mm_minSdkVersion = 16
-    mm_compileSdkVersion = 30
-    mm_targetSdkVersion = 30
-    mm_buildToolsVersion = "30.0.2"
+    mm_compileSdkVersion = 31
+    mm_targetSdkVersion = 31
+    mm_buildToolsVersion = "31.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "18.0.0"
 }

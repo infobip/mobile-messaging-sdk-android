@@ -1,23 +1,18 @@
 package org.infobip.mobile.messaging.app;
 
-
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.view.WebViewActivity;
 
-public class ActivityStarterWrapper {
+public class ActivityStarterWrapper extends ContentIntentWrapper {
 
-    private final Context context;
     private final MobileMessagingCore mobileMessagingCore;
 
     public ActivityStarterWrapper(Context context, MobileMessagingCore mobileMessagingCore) {
-        this.context = context;
+        super(context);
         this.mobileMessagingCore = mobileMessagingCore;
     }
 
@@ -31,18 +26,12 @@ public class ActivityStarterWrapper {
         if (notificationSettings == null) {
             return;
         }
-        Class callbackActivity = notificationSettings.getCallbackActivity();
-        if (callbackActivity == null) {
-            MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
+
+        Intent intent = createContentIntent(callbackIntent, notificationSettings);
+        if (intent == null) {
             return;
         }
 
-        int intentFlags = notificationSettings.getIntentFlags();
-        // FLAG_ACTIVITY_NEW_TASK has to be here because we're starting activity outside of activity context
-        intentFlags |= Intent.FLAG_ACTIVITY_NEW_TASK;
-
-        callbackIntent.addFlags(intentFlags);
-        callbackIntent.setClass(context, callbackActivity);
         context.startActivity(callbackIntent);
     }
 
@@ -52,19 +41,16 @@ public class ActivityStarterWrapper {
      * @param webViewIntent Intent with extras/actions etc. to forward to the web view activity
      */
     public void startWebViewActivity(@NonNull Intent webViewIntent, @NonNull String url) {
-        webViewIntent.putExtra(WebViewActivity.EXTRA_URL, url);
-        webViewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        webViewIntent.setClass(context, WebViewActivity.class);
-        context.startActivity(webViewIntent);
+        Intent intent = createWebViewContentIntent(webViewIntent, url);
+        context.startActivity(intent);
     }
 
     /**
      * Starts available browser
      */
     public void startBrowser(@NonNull String browserUrl) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (intent.resolveActivity(context.getPackageManager()) != null) {
+        Intent intent = createBrowserIntent(browserUrl);
+        if (intent != null) {
             context.startActivity(intent);
         }
     }

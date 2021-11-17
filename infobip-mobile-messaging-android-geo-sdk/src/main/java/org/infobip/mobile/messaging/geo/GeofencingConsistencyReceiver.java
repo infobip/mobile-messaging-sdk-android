@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -66,6 +67,11 @@ public class GeofencingConsistencyReceiver extends BroadcastReceiver {
 
         Intent intent = new Intent(context, GeofencingConsistencyReceiver.class);
         intent.setAction(action);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            flags = flags | PendingIntent.FLAG_MUTABLE;
+        }
+
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags);
 
         // not using exact setter with wake lock because we don't want to wake up device that sleeps

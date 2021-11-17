@@ -22,7 +22,8 @@
 
         <receiver
             android:name="org.infobip.mobile.messaging.geo.BootReceiver"
-            android:enabled="false">
+            android:enabled="false"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -36,7 +37,8 @@
             android:enabled="false" />
         <receiver
             android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver"
-            android:enabled="false">
+            android:enabled="false"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
@@ -49,7 +51,8 @@
         <!--Receiver used for versions below Android O-->
         <receiver
             android:name="org.infobip.mobile.messaging.geo.GeoEnabledConsistencyReceiver"
-            android:enabled="false">
+            android:enabled="false"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
             </intent-filter>

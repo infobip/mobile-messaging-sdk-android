@@ -31,7 +31,6 @@
             android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <receiver android:name="org.infobip.mobile.messaging.notification.NotificationTapReceiver" />
         <receiver
             android:name="org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver"
             android:enabled="false"
@@ -52,6 +51,14 @@
                 <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="org.infobip.mobile.messaging.NotificationTapReceiverActivity"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true" />
 
     </application>
 </manifest>

@@ -69,4 +69,20 @@ public class ActivityStarterWrapperTest extends MobileMessagingTestCase {
         Mockito.verify(contextMock, Mockito.never()).startActivity(givenIntent);
     }
 
+    @Test
+    public void testShouldCreateContentIntentWithMessageAndFlags() throws Exception {
+        // Given
+        Message givenMessage = createMessage(context, "SomeMessageId", false);
+
+        // When
+        Intent intent = activityStarterWrapper.createContentIntent(givenMessage, notificationSettings);
+
+        //Then
+        assertNotNull(intent);
+        assertEquals(notificationSettings.getIntentFlags() | Intent.FLAG_ACTIVITY_NEW_TASK, intent.getFlags());
+        Message message = Message.createFrom(intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE));
+        assertJEquals(givenMessage, message);
+        assertEquals(intent.getAction(), intent.getAction());
+    }
+
 }

@@ -381,7 +381,11 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     private PendingIntent geofencePendingIntent() {
         if (geofencePendingIntent == null) {
             Intent intent = new Intent(context, GeofenceTransitionsReceiver.class);
-            geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags = flags | PendingIntent.FLAG_MUTABLE;
+            }
+            geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags);
         }
 
         return geofencePendingIntent;
