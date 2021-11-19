@@ -11,18 +11,6 @@
     android:animateLayoutChanges="true"
     tools:context=".view.InAppChatFragment">
 
-    <TextView
-        android:id="@+id/ib_lc_tv_error_toast"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_not_available_tv_height"
-        android:layout_alignBottom="@+id/appBarLayout"
-        android:background="@android:color/darker_gray"
-        android:gravity="center_horizontal|center_vertical"
-        android:text="@string/ib_chat_no_connection"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:visibility="invisible" />
-
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -127,4 +115,16 @@
             android:src="@drawable/ib_chat_send_btn_icon" />
 
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/ib_lc_tv_error_toast"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/chat_not_available_tv_height"
+        android:layout_alignBottom="@+id/appBarLayout"
+        android:background="@android:color/darker_gray"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/ib_chat_no_connection"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:visibility="invisible" />
 </RelativeLayout>

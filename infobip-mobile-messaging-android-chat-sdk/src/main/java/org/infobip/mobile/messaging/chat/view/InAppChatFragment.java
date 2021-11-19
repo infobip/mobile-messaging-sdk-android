@@ -158,6 +158,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         permissionsRequestManager = new PermissionsRequestManager(fragmentActivity, this);
 
         initViews();
+        setControlsEnabled(false);
         updateViews();
     }
 
@@ -523,7 +524,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         chatErrors().insertError(InAppChatErrors.JS_ERROR);
         webView.setVisibility(View.GONE);
         spinner.setVisibility(View.GONE);
-        msgInputWrapper.setVisibility(View.GONE);
+        setControlsEnabled(false);
     }
 
     @Override
