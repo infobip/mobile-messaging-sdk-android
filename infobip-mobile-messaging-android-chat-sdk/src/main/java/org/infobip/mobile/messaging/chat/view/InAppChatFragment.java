@@ -41,6 +41,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -94,7 +95,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private ImageView sendAttachmentButton;
     private ProgressBar spinner;
     private Toolbar toolbar;
-    private RelativeLayout msgInputWrapper;
+    private LinearLayout msgInputWrapper;
     private RelativeLayout mainWindow;
     private TextView errorToast;
 
@@ -114,6 +115,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private boolean fragmentCouldBeResumed = true;
     private boolean isToolbarHidden = false;
     private boolean isInputControlsVisible = true;
+    private boolean fragmentHidden = false;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -165,13 +167,17 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @Override
     public void onPause() {
         super.onPause();
-        fragmentPaused();
+        if (!fragmentHidden) {
+            fragmentPaused();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        fragmentResumed();
+        if (!fragmentHidden) {
+            fragmentResumed();
+        }
     }
 
     @Override
@@ -185,6 +191,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     @Override
     public void onHiddenChanged(boolean hidden) {
+        fragmentHidden = hidden;
         if (!hidden) {
             initToolbar();
             updateViews();
