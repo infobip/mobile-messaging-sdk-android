@@ -5,7 +5,6 @@ import org.infobip.mobile.messaging.platform.Time;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
