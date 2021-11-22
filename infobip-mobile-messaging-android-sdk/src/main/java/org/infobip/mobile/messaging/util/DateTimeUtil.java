@@ -5,6 +5,7 @@ import org.infobip.mobile.messaging.platform.Time;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -109,7 +110,7 @@ public class DateTimeUtil {
             return null;
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
         return simpleDateFormat.format(date.getTime());
     }
 
@@ -135,7 +136,7 @@ public class DateTimeUtil {
             return null;
         }
 
-        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.getDefault()).parse(date);
+        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.UK).parse(date);
     }
 
     /**
@@ -181,7 +182,7 @@ public class DateTimeUtil {
             return null;
         }
 
-        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.getDefault()).format(date);
+        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.UK).format(date);
     }
 
     /**
