@@ -4,9 +4,13 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.util.ComponentUtil;
 
-
 public class FirebaseManifestHelper {
 
+    /**
+     * @deprecated it's left because we still have installations of library version less than 2.1.0
+     * Could be deleted if we don't have such installations and almost all users already updated.
+     */
+    @Deprecated
     public static void verifyAndConfigureManifest(Context context) {
         // this component needs to be enabled for legacy migration reasons for versions that used GCM
         // it was disabled if GCM component was used instead of Firebase and not re-enabled programmatically if Firebase was used again

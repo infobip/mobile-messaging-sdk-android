@@ -181,11 +181,9 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         notificationHandler = mock(NotificationHandler.class);
         broadcaster = mock(Broadcaster.class);
 
-        firebaseAppProvider = mock(FirebaseAppProvider.class);
+        firebaseAppProvider = new FirebaseAppProvider(context);
         FirebaseOptions firebaseOptions = new FirebaseOptions.Builder().setProjectId("project_id").setApiKey("api_key").setApplicationId("application_id").build();
-        Mockito.when(firebaseAppProvider.getFirebaseApp()).thenCallRealMethod();
-        Mockito.when(firebaseAppProvider.getContext()).thenReturn(context);
-        Mockito.when(firebaseAppProvider.loadFirebaseOptions(Mockito.any(Context.class))).thenReturn(firebaseOptions);
+        firebaseAppProvider.setFirebaseOptions(firebaseOptions);
 
         mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster, mobileApiResourceProvider, firebaseAppProvider);
         mobileMessaging = mobileMessagingCore;

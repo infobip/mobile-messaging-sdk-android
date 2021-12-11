@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 
+import com.google.firebase.FirebaseOptions;
+
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -462,6 +464,7 @@ public abstract class MobileMessaging {
      * @see Builder#withoutCarrierInfo()
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
+     * @see Builder#withFirebaseOptions(FirebaseOptions) 
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -479,6 +482,7 @@ public abstract class MobileMessaging {
         private boolean allowUntrustedSSLOnError = false;
         private boolean usePrivateSharedPrefs = false;
         private ApplicationCodeProvider applicationCodeProvider = null;
+        private FirebaseOptions firebaseOptions = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -539,6 +543,19 @@ public abstract class MobileMessaging {
          */
         @Deprecated
         public Builder withSenderId(String senderId) {
+            return this;
+        }
+
+        /**
+         * If you don't want to have automatic initialization of {@link FirebaseApp} by <a href=https://developers.google.com/android/guides/google-services-plugin>google-services plugin</a>,
+         * you may use this method to provide {@link FirebaseOptions} at runtime. In this case MobileMessaging SDK will initialize [DEFAULT] {@link FirebaseApp}, using provided {@link FirebaseOptions}.
+         * To create {@link FirebaseOptions} object use {@link FirebaseOptions.Builder} and values, which you can get from google-services.json file as described in the <a href=https://developers.google.com/android/guides/google-services-plugin>documentation of the google-services plugin<a/>.
+         *
+         * @param firebaseOptions, used to initialize {@link FirebaseApp} to register for push notifications.
+         * @return {@link Builder}
+         */
+        public Builder withFirebaseOptions(FirebaseOptions firebaseOptions) {
+            this.firebaseOptions = firebaseOptions;
             return this;
         }
 
@@ -820,7 +837,8 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
-                    .withDisplayNotification(notificationSettings);
+                    .withDisplayNotification(notificationSettings)
+                    .withFirebaseOptions(firebaseOptions);
 
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);

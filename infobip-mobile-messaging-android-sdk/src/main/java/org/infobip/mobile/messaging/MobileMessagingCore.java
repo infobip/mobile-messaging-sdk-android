@@ -91,6 +91,8 @@ import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
+import com.google.firebase.FirebaseOptions;
+
 
 /**
  * @author sslavin
@@ -1948,6 +1950,7 @@ public class MobileMessagingCore
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
         private ApplicationCodeProvider applicationCodeProvider;
+        private FirebaseOptions firebaseOptions;
 
         public Builder(Application application) {
             if (null == application) {
@@ -1980,6 +1983,19 @@ public class MobileMessagingCore
          */
         public Builder withDisplayNotification(NotificationSettings notificationSettings) {
             this.notificationSettings = notificationSettings;
+            return this;
+        }
+
+        /**
+         * If you don't want to have automatic initialization of {@link FirebaseApp} by <a href=https://developers.google.com/android/guides/google-services-plugin>google-services plugin</a>,
+         * you may use this method to provide {@link FirebaseOptions} at runtime. In this case MobileMessaging SDK will initialize [DEFAULT] {@link FirebaseApp}, using provided {@link FirebaseOptions}.
+         * To create {@link FirebaseOptions} object use {@link FirebaseOptions.Builder} and values, which you can get from google-services.json file as described in the <a href=https://developers.google.com/android/guides/google-services-plugin>documentation of the google-services plugin<a/>.
+         *
+         * @param firebaseOptions, used to initialize {@link FirebaseApp} to register for push notifications.
+         * @return {@link Builder}
+         */
+        public Builder withFirebaseOptions(FirebaseOptions firebaseOptions) {
+            this.firebaseOptions = firebaseOptions;
             return this;
         }
 
@@ -2026,6 +2042,7 @@ public class MobileMessagingCore
             Platform.verify(application);
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
+            mobileMessagingCore.firebaseAppProvider.setFirebaseOptions(firebaseOptions);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);

@@ -5,23 +5,23 @@ import android.content.Context;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
-import org.infobip.mobile.messaging.util.ResourceLoader;
-import org.infobip.mobile.messaging.util.StringUtils;
+import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 /**
- * FirebaseAppProvider provides FirebaseApp either by taking FirebaseOptions from google-services.json file or from Resource strings.
- *  Resource string keys are:
- * `ib_project_id`
- * `ib_google_api_key`
- * `ib_google_app_id`
+ * The FirebaseAppProvider checks if [DEFAULT] {@link FirebaseApp} is already initialized automatically by <a href=https://developers.google.com/android/guides/google-services-plugin>Google Services Gradle Plugin</a>
+ * or tries to initialize it from {@link FirebaseOptions}, provided using {@link MobileMessaging.Builder#withFirebaseOptions(FirebaseOptions)} method.
+ * <p>
+ * If your Android project has some configuration that prevents usage of Google Services Gradle Plugin,
+ * you can add key/values from google-services.json to resource strings (strings.xml),
+ * or initialize {@link FirebaseOptions} object and provide it to {@link MobileMessaging.Builder#withFirebaseOptions(FirebaseOptions)} method.
+ * <p>
+ * <a href=https://developers.google.com/android/guides/google-services-plugin>Documentation of the Google Services Gradle Plugin<a/> gives the details of how to get these values from google-services.json file.
  */
 public class FirebaseAppProvider {
 
-    public Context getContext() {
-        return context;
-    }
-
     private Context context;
+    private FirebaseOptions firebaseOptions;
 
     public FirebaseAppProvider(Context context) {
         this.context = context;
@@ -30,33 +30,21 @@ public class FirebaseAppProvider {
     public FirebaseApp getFirebaseApp() {
         FirebaseApp firebaseApp;
         try {
-            //Trying to get instance of FirebaseApp with FirebaseOptions from google-services.json file
+            //Trying to get instance of FirebaseApp with FirebaseOptions from google-services.json file or from resources
             firebaseApp = FirebaseApp.getInstance();
         } catch (Exception e) {
-            //Trying to get instance of FirebaseApp with FirebaseOptions from resources
-            firebaseApp = FirebaseApp.initializeApp(getContext(), loadFirebaseOptions(getContext()));
+            //Trying to get instance of FirebaseApp with FirebaseOptions provided at runtime
+            //firebaseOptions shouldn't be null in this case, or it will throw an error.
+            if (firebaseOptions == null) {
+                MobileMessagingLogger.e("Can't initialize FirebaseApp, provide either google-services.json, or string resources in strings.xml, or call withFirebaseOptions in MobileMessaging builder");
+                throw new IllegalArgumentException("FirebaseOptions aren't provided");
+            }
+            firebaseApp = FirebaseApp.initializeApp(context, firebaseOptions);
         }
         return firebaseApp;
     }
 
-    public FirebaseOptions loadFirebaseOptions(Context context) {
-        FirebaseOptions firebaseOptions = FirebaseOptions.fromResource(context);
-        if (firebaseOptions == null) {
-            String projectId = ResourceLoader.loadStringResourceByName(context, "ib_project_id");
-            String apiKey = ResourceLoader.loadStringResourceByName(context, "ib_google_api_key");
-            String applicationId = ResourceLoader.loadStringResourceByName(context, "ib_google_app_id");
-            if (StringUtils.isNotBlank(projectId) && StringUtils.isNotBlank(apiKey) && StringUtils.isNotBlank(applicationId)) {
-                firebaseOptions = new FirebaseOptions.Builder()
-                        .setApiKey(apiKey)
-                        .setApplicationId(applicationId)
-                        .setProjectId(projectId)
-                        .build();
-            }
-        }
-
-        if (firebaseOptions == null) {
-            throw new IllegalArgumentException("FirebaseOptions aren't provided");
-        }
-        return firebaseOptions;
+    public void setFirebaseOptions(FirebaseOptions firebaseOptions) {
+        this.firebaseOptions = firebaseOptions;
     }
 }

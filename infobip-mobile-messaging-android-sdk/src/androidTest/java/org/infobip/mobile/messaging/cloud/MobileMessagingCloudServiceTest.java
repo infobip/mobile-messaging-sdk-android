@@ -1,15 +1,17 @@
 package org.infobip.mobile.messaging.cloud;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
 import org.infobip.mobile.messaging.Message;
@@ -30,9 +32,10 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidJUnit4.class)
 public class MobileMessagingCloudServiceTest extends PlatformTestCase {
 
-    private MobileMessagingCloudHandler handler = Mockito.mock(MobileMessagingCloudHandler.class);
-    private Context context = Mockito.mock(Context.class);
-    private FirebaseAppProvider firebaseAppProvider = Mockito.mock(FirebaseAppProvider.class);
+    private final MobileMessagingCloudHandler handler = Mockito.mock(MobileMessagingCloudHandler.class);
+    private final Context context = Mockito.mock(Context.class);
+    private FirebaseAppProvider firebaseAppProviderSpy;
+    private final FirebaseApp firebaseApp = Mockito.mock(FirebaseApp.class);
 
     @Before
     public void beforeEach() {
@@ -50,10 +53,13 @@ public class MobileMessagingCloudServiceTest extends PlatformTestCase {
         Mockito.when(context.checkPermission(Mockito.eq(Manifest.permission.WAKE_LOCK), Mockito.anyInt(), Mockito.anyInt()))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
 
+
+        FirebaseAppProvider firebaseAppProvider = new FirebaseAppProvider(context);
+        firebaseAppProviderSpy = Mockito.spy(firebaseAppProvider);
+
         FirebaseOptions firebaseOptions = new FirebaseOptions.Builder().setProjectId("project_id").setApiKey("api_key").setApplicationId("application_id").build();
-        Mockito.when(firebaseAppProvider.getFirebaseApp()).thenCallRealMethod();
-        Mockito.when(firebaseAppProvider.getContext()).thenReturn(context);
-        Mockito.when(firebaseAppProvider.loadFirebaseOptions(Mockito.any(Context.class))).thenReturn(firebaseOptions);
+        firebaseAppProviderSpy.setFirebaseOptions(firebaseOptions);
+        doReturn(firebaseApp).when(firebaseAppProviderSpy).getFirebaseApp();
     }
 
     @Test
@@ -75,22 +81,22 @@ public class MobileMessagingCloudServiceTest extends PlatformTestCase {
 
     @Test
     public void test_shouldHandleTokenCleanup() {
-        MobileMessagingCloudService.enqueueTokenCleanup(context, firebaseAppProvider);
-        Mockito.verify(firebaseAppProvider, Mockito.times(1)).getFirebaseApp();
+        MobileMessagingCloudService.enqueueTokenCleanup(context, firebaseAppProviderSpy);
+        Mockito.verify(firebaseAppProviderSpy, Mockito.times(1)).getFirebaseApp();
         Mockito.verify(handler, Mockito.times(1)).handleWork(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 
     @Test
     public void test_shouldHandleTokenReset() {
-        MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProvider);
-        Mockito.verify(firebaseAppProvider, Mockito.times(1)).getFirebaseApp();
+        MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProviderSpy);
+        Mockito.verify(firebaseAppProviderSpy, Mockito.times(1)).getFirebaseApp();
         Mockito.verify(handler, Mockito.times(1)).handleWork(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 
     @Test
     public void test_shouldHandleTokenAcquisition() {
-        MobileMessagingCloudService.enqueueTokenAcquisition(context, firebaseAppProvider);
-        Mockito.verify(firebaseAppProvider, Mockito.times(1)).getFirebaseApp();
+        MobileMessagingCloudService.enqueueTokenAcquisition(context, firebaseAppProviderSpy);
+        Mockito.verify(firebaseAppProviderSpy, Mockito.times(1)).getFirebaseApp();
         Mockito.verify(handler, Mockito.times(1)).handleWork(Mockito.any(Context.class), Mockito.any(Intent.class));
     }
 

@@ -97,14 +97,6 @@ public class ComponentUtil {
         }
     }
 
-    public static void verifyManifestReceiverActivity(Context context, Class<? extends Activity> cls) {
-        try {
-            context.getPackageManager().getServiceInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
-        } catch (Exception ignored) {
-            reportMissingComponent(context, cls);
-        }
-    }
-
     public static void verifyManifestService(Context context, Class<? extends Service> cls) {
         try {
             context.getPackageManager().getServiceInfo(new ComponentName(context, cls), PackageManager.GET_DISABLED_COMPONENTS);
