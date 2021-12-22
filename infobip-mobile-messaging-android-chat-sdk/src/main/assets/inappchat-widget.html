@@ -69,7 +69,9 @@
 		// If all is OK -> initialize widget, enable native controls and show widget
 		function init() {
 		    liveChat(INIT);
-			liveChat(SHOW, null, () => onShowCallback());
+			liveChat(SHOW, null, function() {
+			    onShowCallback();
+			});
 		}
 
 		function getQueryParameter(name){

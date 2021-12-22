@@ -5,10 +5,14 @@
 
 Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of <a href="https://www.infobip.com/en/products/mobile-app-messaging" target="_blank">Infobip Mobile Apps Messaging</a>. The document describes library integration steps. Additional information can be found in our <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki" target="_blank">Wiki</a>.
 
+> ### Notice:
+> 6.0.0-rc version release contains only core modules, so `infobip-mobile-messaging-android-geo-sdk` and `infobip-mobile-messaging-android-chat-sdk` modules aren't available.
+
 ## Requirements
 
 - Android Studio
-- API Level: 14 (Android 4.0 - Ice Cream Sandwich)
+- Supported API Levels: 16 (Android 4.0 - Jellybean) - 31 (Android 12.0)
+- <a href="https://developer.android.com/jetpack/androidx/migrate" target="_blank">AndroidX</a>
 
 ## Quick start guide
 
@@ -17,22 +21,25 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     ```groovy
     dependencies {
         ...
-        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:5.3.3@aar') {
+        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:5.3.6@aar') {
             transitive = true
         }
     }
     ```
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGGradle.png?raw=true" alt="Gradle dependencies"/>
-3. Add <a href="https://www.infobip.com/docs/mobile-app-messaging/fcm-server-api-key-setup-guide" target="_blank">`Firebase Sender ID`</a> and Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
+3. Add a Firebase configuration file as described in <a href="https://firebase.google.com/docs/cloud-messaging/android/client#add_a_firebase_configuration_file" target="_blank">`Firebase documentation`</a>
+
+> ### Notice: 
+> Check <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Applying-Firebase-configuration-in-MobileMessaging-SDK">Applying Firebase configuration in MobileMessaging SDK Guide</a> for alternatives.
+
+4. Add Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
     ```groovy
     <resources>
-        <string name="google_app_id">SENDER ID</string>
         <string name="infobip_application_code">APPLICATION CODE</string>
         ...
     </resources>
     ```
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGStrings.png?raw=true" alt="String resources"/>
-    Do not add `google_app_id` if you're using <a href="https://developers.google.com/android/guides/google-services-plugin" target="_blank">Google Services Gradle Plugin</a> and `google-services.json`.
 4. Add code to `MainActivity#onCreate`
 
     ```java

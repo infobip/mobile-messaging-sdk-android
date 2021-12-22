@@ -33,7 +33,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
-import org.infobip.mobile.messaging.geo.MobileGeo;
+//import org.infobip.mobile.messaging.geo.MobileGeo;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.storage.MessageStore;
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        MobileGeo.getInstance(this).activateGeofencing();
+//        MobileGeo.getInstance(this).activateGeofencing();
     }
 
     private void clearNotifications() {
