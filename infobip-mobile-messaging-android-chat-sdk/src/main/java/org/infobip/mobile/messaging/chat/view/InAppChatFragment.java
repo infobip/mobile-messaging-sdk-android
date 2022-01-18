@@ -21,9 +21,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -77,12 +83,12 @@ import java.util.List;
 import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
+import static org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4;
 
 public class InAppChatFragment extends Fragment implements InAppChatWebViewManager, PermissionsRequestManager.PermissionsRequester {
 
     private static final int CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500;
     private static final int CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS = 300;
-    private static final int CONTENT_SELECTION_INTENT_CODE = 100;
     private static final int USER_INPUT_CHECKER_DELAY_MS = 250;
 
     private boolean sendButtonIsColored;
@@ -109,6 +115,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private boolean isWebViewLoaded = false;
     private float chatNotAvailableViewHeight;
     private Uri capturedImageUri;
+    private Uri capturedVideoUri;
     private View containerView;
     private PermissionsRequestManager permissionsRequestManager;
     private boolean fragmentCouldBePaused = true;
@@ -157,7 +164,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         inAppChatViewSettingsResolver = new InAppChatViewSettingsResolver(fragmentActivity);
         fragmentActivity.setTheme(inAppChatViewSettingsResolver.getChatViewTheme());
 
-        permissionsRequestManager = new PermissionsRequestManager(fragmentActivity, this);
+        permissionsRequestManager = new PermissionsRequestManager(this, this);
 
         initViews();
         setControlsEnabled(false);
@@ -697,6 +704,41 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         });
     }
 
+    private Uri getCapturedMediaUrl(Intent data) {
+        Uri uri = (data != null) ? data.getData() : null;
+        String mimeType = (uri != null) ? InAppChatMobileAttachment.getMimeType(getFragmentActivity(), data, uri) : null;
+        return (mimeType != null && mimeType.equals(MIME_TYPE_VIDEO_MP_4)) ? capturedVideoUri : capturedImageUri;
+    }
+
+    private final ActivityResultLauncher<Intent> attachmentChooserLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == RESULT_OK) {
+                        Intent data = result.getData();
+                        InAppChatAttachmentHelper.makeAttachment(getFragmentActivity(), data, getCapturedMediaUrl(data), new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
+                            @Override
+                            public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
+                                if (attachment != null) {
+                                    MobileMessagingLogger.w("[InAppChat] Attachment created, will send Attachment");
+                                    inAppChatClient.sendChatMessage(null, attachment);
+                                } else {
+                                    MobileMessagingLogger.e("[InAppChat] Can't create attachment");
+                                }
+                            }
+
+                            @Override
+                            public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
+                                MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
+                                Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            }
+    );
+
     private void chooseFile() {
         fragmentCouldBePaused = false;
         if (!isRequiredPermissionsGranted()) {
@@ -706,7 +748,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
         chooserIntent.putExtra(Intent.EXTRA_INTENT, prepareIntentForChooser());
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser());
-        startActivityForResult(chooserIntent, CONTENT_SELECTION_INTENT_CODE);
+        attachmentChooserLauncher.launch(chooserIntent);
     }
 
     private Intent prepareIntentForChooser() {
@@ -720,9 +762,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         List<Intent> intentsForChooser = new ArrayList<>();
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (Build.VERSION.SDK_INT < 29) {
-            capturedImageUri = InAppChatAttachmentHelper.getOutputMediaUri(getFragmentActivity());
+            capturedImageUri = InAppChatAttachmentHelper.getOutputImageUri(getFragmentActivity());
         } else {
-            capturedImageUri = InAppChatAttachmentHelper.getOutputMediaUrlAPI29(getFragmentActivity());
+            capturedImageUri = InAppChatAttachmentHelper.getOutputImageUrlAPI29(getFragmentActivity());
         }
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri);
         PackageManager packageManager = getPackageManager();
@@ -730,6 +772,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             intentsForChooser.add(takePictureIntent);
         }
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if (Build.VERSION.SDK_INT > 30) {
+            capturedVideoUri = InAppChatAttachmentHelper.getOutputVideoUrl(getFragmentActivity());
+            takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedVideoUri);
+        }
         if (packageManager != null && takeVideoIntent.resolveActivity(packageManager) != null) {
             intentsForChooser.add(takeVideoIntent);
         }
@@ -738,32 +784,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         return intentsArray;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK && requestCode == CONTENT_SELECTION_INTENT_CODE) {
-            InAppChatAttachmentHelper.makeAttachment(getFragmentActivity(), data, capturedImageUri, new InAppChatAttachmentHelper.InAppChatAttachmentHelperListener() {
-                @Override
-                public void onAttachmentCreated(final InAppChatMobileAttachment attachment) {
-                    if (attachment != null) {
-                        MobileMessagingLogger.w("[InAppChat] Attachment created, will send Attachment");
-                        inAppChatClient.sendChatMessage(null, attachment);
-                    } else {
-                        MobileMessagingLogger.e("[InAppChat] Can't create attachment");
-                    }
-                }
-
-                @Override
-                public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
-                    MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
-                    Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     /* PermissionsRequester */
-
     @NonNull
     @Override
     public String[] requiredPermissions() {
@@ -779,17 +800,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     public boolean isRequiredPermissionsGranted() {
-        if (getPackageManager() == null || !getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA) ||
+        if (getPackageManager() == null || !getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY) ||
                 android.hardware.Camera.getNumberOfCameras() == 0) {
             return false;
         }
         return permissionsRequestManager.isRequiredPermissionsGranted();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        permissionsRequestManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     /* PermissionsRequester endregion */

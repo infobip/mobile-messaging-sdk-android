@@ -133,12 +133,6 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
         downloadFile();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        permissionsRequestManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
     /* PermissionsRequester endregion */
 
     @SuppressLint({"AddJavascriptInterface", "SetJavaScriptEnabled"})
