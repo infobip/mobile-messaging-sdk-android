@@ -433,9 +433,8 @@ public abstract class PreferenceHelper {
         migrateCryptedEntriesFromPublicToPrivatePrefs(context, cryptedProperties());
     }
 
-    public static void migrateCryptorIfNeeded(Context context) {
-        Cryptor oldCryptor = new ECBCryptorImpl(keySecretForCryptor(context));
-        if (shouldMigrateFromCryptor(oldCryptor, context)) {
+    public static void migrateCryptorIfNeeded(Context context, Cryptor oldCryptor) {
+        if (oldCryptor != null && shouldMigrateFromCryptor(oldCryptor, context)) {
             migrate(oldCryptor, getCryptor(context), cryptedProperties(), context);
         }
     }

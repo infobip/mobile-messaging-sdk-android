@@ -5,8 +5,6 @@ import androidx.annotation.Nullable;
 import android.util.Base64;
 import android.util.Log;
 
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-
 import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,19 +14,15 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * @author sslavin
- * @since 29/08/16.
- *
  * Used only to migrate previously saved data.
  * ECB encryption mode should not be used, because it's not secure.
- *
- * Deprecated, use {@link CryptorImpl} instead.
  */
 @Deprecated
 public class ECBCryptorImpl extends Cryptor {
 
     private static final String AES_ALGO = "AES/ECB/PKCS5Padding";
     private Key key = null;
+    private final String TAG = "ECBCryptorImpl_TAG";
 
     public ECBCryptorImpl(@NonNull String keySecret) {
         byte[] keyBytes = keySecret.getBytes();
@@ -36,7 +30,7 @@ public class ECBCryptorImpl extends Cryptor {
         try {
             sha = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            Log.d(TAG, Log.getStackTraceString(e));
             return;
         }
         keyBytes = sha.digest(keyBytes);
@@ -47,7 +41,7 @@ public class ECBCryptorImpl extends Cryptor {
     @Override
     @Nullable
     public String encrypt(String data) {
-        if (StringUtils.isBlank(data)) {
+        if (isBlank(data)) {
             return null;
         }
 
@@ -58,7 +52,7 @@ public class ECBCryptorImpl extends Cryptor {
     @Override
     @Nullable
     public String decrypt(String encryptedBase64Data) {
-        if (StringUtils.isBlank(encryptedBase64Data)) {
+        if (isBlank(encryptedBase64Data)) {
             return null;
         }
 
@@ -76,7 +70,7 @@ public class ECBCryptorImpl extends Cryptor {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
     }
@@ -87,8 +81,12 @@ public class ECBCryptorImpl extends Cryptor {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            Log.d(TAG, Log.getStackTraceString(e));
             return null;
         }
+    }
+
+    private boolean isBlank(String s) {
+        return null == s || s.trim().isEmpty();
     }
 }

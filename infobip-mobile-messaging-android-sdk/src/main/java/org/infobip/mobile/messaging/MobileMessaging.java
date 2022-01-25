@@ -16,6 +16,8 @@ import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.util.Cryptor;
+import org.infobip.mobile.messaging.util.CryptorImpl;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -480,9 +482,10 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private boolean allowUntrustedSSLOnError = false;
-        private boolean usePrivateSharedPrefs = false;
+        private boolean usePrivateSharedPrefs = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
+        private Cryptor oldCryptor = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -800,9 +803,25 @@ public abstract class MobileMessaging {
          * </pre>
          *
          * @return {@link Builder}
+         *
+         * Deprecated, preferences are private by default.
          */
+        @Deprecated
         public Builder withPrivateSharedPrefs() {
             this.usePrivateSharedPrefs = true;
+            return this;
+        }
+
+        /**
+         * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
+         * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
+         * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
+         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
+         * @return {@link Builder}
+         */
+        public Builder withCryptorMigration(Cryptor oldCryptor) {
+            this.oldCryptor = oldCryptor;
             return this;
         }
 

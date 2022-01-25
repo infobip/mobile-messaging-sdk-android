@@ -17,6 +17,10 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
 
     @Test
     public void test_privateSharedPrefsNotDeleted_onClearingOfPublicAppPrefs() throws Exception {
+        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, false);
+
         MobileMessagingProperty key1 = MobileMessagingProperty.APP_USER_ID;
         MobileMessagingProperty key2 = MobileMessagingProperty.USER_DATA;
         MobileMessagingProperty key3 = MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES;
@@ -47,11 +51,15 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
 
     @Test
     public void test_shouldMigrateSharedPrefsFromPublicToPrivate_publicPrefsPresent() throws Exception {
+        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, false);
+
         MobileMessagingProperty key1 = MobileMessagingProperty.APPLICATION_CODE;
         MobileMessagingProperty key3 = MobileMessagingProperty.PUSH_REGISTRATION_ENABLED;
         String value = "some value";
 
-        // saving to public storage - per default
+        // saving to public storage
         PreferenceHelper.saveString(context, key1, value);
         PreferenceHelper.saveBoolean(context, key3, true);
 
@@ -82,9 +90,6 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
 
     @Test
     public void test_shouldNotMigrateSharedPrefsFromPublicToPrivate() throws Exception {
-        PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
-        PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
-
         MobileMessagingProperty key1 = MobileMessagingProperty.APPLICATION_CODE;
         MobileMessagingProperty key3 = MobileMessagingProperty.PUSH_REGISTRATION_ENABLED;
         String value = "some value";
@@ -97,10 +102,10 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
         PreferenceHelper.saveBoolean(context, key3, true);
 
         assertFalse(PreferenceHelper.shouldMigrateToPrivatePrefs(context));
-        assertFalse(PreferenceHelper.privatePrefsContains(context, key1));
-        assertFalse(PreferenceHelper.privatePrefsContains(context, key3));
-        assertTrue(PreferenceHelper.publicPrefsContains(context, key1));
-        assertTrue(PreferenceHelper.publicPrefsContains(context, key3));
+        assertTrue(PreferenceHelper.privatePrefsContains(context, key1));
+        assertTrue(PreferenceHelper.privatePrefsContains(context, key3));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key1));
+        assertFalse(PreferenceHelper.publicPrefsContains(context, key3));
     }
 
     @Test

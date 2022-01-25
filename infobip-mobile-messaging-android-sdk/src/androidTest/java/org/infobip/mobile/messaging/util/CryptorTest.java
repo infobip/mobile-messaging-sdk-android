@@ -65,7 +65,7 @@ public class CryptorTest extends MobileMessagingTestCase {
 
         assertTrue(PreferenceHelper.shouldMigrateFromCryptor(oldCryptor, context));
 
-        PreferenceHelper.migrateCryptorIfNeeded(context);
+        PreferenceHelper.migrateCryptorIfNeeded(context, oldCryptor);
 
         assertFalse(PreferenceHelper.shouldMigrateFromCryptor(oldCryptor, context));
 

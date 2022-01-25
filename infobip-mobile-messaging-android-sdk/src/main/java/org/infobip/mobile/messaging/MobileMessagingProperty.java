@@ -22,7 +22,7 @@ public enum MobileMessagingProperty {
     CLOUD_TOKEN_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
     REPORTED_PUSH_SERVICE_TYPE("org.infobip.mobile.messaging.REPORTED_PUSH_SERVICE_TYPE"),
     PERFORMED_USER_DATA_MIGRATION("org.infobip.mobile.messaging.PERFORMED_USER_DATA_MIGRATION"),
-    USE_PRIVATE_SHARED_PREFS("org.infobip.mobile.messaging.infobip.USE_PRIVATE_SHARED_PREFS", false),
+    USE_PRIVATE_SHARED_PREFS("org.infobip.mobile.messaging.infobip.USE_PRIVATE_SHARED_PREFS", true),
     // END
 
     // START: prefs required for keeping up-to-date state of MM SDK
