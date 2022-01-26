@@ -62,6 +62,9 @@ public class GeoEnabledConsistencyReceiver extends BroadcastReceiver {
             if (geofencingHelper(context).isLocationEnabled(context)) {
                 final Date triggerDate = new Date(Time.now() + 15 * 1000);
                 scheduleConsistencyAlarm(context, AlarmManager.RTC, triggerDate, NETWORK_PROVIDER_ENABLED_ACTION, 0);
+                geofencingHelper(context).startGeoMonitoringIfNecessary();
+            } else {
+                GeofencingHelper.setAllActiveGeoAreasMonitored(context, false);
             }
         }
     }
