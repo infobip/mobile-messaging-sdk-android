@@ -78,6 +78,10 @@ android {
         customInApp {
             dimension "default"
         }
+
+        cryptorMigration {
+            dimension "default"
+        }
     }
 }
 

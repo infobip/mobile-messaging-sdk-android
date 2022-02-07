@@ -2035,8 +2035,8 @@ public class MobileMessagingCore
         /**
          * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
          * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
-         * use this method with providing old cryptor, so MobileMessaging SDK will migrate data to the new cryptor.
-         * For code snippets (old cryptor implementation) and more details check docs on github.
+         * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
+         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
          * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
          * @return {@link Builder}
          */

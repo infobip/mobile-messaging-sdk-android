@@ -21,7 +21,7 @@ public class DeviceInformation {
     }
 
     @SuppressLint("HardwareIds")
-    static String getDeviceID(Context context) {
+    public static String getDeviceID(Context context) {
         return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 

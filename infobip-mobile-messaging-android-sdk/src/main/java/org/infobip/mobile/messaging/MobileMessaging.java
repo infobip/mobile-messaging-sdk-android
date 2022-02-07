@@ -859,6 +859,9 @@ public abstract class MobileMessaging {
                     .withDisplayNotification(notificationSettings)
                     .withFirebaseOptions(firebaseOptions);
 
+            if (oldCryptor != null) {
+                mobileMessagingCoreBuilder.withCryptorMigration(oldCryptor);
+            }
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);
             } else if (applicationCodeProvider != null) {
