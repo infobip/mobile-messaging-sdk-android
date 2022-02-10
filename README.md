@@ -5,9 +5,6 @@
 
 Mobile Messaging SDK is designed and developed to easily enable push notification channel in your mobile application. In almost no time of implementation you get push notification in your application and access to the features of <a href="https://www.infobip.com/en/products/mobile-app-messaging" target="_blank">Infobip Mobile Apps Messaging</a>. The document describes library integration steps. Additional information can be found in our <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki" target="_blank">Wiki</a>.
 
-> ### Notice:
-> 6.0.0-rc version release contains only core modules, so `infobip-mobile-messaging-android-geo-sdk` and `infobip-mobile-messaging-android-chat-sdk` modules aren't available.
-
 ## Requirements
 
 - Android Studio
