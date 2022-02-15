@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 
 import java.util.UUID;
 
@@ -9,19 +10,19 @@ import java.util.UUID;
  * @author mstipanov
  * @since 07.04.2016.
  */
+
 public enum MobileMessagingProperty {
 
     // START: prefs required for successfully connected Firebase registration with Push server
     API_URI("org.infobip.mobile.messaging.infobip.API_URI", "https://mobile.infobip.com/"),
     APPLICATION_CODE("org.infobip.mobile.messaging.infobip.APPLICATION_CODE", null, true),
     APPLICATION_CODE_HASH("org.infobip.mobile.messaging.infobip.APPLICATION_CODE_HASH", null, true),
-    SENDER_ID("org.infobip.mobile.messaging.gcm.GCM_SENDER_ID", null, true),
     INFOBIP_REGISTRATION_ID("org.infobip.mobile.messaging.infobip.REGISTRATION_ID", null, true),
     CLOUD_TOKEN("org.infobip.mobile.messaging.gcm.REGISTRATION_ID", null, true),
     CLOUD_TOKEN_REPORTED("org.infobip.mobile.messaging.gcm.GCM_REGISTRATION_ID_REPORTED", false),
     REPORTED_PUSH_SERVICE_TYPE("org.infobip.mobile.messaging.REPORTED_PUSH_SERVICE_TYPE"),
     PERFORMED_USER_DATA_MIGRATION("org.infobip.mobile.messaging.PERFORMED_USER_DATA_MIGRATION"),
-    USE_PRIVATE_SHARED_PREFS("org.infobip.mobile.messaging.infobip.USE_PRIVATE_SHARED_PREFS", false),
+    USE_PRIVATE_SHARED_PREFS("org.infobip.mobile.messaging.infobip.USE_PRIVATE_SHARED_PREFS", true),
     // END
 
     // START: prefs required for keeping up-to-date state of MM SDK
@@ -51,7 +52,9 @@ public enum MobileMessagingProperty {
     DEFAULT_COLOR("org.infobip.mobile.messaging.notification.DEFAULT_COLOR", 0),
     DEFAULT_TITLE("org.infobip.mobile.messaging.notification.DEFAULT_TITLE", "Message"),
     INTENT_FLAGS("org.infobip.mobile.messaging.notification.INTENT_FLAGS", Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
-    PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", PendingIntent.FLAG_CANCEL_CURRENT),
+
+    PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ? PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_MUTABLE : PendingIntent.FLAG_CANCEL_CURRENT),
+
     NOTIFICATION_AUTO_CANCEL("org.infobip.mobile.messaging.notification.NOTIFICATION_AUTO_CANCEL", true),
     FOREGROUND_NOTIFICATION_ENABLED("org.infobip.mobile.messaging.notification.FOREGROUND_NOTIFICATION_ENABLED", true),
     MULTIPLE_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MULTIPLE_NOTIFICATIONS_ENABLED", false),

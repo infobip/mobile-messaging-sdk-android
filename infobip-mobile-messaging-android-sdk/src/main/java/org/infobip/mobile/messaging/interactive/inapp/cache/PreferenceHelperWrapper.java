@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.interactive.inapp.cache;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 

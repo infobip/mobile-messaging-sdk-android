@@ -114,6 +114,7 @@ public class GeoEnabledConsistencyReceiverTest extends MobileMessagingTestCase {
         Mockito.when(contextMock.getSystemService(Mockito.eq(Context.LOCATION_SERVICE))).thenReturn(locationManagerMock);
         Mockito.when(geoHelperSpy.isLocationModeOn(context)).thenReturn(true);
         Mockito.when(geoHelperSpy.isKitKatOrAbove()).thenReturn(true);
+        Mockito.doNothing().when(geoHelperSpy).startGeoMonitoringIfNecessary();
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.GEOFENCING_ACTIVATED, true);
 
         // When
@@ -122,6 +123,7 @@ public class GeoEnabledConsistencyReceiverTest extends MobileMessagingTestCase {
         // Then
         Mockito.verify(geoHelperSpy, Mockito.times(1)).isLocationModeOn(context);
         Mockito.verify(geoHelperSpy, Mockito.never()).isNetworkProviderAvailable(context);
+        Mockito.verify(geoHelperSpy, Mockito.times(1)).startGeoMonitoringIfNecessary();
     }
 
     @Test
@@ -139,5 +141,6 @@ public class GeoEnabledConsistencyReceiverTest extends MobileMessagingTestCase {
         Mockito.verify(geoHelperSpy, Mockito.times(1)).isLocationEnabled(contextMock);
         Mockito.verify(geoHelperSpy, Mockito.times(1)).isNetworkProviderAvailable(contextMock);
         Mockito.verify(geoHelperSpy, Mockito.never()).isLocationModeOn(contextMock);
+        Mockito.verify(geoHelperSpy, Mockito.never()).startGeoMonitoringIfNecessary();
     }
 }

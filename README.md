@@ -8,7 +8,8 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 ## Requirements
 
 - Android Studio
-- API Level: 14 (Android 4.0 - Ice Cream Sandwich)
+- Supported API Levels: 16 (Android 4.0 - Jellybean) - 31 (Android 12.0)
+- <a href="https://developer.android.com/jetpack/androidx/migrate" target="_blank">AndroidX</a>
 
 ## Quick start guide
 
@@ -17,22 +18,25 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     ```groovy
     dependencies {
         ...
-        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:5.3.7@aar') {
+        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:6.0.0-rc2@aar') {
             transitive = true
         }
     }
     ```
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGGradle.png?raw=true" alt="Gradle dependencies"/>
-3. Add <a href="https://www.infobip.com/docs/mobile-app-messaging/fcm-server-api-key-setup-guide" target="_blank">`Firebase Sender ID`</a> and Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
+3. Add a Firebase configuration file as described in <a href="https://firebase.google.com/docs/cloud-messaging/android/client#add_a_firebase_configuration_file" target="_blank">`Firebase documentation`</a>
+
+> ### Notice: 
+> Check <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Applying-Firebase-configuration-in-MobileMessaging-SDK">Applying Firebase configuration in MobileMessaging SDK Guide</a> for alternatives.
+
+4. Add Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
     ```groovy
     <resources>
-        <string name="google_app_id">SENDER ID</string>
         <string name="infobip_application_code">APPLICATION CODE</string>
         ...
     </resources>
     ```
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGStrings.png?raw=true" alt="String resources"/>
-    Do not add `google_app_id` if you're using <a href="https://developers.google.com/android/guides/google-services-plugin" target="_blank">Google Services Gradle Plugin</a> and `google-services.json`.
 4. Add code to `MainActivity#onCreate`
 
     ```java

@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.platform;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -97,7 +97,10 @@ public class Platform {
     }
 
     protected static RegistrationTokenHandler initializeTokenHandler(Context context) {
-        return new FirebaseRegistrationTokenHandler(mobileMessagingCore.get(context), broadcaster.get(context));
+        return new FirebaseRegistrationTokenHandler(
+                mobileMessagingCore.get(context),
+                broadcaster.get(context)
+        );
     }
 
     protected static MobileMessageHandler initializeMobileMessageHandler(Context context) {

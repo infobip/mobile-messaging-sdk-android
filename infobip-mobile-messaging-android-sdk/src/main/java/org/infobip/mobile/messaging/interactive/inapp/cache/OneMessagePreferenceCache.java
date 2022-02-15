@@ -1,8 +1,8 @@
 package org.infobip.mobile.messaging.interactive.inapp.cache;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;

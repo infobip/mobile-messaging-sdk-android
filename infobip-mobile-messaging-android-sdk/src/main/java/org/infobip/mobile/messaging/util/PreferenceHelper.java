@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -189,9 +189,7 @@ public abstract class PreferenceHelper {
 
     private static boolean publicPrefsAreNotMigratedToPrivatePrefs(Context context) {
         return PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
-                && PreferenceHelper.publicPrefsContains(context, MobileMessagingProperty.SENDER_ID)
-                && !PreferenceHelper.privatePrefsContains(context, MobileMessagingProperty.APPLICATION_CODE)
-                && !PreferenceHelper.privatePrefsContains(context, MobileMessagingProperty.SENDER_ID);
+                && !PreferenceHelper.privatePrefsContains(context, MobileMessagingProperty.APPLICATION_CODE);
     }
 
     private static boolean shouldUsePrivateSharedPrefs(Context context) {
@@ -435,9 +433,8 @@ public abstract class PreferenceHelper {
         migrateCryptedEntriesFromPublicToPrivatePrefs(context, cryptedProperties());
     }
 
-    public static void migrateCryptorIfNeeded(Context context) {
-        Cryptor oldCryptor = new ECBCryptorImpl(keySecretForCryptor(context));
-        if (shouldMigrateFromCryptor(oldCryptor, context)) {
+    public static void migrateCryptorIfNeeded(Context context, Cryptor oldCryptor) {
+        if (oldCryptor != null && shouldMigrateFromCryptor(oldCryptor, context)) {
             migrate(oldCryptor, getCryptor(context), cryptedProperties(), context);
         }
     }
@@ -469,7 +466,6 @@ public abstract class PreferenceHelper {
         return new MobileMessagingProperty[]{
                 MobileMessagingProperty.INFOBIP_REGISTRATION_ID,
                 MobileMessagingProperty.APPLICATION_CODE,
-                MobileMessagingProperty.SENDER_ID,
                 MobileMessagingProperty.CLOUD_TOKEN
         };
     }

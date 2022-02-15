@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.geo;
 
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;

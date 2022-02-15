@@ -4,15 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.apiavailability.ApiAvailability;
@@ -35,7 +35,7 @@ public class PlayServicesSupport {
      * it doesn't, display a dialog that allows users to download the APK from
      * the Google Play Store or enable it in the device's system settings.
      */
-    public void checkPlayServicesAndTryToAcquireToken(final Context context, boolean shouldResetToken, @Nullable MobileMessaging.InitListener initListener) {
+    public void checkPlayServicesAndTryToAcquireToken(final Context context, boolean shouldResetToken, @Nullable MobileMessaging.InitListener initListener, FirebaseAppProvider firebaseAppProvider) {
         int errorCode = apiAvailability.checkServicesStatus(context);
         isPlayServicesAvailable = errorCode == ConnectionResult.SUCCESS;
         if (errorCode != ConnectionResult.SUCCESS) {
@@ -69,11 +69,10 @@ public class PlayServicesSupport {
             return;
         }
 
-        String senderId = MobileMessagingCore.getSenderId(context);
         if (shouldResetToken) {
-            MobileMessagingCloudService.enqueueTokenReset(context, senderId);
+            MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProvider);
         } else {
-            MobileMessagingCloudService.enqueueTokenAcquisition(context, senderId);
+            MobileMessagingCloudService.enqueueTokenAcquisition(context, firebaseAppProvider);
         }
 
         if (initListener != null) {

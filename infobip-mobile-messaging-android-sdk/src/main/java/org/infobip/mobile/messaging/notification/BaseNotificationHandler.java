@@ -11,12 +11,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.BitmapCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BitmapCompat;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.ConfigurationException;
@@ -24,7 +24,9 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.NotificationTapReceiverActivity;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -34,6 +36,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 
@@ -46,6 +50,8 @@ public class BaseNotificationHandler {
     private static final int DEFAULT_NOTIFICATION_ID = 0;
 
     private final Context context;
+
+    private ContentIntentWrapper contentIntentWrapper;
 
     public BaseNotificationHandler(Context context) {
         this.context = context;
@@ -130,6 +136,7 @@ public class BaseNotificationHandler {
             return;
         }
 
+
         notificationBuilder
                 .setLargeIcon(notificationPicture)
                 .setStyle(new NotificationCompat.BigPictureStyle()
@@ -200,10 +207,33 @@ public class BaseNotificationHandler {
     @SuppressWarnings("WrongConstant")
     @NonNull
     private PendingIntent createTapPendingIntent(NotificationSettings notificationSettings, Message message) {
-        Intent intent = new Intent(context, NotificationTapReceiver.class);
-        intent.setAction(message.getMessageId());
-        intent.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
-        return PendingIntent.getBroadcast(context, 0, intent, notificationSettings.getPendingIntentFlags());
+
+        Intent callbackIntent;
+        if (StringUtils.isNotBlank(message.getWebViewUrl())) {
+            callbackIntent = activityStarterWrapper(context).createWebViewContentIntent(message);
+        } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
+            callbackIntent = activityStarterWrapper(context).createBrowserIntent(message.getBrowserUrl());
+        } else {
+            callbackIntent = activityStarterWrapper(context).createContentIntent(message, notificationSettings);
+        }
+
+        ArrayList<Intent> intentsList = new ArrayList<>();
+        if (callbackIntent != null) intentsList.add(callbackIntent);
+
+        Intent invisibleActivity = new Intent(context, NotificationTapReceiverActivity.class);
+        invisibleActivity.setAction(message.getMessageId());
+        invisibleActivity.putExtra(EXTRA_MESSAGE, MessageBundleMapper.messageToBundle(message));
+        intentsList.add(invisibleActivity);
+
+        Intent[] intents = new Intent[intentsList.size()];
+
+        return PendingIntent.getActivities(
+                context,
+                0,
+                intentsList.toArray(intents),
+                notificationSettings.getPendingIntentFlags()
+        );
+
     }
 
     private NotificationSettings notificationSettings(Message message) {
@@ -318,5 +348,12 @@ public class BaseNotificationHandler {
         // 1) always display in background
         // 2) display in foreground when configured in message
         return ActivityLifecycleMonitor.isBackground() || message.getInAppStyle() == Message.InAppStyle.BANNER;
+    }
+
+    private ContentIntentWrapper activityStarterWrapper(Context context) {
+        if (contentIntentWrapper == null) {
+            contentIntentWrapper = new ContentIntentWrapper(context);
+        }
+        return contentIntentWrapper;
     }
 }

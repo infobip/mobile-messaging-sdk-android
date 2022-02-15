@@ -10,25 +10,21 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
 import android.util.Pair;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.ConfigurationException.Reason;
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.cloud.PlayServicesSupport;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.BootReceiver;
 import org.infobip.mobile.messaging.geo.Geo;
@@ -51,8 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class GeofencingImpl extends Geofencing implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
+public class GeofencingImpl extends Geofencing {
     private static final String TAG = "GeofencingImpl";
 
     @SuppressLint("StaticFieldLeak")
@@ -60,7 +55,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     private final Context context;
     private static GeoEnabledConsistencyReceiver geoEnabledConsistencyReceiver;
     private final GeofencingHelper geofencingHelper;
-    private final GoogleApiClient googleApiClient;
+    private final GeofencingClient mGeofencingClient;
     private final MessageStore messageStore;
     private List<Geofence> geofences;
     private PendingIntent geofencePendingIntent;
@@ -78,11 +73,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         geofences = new ArrayList<>();
         geofencingHelper = new GeofencingHelper(context);
         messageStore = geofencingHelper.getMessageStoreForGeo();
-        googleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
+        mGeofencingClient = LocationServices.getGeofencingClient(context);
     }
 
     public static GeofencingImpl getInstance(Context context) {
@@ -244,8 +235,7 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     @Override
     public void startGeoMonitoring() {
 
-        if (!PlayServicesSupport.isPlayServicesAvailable(context) ||
-                !GeofencingHelper.isGeoActivated(context) ||
+        if (!GeofencingHelper.isGeoActivated(context) ||
                 // checking this to avoid multiple activation of geofencing API on Play services
                 GeofencingHelper.areAllActiveGeoAreasMonitored(context)) {
             return;
@@ -268,25 +258,20 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         }
 
         requestType = GoogleApiClientRequestType.ADD_GEOFENCES;
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
-            return;
-        }
 
-        LocationServices.GeofencingApi.addGeofences(googleApiClient, geofencingRequest(), geofencePendingIntent())
-                .setResultCallback(new ResultCallback<Status>() {
+        mGeofencingClient.addGeofences(geofencingRequest(), geofencePendingIntent())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onResult(@NonNull Status status) {
-                        logGeofenceStatus(status, true);
+                    public void onComplete(@NonNull Task<Void> task) {
+                        logGeofenceStatus(task, true);
                         requestType = GoogleApiClientRequestType.NONE;
-                        GeofencingHelper.setAllActiveGeoAreasMonitored(context, status.isSuccess());
+                        GeofencingHelper.setAllActiveGeoAreasMonitored(context, task.isSuccessful());
                     }
                 });
     }
 
     @Override
     public void stopGeoMonitoring() {
-
         GeofencingHelper.setAllActiveGeoAreasMonitored(context, false);
 
         if (!checkRequiredPermissions()) {
@@ -294,16 +279,12 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
         }
 
         requestType = GoogleApiClientRequestType.REMOVE_GEOFENCES;
-        if (!googleApiClient.isConnected()) {
-            googleApiClient.connect();
-            return;
-        }
 
-        LocationServices.GeofencingApi.removeGeofences(googleApiClient, geofencePendingIntent())
-                .setResultCallback(new ResultCallback<Status>() {
+        LocationServices.getGeofencingClient(context).removeGeofences(geofencePendingIntent())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onResult(@NonNull Status status) {
-                        logGeofenceStatus(status, false);
+                    public void onComplete(@NonNull Task<Void> task) {
+                        logGeofenceStatus(task, true);
                         requestType = GoogleApiClientRequestType.NONE;
                     }
                 });
@@ -358,16 +339,14 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
             MobileMessagingLogger.e("Unable to configure geofencing", new ConfigurationException(Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.ACCESS_FINE_LOCATION).getMessage());
             return false;
         }
-
         return true;
     }
 
-    private void logGeofenceStatus(@NonNull Status status, boolean activated) {
-        if (status.isSuccess()) {
+    private void logGeofenceStatus(@NonNull Task<Void> task, boolean activated) {
+        if (task.isSuccessful()) {
             MobileMessagingLogger.d(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activated successfully");
-
         } else {
-            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " + status.toString());
+            MobileMessagingLogger.e(TAG, "Geofencing monitoring " + (activated ? "" : "de-") + "activation failed: " + task.getException());
         }
     }
 
@@ -381,30 +360,14 @@ public class GeofencingImpl extends Geofencing implements GoogleApiClient.Connec
     private PendingIntent geofencePendingIntent() {
         if (geofencePendingIntent == null) {
             Intent intent = new Intent(context, GeofenceTransitionsReceiver.class);
-            geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                flags = flags | PendingIntent.FLAG_MUTABLE;
+            }
+            geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags);
         }
 
         return geofencePendingIntent;
     }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        MobileMessagingLogger.d(TAG, "GoogleApiClient connected");
-        if (GoogleApiClientRequestType.ADD_GEOFENCES.equals(requestType)) {
-            startGeoMonitoring();
-
-        } else if (GoogleApiClientRequestType.REMOVE_GEOFENCES.equals(requestType)) {
-            stopGeoMonitoring();
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        MobileMessagingLogger.e(TAG, connectionResult.getErrorMessage(), new ConfigurationException(Reason.CHECK_LOCATION_SETTINGS));
-    }
 }
+

@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 

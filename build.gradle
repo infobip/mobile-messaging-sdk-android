@@ -1,7 +1,6 @@
 buildscript {
 
     repositories {
-        jcenter()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
@@ -20,19 +19,16 @@ plugins {
 }
 
 ext {
-    mm_minSdkVersion = 14
-    mm_compileSdkVersion = 28
-    mm_targetSdkVersion = 28
-    mm_buildToolsVersion = "28.0.3"
-    mm_supportLibrariesVersion = "28.0.0"
-    mm_firebaseMessagingVersion = "17.6.0"
-    mm_gcmVersion = "16.1.0"
-    mm_gmsLocationVersion = "16.0.0"
+    mm_minSdkVersion = 16
+    mm_compileSdkVersion = 31
+    mm_targetSdkVersion = 31
+    mm_buildToolsVersion = "31.0.0"
+    mm_firebaseMessagingVersion = "22.0.0"
+    mm_gmsLocationVersion = "18.0.0"
 }
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
         maven {
             url 'https://maven.google.com/'

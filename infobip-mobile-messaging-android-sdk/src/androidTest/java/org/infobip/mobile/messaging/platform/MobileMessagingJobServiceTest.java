@@ -4,7 +4,7 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.junit.After;

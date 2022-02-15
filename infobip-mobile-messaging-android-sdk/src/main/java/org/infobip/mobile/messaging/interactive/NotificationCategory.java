@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.interactive;
 
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;

@@ -3,14 +3,15 @@ package org.infobip.mobile.messaging.interactive.tools;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -42,6 +43,11 @@ import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_ACTION;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_TAPPED_CATEGORY;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 
 /**
  * @author tjuric
@@ -57,6 +63,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileMessagingCore mobileMessagingCore;
     protected MobileMessaging mobileMessaging;
     protected NotificationHandler notificationHandler;
+    protected FirebaseAppProvider firebaseAppProvider;
 
     protected static class TestTimeProvider implements TimeProvider {
 
@@ -112,7 +119,12 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         notificationHandler = Mockito.mock(NotificationHandler.class);
         messageBroadcaster = Mockito.mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster);
+
+        firebaseAppProvider = new FirebaseAppProvider(context);
+        FirebaseOptions firebaseOptions = new FirebaseOptions.Builder().setProjectId("project_id").setApiKey("api_key").setApplicationId("application_id").build();
+        firebaseAppProvider.setFirebaseOptions(firebaseOptions);
+
+        mobileMessagingCore = MobileMessagingTestable.create(context, messageBroadcaster, firebaseAppProvider);
         mobileMessaging = mobileMessagingCore;
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);

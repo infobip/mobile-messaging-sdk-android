@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.logging;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * @author sslavin

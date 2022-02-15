@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.infobip.mobile.messaging.ListCustomAttributeItem;
 import org.infobip.mobile.messaging.ListCustomAttributeValue;
@@ -17,6 +17,7 @@ import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.baseurl.MobileApiBaseUrl;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -30,6 +31,7 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +44,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
+
+import com.google.firebase.FirebaseOptions;
 
 /**
  * @author sslavin
@@ -66,6 +70,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileApiVersion mobileApiVersion;
     protected MobileApiBaseUrl mobileApiBaseUrl;
     protected String myDeviceRegId = "TestDeviceRegId";
+    protected FirebaseAppProvider firebaseAppProvider;
 
     protected static final String KEY_FOR_LIST_PARAM_1 = "param1";
     protected static final String KEY_FOR_LIST_PARAM_2 = "param2";
@@ -147,7 +152,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         PreferenceHelper.getPublicSharedPreferences(context).edit().clear().commit();
         PreferenceHelper.getPrivateMMSharedPreferences(context).edit().clear().commit();
-        PreferenceHelper.saveUsePrivateSharedPrefs(context, false);
+        PreferenceHelper.saveUsePrivateSharedPrefs(context, true);
 
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
@@ -175,7 +180,12 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         notificationHandler = mock(NotificationHandler.class);
         broadcaster = mock(Broadcaster.class);
-        mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster, mobileApiResourceProvider);
+
+        firebaseAppProvider = new FirebaseAppProvider(context);
+        FirebaseOptions firebaseOptions = new FirebaseOptions.Builder().setProjectId("project_id").setApiKey("api_key").setApplicationId("application_id").build();
+        firebaseAppProvider.setFirebaseOptions(firebaseOptions);
+
+        mobileMessagingCore = MobileMessagingTestable.create(context, broadcaster, mobileApiResourceProvider, firebaseAppProvider);
         mobileMessaging = mobileMessagingCore;
 
         databaseHelper = MobileMessagingCore.getDatabaseHelper(context);

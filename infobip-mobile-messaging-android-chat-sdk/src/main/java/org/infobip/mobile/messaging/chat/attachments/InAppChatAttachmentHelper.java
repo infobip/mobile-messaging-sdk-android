@@ -9,9 +9,9 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
@@ -26,15 +26,20 @@ public class InAppChatAttachmentHelper {
     private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
     private static final String OUTPUT_MEDIA_PATH = "/InAppChat";
+    private static final String VIDEO_FILE_PREFIX = "VIDEO_";
+    public static final String MIME_TYPE_VIDEO_MP_4 = "video/mp4";
+    public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
-    public static void makeAttachment(final FragmentActivity context, final Intent data, final Uri mediaStoreUri, final InAppChatAttachmentHelper.InAppChatAttachmentHelperListener listener) {
+    public static void makeAttachment(final FragmentActivity context, final Intent data, final Uri capturedMediaStoreUri, final InAppChatAttachmentHelper.InAppChatAttachmentHelperListener listener) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Uri imageUri = getUriFromMediaStoreURI(mediaStoreUri, context);
-                    ParcelFileDescriptor fileDescriptor = openFileDescriptorFromMediaStoreURI(mediaStoreUri, context);
-                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, mediaStoreUri, imageUri, fileDescriptor);
+                    //From media store Uri we need to get real Uri of the file
+                    Uri capturedMediaRealUri = getUriFromMediaStoreURI(capturedMediaStoreUri, context);
+
+                    ParcelFileDescriptor fileDescriptor = openFileDescriptorFromMediaStoreURI(capturedMediaStoreUri, context);
+                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, capturedMediaStoreUri, capturedMediaRealUri, fileDescriptor);
                     closeFileDescriptor(fileDescriptor);
                     context.runOnUiThread(new Runnable() {
                         @Override
@@ -55,7 +60,7 @@ public class InAppChatAttachmentHelper {
     }
 
     @Nullable
-    public static Uri getOutputMediaUri(FragmentActivity fragmentActivity) {
+    public static Uri getOutputImageUri(FragmentActivity fragmentActivity) {
         if (fragmentActivity == null) {
             return null;
         }
@@ -78,22 +83,44 @@ public class InAppChatAttachmentHelper {
 
     @RequiresApi(29)
     @Nullable
-    public static Uri getOutputMediaUrlAPI29(FragmentActivity fragmentActivity) {
+    public static Uri getOutputImageUrlAPI29(FragmentActivity fragmentActivity) {
         if (fragmentActivity == null) {
             return null;
         }
         String fileName = JPEG_FILE_PREFIX + DateTimeUtil.dateToYMDHMSString(new Date()) + JPEG_FILE_SUFFIX;
         String appName = SoftwareInformation.getAppName(fragmentActivity.getApplicationContext());
-        String mimeType = "image/jpeg";
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, MIME_TYPE_IMAGE_JPEG);
 
-        //in case if mm_compileSdkVersion > 28, it will be MediaStore.MediaColumns.RELATIVE_PATH
-        contentValues.put("relative_path", Environment.DIRECTORY_PICTURES + File.separator + appName + OUTPUT_MEDIA_PATH);
+        contentValues.put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES + File.separator + appName + OUTPUT_MEDIA_PATH
+        );
 
         return fragmentActivity.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+    }
+
+    @RequiresApi(31)
+    @Nullable
+    // Required only for 31 API, to get rid of camera error on emulator "Only owner is able to interact with pending item"
+    public static Uri getOutputVideoUrl(FragmentActivity fragmentActivity) {
+        if (fragmentActivity == null) {
+            return null;
+        }
+        String fileName = VIDEO_FILE_PREFIX + DateTimeUtil.dateToYMDHMSString(new Date());
+        String appName = SoftwareInformation.getAppName(fragmentActivity.getApplicationContext());
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, MIME_TYPE_VIDEO_MP_4);
+
+        contentValues.put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_MOVIES + File.separator + appName + OUTPUT_MEDIA_PATH
+        );
+        return fragmentActivity.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
     }
 
     @Nullable

@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * Main interface for in-app chat communication

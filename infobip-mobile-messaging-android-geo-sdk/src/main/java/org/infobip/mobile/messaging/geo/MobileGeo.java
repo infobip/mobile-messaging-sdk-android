@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.geo;
 
 import android.Manifest;
 import android.content.Context;
-import android.support.annotation.RequiresPermission;
+import androidx.annotation.RequiresPermission;
 
 public abstract class MobileGeo {
 

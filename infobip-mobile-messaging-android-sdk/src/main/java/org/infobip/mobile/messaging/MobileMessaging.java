@@ -6,14 +6,18 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresPermission;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
+
+import com.google.firebase.FirebaseOptions;
 
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.storage.MessageStore;
+import org.infobip.mobile.messaging.util.Cryptor;
+import org.infobip.mobile.messaging.util.CryptorImpl;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -37,7 +41,6 @@ import java.util.List;
  *
  * @author mstipanov
  * @see Builder
- * @see Builder#withSenderId(String)
  * @see Builder#withoutDisplayNotification()
  * @see Builder#withMessageStore(Class)
  * @see Builder#withApiUri(String)
@@ -452,7 +455,6 @@ public abstract class MobileMessaging {
      * @see MobileMessaging
      * @see NotificationSettings.Builder
      * @see NotificationSettings
-     * @see Builder#withSenderId(String)
      * @see Builder#withApiUri(String)
      * @see Builder#withMessageStore(Class)
      * @see Builder#withoutMessageStore()
@@ -464,12 +466,12 @@ public abstract class MobileMessaging {
      * @see Builder#withoutCarrierInfo()
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
+     * @see Builder#withFirebaseOptions(FirebaseOptions) 
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
     public static final class Builder {
         private final Application application;
-        private String senderId = (String) MobileMessagingProperty.SENDER_ID.getDefaultValue();
         private String applicationCode = (String) MobileMessagingProperty.APPLICATION_CODE.getDefaultValue();
         private String apiUri = (String) MobileMessagingProperty.API_URI.getDefaultValue();
         private NotificationSettings notificationSettings = null;
@@ -480,8 +482,10 @@ public abstract class MobileMessaging {
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
         private boolean allowUntrustedSSLOnError = false;
-        private boolean usePrivateSharedPrefs = false;
+        private boolean usePrivateSharedPrefs = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
+        private FirebaseOptions firebaseOptions = null;
+        private Cryptor oldCryptor = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -493,7 +497,6 @@ public abstract class MobileMessaging {
             this.application = application;
 
             loadDefaultApiUri(application);
-            loadSenderId(application);
             final String applicationCode = MobileMessagingCore.getApplicationCodeFromResources(application);
             if (StringUtils.isNotBlank(applicationCode)) {
                 this.applicationCode = applicationCode;
@@ -519,25 +522,6 @@ public abstract class MobileMessaging {
             }
         }
 
-        private void loadSenderId(Context context) {
-            int googleServicesResource = ResourceLoader.loadResourceByName(context, "string", "gcm_defaultSenderId");
-            if (googleServicesResource > 0) {
-                String senderId = context.getResources().getString(googleServicesResource);
-                if (StringUtils.isNotBlank(senderId)) {
-                    this.senderId = senderId;
-                    return;
-                }
-            }
-
-            int ibResource = ResourceLoader.loadResourceByName(context, "string", "google_app_id");
-            if (ibResource > 0) {
-                String senderId = context.getResources().getString(ibResource);
-                if (StringUtils.isNotBlank(senderId)) {
-                    this.senderId = senderId;
-                }
-            }
-        }
-
         private void validateWithParam(Object o) {
             if (null != o) {
                 return;
@@ -558,15 +542,23 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * When you want to use a FCM sender that is not stored to <i>google_app_id</i> string resource or to google-services.json file.
-         * <br>By default it will use <i>google_app_id</i> string resource
+         * @deprecated Starting from the version 6.0.0 either provide values for registering in Firebase using google-services.json or set them in strings.xml
+         */
+        @Deprecated
+        public Builder withSenderId(String senderId) {
+            return this;
+        }
+
+        /**
+         * If you don't want to have automatic initialization of {@link FirebaseApp} by <a href=https://developers.google.com/android/guides/google-services-plugin>google-services plugin</a>,
+         * you may use this method to provide {@link FirebaseOptions} at runtime. In this case MobileMessaging SDK will initialize [DEFAULT] {@link FirebaseApp}, using provided {@link FirebaseOptions}.
+         * To create {@link FirebaseOptions} object use {@link FirebaseOptions.Builder} and values, which you can get from google-services.json file as described in the <a href=https://developers.google.com/android/guides/google-services-plugin>documentation of the google-services plugin<a/>.
          *
-         * @param senderId if you don't have one, you should <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging">get one</a>
+         * @param firebaseOptions, used to initialize {@link FirebaseApp} to register for push notifications.
          * @return {@link Builder}
          */
-        public Builder withSenderId(String senderId) {
-            validateWithParam(senderId);
-            this.senderId = senderId;
+        public Builder withFirebaseOptions(FirebaseOptions firebaseOptions) {
+            this.firebaseOptions = firebaseOptions;
             return this;
         }
 
@@ -811,9 +803,25 @@ public abstract class MobileMessaging {
          * </pre>
          *
          * @return {@link Builder}
+         *
+         * Deprecated, preferences are private by default.
          */
+        @Deprecated
         public Builder withPrivateSharedPrefs() {
             this.usePrivateSharedPrefs = true;
+            return this;
+        }
+
+        /**
+         * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
+         * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
+         * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
+         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
+         * @return {@link Builder}
+         */
+        public Builder withCryptorMigration(Cryptor oldCryptor) {
+            this.oldCryptor = oldCryptor;
             return this;
         }
 
@@ -838,7 +846,6 @@ public abstract class MobileMessaging {
             validateApplicationCodeAvailability();
 
             MobileMessagingCore.setApiUri(application, apiUri);
-            MobileMessagingCore.setSenderId(application, senderId);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
@@ -849,8 +856,12 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
-                    .withDisplayNotification(notificationSettings);
+                    .withDisplayNotification(notificationSettings)
+                    .withFirebaseOptions(firebaseOptions);
 
+            if (oldCryptor != null) {
+                mobileMessagingCoreBuilder.withCryptorMigration(oldCryptor);
+            }
             if (storeAppCodeOnDisk) {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCode);
             } else if (applicationCodeProvider != null) {

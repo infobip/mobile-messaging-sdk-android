@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main_activity_title">Cryptor Migration Example</string>
+    <string name="web_view_activity_title">MainActivity</string>
+</resources>

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public abstract class Cryptor {
 

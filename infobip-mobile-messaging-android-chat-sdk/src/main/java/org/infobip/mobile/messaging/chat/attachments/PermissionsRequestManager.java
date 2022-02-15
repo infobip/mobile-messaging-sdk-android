@@ -5,14 +5,18 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.util.ArraySet;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.collection.ArraySet;
+import androidx.fragment.app.Fragment;
 
 import org.infobip.mobile.messaging.chat.R;
 
+import java.util.Map;
 import java.util.Set;
 
 public class PermissionsRequestManager {
@@ -37,21 +41,33 @@ public class PermissionsRequestManager {
         String[] requiredPermissions();
     }
 
-    private static final int IN_APP_CHAT_PERMISSIONS_REQUEST_CODE = 200;
     private static final int OPEN_SETTINGS_INTENT_CODE = 201;
 
-    private Activity context;
-    private PermissionsRequester permissionsRequester;
+    private final Activity context;
+    private final PermissionsRequester permissionsRequester;
+    private final ActivityResultLauncher<String[]> activityResultLauncher;
 
-    public PermissionsRequestManager(Activity context, @NonNull PermissionsRequester permissionsRequester) {
-        this.context = context;
+    public PermissionsRequestManager(Fragment fragment, @NonNull PermissionsRequester permissionsRequester) {
+        this.context = fragment.getActivity();
         this.permissionsRequester = permissionsRequester;
+        activityResultLauncher = fragment.registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                this::onRequestPermissionsResult);
     }
 
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == IN_APP_CHAT_PERMISSIONS_REQUEST_CODE && isPermissionGranted(grantResults)) {
-            permissionsRequester.onPermissionGranted();
+    public PermissionsRequestManager(AppCompatActivity activity, @NonNull PermissionsRequester permissionsRequester) {
+        this.context = activity;
+        this.permissionsRequester = permissionsRequester;
+        activityResultLauncher = activity.registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                this::onRequestPermissionsResult);
+    }
+
+    public void onRequestPermissionsResult(@NonNull Map<String, Boolean> permissionsResult) {
+        for (Map.Entry<String, Boolean> entry: permissionsResult.entrySet()) {
+            if (!entry.getValue()) return;
         }
+        permissionsRequester.onPermissionGranted();
     }
 
     public boolean isRequiredPermissionsGranted() {
@@ -72,7 +88,7 @@ public class PermissionsRequestManager {
         String[] permissionsToAskArray = new String[permissionsToAsk.size()];
         permissionsToAsk.toArray(permissionsToAskArray);
         if (permissionsToAsk.size() > 0) {
-            ActivityCompat.requestPermissions(context, permissionsToAskArray, IN_APP_CHAT_PERMISSIONS_REQUEST_CODE);
+            activityResultLauncher.launch(permissionsToAskArray);
             return false;
         }
         return true;
@@ -121,9 +137,5 @@ public class PermissionsRequestManager {
         Uri uri = Uri.fromParts("package", context.getPackageName(), null);
         intent.setData(uri);
         context.startActivityForResult(intent, OPEN_SETTINGS_INTENT_CODE);
-    }
-
-    private boolean isPermissionGranted(@NonNull int[] grantResults) {
-        return grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
     }
 }

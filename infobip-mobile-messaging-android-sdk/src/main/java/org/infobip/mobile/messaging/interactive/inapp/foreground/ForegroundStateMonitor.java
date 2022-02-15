@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.interactive.inapp.foreground;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * @author sslavin

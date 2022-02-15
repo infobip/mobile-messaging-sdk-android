@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.geo.geofencing.GeofencingHelper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -62,6 +62,9 @@ public class GeoEnabledConsistencyReceiver extends BroadcastReceiver {
             if (geofencingHelper(context).isLocationEnabled(context)) {
                 final Date triggerDate = new Date(Time.now() + 15 * 1000);
                 scheduleConsistencyAlarm(context, AlarmManager.RTC, triggerDate, NETWORK_PROVIDER_ENABLED_ACTION, 0);
+                geofencingHelper(context).startGeoMonitoringIfNecessary();
+            } else {
+                GeofencingHelper.setAllActiveGeoAreasMonitored(context, false);
             }
         }
     }

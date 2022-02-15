@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Pair;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;

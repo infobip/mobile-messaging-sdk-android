@@ -2,7 +2,7 @@ package org.infobip.mobile.messaging.geo.transition;
 
 import android.content.Intent;
 import android.location.Location;
-import android.support.v4.util.ArraySet;
+import androidx.collection.ArraySet;
 import android.util.SparseArray;
 
 import com.google.android.gms.location.Geofence;

@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.baseurl;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.baseurl.BaseUrlResponse;

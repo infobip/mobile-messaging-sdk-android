@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -7,16 +8,17 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver;
 import org.infobip.mobile.messaging.MobileMessagingSynchronizationReceiver;
+import org.infobip.mobile.messaging.NotificationTapReceiverActivity;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
 import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService;
+import org.infobip.mobile.messaging.interactive.notification.NotificationActionTapReceiver;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-import org.infobip.mobile.messaging.notification.NotificationTapReceiver;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
 
 /**
@@ -69,7 +71,6 @@ public class ComponentUtil {
      * @throws ConfigurationException if any of desired components is not registered in manifest
      */
     public static void verifyManifestComponentsForPush(Context context) {
-        verifyManifestReceiver(context, NotificationTapReceiver.class);
         verifyManifestService(context, MobileMessagingCloudService.class);
         verifyManifestService(context, MobileMessagingFirebaseService.class);
 

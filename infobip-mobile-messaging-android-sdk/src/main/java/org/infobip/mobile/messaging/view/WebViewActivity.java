@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.view;
 
+import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -15,11 +17,11 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -166,7 +168,7 @@ public class WebViewActivity extends AppCompatActivity {
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED |
                 Intent.FLAG_ACTIVITY_CLEAR_TOP;
         if (Build.VERSION.SDK_INT > 29) {
-            flags = flags | (int) 1024; // FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+            flags = flags | FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
             parsedUriIntent.addFlags(flags);
             try {
                 context.startActivity(parsedUriIntent);

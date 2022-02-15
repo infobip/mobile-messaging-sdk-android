@@ -5,8 +5,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -21,6 +21,7 @@ import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
 import org.infobip.mobile.messaging.cloud.PlayServicesSupport;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseHelper;
 import org.infobip.mobile.messaging.dal.sqlite.PushDatabaseHelperImpl;
 import org.infobip.mobile.messaging.dal.sqlite.SqliteDatabaseProvider;
@@ -58,6 +59,8 @@ import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapperImpl;
 import org.infobip.mobile.messaging.telephony.MobileNetworkStateListener;
 import org.infobip.mobile.messaging.util.ComponentUtil;
+import org.infobip.mobile.messaging.util.Cryptor;
+import org.infobip.mobile.messaging.util.CryptorImpl;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.DeviceInformation;
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
@@ -89,6 +92,8 @@ import java.util.regex.Pattern;
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+
+import com.google.firebase.FirebaseOptions;
 
 
 /**
@@ -143,12 +148,13 @@ public class MobileMessagingCore
     private volatile boolean didSyncAtLeastOnce;
     private volatile Long lastSyncTimeMillis;
     private volatile Long lastForegroundSyncMillis;
+    private FirebaseAppProvider firebaseAppProvider;
 
     protected MobileMessagingCore(Context context) {
-        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context));
+        this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
     }
 
-    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor, ModuleLoader moduleLoader) {
+    protected MobileMessagingCore(Context context, Broadcaster broadcaster, ExecutorService registrationAlignedExecutor, ModuleLoader moduleLoader, FirebaseAppProvider firebaseAppProvider) {
         MobileMessagingLogger.init(context);
 
         this.context = context;
@@ -176,6 +182,7 @@ public class MobileMessagingCore
         migratePrefsIfNecessary(context);
 
         this.installationId = getUniversalInstallationId();
+        this.firebaseAppProvider = firebaseAppProvider;
     }
 
     /**
@@ -942,17 +949,6 @@ public class MobileMessagingCore
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
-    static void setSenderId(Context context, String senderId) {
-        if (StringUtils.isBlank(senderId)) {
-            throw new IllegalArgumentException("senderId is mandatory! Get one here: https://github.com/infobip/mobile-messaging-sdk-android/wiki/Firebase-Cloud-Messaging");
-        }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.SENDER_ID, senderId);
-    }
-
-    public static String getSenderId(Context context) {
-        return PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-    }
-
     public boolean isRegistrationIdReported() {
         return installationSynchronizer().isCloudTokenReported();
     }
@@ -1327,14 +1323,12 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, false);
 
         //it's needed for MobileMessagingCore.Build, when user uses different appCode
-        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
-        MobileMessagingCloudService.enqueueTokenCleanup(context, senderID);
+        MobileMessagingCloudService.enqueueTokenCleanup(context, mmCore.firebaseAppProvider);
     }
 
     public void resetCloudToken(boolean force) {
-        String senderID = PreferenceHelper.findString(context, MobileMessagingProperty.SENDER_ID);
         if (force || !didSyncRecently()) {
-            MobileMessagingCloudService.enqueueTokenReset(context, senderID);
+            MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProvider);
         }
     }
 
@@ -1958,6 +1952,8 @@ public class MobileMessagingCore
         private NotificationSettings notificationSettings = null;
         private String applicationCode = null;
         private ApplicationCodeProvider applicationCodeProvider;
+        private FirebaseOptions firebaseOptions;
+        private Cryptor oldCryptor = null;
 
         public Builder(Application application) {
             if (null == application) {
@@ -1994,6 +1990,19 @@ public class MobileMessagingCore
         }
 
         /**
+         * If you don't want to have automatic initialization of {@link FirebaseApp} by <a href=https://developers.google.com/android/guides/google-services-plugin>google-services plugin</a>,
+         * you may use this method to provide {@link FirebaseOptions} at runtime. In this case MobileMessaging SDK will initialize [DEFAULT] {@link FirebaseApp}, using provided {@link FirebaseOptions}.
+         * To create {@link FirebaseOptions} object use {@link FirebaseOptions.Builder} and values, which you can get from google-services.json file as described in the <a href=https://developers.google.com/android/guides/google-services-plugin>documentation of the google-services plugin<a/>.
+         *
+         * @param firebaseOptions, used to initialize {@link FirebaseApp} to register for push notifications.
+         * @return {@link Builder}
+         */
+        public Builder withFirebaseOptions(FirebaseOptions firebaseOptions) {
+            this.firebaseOptions = firebaseOptions;
+            return this;
+        }
+
+        /**
          * When you want to use the Application code that is not stored to <i>infobip_application_code</i> string resource
          * By default it will use <i>infobip_application_code</i> string resource
          *
@@ -2024,6 +2033,19 @@ public class MobileMessagingCore
         }
 
         /**
+         * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
+         * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
+         * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
+         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
+         * @return {@link Builder}
+         */
+        public Builder withCryptorMigration(Cryptor oldCryptor) {
+            this.oldCryptor = oldCryptor;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessagingCore</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -2036,6 +2058,7 @@ public class MobileMessagingCore
             Platform.verify(application);
 
             MobileMessagingCore mobileMessagingCore = new MobileMessagingCore(application);
+            mobileMessagingCore.firebaseAppProvider.setFirebaseOptions(firebaseOptions);
             mobileMessagingCore.setNotificationSettings(notificationSettings);
             mobileMessagingCore.setApplicationCode(applicationCode);
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
@@ -2044,7 +2067,7 @@ public class MobileMessagingCore
 
             // do the force invalidation of old push cloud tokens
             boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;
-            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(applicationContext, shouldResetToken, initListener);
+            mobileMessagingCore.playServicesSupport.checkPlayServicesAndTryToAcquireToken(applicationContext, shouldResetToken, initListener, mobileMessagingCore.firebaseAppProvider);
 
             Platform.reset(mobileMessagingCore);
             MobileMessagingCloudHandler cloudHandler = Platform.initializeMobileMessagingCloudHandler(application);
@@ -2054,7 +2077,7 @@ public class MobileMessagingCore
         }
 
         private void cleanupLibraryDataIfAppCodeWasChanged(Context applicationContext) {
-            PreferenceHelper.migrateCryptorIfNeeded(applicationContext);
+            PreferenceHelper.migrateCryptorIfNeeded(applicationContext, oldCryptor);
             String existingApplicationCodeHash = MobileMessagingCore.getStoredApplicationCodeHash(applicationContext);
             if (shouldSaveApplicationCode(applicationContext)) {
                 String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(applicationContext);
