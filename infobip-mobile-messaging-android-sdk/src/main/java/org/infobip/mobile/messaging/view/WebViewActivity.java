@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.view;
 
+import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -166,7 +168,7 @@ public class WebViewActivity extends AppCompatActivity {
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED |
                 Intent.FLAG_ACTIVITY_CLEAR_TOP;
         if (Build.VERSION.SDK_INT > 29) {
-            flags = flags | (int) 1024; // FLAG_ACTIVITY_REQUIRE_NON_BROWSER
+            flags = flags | FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
             parsedUriIntent.addFlags(flags);
             try {
                 context.startActivity(parsedUriIntent);
