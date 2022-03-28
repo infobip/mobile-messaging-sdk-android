@@ -47,8 +47,14 @@ public abstract class MobileGeo {
     /**
      * Will automatically ask for permissions and show the dialog with information that not all required permissions are granted, before activating Geofencing.
      * @param shouldShowPermissionsNotGrantedDialogIfShownOnce should application show the dialog with information that not all required permissions are granted, after it was already shown once.
+     * <pre>
+     * Recommendations:
      * <br>
-     * If you want to customize text for dialog with information that not all required permissions are granted, you could change following strings in your resources:
+     * - If you are asking for permissions by button tap, better to return true, so user will be informed, why an action can't be done, if the user didn't grant the permissions.
+     * <br>
+     * - If you are asking for permissions on the application start, without any additional user actions, better to return false not to disturb the user constantly.
+     * </pre>
+     * If you want to customize text for dialog with information that not all required permissions are granted, change following strings in your resources:
      * <pre>
      * {@code
      *  <string name="geofencing_permissions_not_granted_title">custom title</string>
