@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -65,7 +64,7 @@ import org.infobip.mobile.messaging.chat.InAppChatImpl;
 import org.infobip.mobile.messaging.chat.R;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
-import org.infobip.mobile.messaging.chat.attachments.PermissionsRequestManager;
+import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
@@ -792,6 +791,21 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         };
+    }
+
+    @Override
+    public boolean shouldShowPermissionsNotGrantedDialogIfShownOnce() {
+        return true;
+    }
+
+    @Override
+    public int permissionsNotGrantedDialogTitle() {
+        return R.string.ib_chat_permissions_not_granted_title;
+    }
+
+    @Override
+    public int permissionsNotGrantedDialogMessage() {
+        return R.string.ib_chat_permissions_not_granted_message;
     }
 
     @Override

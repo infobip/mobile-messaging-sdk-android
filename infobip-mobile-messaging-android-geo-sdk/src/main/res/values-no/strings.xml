@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Tillatelser ikke gitt</string>
+    <string name="geofencing_permissions_not_granted_message">Du kan gi dem i applikasjonsinnstillinger.</string>
+    <string name="geofencing_update_location_settings_message">Tillat appen å få tilgang til posisjonen din hele tiden for å la den utløse geografiske varsler selv når appen er stengt eller ikke er i bruk</string>
+    <string name="geofencing_update_location_settings_title">Oppdater plasseringsinnstillinger</string>
+</resources>

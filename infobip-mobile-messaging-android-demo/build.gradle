@@ -82,6 +82,10 @@ android {
         cryptorMigration {
             dimension "default"
         }
+
+        geofencing {
+            dimension "default"
+        }
     }
 }
 

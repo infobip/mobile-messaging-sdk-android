@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Отклонить</string>
     <string name="mm_button_cancel">Отмена</string>
     <string name="mm_button_open">Открыть</string>
+    <string name="mm_button_settings">Настройки</string>
 </resources>

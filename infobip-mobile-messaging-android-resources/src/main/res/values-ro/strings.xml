@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Refiză</string>
     <string name="mm_button_cancel">Anulează</string>
     <string name="mm_button_open">Deschide</string>
+    <string name="mm_button_settings">Setări</string>
 </resources>

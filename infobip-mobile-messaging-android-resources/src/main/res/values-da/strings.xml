@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Afvis</string>
     <string name="mm_button_open">Åbn</string>
     <string name="mm_button_cancel">Annullér</string>
+    <string name="mm_button_settings">Indstillinger</string>
 </resources>

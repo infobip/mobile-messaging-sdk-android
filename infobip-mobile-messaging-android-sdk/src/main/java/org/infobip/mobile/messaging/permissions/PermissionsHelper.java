@@ -1,22 +1,24 @@
-package org.infobip.mobile.messaging.chat.attachments;
+package org.infobip.mobile.messaging.permissions;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
 
-import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
-public class InAppChatPermissionsHelper {
+public class PermissionsHelper {
+    public PermissionsHelper() {}
 
-    public static void checkPermission(@NonNull Context context, @NonNull String permission, InAppChatPermissionAskListener listener) {
+    public void checkPermission(@NonNull Context context, @NonNull String permission, PermissionsHelper.PermissionsRequestListener listener) {
         if (shouldAskPermission(context, permission)) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale((AppCompatActivity) context, permission)) {
+            if (shouldShowRequestPermissionRationale((AppCompatActivity) context, permission)) {
                 listener.onNeedPermission(context, permission);
             } else {
                 if (isFirstTimeAsking(context, permission)) {
@@ -31,7 +33,11 @@ public class InAppChatPermissionsHelper {
         }
     }
 
-    public interface InAppChatPermissionAskListener {
+    public boolean shouldShowRequestPermissionRationale(AppCompatActivity context, String permission) {
+        return ActivityCompat.shouldShowRequestPermissionRationale(context, permission);
+    }
+
+    public interface PermissionsRequestListener {
         void onNeedPermission(Context context, String permission);
 
         void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission);
@@ -39,7 +45,7 @@ public class InAppChatPermissionsHelper {
         void onPermissionGranted(Context context, String permission);
     }
 
-    public static boolean hasPermissionInManifest(@NonNull Context context, @NonNull String permissionName) {
+    public boolean hasPermissionInManifest(@NonNull Context context, @NonNull String permissionName) {
         String packageName = context.getPackageName();
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
@@ -53,16 +59,16 @@ public class InAppChatPermissionsHelper {
                 }
             }
         } catch (PackageManager.NameNotFoundException e) {
-            MobileMessagingLogger.e("[InAppChat] Package name not found", e);
+            MobileMessagingLogger.e("[MobileMessaging] Package name not found", e);
         }
         return false;
     }
 
-    private static boolean shouldAskPermission() {
+    private boolean shouldAskPermission() {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M);
     }
 
-    private static boolean shouldAskPermission(@NonNull Context context, @NonNull String permission) {
+    private boolean shouldAskPermission(@NonNull Context context, @NonNull String permission) {
         if (shouldAskPermission()) {
             int permissionResult = ActivityCompat.checkSelfPermission(context, permission);
             return permissionResult != PackageManager.PERMISSION_GRANTED;
@@ -70,11 +76,19 @@ public class InAppChatPermissionsHelper {
         return false;
     }
 
-    private static boolean isFirstTimeAsking(@NonNull Context context, @NonNull String permission) {
-        return PreferenceHelper.findBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_PERMISSION_FIRST_TIME_ASK.getKey() + permission, true);
+    public boolean isFirstTimeAsking(@NonNull Context context, @NonNull String permission) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.KEY_PERMISSION_REQUESTED_FIRST_TIME + permission, true);
     }
 
-    private static void setFirstTimeAsking(@NonNull Context context, @NonNull String permission, Boolean isFirstTime) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_PERMISSION_FIRST_TIME_ASK.getKey() + permission, isFirstTime);
+    public void setFirstTimeAsking(@NonNull Context context, @NonNull String permission, Boolean isFirstTime) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.KEY_PERMISSION_REQUESTED_FIRST_TIME + permission, isFirstTime);
+    }
+
+    public boolean isPermissionSettingsDialogShown(@NonNull Context context, @NonNull String permission) {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.KEY_PERMISSIONS_SETTINGS_DIALOG_WAS_SHOWN + permission, false);
+    }
+
+    public void setPermissionSettingsDialogShown(@NonNull Context context, @NonNull String permission, Boolean shown) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.KEY_PERMISSIONS_SETTINGS_DIALOG_WAS_SHOWN + permission, shown);
     }
 }

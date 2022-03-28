@@ -2,7 +2,6 @@
 <resources>
     <string name="ib_chat_no_connection">لا يوجد اتصال</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">تم تجاوز الحد الأقصى المسموح به لحجم المرفقات</string>
-    <string name="ib_chat_button_settings">الإعدادات</string>
     <string name="ib_chat_permissions_not_granted_title">لم يتم منح الأذونات</string>
     <string name="ib_chat_permissions_not_granted_message">يمكنك منحهم في إعدادات التطبيق.</string>
 </resources>

@@ -4,4 +4,5 @@
     <string name="mm_button_decline">अस्वीकारें</string>
     <string name="mm_button_cancel">रद्द करें</string>
     <string name="mm_button_open">खोलें</string>
+    <string name="mm_button_settings">समायोजन</string>
 </resources>

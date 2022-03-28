@@ -4,5 +4,4 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximum amplitudo concessa affectum exceditur</string>
     <string name="ib_chat_permissions_not_granted_message">Vos can det illis per applicationem occasus.</string>
     <string name="ib_chat_permissions_not_granted_title">Quae non permissiones</string>
-    <string name="ib_chat_button_settings">Optiones</string>
 </resources>

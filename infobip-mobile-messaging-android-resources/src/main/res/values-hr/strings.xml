@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Odbaci</string>
     <string name="mm_button_open">Otvori</string>
     <string name="mm_button_cancel">Poništi</string>
+    <string name="mm_button_settings">Postavke</string>
 </resources>

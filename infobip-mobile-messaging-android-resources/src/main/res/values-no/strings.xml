@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Avslå</string>
     <string name="mm_button_cancel">Avbryt</string>
     <string name="mm_button_open">Åpne</string>
+    <string name="mm_button_settings">innstillinger</string>
 </resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">权限未授予</string>
+    <string name="geofencing_permissions_not_granted_message">您可以在应用程序设置中授予它们。</string>
+    <string name="geofencing_update_location_settings_message">允許應用程序始終訪問您的位置，即使在應用程序關閉或未使用時也能觸發地理通知</string>
+    <string name="geofencing_update_location_settings_title">更新位置設置</string>
+</resources>

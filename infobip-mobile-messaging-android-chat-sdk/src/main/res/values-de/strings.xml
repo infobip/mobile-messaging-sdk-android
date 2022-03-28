@@ -2,7 +2,6 @@
 <resources>
     <string name="ib_chat_no_connection">Keine Verbindung</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximal zulässige Anhangsgröße überschritten</string>
-    <string name="ib_chat_button_settings">die Einstellungen</string>
     <string name="ib_chat_permissions_not_granted_title">Berechtigungen nicht erteilt</string>
     <string name="ib_chat_permissions_not_granted_message">Sie können sie in den Anwendungseinstellungen gewähren.</string>
 </resources>

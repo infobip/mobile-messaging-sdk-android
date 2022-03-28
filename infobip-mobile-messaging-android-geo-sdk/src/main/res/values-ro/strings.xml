@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Permisiuni neacordate</string>
+    <string name="geofencing_permissions_not_granted_message">Le puteți acorda în setările aplicației.</string>
+    <string name="geofencing_update_location_settings_message">Permiteți aplicației să vă acceseze locația tot timpul pentru ai permite să declanșeze notificări geografice chiar și atunci când aplicația este închisă sau nu este utilizată</string>
+    <string name="geofencing_update_location_settings_title">Actualizați setările de locație</string>
+</resources>

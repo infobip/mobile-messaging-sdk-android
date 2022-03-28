@@ -4,6 +4,8 @@ package org.infobip.mobile.messaging.geo;
 import android.Manifest;
 import android.content.Context;
 import androidx.annotation.RequiresPermission;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 public abstract class MobileGeo {
 
@@ -41,4 +43,32 @@ public abstract class MobileGeo {
      * Cleans up MobileGeo installation and removes all geofences and settings.
      */
     public abstract void cleanup();
+
+    /**
+     * Will automatically ask for permissions and show the dialog with information that not all required permissions are granted, before activating Geofencing.
+     * @param shouldShowPermissionsNotGrantedDialogIfShownOnce should application show the dialog with information that not all required permissions are granted, after it was already shown once.
+     * <br>
+     * If you want to customize text for dialog with information that not all required permissions are granted, you could change following strings in your resources:
+     * <pre>
+     * {@code
+     *  <string name="geofencing_permissions_not_granted_title">custom title</string>
+     *  <string name="geofencing_permissions_not_granted_message">custom message</string>
+     * }
+     * </pre>
+     */
+    public abstract void activateGeofencingWithAutomaticPermissionsRequest(boolean shouldShowPermissionsNotGrantedDialogIfShownOnce);
+
+    /**
+     * This method will call `registerForActivityResult()` for provided activity or fragment in order to be able to ask permissions automatically.
+     * `registerForActivityResult()` is safe to call before your fragment or activity is created, so call `setContextForRequestingPermissions` before your fragment or activity is created, for example inside it's `onCreate` method.
+     * @param activity activity which will request for permissions and show the dialog with information that not all required permissions are granted.
+     */
+    public abstract void setContextForRequestingPermissions(AppCompatActivity activity);
+
+    /**
+     * This method will call `registerForActivityResult()` for provided activity or fragment in order to be able to ask permissions automatically.
+     * `registerForActivityResult()` is safe to call before your fragment or activity is created, so call `setContextForRequestingPermissions` before your fragment or activity is created, for example inside it's `onCreate` method.
+     * @param fragment fragment which will request for permissions and show the dialog with information that not all required permissions are granted.
+     */
+    public abstract void setContextForRequestingPermissions(Fragment fragment);
 }

@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Tolak</string>
     <string name="mm_button_cancel">Batal</string>
     <string name="mm_button_open">Buka</string>
+    <string name="mm_button_settings">Tetapan</string>
 </resources>

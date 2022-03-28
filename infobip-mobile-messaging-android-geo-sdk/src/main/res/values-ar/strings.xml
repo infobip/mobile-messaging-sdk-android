@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">تم تجاوز الحد الأقصى المسموح به لحجم المرفقات</string>
+    <string name="geofencing_permissions_not_granted_message">يمكنك منحهم في إعدادات التطبيق.</string>
+    <string name="geofencing_update_location_settings_title">تحديث إعدادات الموقع</string>
+    <string name="geofencing_update_location_settings_message">اسمح للتطبيق بالوصول إلى موقعك طوال الوقت للسماح له بتشغيل الإشعارات الجغرافية حتى عندما يكون التطبيق مغلقًا أو غير مستخدم</string>
+</resources>

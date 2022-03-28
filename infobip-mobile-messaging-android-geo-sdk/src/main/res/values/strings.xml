@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Permissions aren\'t granted.</string>
+    <string name="geofencing_permissions_not_granted_message">Geofencing won\'t work properly. Grant permissions in application settings.</string>
+    <string name="geofencing_update_location_settings_title">Update location settings</string>
+    <string name="geofencing_update_location_settings_message">Allow application to access your location all the time to let it trigger geo notifications even when app is closed or not in use</string>
+</resources>

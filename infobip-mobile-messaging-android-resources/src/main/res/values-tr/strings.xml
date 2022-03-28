@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Reddet</string>
     <string name="mm_button_open">Aç</string>
     <string name="mm_button_cancel">İptal</string>
+    <string name="mm_button_settings">Ayarlar</string>
 </resources>

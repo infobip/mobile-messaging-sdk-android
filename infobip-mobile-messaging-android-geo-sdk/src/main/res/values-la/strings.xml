@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Quae non permissiones</string>
+    <string name="geofencing_permissions_not_granted_message">Vos can det illis per applicationem occasus.</string>
+</resources>

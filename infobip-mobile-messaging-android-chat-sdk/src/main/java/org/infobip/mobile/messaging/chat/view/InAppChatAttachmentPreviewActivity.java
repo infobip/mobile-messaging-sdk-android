@@ -36,7 +36,7 @@ import android.widget.TextView;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.chat.R;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachment;
-import org.infobip.mobile.messaging.chat.attachments.PermissionsRequestManager;
+import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 
@@ -126,6 +126,21 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
     @Override
     public String[] requiredPermissions() {
         return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+    }
+
+    @Override
+    public boolean shouldShowPermissionsNotGrantedDialogIfShownOnce() {
+        return true;
+    }
+
+    @Override
+    public int permissionsNotGrantedDialogTitle() {
+        return R.string.ib_chat_permissions_not_granted_title;
+    }
+
+    @Override
+    public int permissionsNotGrantedDialogMessage() {
+        return R.string.ib_chat_permissions_not_granted_message;
     }
 
     @Override

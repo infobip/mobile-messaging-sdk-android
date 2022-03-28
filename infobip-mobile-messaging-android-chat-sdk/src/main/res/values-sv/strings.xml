@@ -4,5 +4,4 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximal tillåten tillbehörsstorlek överskridits</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan bevilja dem i applikationsinställningar.</string>
     <string name="ib_chat_permissions_not_granted_title">Tillstånd inte beviljade</string>
-    <string name="ib_chat_button_settings">inställningar</string>
 </resources>

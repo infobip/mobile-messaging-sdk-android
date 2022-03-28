@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Từ chối</string>
     <string name="mm_button_cancel">Hủy bỏ</string>
     <string name="mm_button_open">Mở</string>
+    <string name="mm_button_settings">Cài đặt</string>
 </resources>

@@ -4,4 +4,5 @@
     <string name="mm_button_decline">ปฏิเสธ</string>
     <string name="mm_button_open">เปิด</string>
     <string name="mm_button_cancel">ยกเลิก</string>
+    <string name="mm_button_settings">การตั้งค่า</string>
 </resources>

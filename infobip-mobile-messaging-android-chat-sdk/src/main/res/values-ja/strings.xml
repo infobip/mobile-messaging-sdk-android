@@ -4,5 +4,4 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">添付ファイルの最大許容サイズを超えています</string>
     <string name="ib_chat_permissions_not_granted_message">アプリケーション設定でそれらを許可できます。</string>
     <string name="ib_chat_permissions_not_granted_title">許可されていない権限</string>
-    <string name="ib_chat_button_settings">設定</string>
 </resources>

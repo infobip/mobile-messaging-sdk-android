@@ -4,5 +4,4 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Dimensiunea maximă permisă de atașare a fost depășită</string>
     <string name="ib_chat_permissions_not_granted_message">Le puteți acorda în setările aplicației.</string>
     <string name="ib_chat_permissions_not_granted_title">Permisiuni neacordate</string>
-    <string name="ib_chat_button_settings">Setări</string>
 </resources>

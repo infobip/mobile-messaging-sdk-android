@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main_activity_title">Geofencing Example</string>
+    <string name="web_view_activity_title">MainActivity</string>
+    <string name="geofencing_alert_message">This application collects location data to be able to trigger notification about entering geo region even when the app is closed or not in use.</string>
+</resources>

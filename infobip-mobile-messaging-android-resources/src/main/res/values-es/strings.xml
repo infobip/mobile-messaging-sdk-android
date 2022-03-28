@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Rechazar</string>
     <string name="mm_button_cancel">Cancelar</string>
     <string name="mm_button_open">Abrir</string>
+    <string name="mm_button_settings">Configuraciones</string>
 </resources>

@@ -2,7 +2,6 @@
 <resources>
     <string name="ib_chat_no_connection">無連接</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">超過允許的最大附件大小</string>
-    <string name="ib_chat_button_settings">設定值</string>
     <string name="ib_chat_permissions_not_granted_title">權限未授予</string>
     <string name="ib_chat_permissions_not_granted_message">您可以在應用程序設置中授予它們。</string>
 </resources>

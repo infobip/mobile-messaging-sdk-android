@@ -221,7 +221,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         verify(broadcaster, after(300).atLeastOnce()).depersonalized();
         verify(broadcaster, after(300).never()).error(any(MobileMessagingError.class));
 
-        verify(successPendingResultListener, after(300).times(1)).onResult(captor.capture());
+        verify(successPendingResultListener, after(500).times(1)).onResult(captor.capture());
         Result result = captor.getValue();
         assertNotNull(result.getData());
         assertTrue(result.isSuccess());

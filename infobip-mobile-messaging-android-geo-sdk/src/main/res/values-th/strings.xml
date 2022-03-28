@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">ไม่ได้รับอนุญาต</string>
+    <string name="geofencing_permissions_not_granted_message">คุณสามารถให้สิทธิ์ในการตั้งค่าแอปพลิเคชัน</string>
+    <string name="geofencing_update_location_settings_message">อนุญาต ให้ แอปพลิเคชัน เข้า ถึง ตำแหน่ง ของ คุณ ตลอด เวลา เพื่อ ให้ เรียก ใช้ การ แจ้ง เตือน ทาง ภูมิศาสตร์ แม้ ใน ขณะ ที่ แอปปิด อยู่ หรือ ได้ ใช้ งาน</string>
+    <string name="geofencing_update_location_settings_title">อัปเดตการตั้งค่าตำแหน่ง</string>
+</resources>

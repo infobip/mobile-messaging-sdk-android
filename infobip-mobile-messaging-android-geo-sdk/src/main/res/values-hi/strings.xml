@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">अनुमतियाँ प्रदान नहीं की गईं</string>
+    <string name="geofencing_permissions_not_granted_message">आप उन्हें एप्लिकेशन सेटिंग में अनुदान दे सकते हैं।</string>
+    <string name="geofencing_update_location_settings_message">एप्लिकेशन को हर समय अपने स्थान तक पहुंचने की अनुमति दें ताकि वह ऐप बंद होने या उपयोग में न होने भी भी भौगोलिक को ट्रिगर कर सके सके</string>
+    <string name="geofencing_update_location_settings_title">स्थान सेटिंग अपडेट करें</string>
+</resources>

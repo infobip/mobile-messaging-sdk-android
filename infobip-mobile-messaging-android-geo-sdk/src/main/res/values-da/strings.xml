@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Maksimal tilladt fastgørelsesstørrelse overskredet</string>
+    <string name="geofencing_permissions_not_granted_message">Du kan give dem i applikationsindstillinger.</string>
+    <string name="geofencing_update_location_settings_message">Tillad applikationen at få adgang til din placering hele tiden for at lade den udløse geonotifikationer, selv når appen er lukket eller ikke er i brug</string>
+</resources>

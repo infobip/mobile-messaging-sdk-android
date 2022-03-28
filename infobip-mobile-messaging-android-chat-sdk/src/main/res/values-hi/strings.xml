@@ -4,5 +4,4 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">अधिकतम अनुमत अनुलग्नक का आकार पार हो गया</string>
     <string name="ib_chat_permissions_not_granted_message">आप उन्हें एप्लिकेशन सेटिंग में अनुदान दे सकते हैं।</string>
     <string name="ib_chat_permissions_not_granted_title">अनुमतियाँ प्रदान नहीं की गईं</string>
-    <string name="ib_chat_button_settings">समायोजन</string>
 </resources>

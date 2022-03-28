@@ -2,7 +2,6 @@
 <resources>
     <string name="ib_chat_no_connection">Pas de connection</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Taille maximale autorisée des pièces jointes dépassée</string>
-    <string name="ib_chat_button_settings">Paramètres</string>
     <string name="ib_chat_permissions_not_granted_title">Autorisations non accordées</string>
     <string name="ib_chat_permissions_not_granted_message">Vous pouvez les accorder dans les paramètres de l\'application.</string>
 </resources>

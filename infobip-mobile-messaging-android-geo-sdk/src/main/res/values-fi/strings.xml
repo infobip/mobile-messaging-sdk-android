@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Geofencing -->
+    <string name="geofencing_permissions_not_granted_title">Lupaa ei myönnetä</string>
+    <string name="geofencing_permissions_not_granted_message">Voit myöntää heille sovellusasetuksissa.</string>
+    <string name="geofencing_update_location_settings_message">Salli sovelluksen käyttää sijaintiasi koko ajan, jotta se laukaisee maantieteellisiä ilmoituksia, vaikka sovellus olisi suljettu tai ei ole käytössä</string>
+    <string name="geofencing_update_location_settings_title">Paivitä sijaintiasetukset</string>
+</resources>

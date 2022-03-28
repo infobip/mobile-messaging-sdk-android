@@ -4,4 +4,5 @@
     <string name="mm_button_decline">拒絕</string>
     <string name="mm_button_open">打開</string>
     <string name="mm_button_cancel">取消</string>
+    <string name="mm_button_settings">設定值</string>
 </resources>

@@ -4,4 +4,5 @@
     <string name="mm_button_decline">Utasítsd el</string>
     <string name="mm_button_cancel">Mégse</string>
     <string name="mm_button_open">Megnyitás</string>
+    <string name="mm_button_settings">Beállítások</string>
 </resources>

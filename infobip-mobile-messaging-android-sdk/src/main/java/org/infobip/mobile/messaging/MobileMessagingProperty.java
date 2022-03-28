@@ -34,6 +34,9 @@ public enum MobileMessagingProperty {
 
     DEFAULT_MAX_RETRY_COUNT("org.infobip.mobile.messaging.infobip.DEFAULT_MAX_RETRY_COUNT", 3),
     DEFAULT_EXP_BACKOFF_MULTIPLIER("org.infobip.mobile.messaging.infobip.DEFAULT_EXP_BACKOFF_MULTIPLIER", 2),
+    KEY_PERMISSION_REQUESTED_FIRST_TIME("org.infobip.mobile.messaging.infobip.PERMISSION_REQUESTED_FIRST_TIME", null),
+    KEY_PERMISSIONS_SETTINGS_DIALOG_WAS_SHOWN("org.infobip.mobile.messaging.infobip.PERMISSIONS_SETTINGS_DIALOG_WAS_SHOWN", null),
+
     // END
 
     // START: MO/MT messages related prefs
