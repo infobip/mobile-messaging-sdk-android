@@ -9,15 +9,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
+import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
 import static org.junit.Assert.assertFalse;
 
 public class CustomAttributeTypeTest extends MobileMessagingTestCase {
@@ -273,5 +276,22 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
         Map<String, CustomAttributeValue> customInstallationAtts = installation.getCustomAttributes();
         assertEquals(5, customInstallationAtts.size());
+    }
+
+    @Test
+    public void test_save_user_custom_attributes_locale() throws Exception {
+        User user = new User();
+        Locale.setDefault(new Locale("ar"));
+        String someDateString = "١٩٨٩-١١-٢١";
+        Date myDate = dateFromYMDString(someDateString);
+
+        user.setCustomAttribute(KEY_FOR_DATE, new CustomAttributeValue(myDate));
+
+        mobileMessaging.saveUser(user);
+
+        Mockito.verify(broadcaster, Mockito.after(1000).atLeastOnce()).userUpdated(userCaptor.capture());
+        User userResponse = userCaptor.getValue();
+
+        assertEquals(someDateString, DateTimeUtil.dateToYMDStringLocale(userResponse.getCustomAttributeValue(KEY_FOR_DATE).dateValue()));
     }
 }

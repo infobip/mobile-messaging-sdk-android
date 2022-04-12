@@ -23,7 +23,7 @@ public class DateTimeUtil {
     private static final String DATE_FORMAT3 = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final String GMT_TIME_ZONE = "+00:00";
     private static final String ISO8601_GMT_Z_MATCHER = "Z$";
-    private static final String DATE_YMD_HMS_FORMAT = "yy-MM-dd-hh-mm-ss";
+    private static final String DATE_YMD_HMS_FORMAT = "yy-MM-dd-HH-mm-ss";
 
     /**
      * Android's SimpleDateFormat cannot properly parse 'Z' (ISO8601 GMT) time zone.
@@ -98,7 +98,7 @@ public class DateTimeUtil {
     }
 
     /**
-     * Returns ISO8601-compliant string in UTC time for the supplied date.
+     * Returns ISO8601-compliant string for the supplied date.
      * 2020-02-26T09:41:57Z
      *
      * @param date date object
@@ -109,12 +109,28 @@ public class DateTimeUtil {
             return null;
         }
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.UK);
+        return simpleDateFormat.format(date.getTime());
+    }
+
+    /**
+     * Returns ISO8601-compliant string for the supplied date in the current locale.
+     * 2020-02-26T09:41:57Z
+     *
+     * @param date date object
+     * @return String representation of Date object
+     */
+    public static String dateToISO8601StringLocale(Date date) {
+        if (date == null) {
+            return null;
+        }
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT3, Locale.getDefault());
         return simpleDateFormat.format(date.getTime());
     }
 
     /**
-     * Returns ISO8601-compliant string in UTC time for the supplied date.
+     * Returns ISO8601-compliant string for the supplied date.
      * 2020-02-26T09:41:57Z
      *
      * @param dateTime dateTime object
@@ -131,6 +147,20 @@ public class DateTimeUtil {
      * @return Date object
      */
     public static Date dateFromYMDString(String date) throws ParseException {
+        if (date == null) {
+            return null;
+        }
+
+        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.UK).parse(date);
+    }
+
+    /**
+     * Converts "yyyy-MM-dd" string to Date object in the current locale.
+     *
+     * @param date string representation of date
+     * @return Date object
+     */
+    public static Date dateFromYMDStringLocale(String date) throws ParseException {
         if (date == null) {
             return null;
         }
@@ -177,6 +207,20 @@ public class DateTimeUtil {
      * @return String representation of Date object
      */
     public static String dateToYMDString(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return new SimpleDateFormat(DATE_YMD_FORMAT, Locale.UK).format(date);
+    }
+
+    /**
+     * Returns "yyyy-MM-dd" string for the supplied date in the current locale.
+     *
+     * @param date date object
+     * @return String representation of Date object
+     */
+    public static String dateToYMDStringLocale(Date date) {
         if (date == null) {
             return null;
         }

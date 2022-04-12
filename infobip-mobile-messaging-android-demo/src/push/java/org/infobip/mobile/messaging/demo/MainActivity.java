@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-       MobileGeo.getInstance(this).activateGeofencing();
+        MobileGeo.getInstance(this).activateGeofencing();
     }
 
     private void clearNotifications() {

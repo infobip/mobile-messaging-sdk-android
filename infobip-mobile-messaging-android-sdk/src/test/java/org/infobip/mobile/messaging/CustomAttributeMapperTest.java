@@ -44,6 +44,14 @@ public class CustomAttributeMapperTest {
     }
 
     @Test
+    public void test_customValueDateArab() throws Exception {
+        String someString = "١٩٨٩-١١-٢١";
+        Object backendCustomValue = CustomAttributesMapper.customValueToBackend(new CustomAttributeValue(someString, CustomAttributeValue.Type.Date));
+
+        assertEquals("1989-11-21", backendCustomValue);
+    }
+
+    @Test
     public void test_customValueDecimal() throws Exception {
         Object backendCustomValue = CustomAttributesMapper.customValueToBackend(new CustomAttributeValue(1.1));
 

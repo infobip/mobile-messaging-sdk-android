@@ -38,15 +38,12 @@ public class EventPropertiesMapperTest {
 
     @Test
     public void test_customPropertyDate() throws Exception {
-        int hourOfDay = 8;
-        GregorianCalendar gregorianCalendar = new GregorianCalendar(2020, Calendar.MARCH, 31, hourOfDay, 0);
+        GregorianCalendar gregorianCalendar = new GregorianCalendar(2020, Calendar.MARCH, 31, 8, 0);
         Date someDate = gregorianCalendar.getTime();
-        int offset = gregorianCalendar.getTimeZone().getOffset(someDate.getTime());
-        hourOfDay -= TimeUnit.MILLISECONDS.toHours(offset);
 
         Object backendCustomValue = EventPropertiesMapper.eventPropertyToBackend(new CustomAttributeValue(someDate));
 
-        assertEquals("2020-03-31T0" + hourOfDay + ":00:00Z", backendCustomValue);
+        assertEquals("2020-03-31T08:00:00Z", backendCustomValue);
     }
 
     @Test

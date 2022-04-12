@@ -103,7 +103,7 @@ public class UserAttributes extends UserCustomAttributeHolder {
 
     public Date getBirthday() {
         try {
-            return DateTimeUtil.dateFromYMDString(birthday);
+            return DateTimeUtil.dateFromYMDStringLocale(birthday);
         } catch (ParseException e) {
             return null;
         }
