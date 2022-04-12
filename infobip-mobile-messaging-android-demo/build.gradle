@@ -102,6 +102,9 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
+
+    //To add cryptor use build flavour "cryptorMigration"
+    cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
 }
 
 private static String property(Project project, String projectKey, String environmentKey) {

@@ -1,0 +1,113 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.4'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'idea'
+
+android {
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion mm_minSdkVersion
+        targetSdkVersion mm_targetSdkVersion
+        versionCode 1
+        versionName project.version
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation project(":infobip-mobile-messaging-android-sdk")
+    api project(":infobip-mobile-messaging-android-resources")
+    implementation project(":infobip-mobile-messaging-api-java")
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
+        Task javaCompileTask
+        if (variant.hasProperty('javaCompileProvider')) {
+            // Android 3.3.0+
+            javaCompileTask = variant.javaCompileProvider.get()
+        } else {
+            javaCompileTask = variant.javaCompile
+        }
+
+        dependsOn javaCompileTask
+        from javaCompileTask.destinationDir
+
+        manifest {
+            attributes(
+                    "Bundle-Name": 'parse-android',
+                    "Bundle-Version": project.version
+            )
+        }
+
+        exclude '**/R.class'
+        exclude '**/R\$*.class'
+        exclude '**/Manifest.class'
+        exclude '**/Manifest\$*.class'
+        exclude '**/BuildConfig.class'
+    }
+
+    artifacts {
+        archives jar
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set('sources')
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+ext {
+    PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-cryptor-migration'
+}
+apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"

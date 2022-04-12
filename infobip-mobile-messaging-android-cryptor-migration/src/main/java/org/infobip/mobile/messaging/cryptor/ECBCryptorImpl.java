@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.demo;
+package org.infobip.mobile.messaging.cryptor;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
