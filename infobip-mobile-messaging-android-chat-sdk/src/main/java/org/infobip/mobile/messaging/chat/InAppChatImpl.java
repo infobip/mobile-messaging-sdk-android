@@ -82,7 +82,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().saveInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT, unreadChatMessageCount);
         inAppChatBroadcaster().unreadMessagesCounterUpdated(unreadChatMessageCount);
         coreBroadcaster().messageReceived(message);
-        if (!isChatWidgetOnForeground()) {
+        if (!isChatWidgetOnForeground() && !message.isSilent()) {
             MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
         }
         MobileMessagingLogger.d("Message with id: " + message.getMessageId() + " will be handled by inAppChat MessageHandler");
