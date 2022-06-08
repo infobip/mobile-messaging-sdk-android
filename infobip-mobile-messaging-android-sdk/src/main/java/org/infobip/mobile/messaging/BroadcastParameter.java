@@ -22,6 +22,8 @@ public final class BroadcastParameter {
 
     public static final String EXTRA_UNREAD_CHAT_MESSAGES_COUNT = "org.infobip.mobile.messaging.unread.chat.messages.count";
 
+    public static final String EXTRA_INBOX = "org.infobip.mobile.messaging.inbox";
+
     public static final int NOTIFICATION_NOT_DISPLAYED_ID = -1;
 
     private BroadcastParameter() {
