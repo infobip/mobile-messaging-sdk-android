@@ -1,15 +1,16 @@
 package org.infobip.mobile.messaging.chat.core;
 
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageDraftSend;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageSend;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageWithAttachmentSend;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.setLanguage;
+import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
+import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
+
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
-
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageDraftSend;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageSend;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageWithAttachmentSend;
-import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
-import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
 
 public class InAppChatClientImpl implements InAppChatClient {
 
@@ -45,6 +46,15 @@ public class InAppChatClientImpl implements InAppChatClient {
     public void sendInputDraft(String draft) {
         if (webView != null) {
             String script = buildWidgetMethodInvocation(handleMessageDraftSend.name(), isOSOlderThanKitkat(), draft);
+            webView.evaluateJavascriptMethod(script, null);
+        }
+    }
+
+    @Override
+    public void setLanguage(String language) {
+        if (webView != null && !language.isEmpty()) {
+            Language supportedLanguage = Language.findLanguage(language);
+            String script = buildWidgetMethodInvocation(setLanguage.name(), isOSOlderThanKitkat(), supportedLanguage != null ? supportedLanguage.getLocale() : language);
             webView.evaluateJavascriptMethod(script, null);
         }
     }

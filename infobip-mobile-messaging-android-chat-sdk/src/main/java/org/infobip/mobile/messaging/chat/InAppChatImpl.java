@@ -7,12 +7,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.TaskStackBuilder;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.core.app.TaskStackBuilder;
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -27,6 +28,7 @@ import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
+import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
@@ -36,6 +38,8 @@ import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+
+import java.util.Locale;
 
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
@@ -210,6 +214,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
         resetMessageCounter();
     }
 
@@ -315,6 +320,23 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public int getMessageCounter() {
         return propertyHelper().findInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
+    }
+
+    @Override
+    public void setLanguage(String language) {
+        if (inAppChatWVFragment != null) {
+            inAppChatWVFragment.setLanguage(language);
+        }
+
+        propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, language);
+
+        try {
+            Locale locale = LocalizationUtils.localeFromString(language);
+            LocalizationUtils.getInstance(context).setLanguage(locale);
+        } catch (Throwable t) {
+            MobileMessagingLogger.d("Not valid language set: " + language);
+        }
+
     }
     // endregion
 }

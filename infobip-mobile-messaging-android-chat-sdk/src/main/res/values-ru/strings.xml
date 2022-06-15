@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Превышен максимально допустимый размер файла</string>
     <string name="ib_chat_permissions_not_granted_title">Разрешения не предоставлены</string>
     <string name="ib_chat_permissions_not_granted_message">Вы можете предоставить их в настройках приложения.</string>
+    <string name="ib_chat_message_hint">Отправить сообщение...</string>
 </resources>

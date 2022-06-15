@@ -13,4 +13,5 @@ public class WidgetInfo {
     private String primaryColor;
     private String backgroundColor;
     private long maxUploadContentSize;
+    private String language;
 }

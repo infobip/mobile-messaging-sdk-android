@@ -1,5 +1,8 @@
 package org.infobip.mobile.messaging.chat.view;
 
+import static android.app.Activity.RESULT_OK;
+import static org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4;
+
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -21,20 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.core.graphics.ColorUtils;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -52,6 +41,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.ColorUtils;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Event;
@@ -64,7 +67,6 @@ import org.infobip.mobile.messaging.chat.InAppChatImpl;
 import org.infobip.mobile.messaging.chat.R;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
-import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
@@ -72,17 +74,16 @@ import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
+import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import static android.app.Activity.RESULT_OK;
-import static org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4;
 
 public class InAppChatFragment extends Fragment implements InAppChatWebViewManager, PermissionsRequestManager.PermissionsRequester {
 
@@ -122,6 +123,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private boolean isToolbarHidden = false;
     private boolean isInputControlsVisible = true;
     private boolean fragmentHidden = false;
+    private LocalizationUtils localization;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -168,6 +170,15 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         initViews();
         setControlsEnabled(false);
         updateViews();
+    }
+
+    private void localisation() {
+        localization = LocalizationUtils.getInstance(requireContext());
+        containerView.findViewById(R.id.ib_lc_iv_input_top_border).setContentDescription(localization.getString(R.string.ib_iv_input_border_desc));
+        sendAttachmentButton.setContentDescription(localization.getString(R.string.ib_iv_btn_send_attachment_desc));
+        sendMessageButton.setContentDescription(localization.getString(R.string.ib_iv_btn_send_desc));
+        containerView.<TextView>findViewById(R.id.ib_lc_et_msg_input).setHint(localization.getString(R.string.ib_chat_message_hint));
+        errorToast.setText(localization.getString(R.string.ib_chat_no_connection));
     }
 
     @Override
@@ -271,6 +282,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         String widgetPrimaryColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey(), null);
         String widgetBackgroundColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), null);
         String maxUploadContentSizeStr = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), null);
+        String language = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.getKey(), null);
         long maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE;
 
         if (StringUtils.isNotBlank(maxUploadContentSizeStr)) {
@@ -278,7 +290,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
 
         if (widgetId != null) {
-            return new WidgetInfo(widgetId, widgetTitle, widgetPrimaryColor, widgetBackgroundColor, maxUploadContentSize);
+            return new WidgetInfo(widgetId, widgetTitle, widgetPrimaryColor, widgetBackgroundColor, maxUploadContentSize, language);
         }
         return null;
     }
@@ -515,6 +527,20 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     public void onPageStarted() {
         spinner.setVisibility(View.VISIBLE);
         webView.setVisibility(View.INVISIBLE);
+        applyLanguage();
+    }
+
+    private void applyLanguage() {
+        String storedLanguage = widgetInfo.getLanguage();
+        String language;
+        if (storedLanguage == null) {
+            language = MobileMessagingCore.getInstance(getContext()).getInstallation().getLanguage();
+            LocalizationUtils.getInstance(getContext()).setLanguage(LocalizationUtils.localeFromString(language));
+        } else {
+            language = storedLanguage;
+        }
+        localisation();
+        setLanguage(language);
     }
 
     @Override
@@ -571,6 +597,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         intent.putExtra(InAppChatAttachmentPreviewActivity.EXTRA_CAPTION, caption);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    @Override
+    public void setLanguage(String language) {
+        inAppChatClient.setLanguage(language);
     }
 
         /*
@@ -730,7 +761,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                             @Override
                             public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
                                 MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
-                                Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, localization.getString(R.string.ib_chat_allowed_attachment_size_exceeded), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -854,4 +885,6 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     public void setIsToolbarHidden(Boolean hidden) {
         isToolbarHidden = hidden;
     }
+
+
 }

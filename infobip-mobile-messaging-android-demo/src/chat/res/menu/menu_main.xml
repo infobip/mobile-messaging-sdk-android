@@ -4,7 +4,129 @@
     tools:context=".ui.InboxActivity">
     <item
         android:id="@+id/action_id"
-        android:title="@string/action_registration_id_copy"
         android:icon="@drawable/ic_content_copy_white_24dp"
+        android:title="@string/action_registration_id_copy"
         app:showAsAction="always" />
+    <group android:id="@+id/languages">
+        <item
+            android:id="@+id/english"
+            android:enabled="true"
+            android:title="@string/english"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/turkish"
+            android:enabled="true"
+            android:title="@string/turkish"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/korean"
+            android:enabled="true"
+            android:title="@string/korean"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/russian"
+            android:enabled="true"
+            android:title="@string/russian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/chinese"
+            android:enabled="true"
+            android:title="@string/chinese"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/spanish"
+            android:enabled="true"
+            android:title="@string/spanish"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/portuguese"
+            android:enabled="true"
+            android:title="@string/portuguese"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/polish"
+            android:enabled="true"
+            android:title="@string/polish"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/romanian"
+            android:enabled="true"
+            android:title="@string/romanian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/arabic"
+            android:enabled="true"
+            android:title="@string/arabic"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/bosnian"
+            android:enabled="true"
+            android:title="@string/bosnian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/croatian"
+            android:enabled="true"
+            android:title="@string/croatian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/greek"
+            android:enabled="true"
+            android:title="@string/greek"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/swedish"
+            android:enabled="true"
+            android:title="@string/swedish"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/thai"
+            android:enabled="true"
+            android:title="@string/thai"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/lithuanian"
+            android:enabled="true"
+            android:title="@string/lithuanian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/danish"
+            android:enabled="true"
+            android:title="@string/danish"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/latvian"
+            android:enabled="true"
+            android:title="@string/latvian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/hungarian"
+            android:enabled="true"
+            android:title="@string/hungarian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/italian"
+            android:enabled="true"
+            android:title="@string/italian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/french"
+            android:enabled="true"
+            android:title="@string/french"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/slovenian"
+            android:enabled="true"
+            android:title="@string/slovenian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/ukrainian"
+            android:enabled="true"
+            android:title="@string/ukrainian"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/japanese"
+            android:enabled="true"
+            android:title="@string/japanese"
+            app:showAsAction="never" />
+    </group>
 </menu>

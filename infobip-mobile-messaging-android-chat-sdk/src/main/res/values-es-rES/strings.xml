@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Se excedió el tamaño de archivo adjunto máximo permitido</string>
     <string name="ib_chat_permissions_not_granted_title">Permisos no otorgados</string>
     <string name="ib_chat_permissions_not_granted_message">Puede otorgarlos en la configuración de la aplicación.</string>
+    <string name="ib_chat_message_hint">Enviar un mensaje...</string>
 </resources>

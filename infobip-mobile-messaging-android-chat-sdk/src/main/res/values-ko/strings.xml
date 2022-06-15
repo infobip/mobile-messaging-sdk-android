@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">허용되는 최대 첨부 파일 크기를 초과했습니다</string>
     <string name="ib_chat_permissions_not_granted_title">허가되지 않은 권한</string>
     <string name="ib_chat_permissions_not_granted_message">응용 프로그램 설정에서 부여 할 수 있습니다.</string>
+    <string name="ib_chat_message_hint">메시지를 보내십시오...</string>
 </resources>

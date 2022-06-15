@@ -36,6 +36,10 @@ public class PropertyHelper extends PreferenceHelper {
         saveInt(context, property.getKey(), value);
     }
 
+    public void saveString(MobileMessagingChatProperty property, String value) {
+        saveString(context, property.getKey(), value);
+    }
+
     public Class[] findClasses(MobileMessagingChatProperty property) {
         String[] classNames = findStringArray(context, property.getKey(), new String[0]);
         if (classNames == null) {

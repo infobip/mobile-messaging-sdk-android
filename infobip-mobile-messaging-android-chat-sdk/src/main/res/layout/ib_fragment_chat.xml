@@ -53,7 +53,6 @@
             android:id="@+id/ib_lc_iv_input_top_border"
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:contentDescription="@string/ib_iv_input_border_desc"
             android:src="@drawable/light_top_border" />
 
         <RelativeLayout
@@ -69,7 +68,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:contentDescription="@string/ib_iv_btn_send_attachment_desc"
                 android:enabled="false"
                 android:src="@drawable/ib_chat_attachment_btn_icon" />
 
@@ -82,7 +80,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
-                android:contentDescription="@string/ib_iv_btn_send_desc"
                 android:enabled="false"
                 android:src="@drawable/ib_chat_send_btn_icon" />
 
@@ -109,7 +106,6 @@
                     android:layout_marginRight="5dp"
                     android:background="@null"
                     android:enabled="false"
-                    android:hint="@string/ib_chat_message_hint"
                     android:importantForAutofill="no"
                     android:inputType="textMultiLine"
                     android:maxLines="5"
@@ -128,7 +124,6 @@
         android:layout_alignBottom="@+id/appBarLayout"
         android:background="@android:color/darker_gray"
         android:gravity="center_horizontal|center_vertical"
-        android:text="@string/ib_chat_no_connection"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:visibility="invisible" />

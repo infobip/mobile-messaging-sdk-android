@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">İzin verilen maksimum ek boyutu aşıldı</string>
     <string name="ib_chat_permissions_not_granted_message">Bunları uygulama ayarlarında verebilirsiniz.</string>
     <string name="ib_chat_permissions_not_granted_title">İzin verilmedi</string>
+    <string name="ib_chat_message_hint">Mesaj gönder...</string>
 </resources>
