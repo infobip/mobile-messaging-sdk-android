@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_button_accept">Прийняти</string>
+    <string name="mm_button_decline">Відхилити</string>
+    <string name="mm_button_open">Відкрити</string>
+    <string name="mm_button_cancel">Скасувати</string>
+    <string name="mm_button_settings">Параметри</string>
+</resources>

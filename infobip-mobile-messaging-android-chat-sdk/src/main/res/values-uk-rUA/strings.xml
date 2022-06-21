@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="ib_chat_message_hint">Відправити повідомлення...</string>
+    <string name="ib_chat_message_hint">Надіслати повідомлення...</string>
+    <string name="ib_chat_no_connection">Немає з\'єднання</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Перевищено максимально дозволений розмір вкладення</string>
+    <string name="ib_chat_permissions_not_granted_message">Ви можете надати їх у Параметрах.</string>
+    <string name="ib_chat_permissions_not_granted_title">Дозволи не надано</string>
+    <string name="ib_iv_btn_send_desc">Надіслати повідомлення</string>
+    <string name="ib_iv_btn_send_attachment_desc">Надіслати вкладений файл</string>
+    <string name="ib_iv_input_border_desc">Верхня межа</string>
 </resources>
