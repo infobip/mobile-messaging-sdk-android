@@ -11,7 +11,7 @@ import java.util.List;
  * @author sslavin
  * @since 25/04/16.
  */
-class SeenMessagesMapper extends SeenMessages {
+public class SeenMessagesMapper extends SeenMessages {
 
     static SeenMessages fromMessageIds(String[] messageIds) {
         List<Message> messages = new ArrayList<>();
@@ -20,12 +20,14 @@ class SeenMessagesMapper extends SeenMessages {
             String messageId = messageIdWithTimestamp[0];
             String seenTimestampString = messageIdWithTimestamp[1];
 
-            long seenTimestamp = Long.valueOf(seenTimestampString);
-            long deltaTimestamp = Time.now() - seenTimestamp;
-            long deltaInSeconds = Math.round((float) deltaTimestamp / 1000);
-
-            messages.add(new Message(messageId, deltaInSeconds));
+            messages.add(new Message(messageId, countDeltaInSeconds(seenTimestampString)));
         }
         return new SeenMessages(messages.toArray(new Message[0]));
+    }
+
+    public static long countDeltaInSeconds(String seenTimestampString) {
+        long seenTimestamp = Long.valueOf(seenTimestampString);
+        long deltaTimestamp = Time.now() - seenTimestamp;
+        return Math.round((float) deltaTimestamp / 1000);
     }
 }

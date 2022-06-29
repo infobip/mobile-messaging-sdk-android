@@ -2,16 +2,32 @@ package org.infobip.mobile.messaging.inbox;
 
 import java.util.Date;
 
+/**
+ * Class with filtering options for fetching inbox
+ */
+
 public class MobileInboxFilterOptions {
+    /**
+     * fromDateTime - date time from which Inbox will be fetched
+     */
     private Date fromDateTime;
+    /**
+     * toDateTime - date time to which Inbox will be fetched
+     */
     private Date toDateTime;
+    /**
+     * topic - messages' topic to be fetched
+     */
     private String topic;
-    private int limit;
+    /**
+     * limit - number of messages to be fetched
+     */
+    private Integer limit;
 
     public MobileInboxFilterOptions(Date fromDateTime,
                                     Date toDateTime,
                                     String topic,
-                                    int limit) {
+                                    Integer limit) {
         this.fromDateTime = fromDateTime;
         this.toDateTime = toDateTime;
         this.topic = topic;
@@ -40,11 +56,11 @@ public class MobileInboxFilterOptions {
         this.topic = topic;
     }
 
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(int limit) {
+    public void setLimit(Integer limit) {
         this.limit = limit;
     }
 }

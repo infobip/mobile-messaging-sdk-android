@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.inbox;
 
+import static org.infobip.mobile.messaging.api.support.util.StringUtils.isBlank;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 
@@ -16,7 +18,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule {
     @SuppressLint("StaticFieldLeak")
     private static MobileInboxImpl instance;
@@ -26,6 +27,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     private MobileInboxBroadcaster mobileInboxBroadcaster;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private MobileInboxSynchronizer mobileInboxSynchronizer;
+    private InboxSeenStatusReporter inboxSeenStatusReporter;
 
     public static MobileInboxImpl getInstance(Context context) {
         if (instance == null) {
@@ -39,21 +41,35 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
 
     @Override
     public void fetchInbox(@NonNull String token, @NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
-        if (externalUserId == null) {
-            MobileMessagingLogger.e("[Inbox] One or more required parameters is null. Check token and externalUserId");
+        if (isBlank(token) || isBlank(externalUserId)) {
+            MobileMessagingLogger.e("[Inbox] One or more required parameters is empty. Check token and externalUserId");
             return;
         }
         mobileInboxSynchronizer().fetchInbox(token, externalUserId, filterOptions, messageResultListener);
     }
+
     //MM-5082
-//    @Override
-//    public void doFetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
-//        if (externalUserId == null) {
-//            MobileMessagingLogger.e("[Inbox] externalUserId was null");
-//            return;
-//        }
-//        mobileInboxSynchronizer().fetchInbox(null, externalUserId, filterOptions, messageResultListener);
-//    }
+    @Override
+    public void fetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
+        if (isBlank(externalUserId)) {
+            MobileMessagingLogger.e("[Inbox] externalUserId was empty");
+            return;
+        }
+        mobileInboxSynchronizer().fetchInbox(null, externalUserId, filterOptions, messageResultListener);
+    }
+
+    @Override
+    public void setSeen(MobileMessaging.ResultListener<String[]> listener, @NonNull String externalUserId, @NonNull String... messageIDs) {
+        if (isBlank(externalUserId)) {
+            MobileMessagingLogger.e("[Inbox] externalUserId was empty");
+            return;
+        }
+        if (messageIDs.length == 0) {
+            MobileMessagingLogger.w("[Inbox] No messages to report");
+            return;
+        }
+        inboxSeenStatusReporter().reportSeen(listener, externalUserId, MobileMessagingCore.getInstance(context).enrichMessageIdsWithTimestamp(messageIDs));
+    }
 
     @Override
     public void init(Context appContext) {
@@ -145,5 +161,18 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
             );
         }
         return mobileInboxSynchronizer;
+    }
+
+    synchronized private InboxSeenStatusReporter inboxSeenStatusReporter() {
+        if (inboxSeenStatusReporter == null) {
+            inboxSeenStatusReporter = new InboxSeenStatusReporter(
+                    context,
+                    MobileMessagingCore.getInstance(context),
+                    coreBroadcaster(),
+                    mobileInboxBroadcaster(),
+                    mobileApiResourceProvider().getMobileApiInbox(context)
+            );
+        }
+        return inboxSeenStatusReporter;
     }
 }

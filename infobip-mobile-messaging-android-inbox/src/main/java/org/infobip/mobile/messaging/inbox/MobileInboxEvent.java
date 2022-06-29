@@ -6,7 +6,8 @@ public enum MobileInboxEvent {
      */
     INBOX_MESSAGES_FETCHED("org.infobip.mobile.messaging.inbox.INBOX_MESSAGES_FETCHED"),
     INBOX_COUNT_UNREAD("org.infobip.mobile.messaging.inbox.INBOX_COUNT_UNREAD"),
-    INBOX_COUNT_TOTAL("org.infobip.mobile.messaging.inbox.INBOX_COUNT_TOTAL");
+    INBOX_COUNT_TOTAL("org.infobip.mobile.messaging.inbox.INBOX_COUNT_TOTAL"),
+    INBOX_SEEN_REPORTED("org.infobip.mobile.messaging.inbox.INBOX_SEEN_REPORTED");
 
     private final String key;
 

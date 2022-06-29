@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.inbox;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -20,6 +21,19 @@ public class MobileInboxBroadcasterImpl implements MobileInboxBroadcaster {
     public void inboxFetched(Inbox inbox) {
         send(prepare(MobileInboxEvent.INBOX_MESSAGES_FETCHED)
                 .putExtra(BroadcastParameter.EXTRA_INBOX, InboxBundleMapper.inboxToBundle(inbox)));
+    }
+
+    @Override
+    public void seenReported(@NonNull String... messageIds) {
+        if (messageIds.length == 0) {
+            return;
+        }
+
+        Intent seenReportsSent = prepare(MobileInboxEvent.INBOX_SEEN_REPORTED);
+        Bundle extras = new Bundle();
+        extras.putStringArray(BroadcastParameter.EXTRA_INBOX_SEEN_IDS, messageIds);
+        seenReportsSent.putExtras(extras);
+        send(seenReportsSent);
     }
 
     private void send(Intent intent) {

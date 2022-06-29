@@ -351,7 +351,10 @@ public class Generator {
                 Query q = parameter.getQuery();
                 if (null != q) {
                     String name = q.name();
-                    queryParams.put(name, toCollection(arg));
+                    Collection<Object> value = toCollection(arg);
+                    if (value != null) {
+                        queryParams.put(name, value);
+                    }
                 }
 
                 Header h = parameter.getHeader();

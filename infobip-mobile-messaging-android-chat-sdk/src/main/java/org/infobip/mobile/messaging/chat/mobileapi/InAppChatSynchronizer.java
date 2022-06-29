@@ -89,9 +89,9 @@ public class InAppChatSynchronizer {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                 }
 
-                coreBroadcaster.error(MobileMessagingError.createFrom(error));
+                coreBroadcaster.error(mobileMessagingError);
                 if (listener != null) {
-                    listener.onResult(new Result<WidgetInfo, MobileMessagingError>(MobileMessagingError.createFrom(error)));
+                    listener.onResult(new Result<WidgetInfo, MobileMessagingError>(mobileMessagingError));
                 }
             }
         }

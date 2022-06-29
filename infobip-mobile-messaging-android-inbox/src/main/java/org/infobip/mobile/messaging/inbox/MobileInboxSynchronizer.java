@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.inbox;
 
+import static org.infobip.mobile.messaging.util.StringUtils.isBlank;
+
 import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -55,12 +57,12 @@ public class MobileInboxSynchronizer {
                 //TODO: MM-5082
                 String header = token != null ? "Bearer " + token : "App " + mobileMessagingCore.getApplicationCode();
                 if (filterOptions == null) {
-                    return mobileApiInbox.fetchInbox(externalUserId, header, null, null, null, 0);
+                    return mobileApiInbox.fetchInbox(externalUserId, header, null, null, null, null);
                 }
                 String from = filterOptions.getFromDateTime() == null ? null : String.valueOf(filterOptions.getFromDateTime().getTime());
                 String to = filterOptions.getToDateTime() == null ? null : String.valueOf(filterOptions.getToDateTime().getTime());
-                String topic = filterOptions.getTopic() == null ? null : filterOptions.getTopic();
-                int limit = filterOptions.getLimit();
+                String topic = isBlank(filterOptions.getTopic()) ? null : filterOptions.getTopic();
+                Integer limit = filterOptions.getLimit();
                 return mobileApiInbox.fetchInbox(externalUserId, header, from, to, topic, limit);
             }
 
@@ -84,9 +86,9 @@ public class MobileInboxSynchronizer {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                 }
 
-                coreBroadcaster.error(MobileMessagingError.createFrom(error));
+                coreBroadcaster.error(mobileMessagingError);
                 if (listener != null) {
-                    listener.onResult(new Result<>(MobileMessagingError.createFrom(error)));
+                    listener.onResult(new Result<>(mobileMessagingError));
                 }
             }
         }
