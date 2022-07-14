@@ -39,6 +39,19 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     public MobileInboxImpl() {
     }
 
+    public MobileInboxImpl(Context context, AndroidBroadcaster coreBroadcaster,
+                           MobileInboxBroadcaster mobileInboxBroadcaster,
+                           MobileApiResourceProvider mobileApiResourceProvider,
+                           MobileInboxSynchronizer mobileInboxSynchronizer,
+                           InboxSeenStatusReporter inboxSeenStatusReporter) {
+        this.context = context;
+        this.coreBroadcaster = coreBroadcaster;
+        this.mobileInboxBroadcaster = mobileInboxBroadcaster;
+        this.mobileApiResourceProvider = mobileApiResourceProvider;
+        this.mobileInboxSynchronizer = mobileInboxSynchronizer;
+        this.inboxSeenStatusReporter = inboxSeenStatusReporter;
+    }
+
     @Override
     public void fetchInbox(@NonNull String token, @NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
         if (isBlank(token) || isBlank(externalUserId)) {

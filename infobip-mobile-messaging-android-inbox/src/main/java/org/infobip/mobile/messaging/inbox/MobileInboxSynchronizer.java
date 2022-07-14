@@ -41,7 +41,6 @@ public class MobileInboxSynchronizer {
     }
 
     public void fetchInbox(String token, String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> listener) {
-        //TODO: MM-5082
         if (!mobileMessagingCore.isRegistrationAvailable()) {
             if (listener != null) {
                 listener.onResult(new Result<>(InternalSdkError.NO_VALID_REGISTRATION.getError()));
@@ -54,7 +53,6 @@ public class MobileInboxSynchronizer {
             @Override
             public FetchInboxResponse run(Void[] voids) {
                 MobileMessagingLogger.v("FETCHING INBOX >>>");
-                //TODO: MM-5082
                 String header = token != null ? "Bearer " + token : "App " + mobileMessagingCore.getApplicationCode();
                 if (filterOptions == null) {
                     return mobileApiInbox.fetchInbox(externalUserId, header, null, null, null, null);

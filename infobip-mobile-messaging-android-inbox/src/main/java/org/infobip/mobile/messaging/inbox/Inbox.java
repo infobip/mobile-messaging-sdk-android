@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.inbox;
 
+import android.os.Bundle;
+
 import java.util.List;
 
 public class Inbox {
@@ -31,5 +33,9 @@ public class Inbox {
 
     void setMessages(List<InboxMessage> messages) {
         this.messages = messages;
+    }
+
+    public static Inbox createFrom(Bundle bundle) {
+        return InboxBundleMapper.inboxFromBundle(bundle);
     }
 }

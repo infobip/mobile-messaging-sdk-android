@@ -16,11 +16,13 @@ public class InboxMapper {
         Inbox inbox = new Inbox();
         inbox.setCountTotal(fetchInboxResponse.getCountTotal());
         inbox.setCountUnread(fetchInboxResponse.getCountUnread());
-        List<InboxMessage> inboxMessages = new ArrayList<>(fetchInboxResponse.getMessages().size());
-        for (MessageResponse messageResponse : fetchInboxResponse.getMessages()) {
-            inboxMessages.add(responseToMessage(messageResponse));
+        if (inbox.getMessages() != null) {
+            List<InboxMessage> inboxMessages = new ArrayList<>(fetchInboxResponse.getMessages().size());
+            for (MessageResponse messageResponse : fetchInboxResponse.getMessages()) {
+                inboxMessages.add(responseToMessage(messageResponse));
+            }
+            inbox.setMessages(inboxMessages);
         }
-        inbox.setMessages(inboxMessages);
         return inbox;
     }
 

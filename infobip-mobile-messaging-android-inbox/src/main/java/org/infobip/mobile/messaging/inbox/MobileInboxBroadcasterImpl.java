@@ -20,7 +20,7 @@ public class MobileInboxBroadcasterImpl implements MobileInboxBroadcaster {
     @Override
     public void inboxFetched(Inbox inbox) {
         send(prepare(MobileInboxEvent.INBOX_MESSAGES_FETCHED)
-                .putExtra(BroadcastParameter.EXTRA_INBOX, InboxBundleMapper.inboxToBundle(inbox)));
+                .putExtras(InboxBundleMapper.inboxToBundle(inbox)));
     }
 
     @Override

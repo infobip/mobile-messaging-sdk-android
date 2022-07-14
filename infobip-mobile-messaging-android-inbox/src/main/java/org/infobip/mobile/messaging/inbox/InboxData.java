@@ -8,9 +8,13 @@ public class InboxData extends InternalDataMapper.InternalData {
 
     public InboxData(Inbox inbox) { this.inbox = inbox; }
 
-    String getTopic() { return getInbox().getTopic(); }
+    public InboxData(String topic, boolean isSeen) {
+        this.inbox = new Inbox(topic, isSeen);
+    }
 
-    boolean isSeen() { return getInbox().isSeen(); }
+    public String getTopic() { return getInbox().getTopic(); }
+
+    public boolean isSeen() { return getInbox().isSeen(); }
 
     public Inbox getInbox() { return inbox; }
 
