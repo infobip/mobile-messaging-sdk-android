@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Melebihi ukuran lampiran yang dibenarkan</string>
     <string name="ib_chat_permissions_not_granted_title">Kebenaran tidak diberikan</string>
     <string name="ib_chat_permissions_not_granted_message">Anda boleh memberikannya dalam tetapan aplikasi.</string>
+    <string name="ib_chat_cant_create_attachment">Tidak boleh membuat lampiran daripada fail yang dipilih</string>
 </resources>

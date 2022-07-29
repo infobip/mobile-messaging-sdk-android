@@ -5,4 +5,5 @@
     <string name="ib_chat_permissions_not_granted_message">アプリケーション設定でそれらを許可できます。</string>
     <string name="ib_chat_permissions_not_granted_title">許可されていない権限</string>
     <string name="ib_chat_message_hint">メッセージを送信...</string>
+    <string name="ib_chat_cant_create_attachment">選択したファイルから添付ファイルを作成できません</string>
 </resources>

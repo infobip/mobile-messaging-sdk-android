@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Maksimal tillatt innfestingsstørrelse overskredet</string>
     <string name="ib_chat_permissions_not_granted_title">Tillatelser ikke gitt</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan gi dem i applikasjonsinnstillinger.</string>
+    <string name="ib_chat_cant_create_attachment">Kan ikke opprette vedlegg fra valgt fil</string>
 </resources>

@@ -5,4 +5,5 @@
     <string name="ib_chat_permissions_not_granted_message">Du kan bevilja dem i applikationsinställningar.</string>
     <string name="ib_chat_permissions_not_granted_title">Tillstånd inte beviljade</string>
     <string name="ib_chat_message_hint">Skicka ett meddelande...</string>
+    <string name="ib_chat_cant_create_attachment">Det går inte att skapa bilaga från den valda filen</string>
 </resources>

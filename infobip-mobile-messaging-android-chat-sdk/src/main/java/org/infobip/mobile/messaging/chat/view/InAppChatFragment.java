@@ -760,8 +760,13 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
                             @Override
                             public void onError(final Context context, InternalSdkError.InternalSdkException exception) {
-                                MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
-                                Toast.makeText(context, localization.getString(R.string.ib_chat_allowed_attachment_size_exceeded), Toast.LENGTH_SHORT).show();
+                                if (exception.getMessage().equals(InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.get())) {
+                                    MobileMessagingLogger.e("[InAppChat] Maximum allowed attachment size exceeded" + widgetInfo.getMaxUploadContentSize());
+                                    Toast.makeText(context, R.string.ib_chat_allowed_attachment_size_exceeded, Toast.LENGTH_SHORT).show();
+                                } else {
+                                    MobileMessagingLogger.e("[InAppChat] Attachment content is not valid.");
+                                    Toast.makeText(context, R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                     }

@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximální povolená velikost přílohy byla překročena</string>
     <string name="ib_chat_permissions_not_granted_title">Povolení nebyla udělena</string>
     <string name="ib_chat_permissions_not_granted_message">Můžete je udělit v nastavení aplikace.</string>
+    <string name="ib_chat_cant_create_attachment">Z vybraného souboru nelze vytvořit přílohu</string>
 </resources>

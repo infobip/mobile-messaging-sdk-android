@@ -5,4 +5,5 @@
     <string name="ib_chat_permissions_not_granted_title">Berechtigungen nicht erteilt</string>
     <string name="ib_chat_permissions_not_granted_message">Sie können sie in den Anwendungseinstellungen gewähren.</string>
     <string name="ib_chat_message_hint">Nachricht senden...</string>
+    <string name="ib_chat_cant_create_attachment">Aus der ausgewählten Datei kann kein Anhang erstellt werden</string>
 </resources>

@@ -8,4 +8,5 @@
     <string name="ib_iv_btn_send_desc">Надіслати повідомлення</string>
     <string name="ib_iv_btn_send_attachment_desc">Надіслати вкладений файл</string>
     <string name="ib_iv_input_border_desc">Верхня межа</string>
+    <string name="ib_chat_cant_create_attachment">Неможливо створити вкладення з вибраного файлу</string>
 </resources>

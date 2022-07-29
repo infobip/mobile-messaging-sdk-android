@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Vượt quá kích thước tệp đính kèm tối đa</string>
     <string name="ib_chat_permissions_not_granted_title">Quyền không được cấp</string>
     <string name="ib_chat_permissions_not_granted_message">Bạn có thể cấp chúng trong cài đặt ứng dụng.</string>
+    <string name="ib_chat_cant_create_attachment">Không thể tạo tệp đính kèm từ tệp đã chọn</string>
 </resources>
