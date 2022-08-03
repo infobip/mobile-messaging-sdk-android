@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Túllépte a maximálisan megengedett mellékletet</string>
     <string name="ib_chat_permissions_not_granted_message">Az alkalmazás beállításaiban megadhatja őket.</string>
     <string name="ib_chat_permissions_not_granted_title">Nem adtak engedélyeket</string>
+    <string name="ib_chat_message_hint">Üzenetet küldeni</string>
+    <string name="ib_chat_cant_create_attachment">Nem lehet mellékletet létrehozni a kiválasztott fájlból</string>
 </resources>

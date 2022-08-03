@@ -23,7 +23,17 @@ public interface InAppChatClient {
 
     /**
      * Send intermediate state of message input component
+     *
      * @param draft user message draft
      */
     void sendInputDraft(String draft);
+
+
+    /**
+     * Set language of widget
+     *
+     * @param language in locale format e.g.: en-US
+     */
+    void setLanguage(String language);
+
 }

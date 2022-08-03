@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ib_chat_message_hint">Siųsti žinutę...</string>
+    <string name="ib_chat_cant_create_attachment">Negalima sukurti priedo iš pasirinkto failo</string>
+</resources>

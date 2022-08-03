@@ -66,6 +66,11 @@ public class MobileInboxSynchronizer {
 
             @Override
             public void after(FetchInboxResponse fetchInboxResponse) {
+                if (fetchInboxResponse == null) {
+                    MobileMessagingLogger.v("FETCHING INBOX WAS NULL <<<");
+                    listener.onResult(new Result<>(new Inbox()));
+                    return;
+                }
                 MobileMessagingLogger.v("FETCHING INBOX DONE <<<");
                 Inbox inbox = InboxMapper.fromBackend(fetchInboxResponse);
                 mobileInboxBroadcaster.inboxFetched(inbox);

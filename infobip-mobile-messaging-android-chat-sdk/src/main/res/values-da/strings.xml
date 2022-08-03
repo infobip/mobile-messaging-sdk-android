@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Maksimal tilladt fastgørelsesstørrelse overskredet</string>
     <string name="ib_chat_permissions_not_granted_title">Tilladelser ikke givet</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan give dem i applikationsindstillinger.</string>
+    <string name="ib_chat_message_hint">Send en besked...</string>
+    <string name="ib_chat_cant_create_attachment">Kan ikke oprette en vedhæftet fil fra den valgte fil</string>
 </resources>

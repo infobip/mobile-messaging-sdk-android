@@ -49,6 +49,9 @@ public class InAppChatMobileAttachment {
         if (bytesArray.length > getAttachmentMaxSize(context)) {
             throw InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.getException();
         }
+        if (bytesArray.length <= 0) {
+            throw InternalSdkError.ERROR_ATTACHMENT_NOT_VALID.getException();
+        }
 
         String encodedString = Base64.encodeToString(bytesArray, Base64.DEFAULT);
         Uri uri = (data != null && data.getData() != null) ? data.getData() : capturedMediaRealUri;

@@ -61,7 +61,6 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
         mobileInboxSynchronizer().fetchInbox(token, externalUserId, filterOptions, messageResultListener);
     }
 
-    //MM-5082
     @Override
     public void fetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
         if (isBlank(externalUserId)) {

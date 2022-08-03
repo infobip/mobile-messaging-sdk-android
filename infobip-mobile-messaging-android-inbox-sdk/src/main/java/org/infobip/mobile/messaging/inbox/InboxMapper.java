@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.inbox;
 
+import androidx.annotation.NonNull;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
@@ -12,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InboxMapper {
-    public static Inbox fromBackend(FetchInboxResponse fetchInboxResponse) {
+    public static Inbox fromBackend(@NonNull FetchInboxResponse fetchInboxResponse) {
         Inbox inbox = new Inbox();
         inbox.setCountTotal(fetchInboxResponse.getCountTotal());
         inbox.setCountUnread(fetchInboxResponse.getCountUnread());
-        if (inbox.getMessages() != null) {
+        if (fetchInboxResponse.getMessages() != null) {
             List<InboxMessage> inboxMessages = new ArrayList<>(fetchInboxResponse.getMessages().size());
             for (MessageResponse messageResponse : fetchInboxResponse.getMessages()) {
                 inboxMessages.add(responseToMessage(messageResponse));

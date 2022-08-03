@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Dimensiunea maximă permisă de atașare a fost depășită</string>
     <string name="ib_chat_permissions_not_granted_message">Le puteți acorda în setările aplicației.</string>
     <string name="ib_chat_permissions_not_granted_title">Permisiuni neacordate</string>
+    <string name="ib_chat_message_hint">Trimite un mesaj...</string>
+    <string name="ib_chat_cant_create_attachment">Nu se poate crea atașament din fișierul selectat</string>
 </resources>

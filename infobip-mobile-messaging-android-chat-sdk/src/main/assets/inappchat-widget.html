@@ -27,6 +27,7 @@
         const INIT = 'init';
         const SHOW = 'show';
         const SEND = 'send';
+        const SET_LANGUAGE = 'set_language';
 
         window.handleMessageSend = function(message) {
             liveChat(SEND, message);
@@ -46,6 +47,10 @@
                 'message': draft,
                 'type': 'DRAFT'
             });
+        }
+
+        function setLanguage(language) {
+            liveChat(SET_LANGUAGE, language);
         }
 
         // Override widget config

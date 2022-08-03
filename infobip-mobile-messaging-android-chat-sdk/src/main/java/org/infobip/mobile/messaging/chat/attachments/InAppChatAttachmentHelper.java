@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
@@ -131,10 +132,14 @@ public class InAppChatAttachmentHelper {
 
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = activity.managedQuery(mediaStoreUri, proj, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return Uri.fromFile(new File(cursor.getString(column_index)));
+        if (cursor != null && cursor.moveToFirst()) {
+            int column_index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+            if (column_index >= 0) {
+                return Uri.fromFile(new File(cursor.getString(column_index)));
+            }
+            cursor.close();
+        }
+        return null;
     }
 
     @Nullable

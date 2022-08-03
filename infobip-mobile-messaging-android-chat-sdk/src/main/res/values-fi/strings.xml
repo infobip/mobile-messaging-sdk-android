@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Liitteen suurin sallittu koko ylitetty</string>
     <string name="ib_chat_permissions_not_granted_title">Lupaa ei myönnetä</string>
     <string name="ib_chat_permissions_not_granted_message">Voit myöntää heille sovellusasetuksissa.</string>
+    <string name="ib_chat_cant_create_attachment">Valitusta tiedostosta ei voi luoda liitettä</string>
 </resources>

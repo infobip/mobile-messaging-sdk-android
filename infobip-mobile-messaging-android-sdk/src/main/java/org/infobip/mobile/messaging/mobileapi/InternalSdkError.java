@@ -12,7 +12,8 @@ public enum InternalSdkError {
     ERROR_SAVING_EMPTY_OBJECT("20008", "Cannot save object without changes"),
     NETWORK_UNAVAILABLE("20009", "Network unavailable"),
     ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED("20010", "Maximum allowed attachment size exceeded"),
-    INSTALLATION_SYNC_IN_PROGRESS("20011", "Installation sync is already in progress");
+    INSTALLATION_SYNC_IN_PROGRESS("20011", "Installation sync is already in progress"),
+    ERROR_ATTACHMENT_NOT_VALID("20012", "Attachment is not valid");
 
     private final String code;
     private final String message;

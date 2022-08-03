@@ -4,4 +4,5 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">חרג מהגודל המצורף המרבי המותר</string>
     <string name="ib_chat_permissions_not_granted_title">לא ניתנו הרשאות</string>
     <string name="ib_chat_permissions_not_granted_message">אתה יכול להעניק להם הגדרות יישום.</string>
+    <string name="ib_chat_cant_create_attachment">לא ניתן ליצור קובץ מצורף מהקובץ שנבחר</string>
 </resources>

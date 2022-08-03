@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">เกินขนาดสูงสุดที่อนุญาตแล้ว</string>
     <string name="ib_chat_permissions_not_granted_title">ไม่ได้รับอนุญาต</string>
     <string name="ib_chat_permissions_not_granted_message">คุณสามารถให้สิทธิ์ในการตั้งค่าแอปพลิเคชัน</string>
+    <string name="ib_chat_message_hint">ส่งข้อความ</string>
+    <string name="ib_chat_cant_create_attachment">สร้างไฟล์แนบจากไฟล์ที่เลือกไม่ได้</string>
 </resources>

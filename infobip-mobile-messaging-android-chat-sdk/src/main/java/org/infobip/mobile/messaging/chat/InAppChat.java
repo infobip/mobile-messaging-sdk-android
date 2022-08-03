@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
+
 import androidx.fragment.app.FragmentManager;
 
 /**
@@ -74,4 +75,10 @@ public abstract class InAppChat {
      */
     public abstract int getMessageCounter();
 
+    /**
+     * Set the language of the widget
+     *
+     * @param language in locale format e.g.: en-US
+     */
+    public abstract void setLanguage(String language);
 }

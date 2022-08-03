@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Premašena je najveća dopuštena veličina privitka</string>
     <string name="ib_chat_permissions_not_granted_title">Dozvole nisu odobrene</string>
     <string name="ib_chat_permissions_not_granted_message">Možete ih odobriti u postavkama programa.</string>
+    <string name="ib_chat_message_hint">Pošalji poruku...</string>
+    <string name="ib_chat_cant_create_attachment">Nije moguće stvoriti privitak iz odabrane datoteke</string>
 </resources>

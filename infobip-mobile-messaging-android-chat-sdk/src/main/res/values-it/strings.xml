@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Dimensione massima consentita per l\'allegato superata</string>
     <string name="ib_chat_permissions_not_granted_title">Autorizzazioni non concesse</string>
     <string name="ib_chat_permissions_not_granted_message">Puoi concederli nelle impostazioni dell\'applicazione.</string>
+    <string name="ib_chat_message_hint">Mandare un messaggio…</string>
+    <string name="ib_chat_cant_create_attachment">Impossibile creare allegato dal file selezionato</string>
 </resources>

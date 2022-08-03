@@ -4,4 +4,6 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">Bola prekročená maximálna povolená veľkosť prílohy</string>
     <string name="ib_chat_permissions_not_granted_title">Povolenia neboli udelené</string>
     <string name="ib_chat_permissions_not_granted_message">Môžete ich udeliť v nastaveniach aplikácie.</string>
+    <string name="ib_chat_message_hint">Poslať správu...</string>
+    <string name="ib_chat_cant_create_attachment">Nie je možné vytvoriť prílohu z vybraného súboru</string>
 </resources>

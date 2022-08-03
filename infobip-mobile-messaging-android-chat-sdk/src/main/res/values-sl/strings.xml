@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ib_chat_message_hint">Pošlji sporočilo…</string>
+    <string name="ib_chat_cant_create_attachment">Iz izbrane datoteke ni mogoče ustvariti priloge</string>
+</resources>

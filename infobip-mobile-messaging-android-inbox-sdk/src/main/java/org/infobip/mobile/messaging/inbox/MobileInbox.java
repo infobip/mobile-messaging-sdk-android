@@ -42,7 +42,7 @@ public abstract class MobileInbox {
      * @param messageResultListener listener to report the result on
      * @see MobileMessaging.ResultListener
      */
-    //MM-5082
+
     public abstract void fetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener);
 
     /**
