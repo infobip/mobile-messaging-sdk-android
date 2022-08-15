@@ -755,6 +755,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                                     inAppChatClient.sendChatMessage(null, attachment);
                                 } else {
                                     MobileMessagingLogger.e("[InAppChat] Can't create attachment");
+                                    Toast.makeText(getFragmentActivity(), R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
                                 }
                             }
 
