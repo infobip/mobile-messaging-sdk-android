@@ -4,6 +4,9 @@ import android.os.Bundle;
 
 import java.util.List;
 
+/**
+ * The class incapsulates user inbox data.
+ */
 public class Inbox {
     private int countTotal;
 
@@ -11,6 +14,9 @@ public class Inbox {
 
     private List<InboxMessage> messages;
 
+    /**
+     * Total number of messages available in the Inbox. Maximum is limited to 100 messages.
+     */ 
     public int getCountTotal() {
         return countTotal;
     }
@@ -19,6 +25,9 @@ public class Inbox {
         this.countTotal = countTotal;
     }
 
+    /**
+     * Number of messages that not yet marked as seen/read. See `MobileMessaging.getInstance(context).setSeen(externalUserId:messageIds:object:)`.
+     */
     public int getCountUnread() {
         return countUnread;
     }
@@ -27,6 +36,9 @@ public class Inbox {
         this.countUnread = countUnread;
     }
 
+    /**
+     * Array of inbox messages ordered by message send date-time.
+     */
     public List<InboxMessage> getMessages() {
         return messages;
     }
