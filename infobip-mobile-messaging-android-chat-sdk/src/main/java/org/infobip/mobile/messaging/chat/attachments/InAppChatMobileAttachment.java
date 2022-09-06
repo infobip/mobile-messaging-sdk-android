@@ -9,7 +9,9 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+
 import androidx.exifinterface.media.ExifInterface;
+
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
@@ -20,6 +22,7 @@ import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +41,9 @@ public class InAppChatMobileAttachment {
         this.fileName = filename;
     }
 
-    public static InAppChatMobileAttachment makeAttachment(Context context, Intent data, Uri capturedMediaStoreUri, Uri capturedMediaRealUri, ParcelFileDescriptor fileDescriptor) throws InternalSdkError.InternalSdkException {
+    public static InAppChatMobileAttachment makeAttachment(Context context, Intent data, Uri capturedMediaStoreUri, Uri capturedMediaRealUri) throws InternalSdkError.InternalSdkException {
         String mimeType = getMimeType(context, data, capturedMediaRealUri);
-        byte[] bytesArray = getBytes(context, data, capturedMediaStoreUri, capturedMediaRealUri, fileDescriptor, mimeType);
+        byte[] bytesArray = getBytes(context, data, capturedMediaStoreUri, capturedMediaRealUri, mimeType);
 
         if (bytesArray == null) {
             return null;
@@ -90,7 +93,7 @@ public class InAppChatMobileAttachment {
         return mimeType;
     }
 
-    private static byte[] getBytes(Context context, Intent data, Uri capturedMediaStoreUri, Uri capturedMediaRealUri, ParcelFileDescriptor fileDescriptor, String mimeType) {
+    private static byte[] getBytes(Context context, Intent data, Uri capturedMediaStoreUri, Uri capturedMediaRealUri, String mimeType) {
         Uri uriFromIntent = null;
 
         //data.getData() will be null for images captured by camera
@@ -99,7 +102,7 @@ public class InAppChatMobileAttachment {
         }
         //Ony images captured by camera are scaled for now
         if (mimeType.equals("image/jpeg") && uriFromIntent == null) {
-            return getBytesWithBitmapScaling(context, capturedMediaStoreUri, capturedMediaRealUri, fileDescriptor);
+            return getBytesWithBitmapScaling(context, capturedMediaStoreUri, capturedMediaRealUri);
         } else if (uriFromIntent != null) {
             return getBytes(context, uriFromIntent);
         } else {
@@ -107,54 +110,47 @@ public class InAppChatMobileAttachment {
         }
     }
 
-    public static byte[] getBytesWithBitmapScaling(Context context, Uri mediaStoreUri, Uri imageUri, ParcelFileDescriptor fileDescriptor) {
-        if (imageUri == null) {
+    private static byte[] getBytesWithBitmapScaling(Context context, Uri mediaStoreUri, Uri imageUri) {
+        if (context == null || mediaStoreUri == null || imageUri == null) {
             return null;
         }
 
-        long fileSize = fileDescriptor.getStatSize();
-        String filePath;
         try {
-            filePath = imageUri.getPath();
+            ParcelFileDescriptor fileDescriptor = context.getContentResolver().openFileDescriptor(mediaStoreUri, "r");
+
+            long fileSize = fileDescriptor.getStatSize();
+            String filePath = imageUri.getPath();
+
+            boolean shouldScaleImage = fileSize > getAttachmentMaxSize(context);
+            int imageQuality = fileSize > DEFAULT_MAX_UPLOAD_CONTENT_SIZE / 2 ? 80 : 100;
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            //  setting inSampleSize value allows to load a scaled down version of the original image
+            options.inSampleSize = shouldScaleImage ? 2 : 1;
+            // set to false to load the actual bitmap
+            options.inJustDecodeBounds = false;
+            //  this options allow android to claim the bitmap memory if it runs low on memory
+            options.inPurgeable = true;
+            options.inInputShareable = true;
+            options.inTempStorage = new byte[16 * 1024];
+
+            Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), new Rect(-1, -1, -1, -1), options);
+
+            //  check the rotation of the image and display it properly
+            int orientationDegree = getExifOrientationDegree(context, filePath, mediaStoreUri);
+            Matrix rotationMatrix = new Matrix();
+            rotationMatrix.postRotate(orientationDegree);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotationMatrix, true);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
+            bitmap.recycle();
+            fileDescriptor.close();
+            return outputStream.toByteArray();
         } catch (Exception exception) {
             MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
             return null;
         }
-
-        boolean shouldScaleImage = fileSize > getAttachmentMaxSize(context);
-        int imageQuality = fileSize > DEFAULT_MAX_UPLOAD_CONTENT_SIZE / 2 ? 80 : 100;
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        //  setting inSampleSize value allows to load a scaled down version of the original image
-        options.inSampleSize = shouldScaleImage ? 2 : 1;
-        // set to false to load the actual bitmap
-        options.inJustDecodeBounds = false;
-        //  this options allow android to claim the bitmap memory if it runs low on memory
-        options.inPurgeable = true;
-        options.inInputShareable = true;
-        options.inTempStorage = new byte[16 * 1024];
-
-        Bitmap bitmap;
-        try {
-//            bitmap = BitmapFactory.decodeFile(filePath, options);
-//            if (bitmap == null) {
-                bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor.getFileDescriptor(), new Rect(-1, -1, -1, -1), options);
-//            }
-        } catch (Exception exception) {
-            MobileMessagingLogger.e("[InAppChat] can't load image to send attachment", exception);
-            return null;
-        }
-
-        //  check the rotation of the image and display it properly
-        int orientationDegree = getExifOrientationDegree(context, filePath, mediaStoreUri);
-        Matrix rotationMatrix = new Matrix();
-        rotationMatrix.postRotate(orientationDegree);
-        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotationMatrix, true);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, outputStream);
-        bitmap.recycle();
-        return outputStream.toByteArray();
     }
 
     private static int getExifOrientationDegree(Context context, String filepath, Uri mediaStoreUri) {
@@ -218,12 +214,13 @@ public class InAppChatMobileAttachment {
             }
             byte[] bytes = getBytes(stream);
             stream.close();
+            if (fileDescriptor != null) {
+                fileDescriptor.close();
+            }
             return bytes;
         } catch (Exception e) {
             MobileMessagingLogger.e("[InAppChat] Can't get base64 from Uri", e);
             return null;
-        } finally {
-            closeFileDescriptor(context, uri, fileDescriptor);
         }
     }
 
@@ -241,18 +238,5 @@ public class InAppChatMobileAttachment {
 
     private static Long getAttachmentMaxSize(Context context) {
         return PreferenceHelper.findLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), DEFAULT_MAX_UPLOAD_CONTENT_SIZE);
-    }
-
-    private static void closeFileDescriptor(Context context, Uri uri, ParcelFileDescriptor fileDescriptor) {
-        try {
-            if (context != null && uri != null) {
-                context.getApplicationContext().getContentResolver().delete(uri, null, null);
-            }
-            if (fileDescriptor != null) {
-                fileDescriptor.close();
-            }
-        } catch (Exception e) {
-            MobileMessagingLogger.e("[InAppChat] Can't close file descriptor", e);
-        }
     }
 }

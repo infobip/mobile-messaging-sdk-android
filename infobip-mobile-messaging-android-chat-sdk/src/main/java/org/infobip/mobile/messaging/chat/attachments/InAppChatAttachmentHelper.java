@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat.attachments;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
@@ -16,6 +18,7 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 
 import java.io.File;
+import java.sql.Array;
 import java.util.Date;
 
 import androidx.annotation.Nullable;
@@ -34,13 +37,10 @@ public class InAppChatAttachmentHelper {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                ParcelFileDescriptor fileDescriptor = null;
                 try {
                     //From media store Uri we need to get real Uri of the file
                     Uri capturedMediaRealUri = getUriFromMediaStoreURI(capturedMediaStoreUri, context);
-
-                    fileDescriptor = openFileDescriptorFromMediaStoreURI(capturedMediaStoreUri, context);
-                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, capturedMediaStoreUri, capturedMediaRealUri, fileDescriptor);
+                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, capturedMediaStoreUri, capturedMediaRealUri);
                     context.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -54,8 +54,6 @@ public class InAppChatAttachmentHelper {
                             listener.onError(context, e);
                         }
                     });
-                } finally {
-                    closeFileDescriptor(context, capturedMediaStoreUri, fileDescriptor);
                 }
             }
         });
@@ -125,6 +123,30 @@ public class InAppChatAttachmentHelper {
         return fragmentActivity.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
     }
 
+
+    public static void deleteEmptyFileByUri(Context context, Uri uri) {
+        if (context == null || uri == null)
+            return;
+        try {
+            long fileSize = -1;
+            ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+            Cursor cursor = contentResolver.query(uri, new String[]{OpenableColumns.SIZE}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                int columnIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (columnIndex == 0) {
+                    fileSize = cursor.getLong(columnIndex);
+                }
+                cursor.close();
+            }
+            if (fileSize == 0) {
+                contentResolver.delete(uri, null, null);
+            }
+        } catch (Exception e) {
+            MobileMessagingLogger.e("[InAppChat] Can't delete empty file", e);
+        }
+    }
+
+
     @Nullable
     private static Uri getUriFromMediaStoreURI(Uri mediaStoreUri, FragmentActivity activity) {
         if (activity == null || mediaStoreUri == null) {
@@ -161,19 +183,6 @@ public class InAppChatAttachmentHelper {
             MobileMessagingLogger.e("[InAppChat] Can't send attachment", e);
         }
         return fileDescriptor;
-    }
-
-    private static void closeFileDescriptor(FragmentActivity activity, Uri mediaStoreUri, ParcelFileDescriptor fileDescriptor) {
-        try {
-            if (activity != null && mediaStoreUri != null) {
-                activity.getApplicationContext().getContentResolver().delete(mediaStoreUri, null, null);
-            }
-            if (fileDescriptor != null) {
-                fileDescriptor.close();
-            }
-        } catch (Exception e) {
-            MobileMessagingLogger.e("[InAppChat] Can't close file descriptor", e);
-        }
     }
 
     public interface InAppChatAttachmentHelperListener {

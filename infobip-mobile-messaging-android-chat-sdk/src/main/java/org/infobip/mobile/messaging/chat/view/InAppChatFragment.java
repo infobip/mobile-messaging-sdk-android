@@ -757,6 +757,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                                     MobileMessagingLogger.e("[InAppChat] Can't create attachment");
                                     Toast.makeText(getFragmentActivity(), R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
                                 }
+                                deleteEmptyMediaFiles();
                             }
 
                             @Override
@@ -768,12 +769,20 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                                     MobileMessagingLogger.e("[InAppChat] Attachment content is not valid.");
                                     Toast.makeText(context, R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
                                 }
+                                deleteEmptyMediaFiles();
                             }
                         });
+                    } else {
+                        deleteEmptyMediaFiles();
                     }
                 }
             }
     );
+
+    private void deleteEmptyMediaFiles(){
+        InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedImageUri);
+        InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedVideoUri);
+    }
 
     private void chooseFile() {
         fragmentCouldBePaused = false;
