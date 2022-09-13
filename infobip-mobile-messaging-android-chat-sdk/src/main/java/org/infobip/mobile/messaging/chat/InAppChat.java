@@ -81,4 +81,19 @@ public abstract class InAppChat {
      * @param language in locale format e.g.: en-US
      */
     public abstract void setLanguage(String language);
+
+    /**
+     * Set contextual data of the widget
+     *
+     * @param data                   contextual data in the form of JSON string
+     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     */
+    public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy);
+
+    /**
+     * Set contextual data of the widget with false (ACTIVE) value for multithread strategy
+     *
+     * @param data contextual data in the form of JSON string
+     */
+    public abstract void sendContextualData(String data);
 }

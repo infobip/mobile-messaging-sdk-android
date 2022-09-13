@@ -71,6 +71,7 @@ import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
+import org.infobip.mobile.messaging.chat.core.MMChatMultiThreadFlag;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
@@ -602,6 +603,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @Override
     public void setLanguage(String language) {
         inAppChatClient.setLanguage(language);
+    }
+
+    @Override
+    public void sendContextualMetaData(String data, MMChatMultiThreadFlag multiThreadFlag) {
+        inAppChatClient.sendContextualData(data, multiThreadFlag);
     }
 
         /*

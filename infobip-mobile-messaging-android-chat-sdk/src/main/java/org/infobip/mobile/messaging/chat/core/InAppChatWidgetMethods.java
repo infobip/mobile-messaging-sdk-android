@@ -5,5 +5,6 @@ public enum InAppChatWidgetMethods {
     handleMessageSend,
     handleMessageWithAttachmentSend,
     handleMessageDraftSend,
-    setLanguage
+    setLanguage,
+    sendContextualData
 }
