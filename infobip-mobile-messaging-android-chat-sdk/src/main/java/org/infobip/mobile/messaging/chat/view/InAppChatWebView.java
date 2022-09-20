@@ -5,7 +5,6 @@ import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanK
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
@@ -45,10 +44,6 @@ public class InAppChatWebView extends WebView {
         webViewSettings.setJavaScriptEnabled(true);
         webViewSettings.setDomStorageEnabled(true);
         webViewSettings.setDatabaseEnabled(true);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
 
         setClickable(true);
         setWebViewClient(new InAppChatWebViewClient(webViewManager));

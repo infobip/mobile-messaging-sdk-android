@@ -24,8 +24,8 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
+import org.infobip.mobile.messaging.chat.core.InAppChatMultiThreadFlag;
 import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
-import org.infobip.mobile.messaging.chat.core.MMChatMultiThreadFlag;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
@@ -154,9 +154,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void sendContextualData(String data, Boolean allMultiThreadStrategy) {
         if (inAppChatWVFragment != null) {
-            MMChatMultiThreadFlag strategy = MMChatMultiThreadFlag.ACTIVE;
+            InAppChatMultiThreadFlag strategy = InAppChatMultiThreadFlag.ACTIVE;
             if (allMultiThreadStrategy) {
-                strategy = MMChatMultiThreadFlag.ALL;
+                strategy = InAppChatMultiThreadFlag.ALL;
             }
             inAppChatWVFragment.sendContextualMetaData(data, strategy);
         }

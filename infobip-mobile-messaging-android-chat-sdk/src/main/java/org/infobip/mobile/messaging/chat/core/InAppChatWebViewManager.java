@@ -13,5 +13,5 @@ public interface InAppChatWebViewManager {
     void openAttachmentPreview(String url, String type, String caption);
     void setLanguage(String language);
 
-    void sendContextualMetaData(String data, MMChatMultiThreadFlag multiThreadFlag);
+    void sendContextualMetaData(String data, InAppChatMultiThreadFlag multiThreadFlag);
 }

@@ -38,10 +38,10 @@ public interface InAppChatClient {
 
 
     /**
-     * Send contextual metadata of conversation and a MMChatMultiThreadFlag flag
+     * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag
      *
      * @param data
      * @param multitThreadFlag
      */
-    void sendContextualData(String data, MMChatMultiThreadFlag multiThreadFlag);
+    void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag);
 }

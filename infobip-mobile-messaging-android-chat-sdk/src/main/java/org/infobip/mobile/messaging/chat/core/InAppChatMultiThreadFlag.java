@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.chat.core;
 
-public enum MMChatMultiThreadFlag {
+public enum InAppChatMultiThreadFlag {
     ACTIVE,
     ALL
 }

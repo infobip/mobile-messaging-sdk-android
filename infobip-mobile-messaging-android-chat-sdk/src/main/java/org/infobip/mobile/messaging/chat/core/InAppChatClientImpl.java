@@ -61,7 +61,7 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     @Override
-    public void sendContextualData(String data, MMChatMultiThreadFlag multiThreadFlag) {
+    public void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag) {
         if (webView != null && !data.isEmpty()) {
             String script = "sendContextualData(" + data + ", '" + multiThreadFlag + "')";
             webView.evaluateJavascriptMethod(script, value -> {
