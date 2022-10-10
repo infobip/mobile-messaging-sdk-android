@@ -115,9 +115,9 @@ public class InteractiveNotificationHandler implements NotificationHandler {
         intent.putExtra(EXTRA_TAPPED_ACTION, NotificationActionBundleMapper.notificationActionToBundle(notificationAction));
         intent.putExtra(EXTRA_TAPPED_CATEGORY, NotificationCategoryBundleMapper.notificationCategoryToBundle(notificationCategory));
         intent.putExtra(EXTRA_NOTIFICATION_ID, notificationId);
-        int flags = PendingIntent.FLAG_CANCEL_CURRENT;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            flags = flags | PendingIntent.FLAG_MUTABLE;
+            flags = notificationAction.hasInput() ? flags | PendingIntent.FLAG_MUTABLE : flags | PendingIntent.FLAG_IMMUTABLE;
         }
         return PendingIntent.getBroadcast(context, notificationId, intent, flags);
     }
