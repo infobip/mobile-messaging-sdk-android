@@ -1,8 +1,6 @@
 #!/bin/bash
 
 UPLOADER_VERSION=2.12
-# Put your TestFairy API_KEY here. Find it in your TestFairy account settings.
-TESTFAIRY_API_KEY=$4
 
 # Tester Groups that will be notified when the app is ready. Setup groups in your TestFairy account testers page.
 # This parameter is optional, leave empty if not required
@@ -29,7 +27,7 @@ CURL=curl
 SERVER_ENDPOINT=https://upload.testfairy.com
 
 usage() {
-	echo "Usage: testfairy-upload-android.sh APP_FILENAME TESTER_GROUPS MESSAGE API_KEY"
+	echo "Usage: testfairy-upload-android.sh API_KEY APP_FILENAME TESTER_GROUPS MESSAGE"
 	echo
 }
 
@@ -52,24 +50,26 @@ verify_settings() {
 	fi
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
 	usage
 	exit 1
 fi
 
 # before even going on, make sure all tools work
 verify_tools
+# Put your TestFairy API_KEY here. Find it in your TestFairy account settings.
+TESTFAIRY_API_KEY=$1
 verify_settings
 
-APK_FILENAME=$1
+APK_FILENAME=$2
 if [ ! -f "${APK_FILENAME}" ]; then
 	usage
 	echo "Can't find file: ${APK_FILENAME}"
 	exit 2
 fi
 
-TESTER_GROUPS=$2
-COMMENT=$3
+TESTER_GROUPS=$3
+COMMENT=$4
 
 # temporary file paths
 DATE=`date`
