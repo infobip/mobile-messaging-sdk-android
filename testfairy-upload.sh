@@ -29,7 +29,7 @@ CURL=curl
 SERVER_ENDPOINT=https://upload.testfairy.com
 
 usage() {
-	echo "Usage: testfairy-upload-android.sh APP_FILENAME TESTER_GROUPS MESSAGE API_KEY"
+	echo "Usage: testfairy-upload-android.sh APP_FILENAME TESTER_GROUPS MESSAGE"
 	echo
 }
 
