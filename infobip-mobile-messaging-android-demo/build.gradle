@@ -111,5 +111,15 @@ private static String property(Project project, String projectKey, String enviro
     return project.hasProperty(projectKey) ? project[projectKey] : System.getenv(environmentKey)
 }
 
+task uncommentGoogleServices {
+    doLast {
+        def readmeFile = new File('infobip-mobile-messaging-android-demo/build.gradle')
+        def text = readmeFile.text
+        readmeFile.withWriter { w ->
+            w << text.replaceFirst("//apply plugin: 'com\\.google\\.gms\\.google-services'", "apply plugin: 'com\\.google\\.gms\\.google-services'")
+        }
+    }
+}
+
 //It's for usage of google-services.json file, if you are using strings.xml to provide Firebase data, comment next line
 //apply plugin: 'com.google.gms.google-services'
