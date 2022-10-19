@@ -28,6 +28,7 @@
         const SHOW = 'show';
         const SEND = 'send';
         const SET_LANGUAGE = 'set_language';
+        const SEND_CONTEXTUAL_DATA = 'send_contextual_data'
 
         window.handleMessageSend = function(message) {
             liveChat(SEND, message);
@@ -51,6 +52,13 @@
 
         function setLanguage(language) {
             liveChat(SET_LANGUAGE, language);
+        }
+
+        function sendContextualData(data, strategy) {
+             liveChat(SEND_CONTEXTUAL_DATA, {
+                   metadata: data,
+                   multiThreadStrategy: strategy
+             });
         }
 
         // Override widget config

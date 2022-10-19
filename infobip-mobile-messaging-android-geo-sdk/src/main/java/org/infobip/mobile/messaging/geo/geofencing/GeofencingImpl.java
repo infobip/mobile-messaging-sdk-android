@@ -362,7 +362,7 @@ public class GeofencingImpl extends Geofencing {
             Intent intent = new Intent(context, GeofenceTransitionsReceiver.class);
             int flags = PendingIntent.FLAG_UPDATE_CURRENT;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                flags = flags | PendingIntent.FLAG_MUTABLE;
+                flags = flags | PendingIntent.FLAG_IMMUTABLE;
             }
             geofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags);
         }

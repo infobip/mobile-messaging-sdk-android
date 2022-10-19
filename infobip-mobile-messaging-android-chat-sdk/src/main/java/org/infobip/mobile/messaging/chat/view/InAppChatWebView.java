@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.chat.view;
 
+import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
@@ -15,8 +17,6 @@ import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.util.ResourceLoader;
-
-import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
 
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";

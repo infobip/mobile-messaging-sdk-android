@@ -36,4 +36,12 @@ public interface InAppChatClient {
      */
     void setLanguage(String language);
 
+
+    /**
+     * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag
+     *
+     * @param data
+     * @param multitThreadFlag
+     */
+    void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag);
 }

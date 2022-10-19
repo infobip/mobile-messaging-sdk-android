@@ -69,7 +69,7 @@ public class GeofencingConsistencyReceiver extends BroadcastReceiver {
         intent.setAction(action);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            flags = flags | PendingIntent.FLAG_MUTABLE;
+            flags = flags | PendingIntent.FLAG_IMMUTABLE;
         }
 
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, flags);

@@ -70,6 +70,7 @@ import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 import org.infobip.mobile.messaging.chat.core.InAppChatClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
+import org.infobip.mobile.messaging.chat.core.InAppChatMultiThreadFlag;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
@@ -604,6 +605,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         inAppChatClient.setLanguage(language);
     }
 
+    @Override
+    public void sendContextualMetaData(String data, InAppChatMultiThreadFlag multiThreadFlag) {
+        inAppChatClient.sendContextualData(data, multiThreadFlag);
+    }
+
         /*
     Errors handling
      */
@@ -755,7 +761,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                                     inAppChatClient.sendChatMessage(null, attachment);
                                 } else {
                                     MobileMessagingLogger.e("[InAppChat] Can't create attachment");
+                                    Toast.makeText(getFragmentActivity(), R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
                                 }
+                                deleteEmptyMediaFiles();
                             }
 
                             @Override
@@ -767,12 +775,20 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                                     MobileMessagingLogger.e("[InAppChat] Attachment content is not valid.");
                                     Toast.makeText(context, R.string.ib_chat_cant_create_attachment, Toast.LENGTH_SHORT).show();
                                 }
+                                deleteEmptyMediaFiles();
                             }
                         });
+                    } else {
+                        deleteEmptyMediaFiles();
                     }
                 }
             }
     );
+
+    private void deleteEmptyMediaFiles(){
+        InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedImageUri);
+        InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedVideoUri);
+    }
 
     private void chooseFile() {
         fragmentCouldBePaused = false;
