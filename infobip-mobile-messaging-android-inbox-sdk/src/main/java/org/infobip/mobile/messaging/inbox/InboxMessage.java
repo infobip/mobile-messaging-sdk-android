@@ -40,4 +40,8 @@ public class InboxMessage extends Message {
     InboxData getInboxData() { return this.inboxData; }
 
     public boolean isSeen() { return getInboxData().isSeen(); }
+
+    public void setSeen() {
+        setInboxData(new InboxData(getInboxData().getTopic(), true));
+    }
 }

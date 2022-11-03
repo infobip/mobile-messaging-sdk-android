@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class org.infobip.mobile.messaging.inbox.Inbox { *; }
+-keep class org.infobip.mobile.messaging.inbox.InboxData { *; }
+-keep class org.infobip.mobile.messaging.inbox.InboxMessage { *; }

@@ -2,12 +2,16 @@ package org.infobip.mobile.messaging.inbox;
 
 import android.os.Bundle;
 
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+
 import java.util.List;
 
 /**
  * The class incapsulates user inbox data.
  */
 public class Inbox {
+    private static final JsonSerializer serializer = new JsonSerializer(false);
+
     private int countTotal;
 
     private int countUnread;
@@ -49,5 +53,14 @@ public class Inbox {
 
     public static Inbox createFrom(Bundle bundle) {
         return InboxBundleMapper.inboxFromBundle(bundle);
+    }
+
+    @Override
+    public String toString() {
+        return serializer.serialize(this);
+    }
+
+    public Inbox fromString(String inboxDataString) {
+        return serializer.deserialize(inboxDataString, Inbox.class);
     }
 }
