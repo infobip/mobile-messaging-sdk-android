@@ -41,6 +41,10 @@ public class NotificationTapReceiverActivity extends Activity {
 
     public void handleNotificationTap(Context context, Intent intent) {
         Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
+        if (messageBundle == null) {
+            MobileMessagingLogger.e("Received no message in NotificationTapReceiverActivity");
+            return;
+        }
         Message message = Message.createFrom(messageBundle);
         if (message == null) {
             MobileMessagingLogger.e("Received no message in NotificationTapReceiverActivity");
