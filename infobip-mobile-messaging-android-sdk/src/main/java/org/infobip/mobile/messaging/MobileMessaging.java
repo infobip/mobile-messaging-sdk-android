@@ -6,8 +6,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 
 import com.google.firebase.FirebaseOptions;
@@ -401,6 +403,22 @@ public abstract class MobileMessaging {
     public abstract void sendMessages(ResultListener<Message[]> listener, Message... messages);
 
     /**
+     * Call this method to initiate the registration for Push Notification service.
+     * User will be prompted to allow receiving Push Notifications.
+     * Should be used together with {@link Builder#withoutRegisteringForRemoteNotifications()} builder method.
+     *
+     * <pre>
+     * {@code
+     *   MobileMessaging.registerForRemoteNotifications()
+     * }
+     * </pre>
+     * <br>
+     */
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    public abstract void registerForRemoteNotifications();
+
+    /**
      * Synchronously cleans up all persisted data.
      * This method deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
@@ -461,12 +479,13 @@ public abstract class MobileMessaging {
      * @see Builder#withApplicationCode(String)
      * @see Builder#withoutStoringApplicationCode(ApplicationCodeProvider)
      * @see Builder#withDisplayNotification(NotificationSettings)
+     * @see Builder#withoutRegisteringForRemoteNotifications()
      * @see Builder#withoutDisplayNotification()
      * @see Builder#withoutStoringUserData()
      * @see Builder#withoutCarrierInfo()
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
-     * @see Builder#withFirebaseOptions(FirebaseOptions) 
+     * @see Builder#withFirebaseOptions(FirebaseOptions)
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -483,6 +502,7 @@ public abstract class MobileMessaging {
         private boolean storeAppCodeOnDisk = true;
         private boolean allowUntrustedSSLOnError = false;
         private boolean usePrivateSharedPrefs = true;
+        private boolean postNotificationPermissionRequest = true;
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
@@ -669,6 +689,27 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * MobileMessaging SDK by default registers for remote notifications during `MobileMessaging.build()` procedure. It is possible to disable this default behavior.
+         * This might be needed in case your app should support other push notifications vendors in addition to (or instead of) Infobip's one,
+         * or you want to have a more flexible approach of when and where the user will be prompted to allow receiving Push Notifications.
+         * - remark: Don't forget to register for Push Notifications explicitly by calling `MobileMessaging.registerForRemoteNotifications()`.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withoutPostNotificationPermissionRequest()
+         *       .build();
+         * }
+         * </pre>
+         * <br>
+         *
+         * @return {@link Builder}
+         * @see #registerForRemoteNotifications()
+         */
+        public Builder withoutRegisteringForRemoteNotifications() {
+            this.postNotificationPermissionRequest = false;
+            return this;
+        }
+
+        /**
          * It will set the <i>MessageStore</i> class which will be used to store the messages upon arrival.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -803,7 +844,7 @@ public abstract class MobileMessaging {
          * </pre>
          *
          * @return {@link Builder}
-         *
+         * <p>
          * Deprecated, preferences are private by default.
          */
         @Deprecated
@@ -817,6 +858,7 @@ public abstract class MobileMessaging {
          * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
          * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
          * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         *
          * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
          * @return {@link Builder}
          */
@@ -850,6 +892,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
+            MobileMessagingCore.setRemoteNotificationsEnabled(application, postNotificationPermissionRequest);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);

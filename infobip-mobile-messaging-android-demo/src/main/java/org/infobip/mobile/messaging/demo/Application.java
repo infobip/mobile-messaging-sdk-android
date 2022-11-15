@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
 import androidx.core.content.ContextCompat;
-
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;

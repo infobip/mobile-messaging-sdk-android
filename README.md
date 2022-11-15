@@ -8,7 +8,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 ## Requirements
 
 - Android Studio
-- Supported API Levels: 16 (Android 4.0 - Jellybean) - 31 (Android 12.0)
+- Supported API Levels: 16 (Android 4.0 - Jellybean) - 33 (Android 13.0)
 - <a href="https://developer.android.com/jetpack/androidx/migrate" target="_blank">AndroidX</a>
 
 ## Quick start guide
@@ -54,6 +54,11 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     }
     ```
     <img src="https://github.com/infobip/mobile-messaging-sdk-android/wiki/images/QSGActivity.png?raw=true" alt="String resources"/>
+
+> ### Notice:
+> Since Android 13+ we are using default notification permission request dialog.
+> It is possible to trigger permission request later, to learn how please follow: <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Android-13-Notification-Permission-Handling" target="_blank">Android 13 notification permission handling</a>.
+
 
 <br>
 <p align="center"><b>NEXT STEPS: <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile">User profile</a></b></p>
