@@ -81,6 +81,7 @@ import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -785,7 +786,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             }
     );
 
-    private void deleteEmptyMediaFiles(){
+    private void deleteEmptyMediaFiles() {
         InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedImageUri);
         InAppChatAttachmentHelper.deleteEmptyFileByUri(getContext(), capturedVideoUri);
     }
@@ -793,7 +794,12 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private void chooseFile() {
         fragmentCouldBePaused = false;
         if (!isRequiredPermissionsGranted()) {
-            MobileMessagingLogger.e("[InAppChat]", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.CAMERA + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            if (SystemInformation.isTiramisuOrAbove()) {
+                MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,
+                        Manifest.permission.CAMERA + ", " + Manifest.permission.READ_MEDIA_IMAGES + ", " + Manifest.permission.READ_MEDIA_VIDEO + ", " + Manifest.permission.READ_MEDIA_AUDIO + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            } else {
+                MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            }
             return;
         }
         Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
@@ -839,7 +845,12 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @NonNull
     @Override
     public String[] requiredPermissions() {
-        return new String[]{
+        if (SystemInformation.isTiramisuOrAbove()) {
+            return new String[]{Manifest.permission.CAMERA,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO};
+        } else return new String[]{
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         };
@@ -906,6 +917,4 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     public void setIsToolbarHidden(Boolean hidden) {
         isToolbarHidden = hidden;
     }
-
-
 }

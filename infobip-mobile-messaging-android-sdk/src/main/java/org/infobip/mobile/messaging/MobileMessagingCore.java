@@ -5,7 +5,6 @@ import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
-import android.Manifest;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,6 +16,7 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.FirebaseOptions;
@@ -1720,14 +1720,14 @@ public class MobileMessagingCore
     public void registerForRemoteNotifications() {
         if (!isNotificationsPermissionAllowed())
             setRemoteNotificationsEnabled(context, true);
-        if (isTiramisuOrAbove())
+        if (SystemInformation.isTiramisuOrAbove())
             checkPostNotificationPermission();
     }
 
     public void checkPostNotificationPermission() {
         if (foregroundActivityExists()
                 && isNotificationsPermissionAllowed()
-                && isTiramisuOrAbove()) {
+                && SystemInformation.isTiramisuOrAbove()) {
             PermissionsHelper permissionsHelper = new PermissionsHelper();
             permissionsHelper.checkPermission(getActivityLifecycleMonitor().getForegroundActivity(), POST_NOTIFICATIONS, this);
         }
@@ -1735,10 +1735,6 @@ public class MobileMessagingCore
 
     public boolean foregroundActivityExists() {
         return getActivityLifecycleMonitor() != null && getActivityLifecycleMonitor().getForegroundActivity() != null;
-    }
-
-    public boolean isTiramisuOrAbove() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
 
     public boolean isNotificationsPermissionAllowed() {
@@ -1982,7 +1978,7 @@ public class MobileMessagingCore
     @Override
     public void onNeedPermission(Context context, String permission) {
         if (foregroundActivityExists()
-                && isTiramisuOrAbove()) {
+                && SystemInformation.isTiramisuOrAbove()) {
             requestNotificationsPermission();
         }
     }
@@ -1990,16 +1986,18 @@ public class MobileMessagingCore
     @Override
     public void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission) {
         if (foregroundActivityExists()
-                && isPostNotificationsGranted(getActivityLifecycleMonitor().getForegroundActivity())
-                && isTiramisuOrAbove()) {
+                && SystemInformation.isTiramisuOrAbove()
+                && isPostNotificationsGranted(getActivityLifecycleMonitor().getForegroundActivity())) {
             requestNotificationsPermission();
         }
     }
 
-    public boolean isPostNotificationsGranted(Context context) {
-        return ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED;
+    @RequiresApi(api = 33)
+    public static boolean isPostNotificationsGranted(Context context) {
+        return ActivityCompat.checkSelfPermission(context, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED;
     }
 
+    @RequiresApi(api = 33)
     public void requestNotificationsPermission() {
         ActivityCompat.requestPermissions(getActivityLifecycleMonitor().getForegroundActivity(), new String[]{POST_NOTIFICATIONS}, 10000);
     }

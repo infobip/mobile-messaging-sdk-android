@@ -1,13 +1,10 @@
 package org.infobip.mobile.messaging.interactive;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import androidx.core.app.ActivityCompat;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
@@ -219,7 +216,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     @Override
     public void applicationInForeground() {
         inAppNotificationHandler(context).appWentToForeground();
-        if (mobileMessagingCore.isPostNotificationsGranted(context)) {
+        if (MobileMessagingCore.isPostNotificationsGranted(context)) {
             mobileMessagingCore(context).checkPostNotificationPermission();
         }
     }

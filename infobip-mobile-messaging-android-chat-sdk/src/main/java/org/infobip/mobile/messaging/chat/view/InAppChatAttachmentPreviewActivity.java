@@ -41,7 +41,7 @@ import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.util.ResourceLoader;
-
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implements PermissionsRequestManager.PermissionsRequester {
 
@@ -133,6 +133,11 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
     @NonNull
     @Override
     public String[] requiredPermissions() {
+        if (SystemInformation.isTiramisuOrAbove()) {
+            return new String[]{Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO};
+        }
         return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
     }
 
@@ -208,7 +213,12 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
 
     private void downloadFile() {
         if (!permissionsRequestManager.isRequiredPermissionsGranted()) {
-            MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            if (SystemInformation.isTiramisuOrAbove()) {
+                MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,
+                        Manifest.permission.READ_MEDIA_IMAGES + ", " + Manifest.permission.READ_MEDIA_VIDEO + ", " + Manifest.permission.READ_MEDIA_AUDIO + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            } else {
+                MobileMessagingLogger.e("[InAppChat] Permissions required for attachments not granted", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.WRITE_EXTERNAL_STORAGE).getMessage());
+            }
             return;
         }
         DownloadManager.Request request = new DownloadManager.Request(
