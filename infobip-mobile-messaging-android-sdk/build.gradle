@@ -1,21 +1,18 @@
 buildscript {
     repositories {
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'idea'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'idea'
+}
 
 android {
     compileSdkVersion mm_compileSdkVersion
@@ -26,6 +23,10 @@ android {
         targetSdkVersion mm_targetSdkVersion
         versionCode 1
         versionName project.version
+
+        // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
+        // https://issuetracker.google.com/issues/154275579
+        buildConfigField "String", "VERSION_NAME", "\"$versionName\""
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         consumerProguardFiles 'proguard-rules.pro'
     }
@@ -59,6 +60,8 @@ dependencies {
 
     testImplementation project(":infobip-mobile-messaging-android-test")
     testImplementation "junit:junit:4.12"
+
+    implementation('com.google.code.gson:gson:2.9.0')
 }
 
 android.libraryVariants.all { variant ->
@@ -115,26 +118,7 @@ artifacts {
     archives sourcesJar
 }
 
-// Remove this when Gradle bug is fixed.
-// https://github.com/gradle/gradle/issues/3170
-task modifyPomBeforeUpload {
-    doLast {
-        def pom = "${project.buildDir}/poms/pom-default.xml"
-        if (!file(pom).exists()) { install }
-        def project = new XmlParser().parse(pom)
-        project.dependencies
-                .dependency
-                .find { dependency -> dependency.artifactId[0].text() == 'infobip-mobile-messaging-android-resources' }
-                .appendNode('type', 'aar')
-        //noinspection UnnecessaryQualifiedReference
-        groovy.xml.XmlUtil.serialize(project, new FileWriter(pom))
-    }
-}
-modifyPomBeforeUpload.dependsOn(install)
-
 ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-sdk'
 }
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
-
-publish.dependsOn(modifyPomBeforeUpload)

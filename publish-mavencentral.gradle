@@ -80,6 +80,7 @@ publishing {
 //    }
 }
 
+//Comment out for making local version
 signing {
     sign publishing.publications
 }

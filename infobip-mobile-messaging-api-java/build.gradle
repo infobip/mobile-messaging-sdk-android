@@ -1,33 +1,13 @@
 
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '2.0.4'
-    id 'maven'
+    id 'java-library'
+    id 'maven-publish'
     id 'idea'
-    id 'io.freefair.lombok' version '4.1.0'
+    id 'io.freefair.lombok' version '5.1.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-
-shadowJar {
-    archiveClassifier.set('shaded')
-    zip64 = true
-    relocate('com.google.gson', 'org.infobip.mobile.messaging.api.shaded.google.gson')
-    manifest {
-        attributes("Implementation-Title": "Gradle", "Implementation-Version": version)
-    }
-}
-
-jar.dependsOn(shadowJar)
-
-jar {
-    from{
-        zipTree(shadowJar.archivePath)
-    }{
-        include 'org/infobip/mobile/messaging/api/shaded/**'
-    }
-}
 
 configurations {
     provided
@@ -73,7 +53,7 @@ idea {
 }
 
 dependencies {
-    compile "com.google.code.gson:gson:2.8.5"
+    implementation 'com.google.code.gson:gson:2.9.0'
     implementation "commons-codec:commons-codec:1.10"
 
     testImplementation "junit:junit:4.12"

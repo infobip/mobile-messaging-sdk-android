@@ -1,20 +1,18 @@
 buildscript {
     repositories {
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 }
 
-apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'idea'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'idea'
+}
 
 android {
     compileSdkVersion mm_compileSdkVersion
@@ -25,6 +23,10 @@ android {
         targetSdkVersion mm_targetSdkVersion
         versionCode 1
         versionName project.version
+
+        // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
+        // https://issuetracker.google.com/issues/154275579
+        buildConfigField "String", "VERSION_NAME", "\"$versionName\""
         consumerProguardFiles 'proguard-rules.pro'
     }
 

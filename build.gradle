@@ -1,14 +1,10 @@
 buildscript {
-
     repositories {
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.4'
+        classpath 'com.android.tools.build:gradle:7.2.2'
     }
 }
 
@@ -30,15 +26,12 @@ ext {
 allprojects {
     repositories {
         mavenCentral()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
+        google()
     }
 }
 
+//It's required to be applied here, to have `subprojects.publish` task available
 subprojects {
-    apply plugin: "maven"
     apply plugin: "maven-publish"
 }
 
@@ -60,8 +53,15 @@ afterReleaseBuild.dependsOn updateVersionInReadme
 
 // workaround for `net.researchgate.release` plugin issue:
 // https://github.com/researchgate/gradle-release/issues/186
+
 task build {}
-build.dependsOn subprojects.findAll {!it.name.contains("demo")}.build
+
+build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-chat-sdk:build')
+build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-geo-sdk:build')
+build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-cryptor-migration:build')
+build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-resources:build')
+build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-sdk:build')
+build.dependsOn tasks.getByPath(':infobip-mobile-messaging-api-java:build')
 
 nexusPublishing {
     repositories {
