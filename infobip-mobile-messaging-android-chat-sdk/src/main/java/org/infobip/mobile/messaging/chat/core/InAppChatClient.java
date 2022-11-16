@@ -40,8 +40,8 @@ public interface InAppChatClient {
     /**
      * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag
      *
-     * @param data
-     * @param multitThreadFlag
+     * @param data            contextual data in the form of JSON string
+     * @param multiThreadFlag multithread strategy flag
      */
     void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag);
 }

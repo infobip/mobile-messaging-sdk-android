@@ -63,8 +63,12 @@ public class InAppChatClientImpl implements InAppChatClient {
     @Override
     public void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag) {
         if (webView != null && !data.isEmpty()) {
-            String script = "sendContextualData(" + data + ", '" + multiThreadFlag + "')";
-            webView.evaluateJavascriptMethod(script, value -> {
+            StringBuilder script = new StringBuilder();
+            if (isOSOlderThanKitkat()) {
+                script.append("javascript:");
+            }
+            script.append("sendContextualData(").append(data).append(", '").append(multiThreadFlag).append("')");
+            webView.evaluateJavascriptMethod(script.toString(), value -> {
                 if (value != null) {
                     MobileMessagingLogger.d(TAG, value);
                 }

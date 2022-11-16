@@ -263,8 +263,10 @@ public class WebViewActivity extends AppCompatActivity {
             NotificationSettings notificationSettings = MobileMessagingCore.getInstance(WebViewActivity.this).getNotificationSettings();
             if (notificationSettings != null) {
                 Class<?> callbackActivity = notificationSettings.getCallbackActivity();
-                Intent startParentActivity = new Intent(WebViewActivity.this, callbackActivity);
-                startActivity(startParentActivity);
+                if (callbackActivity != null) {
+                    Intent startParentActivity = new Intent(WebViewActivity.this, callbackActivity);
+                    startActivity(startParentActivity);
+                }
             }
         }
         super.onBackPressed();
