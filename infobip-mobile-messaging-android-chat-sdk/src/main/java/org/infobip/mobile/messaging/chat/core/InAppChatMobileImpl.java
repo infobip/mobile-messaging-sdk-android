@@ -2,8 +2,10 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.app.Activity;
 import android.os.Handler;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+
 import android.webkit.JavascriptInterface;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -74,6 +76,22 @@ public class InAppChatMobileImpl implements InAppChatMobile {
             public void run() {
                 if (inAppChatWebViewManager != null) {
                     inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
+                }
+            }
+        };
+        handler.post(myRunnable);
+    }
+
+    @Override
+    @JavascriptInterface
+    public void onViewChanged(String view) {
+        Runnable myRunnable = () -> {
+            MobileMessagingLogger.d("WebView onViewChanged: " + view);
+            if (inAppChatWebViewManager != null) {
+                try {
+                    inAppChatWebViewManager.onWidgetViewChanged(InAppChatWidgetView.valueOf(view));
+                } catch (IllegalArgumentException exception) {
+                    MobileMessagingLogger.e("Could not parse InAppChatWidgetView from " + view, exception);
                 }
             }
         };

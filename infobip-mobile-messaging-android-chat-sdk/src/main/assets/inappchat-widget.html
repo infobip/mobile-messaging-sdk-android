@@ -29,6 +29,7 @@
         const SEND = 'send';
         const SET_LANGUAGE = 'set_language';
         const SEND_CONTEXTUAL_DATA = 'send_contextual_data'
+        const SHOW_THREAD_LIST = 'show_thread_list'
 
         window.handleMessageSend = function(message) {
             liveChat(SEND, message);
@@ -49,6 +50,16 @@
                 'type': 'DRAFT'
             });
         }
+
+        window.showThreadList = function() {
+            liveChat(SHOW_THREAD_LIST);
+        }
+
+        window.addEventListener('message', (event) => {
+            if(event.data.destination === 'viewChange') {
+                window.InAppChatMobile.onViewChanged(event.data.view);
+            }
+        })
 
         function setLanguage(language) {
             liveChat(SET_LANGUAGE, language);

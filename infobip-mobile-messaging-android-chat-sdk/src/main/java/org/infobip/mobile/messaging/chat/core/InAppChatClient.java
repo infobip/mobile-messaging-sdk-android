@@ -44,4 +44,9 @@ public interface InAppChatClient {
      * @param multiThreadFlag multithread strategy flag
      */
     void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag);
+
+    /**
+     * Change destination from thread to list in multiThread widget. For non multiThread widget it does nothing.
+     */
+    void showThreadList();
 }

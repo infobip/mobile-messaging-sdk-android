@@ -47,7 +47,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:minHeight="40dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/ib_lc_iv_input_top_border"

@@ -14,4 +14,5 @@ public class WidgetInfo {
     private String backgroundColor;
     private long maxUploadContentSize;
     private String language;
+    private boolean multiThread;
 }

@@ -41,6 +41,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -49,6 +50,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
@@ -72,6 +74,7 @@ import org.infobip.mobile.messaging.chat.core.InAppChatClientImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatMultiThreadFlag;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
+import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
@@ -122,10 +125,16 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private PermissionsRequestManager permissionsRequestManager;
     private boolean fragmentCouldBePaused = true;
     private boolean fragmentCouldBeResumed = true;
-    private boolean isToolbarHidden = false;
-    private boolean isInputControlsVisible = true;
+    private boolean isInputControlsVisible = false;
     private boolean fragmentHidden = false;
     private LocalizationUtils localization;
+    private InAppChatWidgetView currentWidgetView = null;
+    private final OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+        @Override
+        public void handleOnBackPressed() {
+            navigateBack();
+        }
+    };
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -172,6 +181,13 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         initViews();
         setControlsEnabled(false);
         updateViews();
+        initBackPressHandler();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        removeBackPressHandler();
     }
 
     private void localisation() {
@@ -218,6 +234,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         } else {
             fragmentPaused();
         }
+        backPressedCallback.setEnabled(!hidden);
         super.onHiddenChanged(hidden);
     }
 
@@ -264,6 +281,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         updateToolbarConfigs();
         fillButtonByPrimaryColor(sendAttachmentButton);
         updateBackgroundColor();
+        if (!isMultiThread()) {
+            setInputVisibility(true);
+        }
     }
 
     private void updateBackgroundColor() {
@@ -284,6 +304,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         String widgetPrimaryColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey(), null);
         String widgetBackgroundColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), null);
         String maxUploadContentSizeStr = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), null);
+        boolean widgetMultiThread = prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.getKey(), false);
         String language = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.getKey(), null);
         long maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE;
 
@@ -292,7 +313,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
 
         if (widgetId != null) {
-            return new WidgetInfo(widgetId, widgetTitle, widgetPrimaryColor, widgetBackgroundColor, maxUploadContentSize, language);
+            return new WidgetInfo(widgetId, widgetTitle, widgetPrimaryColor, widgetBackgroundColor, maxUploadContentSize, language, widgetMultiThread);
         }
         return null;
     }
@@ -310,14 +331,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         initAttachmentButton();
     }
 
+    //region Toolbar
     private void initToolbar() {
         toolbar = containerView.findViewById(R.id.ib_toolbar_chat_fragment);
         if (toolbar == null) return;
 
-        if (isToolbarHidden) {
-            toolbar.setVisibility(View.GONE);
-            return;
-        }
         //If Activity has it's own ActionBar, it should be hidden.
         try {
             InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
@@ -334,12 +352,31 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                closeChatPage();
+                navigateBack();
             }
         });
     }
 
-    public void closeChatPage() {
+    private void navigateBack() {
+        if (isMultiThread()) {
+            switch (currentWidgetView) {
+                case LOADING:
+                case THREAD_LIST:
+                case SINGLE_MODE_THREAD:
+                    closeChatPage();
+                    break;
+                case THREAD:
+                case LOADING_THREAD:
+                case CLOSED_THREAD:
+                    showThreadList();
+                    break;
+            }
+        } else {
+            closeChatPage();
+        }
+    }
+
+    private void closeChatPage() {
         try {
             InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
             if (actionBarProvider != null) {
@@ -347,12 +384,71 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                 if (ab != null) {
                     ab.show();
                 }
+                backPressedCallback.setEnabled(false); //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
                 actionBarProvider.onInAppChatBackPressed();
             }
         } catch (Exception e) {
             MobileMessagingLogger.e("[InAppChat] can't get actionBarProvider", e);
         }
     }
+
+    private void showThreadList() {
+        inAppChatClient.showThreadList();
+    }
+
+    private void updateToolbarConfigs() {
+        if (toolbar == null || widgetInfo == null) {
+            return;
+        }
+
+        @ColorInt int primaryColor = Color.parseColor(widgetInfo.getPrimaryColor());
+        @ColorInt int titleTextColor = Color.parseColor(widgetInfo.getBackgroundColor());
+        @ColorInt int navigationIconColor = titleTextColor;
+        @ColorInt int primaryDarkColor = calculatePrimaryDarkColor(primaryColor);
+
+        // setup colors (from widget or local config)
+        if (!shouldUseWidgetConfig()) {
+            TypedValue typedValue = new TypedValue();
+            Resources.Theme theme = getTheme();
+            if (theme != null) {
+                // toolbar background color
+                theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                if (typedValue.data != 0) primaryColor = typedValue.data;
+                // titleFromRes text color
+                theme.resolveAttribute(R.attr.titleTextColor, typedValue, true);
+                if (typedValue.data != 0) titleTextColor = typedValue.data;
+                // back arrow color
+                theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true);
+                if (typedValue.data != 0) navigationIconColor = typedValue.data;
+
+                theme.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true);
+                if (typedValue.data != 0) primaryDarkColor = typedValue.data;
+
+            }
+        }
+
+        setStatusBarColor(primaryDarkColor);
+
+        // set colors to views
+        try {
+            spinner.getIndeterminateDrawable().setColorFilter(primaryDarkColor, PorterDuff.Mode.SRC_IN);
+        } catch (Exception ignored) {
+        }
+        toolbar.setBackgroundColor(primaryColor);
+
+        String title = inAppChatViewSettingsResolver.getChatViewTitle();
+        if (StringUtils.isBlank(title)) {
+            title = widgetInfo.getTitle();
+        }
+        toolbar.setTitle(title);
+        toolbar.setTitleTextColor(titleTextColor);
+
+        Drawable drawable = toolbar.getNavigationIcon();
+        if (drawable != null) {
+            drawable.setColorFilter(navigationIconColor, PorterDuff.Mode.SRC_ATOP);
+        }
+    }
+    //endregion
 
     private void initTextBar() {
         messageInput = containerView.findViewById(R.id.ib_lc_et_msg_input);
@@ -405,59 +501,6 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             }
         }
         buttonToFill.getDrawable().setColorFilter(widgetPrimaryColor, PorterDuff.Mode.SRC_ATOP);
-    }
-
-    private void updateToolbarConfigs() {
-        if (toolbar == null || widgetInfo == null || isToolbarHidden) {
-            return;
-        }
-
-        @ColorInt int primaryColor = Color.parseColor(widgetInfo.getPrimaryColor());
-        @ColorInt int titleTextColor = Color.parseColor(widgetInfo.getBackgroundColor());
-        @ColorInt int navigationIconColor = titleTextColor;
-        @ColorInt int primaryDarkColor = calculatePrimaryDarkColor(primaryColor);
-
-        // setup colors (from widget or local config)
-        if (!shouldUseWidgetConfig()) {
-            TypedValue typedValue = new TypedValue();
-            Resources.Theme theme = getTheme();
-            if (theme != null) {
-                // toolbar background color
-                theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
-                if (typedValue.data != 0) primaryColor = typedValue.data;
-                // titleFromRes text color
-                theme.resolveAttribute(R.attr.titleTextColor, typedValue, true);
-                if (typedValue.data != 0) titleTextColor = typedValue.data;
-                // back arrow color
-                theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true);
-                if (typedValue.data != 0) navigationIconColor = typedValue.data;
-
-                theme.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true);
-                if (typedValue.data != 0) primaryDarkColor = typedValue.data;
-
-            }
-        }
-
-        setStatusBarColor(primaryDarkColor);
-
-        // set colors to views
-        try {
-            spinner.getIndeterminateDrawable().setColorFilter(primaryDarkColor, PorterDuff.Mode.SRC_IN);
-        } catch (Exception ignored) {
-        }
-        toolbar.setBackgroundColor(primaryColor);
-
-        String title = inAppChatViewSettingsResolver.getChatViewTitle();
-        if (StringUtils.isBlank(title)) {
-            title = widgetInfo.getTitle();
-        }
-        toolbar.setTitle(title);
-        toolbar.setTitleTextColor(titleTextColor);
-
-        Drawable drawable = toolbar.getNavigationIcon();
-        if (drawable != null) {
-            drawable.setColorFilter(navigationIconColor, PorterDuff.Mode.SRC_ATOP);
-        }
     }
 
     private int calculatePrimaryDarkColor(int primaryColor) {
@@ -570,9 +613,17 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     @Override
     public void setControlsVisibility(boolean isVisible) {
-        if (isInputControlsVisible == isVisible) {
+        setInputVisibility(isVisible);
+    }
+
+    private void setInputVisibility(boolean isVisible) {
+        boolean canShowInMultiThread = isMultiThread() && (this.currentWidgetView == InAppChatWidgetView.THREAD || this.currentWidgetView == InAppChatWidgetView.SINGLE_MODE_THREAD);
+        boolean isNotMultiThread = !isMultiThread();
+        boolean isVisibleMultiThreadSafe = isVisible && (canShowInMultiThread || isNotMultiThread);
+
+        if (isInputControlsVisible == isVisibleMultiThreadSafe) {
             return;
-        } else if (isVisible) {
+        } else if (isVisibleMultiThreadSafe) {
             msgInputWrapper.animate().translationY(0).setDuration(CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -587,7 +638,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                 }
             });
         }
-        isInputControlsVisible = isVisible;
+        isInputControlsVisible = isVisibleMultiThreadSafe;
     }
 
     @Override
@@ -607,14 +658,48 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     @Override
+    public void onWidgetViewChanged(InAppChatWidgetView widgetView) {
+        this.currentWidgetView = widgetView;
+        updateViewsVisibilityByMultiThreadView();
+    }
+
+    private void updateViewsVisibilityByMultiThreadView() {
+        if (isMultiThread()) {
+            switch (currentWidgetView) {
+                case THREAD:
+                case SINGLE_MODE_THREAD:
+                    setInputVisibility(true);
+                    break;
+                case LOADING:
+                case THREAD_LIST:
+                case CLOSED_THREAD:
+                case LOADING_THREAD:
+                    setInputVisibility(false);
+                    break;
+            }
+        } else {
+            setInputVisibility(true);
+        }
+    }
+
+    @Override
     public void sendContextualMetaData(String data, InAppChatMultiThreadFlag multiThreadFlag) {
         inAppChatClient.sendContextualData(data, multiThreadFlag);
     }
 
-        /*
-    Errors handling
-     */
+    private void initBackPressHandler() {
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
+    }
 
+    private void removeBackPressHandler() {
+        backPressedCallback.remove();
+    }
+
+    private boolean isMultiThread() {
+        return widgetInfo != null && widgetInfo.isMultiThread();
+    }
+
+    //region Errors handling
     private static final String CHAT_SERVICE_ERROR = "12";
     private static final String CHAT_WIDGET_NOT_FOUND = "24";
 
@@ -701,6 +786,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
         chatNotAvailableViewShown = false;
     }
+    //endregion
 
     protected void registerReceivers() {
         if (!receiversRegistered) {
@@ -731,6 +817,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
     }
 
+    //region Attachment
     private void initAttachmentButton() {
         sendAttachmentButton = containerView.findViewById(R.id.ib_lc_iv_send_attachment_btn);
         sendAttachmentButton.setOnClickListener(new View.OnClickListener() {
@@ -840,8 +927,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         intentsForChooser.toArray(intentsArray);
         return intentsArray;
     }
+    //endregion
 
-    /* PermissionsRequester */
+    //region PermissionsRequester
     @NonNull
     @Override
     public String[] requiredPermissions() {
@@ -883,10 +971,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
         return permissionsRequestManager.isRequiredPermissionsGranted();
     }
+    //endregion
 
-    /* PermissionsRequester endregion */
-
-    /* Helper methods to get FragmentActivity properties */
+    //region Helper methods to get FragmentActivity properties
     @Nullable
     private FragmentActivity getFragmentActivity() {
         FragmentActivity activity = getActivity();
@@ -913,8 +1000,6 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
         return theme;
     }
+    //endregion
 
-    public void setIsToolbarHidden(Boolean hidden) {
-        isToolbarHidden = hidden;
-    }
 }

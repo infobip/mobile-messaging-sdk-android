@@ -35,4 +35,10 @@ interface InAppChatMobile {
      * @param caption name of preview file
      */
     void openAttachmentPreview(String url, String type, String caption);
+
+    /**
+     * Provides widget (client-side) current view name.
+     * @param view name of current widget destination
+     */
+    void onViewChanged(String view);
 }
