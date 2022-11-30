@@ -1,12 +1,10 @@
 package org.infobip.mobile.messaging.permissions;
 
-import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -45,13 +43,14 @@ public class PermissionsRequestManager {
         /**
          * Should application show the dialog with information that not all required permissions are granted and button which leads to the settings for granting permissions after it was already shown once.
          * Recommendations:
-         *  - If you are asking for permissions by button tap, better to return true, so user will be informed, why an action can't be done, if the user didn't grant the permissions.
-         *  - If you are asking for permissions on the application start, without any additional user actions, better to return false not to disturb the user constantly.
-         * **/
+         * - If you are asking for permissions by button tap, better to return true, so user will be informed, why an action can't be done, if the user didn't grant the permissions.
+         * - If you are asking for permissions on the application start, without any additional user actions, better to return false not to disturb the user constantly.
+         **/
         boolean shouldShowPermissionsNotGrantedDialogIfShownOnce();
 
         /**
          * This method is for providing custom title for the permissions dialog.
+         *
          * @return reference to string resource for permissions dialog title
          */
         @StringRes
@@ -59,6 +58,7 @@ public class PermissionsRequestManager {
 
         /**
          * This method is for providing custom message for the permissions dialog.
+         *
          * @return reference to string resource for permissions dialog message
          */
         @StringRes
@@ -91,7 +91,7 @@ public class PermissionsRequestManager {
     }
 
     public void onRequestPermissionsResult(@NonNull Map<String, Boolean> permissionsResult) {
-        for (Map.Entry<String, Boolean> entry: permissionsResult.entrySet()) {
+        for (Map.Entry<String, Boolean> entry : permissionsResult.entrySet()) {
             if (!entry.getValue()) return;
         }
         permissionsRequester.onPermissionGranted();
@@ -130,17 +130,17 @@ public class PermissionsRequestManager {
     protected void checkPermission(String permission, final Set<String> permissionsToAsk, final Set<String> neverAskPermissions) {
         permissionsHelper.checkPermission(context, permission, new PermissionsHelper.PermissionsRequestListener() {
             @Override
-            public void onNeedPermission(Context context, String permission) {
+            public void onNeedPermission(Activity activity, String permission) {
                 permissionsToAsk.add(permission);
             }
 
             @Override
-            public void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission) {
+            public void onPermissionPreviouslyDeniedWithNeverAskAgain(Activity activity, String permission) {
                 neverAskPermissions.add(permission);
             }
 
             @Override
-            public void onPermissionGranted(Context context, String permission) {
+            public void onPermissionGranted(Activity activity, String permission) {
             }
         });
     }

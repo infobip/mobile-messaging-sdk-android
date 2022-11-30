@@ -5,6 +5,7 @@ import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -1717,21 +1718,34 @@ public class MobileMessagingCore
     }
 
     @Override
-    public void registerForRemoteNotifications() {
+    public void registerForRemoteNotifications(Activity receivedActivity) {
         if (!isNotificationsPermissionAllowed())
             setRemoteNotificationsEnabled(context, true);
         if (SystemInformation.isTiramisuOrAbove())
-            checkPostNotificationPermission();
+            checkPostNotificationPermission(receivedActivity);
     }
 
-    public void checkPostNotificationPermission() {
-        if (foregroundActivityExists()
+    @Override
+    public void registerForRemoteNotifications() {
+        if (foregroundActivityExists()) {
+            registerForRemoteNotifications(getActivityLifecycleMonitor().getForegroundActivity());
+        }
+    }
+
+    public void checkPostNotificationPermission(Activity receivedActivity) {
+        if (receivedActivity != null
                 && isNotificationsPermissionAllowed()
                 && SystemInformation.isTiramisuOrAbove()) {
             PermissionsHelper permissionsHelper = new PermissionsHelper();
-            permissionsHelper.checkPermission(getActivityLifecycleMonitor().getForegroundActivity(), POST_NOTIFICATIONS, this);
+            permissionsHelper.checkPermission(receivedActivity, POST_NOTIFICATIONS, this);
         }
     }
+
+    public void checkPostNotificationPermission() {
+        if (foregroundActivityExists())
+            checkPostNotificationPermission(getActivityLifecycleMonitor().getForegroundActivity());
+    }
+
 
     public boolean foregroundActivityExists() {
         return getActivityLifecycleMonitor() != null && getActivityLifecycleMonitor().getForegroundActivity() != null;
@@ -1976,35 +1990,34 @@ public class MobileMessagingCore
 
 
     @Override
-    public void onNeedPermission(Context context, String permission) {
-        if (foregroundActivityExists()
-                && SystemInformation.isTiramisuOrAbove()) {
-            requestNotificationsPermission();
+    public void onNeedPermission(Activity activity, String permission) {
+        if (activity != null && SystemInformation.isTiramisuOrAbove()) {
+            requestNotificationsPermission(activity);
         }
     }
 
     @Override
-    public void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission) {
-        if (foregroundActivityExists()
+    public void onPermissionPreviouslyDeniedWithNeverAskAgain(Activity activity, String permission) {
+        if (activity != null
                 && SystemInformation.isTiramisuOrAbove()
-                && isPostNotificationsGranted(getActivityLifecycleMonitor().getForegroundActivity())) {
-            requestNotificationsPermission();
+                && isPostNotificationsNotGranted(activity)) {
+            requestNotificationsPermission(activity);
         }
     }
 
     @RequiresApi(api = 33)
-    public static boolean isPostNotificationsGranted(Context context) {
+    public static boolean isPostNotificationsNotGranted(Context context) {
         return ActivityCompat.checkSelfPermission(context, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED;
     }
 
     @RequiresApi(api = 33)
-    public void requestNotificationsPermission() {
-        ActivityCompat.requestPermissions(getActivityLifecycleMonitor().getForegroundActivity(), new String[]{POST_NOTIFICATIONS}, 10000);
+    public void requestNotificationsPermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{POST_NOTIFICATIONS}, 10000);
     }
 
     @Override
-    public void onPermissionGranted(Context context, String permission) {
-        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED, true);
+    public void onPermissionGranted(Activity activity, String permission) {
+        PreferenceHelper.saveBoolean(activity, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED, true);
     }
 
     /**

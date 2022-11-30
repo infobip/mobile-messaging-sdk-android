@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.permissions;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -16,20 +17,20 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 public class PermissionsHelper {
     public PermissionsHelper() {}
 
-    public void checkPermission(@NonNull Context context, @NonNull String permission, PermissionsHelper.PermissionsRequestListener listener) {
-        if (shouldAskPermission(context, permission)) {
-            if (shouldShowRequestPermissionRationale((AppCompatActivity) context, permission)) {
-                listener.onNeedPermission(context, permission);
+    public void checkPermission(@NonNull Activity activity, @NonNull String permission, PermissionsHelper.PermissionsRequestListener listener) {
+        if (shouldAskPermission(activity, permission)) {
+            if (shouldShowRequestPermissionRationale((AppCompatActivity) activity, permission)) {
+                listener.onNeedPermission(activity, permission);
             } else {
-                if (isFirstTimeAsking(context, permission)) {
-                    setFirstTimeAsking(context, permission, false);
-                    listener.onNeedPermission(context, permission);
+                if (isFirstTimeAsking(activity, permission)) {
+                    setFirstTimeAsking(activity, permission, false);
+                    listener.onNeedPermission(activity, permission);
                 } else {
-                    listener.onPermissionPreviouslyDeniedWithNeverAskAgain(context, permission);
+                    listener.onPermissionPreviouslyDeniedWithNeverAskAgain(activity, permission);
                 }
             }
         } else {
-            listener.onPermissionGranted(context, permission);
+            listener.onPermissionGranted(activity, permission);
         }
     }
 
@@ -38,11 +39,11 @@ public class PermissionsHelper {
     }
 
     public interface PermissionsRequestListener {
-        void onNeedPermission(Context context, String permission);
+        void onNeedPermission(Activity activity, String permission);
 
-        void onPermissionPreviouslyDeniedWithNeverAskAgain(Context context, String permission);
+        void onPermissionPreviouslyDeniedWithNeverAskAgain(Activity activity, String permission);
 
-        void onPermissionGranted(Context context, String permission);
+        void onPermissionGranted(Activity activity, String permission);
     }
 
     public boolean hasPermissionInManifest(@NonNull Context context, @NonNull String permissionName) {

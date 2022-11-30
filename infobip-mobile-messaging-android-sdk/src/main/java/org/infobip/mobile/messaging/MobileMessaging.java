@@ -419,6 +419,24 @@ public abstract class MobileMessaging {
     public abstract void registerForRemoteNotifications();
 
     /**
+     * Call this method to initiate the registration for Push Notification service.
+     * User will be prompted to allow receiving Push Notifications.
+     * Should be used together with {@link Builder#withoutRegisteringForRemoteNotifications()} builder method.
+     *
+     * <pre>
+     * {@code
+     *   MobileMessaging.registerForRemoteNotifications()
+     * }
+     * </pre>
+     * <br>
+     *
+     * @param activity activity for requesting the permission
+     */
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    public abstract void registerForRemoteNotifications(Activity activity);
+
+    /**
      * Synchronously cleans up all persisted data.
      * This method deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
@@ -695,7 +713,7 @@ public abstract class MobileMessaging {
          * - remark: Don't forget to register for Push Notifications explicitly by calling `MobileMessaging.registerForRemoteNotifications()`.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
-         *       .withoutPostNotificationPermissionRequest()
+         *       .withoutRegisteringForRemoteNotifications()
          *       .build();
          * }
          * </pre>
