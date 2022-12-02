@@ -14,6 +14,7 @@ import android.view.WindowManager
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -34,13 +35,10 @@ import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.model.Colors
 import com.infobip.webrtc.ui.model.Icons
 import com.infobip.webrtc.ui.service.OngoingCallService
-import com.infobip.webrtc.ui.service.ScreenShareService
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
 
 class CallActivity : AppCompatActivity(R.layout.activity_call) {
@@ -248,6 +246,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         })
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.updateState { copy(isPip = isInPictureInPictureMode) }
