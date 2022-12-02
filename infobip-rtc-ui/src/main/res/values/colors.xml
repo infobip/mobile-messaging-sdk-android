@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rtc_ui_white">#ffffff</color>
+    <color name="rtc_ui_error">#C84714</color>
+    <color name="rtc_ui_primary">#29B899</color>
+
+    <color name="rtc_ui_foreground">@color/rtc_ui_white</color>
+    <color name="rtc_ui_notification">#00e000</color>
+    <color name="rtc_ui_actions_background">#15FFFFFF</color>
+    <color name="rtc_ui_actions_background_checked">@color/rtc_ui_white</color>
+    <color name="rtc_ui_actions_icon">@color/rtc_ui_white</color>
+    <color name="rtc_ui_actions_icon_checked">#B2242424</color>
+    <color name="rtc_ui_text_secondary">#7AFFFFFF</color>
+    <color name="rtc_ui_background">#242424</color>
+    <color name="rtc_ui_overlay_background">#80242424</color>
+    <color name="rtc_ui_alert_background">#99050708</color>
+    <color name="rtc_ui_accept">@color/rtc_ui_primary</color>
+    <color name="rtc_ui_hangup">@color/rtc_ui_error</color>
+</resources>

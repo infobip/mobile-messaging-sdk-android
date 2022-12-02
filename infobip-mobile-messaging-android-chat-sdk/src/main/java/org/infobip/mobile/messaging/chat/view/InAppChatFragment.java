@@ -135,6 +135,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             navigateBack();
         }
     };
+    private InAppChatActionBarProvider inAppChatActionBarProvider;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -338,7 +339,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
         //If Activity has it's own ActionBar, it should be hidden.
         try {
-            InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
+            InAppChatActionBarProvider actionBarProvider = getInAppChatActionBarProvider();
             if (actionBarProvider != null) {
                 ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
                 if (ab != null) {
@@ -378,7 +379,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void closeChatPage() {
         try {
-            InAppChatActionBarProvider actionBarProvider = (InAppChatActionBarProvider) getFragmentActivity();
+            InAppChatActionBarProvider actionBarProvider = getInAppChatActionBarProvider();
             if (actionBarProvider != null) {
                 ActionBar ab = actionBarProvider.getOriginalSupportActionBar();
                 if (ab != null) {
@@ -1001,5 +1002,23 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         return theme;
     }
     //endregion
+
+    /**
+    * Function allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
+    */
+    public void setInAppChatActionBarProvider(InAppChatActionBarProvider inAppChatActionBarProvider) {
+        //it is used in React Native plugin to handle multithread navigation
+        this.inAppChatActionBarProvider = inAppChatActionBarProvider;
+    }
+
+    @Nullable
+    private InAppChatActionBarProvider getInAppChatActionBarProvider() {
+        if (this.inAppChatActionBarProvider != null)
+            return this.inAppChatActionBarProvider;
+        else if (getFragmentActivity() instanceof InAppChatActionBarProvider)
+            return (InAppChatActionBarProvider) getFragmentActivity();
+        else
+            return null;
+    }
 
 }

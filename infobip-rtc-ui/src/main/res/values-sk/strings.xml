@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">Akceptovať</string>
+    <string name="mm_decline">Odmietnuť</string>
+    <string name="mm_cancel">Zrušiť</string>
+    <string name="mm_ok">Ok</string>
+    <string name="mm_video_call">Videohovor</string>
+    <string name="mm_flip_camera">Zmeniť fotoaparát</string>
+    <string name="mm_speaker">Reproduktor</string>
+    <string name="mm_microphone">Mikrofón</string>
+    <string name="mm_screen_share">Zdieľanie obrazovky</string>
+    <string name="mm_calls_notification_channel">Hovory</string>
+    <string name="mm_in_call_notification_channel">Prebiehajúci hovor</string>
+    <string name="mm_is_calling">Volá</string>
+    <string name="mm_incoming_call">Prichádzajúci hovor</string>
+    <string name="mm_unknown">Neznámy</string>
+    <string name="mm_call_finished">Hovor ukončený</string>
+    <string name="mm_audio_permission_required">Na používanie hovorov sa vyžaduje povolenie na zvuk.</string>
+    <string name="mm_weak_internet_connection">Slabé internetové pripojenie</string>
+    <string name="mm_microphone_muted">Stlmené</string>
+    <string name="mm_unknown_error">Neznáma chyba</string>
+    <string name="mm_unmute">Zapnúť zvuk</string>
+    <string name="mm_mute">Stlmiť zvuk</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_hangup">Zložiť</string>
+    <string name="mm_video_permission_required">Na videohovory sa vyžaduje povolenie fotoaparátu.</string>
+    <string name="mm_screen_sharing">Zdieľanie obrazovky</string>
+    <string name="mm_screen_sharing_description">Vaša obrazovka je zdieľaná</string>
+    <string name="mm_in_call">Prebiehajúci hovor</string>
+</resources>

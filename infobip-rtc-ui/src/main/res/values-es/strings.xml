@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">Aceptar</string>
+    <string name="mm_decline">Rechazar</string>
+    <string name="mm_cancel">Cancelar</string>
+    <string name="mm_ok">OK</string>
+    <string name="mm_video_call">Videollamada</string>
+    <string name="mm_flip_camera">Voltear cámara</string>
+    <string name="mm_speaker">Altavoz</string>
+    <string name="mm_microphone">Micrófono</string>
+    <string name="mm_screen_share">Compartir pantalla</string>
+    <string name="mm_calls_notification_channel">Llamadas</string>
+    <string name="mm_in_call_notification_channel">En llamada</string>
+    <string name="mm_is_calling">esta llamando</string>
+    <string name="mm_incoming_call">Llamada entrante</string>
+    <string name="mm_unknown">Desconocido</string>
+    <string name="mm_call_finished">Llamada finalizada</string>
+    <string name="mm_audio_permission_required">Se requiere permiso de audio para manejar llamadas.</string>
+    <string name="mm_weak_internet_connection">Conexión a internet débil</string>
+    <string name="mm_microphone_muted">Apagado</string>
+    <string name="mm_unknown_error">Error desconocido</string>
+    <string name="mm_unmute">No silenciar</string>
+    <string name="mm_mute">Silencio</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_hangup">Colgar</string>
+    <string name="mm_video_permission_required">Se requiere permiso de cámara para videollamadas.</string>
+    <string name="mm_screen_sharing">Compartir pantalla</string>
+    <string name="mm_screen_sharing_description">Tu pantalla es compartida</string>
+    <string name="mm_in_call">En una llamada</string>
+</resources>

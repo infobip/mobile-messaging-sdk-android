@@ -25,7 +25,6 @@ import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
  */
 
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
-
     /* InAppChatActionBarProvider */
     @Nullable
     @Override
@@ -55,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
                 //2. Shows in-app chat as Activity
                 InAppChat.getInstance(MainActivity.this).inAppChatView().show();
+
             }
         });
     }

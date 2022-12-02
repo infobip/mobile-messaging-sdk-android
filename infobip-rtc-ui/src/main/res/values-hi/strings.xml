@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">स्वीकार करना</string>
+    <string name="mm_decline">पतन</string>
+    <string name="mm_cancel">रद्द करना</string>
+    <string name="mm_ok">ठीक</string>
+    <string name="mm_video_call">वीडियो कॉल</string>
+    <string name="mm_flip_camera">फ्लिप कैमरा</string>
+    <string name="mm_speaker">वक्ता</string>
+    <string name="mm_microphone">माइक्रोफ़ोन</string>
+    <string name="mm_screen_share">स्क्रीन शेयर</string>
+    <string name="mm_calls_notification_channel">कॉल</string>
+    <string name="mm_in_call_notification_channel">कॉल में</string>
+    <string name="mm_is_calling">कॉल कर रहा है</string>
+    <string name="mm_incoming_call">आने वाली कॉल</string>
+    <string name="mm_unknown">अनजान</string>
+    <string name="mm_call_finished">कॉल समाप्त</string>
+    <string name="mm_audio_permission_required">कॉल को संभालने के लिए ऑडियो अनुमति की आवश्यकता होती है।</string>
+    <string name="mm_weak_internet_connection">कमजोर इंटरनेट कनेक्शन</string>
+    <string name="mm_microphone_muted">म्यूट किए गए</string>
+    <string name="mm_unknown_error">अज्ञात त्रुटि</string>
+    <string name="mm_unmute">अनम्यूट</string>
+    <string name="mm_mute">आवाज़ बंद करना</string>
+    <string name="mm_video">वीडियो</string>
+    <string name="mm_hangup">फोन रख देना</string>
+    <string name="mm_video_permission_required">वीडियो कॉल के लिए कैमरा अनुमति आवश्यक है।</string>
+    <string name="mm_screen_sharing">स्क्रीन साझेदारी</string>
+    <string name="mm_screen_sharing_description">आपकी स्क्रीन साझा की गई है</string>
+    <string name="mm_in_call">एक कॉल में</string>
+</resources>

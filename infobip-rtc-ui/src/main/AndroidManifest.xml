@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.infobip.webrtc.ui">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application>
+        <activity
+            android:name=".CallActivity"
+            android:autoRemoveFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+            android:showWhenLocked="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity=""
+            android:theme="@style/InfobipRtcUi.Call"
+            android:turnScreenOn="true" />
+        <receiver
+            android:name=".receiver.PushIdBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.DefaultIncomingCallService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".service.OngoingCallService"
+            android:exported="false"
+            android:foregroundServiceType="phoneCall" />
+        <service
+            android:name=".service.ScreenShareService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+        <service android:name="com.infobip.webrtc.sdk.impl.fcm.FcmTokenRefresher" />
+
+    </application>
+
+</manifest>
