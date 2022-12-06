@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import org.infobip.mobile.messaging.R;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.util.Map;
 import java.util.Set;
@@ -65,11 +67,10 @@ public class PermissionsRequestManager {
         int permissionsNotGrantedDialogMessage();
     }
 
-    private static final int OPEN_SETTINGS_INTENT_CODE = 201;
-
     protected final FragmentActivity context;
     protected PermissionsRequester permissionsRequester;
     protected final ActivityResultLauncher<String[]> activityResultLauncher;
+    protected final ActivityResultLauncher<Intent> settingsActivityLauncher;
     protected PermissionsHelper permissionsHelper;
 
     public PermissionsRequestManager(AppCompatActivity activity, @NonNull PermissionsRequester permissionsRequester) {
@@ -77,6 +78,9 @@ public class PermissionsRequestManager {
         activityResultLauncher = activity.registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 this::onRequestPermissionsResult);
+        settingsActivityLauncher = activity.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::onSettingsResult);
         this.permissionsRequester = permissionsRequester;
         this.permissionsHelper = new PermissionsHelper();
     }
@@ -86,6 +90,9 @@ public class PermissionsRequestManager {
         activityResultLauncher = fragment.registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 this::onRequestPermissionsResult);
+        settingsActivityLauncher = fragment.registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                this::onSettingsResult);
         this.permissionsRequester = permissionsRequester;
         this.permissionsHelper = new PermissionsHelper();
     }
@@ -95,6 +102,10 @@ public class PermissionsRequestManager {
             if (!entry.getValue()) return;
         }
         permissionsRequester.onPermissionGranted();
+    }
+
+    public void onSettingsResult(ActivityResult result) {
+        MobileMessagingLogger.d("Did open application settings activity with result" + result.getResultCode());
     }
 
     public boolean isRequiredPermissionsGranted() {
@@ -164,9 +175,10 @@ public class PermissionsRequestManager {
     }
 
     protected void openSettings() {
+        MobileMessagingLogger.d("Will open application settings activity");
         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         Uri uri = Uri.fromParts("package", context.getPackageName(), null);
         intent.setData(uri);
-        context.startActivityForResult(intent, OPEN_SETTINGS_INTENT_CODE);
+        settingsActivityLauncher.launch(intent);
     }
 }
