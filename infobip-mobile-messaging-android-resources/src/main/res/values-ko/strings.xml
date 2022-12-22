@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">취소</string>
     <string name="mm_button_open">열기</string>
     <string name="mm_button_settings">설정</string>
+    <string name="mm_post_notifications_settings_title">알림 설정 업데이트</string>
+    <string name="mm_post_notifications_settings_message">애플리케이션이 항상 푸시 알림을 보내도록 허용하여 앱이 닫혀 있거나 사용 중이 아닌 경우에도 알림을 트리거할 수 있도록 합니다.</string>
 </resources>

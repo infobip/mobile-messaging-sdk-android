@@ -5,4 +5,6 @@
     <string name="mm_button_open">Avaa</string>
     <string name="mm_button_cancel">Peruuta</string>
     <string name="mm_button_settings">asetukset</string>
+    <string name="mm_post_notifications_settings_title">Päivitä ilmoitusasetukset</string>
+    <string name="mm_post_notifications_settings_message">Salli sovelluksen lähettää push-ilmoituksia koko ajan, jotta se laukaisee ilmoituksia, vaikka sovellus olisi suljettu tai ei ole käytössä</string>
 </resources>

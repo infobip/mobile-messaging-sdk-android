@@ -5,4 +5,6 @@
     <string name="mm_button_open">เปิด</string>
     <string name="mm_button_cancel">ยกเลิก</string>
     <string name="mm_button_settings">การตั้งค่า</string>
+    <string name="mm_post_notifications_settings_title">อัปเดตการตั้งค่าการแจ้งเตือน</string>
+    <string name="mm_post_notifications_settings_message">อนุญาตให้แอปพลิเคชันส่งการแจ้งเตือนแบบพุชตลอดเวลา เพื่อให้แอปพลิเคชันเรียกการแจ้งเตือนแม้ว่าแอปจะปิดหรือไม่ได้ใช้งานก็ตาม</string>
 </resources>

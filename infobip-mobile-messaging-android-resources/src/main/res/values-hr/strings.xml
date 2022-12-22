@@ -5,4 +5,6 @@
     <string name="mm_button_open">Otvori</string>
     <string name="mm_button_cancel">Poništi</string>
     <string name="mm_button_settings">Postavke</string>
+    <string name="mm_post_notifications_settings_title">Ažurirajte postavke obavijesti</string>
+    <string name="mm_post_notifications_settings_message">Dopusti aplikaciji slanje push obavijesti cijelo vrijeme kako bi pokrenula obavijesti čak i kada je aplikacija zatvorena ili nije u upotrebi</string>
 </resources>

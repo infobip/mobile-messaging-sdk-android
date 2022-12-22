@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Anuluj</string>
     <string name="mm_button_open">Otwórz</string>
     <string name="mm_button_settings">Ustawienia</string>
+    <string name="mm_post_notifications_settings_title">Zaktualizuj ustawienia powiadomień</string>
+    <string name="mm_post_notifications_settings_message">Zezwalaj aplikacji na wysyłanie powiadomień push przez cały czas, aby uruchamiała powiadomienia, nawet gdy aplikacja jest zamknięta lub nie jest używana</string>
 </resources>

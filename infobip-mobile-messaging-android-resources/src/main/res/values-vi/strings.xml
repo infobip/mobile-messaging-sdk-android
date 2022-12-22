@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Hủy bỏ</string>
     <string name="mm_button_open">Mở</string>
     <string name="mm_button_settings">Cài đặt</string>
+    <string name="mm_post_notifications_settings_title">Cập nhật cài đặt thông báo</string>
+    <string name="mm_post_notifications_settings_message">Cho phép ứng dụng gửi thông báo đẩy mọi lúc để cho phép ứng dụng kích hoạt thông báo ngay cả khi ứng dụng bị đóng hoặc không được sử dụng</string>
 </resources>

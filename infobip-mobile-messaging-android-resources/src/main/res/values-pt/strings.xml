@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Cancelar</string>
     <string name="mm_button_open">Abrir</string>
     <string name="mm_button_settings">Configurações</string>
+    <string name="mm_post_notifications_settings_title">Atualizar configurações de notificações</string>
+    <string name="mm_post_notifications_settings_message">Permitir que o aplicativo envie notificações por push o tempo todo para permitir que ele acione notificações mesmo quando o aplicativo estiver fechado ou não estiver em uso</string>
 </resources>

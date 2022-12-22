@@ -418,23 +418,6 @@ public abstract class MobileMessaging {
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     public abstract void registerForRemoteNotifications();
 
-    /**
-     * Call this method to initiate the registration for Push Notification service.
-     * User will be prompted to allow receiving Push Notifications.
-     * Should be used together with {@link Builder#withoutRegisteringForRemoteNotifications()} builder method.
-     *
-     * <pre>
-     * {@code
-     *   MobileMessaging.registerForRemoteNotifications()
-     * }
-     * </pre>
-     * <br>
-     *
-     * @param activity activity for requesting the permission
-     */
-    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    public abstract void registerForRemoteNotifications(Activity activity);
 
     /**
      * Synchronously cleans up all persisted data.

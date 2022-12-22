@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Отмена</string>
     <string name="mm_button_open">Открыть</string>
     <string name="mm_button_settings">Настройки</string>
+    <string name="mm_post_notifications_settings_title">Обновить настройки уведомлений</string>
+    <string name="mm_post_notifications_settings_message">Разрешить приложению постоянно отправлять push-уведомления, чтобы оно могло запускать уведомления, даже когда приложение закрыто или не используется.</string>
 </resources>

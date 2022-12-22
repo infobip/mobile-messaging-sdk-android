@@ -5,4 +5,6 @@
     <string name="mm_button_open">Open</string>
     <string name="mm_button_cancel">Cancel</string>
     <string name="mm_button_settings">Settings</string>
+    <string name="mm_post_notifications_settings_title">Update notifications settings</string>
+    <string name="mm_post_notifications_settings_message">Allow application to send push notifications all the time to let it trigger notifications even when app is closed or not in use</string>
 </resources>

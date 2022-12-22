@@ -1,24 +1,19 @@
 package org.infobip.mobile.messaging;
 
-import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
 import static org.infobip.mobile.messaging.UserMapper.toJson;
 import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
-import android.app.Activity;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.FirebaseOptions;
 
@@ -60,7 +55,7 @@ import org.infobip.mobile.messaging.mobileapi.user.PersonalizeSynchronizer;
 import org.infobip.mobile.messaging.mobileapi.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobileapi.version.VersionChecker;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
-import org.infobip.mobile.messaging.permissions.PermissionsHelper;
+import org.infobip.mobile.messaging.permissions.PostNotificationsPermissionRequester;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
@@ -109,7 +104,7 @@ import java.util.regex.Pattern;
  */
 public class MobileMessagingCore
         extends MobileMessaging
-        implements DepersonalizeServerListener, PermissionsHelper.PermissionsRequestListener {
+        implements DepersonalizeServerListener {
 
     private static final int MESSAGE_ID_PARAMETER_LIMIT = 100;
     private static final long MESSAGE_EXPIRY_TIME = TimeUnit.DAYS.toMillis(7);
@@ -156,6 +151,7 @@ public class MobileMessagingCore
     private volatile Long lastSyncTimeMillis;
     private volatile Long lastForegroundSyncMillis;
     private FirebaseAppProvider firebaseAppProvider;
+    private PostNotificationsPermissionRequester postNotificationsPermissionRequester;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
@@ -172,6 +168,7 @@ public class MobileMessagingCore
         this.moduleLoader = moduleLoader;
         this.notificationHandler = new InteractiveNotificationHandler(context);
         this.messageHandlerModules = loadMessageHandlerModules();
+        this.postNotificationsPermissionRequester = new PostNotificationsPermissionRequester(PreferenceHelper.findBoolean(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED));
 
         if (mobileMessagingSynchronizationReceiver == null) {
             mobileMessagingSynchronizationReceiver = new MobileMessagingSynchronizationReceiver();
@@ -319,6 +316,10 @@ public class MobileMessagingCore
     @Nullable
     public ActivityLifecycleMonitor getActivityLifecycleMonitor() {
         return activityLifecycleMonitor;
+    }
+
+    public PostNotificationsPermissionRequester getPostNotificationsPermissionRequester() {
+        return postNotificationsPermissionRequester;
     }
 
     public void sync() {
@@ -1717,44 +1718,6 @@ public class MobileMessagingCore
         moMessageSender().send(listener, messages);
     }
 
-    @Override
-    public void registerForRemoteNotifications(Activity receivedActivity) {
-        if (!isNotificationsPermissionAllowed())
-            setRemoteNotificationsEnabled(context, true);
-        if (SystemInformation.isTiramisuOrAbove())
-            checkPostNotificationPermission(receivedActivity);
-    }
-
-    @Override
-    public void registerForRemoteNotifications() {
-        if (foregroundActivityExists()) {
-            registerForRemoteNotifications(getActivityLifecycleMonitor().getForegroundActivity());
-        }
-    }
-
-    public void checkPostNotificationPermission(Activity receivedActivity) {
-        if (receivedActivity != null
-                && isNotificationsPermissionAllowed()
-                && SystemInformation.isTiramisuOrAbove()) {
-            PermissionsHelper permissionsHelper = new PermissionsHelper();
-            permissionsHelper.checkPermission(receivedActivity, POST_NOTIFICATIONS, this);
-        }
-    }
-
-    public void checkPostNotificationPermission() {
-        if (foregroundActivityExists())
-            checkPostNotificationPermission(getActivityLifecycleMonitor().getForegroundActivity());
-    }
-
-
-    public boolean foregroundActivityExists() {
-        return getActivityLifecycleMonitor() != null && getActivityLifecycleMonitor().getForegroundActivity() != null;
-    }
-
-    public boolean isNotificationsPermissionAllowed() {
-        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED);
-    }
-
     public void sendMessagesDontStore(MobileMessaging.ResultListener<Message[]> listener, Message... messages) {
         moMessageSender().sendDontSave(listener, messages);
     }
@@ -1988,36 +1951,10 @@ public class MobileMessagingCore
         return userEventsSynchronizer;
     }
 
-
     @Override
-    public void onNeedPermission(Activity activity, String permission) {
-        if (activity != null && SystemInformation.isTiramisuOrAbove()) {
-            requestNotificationsPermission(activity);
-        }
-    }
-
-    @Override
-    public void onPermissionPreviouslyDeniedWithNeverAskAgain(Activity activity, String permission) {
-        if (activity != null
-                && SystemInformation.isTiramisuOrAbove()
-                && isPostNotificationsNotGranted(activity)) {
-            requestNotificationsPermission(activity);
-        }
-    }
-
-    @RequiresApi(api = 33)
-    public static boolean isPostNotificationsNotGranted(Context context) {
-        return ActivityCompat.checkSelfPermission(context, POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED;
-    }
-
-    @RequiresApi(api = 33)
-    public void requestNotificationsPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{POST_NOTIFICATIONS}, 10000);
-    }
-
-    @Override
-    public void onPermissionGranted(Activity activity, String permission) {
-        PreferenceHelper.saveBoolean(activity, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED, true);
+    public void registerForRemoteNotifications() {
+        setRemoteNotificationsEnabled(context, true);
+        MobileMessagingCore.getInstance(context).getPostNotificationsPermissionRequester().requestPermission();
     }
 
     /**
@@ -2157,7 +2094,6 @@ public class MobileMessagingCore
             Platform.reset(mobileMessagingCore);
             MobileMessagingCloudHandler cloudHandler = Platform.initializeMobileMessagingCloudHandler(application);
             Platform.reset(cloudHandler);
-            mobileMessagingCore.checkPostNotificationPermission();
             return mobileMessagingCore;
         }
 

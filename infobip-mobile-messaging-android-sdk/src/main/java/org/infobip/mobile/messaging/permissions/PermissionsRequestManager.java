@@ -6,15 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 
+import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArraySet;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -67,13 +66,13 @@ public class PermissionsRequestManager {
         int permissionsNotGrantedDialogMessage();
     }
 
-    protected final FragmentActivity context;
+    protected final ComponentActivity context;
     protected PermissionsRequester permissionsRequester;
     protected final ActivityResultLauncher<String[]> activityResultLauncher;
     protected final ActivityResultLauncher<Intent> settingsActivityLauncher;
     protected PermissionsHelper permissionsHelper;
 
-    public PermissionsRequestManager(AppCompatActivity activity, @NonNull PermissionsRequester permissionsRequester) {
+    public PermissionsRequestManager(ComponentActivity activity, @NonNull PermissionsRequester permissionsRequester) {
         this.context = activity;
         activityResultLauncher = activity.registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
@@ -120,12 +119,9 @@ public class PermissionsRequestManager {
         }
 
         if (neverAskPermissions.size() > 0) {
-            showSettingsDialog(new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    openSettings();
-                    dialog.dismiss();
-                }
+            showSettingsDialog((dialog, which) -> {
+                openSettings();
+                dialog.dismiss();
             }, neverAskPermissions.toString());
             return false;
         }
@@ -163,12 +159,7 @@ public class PermissionsRequestManager {
                     .setMessage(permissionsRequester.permissionsNotGrantedDialogMessage())
                     .setTitle(permissionsRequester.permissionsNotGrantedDialogTitle())
                     .setPositiveButton(R.string.mm_button_settings, onPositiveButtonClick)
-                    .setNegativeButton(R.string.mm_button_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
+                    .setNegativeButton(R.string.mm_button_cancel, (dialog, which) -> dialog.dismiss());
             builder.show();
             permissionsHelper.setPermissionSettingsDialogShown(context, permission, true);
         }
