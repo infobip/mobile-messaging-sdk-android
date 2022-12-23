@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Batal</string>
     <string name="mm_button_open">Buka</string>
     <string name="mm_button_settings">Tetapan</string>
+    <string name="mm_post_notifications_settings_title">Kemas kini tetapan pemberitahuan</string>
+    <string name="mm_post_notifications_settings_message">Benarkan aplikasi menghantar pemberitahuan tolak sepanjang masa untuk membiarkannya mencetuskan pemberitahuan walaupun apabila apl ditutup atau tidak digunakan</string>
 </resources>

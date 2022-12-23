@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Anulează</string>
     <string name="mm_button_open">Deschide</string>
     <string name="mm_button_settings">Setări</string>
+    <string name="mm_post_notifications_settings_title">Actualizați setările de notificări</string>
+    <string name="mm_post_notifications_settings_message">Permite aplicației să trimită notificări push tot timpul pentru a le permite să declanșeze notificări chiar și atunci când aplicația este închisă sau nu este utilizată</string>
 </resources>

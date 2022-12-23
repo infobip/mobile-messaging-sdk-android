@@ -5,4 +5,6 @@
     <string name="mm_button_open">打開</string>
     <string name="mm_button_cancel">取消</string>
     <string name="mm_button_settings">設定值</string>
+    <string name="mm_post_notifications_settings_title">更新通知设置</string>
+    <string name="mm_post_notifications_settings_message">允许应用程序一直发送推送通知，即使在应用程序关闭或未使用时也能触发通知</string>
 </resources>

@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">キャンセルする</string>
     <string name="mm_button_open">開く</string>
     <string name="mm_button_settings">設定</string>
+    <string name="mm_post_notifications_settings_title">通知設定を更新する</string>
+    <string name="mm_post_notifications_settings_message">アプリケーションが常にプッシュ通知を送信できるようにして、アプリケーションが閉じられている場合や使用されていない場合でも通知をトリガーできるようにします</string>
 </resources>

@@ -5,4 +5,6 @@
     <string name="mm_button_open">Otvoriť</string>
     <string name="mm_button_cancel">Zrušiť</string>
     <string name="mm_button_settings">nastavenie</string>
+    <string name="mm_post_notifications_settings_title">Aktualizujte nastavenia upozornení</string>
+    <string name="mm_post_notifications_settings_message">Povoľte aplikácii neustále odosielať upozornenia push, aby mohla spúšťať upozornenia, aj keď je aplikácia zatvorená alebo sa nepoužíva</string>
 </resources>

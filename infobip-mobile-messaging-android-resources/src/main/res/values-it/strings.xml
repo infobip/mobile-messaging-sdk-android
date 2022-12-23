@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Annulla</string>
     <string name="mm_button_open">Apri</string>
     <string name="mm_button_settings">impostazioni</string>
+    <string name="mm_post_notifications_settings_title">Aggiorna le impostazioni delle notifiche</string>
+    <string name="mm_post_notifications_settings_message">Consenti all\'applicazione di inviare sempre notifiche push per consentirne l\'attivazione anche quando l\'app è chiusa o non è in uso</string>
 </resources>

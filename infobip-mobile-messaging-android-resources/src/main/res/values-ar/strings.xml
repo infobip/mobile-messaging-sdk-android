@@ -5,4 +5,6 @@
     <string name="mm_button_open">فتح</string>
     <string name="mm_button_cancel">إلغاء</string>
     <string name="mm_button_settings">الإعدادات</string>
+    <string name="mm_post_notifications_settings_title">تحديث إعدادات الإخطارات</string>
+    <string name="mm_post_notifications_settings_message">اسمح للتطبيق بإرسال إشعارات فورية طوال الوقت للسماح له بتشغيل الإشعارات حتى عندما يكون التطبيق مغلقًا أو غير مستخدم</string>
 </resources>

@@ -216,9 +216,6 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
     @Override
     public void applicationInForeground() {
         inAppNotificationHandler(context).appWentToForeground();
-        if (MobileMessagingCore.isPostNotificationsGranted(context)) {
-            mobileMessagingCore(context).checkPostNotificationPermission();
-        }
     }
 
     @Override

@@ -5,4 +5,6 @@
     <string name="mm_button_open">Aç</string>
     <string name="mm_button_cancel">İptal</string>
     <string name="mm_button_settings">Ayarlar</string>
+    <string name="mm_post_notifications_settings_title">Bildirim ayarlarını güncelle</string>
+    <string name="mm_post_notifications_settings_message">Uygulamanın, uygulama kapalıyken veya kullanımda değilken bile bildirimleri tetiklemesine izin vermek için her zaman push bildirimleri göndermesine izin verin</string>
 </resources>

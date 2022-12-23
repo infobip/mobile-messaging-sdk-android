@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">ביטול</string>
     <string name="mm_button_open">פתח</string>
     <string name="mm_button_settings">הגדרות</string>
+    <string name="mm_post_notifications_settings_title">עדכן את הגדרות ההתראות</string>
+    <string name="mm_post_notifications_settings_message">אפשר לאפליקציה לשלוח הודעות דחיפה כל הזמן כדי לאפשר לה להפעיל התראות גם כשהאפליקציה סגורה או לא בשימוש</string>
 </resources>

@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Avbryt</string>
     <string name="mm_button_open">Öppna</string>
     <string name="mm_button_settings">inställningar</string>
+    <string name="mm_post_notifications_settings_title">Uppdatera aviseringsinställningar</string>
+    <string name="mm_post_notifications_settings_message">Tillåt appen att skicka push-meddelanden hela tiden för att låta den utlösa aviseringar även när appen är stängd eller inte används</string>
 </resources>

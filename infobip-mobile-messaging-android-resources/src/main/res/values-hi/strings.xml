@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">रद्द करें</string>
     <string name="mm_button_open">खोलें</string>
     <string name="mm_button_settings">समायोजन</string>
+    <string name="mm_post_notifications_settings_title">नोटिफिकेशन सेटिंग अपडेट करें</string>
+    <string name="mm_post_notifications_settings_message">एप्लिकेशन को हर समय पुश नोटिफिकेशन भेजने की अनुमति दें ताकि ऐप बंद होने या उपयोग में न होने पर भी नोटिफिकेशन ट्रिगर हो सके</string>
 </resources>

@@ -5,4 +5,6 @@
     <string name="mm_button_cancel">Mégse</string>
     <string name="mm_button_open">Megnyitás</string>
     <string name="mm_button_settings">Beállítások</string>
+    <string name="mm_post_notifications_settings_title">Frissítse az értesítési beállításokat</string>
+    <string name="mm_post_notifications_settings_message">zEngedélyezze az alkalmazás számára, hogy folyamatosan push értesítéseket küldjön, hogy akkor is értesítéseket indítson el, ha az alkalmazás be van zárva vagy nincs használatban</string>
 </resources>

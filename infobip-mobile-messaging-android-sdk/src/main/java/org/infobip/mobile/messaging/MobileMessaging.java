@@ -418,6 +418,7 @@ public abstract class MobileMessaging {
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     public abstract void registerForRemoteNotifications();
 
+
     /**
      * Synchronously cleans up all persisted data.
      * This method deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
@@ -695,7 +696,7 @@ public abstract class MobileMessaging {
          * - remark: Don't forget to register for Push Notifications explicitly by calling `MobileMessaging.registerForRemoteNotifications()`.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
-         *       .withoutPostNotificationPermissionRequest()
+         *       .withoutRegisteringForRemoteNotifications()
          *       .build();
          * }
          * </pre>

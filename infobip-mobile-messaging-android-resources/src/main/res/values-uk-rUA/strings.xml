@@ -5,4 +5,6 @@
     <string name="mm_button_open">Відкрити</string>
     <string name="mm_button_cancel">Скасувати</string>
     <string name="mm_button_settings">Параметри</string>
+    <string name="mm_post_notifications_settings_title">Оновити налаштування сповіщень</string>
+    <string name="mm_post_notifications_settings_message">Дозволити програмі постійно надсилати push-повідомлення, щоб дозволити їй запускати сповіщення, навіть коли програма закрита або не використовується</string>
 </resources>
