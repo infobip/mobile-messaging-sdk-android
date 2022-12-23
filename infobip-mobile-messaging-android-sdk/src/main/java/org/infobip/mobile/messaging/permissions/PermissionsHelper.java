@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
@@ -19,7 +18,7 @@ public class PermissionsHelper {
 
     public void checkPermission(@NonNull Activity activity, @NonNull String permission, PermissionsHelper.PermissionsRequestListener listener) {
         if (shouldAskPermission(activity, permission)) {
-            if (shouldShowRequestPermissionRationale((AppCompatActivity) activity, permission)) {
+            if (shouldShowRequestPermissionRationale(activity, permission)) {
                 listener.onNeedPermission(activity, permission);
             } else {
                 if (isFirstTimeAsking(activity, permission)) {
@@ -34,7 +33,7 @@ public class PermissionsHelper {
         }
     }
 
-    public boolean shouldShowRequestPermissionRationale(AppCompatActivity context, String permission) {
+    public boolean shouldShowRequestPermissionRationale(Activity context, String permission) {
         return ActivityCompat.shouldShowRequestPermissionRationale(context, permission);
     }
 
