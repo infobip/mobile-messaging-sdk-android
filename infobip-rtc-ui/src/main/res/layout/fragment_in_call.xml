@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:id="@+id/background">
 
     <RelativeLayout
@@ -174,7 +175,7 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="muteButton,videoButton,speakerButton,flipCamButton,screenShareButton"
         app:flow_horizontalStyle="spread"
-        app:flow_maxElementsWrap="3"
+        app:flow_maxElementsWrap="@integer/rtc_ui_in_call_fragment_buttons_flow_max_element_wrap"
         app:flow_verticalGap="36dp"
         app:flow_wrapMode="chain"
         app:layout_constraintEnd_toEndOf="parent"
@@ -387,14 +388,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="toolbarBackground,nameInVideo,nameDivider,elapsedTimeVideo,remoteVideoWrapper" />
+        app:constraint_referenced_ids="toolbarBackground,nameInVideo,nameDivider,elapsedTimeVideo" />
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/voiceGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="visible"
-        app:constraint_referenced_ids="nameInVoice,elapsedTimeVoice,avatar" />
+        app:constraint_referenced_ids="nameInVoice,avatar" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/localVideoBarrier"

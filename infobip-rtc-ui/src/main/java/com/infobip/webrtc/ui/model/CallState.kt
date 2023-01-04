@@ -4,7 +4,6 @@ import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
 
 data class CallState(
     val isIncoming: Boolean,
-    val isLocalVideo: Boolean,
     val isMuted: Boolean,
     val isPeerMuted: Boolean,
     val elapsedTimeSeconds: Int,
@@ -13,10 +12,12 @@ data class CallState(
     val isWeakConnection: Boolean,
     val isPip: Boolean,
     val isFinished: Boolean,
+    val showControls: Boolean,
     val error: String = "",
     val localVideoTrack: RTCVideoTrack? = null,
     val remoteVideoTrack: RTCVideoTrack? = null,
     val screenShareTrack: RTCVideoTrack? = null
 ) {
     val isRemoteVideo: Boolean = remoteVideoTrack != null || screenShareTrack != null
+    val isLocalVideo: Boolean = localVideoTrack != null
 }

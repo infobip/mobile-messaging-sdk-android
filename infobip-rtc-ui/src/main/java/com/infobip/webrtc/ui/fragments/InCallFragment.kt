@@ -31,9 +31,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infobip.webrtc.Injector.colors
 import com.infobip.webrtc.TAG
+import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.video.ScreenCapturer
 import com.infobip.webrtc.ui.*
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
@@ -52,8 +54,10 @@ import kotlin.time.Duration.Companion.seconds
 
 class InCallFragment : Fragment() {
     companion object {
-        internal const val ACTION_PIP = "com.infobip.conversations.app.ui.call.InCallFragment.ACTION_PIP"
-        internal const val EXTRAS_PIP_ACTION = "com.infobip.conversations.app.ui.call.InCallFragment.EXTRAS_PIP_ACTION"
+        internal const val ACTION_PIP =
+            "com.infobip.conversations.app.ui.call.InCallFragment.ACTION_PIP"
+        internal const val EXTRAS_PIP_ACTION =
+            "com.infobip.conversations.app.ui.call.InCallFragment.EXTRAS_PIP_ACTION"
         const val PIP_ACTION_MUTE = 1
         const val PIP_ACTION_SPEAKER = 2
         const val PIP_ACTION_VIDEO = 3
@@ -69,18 +73,19 @@ class InCallFragment : Fragment() {
     private var _binding: FragmentInCallBinding? = null
     private val binding get() = _binding!!
     private val requestVideoPermissionLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             toggleVideo()
         }
     }
     private val viewModel: CallViewModel by activityViewModels()
-    private val requestMediaProjection = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            viewModel.shareScreen(ScreenCapturer(it.resultCode, it.data))
+    private val requestMediaProjection =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                viewModel.shareScreen(ScreenCapturer(it.resultCode, it.data))
+            }
         }
-    }
     private val pipActionsReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_PIP) {
@@ -95,26 +100,36 @@ class InCallFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return FragmentInCallBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        viewModel.remoteVideoTrack
+            .onEach(::handleRemoteVideoTrack)
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+        viewModel.localVideoTrack
+            .onEach(::handleLocalVideoTrack)
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
         viewModel.state
-                .onEach(::renderState)
-                .catch { Log.e(TAG, "Failed to render state", it) }
-                .launchIn(viewLifecycleOwner.lifecycleScope)
+            .onEach(::renderState)
+            .catch { Log.e(TAG, "Failed to render state", it) }
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
         setUpScreen()
     }
 
     override fun onResume() {
         super.onResume()
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Default) {
             while (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                val time = viewModel.callDuration()
-                withContext(Dispatchers.Main) {
-                    viewModel.updateState { copy(elapsedTimeSeconds = time + 1) }
-                }
+                viewModel.updateState { copy(elapsedTimeSeconds = viewModel.callDuration()) }
                 delay(1.seconds)
             }
         }
@@ -137,6 +152,12 @@ class InCallFragment : Fragment() {
                 nameInPip.text = it
             }
 
+            remoteVideo.setOnClickListener {
+                viewModel.toggleControlsVisibility()
+            }
+            root.setOnClickListener {
+                viewModel.toggleControlsVisibility()
+            }
             hangupButton.setOnClickListener {
                 viewModel.hangup()
             }
@@ -152,7 +173,10 @@ class InCallFragment : Fragment() {
             videoButton.setOnClickListener {
                 val cameraPermission = Manifest.permission.CAMERA
                 when {
-                    ContextCompat.checkSelfPermission(requireContext(), cameraPermission) == PackageManager.PERMISSION_GRANTED -> toggleVideo()
+                    ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        cameraPermission
+                    ) == PackageManager.PERMISSION_GRANTED -> toggleVideo()
                     shouldShowRequestPermissionRationale(cameraPermission) -> showVideoRationale()
                     else -> requestVideoPermissionLauncher.launch(cameraPermission)
                 }
@@ -160,12 +184,20 @@ class InCallFragment : Fragment() {
             screenShareButton.setOnClickListener {
                 toggleScreenShare()
             }
-            val isPipSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+            val isPipSupported =
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requireActivity().packageManager.hasSystemFeature(
+                    PackageManager.FEATURE_PICTURE_IN_PICTURE
+                )
             if (isPipSupported) {
                 collapseCallButton.setOnClickListener {
                     requireActivity().enterPictureInPictureMode(createPipParams())
                 }
-                registerReceiver(requireContext(), pipActionsReceiver, IntentFilter(ACTION_PIP), RECEIVER_NOT_EXPORTED)
+                registerReceiver(
+                    requireContext(),
+                    pipActionsReceiver,
+                    IntentFilter(ACTION_PIP),
+                    RECEIVER_NOT_EXPORTED
+                )
             }
             collapseCallButton.isVisible = isPipSupported
         }
@@ -174,66 +206,67 @@ class InCallFragment : Fragment() {
     private fun renderState(state: CallState) {
         with(state) {
             Log.d(TAG, state.toString())
-            binding.remoteVideoWrapper.isVisible = isRemoteVideo
-
             val timeFormatted = viewModel.formatTime(elapsedTimeSeconds)
-
-            runCatching {
-                if (isLocalVideo)
-                    localVideoTrack?.addSink(binding.localVideo)
-                else
-                    localVideoTrack?.removeSink(binding.localVideo)
-            }.onFailure {
-                Log.e(TAG, "Failed to update local video.")
-            }
-            runCatching {
-                viewModel.getRemoteVideos()?.forEach {
-                    it.camera?.removeSink(binding.remoteVideo)
-                    it.screenShare?.removeSink(binding.remoteVideo)
-                }
-                if (isRemoteVideo) {
-                    val track = screenShareTrack ?: remoteVideoTrack
-                    track?.addSink(binding.remoteVideo)
-                }
-            }.onFailure {
-                Log.e(TAG, "Failed to update remote video.")
-            }
             if (isRemoteVideo) {
                 binding.elapsedTimeVideo.text = timeFormatted
             } else {
                 binding.elapsedTimeVoice.text = timeFormatted
             }
             //audio/video call views
-            binding.voiceGroup.isGone = isRemoteVideo
-            binding.videoGroup.isVisible = isRemoteVideo
-            binding.toolbarBackground.isVisible = binding.toolbarBackground.isVisible && !isPip
-            binding.nameInVideo.isVisible = binding.nameInVideo.isVisible && !isPip
-            binding.nameDivider.isVisible = binding.nameDivider.isVisible && !isPip
-            binding.elapsedTimeVideo.isVisible = binding.elapsedTimeVideo.isVisible && !isPip
-            binding.nameInVoice.isVisible = binding.nameInVoice.isVisible && !isPip
-            binding.avatar.isVisible = binding.avatar.isVisible && !isPip
-            //another views
-            binding.weakConnectionAlert.isVisible = isWeakConnection && !isPip
-            binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip
-            binding.peerMuteIndicatorInVideo.isVisible = isRemoteVideo && isPeerMuted && !isPip
-            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && isPeerMuted && !isPip
-            binding.collapseCallButton.isVisible = !isPip
             binding.localVideo.isVisible = isLocalVideo
-            //in PIP
+            binding.remoteVideoWrapper.isVisible = isRemoteVideo
+            binding.voiceGroup.isVisible = !isRemoteVideo && !isPip
+            binding.videoGroup.isVisible = isRemoteVideo && !isPip && showControls
             binding.elapsedTimeVoice.isVisible = !isRemoteVideo || isPip
+            //another views
+            binding.weakConnectionAlert.isVisible = isWeakConnection && !isPip && showControls
+            binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip && showControls
+            binding.peerMuteIndicatorInVideo.isVisible = isRemoteVideo && isPeerMuted && !isPip && showControls
+            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && isPeerMuted && !isPip
+            binding.collapseCallButton.isVisible = !isPip && showControls
+            //in PIP
             binding.nameInPip.isVisible = isPip
             //buttons
-            binding.flipCam.isVisible = isLocalVideo && !isPip
-            binding.mute.isVisible = !isPip
-            binding.speaker.isVisible = !isPip
-            binding.hangupButton.isVisible = !isPip
-            binding.screenShare.isVisible = !isPip
-            binding.video.isVisible = !isPip
+            binding.flipCam.isVisible = isLocalVideo && !isPip && showControls
+            binding.mute.isVisible = !isPip && showControls
+            binding.speaker.isVisible = !isPip && showControls
+            binding.hangupButton.isVisible = !isPip && showControls
+            binding.screenShare.isVisible = !isPip && showControls
+            binding.video.isVisible = !isPip && showControls
             //check state
             binding.muteButton.isChecked = !isMuted
             binding.speakerButton.isChecked = isSpeakerOn
             binding.screenShareButton.isChecked = isScreenShare
             binding.videoButton.isChecked = isLocalVideo
+        }
+    }
+
+    private fun handleLocalVideoTrack(track: RTCVideoTrack?) {
+        with(binding) {
+            runCatching {
+                viewModel.getLocalVideo()?.removeSink(localVideo)
+                track?.addSink(localVideo)
+            }.onFailure {
+                Log.e(TAG, "Handle local video sink failed.", it)
+            }
+        }
+    }
+
+    private fun handleRemoteVideoTrack(track: RTCVideoTrack?) {
+        with(binding) {
+            runCatching {
+                viewModel.getRemoteVideos()?.forEach {
+                    Log.e(
+                        TAG,
+                        "Remote video camera ${it.camera != null}, screenShare ${it.screenShare != null}"
+                    )
+                    it.camera?.removeSink(binding.remoteVideo)
+                    it.screenShare?.removeSink(binding.remoteVideo)
+                }
+                track?.addSink(remoteVideo)
+            }.onFailure {
+                Log.e(TAG, "Handle remote video sink failed.", it)
+            }
         }
     }
 
@@ -252,28 +285,42 @@ class InCallFragment : Fragment() {
     private fun toggleScreenShare() {
         if (viewModel.state.value.isScreenShare) {
             viewModel.stopScreenShare()
-            ScreenShareService.sendScreenShareServiceIntent(requireContext(), ScreenShareService.ACTION_STOP_SCREEN_SHARE)
+            ScreenShareService.sendScreenShareServiceIntent(
+                requireContext(),
+                ScreenShareService.ACTION_STOP_SCREEN_SHARE
+            )
         } else {
-            ScreenShareService.sendScreenShareServiceIntent(requireContext(), ScreenShareService.ACTION_START_SCREEN_SHARE)
-            val mediaProjectionManager = requireActivity().getSystemService(AppCompatActivity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+            ScreenShareService.sendScreenShareServiceIntent(
+                requireContext(),
+                ScreenShareService.ACTION_START_SCREEN_SHARE
+            )
+            val mediaProjectionManager =
+                requireActivity().getSystemService(AppCompatActivity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             requestMediaProjection.launch(mediaProjectionManager.createScreenCaptureIntent())
         }
     }
 
     private fun showVideoRationale() {
         AlertDialog.Builder(requireContext())
-                .setMessage(R.string.mm_video_permission_required)
-                .setCancelable(false)
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
-                    dialog.dismiss()
-                }.show()
+            .setMessage(R.string.mm_video_permission_required)
+            .setCancelable(false)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                dialog.dismiss()
+            }.show()
     }
 
     private fun customize() {
         colors?.let { res ->
             val foregroundColorStateList = ColorStateList.valueOf(res.rtc_ui_foreground)
-            val actionsBackgroundColorStateList = activatedColorStateList(res.rtc_ui_actions_background_checked, res.rtc_ui_actions_background)
-            val actionsIconColorStateList = activatedColorStateList(res.rtc_ui_actions_icon_checked, res.rtc_ui_actions_icon)
+            val actionsBackgroundColorStateList = activatedColorStateList(
+                res.rtc_ui_actions_background_checked,
+                res.rtc_ui_actions_background
+            )
+            val actionsIconColorStateList =
+                activatedColorStateList(
+                    res.rtc_ui_actions_icon_checked,
+                    res.rtc_ui_actions_icon
+                )
 
             with(binding) {
                 toolbarBackground.setBackgroundColor(res.rtc_ui_overlay_background)
@@ -333,10 +380,10 @@ class InCallFragment : Fragment() {
                             else if (y > boundaries.bottom) y = boundaries.bottom.toFloat()
                         }
                         view.animate()
-                                .x(x)
-                                .y(y)
-                                .setDuration(0)
-                                .start()
+                            .x(x)
+                            .y(y)
+                            .setDuration(0)
+                            .start()
                         lastAction = MotionEvent.ACTION_MOVE
                     }
                     MotionEvent.ACTION_UP -> {
@@ -369,6 +416,8 @@ class InCallFragment : Fragment() {
         with(binding) {
             localVideo.release()
             remoteVideo.release()
+            root.setOnClickListener(null)
+            remoteVideo.setOnClickListener(null)
             hangupButton.setOnClickListener(null)
             muteButton.setOnClickListener(null)
             speakerButton.setOnClickListener(null)

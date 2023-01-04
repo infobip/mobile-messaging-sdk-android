@@ -1,41 +1,53 @@
 package com.infobip.webrtc.ui
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.sdk.api.call.CallStatus
 import com.infobip.webrtc.sdk.api.conference.RemoteVideo
+import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.video.ScreenCapturer
 import com.infobip.webrtc.sdk.impl.event.DefaultApplicationCallEventListener
 import com.infobip.webrtc.ui.model.CallState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class CallViewModel : ViewModel() {
     private val _state = MutableStateFlow(
-            CallState(
-                    isIncoming = true,
-                    isLocalVideo = false,
-                    isMuted = false,
-                    isPeerMuted = false,
-                    elapsedTimeSeconds = 0,
-                    isSpeakerOn = false,
-                    isScreenShare = false,
-                    isWeakConnection = false,
-                    isPip = false,
-                    isFinished = false,
-                    localVideoTrack = null,
-                    remoteVideoTrack = null,
-                    screenShareTrack = null
-            )
+        CallState(
+            isIncoming = true,
+            isMuted = false,
+            isPeerMuted = false,
+            elapsedTimeSeconds = 0,
+            isSpeakerOn = false,
+            isScreenShare = false,
+            isWeakConnection = false,
+            isPip = false,
+            isFinished = false,
+            showControls = true,
+            localVideoTrack = null,
+            remoteVideoTrack = null,
+            screenShareTrack = null
+        )
     )
     val state = _state.asStateFlow()
+
     var peerName: String = ""
+    var orientation: Int = Configuration.ORIENTATION_UNDEFINED
 
     private val callsDelegate by lazy { Injector.callsDelegate }
+
+    val remoteVideoTrack: StateFlow<RTCVideoTrack?> = state
+        .map { it.screenShareTrack ?: it.remoteVideoTrack }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.screenShareTrack() ?: callsDelegate.remoteVideoTrack())
+
+    val localVideoTrack: StateFlow<RTCVideoTrack?> = state
+        .map { it.localVideoTrack }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.localVideoTrack())
 
     private val timeFormatter = DateTimeFormatter.ofPattern("mm:ss")
 
@@ -44,7 +56,7 @@ class CallViewModel : ViewModel() {
     }
 
     fun updateState(update: CallState.() -> CallState) {
-        _state.value = update(_state.value)
+        _state.update { update(_state.value) }
     }
 
     fun accept() {
@@ -66,7 +78,15 @@ class CallViewModel : ViewModel() {
     }
 
     fun onError(message: String) {
-        updateState { copy(error = message, isFinished = callsDelegate.getCallStatus() in arrayOf(CallStatus.FINISHED, CallStatus.FINISHING)) }
+        updateState {
+            copy(
+                error = message,
+                isFinished = callsDelegate.getCallStatus() in arrayOf(
+                    CallStatus.FINISHED,
+                    CallStatus.FINISHING
+                )
+            )
+        }
     }
 
     fun formatTime(durationSeconds: Int): String {
@@ -100,7 +120,6 @@ class CallViewModel : ViewModel() {
         runCatching {
             val newValue = !state.value.isLocalVideo
             callsDelegate.cameraVideo(newValue)
-            updateState { copy(isMuted = newValue) }
         }.onFailure {
             Log.e(TAG, "Action camera failed.", it)
         }
@@ -122,6 +141,11 @@ class CallViewModel : ViewModel() {
         updateState { copy(isSpeakerOn = newValue) }
     }
 
+    fun toggleControlsVisibility() {
+        if (state.value.isRemoteVideo)
+            updateState { copy(showControls = !showControls) }
+    }
+
     fun flipCamera() {
         callsDelegate.flipCamera()
     }
@@ -139,4 +163,6 @@ class CallViewModel : ViewModel() {
     }
 
     fun getRemoteVideos(): List<RemoteVideo>? = callsDelegate.remoteVideos()?.map { it.value }
+
+    fun getLocalVideo(): RTCVideoTrack? = callsDelegate.localVideoTrack()
 }

@@ -58,8 +58,8 @@ internal interface CallsDelegate {
 }
 
 internal class CallsDelegateImpl(
-        private val context: Context,
-        private val callsScope: CoroutineScope
+    private val context: Context,
+    private val callsScope: CoroutineScope
 ) : CallsDelegate {
     private val call: ApplicationCall?
         get() = InfobipRTC.getActiveApplicationCall()
@@ -152,19 +152,19 @@ internal class CallsDelegateImpl(
                 val localVideoTrack = localVideoTrack()
                 CallState(
                     isIncoming = call.duration() == 0,
-                    isLocalVideo = localVideoTrack != null,
                     isMuted = call.muted(),
                     isPeerMuted = call.participants().firstOrNull()?.media?.audio?.muted == true,
                     elapsedTimeSeconds = call.duration(),
-                        isSpeakerOn = call.speakerphone(),
-                        isScreenShare = call.hasScreenShare(),
-                        isWeakConnection = false,
-                        isPip = false,
-                        isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
-                        error = "",
-                        localVideoTrack = localVideoTrack,
-                        remoteVideoTrack = remoteVideoTrack,
-                        screenShareTrack = screenShareTrack
+                    isSpeakerOn = call.speakerphone(),
+                    isScreenShare = call.hasScreenShare(),
+                    isWeakConnection = false,
+                    isPip = false,
+                    isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
+                    showControls = true,
+                    error = "",
+                    localVideoTrack = localVideoTrack,
+                    remoteVideoTrack = remoteVideoTrack,
+                    screenShareTrack = screenShareTrack
                 )
             }.getOrNull()
         }
@@ -179,14 +179,18 @@ internal class CallsDelegateImpl(
     }
 
     override fun handlePushMessage(data: Map<String, String>) {
-        InfobipRTC.handleIncomingApplicationCall(data, context, IncomingCallListener(context, callsScope, data))
+        InfobipRTC.handleIncomingApplicationCall(
+            data,
+            context,
+            IncomingCallListener(context, callsScope, data)
+        )
     }
 
     override fun registerActiveConnection(token: String) {
         InfobipRTC.registerForActiveConnection(
-                token,
-                context,
-                IncomingCallListener(context, callsScope, mapOf())
+            token,
+            context,
+            IncomingCallListener(context, callsScope, mapOf())
         )
     }
 
@@ -197,9 +201,9 @@ internal class CallsDelegateImpl(
     }
 
     private class IncomingCallListener(
-            private val context: Context,
-            private val callsScope: CoroutineScope,
-            private val data: Map<String, String>
+        private val context: Context,
+        private val callsScope: CoroutineScope,
+        private val data: Map<String, String>
     ) : DefaultIncomingCallEventListener() {
 
         override fun onIncomingApplicationCall(incomingApplicationCallEvent: IncomingApplicationCallEvent?) {
@@ -218,7 +222,10 @@ internal class CallsDelegateImpl(
                 call.eventListener = object : DefaultApplicationCallEventListener() {
                     private fun stopCall() {
                         callsScope.launch(Dispatchers.Main) {
-                            OngoingCallService.sendCallServiceIntent(context, OngoingCallService.CALL_ENDED_ACTION)
+                            OngoingCallService.sendCallServiceIntent(
+                                context,
+                                OngoingCallService.CALL_ENDED_ACTION
+                            )
                         }
                     }
 
@@ -232,7 +239,10 @@ internal class CallsDelegateImpl(
 
                     override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {
                         callsScope.launch(Dispatchers.Main) {
-                            OngoingCallService.sendCallServiceIntent(context, OngoingCallService.CALL_ESTABLISHED_ACTION)
+                            OngoingCallService.sendCallServiceIntent(
+                                context,
+                                OngoingCallService.CALL_ESTABLISHED_ACTION
+                            )
                         }
                     }
                 }

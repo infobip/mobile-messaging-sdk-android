@@ -86,6 +86,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.orientation = resources.configuration.orientation
         showWhenLocked()
         viewModel.init()
         listenCallEvents()
@@ -173,15 +174,15 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {
-                viewModel.updateState { copy(isLocalVideo = true, localVideoTrack = cameraVideoAddedEvent?.track) }
+                viewModel.updateState { copy(localVideoTrack = cameraVideoAddedEvent?.track) }
             }
 
             override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {
-                viewModel.updateState { copy(isLocalVideo = true, localVideoTrack = cameraVideoUpdatedEvent?.track) }
+                viewModel.updateState { copy(localVideoTrack = cameraVideoUpdatedEvent?.track) }
             }
 
             override fun onCameraVideoRemoved() {
-                viewModel.updateState { copy(isLocalVideo = false, localVideoTrack = null) }
+                viewModel.updateState { copy(localVideoTrack = null) }
             }
 
             override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
@@ -197,7 +198,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {
-                viewModel.updateState { copy(remoteVideoTrack = null) }
+                viewModel.updateState { copy(remoteVideoTrack = null, showControls = true) }
             }
 
             override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {
@@ -205,7 +206,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {
-                viewModel.updateState { copy(screenShareTrack = null) }
+                viewModel.updateState { copy(screenShareTrack = null, showControls = true) }
             }
 
             override fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?) {
@@ -250,6 +251,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.updateState { copy(isPip = isInPictureInPictureMode) }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (!viewModel.state.value.isPip && viewModel.orientation != newConfig.orientation) {
+            viewModel.orientation = newConfig.orientation
+            intent.action = null
+            intent.removeExtra(ACCEPT_EXTRA_KEY)
+            recreate()
+        }
     }
 
 }
