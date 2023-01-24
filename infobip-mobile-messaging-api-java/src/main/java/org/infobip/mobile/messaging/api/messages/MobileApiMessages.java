@@ -24,7 +24,7 @@ import org.infobip.mobile.messaging.api.support.http.client.HttpMethod;
 @ApiKey("${api.key}")
 @HttpRequest("/mobile/{version}/messages")
 public interface MobileApiMessages {
-    @Version("1")
+    @Version("2")
     @HttpRequest(method = HttpMethod.POST, value = "seen")
     void reportSeen(@Body() SeenMessages seenReport);
 

@@ -14,7 +14,7 @@ import java.util.List;
 public class GeoBundleMapper extends BundleMapper {
 
     private static final String BUNDLED_GEO_TAG = GeoBundleMapper.class.getName() + ".geo";
-    private static final String BUNDLED_GEO_MESSAGE_TAG = GeoBundleMapper.class.getName() + ".geoMessage";
+    private static final String BUNDLED_GEO_MESSAGE_TAG = GeoBundleMapper.class.getName() + ".geo.message";
     private static final String BUNDLED_GEO_REPORTS_TAG = GeoBundleMapper.class.getName() + ".geo.report";
 
     /**
@@ -29,10 +29,10 @@ public class GeoBundleMapper extends BundleMapper {
     }
 
     /**
-     * Serializes geo object into bundle
+     * Serializes geo message object into bundle
      *
      * @param geoMessage object to serialize
-     * @return bundle with geo contents
+     * @return bundle with geo message contents
      */
     @NonNull
     public static Bundle geoMessageToBundle(@NonNull GeoMessage geoMessage) {
@@ -40,10 +40,10 @@ public class GeoBundleMapper extends BundleMapper {
     }
 
     /**
-     * Serializes geo object into bundle
+     * De-serializes geo message object from bundle
      *
      * @param bundle where to load data from
-     * @return bundle with geo contents
+     * @return new geo message object
      */
     @Nullable
     public static GeoMessage geoMessageFromBundle(@NonNull Bundle bundle) {
