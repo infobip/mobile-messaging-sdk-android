@@ -4,6 +4,8 @@ import android.content.Context;
 
 import androidx.fragment.app.FragmentManager;
 
+import org.infobip.mobile.messaging.MobileMessaging;
+
 /**
  * Main interface for in-app chat communication
  */
@@ -83,6 +85,16 @@ public abstract class InAppChat {
     public abstract void setLanguage(String language);
 
     /**
+     * Set the language of the widget
+     *
+     * @param language       in locale format e.g.: en-US
+     * @param resultListener listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+
+    public abstract void setLanguage(String language, MobileMessaging.ResultListener<Void> resultListener);
+
+    /**
      * Set contextual data of the widget
      *
      * @param data                   contextual data in the form of JSON string
@@ -96,4 +108,14 @@ public abstract class InAppChat {
      * @param data contextual data in the form of JSON string
      */
     public abstract void sendContextualData(String data);
+
+    /**
+     * Set contextual data of the widget
+     *
+     * @param data                   contextual data in the form of JSON string
+     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     * @param resultListener         listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+    public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener);
 }

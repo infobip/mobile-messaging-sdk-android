@@ -8,7 +8,9 @@ public interface InAppChatWebViewManager {
     void onPageStarted();
     void onPageFinished();
     void setControlsEnabled(boolean enabled);
-    void onJSError();
+
+    void onJSError(String message);
+
     void setControlsVisibility(boolean isVisible);
     void openAttachmentPreview(String url, String type, String caption);
     void setLanguage(String language);

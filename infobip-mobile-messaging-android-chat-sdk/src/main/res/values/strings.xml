@@ -13,4 +13,6 @@
     <string name="ib_chat_permissions_not_granted_title">Permissions not granted</string>
     <string name="ib_chat_permissions_not_granted_message">You can grant them in application settings.</string>
     <string name="ib_chat_cant_create_attachment">Cannot create attachment from selected file</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Something went wrong: %1$s.</string>
 </resources>

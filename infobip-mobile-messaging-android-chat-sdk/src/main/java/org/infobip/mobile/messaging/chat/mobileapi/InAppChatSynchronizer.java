@@ -84,6 +84,7 @@ public class InAppChatSynchronizer {
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.v("GET WIDGET CONFIGURATION ERROR <<<", error);
+
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 if (error instanceof BackendInvalidParameterException) {
