@@ -165,4 +165,25 @@ public class MobileApiInboxTest {
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);
     }
+
+    @Test
+    public void fetch_for_hms_cloudType() throws Exception {
+
+        String jsonResponse = "{" +
+                "   \"messages\": []," +
+                "   \"countTotal\": 0," +
+                "   \"countUnread\": 0" +
+                "}";
+
+        String hmsCloudType = "hms";
+
+        debugServer.respondWith(NanoHTTPD.Response.Status.OK, jsonResponse);
+
+        FetchInboxResponse response = mobileApiInbox.fetchInbox(externalUserId, null, null, null, null, 10, hmsCloudType);
+
+        //inspect http context
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/user/" + externalUserId + "/inbox/" + hmsCloudType + "/messages");
+        assertThat(debugServer.getRequestCount()).isEqualTo(1);
+        assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.GET);
+    }
 }

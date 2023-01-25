@@ -1,6 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
-import static org.infobip.mobile.messaging.api.support.util.StringUtils.isBlank;
+import static org.infobip.mobile.messaging.util.StringUtils.isBlank;
 import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
 
 import android.annotation.SuppressLint;
