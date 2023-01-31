@@ -112,6 +112,9 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
+    //To add JWT use build flavour "chat"
+    chatImplementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
+
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
 }

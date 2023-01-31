@@ -95,8 +95,15 @@
             showFab: false
         });
 
-        // Try identify user by pushRegId
-		liveChat(IDENTIFY, {'pushRegistrationId' : getQueryParameter('pushRegId')}, function(error, result) {
+        // Try identify user by pushRegId and (optional) jwt
+		let inputParams = {
+            'pushRegistrationId' : getQueryParameter('pushRegId'),
+		};
+        const jwt = getQueryParameter('jwt');
+		if(jwt != null){
+            inputParams.jwt = jwt;
+		}
+		liveChat(IDENTIFY, inputParams, function(error, result) {
 		    if (error) {
 		        errorCallback(error);
 			} else {

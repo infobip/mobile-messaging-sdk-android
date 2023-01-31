@@ -13,6 +13,21 @@ import org.infobip.mobile.messaging.MobileMessaging;
 public abstract class InAppChat {
 
     /**
+     * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
+     */
+    public interface JwtProvider {
+        /**
+         * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
+         * Function can be triggered multiple times during in-app chat lifetime, due to various events like screen orientation change, internet re-connection.
+         * If you can ensure JWT expiration time is more than in-app chat lifetime, you can return cached token, otherwise
+         * <b>it is important to provide fresh new token for each invocation.</b>
+         *
+         * @return JWT
+         */
+        String provideJwt();
+    }
+
+    /**
      * Returns instance of chat api
      *
      * @param context android context
@@ -118,4 +133,21 @@ public abstract class InAppChat {
      * @see MobileMessaging.ResultListener
      */
     public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener);
+
+    /**
+     * Set {@link JwtProvider} to give in-app chat ability to authenticate.
+     *
+     * @param jwtProvider provider instance
+     * @see JwtProvider
+     */
+    public abstract void setJwtProvider(InAppChat.JwtProvider jwtProvider);
+
+    /**
+     * Returns instance of {@link JwtProvider}
+     *
+     * @return instance of {@link JwtProvider}
+     * @see JwtProvider
+     */
+    public abstract InAppChat.JwtProvider getJwtProvider();
+
 }

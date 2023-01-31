@@ -570,7 +570,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void loadWebPage(Boolean force) {
         if (webView == null) return;
-        webView.loadWebPage(force, widgetInfo);
+        InAppChat.JwtProvider jwtProvider = InAppChat.getInstance(requireContext()).getJwtProvider();
+        String jwt = jwtProvider != null ? jwtProvider.provideJwt() : null;
+        webView.loadWebPage(force, widgetInfo, jwt);
     }
 
     @Override

@@ -57,6 +57,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatSynchronizer inAppChatSynchronizer;
     private static Result<WidgetInfo, MobileMessagingError> chatWidgetConfigSyncResult = null;
     private static Boolean isWebViewCacheCleaned = false;
+    private JwtProvider jwtProvider = null;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
@@ -229,6 +230,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    public void setJwtProvider(InAppChat.JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+    @Override
+    public InAppChat.JwtProvider getJwtProvider() {
+        return jwtProvider;
+    }
+
+    @Override
     public void applicationInForeground() {
         performSyncActions();
     }
@@ -237,6 +248,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public void cleanup() {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
+        jwtProvider = null;
         cleanupWidgetData();
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
