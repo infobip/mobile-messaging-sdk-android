@@ -2,11 +2,10 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.app.Activity;
 import android.os.Handler;
+import android.webkit.JavascriptInterface;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-
-import android.webkit.JavascriptInterface;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
@@ -49,7 +48,7 @@ public class InAppChatMobileImpl implements InAppChatMobile {
             @Override
             public void run() {
                 MobileMessagingLogger.d("WebView loading error", errorMessage);
-                if (inAppChatWebViewManager != null) inAppChatWebViewManager.onJSError();
+                if (inAppChatWebViewManager != null) inAppChatWebViewManager.onJSError(errorMessage);
             }
         };
         handler.post(myRunnable);

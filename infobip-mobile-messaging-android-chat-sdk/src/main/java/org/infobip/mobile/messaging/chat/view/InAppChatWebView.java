@@ -17,13 +17,13 @@ import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.util.ResourceLoader;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
 
     private String widgetUri;
-    private boolean alreadyLoaded;
 
     public InAppChatWebView(Context context) {
         super(context);
@@ -50,7 +50,7 @@ public class InAppChatWebView extends WebView {
         addJavascriptInterface(new InAppChatMobileImpl(webViewManager), IN_APP_CHAT_MOBILE_INTERFACE);
     }
 
-    public void loadWebPage(Boolean force, WidgetInfo widgetInfo) {
+    public void loadWebPage(Boolean force, WidgetInfo widgetInfo, String jwt) {
         if (!force && !InAppChatImpl.getIsWebViewCacheCleaned()) {
             return;
         }
@@ -58,12 +58,16 @@ public class InAppChatWebView extends WebView {
 
         String pushRegistrationId = MobileMessagingCore.getInstance(getContext()).getPushRegistrationId();
         if (pushRegistrationId != null && widgetInfo != null) {
-            String resultUrl = new Uri.Builder()
+            Uri.Builder builder = new Uri.Builder()
                     .encodedPath(widgetUri)
                     .appendQueryParameter("pushRegId", pushRegistrationId)
-                    .appendQueryParameter("widgetId", widgetInfo.getId())
-                    .build()
-                    .toString();
+                    .appendQueryParameter("widgetId", widgetInfo.getId());
+
+            if (StringUtils.isNotBlank(jwt)) {
+                builder.appendQueryParameter("jwt", jwt);
+            }
+
+            String resultUrl = builder.build().toString();
             loadUrl(resultUrl);
         }
     }

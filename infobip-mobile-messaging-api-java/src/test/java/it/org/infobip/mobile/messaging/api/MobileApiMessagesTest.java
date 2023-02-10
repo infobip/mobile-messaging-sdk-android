@@ -70,7 +70,7 @@ public class MobileApiMessagesTest {
         mobileApiMessages.reportSeen(messages);
 
         //inspect http context
-        assertThat(debugServer.getUri()).isEqualTo("/mobile/1/messages/seen");
+        assertThat(debugServer.getUri()).isEqualTo("/mobile/2/messages/seen");
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.POST);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(0);

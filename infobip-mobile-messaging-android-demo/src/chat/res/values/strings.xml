@@ -3,10 +3,17 @@
 
     <string name="main_activity_title" tools:ignore="MissingTranslation">Chat Example</string>
     <string name="main_activity_button_open_title" tools:ignore="MissingTranslation">Go to chat screen</string>
-
+    <string name="mm_open_chat">Open chat</string>
+    <string name="mm_personalize">Personalize</string>
+    <string name="mm_depersonalize">Depersonalize</string>
     <string name="action_registration_id_copy" tools:ignore="MissingTranslation">Registration ID</string>
-
     <string name="toast_registration_id_copy" tools:ignore="MissingTranslation">Registration ID copied to clipboard</string>
+    <string name="push_registration_id">Push registration ID</string>
+    <string name="subject_type">Subject type</string>
+    <string name="customer_name">Customer name</string>
+    <string name="subject">Subject</string>
+    <string name="open_auth_chat">Open authenticated chat</string>
+
     <string name="turkish">Türkçe</string>
     <string name="korean">한국어</string>
     <string name="russian">Русский</string>
@@ -31,4 +38,10 @@
     <string name="slovenian">Slovenščina</string>
     <string name="ukrainian">украї́нська</string>
     <string name="english">English</string>
+
+    <string-array name="subject_types">
+        <item>E-mail</item>
+        <item>Phone number</item>
+        <item>External person ID</item>
+    </string-array>
 </resources>

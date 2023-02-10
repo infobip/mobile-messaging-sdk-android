@@ -206,7 +206,7 @@ public class BaseNotificationHandler {
 
     @SuppressWarnings("WrongConstant")
     @NonNull
-    private PendingIntent createTapPendingIntent(NotificationSettings notificationSettings, Message message) {
+    private PendingIntent createTapPendingIntent(@NonNull NotificationSettings notificationSettings, Message message) {
 
         Intent callbackIntent;
         if (StringUtils.isNotBlank(message.getWebViewUrl())) {
@@ -227,13 +227,28 @@ public class BaseNotificationHandler {
 
         Intent[] intents = new Intent[intentsList.size()];
 
+        int pendingIntentFlags = notificationSettings.getPendingIntentFlags();
+
+        //if PendingIntent.FLAG_IMMUTABLE wasn't set, setting it because for Android 12 it's mandatory
+        pendingIntentFlags = setPendingIntentMutabilityFlagIfNeeded(pendingIntentFlags);
+
         return PendingIntent.getActivities(
                 context,
                 0,
                 intentsList.toArray(intents),
-                notificationSettings.getPendingIntentFlags()
+                pendingIntentFlags
         );
 
+    }
+
+    int setPendingIntentMutabilityFlagIfNeeded(int currentFlags) {
+        int resultFlags = currentFlags;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                (currentFlags & PendingIntent.FLAG_IMMUTABLE) != PendingIntent.FLAG_IMMUTABLE &&
+                (currentFlags & PendingIntent.FLAG_MUTABLE) != PendingIntent.FLAG_MUTABLE) {
+            resultFlags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        return resultFlags;
     }
 
     private NotificationSettings notificationSettings(Message message) {

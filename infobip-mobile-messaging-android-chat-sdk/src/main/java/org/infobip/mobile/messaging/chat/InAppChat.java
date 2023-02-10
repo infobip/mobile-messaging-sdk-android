@@ -4,11 +4,28 @@ import android.content.Context;
 
 import androidx.fragment.app.FragmentManager;
 
+import org.infobip.mobile.messaging.MobileMessaging;
+
 /**
  * Main interface for in-app chat communication
  */
 @SuppressWarnings("unused")
 public abstract class InAppChat {
+
+    /**
+     * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
+     */
+    public interface JwtProvider {
+        /**
+         * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
+         * Function can be triggered multiple times during in-app chat lifetime, due to various events like screen orientation change, internet re-connection.
+         * If you can ensure JWT expiration time is more than in-app chat lifetime, you can return cached token, otherwise
+         * <b>it is important to provide fresh new token for each invocation.</b>
+         *
+         * @return JWT
+         */
+        String provideJwt();
+    }
 
     /**
      * Returns instance of chat api
@@ -83,6 +100,16 @@ public abstract class InAppChat {
     public abstract void setLanguage(String language);
 
     /**
+     * Set the language of the widget
+     *
+     * @param language       in locale format e.g.: en-US
+     * @param resultListener listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+
+    public abstract void setLanguage(String language, MobileMessaging.ResultListener<Void> resultListener);
+
+    /**
      * Set contextual data of the widget
      *
      * @param data                   contextual data in the form of JSON string
@@ -96,4 +123,31 @@ public abstract class InAppChat {
      * @param data contextual data in the form of JSON string
      */
     public abstract void sendContextualData(String data);
+
+    /**
+     * Set contextual data of the widget
+     *
+     * @param data                   contextual data in the form of JSON string
+     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     * @param resultListener         listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+    public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener);
+
+    /**
+     * Set {@link JwtProvider} to give in-app chat ability to authenticate.
+     *
+     * @param jwtProvider provider instance
+     * @see JwtProvider
+     */
+    public abstract void setJwtProvider(InAppChat.JwtProvider jwtProvider);
+
+    /**
+     * Returns instance of {@link JwtProvider}
+     *
+     * @return instance of {@link JwtProvider}
+     * @see JwtProvider
+     */
+    public abstract InAppChat.JwtProvider getJwtProvider();
+
 }

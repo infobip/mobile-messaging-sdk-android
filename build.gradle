@@ -59,6 +59,7 @@ task build {}
 
 build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-chat-sdk:build')
 build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-geo-sdk:build')
+build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-inbox-sdk:build')
 build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-cryptor-migration:build')
 build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-resources:build')
 build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-sdk:build')

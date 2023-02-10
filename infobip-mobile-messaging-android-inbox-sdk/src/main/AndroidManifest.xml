@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.infobip.mobile.messaging.inbox">
+
+    <meta-data
+        android:name="org.infobip.mobile.messaging.inbox.MobileInboxImpl"
+        android:value="org.infobip.mobile.messaging.MessageHandlerModule" />
+
+</manifest>

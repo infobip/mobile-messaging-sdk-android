@@ -28,14 +28,12 @@ public interface InAppChatClient {
      */
     void sendInputDraft(String draft);
 
-
     /**
      * Set language of widget
      *
      * @param language in locale format e.g.: en-US
      */
     void setLanguage(String language);
-
 
     /**
      * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag

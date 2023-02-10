@@ -1,13 +1,54 @@
 package org.infobip.mobile.messaging.chat;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class InAppChatErrors {
+    public static class Error {
+        private final String type;
+        private final String message;
+
+        public Error(@ChatErrorsDef String type, String message) {
+            this.type = type;
+            this.message = message;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Error error = (Error) o;
+            return Objects.equals(type, error.type) && Objects.equals(message, error.message);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, message);
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "Error{" +
+                    "type='" + type + '\'' +
+                    ", message='" + message + '\'' +
+                    '}';
+        }
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({INTERNET_CONNECTION_ERROR, CONFIG_SYNC_ERROR, JS_ERROR})
@@ -22,24 +63,28 @@ public class InAppChatErrors {
         this.listener = listener;
     }
 
-    private OnChangeListener listener;
-    private Set<String> errors = new HashSet<>();
+    private final OnChangeListener listener;
+    private final Set<Error> errors = new HashSet<>();
 
-    public void insertError(@ChatErrorsDef String error) {
+    public void insertError(Error error) {
         if (!errors.contains(error)) {
             errors.add(error);
             listener.onErrorsChange(errors, null, error);
         }
     }
 
-    public void removeError(@ChatErrorsDef String error) {
-        if (errors.contains(error)) {
-            errors.remove(error);
-            listener.onErrorsChange(errors, error, null);
+    public boolean removeError(@ChatErrorsDef @NonNull String errorType) {
+        for (Error error : errors) {
+            if (errorType.equals(error.getType())) {
+                errors.remove(error);
+                listener.onErrorsChange(errors, error, null);
+                return true;
+            }
         }
+        return false;
     }
 
     public interface OnChangeListener {
-        void onErrorsChange(Set<String> currentErrors, String removedError, String insertedError);
+        void onErrorsChange(Set<Error> currentErrors, Error removedError, Error insertedError);
     }
 }

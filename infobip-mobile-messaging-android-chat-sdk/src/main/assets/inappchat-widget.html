@@ -31,6 +31,16 @@
         const SEND_CONTEXTUAL_DATA = 'send_contextual_data'
         const SHOW_THREAD_LIST = 'show_thread_list'
 
+        const errorCallback = function(error, result) {
+            if (error) {
+                if ((typeof error === 'object' || Array.isArray(error)) && error !== null) {
+                    window.InAppChatMobile.onError(JSON.stringify(error));
+                } else {
+                    window.InAppChatMobile.onError(error);
+                }
+            }
+        };
+
         window.handleMessageSend = function(message) {
             liveChat(SEND, message);
         }
@@ -52,7 +62,7 @@
         }
 
         window.showThreadList = function() {
-            liveChat(SHOW_THREAD_LIST);
+            liveChat(SHOW_THREAD_LIST, null, errorCallback);
         }
 
         window.addEventListener('message', (event) => {
@@ -62,14 +72,18 @@
         })
 
         function setLanguage(language) {
-            liveChat(SET_LANGUAGE, language);
+            liveChat(SET_LANGUAGE, language, errorCallback);
         }
 
         function sendContextualData(data, strategy) {
-             liveChat(SEND_CONTEXTUAL_DATA, {
+             liveChat(
+                SEND_CONTEXTUAL_DATA,
+                {
                    metadata: data,
                    multiThreadStrategy: strategy
-             });
+                },
+                errorCallback
+		     );
         }
 
         // Override widget config
@@ -81,10 +95,17 @@
             showFab: false
         });
 
-        // Try identify user by pushRegId
-		liveChat(IDENTIFY, {'pushRegistrationId' : getQueryParameter('pushRegId')}, function(error, result) {
+        // Try identify user by pushRegId and (optional) jwt
+		let inputParams = {
+            'pushRegistrationId' : getQueryParameter('pushRegId'),
+		};
+        const jwt = getQueryParameter('jwt');
+		if(jwt != null){
+            inputParams.jwt = jwt;
+		}
+		liveChat(IDENTIFY, inputParams, function(error, result) {
 		    if (error) {
-		        window.InAppChatMobile.onError(error);
+		        errorCallback(error);
 			} else {
 				init();
 			}
@@ -106,7 +127,7 @@
 
         function onShowCallback(error, result) {
             if (error) {
-                window.InAppChatMobile.onError(error);
+            	errorCallback(error);
             } else {
                 window.InAppChatMobile.setControlsEnabled(true);
             }

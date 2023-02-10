@@ -1,0 +1,21 @@
+<resources>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="next">To Inbox</string>
+    <string name="previous">Back</string>
+    <string name="button">Button</string>
+    <string name="personalize_button">Personalize</string>
+    <string name="extuserid_field"> </string>
+    <string name="extuserid_hint">External User ID</string>
+    <string name="button_personalize">Personalize</string>
+    <string name="button_depersonalize">Depersonalize</string>
+    <string name="external_user_id"> </string>
+    <string name="inbox_empty">Inbox is empty</string>
+    <string name="tb_all">all</string>
+    <string name="tb_promo">promo</string>
+    <string name="tb_notifications">notifications</string>
+    <string name="mark_as_seen">Do you want to mark message as seen?</string>
+    <string name="cannot_update_inbox">Cannot update inbox</string>
+    <string name="cannot_personalize">Cannot personalize: externalUserId is empty</string>
+    <string name="personalized_success">Personalized successfully</string>
+    <string name="depersonalized_success">Depersonalized successfully</string>
+</resources>

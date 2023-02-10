@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.chat.view;
 
 import static android.app.Activity.RESULT_OK;
+import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.ErrorCode.API_IO_ERROR;
 import static org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4;
 
 import android.Manifest;
@@ -50,12 +51,13 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.ColorUtils;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.ConfigurationException;
@@ -82,13 +84,13 @@ import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class InAppChatFragment extends Fragment implements InAppChatWebViewManager, PermissionsRequestManager.PermissionsRequester {
 
@@ -108,7 +110,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private Toolbar toolbar;
     private LinearLayout msgInputWrapper;
     private RelativeLayout mainWindow;
-    private TextView errorToast;
+    private TextView noConnectionErrorToast;
 
     private InAppChatClient inAppChatClient;
     private InAppChatViewSettingsResolver inAppChatViewSettingsResolver;
@@ -127,7 +129,6 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private boolean fragmentCouldBeResumed = true;
     private boolean isInputControlsVisible = false;
     private boolean fragmentHidden = false;
-    private LocalizationUtils localization;
     private InAppChatWidgetView currentWidgetView = null;
     private final OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
         @Override
@@ -136,6 +137,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         }
     };
     private InAppChatActionBarProvider inAppChatActionBarProvider;
+    private MobileMessagingCore mobileMessagingCore;
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -168,6 +170,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mobileMessagingCore = MobileMessagingCore.getInstance(getContext());
         containerView = view;
         FragmentActivity fragmentActivity = getFragmentActivity();
         if (fragmentActivity == null) {
@@ -192,12 +195,12 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void localisation() {
-        localization = LocalizationUtils.getInstance(requireContext());
+        LocalizationUtils localization = LocalizationUtils.getInstance(requireContext());
         containerView.findViewById(R.id.ib_lc_iv_input_top_border).setContentDescription(localization.getString(R.string.ib_iv_input_border_desc));
         sendAttachmentButton.setContentDescription(localization.getString(R.string.ib_iv_btn_send_attachment_desc));
         sendMessageButton.setContentDescription(localization.getString(R.string.ib_iv_btn_send_desc));
         containerView.<TextView>findViewById(R.id.ib_lc_et_msg_input).setHint(localization.getString(R.string.ib_chat_message_hint));
-        errorToast.setText(localization.getString(R.string.ib_chat_no_connection));
+        noConnectionErrorToast.setText(localization.getString(R.string.ib_chat_no_connection));
     }
 
     @Override
@@ -243,7 +246,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         if (!fragmentCouldBePaused) return;
         sendInputDraftImmediately();
         unregisterReceivers();
-        hideChatNotAvailableView(0);
+        hideNoInternetConnectionView(0);
         webView.onPause();
         fragmentCouldBeResumed = true;
     }
@@ -269,9 +272,15 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     private void updateErrors() {
         chatErrors = null;
 
-        Boolean chatWidgetConfigSynced = InAppChatImpl.getIsChatWidgetConfigSynced();
-        if (chatWidgetConfigSynced != null && !chatWidgetConfigSynced) {
-            chatErrors().insertError(InAppChatErrors.CONFIG_SYNC_ERROR);
+        Result<WidgetInfo, MobileMessagingError> chatWidgetConfigSyncResult = InAppChatImpl.getChatWidgetConfigSyncResult();
+        if (chatWidgetConfigSyncResult != null && !chatWidgetConfigSyncResult.isSuccess()) {
+            MobileMessagingError error = chatWidgetConfigSyncResult.getError();
+            boolean isInternetConnectionError = API_IO_ERROR.getValue().equals(error.getCode()) && error.getType() == MobileMessagingError.Type.SERVER_ERROR;
+            boolean isRegistrationPendingError = InternalSdkError.NO_VALID_REGISTRATION.getError().getCode().equals(error.getCode()) && mobileMessagingCore.isRegistrationIdReported();
+            //connection error handled separately by broadcast receiver, sync is triggered again after registration, do not show error
+            if (!isInternetConnectionError && !isRegistrationPendingError) {
+                chatErrors().insertError(new InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, error.getMessage()));
+            }
         }
     }
 
@@ -323,7 +332,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         spinner = containerView.findViewById(R.id.ib_lc_pb_spinner);
         msgInputWrapper = containerView.findViewById(R.id.ib_lc_rl_msg_input_wrapper);
         mainWindow = containerView.findViewById(R.id.ib_lc_rl_main_window);
-        errorToast = containerView.findViewById(R.id.ib_lc_tv_error_toast);
+        noConnectionErrorToast = containerView.findViewById(R.id.ib_lc_tv_error_toast);
         chatNotAvailableViewHeight = getResources().getDimension(R.dimen.chat_not_available_tv_height);
         initToolbar();
         initWebView();
@@ -350,16 +359,11 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             MobileMessagingLogger.e("[InAppChat] can't get actionBarProvider", e);
         }
         toolbar.setNavigationIcon(R.drawable.ic_chat_arrow_back);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navigateBack();
-            }
-        });
+        toolbar.setNavigationOnClickListener(view -> navigateBack());
     }
 
     private void navigateBack() {
-        if (isMultiThread()) {
+        if (isMultiThread() && currentWidgetView != null) {
             switch (currentWidgetView) {
                 case LOADING:
                 case THREAD_LIST:
@@ -566,7 +570,9 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void loadWebPage(Boolean force) {
         if (webView == null) return;
-        webView.loadWebPage(force, widgetInfo);
+        InAppChat.JwtProvider jwtProvider = InAppChat.getInstance(requireContext()).getJwtProvider();
+        String jwt = jwtProvider != null ? jwtProvider.provideJwt() : null;
+        webView.loadWebPage(force, widgetInfo, jwt);
     }
 
     @Override
@@ -580,7 +586,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         String storedLanguage = widgetInfo.getLanguage();
         String language;
         if (storedLanguage == null) {
-            language = MobileMessagingCore.getInstance(getContext()).getInstallation().getLanguage();
+            language = mobileMessagingCore.getInstallation().getLanguage();
             LocalizationUtils.getInstance(getContext()).setLanguage(LocalizationUtils.localeFromString(language));
         } else {
             language = storedLanguage;
@@ -605,8 +611,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     @Override
-    public void onJSError() {
-        chatErrors().insertError(InAppChatErrors.JS_ERROR);
+    public void onJSError(String message) {
+        chatErrors().insertError(new InAppChatErrors.Error(InAppChatErrors.JS_ERROR, message));
         webView.setVisibility(View.GONE);
         spinner.setVisibility(View.GONE);
         setControlsEnabled(false);
@@ -666,17 +672,19 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private void updateViewsVisibilityByMultiThreadView() {
         if (isMultiThread()) {
-            switch (currentWidgetView) {
-                case THREAD:
-                case SINGLE_MODE_THREAD:
-                    setInputVisibility(true);
-                    break;
-                case LOADING:
-                case THREAD_LIST:
-                case CLOSED_THREAD:
-                case LOADING_THREAD:
-                    setInputVisibility(false);
-                    break;
+            if (currentWidgetView != null) {
+                switch (currentWidgetView) {
+                    case THREAD:
+                    case SINGLE_MODE_THREAD:
+                        setInputVisibility(true);
+                        break;
+                    case LOADING:
+                    case THREAD_LIST:
+                    case CLOSED_THREAD:
+                    case LOADING_THREAD:
+                        setInputVisibility(false);
+                        break;
+                }
             }
         } else {
             setInputVisibility(true);
@@ -713,17 +721,20 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             }
             if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)) {
-                    chatErrors().insertError(InAppChatErrors.INTERNET_CONNECTION_ERROR);
+                    chatErrors().insertError(new InAppChatErrors.Error(InAppChatErrors.INTERNET_CONNECTION_ERROR, getString(R.string.ib_chat_no_connection)));
                 } else {
                     chatErrors().removeError(InAppChatErrors.INTERNET_CONNECTION_ERROR);
                 }
             } else if (action.equals(InAppChatEvent.CHAT_CONFIGURATION_SYNCED.getKey())) {
-                chatErrors().removeError(InAppChatErrors.CONFIG_SYNC_ERROR);
+                if (!chatErrors().removeError(InAppChatErrors.CONFIG_SYNC_ERROR)) {
+                    updateViews();
+                    loadWebPage(true);
+                }
             } else if (action.equals(Event.API_COMMUNICATION_ERROR.getKey()) && intent.hasExtra(BroadcastParameter.EXTRA_EXCEPTION)) {
                 MobileMessagingError mobileMessagingError = (MobileMessagingError) intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION);
                 String errorCode = mobileMessagingError.getCode();
                 if (errorCode.equals(CHAT_SERVICE_ERROR) || errorCode.equals(CHAT_WIDGET_NOT_FOUND)) {
-                    chatErrors().insertError(InAppChatErrors.CONFIG_SYNC_ERROR);
+                    chatErrors().insertError(new InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, mobileMessagingError.getMessage()));
                 }
             } else if (action.equals(Event.REGISTRATION_CREATED.getKey())) {
                 syncInAppChatConfigIfNeeded();
@@ -735,27 +746,32 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
 
     private InAppChatErrors chatErrors() {
         if (chatErrors == null) {
-            chatErrors = new InAppChatErrors(new InAppChatErrors.OnChangeListener() {
-                @Override
-                public void onErrorsChange(Set<String> newErrors, String removedError, String insertedError) {
+            chatErrors = new InAppChatErrors((newErrors, removedError, insertedError) -> {
 
-                    if (removedError != null) {
-                        //reload webView if it wasn't loaded in case when internet connection appeared
-                        if (removedError.equals(InAppChatErrors.INTERNET_CONNECTION_ERROR) && !isWebViewLoaded) {
-                            loadWebPage(true);
-                        }
-
-                        //update views configuration and reload webPage in case there was config sync error
-                        if (removedError.equals(InAppChatErrors.CONFIG_SYNC_ERROR)) {
-                            updateViews();
-                            loadWebPage(true);
-                        }
+                if (removedError != null) {
+                    //reload webView if it wasn't loaded in case when internet connection appeared
+                    if (InAppChatErrors.INTERNET_CONNECTION_ERROR.equals(removedError.getType()) && !isWebViewLoaded) {
+                        loadWebPage(true);
                     }
 
-                    if (newErrors.isEmpty()) {
-                        hideChatNotAvailableView(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
-                    } else {
-                        showChatNotAvailableView(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
+                    //update views configuration and reload webPage in case there was config sync error
+                    if (InAppChatErrors.CONFIG_SYNC_ERROR.equals(removedError.getType())) {
+                        updateViews();
+                        loadWebPage(true);
+                    }
+                }
+
+                if (newErrors.isEmpty()) {
+                    hideNoInternetConnectionView(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
+                } else {
+                    for (InAppChatErrors.Error error : newErrors) {
+                        if (InAppChatErrors.INTERNET_CONNECTION_ERROR.equals(error.getType())) {
+                            showNoInternetConnectionView(CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS);
+                        } else if (InAppChatErrors.CONFIG_SYNC_ERROR.equals(error.getType()) || InAppChatErrors.JS_ERROR.equals(error.getType())) {
+                            showError(error.getMessage());
+                        } else {
+                            MobileMessagingLogger.e("InAppChat", "Unhandled error " + error);
+                        }
                     }
                 }
             });
@@ -763,25 +779,25 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
         return chatErrors;
     }
 
-    private void showChatNotAvailableView(int duration) {
+    private void showNoInternetConnectionView(int duration) {
         if (!chatNotAvailableViewShown) {
-            errorToast.setVisibility(View.VISIBLE);
-            errorToast.animate().translationY(chatNotAvailableViewHeight).setDuration(duration).setListener(new AnimatorListenerAdapter() {
+            noConnectionErrorToast.setVisibility(View.VISIBLE);
+            noConnectionErrorToast.animate().translationY(chatNotAvailableViewHeight).setDuration(duration).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    errorToast.setVisibility(View.VISIBLE);
+                    noConnectionErrorToast.setVisibility(View.VISIBLE);
                 }
             });
         }
         chatNotAvailableViewShown = true;
     }
 
-    private void hideChatNotAvailableView(int duration) {
+    private void hideNoInternetConnectionView(int duration) {
         if (chatNotAvailableViewShown) {
-            errorToast.animate().translationY(0).setDuration(duration).setListener(new AnimatorListenerAdapter() {
+            noConnectionErrorToast.animate().translationY(0).setDuration(duration).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    errorToast.setVisibility(View.INVISIBLE);
+                    noConnectionErrorToast.setVisibility(View.INVISIBLE);
                 }
             });
         }
@@ -1004,8 +1020,8 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     //endregion
 
     /**
-    * Function allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
-    */
+     * Function allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
+     */
     public void setInAppChatActionBarProvider(InAppChatActionBarProvider inAppChatActionBarProvider) {
         //it is used in React Native plugin to handle multithread navigation
         this.inAppChatActionBarProvider = inAppChatActionBarProvider;
@@ -1021,4 +1037,10 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
             return null;
     }
 
+    private void showError(String message) {
+        Snackbar.make(mainWindow, getString(R.string.ib_chat_error, message), Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.ib_chat_ok, v -> {
+                })
+                .show();
+    }
 }

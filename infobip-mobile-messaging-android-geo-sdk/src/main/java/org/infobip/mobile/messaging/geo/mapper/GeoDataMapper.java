@@ -22,7 +22,7 @@ public final class GeoDataMapper {
     }
 
     /**
-     * Serializes json data to Geo object
+     * Serializes Geo object to json data
      *
      * @param geo geo object to serialize
      * @return String - geo data as json string
