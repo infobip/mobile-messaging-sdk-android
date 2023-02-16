@@ -19,7 +19,6 @@ internal class InMemoryCache : Cache {
     override var activityClass: Class<out Activity> = CallActivity::class.java
 
     override fun clear() {
-        applicationId = ""
         identity = ""
         inAppCallsEnabled = false
         activityClass = CallActivity::class.java

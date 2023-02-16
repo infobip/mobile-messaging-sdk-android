@@ -37,14 +37,15 @@ internal object Injector {
     private var webrtcUi: InfobipRtcUi? = null
 
     fun getWebrtcUi(context: Context): InfobipRtcUi {
-        appContext = context.applicationContext
+        if (!::appContext.isInitialized)
+            appContext = context.applicationContext
         return webrtcUi ?: InfobipRtcUiImpl(
-                context,
-                tokenProvider,
-                cache,
-                callsDelegate,
-                callsScope,
-                pushIdDelegate
+            appContext,
+            tokenProvider,
+            cache,
+            callsDelegate,
+            callsScope,
+            pushIdDelegate
         ).also { webrtcUi = it }
     }
 }

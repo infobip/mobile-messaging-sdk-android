@@ -29,6 +29,7 @@ abstract class IncomingCallService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
+        Log.d(TAG, "On new FCM token: $token")
         MobileMessagingFirebaseService.onNewToken(this, token)
         onNewTokenDelegate(token)
     }

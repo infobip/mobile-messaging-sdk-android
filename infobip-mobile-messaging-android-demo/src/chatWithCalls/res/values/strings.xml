@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="main_activity_title">Chat with calls example</string>
-    <string name="mm_open_chat">Open chat</string>
-    <string name="mm_personalize">Personalize</string>
-    <string name="mm_depersonalize">Depersonalize</string>
-    <string name="action_registration_id_copy">Registration ID</string>
-    <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
+    <string name="enable_calls">Enable calls</string>
+    <string name="disable_calls">Disable calls</string>
 </resources>
