@@ -47,6 +47,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -56,6 +57,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
 
+    private final String TAG = "DemoApp";
     private final String EXTRA_AUTH_DATA = "org.infobip.mobile.messaging.demo.MainActivity.EXTRA_AUTH_DATA";
     /**
      * Widget ID
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             try {
                 LocalBroadcastManager.getInstance(this).unregisterReceiver(pushRegIdReceiver);
             } catch (Throwable t) {
-                Log.e("MainActivity", "Unable to unregister pushRegIdReceiverRegistered", t);
+                MobileMessagingLogger.e(TAG, "Unable to unregister pushRegIdReceiverRegistered", t);
             }
         }
         super.onDestroy();
@@ -161,7 +163,16 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         } else if (item.getGroupId() == R.id.languages) {
             String language = langMenuIdToLocale(item.getItemId());
             //change language of chat view
-            InAppChat.getInstance(MainActivity.this).setLanguage(language);
+            InAppChat.getInstance(MainActivity.this).setLanguage(language, new MobileMessaging.ResultListener<String>() {
+                @Override
+                public void onResult(Result<String, MobileMessagingError> result) {
+                    if (result.isSuccess()) {
+                        MobileMessagingLogger.d(TAG, "Language changed to " + result.getData());
+                    } else {
+                        MobileMessagingLogger.d(TAG, "Failed to change language, reason: " + result.getError().getMessage());
+                    }
+                }
+            });
         }
         return super.onOptionsItemSelected(item);
     }
@@ -215,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "uk-UA";
         else if (menuId == R.id.japanese)
             return "ja-JP";
+        else if (menuId == R.id.german)
+            return "de-DE";
         else return null;
     }
 
@@ -278,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                 if (authData != null) {
                     jwt = createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
                 }
-                MobileMessagingLogger.d("Providing JWT for " + authData + " = " + jwt);
+                MobileMessagingLogger.d(TAG, "Providing JWT for " + authData + " = " + jwt);
                 return jwt;
             });
 

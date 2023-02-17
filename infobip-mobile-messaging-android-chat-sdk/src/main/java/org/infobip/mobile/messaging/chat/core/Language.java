@@ -28,7 +28,8 @@ enum Language {
     FRENCH("fr-FR"),
     SLOVENIAN("sl-SI"),
     UKRAINIAN("uk-UA"),
-    JAPANESE("ja-JP");
+    JAPANESE("ja-JP"),
+    GERMAN("de-DE");
 
     private final String locale;
 
@@ -49,9 +50,7 @@ enum Language {
                     return l;
                 }
             }
-            return null;
-        } else {
-            return null;
         }
+        return null;
     }
 }

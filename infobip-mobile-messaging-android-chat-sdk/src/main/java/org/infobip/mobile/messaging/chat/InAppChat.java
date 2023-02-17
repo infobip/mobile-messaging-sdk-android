@@ -107,7 +107,7 @@ public abstract class InAppChat {
      * @see MobileMessaging.ResultListener
      */
 
-    public abstract void setLanguage(String language, MobileMessaging.ResultListener<Void> resultListener);
+    public abstract void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener);
 
     /**
      * Set contextual data of the widget

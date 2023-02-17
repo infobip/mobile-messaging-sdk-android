@@ -6,6 +6,11 @@ import android.content.res.Resources;
 import android.os.Build;
 
 import androidx.annotation.StringRes;
+import androidx.core.os.ConfigurationCompat;
+import androidx.core.os.LocaleListCompat;
+
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.Locale;
 
@@ -16,7 +21,7 @@ public class LocalizationUtils {
     private Resources resources;
 
     private LocalizationUtils(Context context) {
-        this.appContext = context.getApplicationContext();
+        appContext = context.getApplicationContext();
         resources = context.getResources();
     }
 
@@ -26,21 +31,6 @@ public class LocalizationUtils {
         }
 
         return INSTANCE;
-    }
-
-    public static Locale localeFromString(String locale) {
-        try {
-            String language;
-            if (locale.startsWith("zh") || !locale.contains("-")) {
-                language = locale;
-            } else {
-                language = locale.substring(0, locale.indexOf('-'));
-            }
-
-            return new Locale(language);
-        } catch (Throwable ignored) {
-            return Locale.getDefault();
-        }
     }
 
     public Context updateContext() {
@@ -70,6 +60,43 @@ public class LocalizationUtils {
         Configuration conf = appContext.getResources().getConfiguration();
         conf.locale = locale;
         resources = new Resources(appContext.getAssets(), appContext.getResources().getDisplayMetrics(), conf);
+    }
+
+    public Locale localeFromString(String language) {
+        try {
+            if (StringUtils.isBlank(language)) {
+                MobileMessagingLogger.d("Language is empty, using device default locale.");
+                return getApplicationLocale();
+            }
+
+            if (language.contains("-")) {
+                return parseLocaleWithDelimiter(language, "-");
+            } else if (language.contains("_")) {
+                return parseLocaleWithDelimiter(language, "_");
+            } else {
+                return new Locale(language);
+            }
+        } catch (Throwable ignored) {
+            MobileMessagingLogger.e("Could not parse language, using device default locale.", ignored);
+            return getApplicationLocale();
+        }
+    }
+
+    private Locale parseLocaleWithDelimiter(String language, String delimiter) {
+        String[] parts = language.split(delimiter);
+        if (parts.length >= 3) {
+            return new Locale(parts[0], parts[1], parts[2]);
+        } else if (parts.length == 2) {
+            return new Locale(parts[0], parts[1]);
+        } else if (parts.length == 1) {
+            return new Locale(parts[0]);
+        } else {
+            return new Locale(language);
+        }
+    }
+
+    private Locale getApplicationLocale() {
+        return ConfigurationCompat.getLocales(appContext.getResources().getConfiguration()).get(0);
     }
 
 }
