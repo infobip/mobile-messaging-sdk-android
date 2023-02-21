@@ -2,7 +2,6 @@ package com.infobip.webrtc.ui.delegate
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.infobip.webrtc.sdk.api.InfobipRTC
 import com.infobip.webrtc.sdk.api.application.ApplicationCall
 import com.infobip.webrtc.sdk.api.application.IncomingApplicationCall
@@ -18,7 +17,7 @@ import com.infobip.webrtc.sdk.api.event.rtc.IncomingApplicationCallEvent
 import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.video.ScreenCapturer
 import com.infobip.webrtc.sdk.impl.event.DefaultApplicationCallEventListener
-import com.infobip.webrtc.sdk.impl.event.DefaultIncomingCallEventListener
+import com.infobip.webrtc.sdk.impl.event.DefaultIncomingApplicationCallEventListener
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.service.OngoingCallService
@@ -182,7 +181,7 @@ internal class CallsDelegateImpl(
         InfobipRTC.handleIncomingApplicationCall(
             data,
             context,
-            IncomingCallListener(context, callsScope, data)
+            IncomingApplicationCallListener(context, callsScope, data)
         )
     }
 
@@ -190,7 +189,7 @@ internal class CallsDelegateImpl(
         InfobipRTC.registerForActiveConnection(
             token,
             context,
-            IncomingCallListener(context, callsScope, mapOf())
+            IncomingApplicationCallListener(context, callsScope, mapOf())
         )
     }
 
@@ -200,16 +199,17 @@ internal class CallsDelegateImpl(
         }
     }
 
-    private class IncomingCallListener(
+    private class IncomingApplicationCallListener(
         private val context: Context,
         private val callsScope: CoroutineScope,
         private val data: Map<String, String>
-    ) : DefaultIncomingCallEventListener() {
+    ) : DefaultIncomingApplicationCallEventListener() {
 
         override fun onIncomingApplicationCall(incomingApplicationCallEvent: IncomingApplicationCallEvent?) {
             incomingApplicationCallEvent?.incomingApplicationCall?.let { call ->
-                if (call.callOptions().customData.isNullOrEmpty()) {
-                    call.callOptions().customData = data
+                val customData = call.options().customData
+                if (customData.isNullOrEmpty()) {
+                    customData.putAll(data)
                 }
                 val name = call.fromDisplayName()?.takeIf { it.isNotEmpty() } ?: call.from()
                 ?: context.getString(R.string.mm_unknown)

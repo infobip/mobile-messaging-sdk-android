@@ -194,7 +194,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {
-                viewModel.updateState { copy(remoteVideoTrack = participantCameraVideoAddedEvent?.videoTrack) }
+                viewModel.updateState { copy(remoteVideoTrack = participantCameraVideoAddedEvent?.track) }
             }
 
             override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {
@@ -202,7 +202,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {
-                viewModel.updateState { copy(screenShareTrack = participantScreenShareAddedEvent?.videoTrack) }
+                viewModel.updateState { copy(screenShareTrack = participantScreenShareAddedEvent?.track) }
             }
 
             override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {

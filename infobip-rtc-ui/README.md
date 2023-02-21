@@ -9,14 +9,21 @@
 - [Customising the calls UI](#customising-the-calls-ui)
 - [Firebase Messaging Service delegation](#firebase-messaging-service-delegation)
 
-
 # Intro
 
-InfobipRtcUi is an easy to use library, that allows you to connect to [Infobip RTC](https://github.com/infobip/infobip-rtc-android) by just building library. This assumes, though, that the initial setups of [Mobile Push Notifications](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/README.md) and the [Infobip RTC](https://www.infobip.com/docs/voice-and-video/webrtc#set-up-web-and-in-app-calls) are set in both, your account and your mobile app profile.
+InfobipRtcUi is an easy to use library, that allows you to connect to [Infobip RTC](https://github.com/infobip/infobip-rtc-android) by just building library. This assumes, though, that the initial
+setups of [Mobile Push Notifications](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/README.md) and
+the [Infobip RTC](https://www.infobip.com/docs/voice-and-video/webrtc#set-up-web-and-in-app-calls) are set in both, your account and your mobile app profile.
 
-InfobipRtcUi takes care of everything: the registration of your device (in order to receive and trigger calls), the handle of the calls themselves, and offers you a powerful user interface with all the features your customer may need: ability to capture video through both, front and back camera, option to mute and use the speaker, ability to capture and share the screen of your mobile device, option to minimise the call UI in a picture-on-picture mode, and more.
+InfobipRtcUi takes care of everything: the registration of your device (in order to receive and trigger calls), the handle of the calls themselves, and offers you a powerful user interface with all
+the features your customer may need: ability to capture video through both, front and back camera, option to mute and use the speaker, ability to capture and share the screen of your mobile device,
+option to minimise the call UI in a picture-on-picture mode, and more.
 
-InfobipRtcUi also allows you to take control in any step of the flow, if you wish or need so, you can become a delegate for the FirebaseMessagingService or use your own custom user interface to handle the calls, it is up to you.
+InfobipRtcUi also allows you to take control in any step of the flow, if you wish or need so, you can become a delegate for the FirebaseMessagingService or use your own custom user interface to handle
+the calls, it is up to you.
+
+Currently, InfobipRtcUi is oriented to calls with Infobip Conversation's agents; P2P calls and channel specific call types are not yet supported (though you can still manually integrate them
+with [Infobip RTC](https://github.com/infobip/infobip-rtc-android).
 
 # Requirements
 
@@ -39,7 +46,7 @@ handled by library UI components. There are also another four `normal` permissio
 1. Include InfobipRtcUi dependency
 
     ```gradle
-    implementation ('com.infobip:infobip-rtc-ui:7.3.0') {
+    implementation ('com.infobip:infobip-rtc-ui:7.3.0-rc3') {
         transitive = true
     }
     ```
@@ -90,7 +97,7 @@ handled by library UI components. There are also another four `normal` permissio
     
             new InfobipRtcUi.Builder(getApplication())
                  .applicationId("WebRTC application ID") //optional step, builder provided ID has precedent over ID provided in resources
-                 .enableInAppCalls() //optional step, enables calls immediatelly 
+                 .enableInAppCalls() //optional step, enables calls immediately 
                  .build();
         }
     }
@@ -179,9 +186,12 @@ The UI for interacting with the calls is important. For this reason, we offer se
 
 # Firebase Messaging Service delegation
 
-Let's assume that you use FCM to process push from native backend and you don't want to migrate all the code to use Infobip - there's still some use case where you want to send notifications directly to Firebase. In that case you have your own service that extends FirebaseMessagingService. Infobip's SDK also extends the same service and if your service is registered in manifest, Infobip's service won't be used for message handling (won't be able to receive calls).
+Let's assume that you use FCM to process push from native backend and you don't want to migrate all the code to use Infobip - there's still some use case where you want to send notifications directly
+to Firebase. In that case you have your own service that extends FirebaseMessagingService. Infobip's SDK also extends the same service and if your service is registered in manifest, Infobip's service
+won't be used for message handling (won't be able to receive calls).
 
-To solve this issue you need to extend `IncomingCallService` and put your current Firebase implementation there. Mobile Messaging SDK message and token handling is covered by `IncomingCallService`.<mark>Don't forget to register your service</mark> in `Manifest.xml`.
+To solve this issue you need to extend `IncomingCallService` and put your current Firebase implementation there. Mobile Messaging SDK message and token handling is covered by `IncomingCallService`.
+<mark>Don't forget to register your service</mark> in `Manifest.xml`.
 
 Kotlin
 
@@ -219,13 +229,12 @@ class YourIncomingCallService extends IncomingCallService {
 </p>
 </details>
 
-
 ```xml
 <service
-   android:name=".YourIncomingCallService"
-   android:exported="false">
-   <intent-filter>
-      <action android:name="com.google.firebase.MESSAGING_EVENT" />
-   </intent-filter>
+    android:name=".YourIncomingCallService"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+    </intent-filter>
 </service>
 ```
