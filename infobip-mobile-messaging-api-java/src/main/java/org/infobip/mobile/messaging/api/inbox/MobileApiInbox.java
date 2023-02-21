@@ -27,8 +27,8 @@ public interface MobileApiInbox {
     @HttpRequest(method = HttpMethod.GET, value = "user/{externalUserId}/inbox/gcm/messages")
     FetchInboxResponse fetchInbox(@Path(name = "externalUserId") String externalUserId,
                                   @Header(name = "Authorization") String accessToken,
-                                  @Query(name = "from") String from,
-                                  @Query(name = "to") String to,
+                                  @Query(name = "dateTimeFrom") String from,
+                                  @Query(name = "dateTimeTo") String to,
                                   @Query(name = "messageTopic") String topic,
                                   @Query(name = "limit") Integer limit);
 
@@ -36,8 +36,8 @@ public interface MobileApiInbox {
     @HttpRequest(method = HttpMethod.GET, value = "user/{externalUserId}/inbox/{cloudType}/messages")
     FetchInboxResponse fetchInbox(@Path(name = "externalUserId") String externalUserId,
                                   @Header(name = "Authorization") String accessToken,
-                                  @Query(name = "from") String from,
-                                  @Query(name = "to") String to,
+                                  @Query(name = "dateTimeFrom") String from,
+                                  @Query(name = "dateTimeTo") String to,
                                   @Query(name = "messageTopic") String topic,
                                   @Query(name = "limit") Integer limit,
                                   @Path(name = "cloudType") String cloudType);
