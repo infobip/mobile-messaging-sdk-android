@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="main_activity_button_open_title">Go to chat screen</string>
     <string name="mm_open_chat">Open chat</string>
     <string name="mm_personalize">Personalize</string>
@@ -36,6 +36,7 @@
     <string name="slovenian">Slovenščina</string>
     <string name="ukrainian">украї́нська</string>
     <string name="english">English</string>
+    <string name="german">German</string>
 
     <string-array name="subject_types">
         <item>E-mail</item>
