@@ -71,11 +71,11 @@
             }
         })
 
-        function setLanguage(language) {
+        window.setLanguage = function(language) {
             liveChat(SET_LANGUAGE, language, errorCallback);
         }
 
-        function sendContextualData(data, strategy) {
+        window.sendContextualData = function(data, strategy) {
              liveChat(
                 SEND_CONTEXTUAL_DATA,
                 {

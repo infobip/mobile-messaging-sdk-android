@@ -331,9 +331,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void setLanguage(String language) {
-        setLanguage(language, new MobileMessaging.ResultListener<Void>() {
+        setLanguage(language, new MobileMessaging.ResultListener<String>() {
             @Override
-            public void onResult(Result<Void, MobileMessagingError> result) {
+            public void onResult(Result<String, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
                     MobileMessagingLogger.e("Set language error: " + result.getError().getMessage());
                 }
@@ -342,17 +342,17 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public void setLanguage(String language, MobileMessaging.ResultListener<Void> resultListener) {
+    public void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener) {
         try {
+            LocalizationUtils localizationUtils = LocalizationUtils.getInstance(context);
+            Locale locale = localizationUtils.localeFromString(language);
+            String appliedLocale = locale.toString();
+            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, appliedLocale);
             if (inAppChatWVFragment != null) {
-                inAppChatWVFragment.setLanguage(language);
+                inAppChatWVFragment.setLanguage(locale);
             }
-            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, language);
-
-            Locale locale = LocalizationUtils.localeFromString(language);
-            LocalizationUtils.getInstance(context).setLanguage(locale);
             if (resultListener != null) {
-                resultListener.onResult(new Result<>(null));
+                resultListener.onResult(new Result<>(appliedLocale));
             }
         } catch (Throwable t) {
             if (resultListener != null) {

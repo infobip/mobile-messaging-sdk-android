@@ -57,7 +57,7 @@ public class InAppChatClientImpl implements InAppChatClient {
     public void setLanguage(String language) {
         if (webView != null && !language.isEmpty()) {
             Language supportedLanguage = Language.findLanguage(language);
-            String script = buildWidgetMethodInvocation(setLanguage.name(), isOSOlderThanKitkat(), supportedLanguage != null ? supportedLanguage.getLocale() : language);
+            String script = buildWidgetMethodInvocation(setLanguage.name(), isOSOlderThanKitkat(), supportedLanguage != null ? supportedLanguage.getLocale() : Language.ENGLISH.getLocale());
             webView.evaluateJavascriptMethod(script, null);
         }
     }

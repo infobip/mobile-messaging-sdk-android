@@ -65,6 +65,10 @@ public class MobileApiInboxTest {
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.GET);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(4);
+        assertThat(debugServer.getQueryParameter("dateTimeFrom")).isEqualTo("12345");
+        assertThat(debugServer.getQueryParameter("dateTimeTo")).isEqualTo("23456");
+        assertThat(debugServer.getQueryParameter("messageTopic")).isEqualTo("some_topic");
+        assertThat(debugServer.getQueryParameter("limit")).isEqualTo("10");
         assertThat(response.getCountTotal()).isEqualTo(0);
         assertThat(response.getCountUnread()).isEqualTo(0);
     }
@@ -136,6 +140,10 @@ public class MobileApiInboxTest {
         assertThat(debugServer.getRequestCount()).isEqualTo(1);
         assertThat(debugServer.getRequestMethod()).isEqualTo(NanoHTTPD.Method.GET);
         assertThat(debugServer.getQueryParametersCount()).isEqualTo(4);
+        assertThat(debugServer.getQueryParameter("dateTimeFrom")).isEqualTo("12345");
+        assertThat(debugServer.getQueryParameter("dateTimeTo")).isEqualTo("23456");
+        assertThat(debugServer.getQueryParameter("messageTopic")).isEqualTo("some_topic");
+        assertThat(debugServer.getQueryParameter("limit")).isEqualTo("10");
         assertThat(response.getCountTotal()).isEqualTo(2);
         assertThat(response.getCountUnread()).isEqualTo(1);
         assertThat(response.getMessages().size()).isEqualTo(2);

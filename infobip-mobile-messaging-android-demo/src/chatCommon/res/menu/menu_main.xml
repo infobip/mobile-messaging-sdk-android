@@ -128,5 +128,11 @@
             android:enabled="true"
             android:title="@string/japanese"
             app:showAsAction="never" />
+
+        <item
+            android:id="@+id/german"
+            android:enabled="true"
+            android:title="@string/german"
+            app:showAsAction="never" />
     </group>
 </menu>
