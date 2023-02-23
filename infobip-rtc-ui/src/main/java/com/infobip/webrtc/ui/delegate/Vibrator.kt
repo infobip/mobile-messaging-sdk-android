@@ -6,7 +6,7 @@ import android.os.CombinedVibration
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.annotation.RequiresApi
-
+import android.os.Vibrator as VibratorService
 internal interface Vibrator {
     fun vibrate()
     fun stopVibrate()
@@ -28,32 +28,32 @@ internal class VibratorImpl(appContext: Context) : Vibrator {
     @RequiresApi(Build.VERSION_CODES.S)
     private class VibratorManagerImpl(appContext: Context, pattern: LongArray) : Vibrator {
         private val effect = CombinedVibration.createParallel(VibrationEffect.createWaveform(pattern, 0))
-        private val vibrator: VibratorManager? = appContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+        private val vibratorManager: VibratorManager? = appContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
 
         override fun vibrate() {
-            vibrator?.vibrate(effect)
+            vibratorManager?.vibrate(effect)
         }
 
         override fun stopVibrate() {
-            vibrator?.cancel()
+            vibratorManager?.cancel()
         }
 
     }
 
     @Suppress("DEPRECATION")
     private class VibratorServiceImpl(appContext: Context, private val pattern: LongArray) : Vibrator {
-        private val vibrator: android.os.Vibrator? = appContext.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+        private val vibratorService: VibratorService? = appContext.getSystemService(Context.VIBRATOR_SERVICE) as? VibratorService
 
         override fun vibrate() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
+                vibratorService?.vibrate(VibrationEffect.createWaveform(pattern, 0))
             } else {
-                vibrator?.vibrate(pattern, 0)
+                vibratorService?.vibrate(pattern, 0)
             }
         }
 
         override fun stopVibrate() {
-            vibrator?.cancel()
+            vibratorService?.cancel()
         }
 
     }

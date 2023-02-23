@@ -36,7 +36,6 @@
     <string name="slovenian">Slovenščina</string>
     <string name="ukrainian">украї́нська</string>
     <string name="english">English</string>
-    <string name="german">German</string>
 
     <string-array name="subject_types">
         <item>E-mail</item>

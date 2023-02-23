@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,11 +26,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.infobip.webrtc.ui.InfobipRtcUi;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -44,10 +38,6 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONObject;
-
-import java.util.Date;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
 
@@ -119,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             try {
                 LocalBroadcastManager.getInstance(this).unregisterReceiver(pushRegIdReceiver);
             } catch (Throwable t) {
-                MobileMessagingLogger.e("MainActivity", "Unable to unregister pushRegIdReceiverRegistered", t);
+                MobileMessagingLogger.e("MainActivity", "Unable to unregister pushRegIdReceiver", t);
             }
         }
         super.onDestroy();
