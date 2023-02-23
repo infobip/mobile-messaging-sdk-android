@@ -1,0 +1,3 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="main_activity_title" tools:ignore="MissingTranslation">Chat Example</string>
+</resources>
