@@ -1,45 +1,42 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="main_activity_button_open_title">Go to chat screen</string>
-    <string name="mm_open_chat">Open chat</string>
-    <string name="mm_personalize">Personalize</string>
-    <string name="mm_depersonalize">Depersonalize</string>
     <string name="action_registration_id_copy">Registration ID</string>
-    <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
-    <string name="push_registration_id">Push registration ID</string>
-    <string name="subject_type">Subject type</string>
-    <string name="customer_name">Customer name</string>
-    <string name="subject">Subject</string>
-    <string name="open_auth_chat">Open authenticated chat</string>
-
-    <string name="turkish">Türkçe</string>
-    <string name="korean">한국어</string>
-    <string name="russian">Русский</string>
-    <string name="japanese">日本語</string>
-    <string name="chinese">繁體中文</string>
-    <string name="spanish">Español</string>
-    <string name="portuguese">Português</string>
-    <string name="polish">Polski</string>
-    <string name="romanian">Românește</string>
     <string name="arabic">العربية</string>
     <string name="bosnian">босански</string>
+    <string name="chinese">繁體中文</string>
     <string name="croatian">Hrvatski</string>
-    <string name="greek">Ελληνικά</string>
-    <string name="swedish">Svenska</string>
-    <string name="thai">Thai</string>
-    <string name="lithuanian">Lietuvių</string>
+    <string name="customer_name">Customer name</string>
     <string name="danish">Dansk</string>
-    <string name="latvian">Latviešu</string>
+    <string name="english">English</string>
+    <string name="french">Français</string>
+    <string name="greek">Ελληνικά</string>
     <string name="hungarian">Magyar</string>
     <string name="italian">Italiano</string>
-    <string name="french">Français</string>
+    <string name="japanese">日本語</string>
+    <string name="korean">한국어</string>
+    <string name="latvian">Latviešu</string>
+    <string name="lithuanian">Lietuvių</string>
+    <string name="main_activity_button_open_title">Go to chat screen</string>
+    <string name="mm_depersonalize">Depersonalize</string>
+    <string name="mm_open_chat">Open chat</string>
+    <string name="mm_personalize">Personalize</string>
+    <string name="open_auth_chat">Open authenticated chat</string>
+    <string name="polish">Polski</string>
+    <string name="portuguese">Português</string>
+    <string name="push_registration_id">Push registration ID</string>
+    <string name="romanian">Românește</string>
+    <string name="russian">Русский</string>
     <string name="slovenian">Slovenščina</string>
-    <string name="ukrainian">украї́нська</string>
-    <string name="english">English</string>
-
+    <string name="spanish">Español</string>
+    <string name="subject">Subject</string>
+    <string name="subject_type">Subject type</string>
     <string-array name="subject_types">
         <item>E-mail</item>
         <item>Phone number</item>
         <item>External person ID</item>
     </string-array>
+    <string name="swedish">Svenska</string>
+    <string name="thai">Thai</string>
+    <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
+    <string name="turkish">Türkçe</string>
+    <string name="ukrainian">украї́нська</string>
 </resources>
