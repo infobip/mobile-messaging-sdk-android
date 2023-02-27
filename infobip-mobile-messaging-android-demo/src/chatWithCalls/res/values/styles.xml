@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- uncomment to override webrtc-ui style -->
+<!--    <style name="InfobipRtcUi">-->
+<!--        <item name="rtc_ui_color_foreground">#666666</item>-->
+<!--        <item name="rtc_ui_color_notification">#009900</item>-->
+<!--        <item name="rtc_ui_color_actions_background">#15666666</item>-->
+<!--        <item name="rtc_ui_color_actions_background_checked">#222222</item>-->
+<!--        <item name="rtc_ui_color_actions_icon">#222222</item>-->
+<!--        <item name="rtc_ui_color_actions_icon_checked">#B2fff0f0</item>-->
+<!--        <item name="rtc_ui_color_text_secondary">#7A666666</item>-->
+<!--        <item name="rtc_ui_color_background">#fff0f0</item>-->
+<!--        <item name="rtc_ui_color_overlay_background">#80666666</item>-->
+<!--        <item name="rtc_ui_color_alert_background">#99f00000</item>-->
+<!--        <item name="rtc_ui_color_accept">#000000</item>-->
+<!--        <item name="rtc_ui_color_hangup">#999999</item>-->
+<!--    </style>-->
+</resources>

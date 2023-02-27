@@ -1,0 +1,139 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.2.2'
+    }
+}
+
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
+}
+
+android {
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion mm_targetSdkVersion
+
+        versionCode 1
+        versionName project.version
+
+        // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
+        // https://issuetracker.google.com/issues/154275579
+        buildConfigField "String", "VERSION_NAME", "\"$versionName\""
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+dependencies {
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    def kotlin_version = "1.7.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    def lifecycle_version = "2.5.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.fragment:fragment-ktx:1.5.4"
+    implementation project(":infobip-mobile-messaging-android-sdk")
+    implementation "androidx.core:core-ktx:1.9.0"
+    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation "com.google.android.material:material:1.6.1"
+    api("com.infobip:infobip-rtc:1.13.0@aar") {
+        transitive = true
+    }
+
+    testImplementation "junit:junit:4.13.2"
+
+    androidTestImplementation "androidx.test.ext:junit:1.1.3"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
+
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.8"
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
+        Task javaCompileTask
+        if (variant.hasProperty('javaCompileProvider')) {
+            // Android 3.3.0+
+            javaCompileTask = variant.javaCompileProvider.get()
+        } else {
+            javaCompileTask = variant.javaCompile
+        }
+
+        dependsOn javaCompileTask
+        from javaCompileTask.destinationDir
+
+        manifest {
+            attributes(
+                    "Bundle-Name": 'parse-android',
+                    "Bundle-Version": project.version
+            )
+        }
+
+        exclude '**/R.class'
+        exclude '**/R\$*.class'
+        exclude '**/Manifest.class'
+        exclude '**/Manifest\$*.class'
+        exclude '**/BuildConfig.class'
+    }
+
+    artifacts {
+        archives jar
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    archiveClassifier.set('sources')
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+ext {
+    PUBLISH_ARTIFACT_ID = 'infobip-rtc-ui'
+}
+apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"

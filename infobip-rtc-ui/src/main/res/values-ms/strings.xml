@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">Terima</string>
+    <string name="mm_decline">Tolak</string>
+    <string name="mm_cancel">Batal</string>
+    <string name="mm_ok">Okey</string>
+    <string name="mm_video_call">Panggilan video</string>
+    <string name="mm_flip_camera">Balikkan kamera</string>
+    <string name="mm_speaker">Penceramah</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_screen_share">Perkongsian skrin</string>
+    <string name="mm_calls_notification_channel">Panggilan</string>
+    <string name="mm_in_call_notification_channel">Dalam panggilan</string>
+    <string name="mm_is_calling">sedang memanggil</string>
+    <string name="mm_incoming_call">Panggilan masuk</string>
+    <string name="mm_unknown">Tidak diketahui</string>
+    <string name="mm_call_finished">Panggilan selesai</string>
+    <string name="mm_audio_permission_required">Kebenaran audio diperlukan untuk mengendalikan panggilan.</string>
+    <string name="mm_weak_internet_connection">Sambungan internet yang lemah</string>
+    <string name="mm_microphone_muted">Disenyapkan</string>
+    <string name="mm_unknown_error">Ralat tidak diketahui</string>
+    <string name="mm_unmute">Nyahredam</string>
+    <string name="mm_mute">bisu</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_hangup">Letak gagang</string>
+    <string name="mm_video_permission_required">Kebenaran kamera diperlukan untuk panggilan video.</string>
+    <string name="mm_screen_sharing">Perkongsian skrin</string>
+    <string name="mm_screen_sharing_description">Skrin anda dikongsi</string>
+    <string name="mm_in_call">Dalam panggilan</string>
+</resources>

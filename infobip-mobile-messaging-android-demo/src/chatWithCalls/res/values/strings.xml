@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="main_activity_title">Chat with calls example</string>
+    <string name="enable_calls">Enable calls</string>
+    <string name="disable_calls">Disable calls</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="InfobipRtcUi.Call" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/rtc_ui_primary</item>
+        <item name="colorOnPrimary">@color/rtc_ui_foreground</item>
+        <item name="colorSecondary">@color/rtc_ui_background</item>
+        <item name="colorOnSecondary">@color/rtc_ui_foreground</item>
+        <item name="android:colorBackground">@color/rtc_ui_background</item>
+        <item name="colorOnBackground">@color/rtc_ui_foreground</item>
+        <item name="colorSurface">@color/rtc_ui_background</item>
+        <item name="colorOnSurface">@color/rtc_ui_foreground</item>
+        <item name="colorError">@color/rtc_ui_error</item>
+        <item name="colorControlNormal">@color/rtc_ui_foreground</item>
+        <item name="colorControlActivated">@color/rtc_ui_background</item>
+        <item name="android:textColorPrimary">@color/rtc_ui_foreground</item>
+        <item name="android:textColorSecondary">@color/rtc_ui_text_secondary</item>
+        <item name="alertDialogTheme">@style/AlertDialogTheme.Calls</item>
+        <item name="android:statusBarColor">@color/rtc_ui_background</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
+        <item name="android:navigationBarColor" tools:ignore="NewApi">@color/rtc_ui_background</item>
+        <item name="android:navigationBarDividerColor" tools:ignore="NewApi">@color/rtc_ui_background</item>
+        <item name="infobipRtcUiStyle">@style/InfobipRtcUi</item>
+    </style>
+</resources>

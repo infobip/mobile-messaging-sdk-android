@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="rtc_ui_in_call_fragment_buttons_flow_max_element_wrap">3</integer>
+</resources>

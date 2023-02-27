@@ -70,6 +70,12 @@ android {
             dimension "default"
         }
 
+        chatWithCalls {
+            dimension "default"
+            minSdkVersion 21
+            property(project, 'infobip_webrtc_application_id', 'INFOBIP_WEBRTC_APPLICATION_ID')?.with { resValue "string", "infobip_webrtc_application_id", delegate }
+        }
+
         deeplink {
             dimension "default"
         }
@@ -94,6 +100,20 @@ android {
             dimension "default"
         }
     }
+
+    sourceSets {
+        chatWithCalls {
+            java.srcDirs += "src/chatCommon/java"
+            kotlin.srcDirs += ["src/chatCommon/java", "src/chatCommon/kotlin"]
+            res.srcDirs += "src/chatCommon/res"
+        }
+        chat {
+            java.srcDirs += "src/chatCommon/java"
+            kotlin.srcDirs += ["src/chatCommon/java", "src/chatCommon/kotlin"]
+            res.srcDirs += "src/chatCommon/res"
+        }
+    }
+
 }
 
 dependencies {
@@ -107,13 +127,18 @@ dependencies {
     implementation project(":infobip-mobile-messaging-android-sdk")
     implementation project(":infobip-mobile-messaging-api-java")
     implementation project(":infobip-mobile-messaging-android-inbox-sdk")
+
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 
-    //To add JWT use build flavour "chat"
+    //To add WebRTC use build flavour "chatWithCalls"
+    chatWithCallsImplementation project(':infobip-rtc-ui')
+
+    //To add JWT use build flavour "chat" and "chatWithCalls"
     chatImplementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
+    chatWithCallsImplementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")

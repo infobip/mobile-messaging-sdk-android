@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">Prihvati</string>
+    <string name="mm_decline">Odbaci</string>
+    <string name="mm_cancel">Poništi</string>
+    <string name="mm_ok">OK</string>
+    <string name="mm_video_call">video poziv</string>
+    <string name="mm_flip_camera">preklopna kamera</string>
+    <string name="mm_speaker">zvučnik</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_screen_share">Dijeljenje zaslona</string>
+    <string name="mm_screen_sharing">dijeljenje zaslona</string>
+    <string name="mm_screen_sharing_description">vaš zaslon je podijeljen</string>
+    <string name="mm_in_call">u pozivu</string>
+    <string name="mm_video_permission_required">Za videopozive potrebna je dozvola kamere.</string>
+    <string name="mm_hangup">poklopi</string>
+    <string name="mm_video">video</string>
+    <string name="mm_mute">utišati</string>
+    <string name="mm_unmute">isključi zvuk</string>
+    <string name="mm_unknown_error">nepoznata pogreška</string>
+    <string name="mm_microphone_muted">prigušen</string>
+    <string name="mm_weak_internet_connection">Slaba internetska veza</string>
+    <string name="mm_audio_permission_required">Za upravljanje pozivima potrebno je audiodopuštenje.</string>
+    <string name="mm_call_finished">Poziv završen</string>
+    <string name="mm_calls_notification_channel">Pozivi</string>
+    <string name="mm_in_call_notification_channel">U pozivu</string>
+    <string name="mm_is_calling">zove</string>
+    <string name="mm_incoming_call">Dolazni poziv</string>
+    <string name="mm_unknown">Nepoznato</string>
+</resources>

@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:id="@+id/background">
+
+    <RelativeLayout
+        android:id="@+id/remoteVideoWrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.infobip.webrtc.sdk.api.video.VideoRenderer
+            android:id="@+id/remoteVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <!--    region Video-->
+    <View
+        android:id="@+id/toolbarBackground"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/rtc_ui_overlay_background"
+        android:paddingBottom="24dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/nameInVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Henry Ford" />
+
+    <ImageView
+        android:id="@+id/peerMuteIndicatorInVideo"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/nameInVideo"
+        app:layout_constraintStart_toEndOf="@id/nameInVideo"
+        app:layout_constraintTop_toTopOf="@id/nameInVideo"
+        app:srcCompat="@drawable/ic_unmute"
+        app:tint="@color/rtc_ui_foreground"
+        tools:visibility="gone" />
+
+    <View
+        android:id="@+id/nameDivider"
+        android:layout_width="1dp"
+        android:layout_height="11dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/rtc_ui_foreground"
+        app:layout_constraintBottom_toBottomOf="@+id/nameInVideo"
+        app:layout_constraintStart_toEndOf="@id/peerMuteIndicatorInVideo"
+        app:layout_constraintTop_toTopOf="@+id/nameInVideo" />
+
+    <TextView
+        android:id="@+id/elapsedTimeVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/nameInVideo"
+        app:layout_constraintStart_toEndOf="@+id/nameDivider"
+        app:layout_constraintTop_toTopOf="@+id/nameInVideo"
+        tools:text="00:10" />
+
+    <!--    endregion-->
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topQuarterGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <TextView
+        android:id="@+id/nameInPip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/elapsedTimeVoice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Henry Ford" />
+
+    <!--    region Voice-->
+    <TextView
+        android:id="@+id/nameInVoice"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/elapsedTimeVoice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/topQuarterGuideline"
+        tools:text="Henry Ford" />
+
+    <TextView
+        android:id="@+id/elapsedTimeVoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintEnd_toEndOf="@id/nameInVoice"
+        app:layout_constraintStart_toStartOf="@+id/nameInVoice"
+        app:layout_constraintTop_toBottomOf="@+id/nameInVoice"
+        tools:text="01:34" />
+
+    <ImageView
+        android:id="@+id/peerMuteIndicatorInVoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/nameInVoice"
+        app:layout_constraintStart_toEndOf="@id/nameInVoice"
+        app:layout_constraintTop_toTopOf="@id/nameInVoice"
+        app:srcCompat="@drawable/ic_unmute"
+        app:tint="@color/rtc_ui_foreground"
+        tools:visibility="gone" />
+    <!--    endregion-->
+
+    <ImageView
+        android:id="@+id/collapseCallButton"
+        style="@style/ViewRipple_Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_collapse"
+        app:tint="@color/rtc_ui_foreground" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/timeBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="false"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="elapsedTimeVideo, elapsedTimeVoice, nameInVideo, nameInVoice" />
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/buttonsFlow"
+        app:layout_constraintDimensionRatio="w,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/timeBarrier"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_user_grayscale"/>
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/buttonsFlow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="muteButton,videoButton,speakerButton,flipCamButton,screenShareButton"
+        app:flow_horizontalStyle="spread"
+        app:flow_maxElementsWrap="@integer/rtc_ui_in_call_fragment_buttons_flow_max_element_wrap"
+        app:flow_verticalGap="36dp"
+        app:flow_wrapMode="chain"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="48dp"
+        app:layout_constraintBottom_toTopOf="@id/hangupButton" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/muteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:checkedCircleBackground="@color/rtc_ui_foreground"
+        app:checkedIcon="@drawable/ic_mute"
+        app:checkedIconColor="@color/rtc_ui_actions_icon_checked"
+        app:circleBackground="@color/rtc_ui_actions_background"
+        app:icon="@drawable/ic_unmute"
+        app:iconColor="@color/rtc_ui_foreground" />
+
+    <TextView
+        android:id="@+id/muteLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/muteButton"
+        app:layout_constraintStart_toStartOf="@id/muteButton"
+        app:layout_constraintTop_toBottomOf="@id/muteButton"
+        android:text="@string/mm_microphone"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/mute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="muteButton, muteLabel" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/videoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:checkedCircleBackground="@color/rtc_ui_foreground"
+        app:checkedIcon="@drawable/ic_video"
+        app:checkedIconColor="@color/rtc_ui_actions_icon_checked"
+        app:circleBackground="@color/rtc_ui_actions_background"
+        app:icon="@drawable/ic_video_off"
+        app:iconColor="@color/rtc_ui_foreground" />
+
+    <TextView
+        android:id="@+id/videoLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/videoButton"
+        app:layout_constraintStart_toStartOf="@id/videoButton"
+        app:layout_constraintTop_toBottomOf="@id/videoButton"
+        android:text="@string/mm_video_call"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="videoButton, videoLabel" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/speakerButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:checkedCircleBackground="@color/rtc_ui_foreground"
+        app:checkedIcon="@drawable/ic_speaker"
+        app:checkedIconColor="@color/rtc_ui_actions_icon_checked"
+        app:circleBackground="@color/rtc_ui_actions_background"
+        app:icon="@drawable/ic_speaker_off"
+        app:iconColor="@color/rtc_ui_foreground"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/speakerLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/speakerButton"
+        app:layout_constraintStart_toStartOf="@id/speakerButton"
+        app:layout_constraintTop_toBottomOf="@id/speakerButton"
+        android:text="@string/mm_speaker"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/speaker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="speakerButton, speakerLabel" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/flipCamButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:checkedCircleBackground="@color/rtc_ui_foreground"
+        app:checkedIconColor="@color/rtc_ui_actions_icon_checked"
+        app:circleBackground="@color/rtc_ui_actions_background"
+        app:icon="@drawable/ic_flip_camera"
+        app:iconColor="@color/rtc_ui_foreground"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/flipCamLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/flipCamButton"
+        app:layout_constraintStart_toStartOf="@id/flipCamButton"
+        app:layout_constraintTop_toBottomOf="@id/flipCamButton"
+        android:text="@string/mm_flip_camera"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/flipCam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="flipCamButton, flipCamLabel" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/screenShareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:circleBackground="@color/rtc_ui_actions_background"
+        app:checkedCircleBackground="@color/rtc_ui_foreground"
+        app:checkedIconColor="@color/rtc_ui_actions_icon_checked"
+        app:icon="@drawable/ic_screen_share"
+        app:iconColor="@color/rtc_ui_foreground" />
+
+    <TextView
+        android:id="@+id/screenShareLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/rtc_ui_foreground"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/screenShareButton"
+        app:layout_constraintStart_toStartOf="@id/screenShareButton"
+        app:layout_constraintTop_toBottomOf="@id/screenShareButton"
+        android:text="@string/mm_screen_share"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/screenShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="screenShareButton, screenShareLabel" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/hangupButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:circleBackground="@color/rtc_ui_hangup"
+        app:icon="@drawable/ic_endcall"
+        app:iconColor="@color/rtc_ui_foreground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginVertical="48dp" />
+
+    <com.infobip.webrtc.ui.view.CallAlert
+        android:id="@+id/weakConnectionAlert"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:alertIcon="@drawable/ic_alert_triangle"
+        app:alertText="@string/mm_weak_internet_connection"
+        app:alertTextColor="@color/rtc_ui_foreground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/localVideoBarrier"
+        tools:visibility="gone" />
+
+    <com.infobip.webrtc.ui.view.CallAlert
+        android:id="@+id/mutedMicrophoneAlert"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:alertIcon="@drawable/ic_unmute"
+        app:alertIconTint="@color/rtc_ui_foreground"
+        app:alertText="@string/mm_microphone_muted"
+        app:alertTextColor="@color/rtc_ui_foreground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/weakConnectionAlert"
+        tools:visibility="gone" />
+
+    <com.infobip.webrtc.sdk.api.video.VideoRenderer
+        android:id="@+id/localVideo"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:visibility="gone"
+        app:layout_constraintDimensionRatio="1:1.6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.25"
+        app:layout_constraintTop_toBottomOf="@id/localVideoBarrier" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/videoGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="toolbarBackground,nameInVideo,nameDivider,elapsedTimeVideo" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/voiceGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:constraint_referenced_ids="nameInVoice,avatar" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/localVideoBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="collapseCallButton,toolbarBackground" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

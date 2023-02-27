@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/background">
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/logo"
+        app:layout_constraintTop_toTopOf="@+id/topQuarterGuideline"
+        tools:text="Caller" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/name"
+        app:layout_constraintEnd_toStartOf="@+id/name"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/name"
+        app:tint="@color/rtc_ui_foreground"
+        app:srcCompat="@drawable/ic_calls_30" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/decline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        app:circleBackground="@color/rtc_ui_hangup"
+        app:icon="@drawable/ic_clear_large"
+        app:iconColor="@color/rtc_ui_foreground"
+        app:layout_constraintBottom_toTopOf="@+id/bottomQuarterGuideline"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.infobip.webrtc.ui.view.CircleImageButton
+        android:id="@+id/accept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="48dp"
+        app:circleBackground="@color/rtc_ui_accept"
+        app:icon="@drawable/ic_calls_30"
+        app:iconColor="@color/rtc_ui_foreground"
+        app:layout_constraintBottom_toTopOf="@+id/bottomQuarterGuideline"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/bottomQuarterGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.85" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/topQuarterGuideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.15" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

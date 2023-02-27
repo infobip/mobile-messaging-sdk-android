@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">承認</string>
+    <string name="mm_decline">却下</string>
+    <string name="mm_cancel">キャンセル</string>
+    <string name="mm_ok">Ok</string>
+    <string name="mm_video_call">ビデオ通話</string>
+    <string name="mm_flip_camera">カメラを反転</string>
+    <string name="mm_speaker">スピーカー</string>
+    <string name="mm_microphone">マイクロフォン</string>
+    <string name="mm_screen_share">画面共有</string>
+    <string name="mm_calls_notification_channel">通話</string>
+    <string name="mm_in_call_notification_channel">通話中</string>
+    <string name="mm_is_calling">呼んでいる</string>
+    <string name="mm_incoming_call">電話の着信</string>
+    <string name="mm_unknown">わからない</string>
+    <string name="mm_call_finished">通話終了</string>
+    <string name="mm_audio_permission_required">通話を処理するには、音声の許可が必要です。</string>
+    <string name="mm_weak_internet_connection">インターネット接続が弱い</string>
+    <string name="mm_microphone_muted">ミュート</string>
+    <string name="mm_unknown_error">未知のエラー</string>
+    <string name="mm_unmute">ミュート解除</string>
+    <string name="mm_mute">ミュート</string>
+    <string name="mm_video">ビデオ</string>
+    <string name="mm_hangup">電話を切る</string>
+    <string name="mm_video_permission_required">ビデオ通話にはカメラの許可が必要です。</string>
+    <string name="mm_screen_sharing">画面共有</string>
+    <string name="mm_screen_sharing_description">あなたの画面は共有されています</string>
+    <string name="mm_in_call">通話中</string>
+</resources>

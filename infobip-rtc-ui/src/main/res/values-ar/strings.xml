@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_accept">قبول</string>
+    <string name="mm_decline">رفض</string>
+    <string name="mm_cancel">إلغاء</string>
+    <string name="mm_ok">حسنا</string>
+    <string name="mm_video_call">مكالمة فيديو</string>
+    <string name="mm_flip_camera">قلب الكاميرا</string>
+    <string name="mm_speaker">مكبر الصوت</string>
+    <string name="mm_microphone">ميكروفون</string>
+    <string name="mm_screen_share">حصة الشاشة</string>
+    <string name="mm_calls_notification_channel">المكالمات</string>
+    <string name="mm_in_call_notification_channel">في المكالمة</string>
+    <string name="mm_is_calling">يدعو</string>
+    <string name="mm_incoming_call">مكالمة واردة</string>
+    <string name="mm_unknown">مجهول</string>
+    <string name="mm_call_finished">انتهت المكالمة</string>
+    <string name="mm_audio_permission_required">مطلوب إذن الصوت للتعامل مع المكالمات.</string>
+    <string name="mm_weak_internet_connection">اتصال ضعيف بالإنترنت</string>
+    <string name="mm_microphone_muted">صامت</string>
+    <string name="mm_unknown_error">خطأ غير معروف</string>
+    <string name="mm_unmute">unmute</string>
+    <string name="mm_mute">كتم الصوت</string>
+    <string name="mm_video">فيديو</string>
+    <string name="mm_hangup">يشنق</string>
+    <string name="mm_video_permission_required">مطلوب إذن الكاميرا لمكالمات الفيديو.</string>
+    <string name="mm_screen_sharing">مشاركة الشاشة</string>
+    <string name="mm_screen_sharing_description">شاشتك مشتركة</string>
+    <string name="mm_in_call">في المكالمة</string>
+</resources>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ViewRipple_Borderless">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="AlertDialogTheme.Calls" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="buttonBarNegativeButtonStyle">@style/TextButton.AlertDialog.Calls</item>
+        <item name="buttonBarPositiveButtonStyle">@style/TextButton.AlertDialog.Calls</item>
+    </style>
+
+    <style name="TextButton.AlertDialog.Calls" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/rtc_ui_foreground</item>
+    </style>
+
+    <style name="InfobipRtcUi">
+        <item name="rtc_ui_color_foreground">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_color_notification">@color/rtc_ui_notification</item>
+        <item name="rtc_ui_color_actions_background">@color/rtc_ui_actions_background</item>
+        <item name="rtc_ui_color_actions_background_checked">@color/rtc_ui_actions_background_checked</item>
+        <item name="rtc_ui_color_actions_icon">@color/rtc_ui_actions_icon</item>
+        <item name="rtc_ui_color_actions_icon_checked">@color/rtc_ui_actions_icon_checked</item>
+        <item name="rtc_ui_color_text_secondary">@color/rtc_ui_text_secondary</item>
+        <item name="rtc_ui_color_background">@color/rtc_ui_background</item>
+        <item name="rtc_ui_color_overlay_background">@color/rtc_ui_overlay_background</item>
+        <item name="rtc_ui_color_alert_background">@color/rtc_ui_background</item>
+        <item name="rtc_ui_color_accept">@color/rtc_ui_accept</item>
+        <item name="rtc_ui_color_hangup">@color/rtc_ui_hangup</item>
+        <item name="rtc_ui_icon_unMute">@drawable/ic_unmute</item>
+        <item name="rtc_ui_icon_screenShare">@drawable/ic_screen_share</item>
+        <item name="rtc_ui_icon_avatar">@drawable/ic_user_grayscale</item>
+        <item name="rtc_ui_icon_video">@drawable/ic_video</item>
+        <item name="rtc_ui_icon_videoOff">@drawable/ic_video_off</item>
+        <item name="rtc_ui_icon_speaker">@drawable/ic_speaker</item>
+        <item name="rtc_ui_icon_speakerOff">@drawable/ic_speaker_off</item>
+        <item name="rtc_ui_icon_mute">@drawable/ic_mute</item>
+        <item name="rtc_ui_icon_accept">@drawable/ic_calls_30</item>
+        <item name="rtc_ui_icon_flipCamera">@drawable/ic_flip_camera</item>
+        <item name="rtc_ui_icon_endCall">@drawable/ic_endcall</item>
+        <item name="rtc_ui_icon_collapse">@drawable/ic_collapse</item>
+        <item name="rtc_ui_icon_decline">@drawable/ic_clear_large</item>
+        <item name="rtc_ui_icon_callsIcon">@drawable/ic_calls_30</item>
+        <item name="rtc_ui_icon_alertTriangle">@drawable/ic_alert_triangle</item>
+    </style>
+</resources>
