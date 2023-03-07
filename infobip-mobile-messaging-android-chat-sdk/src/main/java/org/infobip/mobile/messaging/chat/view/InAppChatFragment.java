@@ -357,6 +357,7 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
     }
 
     private void navigateBack() {
+        hideKeyboard(messageInput);
         if (isMultiThread() && currentWidgetView != null) {
             switch (currentWidgetView) {
                 case LOADING:
@@ -477,16 +478,19 @@ public class InAppChatFragment extends Fragment implements InAppChatWebViewManag
                 inputCheckerHandler.postDelayed(inputFinishChecker, USER_INPUT_CHECKER_DELAY_MS);
             }
         });
-        messageInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                FragmentActivity activity = getFragmentActivity();
-                if (activity != null && !hasFocus) {
-                    InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputManager.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-                }
+        messageInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                hideKeyboard(v);
             }
         });
+    }
+
+    private void hideKeyboard(View view) {
+        FragmentActivity activity = getFragmentActivity();
+        if (activity != null && view != null) {
+            InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
     private void fillButtonByPrimaryColor(ImageView buttonToFill) {
