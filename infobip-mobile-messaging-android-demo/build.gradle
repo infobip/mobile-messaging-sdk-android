@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion mm_compileSdkVersion
     buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
@@ -23,6 +23,7 @@ android {
         versionName version
         applicationId "org.infobip.mobile.messaging.demo"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -142,6 +143,8 @@ dependencies {
 
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
+
+    implementation 'com.android.support:multidex:2.0.1'
 }
 
 private static String property(Project project, String projectKey, String environmentKey) {

@@ -22,6 +22,12 @@ ext {
     mm_buildToolsVersion = "33.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "18.0.0"
+    mm_kotlinVersion = "1.7.20"
+    mm_constraintLayoutVersion = "2.1.4"
+    mm_appCompatVersion = "1.6.1"
+    mm_materialVersion = "1.8.0"
+    mm_coreKtxVersion = "1.9.0"
+    mm_desugarJdkVersion = "1.1.8"
 }
 
 allprojects {

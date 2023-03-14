@@ -1,6 +1,6 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- region Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -13,19 +13,41 @@
     </style>
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"/>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light"/>
+    <!--    endregion-->
 
-    <style name="IB_AppTheme.Chat">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="titleTextColor">@android:color/white</item>
+    <!-- region Custom InAppChat style. -->
+    <style name="InAppChat"/>
+
+    <style name="InAppChat.Demo.Toolbar" parent="InAppChat">
+        <item name="ibChatNavigationIconTint">@android:color/white</item>
+        <item name="ibChatTitleTextAppearance">@style/InAppChat.Demo.Toolbar.Title.TextAppearance</item>
+        <item name="ibChatTitleTextColor">@android:color/white</item>
+        <item name="ibChatTitleCentered">false</item>
     </style>
 
-    <style name="IB_AppTheme.ChatAttach">
-        <item name="colorPrimary">@color/black</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="titleTextColor">@android:color/white</item>
+    <style name="InAppChat.Demo.Toolbar.Title.TextAppearance" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textStyle">italic</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="InAppChat.Demo.Toolbar.AttachmentPreview" parent="InAppChat.Demo.Toolbar">
+        <item name="ibChatSubtitleCentered">true</item>
+    </style>
+
+    <style name="InAppChat.Demo.Input" parent="InAppChat">
+        <item name="ibChatInputBackgroundColor">@android:color/white</item>
+    </style>
+
+    <style name="InAppChat.Demo.Chat" parent="InAppChat">
+        <item name="ibChatBackgroundColor">@android:color/white</item>
+    </style>
+    <!--    endregion-->
+
+    <style name="IB_AppTheme.Chat">
+        <item name="ibChatToolbarStyle">@style/InAppChat.Demo.Toolbar</item>
+        <item name="ibChatAttachmentToolbarStyle">@style/InAppChat.Demo.Toolbar.AttachmentPreview</item>
+        <item name="ibChatInputStyle">@style/InAppChat.Demo.Input</item>
+        <item name="ibChatStyle">@style/InAppChat.Demo.Chat</item>
     </style>
 
     <style name="IB_AppTheme.WebView">
