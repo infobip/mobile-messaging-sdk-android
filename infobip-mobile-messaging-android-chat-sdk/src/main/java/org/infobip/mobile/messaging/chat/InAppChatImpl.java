@@ -24,8 +24,7 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
-import org.infobip.mobile.messaging.chat.core.InAppChatMultiThreadFlag;
-import org.infobip.mobile.messaging.chat.core.InAppChatViewImpl;
+import org.infobip.mobile.messaging.chat.core.InAppChatScreenImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
@@ -50,7 +49,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private Context context;
     private AndroidBroadcaster coreBroadcaster;
     private InAppChatBroadcasterImpl inAppChatBroadcaster;
-    private InAppChatViewImpl inAppChatView;
+    private InAppChatScreenImpl inAppChatScreen;
     private PropertyHelper propertyHelper;
     private InAppChatWebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
@@ -159,14 +158,14 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public InAppChatViewImpl inAppChatView() {
-        if (inAppChatView == null) {
-            inAppChatView = new InAppChatViewImpl(context);
+    public InAppChatScreenImpl inAppChatScreen() {
+        if (inAppChatScreen == null) {
+            inAppChatScreen = new InAppChatScreenImpl(context);
         }
         if (!isActivated()) {
             MobileMessagingLogger.e("In-app chat wasn't activated, call activate()");
         }
-        return inAppChatView;
+        return inAppChatScreen;
     }
 
     @Override
@@ -214,11 +213,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener) {
         try {
             if (inAppChatWVFragment != null) {
-                InAppChatMultiThreadFlag strategy = InAppChatMultiThreadFlag.ACTIVE;
-                if (allMultiThreadStrategy) {
-                    strategy = InAppChatMultiThreadFlag.ALL;
-                }
-                inAppChatWVFragment.sendContextualMetaData(data, strategy);
+                inAppChatWVFragment.sendContextualMetaData(data, allMultiThreadStrategy);
             }
             if (resultListener != null)
                 resultListener.onResult(new Result<>(null));

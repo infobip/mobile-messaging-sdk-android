@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/white">
+
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exit"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/chatNavigateBack"
+        android:layout_marginVertical="8dp"
+        app:layout_constraintHorizontal_chainStyle="spread" />
+
+    <Button
+        android:id="@+id/chatNavigateBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chat navigate back"
+        app:layout_constraintTop_toTopOf="@id/exit"
+        app:layout_constraintBottom_toBottomOf="@id/exit"
+        app:layout_constraintStart_toEndOf="@id/exit"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="8dp" />
+
+    <org.infobip.mobile.messaging.chat.view.InAppChatView
+        android:id="@+id/inAppChatView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/exit"
+        app:layout_constraintBottom_toTopOf="@id/messageInput"
+        android:layout_marginVertical="8dp" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/messageInput"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="8dp"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/white"
+        android:minHeight="30dp"
+        android:gravity="start|center_vertical"
+        android:hint="Message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/send"
+        app:layout_constraintTop_toTopOf="@id/send"
+        app:layout_constraintBottom_toBottomOf="@id/send" />
+
+    <Button
+        android:id="@+id/send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/messageInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginVertical="8dp"
+        android:layout_marginEnd="8dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

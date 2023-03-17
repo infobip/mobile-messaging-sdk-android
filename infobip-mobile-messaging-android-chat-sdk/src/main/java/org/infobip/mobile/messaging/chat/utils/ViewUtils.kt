@@ -18,6 +18,7 @@ import android.widget.ProgressBar
 import androidx.annotation.*
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
@@ -123,6 +124,17 @@ internal fun Theme?.isThemeAttributePresent(attr: Int): Boolean {
     } ?: false
 }
 
+internal fun Theme?.isMMBaseTheme(): Boolean {
+    return this?.let {
+        listOf(
+            resolveThemeColor(R.attr.colorPrimary),
+            resolveThemeColor(R.attr.colorPrimaryDark),
+            resolveThemeColor(R.attr.colorControlNormal),
+            resolveThemeColor(R.attr.titleTextColor),
+        ).all { it == Color.BLACK }
+    } ?: false
+}
+
 /**
  * Checks if attribute attr is present in theme as theme attribute inside theme's style attributes.
  */
@@ -178,9 +190,13 @@ internal val WidgetInfo.colorPrimary: Int?
 internal val WidgetInfo.colorBackground: Int?
     get() = runCatching { Color.parseColor(this.getBackgroundColor()) }.getOrNull()
 
+@get:ColorInt
+internal val WidgetInfo.colorPrimaryDark: Int?
+    get() = colorPrimary?.let { ColorUtils.blendARGB(it, Color.BLACK, 0.2f) }
+
 @ColorInt
 internal fun Activity?.getStatusBarColor(): Int? {
-    return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+    return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
         this?.window?.statusBarColor
     } else {
         null

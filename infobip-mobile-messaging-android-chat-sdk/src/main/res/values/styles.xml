@@ -43,6 +43,13 @@
 
     <style name="IB.Chat" parent="IB">
         <item name="ibChatBackgroundColor">@android:color/white</item>
+        <item name="ibChatProgressBarColor">@android:color/black</item>
+        <item name="ibChatNetworkConnectionErrorText">@string/ib_chat_no_connection</item>
+        <item name="ibChatNetworkConnectionErrorTextColor">@android:color/black</item>
+        <item name="ibChatNetworkConnectionErrorTextAppearance">@null</item>
+        <item name="ibChatNetworkConnectionErrorLabelBackgroundColor">
+            @color/ib_chat_hint_text_color
+        </item>
     </style>
 
     <style name="IB.Chat.Input" parent="IB">

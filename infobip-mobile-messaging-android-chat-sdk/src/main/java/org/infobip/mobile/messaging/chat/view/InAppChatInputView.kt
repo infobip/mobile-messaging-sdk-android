@@ -12,10 +12,7 @@ import androidx.core.view.children
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatInputBinding
-import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
-import org.infobip.mobile.messaging.chat.utils.hideKeyboard
-import org.infobip.mobile.messaging.chat.utils.setImageTint
-import org.infobip.mobile.messaging.chat.utils.show
+import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle.Companion.applyWidgetConfig
 
@@ -32,6 +29,7 @@ class InAppChatInputView @JvmOverloads constructor(
 
     private val binding = IbViewChatInputBinding.inflate(LayoutInflater.from(context), this)
     var style = InAppChatInputViewStyle(context, attributes)
+    private val localizationUtils = LocalizationUtils.getInstance(context)
 
     init {
         applyStyle(style)
@@ -45,6 +43,12 @@ class InAppChatInputView @JvmOverloads constructor(
 
     private fun applyStyle(style: InAppChatInputViewStyle) {
         with(binding) {
+            topSeparator.contentDescription =
+                localizationUtils.getString(R.string.ib_iv_input_border_desc)
+            attachmentButton.contentDescription =
+                localizationUtils.getString(R.string.ib_iv_btn_send_attachment_desc)
+            sendButton.contentDescription =
+                localizationUtils.getString(R.string.ib_iv_btn_send_desc)
             style.textAppearance?.let {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     messageInput.setTextAppearance(it)
@@ -53,10 +57,10 @@ class InAppChatInputView @JvmOverloads constructor(
                 }
             }
             root.setBackgroundColor(style.backgroundColor)
-            if (style.hintText != null) {
+            if (style.hintTextRes != null) {
+                messageInput.hint = localizationUtils.getString(style.hintTextRes)
+            } else if (style.hintText != null) {
                 messageInput.hint = style.hintText
-            } else {
-                style.hintTextRes?.let { messageInput.hint = context.getString(it) }
             }
             messageInput.setHintTextColor(style.hintTextColor)
             style.attachmentIcon?.let { attachmentButton.setImageResource(it) }
@@ -80,7 +84,7 @@ class InAppChatInputView @JvmOverloads constructor(
     }
 
     fun setSendButtonClickListener(listener: OnClickListener) {
-        binding.sendButton.setOnClickListener(listener)
+        binding.sendButton.setThrottleFirstOnClickListener(listener)
     }
 
     fun setAttachmentButtonEnabled(isEnabled: Boolean) {
@@ -88,7 +92,7 @@ class InAppChatInputView @JvmOverloads constructor(
     }
 
     fun setAttachmentButtonClickListener(listener: OnClickListener) {
-        binding.attachmentButton.setOnClickListener(listener)
+        binding.attachmentButton.setThrottleFirstOnClickListener(listener)
     }
 
     fun getInputText(): String? = binding.messageInput.text?.toString()
@@ -105,13 +109,6 @@ class InAppChatInputView @JvmOverloads constructor(
 
     fun setInputFocusChangeListener(listener: OnFocusChangeListener) {
         binding.messageInput.onFocusChangeListener = listener
-    }
-
-    fun refreshLocalisation(localizationUtils: LocalizationUtils) = with(binding) {
-        topSeparator.contentDescription = localizationUtils.getString(R.string.ib_iv_input_border_desc)
-        attachmentButton.contentDescription = localizationUtils.getString(R.string.ib_iv_btn_send_attachment_desc)
-        sendButton.contentDescription = localizationUtils.getString(R.string.ib_iv_btn_send_desc)
-        style.hintTextRes?.let { messageInput.hint = localizationUtils.getString(it) }
     }
 
     fun show(show: Boolean) {

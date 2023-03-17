@@ -43,12 +43,12 @@ public abstract class InAppChat {
     public abstract void activate();
 
     /**
-     * Creates in-app chat view activity
+     * Creates in-app chat screen
      *
      * @return chat view object
-     * @see InAppChatView#show()
+     * @see InAppChatScreen#show()
      */
-    public abstract InAppChatView inAppChatView();
+    public abstract InAppChatScreen inAppChatScreen();
 
     /**
      * Sets which activities to start when user taps on chat notification. Last one in array will be shown, others will be put to task stack.

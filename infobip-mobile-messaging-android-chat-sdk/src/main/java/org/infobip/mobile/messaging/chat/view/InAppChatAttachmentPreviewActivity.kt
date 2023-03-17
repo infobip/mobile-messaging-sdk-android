@@ -106,7 +106,10 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         }
         var style = InAppChatToolbarStyle.createChatAttachmentStyle(this, prepareWidgetInfo())
         if (style.titleText.isNullOrBlank()) {
-            style = style.copy(titleText = this.intent.getStringExtra(EXTRA_CAPTION))
+            style = style.copy(
+                titleText = this.intent.getStringExtra(EXTRA_CAPTION),
+                titleTextRes = null
+            )
         }
         style.apply(binding.ibLcChatAttachTb)
         binding.ibLcChatAttachPb.setProgressTint(

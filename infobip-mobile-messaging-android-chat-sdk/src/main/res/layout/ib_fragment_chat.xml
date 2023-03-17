@@ -1,65 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ib_lc_rl_main_window"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:animateLayoutChanges="true"
-    android:background="@android:color/white"
-    android:orientation="vertical"
-    tools:context=".view.InAppChatFragment">
+    android:background="@android:color/white">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/ib_lc_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/IB_ChatDefaultTheme.AppBarOverlay">
 
         <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/ib_lc_chat_tb"
+            android:id="@+id/ib_lc_chat_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/IB_ChatDefaultTheme.PopupOverlay"/>
+            app:popupTheme="@style/IB_ChatDefaultTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ProgressBar
-        android:id="@+id/ib_lc_pb_spinner"
+    <org.infobip.mobile.messaging.chat.view.InAppChatView
+        android:id="@+id/ib_lc_chat"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="70dp"
-        android:visibility="visible" />
-
-    <org.infobip.mobile.messaging.chat.view.InAppChatWebView
-        android:id="@+id/ib_lc_wv_in_app_chat"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/ib_lc_msg_input"
-        android:layout_below="@+id/ib_lc_appbar"
-        android:visibility="invisible" />
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/ib_lc_appbar"
+        app:layout_constraintBottom_toTopOf="@id/ib_lc_chat_input" />
 
     <org.infobip.mobile.messaging.chat.view.InAppChatInputView
-        android:id="@+id/ib_lc_msg_input"
+        android:id="@+id/ib_lc_chat_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:visibility="gone"
         tools:visibility="visible"
         android:minHeight="?attr/actionBarSize"
-        />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <TextView
-        android:id="@+id/ib_lc_tv_error_toast"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_not_available_tv_height"
-        android:layout_alignBottom="@+id/ib_lc_appbar"
-        android:background="@android:color/darker_gray"
-        android:gravity="center_horizontal|center_vertical"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:visibility="invisible"
-        android:text="@string/ib_chat_no_connection" />
-
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

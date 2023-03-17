@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.app.Activity;
 import android.os.Handler;
+import android.os.Looper;
 import android.webkit.JavascriptInterface;
 
 import androidx.fragment.app.Fragment;
@@ -24,6 +25,8 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         } else if (inAppChatWebViewManager instanceof Activity) {
             Activity inAppChatWebViewManagerActivity = (Activity) inAppChatWebViewManager;
             this.handler = new Handler(inAppChatWebViewManagerActivity.getMainLooper());
+        } else {
+            this.handler = new Handler(Looper.getMainLooper());
         }
     }
 

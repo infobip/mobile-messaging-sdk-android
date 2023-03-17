@@ -26,6 +26,11 @@
 
     <declare-styleable name="InAppChatViewStyleable">
         <attr name="ibChatBackgroundColor" format="color|reference" />
+        <attr name="ibChatProgressBarColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorText" format="string|reference" />
+        <attr name="ibChatNetworkConnectionErrorTextColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorTextAppearance" format="reference" />
+        <attr name="ibChatNetworkConnectionErrorLabelBackgroundColor" format="color|reference" />
     </declare-styleable>
 
     <declare-styleable name="InAppChatInputViewStyleable">

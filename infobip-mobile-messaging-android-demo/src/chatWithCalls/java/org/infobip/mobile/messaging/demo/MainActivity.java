@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -96,8 +97,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         inAppChat.activate();
         setUpPushRegIdField();
         setUpSubjectTypeSpinner();
-        setUpOpenChatButton();
-        setUpOpenAuthChatButton();
+        setUpOpenChatActivityButton();
+        setUpOpenChatFragmentButton();
+        setUpOpenChatViewButton();
+        setUpAuthButton();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
         setUpCallsButtons();
@@ -245,17 +248,32 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         });
     }
 
-    private void setUpOpenChatButton() {
-        Button openChat = findViewById(R.id.openChat);
-        openChat.setOnClickListener((v) -> {
-            inAppChat.setJwtProvider(null);
-            openChat();
+    private void setUpOpenChatActivityButton() {
+        Button openChatActivityButton = findViewById(R.id.openChatActivity);
+        openChatActivityButton.setOnClickListener((v) -> {
+            inAppChat.inAppChatScreen().show();
         });
     }
 
-    private void setUpOpenAuthChatButton() {
-        Button openAuthChat = findViewById(R.id.openAuthChat);
-        openAuthChat.setOnClickListener((v) -> {
+    private void setUpOpenChatFragmentButton() {
+        Button openChatFragmentButton = findViewById(R.id.openChatFragment);
+        openChatFragmentButton.setOnClickListener((v) -> {
+            inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer);
+        });
+    }
+
+    private void setUpOpenChatViewButton() {
+        Button openChatViewButton = findViewById(R.id.openChatView);
+        openChatViewButton.setOnClickListener((v) -> {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.fragmentContainer, new InAppChatViewDemoFragment(), InAppChatViewDemoFragment.class.getSimpleName());
+            fragmentTransaction.commit();
+        });
+    }
+
+    private void setUpAuthButton() {
+        Button authButton = findViewById(R.id.authenticate);
+        authButton.setOnClickListener((v) -> {
             showProgressBar();
 
             inAppChat.setJwtProvider(() -> {
@@ -263,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                 String jwt = null;
                 if (authData != null) {
                     jwt = JWTUtils.createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
-                    if (jwt == null){
+                    if (jwt == null) {
                         Toast.makeText(MainActivity.this, "Create JWT process failed!", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -283,26 +301,16 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     @Override
                     public void onResult(Result<User, MobileMessagingError> result) {
                         hideProgressBar();
-                        if (result.isSuccess()) {
-                            Toast.makeText(MainActivity.this, "Personalization done!", Toast.LENGTH_SHORT).show();
-                            openChat();
-                        } else
-                            Toast.makeText(MainActivity.this, "Personalization failed: " + result.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                        if (result.isSuccess())
+                            Toast.makeText(MainActivity.this, "Authentication done!", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Authentication failed: " + result.getError().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
                 hideProgressBar();
             }
         });
-    }
-
-    private void openChat() {
-        //Uncomment one of the following variants
-        //1. Shows in-app chat as Fragment
-        inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer);
-
-        //2. Shows in-app chat as Activity
-//        inAppChat.inAppChatView().show();
     }
 
     private void setUpPersonalizationButton() {
