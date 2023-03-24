@@ -26,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
 import androidx.core.content.ContextCompat.registerReceiver
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -35,8 +34,8 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infobip.webrtc.Injector.colors
 import com.infobip.webrtc.TAG
-import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
-import com.infobip.webrtc.sdk.api.video.ScreenCapturer
+import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
+import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.ui.*
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
 import com.infobip.webrtc.ui.model.CallState
@@ -48,7 +47,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.webrtc.RendererCommon
 import kotlin.time.Duration.Companion.seconds
 
@@ -221,8 +219,8 @@ class InCallFragment : Fragment() {
             //another views
             binding.weakConnectionAlert.isVisible = isWeakConnection && !isPip && showControls
             binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip && showControls
-            binding.peerMuteIndicatorInVideo.isVisible = isRemoteVideo && isPeerMuted && !isPip && showControls
-            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && isPeerMuted && !isPip
+            binding.peerMuteIndicatorInVideo.isVisible = isRemoteVideo && isPeerMuted == true && !isPip && showControls
+            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && isPeerMuted == true && !isPip
             binding.collapseCallButton.isVisible = !isPip && showControls
             //in PIP
             binding.nameInPip.isVisible = isPip

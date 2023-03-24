@@ -1,6 +1,7 @@
 package com.infobip.webrtc
 
 import android.content.Context
+import com.infobip.webrtc.sdk.api.InfobipRTC
 import com.infobip.webrtc.ui.ErrorListener
 import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.InfobipRtcUiImpl
@@ -21,10 +22,11 @@ internal const val TAG = "InfobipRtcUi"
 internal object Injector {
     private lateinit var appContext: Context
     private val callsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val rtcInstance = InfobipRTC.getInstance()
     val vibrator: Vibrator by lazy { VibratorImpl(appContext) }
     val cache: Cache = InMemoryCache()
     val notificationFactory: CallNotificationFactory by lazy { CallNotificationFactoryImpl(appContext) }
-    val callsDelegate: CallsDelegate by lazy { CallsDelegateImpl(appContext, callsScope) }
+    val callsDelegate: CallsDelegate by lazy { CallsDelegateImpl(appContext, callsScope, rtcInstance) }
     var colors: Colors? = null
     var icons: Icons? = null
     var enableInAppCallsSuccess: SuccessListener? = null
@@ -45,7 +47,8 @@ internal object Injector {
             cache,
             callsDelegate,
             callsScope,
-            pushIdDelegate
+            pushIdDelegate,
+            rtcInstance
         ).also { webrtcUi = it }
     }
 }

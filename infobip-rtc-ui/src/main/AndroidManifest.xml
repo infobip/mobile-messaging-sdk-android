@@ -13,12 +13,12 @@
         <activity
             android:name=".CallActivity"
             android:autoRemoveFromRecents="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:exported="false"
             android:launchMode="singleTask"
             android:noHistory="true"
             android:showWhenLocked="true"
             android:supportsPictureInPicture="true"
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:taskAffinity=""
             android:theme="@style/InfobipRtcUi.Call"
             android:turnScreenOn="true" />
@@ -45,7 +45,9 @@
             android:name=".service.ScreenShareService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
-        <service android:name="com.infobip.webrtc.sdk.impl.fcm.FcmTokenRefresher" />
+        <service
+            android:name="com.infobip.webrtc.sdk.impl.push.FcmTokenRefresher"
+            android:exported="false" />
 
     </application>
 

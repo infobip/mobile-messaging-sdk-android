@@ -7,7 +7,7 @@ import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.TokenProvider
 import com.infobip.webrtc.sdk.api.InfobipRTC
-import com.infobip.webrtc.sdk.api.Status
+import com.infobip.webrtc.sdk.api.model.push.Status
 import com.infobip.webrtc.ui.delegate.CallsDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.model.ListenType
@@ -23,6 +23,7 @@ internal class InfobipRtcUiImpl(
         private val callsDelegate: CallsDelegate,
         private val callsScope: CoroutineScope,
         private val pushIdDelegate: PushIdDelegate,
+        private val rtcInstance: InfobipRTC
 ) : InfobipRtcUi {
 
     override fun enableCalls(identity: String, listenType: ListenType, successListener: SuccessListener?, errorListener: ErrorListener?) {
@@ -67,7 +68,7 @@ internal class InfobipRtcUiImpl(
                 "Calls are not registered."
             }
             callsScope.launch {
-                InfobipRTC.disablePushNotification(tokenProvider.getToken(identity, cache.applicationId), context)
+                rtcInstance.disablePushNotification(tokenProvider.getToken(identity, cache.applicationId), context)
                 cache.clear()
                 callsScope.coroutineContext.cancelChildren()
             }

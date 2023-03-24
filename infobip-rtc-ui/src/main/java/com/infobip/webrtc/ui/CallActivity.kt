@@ -22,15 +22,11 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
-import com.infobip.webrtc.sdk.api.event.application.*
-import com.infobip.webrtc.sdk.api.event.call.CallEarlyMediaEvent
-import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
-import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
-import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
-import com.infobip.webrtc.sdk.api.event.conference.ErrorEvent
-import com.infobip.webrtc.sdk.impl.event.DefaultApplicationCallEventListener
+import com.infobip.webrtc.sdk.api.event.call.*
+import com.infobip.webrtc.sdk.api.model.ErrorCode
 import com.infobip.webrtc.ui.fragments.InCallFragment
 import com.infobip.webrtc.ui.fragments.IncomingCallFragment
+import com.infobip.webrtc.ui.listeners.DefaultRtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.model.Colors
 import com.infobip.webrtc.ui.model.Icons
@@ -166,11 +162,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     }
 
     private fun listenCallEvents() {
-        viewModel.setEventListener(object : DefaultApplicationCallEventListener() {
+        viewModel.setEventListener(object : DefaultRtcUiCallEventListener() {
 
-            override fun onError(errorEvent: ErrorEvent?) {
-                viewModel.onError(errorEvent?.errorCode?.let { it.description ?: it.name }
-                        ?: getString(R.string.mm_unknown_error))
+            override fun onError(errorCode: ErrorCode?) {
+                viewModel.onError(errorCode?.let { it.description ?: it.name }
+                    ?: getString(R.string.mm_unknown_error))
             }
 
             override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {

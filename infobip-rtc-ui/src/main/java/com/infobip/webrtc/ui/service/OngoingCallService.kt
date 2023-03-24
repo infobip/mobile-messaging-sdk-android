@@ -10,7 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
-import com.infobip.webrtc.sdk.api.call.CallStatus
+import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.delegate.CallsDelegate
 import com.infobip.webrtc.ui.delegate.Vibrator

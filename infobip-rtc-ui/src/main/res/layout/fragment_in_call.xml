@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.infobip.webrtc.sdk.api.video.VideoRenderer
+        <com.infobip.webrtc.sdk.api.model.video.VideoRenderer
             android:id="@+id/remoteVideo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -372,7 +372,7 @@
         app:layout_constraintTop_toBottomOf="@id/weakConnectionAlert"
         tools:visibility="gone" />
 
-    <com.infobip.webrtc.sdk.api.video.VideoRenderer
+    <com.infobip.webrtc.sdk.api.model.video.VideoRenderer
         android:id="@+id/localVideo"
         android:layout_width="0dp"
         android:layout_height="0dp"

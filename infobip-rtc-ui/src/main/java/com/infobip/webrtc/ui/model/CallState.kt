@@ -1,11 +1,11 @@
 package com.infobip.webrtc.ui.model
 
-import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
+import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 
 data class CallState(
     val isIncoming: Boolean,
     val isMuted: Boolean,
-    val isPeerMuted: Boolean,
+    val isPeerMuted: Boolean?,
     val elapsedTimeSeconds: Int,
     val isSpeakerOn: Boolean,
     val isScreenShare: Boolean,

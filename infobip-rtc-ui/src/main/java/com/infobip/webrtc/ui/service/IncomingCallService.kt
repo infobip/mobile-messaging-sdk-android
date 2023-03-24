@@ -21,10 +21,7 @@ abstract class IncomingCallService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         if (MobileMessagingFirebaseService.onMessageReceived(this, message))
             return
-        if (callsDelegate.isIncomingCall(message.data)) {
-            Log.d(TAG, "Incoming call push message received $message")
-            callsDelegate.handlePushMessage(message.data)
-        } else
+        if (!callsDelegate.handleIncomingCall(message.data))
             onMessageReceivedDelegate(message)
     }
 

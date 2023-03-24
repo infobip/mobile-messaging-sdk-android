@@ -1,32 +1,26 @@
 package com.infobip.webrtc.ui.delegate
 
 import android.content.Context
-import android.content.Intent
+import android.util.Log
+import com.infobip.webrtc.TAG
 import com.infobip.webrtc.sdk.api.InfobipRTC
-import com.infobip.webrtc.sdk.api.application.ApplicationCall
-import com.infobip.webrtc.sdk.api.application.IncomingApplicationCall
-import com.infobip.webrtc.sdk.api.call.CallStatus
-import com.infobip.webrtc.sdk.api.call.options.VideoOptions
-import com.infobip.webrtc.sdk.api.conference.RemoteVideo
-import com.infobip.webrtc.sdk.api.event.ApplicationCallEventListener
-import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
-import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
-import com.infobip.webrtc.sdk.api.event.conference.ErrorEvent
-import com.infobip.webrtc.sdk.api.event.rtc.EnablePushNotificationResult
-import com.infobip.webrtc.sdk.api.event.rtc.IncomingApplicationCallEvent
-import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
-import com.infobip.webrtc.sdk.api.video.ScreenCapturer
-import com.infobip.webrtc.sdk.impl.event.DefaultApplicationCallEventListener
-import com.infobip.webrtc.sdk.impl.event.DefaultIncomingApplicationCallEventListener
-import com.infobip.webrtc.ui.R
-import com.infobip.webrtc.ui.model.CallState
-import com.infobip.webrtc.ui.service.OngoingCallService
-import com.infobip.webrtc.ui.service.OngoingCallService.Companion.CALL_STATUS_EXTRA
-import com.infobip.webrtc.ui.service.OngoingCallService.Companion.INCOMING_CALL_ACTION
-import com.infobip.webrtc.ui.service.OngoingCallService.Companion.NAME_EXTRA
+import com.infobip.webrtc.sdk.api.call.ApplicationCall
+import com.infobip.webrtc.sdk.api.call.IncomingApplicationCall
+import com.infobip.webrtc.sdk.api.call.IncomingWebrtcCall
+import com.infobip.webrtc.sdk.api.call.WebrtcCall
+import com.infobip.webrtc.sdk.api.event.listener.IncomingApplicationCallEventListener
+import com.infobip.webrtc.sdk.api.event.listener.IncomingCallEventListener
+import com.infobip.webrtc.sdk.api.event.listener.NetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.model.CallStatus
+import com.infobip.webrtc.sdk.api.model.RemoteVideo
+import com.infobip.webrtc.sdk.api.model.push.EnablePushNotificationResult
+import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
+import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
+import com.infobip.webrtc.sdk.api.options.VideoOptions
+import com.infobip.webrtc.ui.listeners.IncomingCallEventListenerImpl
+import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
+import com.infobip.webrtc.ui.model.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 internal interface CallsDelegate {
     fun accept()
@@ -36,7 +30,7 @@ internal interface CallsDelegate {
     fun screenShareTrack(): RTCVideoTrack?
     fun remoteVideoTrack(): RTCVideoTrack?
     fun localVideoTrack(): RTCVideoTrack?
-    fun setEventListener(listener: ApplicationCallEventListener)
+    fun setEventListener(listener: RtcUiCallEventListener)
     fun duration(): Int
     fun flipCamera()
     fun frontCamera()
@@ -50,25 +44,36 @@ internal interface CallsDelegate {
     fun hasRemoteVideo(): Boolean
     fun getCallState(): CallState?
     fun getCallStatus(): CallStatus
-    fun isIncomingCall(data: Map<String, String>): Boolean
-    fun handlePushMessage(data: Map<String, String>)
+    fun handleIncomingCall(data: Map<String, String>) : Boolean
     fun registerActiveConnection(token: String)
     fun enablePush(token: String, onResult: (EnablePushNotificationResult) -> Unit)
+    fun setNetworkQualityListener(networkQualityEventListener: NetworkQualityEventListener)
 }
 
 internal class CallsDelegateImpl(
     private val context: Context,
-    private val callsScope: CoroutineScope
+    private val callsScope: CoroutineScope,
+    private val infobipRtc: InfobipRTC
 ) : CallsDelegate {
-    private val call: ApplicationCall?
-        get() = InfobipRTC.getActiveApplicationCall()
+    private val call: RtcUiCall? by lazy {
+        getActiveCall(
+            { if (this is IncomingWebrtcCall) RtcUiIncomingWebrtcCallImpl(this) else null },
+            { if (this is IncomingApplicationCall) RtcUiIncomingAppCallImpl(this) else null })
+    }
+
+    private inline fun <OUT : RtcUiCall?> getActiveCall(
+        callBlock: WebrtcCall.() -> OUT,
+        appCallBlock: ApplicationCall.() -> OUT,
+    ): OUT? {
+        return (infobipRtc.activeCall as? WebrtcCall)?.callBlock() ?: infobipRtc.activeApplicationCall?.appCallBlock()
+    }
 
     override fun accept() {
-        (call as? IncomingApplicationCall)?.accept()
+        (call as? RtcUiIncomingCall)?.accept()
     }
 
     override fun decline() {
-        (call as? IncomingApplicationCall)?.decline()
+        (call as? RtcUiIncomingCall)?.decline()
     }
 
     override fun hangup() {
@@ -88,17 +93,17 @@ internal class CallsDelegateImpl(
     }
 
     override fun localVideoTrack(): RTCVideoTrack? {
-        return call?.localCameraTrack()
+        return call?.localVideoTrack()
     }
 
-    override fun setEventListener(listener: ApplicationCallEventListener) {
-        call?.eventListener = listener
+    override fun setEventListener(listener: RtcUiCallEventListener) {
+        call?.setEventListener(listener)
     }
 
     override fun duration(): Int = call?.duration() ?: 0
 
     override fun flipCamera() {
-        if (call?.hasCameraVideo() == true) {
+        if (call?.hasLocalVideo() == true) {
             if (call?.cameraOrientation() == VideoOptions.CameraOrientation.FRONT) {
                 backCamera()
             } else {
@@ -116,7 +121,7 @@ internal class CallsDelegateImpl(
     }
 
     override fun cameraVideo(enabled: Boolean) {
-        call?.cameraVideo(enabled)
+        call?.localVideo(enabled)
     }
 
     override fun mute(isMuted: Boolean) {
@@ -152,7 +157,7 @@ internal class CallsDelegateImpl(
                 CallState(
                     isIncoming = call.duration() == 0,
                     isMuted = call.muted(),
-                    isPeerMuted = call.participants().firstOrNull()?.media?.audio?.muted == true,
+                    isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
                     elapsedTimeSeconds = call.duration(),
                     isSpeakerOn = call.speakerphone(),
                     isScreenShare = call.hasScreenShare(),
@@ -173,80 +178,39 @@ internal class CallsDelegateImpl(
         return call?.status() ?: CallStatus.FINISHED
     }
 
-    override fun isIncomingCall(data: Map<String, String>): Boolean {
-        return InfobipRTC.isIncomingApplicationCall(data)
-    }
-
-    override fun handlePushMessage(data: Map<String, String>) {
-        InfobipRTC.handleIncomingApplicationCall(
-            data,
-            context,
-            IncomingApplicationCallListener(context, callsScope, data)
-        )
+    override fun handleIncomingCall(data: Map<String, String>): Boolean {
+        Log.d(TAG, "Incoming call push message received $data")
+        var handled = false
+        if (infobipRtc.isIncomingCall(data)) {
+            infobipRtc.handleIncomingCall(data, context, IncomingCallEventListenerImpl(context, data, callsScope))
+            handled = true
+        } else if (infobipRtc.isIncomingApplicationCall(data)) {
+            infobipRtc.handleIncomingApplicationCall(data, context, IncomingCallEventListenerImpl(context, data, callsScope))
+            handled = true
+        }
+        return handled
     }
 
     override fun registerActiveConnection(token: String) {
-        InfobipRTC.registerForActiveConnection(
+        infobipRtc.registerForActiveConnection(
             token,
             context,
-            IncomingApplicationCallListener(context, callsScope, mapOf())
+            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingApplicationCallEventListener
+        )
+        infobipRtc.registerForActiveConnection(
+            token,
+            context,
+            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingCallEventListener
         )
     }
 
     override fun enablePush(token: String, onResult: (EnablePushNotificationResult) -> Unit) {
-        InfobipRTC.enablePushNotification(token, context) {
+        infobipRtc.enablePushNotification(token, context) {
             onResult(it)
         }
     }
 
-    private class IncomingApplicationCallListener(
-        private val context: Context,
-        private val callsScope: CoroutineScope,
-        private val data: Map<String, String>
-    ) : DefaultIncomingApplicationCallEventListener() {
-
-        override fun onIncomingApplicationCall(incomingApplicationCallEvent: IncomingApplicationCallEvent?) {
-            incomingApplicationCallEvent?.incomingApplicationCall?.let { call ->
-                val customData = call.options().customData
-                if (customData.isNullOrEmpty()) {
-                    customData.putAll(data)
-                }
-                val name = call.fromDisplayName()?.takeIf { it.isNotEmpty() } ?: call.from()
-                ?: context.getString(R.string.mm_unknown)
-                context.startService(Intent(context, OngoingCallService::class.java).apply {
-                    action = INCOMING_CALL_ACTION
-                    putExtra(NAME_EXTRA, name)
-                    putExtra(CALL_STATUS_EXTRA, call.status()?.name)
-                })
-
-                call.eventListener = object : DefaultApplicationCallEventListener() {
-                    private fun stopCall() {
-                        callsScope.launch(Dispatchers.Main) {
-                            OngoingCallService.sendCallServiceIntent(
-                                context,
-                                OngoingCallService.CALL_ENDED_ACTION
-                            )
-                        }
-                    }
-
-                    override fun onHangup(callHangupEvent: CallHangupEvent?) {
-                        stopCall()
-                    }
-
-                    override fun onError(errorEvent: ErrorEvent?) {
-                        stopCall()
-                    }
-
-                    override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {
-                        callsScope.launch(Dispatchers.Main) {
-                            OngoingCallService.sendCallServiceIntent(
-                                context,
-                                OngoingCallService.CALL_ESTABLISHED_ACTION
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    override fun setNetworkQualityListener(networkQualityEventListener: NetworkQualityEventListener) {
+        call?.setNetworkQualityListener(networkQualityEventListener)
     }
 }
