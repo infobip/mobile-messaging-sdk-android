@@ -360,7 +360,17 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
         val uri = data?.data
         val mimeType =
             uri?.let { InAppChatMobileAttachment.getMimeType(requireActivity(), data, it) }
-        return if (mimeType == InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4) capturedVideoUri else capturedImageUri
+        return when {
+            capturedImageUri != null && (mimeType == InAppChatAttachmentHelper.MIME_TYPE_IMAGE_JPEG || InAppChatAttachmentHelper.isUriFileEmpty(
+                requireContext(),
+                capturedImageUri
+            ) == false) -> capturedImageUri
+            capturedVideoUri != null && (mimeType == InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4 || InAppChatAttachmentHelper.isUriFileEmpty(
+                requireContext(),
+                capturedVideoUri
+            ) == false) -> capturedVideoUri
+            else -> null
+        }
     }
 
     private val attachmentChooserLauncher =
@@ -419,9 +429,10 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
                     }
                 val data = result.data
+
                 InAppChatAttachmentHelper.makeAttachment(
                     requireActivity(),
-                    result.data,
+                    data,
                     getCapturedMediaUrl(data),
                     listener
                 )

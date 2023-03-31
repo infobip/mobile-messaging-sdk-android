@@ -8,9 +8,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
@@ -18,12 +21,7 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 
 import java.io.File;
-import java.sql.Array;
 import java.util.Date;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
 
 public class InAppChatAttachmentHelper {
     private static final String JPEG_FILE_PREFIX = "IMG_";
@@ -34,27 +32,14 @@ public class InAppChatAttachmentHelper {
     public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
     public static void makeAttachment(final FragmentActivity context, final Intent data, final Uri capturedMediaStoreUri, final InAppChatAttachmentHelper.InAppChatAttachmentHelperListener listener) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    //From media store Uri we need to get real Uri of the file
-                    Uri capturedMediaRealUri = getUriFromMediaStoreURI(capturedMediaStoreUri, context);
-                    final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, capturedMediaStoreUri, capturedMediaRealUri);
-                    context.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onAttachmentCreated(attachment);
-                        }
-                    });
-                } catch (final InternalSdkError.InternalSdkException e) {
-                    context.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onError(context, e);
-                        }
-                    });
-                }
+        AsyncTask.execute(() -> {
+            try {
+                //From media store Uri we need to get real Uri of the file
+                Uri capturedMediaRealUri = getUriFromMediaStoreURI(capturedMediaStoreUri, context);
+                final InAppChatMobileAttachment attachment = InAppChatMobileAttachment.makeAttachment(context, data, capturedMediaStoreUri, capturedMediaRealUri);
+                context.runOnUiThread(() -> listener.onAttachmentCreated(attachment));
+            } catch (final InternalSdkError.InternalSdkException e) {
+                context.runOnUiThread(() -> listener.onError(context, e));
             }
         });
     }
@@ -123,29 +108,40 @@ public class InAppChatAttachmentHelper {
         return fragmentActivity.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
     }
 
-
-    public static void deleteEmptyFileByUri(Context context, Uri uri) {
+    public static Boolean isUriFileEmpty(Context context, Uri uri) {
         if (context == null || uri == null)
-            return;
+            return null;
         try {
-            long fileSize = -1;
             ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
             Cursor cursor = contentResolver.query(uri, new String[]{OpenableColumns.SIZE}, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int columnIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                 if (columnIndex == 0) {
-                    fileSize = cursor.getLong(columnIndex);
+                    long fileSize = cursor.getLong(columnIndex);
+                    return fileSize <= 0;
                 }
                 cursor.close();
             }
-            if (fileSize == 0) {
+            return null;
+        } catch (Exception e) {
+            MobileMessagingLogger.e("[InAppChat] Can't detect file size", e);
+            return null;
+        }
+    }
+
+    public static void deleteEmptyFileByUri(Context context, Uri uri) {
+        if (context == null || uri == null)
+            return;
+        try {
+            ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+            Boolean isFileEmpty = isUriFileEmpty(context, uri);
+            if (Boolean.TRUE.equals(isFileEmpty)) {
                 contentResolver.delete(uri, null, null);
             }
         } catch (Exception e) {
             MobileMessagingLogger.e("[InAppChat] Can't delete empty file", e);
         }
     }
-
 
     @Nullable
     private static Uri getUriFromMediaStoreURI(Uri mediaStoreUri, FragmentActivity activity) {
@@ -168,21 +164,6 @@ public class InAppChatAttachmentHelper {
         } catch (Throwable t) {
             return null;
         }
-    }
-
-    @Nullable
-    private static ParcelFileDescriptor openFileDescriptorFromMediaStoreURI(Uri mediaStoreUri, FragmentActivity activity) {
-        if (activity == null || mediaStoreUri == null) {
-            return null;
-        }
-
-        ParcelFileDescriptor fileDescriptor = null;
-        try {
-            fileDescriptor = activity.getApplicationContext().getContentResolver().openFileDescriptor(mediaStoreUri, "rw");
-        } catch (Exception e) {
-            MobileMessagingLogger.e("[InAppChat] Can't send attachment", e);
-        }
-        return fileDescriptor;
     }
 
     public interface InAppChatAttachmentHelperListener {
