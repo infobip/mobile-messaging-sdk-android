@@ -2,13 +2,14 @@ package org.infobip.mobile.messaging.interactive.inapp.view;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.R;
@@ -23,8 +24,7 @@ import java.util.concurrent.Executor;
  * @author sslavin
  * @since 13/04/2018.
  */
-public class InAppViewDialog implements InAppView {
-
+public class InAppViewDialog implements InAppNativeView {
     private final Callback callback;
     private final View dialogView;
     private final TextView tvMessageText;

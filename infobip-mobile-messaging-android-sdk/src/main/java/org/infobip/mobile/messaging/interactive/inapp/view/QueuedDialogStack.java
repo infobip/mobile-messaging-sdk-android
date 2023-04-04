@@ -8,21 +8,19 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.image.DownloadImageTask;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppCtx;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppNativeCtx;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppWebCtx;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * @author sslavin
- * @since 25/04/2018.
- */
-public class QueuedDialogStack implements DialogStack {
-
-    private final Queue<InAppViewCtx> queue = new ConcurrentLinkedQueue<>();
+public class QueuedDialogStack implements DialogStack, InAppCtxVisitor {
+    private final Queue<InAppCtx> queue = new ConcurrentLinkedQueue<>();
 
     @Override
-    public void add(InAppView view, Message message, NotificationCategory category, NotificationAction[] actions) {
-        queue.add(new InAppViewCtx(view, message, category, actions));
+    public void add(InAppCtx ctx) {
+        queue.add(ctx);
         if (queue.size() <= 1) {
             show(queue.peek());
         }
@@ -30,7 +28,7 @@ public class QueuedDialogStack implements DialogStack {
 
     @Override
     public void remove(InAppView view) {
-        for (InAppViewCtx ctx : queue) {
+        for (InAppCtx ctx : queue) {
             if (ctx.getInAppView().equals(view)) {
                 queue.remove(ctx);
                 break;
@@ -44,16 +42,12 @@ public class QueuedDialogStack implements DialogStack {
         queue.clear();
     }
 
-    private void show(InAppViewCtx ctx) {
+    private void show(InAppCtx ctx) {
         if (ctx == null) {
             return;
         }
 
-        if (TextUtils.isEmpty(ctx.getMessage().getContentUrl())) {
-            ctx.getInAppView().show(ctx.getMessage(), ctx.getCategory(), ctx.getActions());
-        } else {
-            downloadImageThenShowDialog(ctx.getMessage(), ctx.getCategory(), ctx.getActions(), ctx.getMessage().getContentUrl(), ctx.getInAppView());
-        }
+        ctx.accept(this);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -61,16 +55,30 @@ public class QueuedDialogStack implements DialogStack {
                                              final NotificationCategory category,
                                              final NotificationAction[] actions,
                                              String imageUrl,
-                                             final InAppView dialog) {
+                                             final InAppNativeView dialog) {
         new DownloadImageTask() {
             @Override
             protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap == null) {
-                    dialog.show(message, category, actions);
-                } else {
-                    dialog.showWithImage(bitmap, message, category, actions);
+                    if (bitmap == null) {
+                        dialog.show(message, category, actions);
+                    } else {
+                        dialog.showWithImage(bitmap, message, category, actions);
+                    }
                 }
-            }
         }.execute(imageUrl);
+    }
+
+    @Override
+    public void visit(InAppWebCtx ctx) {
+        ctx.show();
+    }
+
+    @Override
+    public void visit(InAppNativeCtx ctx) {
+        if (TextUtils.isEmpty(ctx.getMessage().getContentUrl())) {
+            ctx.show();
+        } else {
+            downloadImageThenShowDialog(ctx.getMessage(), ctx.getCategory(), ctx.getActions(), ctx.getMessage().getContentUrl(), (InAppNativeView) ctx.getInAppView());
+        }
     }
 }

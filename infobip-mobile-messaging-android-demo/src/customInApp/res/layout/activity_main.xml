@@ -7,4 +7,60 @@
 
     <include layout="@layout/toolbar" />
 
+    <Button
+        android:layout_marginTop="120dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_big_top"
+        android:text="Send big top banner!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_small_top"
+        android:text="Send small top banner!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_big_bottom"
+        android:text="Send big bottom banner!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_small_bottom"
+        android:text="Send small bottom banner!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_popup"
+        android:text="Send popup in app message!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_banner_fullscreen"
+        android:text="Send full screen message!"/>
+
+    <Button
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/test_native_inapp"
+        android:text="Send native in app message!"/>
 </LinearLayout>

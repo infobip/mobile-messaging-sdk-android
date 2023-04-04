@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.interactive.inapp.InAppNotificationHandler;
 import org.infobip.mobile.messaging.interactive.inapp.InAppNotificationHandlerImpl;
+import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -203,7 +204,11 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
 
     @Override
     public boolean handleMessage(Message message) {
-        inAppNotificationHandler(context).handleMessage(message);
+        InAppWebViewMessage wvMessage = InAppWebViewMessage.createInAppWebViewMessage(message);
+        if(wvMessage != null)
+            inAppNotificationHandler(context).handleMessage(wvMessage);
+        else
+            inAppNotificationHandler(context).handleMessage(message);
         return false;
     }
 

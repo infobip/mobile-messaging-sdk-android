@@ -2,9 +2,10 @@ package org.infobip.mobile.messaging.interactive.inapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -18,9 +19,14 @@ import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState
 import org.infobip.mobile.messaging.interactive.inapp.rules.InAppRules;
 import org.infobip.mobile.messaging.interactive.inapp.rules.ShowOrNot;
 import org.infobip.mobile.messaging.interactive.inapp.view.DialogStack;
+import org.infobip.mobile.messaging.interactive.inapp.view.InAppNativeView;
 import org.infobip.mobile.messaging.interactive.inapp.view.InAppView;
 import org.infobip.mobile.messaging.interactive.inapp.view.InAppViewFactory;
+import org.infobip.mobile.messaging.interactive.inapp.view.InAppWebView;
 import org.infobip.mobile.messaging.interactive.inapp.view.QueuedDialogStack;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppCtx;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppNativeCtx;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppWebCtx;
 import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
@@ -32,7 +38,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
  */
 
 public class InAppNotificationHandlerImpl implements InAppNotificationHandler, InAppView.Callback {
-
     private final MobileInteractive mobileInteractive;
     private final InAppViewFactory inAppViewFactory;
     private final InAppRules inAppRules;
@@ -77,6 +82,17 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
             oneMessageCache.save(message);
             return;
         }
+            displayDialogFor(message, inAppRules.areModalInAppNotificationsEnabled());
+    }
+
+    @Override
+    public void handleMessage(InAppWebViewMessage message) {
+        ShowOrNot showOrNot =  inAppRules.shouldDisplayDialogFor(message);
+
+        if (!showOrNot.shouldShowNow() && showOrNot.shouldShowWhenInForeground()) {
+            oneMessageCache.save(message);
+            return;
+        }
 
         displayDialogFor(message, inAppRules.areModalInAppNotificationsEnabled());
     }
@@ -89,29 +105,60 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
             return;
         }
 
-        handleMessage(message);
+        InAppWebViewMessage wvMessage = InAppWebViewMessage.createInAppWebViewMessage(message);
+        if(wvMessage != null)
+            handleMessage(wvMessage);
+        else
+            handleMessage(message);
     }
 
     @Override
     public void displayDialogFor(Message message) {
-        displayDialogFor(message, true);
+        InAppWebViewMessage wvMessage = InAppWebViewMessage.createInAppWebViewMessage(message);
+
+        if(wvMessage != null)
+            displayDialogFor(wvMessage, true);
+        else
+            displayDialogFor(message, true);
     }
 
     private void displayDialogFor(Message message, Boolean displayingEnabled) {
         ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+
         if (!showOrNot.shouldShowNow()) {
             return;
         }
 
         if (displayingEnabled) {
-            dialogStack.add(
-                        inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this),
-                        message,
-                        showOrNot.getCategory(),
-                        showOrNot.getActionsToShowFor());
+            dialogStack.add(createInAppNativeCtx(message, showOrNot));
         } else {
             interactiveBroadcaster.inAppNotificationIsReadyToDisplay(message);
         }
+    }
+
+    private void displayDialogFor(InAppWebViewMessage message, Boolean displayingEnabled) {
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
+
+        if (!showOrNot.shouldShowNow()) {
+            return;
+        }
+
+        if (displayingEnabled) {
+            dialogStack.add(createInAppWebCtx(message, showOrNot));
+        } else {
+            interactiveBroadcaster.inAppNotificationIsReadyToDisplay(message);
+        }
+    }
+
+
+    private InAppCtx createInAppWebCtx(InAppWebViewMessage wvMessage, ShowOrNot showOrNot) {
+        InAppWebView view = inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this, wvMessage);
+        return new InAppWebCtx(view, wvMessage);
+    }
+
+    private InAppCtx createInAppNativeCtx(Message message, ShowOrNot showOrNot) {
+        InAppNativeView view = inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this, message);
+        return new InAppNativeCtx(view, message, showOrNot.getCategory(), showOrNot.getActionsToShowFor());
     }
 
     @Override
