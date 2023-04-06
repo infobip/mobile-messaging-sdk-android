@@ -97,7 +97,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-
 /**
  * @author sslavin
  * @since 28.04.2016.
@@ -1214,7 +1213,7 @@ public class MobileMessagingCore
 
     public static void setApiUri(Context context, String apiUri) {
         if (StringUtils.isBlank(apiUri)) {
-            throw new IllegalArgumentException("apiUri is mandatory! If in doubt, use " + MobileMessagingProperty.API_URI.getDefaultValue());
+            return;
         }
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, apiUri);
     }
@@ -1223,8 +1222,7 @@ public class MobileMessagingCore
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, (String) MobileMessagingProperty.API_URI.getDefaultValue());
     }
 
-    public static String getApiUri(Context context, boolean defaultValue) {
-        if (defaultValue) return MobileMessagingProperty.API_URI.getDefaultValue().toString();
+    public static String getApiUri(Context context) {
         return PreferenceHelper.findString(context, MobileMessagingProperty.API_URI);
     }
 

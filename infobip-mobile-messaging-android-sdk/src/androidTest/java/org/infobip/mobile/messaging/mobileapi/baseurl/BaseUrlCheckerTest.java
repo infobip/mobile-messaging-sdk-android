@@ -57,7 +57,7 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        String apiUri = MobileMessagingCore.getApiUri(context, false);
+        String apiUri = MobileMessagingCore.getApiUri(context);
         assertEquals(baseUrl, apiUri);
     }
 
@@ -68,7 +68,7 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        String apiUri = MobileMessagingCore.getApiUri(context, false);
+        String apiUri = MobileMessagingCore.getApiUri(context);
         assertTrue(apiUri.startsWith("http://127.0.0.1:"));
     }
 
@@ -79,7 +79,7 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        String apiUri = MobileMessagingCore.getApiUri(context, false);
+        String apiUri = MobileMessagingCore.getApiUri(context);
         assertTrue(apiUri.startsWith("http://127.0.0.1:"));
     }
 
@@ -92,13 +92,13 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context, false));
+        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
 
         baseUrlChecker.sync();
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context, false));
+        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
     }
 
     @Test
@@ -123,13 +123,13 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
-        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context, false));
+        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
 
         baseUrlChecker.sync();
         baseUrlChecker.sync();
 
         verify(mobileApiBaseUrl, after(300).times(2)).getBaseUrl();
-        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context, false));
+        assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
     }
 
 }
