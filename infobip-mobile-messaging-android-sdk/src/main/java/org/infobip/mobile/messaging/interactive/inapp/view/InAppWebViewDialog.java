@@ -33,6 +33,8 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
     private static final int CORNER_RADIUS = 20;
     public static final int WIDTH_PADDING = 16;
     public static final int VERTICAL_SCROLLBAR_SIZE = 30;
+    public static final double SCREEN_COVER_PERCENTAGE = 0.85;
+    public static final int SCREEN_MARGINS = 16;
     private final Callback callback;
     private DisplayMetrics displayMetrics;
     private PopupWindow popupWindow;
@@ -177,14 +179,22 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
+                int minHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_min_height);
+                int maxHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_max_height);
+                ViewGroup.LayoutParams viewFlowLayout = webView.getLayoutParams();
                 if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
-                    int minHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_min_height);
-                    int maxHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_max_height);
-                    int height = Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight));
-                    ViewGroup.LayoutParams viewFlowLayout = webView.getLayoutParams();
-                    viewFlowLayout.height = height;
-                    webView.setLayoutParams(viewFlowLayout);
+                    viewFlowLayout.height = Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight));
                 }
+                if (message.type == InAppWebViewMessage.InAppWebViewType.POPUP) {
+                    maxHeight = (int) ((displayMetrics.heightPixels * SCREEN_COVER_PERCENTAGE) - SCREEN_MARGINS);
+                    if (Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight)) == maxHeight) {
+                        viewFlowLayout.height = maxHeight;
+
+                    } else if (Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight)) == minHeight) {
+                        viewFlowLayout.height = minHeight;
+                    }
+                }
+                webView.setLayoutParams(viewFlowLayout);
             });
         } catch (Exception e) {
             MobileMessagingLogger.w("Failed due to " + e.getMessage());
