@@ -67,3 +67,4 @@ ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-api-java'
 }
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
+apply from: "${rootProject.projectDir}/jacoco.gradle"
