@@ -16,7 +16,7 @@
     <string name="mm_unknown">Necunoscut</string>
     <string name="mm_call_finished">Apel terminat</string>
     <string name="mm_audio_permission_required">Este necesară permisiune audio pentru a gestiona apelurile.</string>
-    <string name="mm_weak_internet_connection">Conexiune slabă la internet</string>
+    <string name="mm_call_weak_internet_connection">Rețeaua dvs. cauzează o calitate slabă a apelurilor</string>
     <string name="mm_microphone_muted">Dezactivat</string>
     <string name="mm_unknown_error">Eroare necunoscută</string>
     <string name="mm_unmute">Activați sunetul</string>

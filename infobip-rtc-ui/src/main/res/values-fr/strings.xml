@@ -16,7 +16,7 @@
     <string name="mm_unknown">Inconnue</string>
     <string name="mm_call_finished">Appel terminé</string>
     <string name="mm_audio_permission_required">Une autorisation audio est requise pour gérer les appels.</string>
-    <string name="mm_weak_internet_connection">Connexion Internet faible</string>
+    <string name="mm_call_weak_internet_connection">Votre réseau cause une mauvaise qualité d\'appel</string>
     <string name="mm_microphone_muted">En sourdine</string>
     <string name="mm_unknown_error">Erreur inconnue</string>
     <string name="mm_unmute">Rétablir le son</string>

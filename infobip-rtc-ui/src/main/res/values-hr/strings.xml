@@ -19,7 +19,7 @@
     <string name="mm_unmute">isključi zvuk</string>
     <string name="mm_unknown_error">nepoznata pogreška</string>
     <string name="mm_microphone_muted">prigušen</string>
-    <string name="mm_weak_internet_connection">Slaba internetska veza</string>
+    <string name="mm_call_weak_internet_connection">Vaša mreža uzrokuje lošu kvalitetu poziva</string>
     <string name="mm_audio_permission_required">Za upravljanje pozivima potrebno je audiodopuštenje.</string>
     <string name="mm_call_finished">Poziv završen</string>
     <string name="mm_calls_notification_channel">Pozivi</string>

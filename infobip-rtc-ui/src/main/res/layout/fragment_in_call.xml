@@ -348,7 +348,7 @@
         android:layout_margin="16dp"
         android:visibility="gone"
         app:alertIcon="@drawable/ic_alert_triangle"
-        app:alertText="@string/mm_weak_internet_connection"
+        app:alertText="@string/mm_call_weak_internet_connection"
         app:alertTextColor="@color/rtc_ui_foreground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

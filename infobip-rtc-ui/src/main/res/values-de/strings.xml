@@ -16,7 +16,7 @@
     <string name="mm_unknown">Unbekannt</string>
     <string name="mm_call_finished">Anruf beendet</string>
     <string name="mm_audio_permission_required">Zur Bearbeitung von Anrufen ist eine Audioberechtigung erforderlich.</string>
-    <string name="mm_weak_internet_connection">Schwache Internetverbindung</string>
+    <string name="mm_call_weak_internet_connection">Ihr Netzwerk verursacht eine schlechte Anrufqualität</string>
     <string name="mm_microphone_muted">Stummgeschaltet</string>
     <string name="mm_unknown_error">Unbekannter Fehler</string>
     <string name="mm_unmute">Stummschaltung aufheben</string>

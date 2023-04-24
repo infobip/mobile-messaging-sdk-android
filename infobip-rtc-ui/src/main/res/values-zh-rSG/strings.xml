@@ -17,7 +17,7 @@
     <string name="mm_unknown">未知</string>
     <string name="mm_call_finished">通话结束</string>
     <string name="mm_audio_permission_required">处理呼叫需要音频权限。</string>
-    <string name="mm_weak_internet_connection">互联网连接较弱</string>
+    <string name="mm_call_weak_internet_connection">您的網絡導致通話質量不佳</string>
     <string name="mm_microphone_muted">静音</string>
     <string name="mm_unknown_error">未知错误</string>
     <string name="mm_unmute">取消静音</string>

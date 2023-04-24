@@ -16,7 +16,7 @@
     <string name="mm_unknown">ไม่รู้จัก</string>
     <string name="mm_call_finished">โทรเสร็จแล้ว</string>
     <string name="mm_audio_permission_required">ต้องมีการอนุญาตเสียงเพื่อจัดการการโทร</string>
-    <string name="mm_weak_internet_connection">การเชื่อมต่ออินเทอร์เน็ตที่อ่อนแอ</string>
+    <string name="mm_call_weak_internet_connection">เครือข่ายของคุณทำให้คุณภาพการโทรไม่ดี</string>
     <string name="mm_microphone_muted">ปิดเสียง</string>
     <string name="mm_unknown_error">ข้อผิดพลาดที่ไม่รู้จัก</string>
     <string name="mm_unmute">เปิดเสียง</string>

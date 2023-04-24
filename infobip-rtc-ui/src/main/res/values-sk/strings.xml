@@ -16,7 +16,7 @@
     <string name="mm_unknown">Neznámy</string>
     <string name="mm_call_finished">Hovor ukončený</string>
     <string name="mm_audio_permission_required">Na používanie hovorov sa vyžaduje povolenie na zvuk.</string>
-    <string name="mm_weak_internet_connection">Slabé internetové pripojenie</string>
+    <string name="mm_call_weak_internet_connection">Vaša sieť spôsobuje zlú kvalitu hovoru</string>
     <string name="mm_microphone_muted">Stlmené</string>
     <string name="mm_unknown_error">Neznáma chyba</string>
     <string name="mm_unmute">Zapnúť zvuk</string>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">Desconocido</string>
     <string name="mm_call_finished">Llamada finalizada</string>
     <string name="mm_audio_permission_required">Se requiere permiso de audio para manejar llamadas.</string>
-    <string name="mm_weak_internet_connection">Conexión a internet débil</string>
+    <string name="mm_call_weak_internet_connection">Su red está provocando una calidad de llamada deficiente</string>
     <string name="mm_microphone_muted">Apagado</string>
     <string name="mm_unknown_error">Error desconocido</string>
     <string name="mm_unmute">No silenciar</string>

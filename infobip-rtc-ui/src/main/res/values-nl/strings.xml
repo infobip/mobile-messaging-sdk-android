@@ -16,7 +16,7 @@
     <string name="mm_unknown">Onbekend</string>
     <string name="mm_call_finished">Oproep beëindigd</string>
     <string name="mm_audio_permission_required">Audiotoestemming is vereist om gesprekken af te handelen.</string>
-    <string name="mm_weak_internet_connection">Zwakke internetverbinding</string>
+    <string name="mm_call_weak_internet_connection">Uw netwerk veroorzaakt een slechte gesprekskwaliteit</string>
     <string name="mm_microphone_muted">Gedempt</string>
     <string name="mm_unknown_error">Onbekende fout</string>
     <string name="mm_unmute">Dempen opheffen</string>

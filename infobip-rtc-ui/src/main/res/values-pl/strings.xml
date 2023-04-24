@@ -16,7 +16,7 @@
     <string name="mm_unknown">Nieznany</string>
     <string name="mm_call_finished">Rozmowa zakończona</string>
     <string name="mm_audio_permission_required">Do obsługi połączeń wymagane jest zezwolenie na dźwięk.</string>
-    <string name="mm_weak_internet_connection">Słabe połączenie internetowe</string>
+    <string name="mm_call_weak_internet_connection">Twoja sieć powoduje niską jakość połączenia</string>
     <string name="mm_microphone_muted">Wyciszony</string>
     <string name="mm_unknown_error">Nieznany błąd</string>
     <string name="mm_unmute">Wyłącz wyciszenie</string>

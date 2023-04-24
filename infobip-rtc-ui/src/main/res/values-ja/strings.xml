@@ -16,7 +16,7 @@
     <string name="mm_unknown">わからない</string>
     <string name="mm_call_finished">通話終了</string>
     <string name="mm_audio_permission_required">通話を処理するには、音声の許可が必要です。</string>
-    <string name="mm_weak_internet_connection">インターネット接続が弱い</string>
+    <string name="mm_call_weak_internet_connection">ネットワークが原因で通話品質が低下している</string>
     <string name="mm_microphone_muted">ミュート</string>
     <string name="mm_unknown_error">未知のエラー</string>
     <string name="mm_unmute">ミュート解除</string>
