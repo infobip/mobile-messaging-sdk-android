@@ -17,6 +17,7 @@ import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker;
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.Collection;
 
@@ -77,8 +78,9 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         if (activity instanceof ComponentActivity)
             MobileMessagingCore.getInstance(activity).getPostNotificationsPermissionRequester().onActivityCreated((ComponentActivity) activity);
-        else
-            MobileMessagingLogger.e("Activity not an instance of ComponentActivity. You'll need to manually require POST_NOTIFICATIONS permission.");
+        else if (SystemInformation.isTiramisuOrAbove()) {
+            MobileMessagingLogger.d("Activity not an instance of ComponentActivity. You'll need to manually require POST_NOTIFICATIONS permission.");
+        }
     }
 
     @Override
