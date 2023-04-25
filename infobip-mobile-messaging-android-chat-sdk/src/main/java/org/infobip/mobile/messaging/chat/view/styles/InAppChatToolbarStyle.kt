@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 data class InAppChatToolbarStyle(
     @ColorInt val toolbarBackgroundColor: Int,
     @ColorInt val statusBarBackgroundColor: Int,
+    val lightStatusBarIcons: Boolean,
     @DrawableRes val navigationIcon: Int,
     @ColorInt val navigationIconTint: Int,
     @StyleRes val titleTextAppearance: Int? = null,
@@ -34,7 +35,7 @@ data class InAppChatToolbarStyle(
 
         private const val RES_ID_CHAT_VIEW_TITLE = "ib_in_app_chat_view_title"
 
-        internal operator fun invoke(@AttrRes attr: Int, context: Context): InAppChatToolbarStyle {
+        private operator fun invoke(@AttrRes attr: Int, context: Context): InAppChatToolbarStyle {
             val theme = context.theme
 
             //load deprecated attributes
@@ -57,6 +58,7 @@ data class InAppChatToolbarStyle(
             //load new style values
             var newToolbarBackgroundColor: Int? = null
             var newStatusBarBackgroundColor: Int? = null
+            var lightStatusBarIcons: Boolean? = null
             var newNavigationIcon: Int? = null
             var newNavigationIconTint: Int? = null
             var newTitleTextAppearance: Int? = null
@@ -76,6 +78,7 @@ data class InAppChatToolbarStyle(
                 val typedArray: TypedArray = theme.obtainStyledAttributes(typedValue.data, R.styleable.InAppChatToolbarViewStyleable)
                 newToolbarBackgroundColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatToolbarBackgroundColor, 0).takeIfDefined()
                 newStatusBarBackgroundColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatStatusBarBackgroundColor, 0).takeIfDefined()
+                lightStatusBarIcons = typedArray.getInt(R.styleable.InAppChatToolbarViewStyleable_ibChatStatusBarIconsColorMode, 0) == 0
                 newNavigationIcon = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIcon, 0).takeIfDefined()
                 newNavigationIconTint = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIconTint, 0).takeIfDefined()
                 newTitleTextAppearance = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextAppearance, 0).takeIfDefined()
@@ -112,6 +115,7 @@ data class InAppChatToolbarStyle(
                     ?: deprecatedToolbarBackgroundColor ?: Color.BLACK,
                 statusBarBackgroundColor = newStatusBarBackgroundColor
                     ?: deprecatedStatusBarBackgroundColor ?: Color.BLACK,
+                lightStatusBarIcons = lightStatusBarIcons ?: true,
                 navigationIcon = newNavigationIcon ?: R.drawable.ic_chat_arrow_back,
                 navigationIconTint = newNavigationIconTint ?: deprecatedNavigationIconTint
                 ?: Color.WHITE,

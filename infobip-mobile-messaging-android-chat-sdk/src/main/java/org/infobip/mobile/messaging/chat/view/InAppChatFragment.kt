@@ -34,10 +34,7 @@ import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
-import org.infobip.mobile.messaging.chat.utils.CommonUtils
-import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
-import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
-import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -79,6 +76,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
     @ColorInt
     private var originalStatusBarColor = 0
+    private var originalLightStatusBar: Boolean? = null
     private lateinit var permissionsRequestManager: PermissionsRequestManager
     private lateinit var localizationUtils: LocalizationUtils
     private var capturedImageUri: Uri? = null
@@ -220,6 +218,9 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
                 false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
             if (originalStatusBarColor != 0)
                 requireActivity().setStatusBarColor(originalStatusBarColor)
+            originalLightStatusBar?.let {
+                requireActivity().setLightStatusBarMode(it)
+            }
             inAppChatActionBarProvider?.onInAppChatBackPressed()
         } catch (e: Exception) {
             MobileMessagingLogger.e("InAppChatFragment", "Can't get actionBarProvider", e)
@@ -231,10 +232,16 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
         val style = InAppChatToolbarStyle.createChatToolbarStyle(requireContext(), widgetInfo)
         binding.ibLcChatToolbar.setNavigationIcon(style.navigationIcon)
-        val currentColor = requireActivity().getStatusBarColor() ?: 0
-        if (currentColor != style.statusBarBackgroundColor)
-            this.originalStatusBarColor = currentColor
-        requireActivity().setStatusBarColor(style.statusBarBackgroundColor)
+        requireActivity().apply {
+            val currentColor = getStatusBarColor() ?: 0
+            if (currentColor != style.statusBarBackgroundColor)
+                this@InAppChatFragment.originalStatusBarColor = currentColor
+            setStatusBarColor(style.statusBarBackgroundColor)
+            val currentMode = isLightStatusBarMode()
+            if (currentMode != (!style.lightStatusBarIcons))
+                this@InAppChatFragment.originalLightStatusBar = currentMode
+            setLightStatusBarMode(!style.lightStatusBarIcons)
+        }
         style.apply(binding.ibLcChatToolbar)
     }
     //endregion

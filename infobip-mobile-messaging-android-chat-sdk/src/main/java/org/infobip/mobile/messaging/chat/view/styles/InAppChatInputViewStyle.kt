@@ -15,6 +15,7 @@ import org.infobip.mobile.messaging.chat.utils.*
 
 data class InAppChatInputViewStyle(
     @StyleRes val textAppearance: Int? = null,
+    @ColorInt val textColor: Int,
     @ColorInt val backgroundColor: Int,
     val hintText: String? = null,
     @StringRes val hintTextRes: Int? = null,
@@ -25,6 +26,7 @@ data class InAppChatInputViewStyle(
     val sendIconTint: ColorStateList? = null,
     @ColorInt val separatorLineColor: Int,
     val isSeparatorLineVisible: Boolean,
+    @ColorInt val cursorColor: Int,
 ) {
     companion object {
 
@@ -57,6 +59,7 @@ data class InAppChatInputViewStyle(
                 }
 
                 val textAppearance = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputTextAppearance, 0).takeIfDefined()
+                val textColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputTextColor, context.getColorCompat(R.color.ib_chat_text_color))
                 val backgroundColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputBackgroundColor, Color.WHITE)
                 val hintTextNonResource = getNonResourceString(R.styleable.InAppChatInputViewStyleable_ibChatInputHintText)
                 var hintText: String?
@@ -77,10 +80,12 @@ data class InAppChatInputViewStyle(
                 val sendIconTint = getColorStateList(R.styleable.InAppChatInputViewStyleable_ibChatInputSendIconTint) ?: buttonDefaultTint
                 val separatorLineColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputSeparatorLineColor, context.getColorCompat(R.color.ib_chat_separator_color))
                 val isSeparatorLineVisible = getBoolean(R.styleable.InAppChatInputViewStyleable_ibChatInputSeparatorLineVisible, true)
+                val cursorColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor, textColor)
 
                 recycle()
                 return InAppChatInputViewStyle(
                     textAppearance,
+                    textColor,
                     backgroundColor,
                     hintText,
                     hintTextRes,
@@ -90,7 +95,8 @@ data class InAppChatInputViewStyle(
                     sendIcon,
                     sendIconTint,
                     separatorLineColor,
-                    isSeparatorLineVisible
+                    isSeparatorLineVisible,
+                    cursorColor
                 )
             }
         }
@@ -126,6 +132,9 @@ data class InAppChatInputViewStyle(
                 if (backgroundColor != null) {
                     style = style.copy(backgroundColor = backgroundColor)
                 }
+                if (colorPrimary != null) {
+                    style = style.copy(cursorColor = colorPrimary)
+                }
             } else { //if it is theme provided by integrator apply widget color only to components which are not defined by integrator
                 val sendButtonTintDefined = theme.isAttributePresent(
                     R.styleable.InAppChatInputViewStyleable_ibChatInputSendIconTint,
@@ -135,6 +144,7 @@ data class InAppChatInputViewStyle(
                 if (!sendButtonTintDefined && buttonTint != null) {
                     style = style.copy(sendIconTint = buttonTint)
                 }
+
                 val attachmentButtonTintDefined = theme.isAttributePresent(
                     R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentIconTint,
                     R.attr.ibChatInputStyle,
@@ -143,6 +153,7 @@ data class InAppChatInputViewStyle(
                 if (!attachmentButtonTintDefined && buttonTint != null) {
                     style = style.copy(attachmentIconTint = buttonTint)
                 }
+
                 val backgroundColorDefined = theme.isAttributePresent(
                     R.styleable.InAppChatInputViewStyleable_ibChatInputBackgroundColor,
                     R.attr.ibChatInputStyle,
@@ -150,6 +161,15 @@ data class InAppChatInputViewStyle(
                 )
                 if (!backgroundColorDefined && backgroundColor != null) {
                     style = style.copy(backgroundColor = backgroundColor)
+                }
+
+                val cursorColorDefined = theme.isAttributePresent(
+                    R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor,
+                    R.attr.ibChatInputStyle,
+                    R.styleable.InAppChatInputViewStyleable
+                )
+                if (!cursorColorDefined && colorPrimary != null) {
+                    style = style.copy(cursorColor = colorPrimary)
                 }
             }
 

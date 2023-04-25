@@ -20,6 +20,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 
@@ -54,6 +55,14 @@ internal fun Drawable?.setTint(color: ColorStateList?): Drawable? {
         val drawable = it.mutate()
         DrawableCompat.setTintList(drawable, color)
         drawable
+    }
+}
+
+internal fun Drawable?.setTint(@ColorInt color: Int): Drawable? {
+    return this?.let { drawable ->
+        DrawableCompat.wrap(drawable)
+            .also { DrawableCompat.setTint(it, color) }
+            .let { DrawableCompat.unwrap(it) }
     }
 }
 
@@ -204,11 +213,27 @@ internal fun Activity?.getStatusBarColor(): Int? {
 }
 
 internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
-    if(color != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP){
+    if (color != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
         this?.window?.let {
             it.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             it.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
             it.statusBarColor = color
         }
+    }
+}
+
+internal fun Activity?.isLightStatusBarMode(): Boolean? {
+    return this?.window?.let {
+        WindowInsetsControllerCompat(
+            it,
+            it.decorView
+        ).isAppearanceLightStatusBars
+    }
+}
+
+internal fun Activity?.setLightStatusBarMode(isLightStatusBar: Boolean) {
+    this?.window?.let {
+        WindowInsetsControllerCompat(it, it.decorView).isAppearanceLightStatusBars =
+            isLightStatusBar
     }
 }

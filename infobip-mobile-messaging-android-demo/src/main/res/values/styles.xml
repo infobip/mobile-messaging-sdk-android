@@ -23,6 +23,7 @@
         <item name="ibChatTitleTextAppearance">@style/InAppChat.Demo.Toolbar.Title.TextAppearance</item>
         <item name="ibChatTitleTextColor">@android:color/white</item>
         <item name="ibChatTitleCentered">false</item>
+        <item name="ibChatStatusBarIconsColorMode">light</item>
     </style>
 
     <style name="InAppChat.Demo.Toolbar.Title.TextAppearance" parent="TextAppearance.MaterialComponents.Headline6">

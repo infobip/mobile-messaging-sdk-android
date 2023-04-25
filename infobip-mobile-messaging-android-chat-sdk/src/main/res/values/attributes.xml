@@ -12,6 +12,10 @@
     <declare-styleable name="InAppChatToolbarViewStyleable">
         <attr name="ibChatToolbarBackgroundColor" format="color|reference" />
         <attr name="ibChatStatusBarBackgroundColor" format="color|reference" />
+        <attr name="ibChatStatusBarIconsColorMode" format="enum">
+            <enum name="light" value="0" />
+            <enum name="dark" value="1" />
+        </attr>
         <attr name="ibChatNavigationIcon" format="reference" />
         <attr name="ibChatNavigationIconTint" format="color|reference" />
         <attr name="ibChatTitleTextAppearance" format="reference" />
@@ -35,6 +39,7 @@
 
     <declare-styleable name="InAppChatInputViewStyleable">
         <attr name="ibChatInputTextAppearance" format="reference" />
+        <attr name="ibChatInputTextColor" format="color|reference" />
         <attr name="ibChatInputBackgroundColor" format="color|reference" />
         <attr name="ibChatInputHintText" format="string|reference" />
         <attr name="ibChatInputHintTextColor" format="color|reference" />
@@ -44,6 +49,7 @@
         <attr name="ibChatInputSendIcon" format="reference" />
         <attr name="ibChatInputSeparatorLineColor" format="color|reference" />
         <attr name="ibChatInputSeparatorLineVisible" format="boolean" />
+        <attr name="ibChatInputCursorColor" format="color|reference" />
     </declare-styleable>
 
 </resources>

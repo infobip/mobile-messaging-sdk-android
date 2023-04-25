@@ -7,7 +7,10 @@ import android.os.Build
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
@@ -15,6 +18,8 @@ import org.infobip.mobile.messaging.chat.databinding.IbViewChatInputBinding
 import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle.Companion.applyWidgetConfig
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger
+import java.lang.reflect.Field
 
 class InAppChatInputView @JvmOverloads constructor(
     context: Context,
@@ -56,6 +61,7 @@ class InAppChatInputView @JvmOverloads constructor(
                     messageInput.setTextAppearance(context, it)
                 }
             }
+            messageInput.setTextColor(style.textColor)
             root.setBackgroundColor(style.backgroundColor)
             if (style.hintTextRes != null) {
                 messageInput.hint = localizationUtils.getString(style.hintTextRes)
@@ -69,7 +75,50 @@ class InAppChatInputView @JvmOverloads constructor(
             style.sendIconTint?.let { sendButton.setImageTint(it) }
             topSeparator.setBackgroundColor(style.separatorLineColor)
             topSeparator.show(style.isSeparatorLineVisible)
+            messageInput.setCursorDrawableColor(style.cursorColor)
         }
+    }
+
+    private fun TextView.setCursorDrawableColor(@ColorInt color: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            textCursorDrawable?.setTint(color)
+            return
+        }
+
+        try {
+            val editorField = TextView::class.java.getFieldByName("mEditor")
+            val editor = editorField?.get(this) ?: this
+            val editorClass: Class<*> =
+                if (editorField != null) editor.javaClass else TextView::class.java
+            val cursorRes =
+                TextView::class.java.getFieldByName("mCursorDrawableRes")?.get(this) as? Int
+                    ?: return
+            val tintedCursorDrawable =
+                ContextCompat.getDrawable(context, cursorRes)?.setTint(color = color) ?: return
+            val cursorField = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                editorClass.getFieldByName("mDrawableForCursor")
+            } else {
+                null
+            }
+            if (cursorField != null) {
+                cursorField.set(editor, tintedCursorDrawable)
+            } else {
+                editorClass.getFieldByName("mCursorDrawable", "mDrawableForCursor")
+                    ?.set(editor, arrayOf(tintedCursorDrawable, tintedCursorDrawable))
+            }
+        } catch (t: Throwable) {
+            MobileMessagingLogger.e("Could not set message input cursor color.", t)
+        }
+    }
+
+    private fun Class<*>.getFieldByName(vararg name: String): Field? {
+        name.forEach {
+            try {
+                return this.getDeclaredField(it).apply { isAccessible = true }
+            } catch (t: Throwable) {
+            }
+        }
+        return null
     }
 
     override fun setEnabled(enabled: Boolean) {

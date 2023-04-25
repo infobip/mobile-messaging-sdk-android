@@ -2,10 +2,7 @@
 <resources>
 
     <!--    region Themes-->
-    <style name="IB_ChatDefaultTheme" parent="IB_AppTheme">
-        <item name="colorControlNormal">@android:color/white</item> <!-- deprecated | prefer ibChatToolbarStyle - ibChatNavigationIconTint attribute | color of navigation icon in toolbar -->
-        <item name="titleTextColor">@android:color/white</item> <!-- deprecated | prefer ibChatToolbarStyle - ibChatTitleTextColor attribute | color of toolbar title text -->
-    </style>
+    <style name="IB_ChatDefaultTheme" parent="Theme.MaterialComponents.Light.NoActionBar" />
 
     <style name="IB_ChatDefaultTheme.Styled" parent="IB_ChatDefaultTheme">
         <item name="ibChatDefaultStyledTheme">true</item>
@@ -25,6 +22,7 @@
     <style name="IB.Chat.Toolbar" parent="IB">
         <item name="ibChatToolbarBackgroundColor">@android:color/black</item>
         <item name="ibChatStatusBarBackgroundColor">@android:color/black</item>
+        <item name="ibChatStatusBarIconsColorMode">light</item>
         <item name="ibChatNavigationIcon">@drawable/ic_chat_arrow_back</item>
         <item name="ibChatNavigationIconTint">@android:color/white</item>
         <item name="ibChatTitleTextAppearance">@null</item>
@@ -54,6 +52,7 @@
 
     <style name="IB.Chat.Input" parent="IB">
         <item name="ibChatInputTextAppearance">@style/IB.Chat.Input.TextAppearance</item>
+        <item name="ibChatInputTextColor">@color/ib_chat_text_color</item>
         <item name="ibChatInputBackgroundColor">@android:color/white</item>
         <item name="ibChatInputHintText">@string/ib_chat_message_hint</item>
         <item name="ibChatInputHintTextColor">@color/ib_chat_hint_text_color</item>
@@ -63,6 +62,7 @@
         <item name="ibChatInputSendIconTint">@color/ib_selector_black_disabled</item>
         <item name="ibChatInputSeparatorLineColor">@color/ib_chat_separator_color</item>
         <item name="ibChatInputSeparatorLineVisible">true</item>
+        <item name="ibChatInputCursorColor">@color/ib_chat_text_color</item>
     </style>
 
     <style name="IB.Chat.Input.TextAppearance" parent="TextAppearance.MaterialComponents.Body1" />
