@@ -60,6 +60,7 @@ public class PlayServicesSupport {
                 public void run() {
                     Intent playServicesError = new Intent(Event.GOOGLE_PLAY_SERVICES_ERROR.getKey());
                     playServicesError.putExtra(BroadcastParameter.EXTRA_PLAY_SERVICES_ERROR_CODE, finalErrorCode);
+                    playServicesError.setPackage(context.getPackageName());
 
                     context.sendBroadcast(playServicesError);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(playServicesError);
