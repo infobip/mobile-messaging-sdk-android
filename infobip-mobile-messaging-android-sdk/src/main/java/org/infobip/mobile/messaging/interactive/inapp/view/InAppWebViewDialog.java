@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
+import static android.content.Context.WINDOW_SERVICE;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,13 +24,14 @@ import android.widget.PopupWindow;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.R;
-import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
-public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAppWebView {
+public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "InAppWebViewDialog";
     private static final int DIALOG_TIMEOUT = 5000;
     private static final int CORNER_RADIUS = 20;
@@ -40,15 +44,23 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
     private PopupWindow popupWindow;
     private WebView webView;
     private final ActivityWrapper activityWrapper;
-    private boolean isMessageDisplayed = false;
     private InAppWebViewMessage message;
 
+
     InAppWebViewDialog(Callback callback, ActivityWrapper activityWrapper) {
-        super(activityWrapper.getActivity().getApplication());
         this.callback = callback;
         this.activityWrapper = activityWrapper;
         displayMetrics = new DisplayMetrics();
         activityWrapper.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+    }
+
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+        if (popupWindow != null) {
+            popupWindow.dismiss();
+            setActivityLifecycleListener(null);
+        }
     }
 
     /*
@@ -70,8 +82,8 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
             MobileMessagingLogger.d(TAG, "onDismissWebView()");
             new Handler(Looper.getMainLooper()).post(() -> {
                 popupWindow.dismiss();
+                setActivityLifecycleListener(null);
                 webView.destroy();
-                isMessageDisplayed = false;
             });
         }
 
@@ -90,7 +102,6 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
         @JavascriptInterface
         public void onHeightChanged(float pageHeight) {
             MobileMessagingLogger.d(TAG, "onHeightChanged: " + pageHeight);
-            //TODO: Find a way how to display webview on screen rotation without recreating webview
             updatePageHeight(pageHeight);
         }
     }
@@ -99,12 +110,21 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
     public void show(@NonNull final InAppWebViewMessage message) {
         this.message = message;
 
+        setActivityLifecycleListener(this);
+
         LayoutInflater inflater = activityWrapper.getActivity().getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.ib_inapp_webview, null);
         CardView cardView = dialogView.findViewById(R.id.webview_dialog_card);
         cardView.setRadius(CORNER_RADIUS);
 
         popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+
+        int screenRotation = ((WindowManager) activityWrapper.getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
+            cardView.getLayoutParams().width = displayMetrics.heightPixels - WIDTH_PADDING;
+        }
+
+        popupWindow.setContentView(dialogView);
 
         if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
             setDialogAnimations(message.position);
@@ -119,8 +139,6 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
 
         setDialogTimeout(DIALOG_TIMEOUT);
         showWebViewDialog(dialogView, message.position, message.type);
-
-        isMessageDisplayed = true;
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -153,7 +171,6 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
         };
         popupWindow.setOnDismissListener(() -> {
             callback.dismissed(this);
-            isMessageDisplayed = false;
             handler.removeCallbacks(runnable);
         });
         handler.postDelayed(runnable, dialogTimeout);
@@ -201,13 +218,6 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
         }
     }
 
-    @Override
-    public void onActivityResumed(Activity activity) {
-        if (isMessageDisplayed)
-            show(message);
-    }
-
-
     private void showWebViewDialog(View dialogView, InAppWebViewPosition position, InAppWebViewMessage.InAppWebViewType type) {
         switch (type) {
             case BANNER:
@@ -228,6 +238,11 @@ public class InAppWebViewDialog extends ActivityLifecycleMonitor implements InAp
     public void setVerticalScrollBar(int size) {
         webView.setVerticalScrollBarEnabled(true);
         webView.setScrollBarSize(size);
+    }
+
+    private void setActivityLifecycleListener(ActivityLifecycleListener listener) {
+        if (activityWrapper.getActivity() != null && MobileMessagingCore.getInstance(activityWrapper.getActivity()).getActivityLifecycleMonitor() != null)
+            MobileMessagingCore.getInstance(activityWrapper.getActivity()).getActivityLifecycleMonitor().activityListener = listener;
     }
 
     /*

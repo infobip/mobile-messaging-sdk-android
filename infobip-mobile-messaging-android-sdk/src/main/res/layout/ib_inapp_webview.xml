@@ -8,6 +8,7 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             app:cardUseCompatPadding="true"
             app:cardElevation="2dp"
             android:id="@+id/webview_dialog_card"

@@ -12,10 +12,10 @@ import org.infobip.mobile.messaging.platform.Platform;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Random;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
             Platform.mobileMessageHandler.get(this).handleMessage(generateNewMessage(object));
         });
 
@@ -116,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
             nativeMessage.setInAppStyle(Message.InAppStyle.MODAL);
             Platform.mobileMessageHandler.get(this).handleMessage(nativeMessage);
         });
-
     }
 
     @NonNull

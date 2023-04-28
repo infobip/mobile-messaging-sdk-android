@@ -28,6 +28,7 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
     private static volatile boolean foreground = false;
     @SuppressLint("StaticFieldLeak")
     private static volatile Activity foregroundActivity = null;
+    public ActivityLifecycleListener activityListener;
 
     public ActivityLifecycleMonitor(@NonNull Application application) {
         application.registerActivityLifecycleCallbacks(this);
@@ -101,7 +102,8 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityStopped(Activity activity) {
-
+        if (activityListener != null)
+            activityListener.onActivityStopped(activity);
     }
 
     @Override
