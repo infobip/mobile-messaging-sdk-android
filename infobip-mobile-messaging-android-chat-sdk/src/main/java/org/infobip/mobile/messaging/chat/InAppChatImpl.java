@@ -235,6 +235,15 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    public void showThreadsList() {
+        if (inAppChatWVFragment != null) {
+            inAppChatWVFragment.showThreadList();
+        } else {
+            MobileMessagingLogger.e("Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
+        }
+    }
+
+    @Override
     public void applicationInForeground() {
         performSyncActions();
     }

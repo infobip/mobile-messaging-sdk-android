@@ -38,7 +38,7 @@ public abstract class InAppChat {
     }
 
     /**
-     * Activates In-app chat service.
+     * Activates in-app chat service.
      */
     public abstract void activate();
 
@@ -70,14 +70,14 @@ public abstract class InAppChat {
     public abstract void cleanup();
 
     /**
-     * Adds in-app Chat Fragment to the Activity or shows it if it was already added and hidden.
+     * Adds in-app chat Fragment to the Activity or shows it if it was already added and hidden.
      * @param fragmentManager manager to make interactions with Fragment
-     * @param containerId identifier of the container in-app Chat Fragment is to be placed in
+     * @param containerId identifier of the container in-app chat Fragment is to be placed in
      */
     public abstract void showInAppChatFragment(FragmentManager fragmentManager, int containerId);
 
     /**
-     * Hides in-app Chat Fragment, so that all views, especially in-app Chat webView, stays in memory.
+     * Hides in-app chat Fragment, so that all views, especially in-app chat webView, stays in memory.
      * @param fragmentManager manager to make interactions with Fragment
      */
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager);
@@ -149,5 +149,11 @@ public abstract class InAppChat {
      * @see JwtProvider
      */
     public abstract InAppChat.JwtProvider getJwtProvider();
+
+    /**
+     * Navigates to THREAD_LIST view in multithread widget if in-app chat is shown as Fragment.
+     * @see org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+     */
+    public abstract void showThreadsList();
 
 }

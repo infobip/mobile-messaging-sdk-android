@@ -70,6 +70,7 @@ class InAppChatView @JvmOverloads constructor(
     private var style = InAppChatStyle(context, attributes)
     private val inAppChat = InAppChat.getInstance(context)
     private val inAppChatClient: InAppChatClient = InAppChatClientImpl(binding.ibLcWebView)
+    private var inAppChatBroadcaster: InAppChatBroadcaster = InAppChatBroadcasterImpl(context)
     private val mmCore: MobileMessagingCore = MobileMessagingCore.getInstance(context)
     private val localizationUtils = LocalizationUtils.getInstance(context)
     private var isChatLoaded: Boolean = false
@@ -247,6 +248,7 @@ class InAppChatView @JvmOverloads constructor(
 
         override fun onWidgetViewChanged(widgetView: InAppChatWidgetView) {
             eventsListener?.onChatViewChanged(widgetView)
+            inAppChatBroadcaster.chatViewChanged(widgetView)
         }
     }
     //endregion

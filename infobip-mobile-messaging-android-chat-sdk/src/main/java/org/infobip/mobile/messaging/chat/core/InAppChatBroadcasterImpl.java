@@ -26,6 +26,12 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
                 .putExtra(BroadcastParameter.EXTRA_UNREAD_CHAT_MESSAGES_COUNT, unreadMessagesCount));
     }
 
+    @Override
+    public void chatViewChanged(InAppChatWidgetView view) {
+        send(prepare(InAppChatEvent.CHAT_VIEW_CHANGED)
+                .putExtra(BroadcastParameter.EXTRA_CHAT_VIEW, view.name()));
+    }
+
     private void send(Intent intent) {
         try {
             context.sendBroadcast(intent);

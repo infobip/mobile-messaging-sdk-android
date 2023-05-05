@@ -85,15 +85,6 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
     private var widgetView: InAppChatWidgetView? = null
     private val isMultiThread
         get() = binding.ibLcChat.isMultiThread
-
-    /**
-     * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
-     * It is used in React Native plugin to handle multithread navigation.
-     */
-    private var inAppChatActionBarProvider: InAppChatActionBarProvider? = null
-        get() {
-            return field ?: (requireActivity() as? InAppChatActionBarProvider)
-        }
     private val backPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             navigateBack()
@@ -105,6 +96,24 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
                 binding.ibLcChat.sendInputDraft(it)
         }
     private val inputCheckerHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
+     * It is used in React Native plugin to handle multithread navigation.
+     */
+    var inAppChatActionBarProvider: InAppChatActionBarProvider? = null
+        get() {
+            return field ?: (requireActivity() as? InAppChatActionBarProvider)
+        }
+    /**
+     * Allows to hide Toolbar in InAppChatFragment.
+     * It is used in React Native plugin, ChatView UI component is without toolbar.
+     */
+    var withToolbar = true
+        set(value) {
+            field = value
+            _binding?.ibLcChatToolbar?.show(value)
+        }
 
     //region Lifecycle
     override fun onCreateView(
@@ -155,6 +164,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
     override fun onDestroyView() {
         super.onDestroyView()
+        revertStatusBarStyle() //called because of react native plugin UI component
         removeBackPressHandler()
         binding.ibLcChat.eventsListener = null
         _binding = null
@@ -189,16 +199,19 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
     //region Toolbar
     private fun initToolbar() {
-        //If Activity has it's own ActionBar, it should be hidden.
-        try {
-            inAppChatActionBarProvider?.originalSupportActionBar?.hide()
-        } catch (e: Exception) {
-            MobileMessagingLogger.e("InAppChatFragment", "Can't get actionBarProvider", e)
+        if (!withToolbar) {
+            if (binding.ibLcChatToolbar.isVisible)
+                binding.ibLcChatToolbar.hide()
+            return
         }
+        //If Activity has it's own ActionBar, it should be hidden.
+        inAppChatActionBarProvider?.originalSupportActionBar?.hide()
         binding.ibLcChatToolbar.setNavigationOnClickListener { navigateBack() }
     }
 
     private fun navigateBack() {
+        if (!withToolbar)
+            return
         binding.ibLcChatInput.hideKeyboard()
         val view = widgetView
         if (isMultiThread && view != null) {
@@ -212,26 +225,24 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
     }
 
     private fun closeChatPage() {
-        try {
-            inAppChatActionBarProvider?.originalSupportActionBar?.show()
-            backPressedCallback.isEnabled =
-                false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
-            if (originalStatusBarColor != 0)
-                requireActivity().setStatusBarColor(originalStatusBarColor)
-            originalLightStatusBar?.let {
-                requireActivity().setLightStatusBarMode(it)
-            }
-            inAppChatActionBarProvider?.onInAppChatBackPressed()
-        } catch (e: Exception) {
-            MobileMessagingLogger.e("InAppChatFragment", "Can't get actionBarProvider", e)
-        }
+        revertStatusBarStyle()
+        inAppChatActionBarProvider?.originalSupportActionBar?.show()
+        backPressedCallback.isEnabled = false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
+        inAppChatActionBarProvider?.onInAppChatBackPressed()
     }
 
-    private fun showThreadList() = binding.ibLcChat.showThreadList()
+    fun showThreadList() = binding.ibLcChat.showThreadList()
 
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
+        if (!withToolbar)
+            return
         val style = InAppChatToolbarStyle.createChatToolbarStyle(requireContext(), widgetInfo)
         binding.ibLcChatToolbar.setNavigationIcon(style.navigationIcon)
+        style.apply(binding.ibLcChatToolbar)
+        applyStatusBarStyle(style)
+    }
+
+    private fun applyStatusBarStyle(style: InAppChatToolbarStyle) {
         requireActivity().apply {
             val currentColor = getStatusBarColor() ?: 0
             if (currentColor != style.statusBarBackgroundColor)
@@ -242,7 +253,14 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
                 this@InAppChatFragment.originalLightStatusBar = currentMode
             setLightStatusBarMode(!style.lightStatusBarIcons)
         }
-        style.apply(binding.ibLcChatToolbar)
+    }
+
+    private fun revertStatusBarStyle() {
+        if (originalStatusBarColor != 0)
+            requireActivity().setStatusBarColor(originalStatusBarColor)
+        originalLightStatusBar?.let {
+            requireActivity().setLightStatusBarMode(it)
+        }
     }
     //endregion
 
