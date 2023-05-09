@@ -186,8 +186,14 @@ class InAppChatView @JvmOverloads constructor(
 
     //region Lifecycle
     private val lifecycleObserver = object : DefaultLifecycleObserver {
+
+        override fun onCreate(owner: LifecycleOwner) {
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+        }
+
         override fun onResume(owner: LifecycleOwner) {
-            super.onResume(owner)
             registerReceivers()
             updateErrors()
             binding.ibLcWebView.onResume()
@@ -196,13 +202,14 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            super.onPause(owner)
             unregisterReceivers()
             binding.ibLcWebView.onPause()
         }
 
+        override fun onStop(owner: LifecycleOwner) {
+        }
+
         override fun onDestroy(owner: LifecycleOwner) {
-            super.onDestroy(owner)
             binding.ibLcWebView.destroy()
         }
     }
