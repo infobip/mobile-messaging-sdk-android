@@ -9,6 +9,7 @@ import com.infobip.webrtc.TokenProvider
 import com.infobip.webrtc.sdk.api.InfobipRTC
 import com.infobip.webrtc.sdk.api.model.push.Status
 import com.infobip.webrtc.ui.delegate.CallsDelegate
+import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.model.ListenType
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +24,8 @@ internal class InfobipRtcUiImpl(
         private val callsDelegate: CallsDelegate,
         private val callsScope: CoroutineScope,
         private val pushIdDelegate: PushIdDelegate,
-        private val rtcInstance: InfobipRTC
+        private val rtcInstance: InfobipRTC,
+        private val notificationPermissionDelegate: NotificationPermissionDelegate,
 ) : InfobipRtcUi {
 
     override fun enableCalls(identity: String, listenType: ListenType, successListener: SuccessListener?, errorListener: ErrorListener?) {
@@ -34,6 +36,9 @@ internal class InfobipRtcUiImpl(
                 cache.identity = identity
                 tokenProvider.getToken(identity, cache.applicationId)?.let { token ->
                     if (listenType == ListenType.PUSH) {
+                        if (notificationPermissionDelegate.isPermissionNeeded()) {
+                            notificationPermissionDelegate.request()
+                        }
                         registerPush(token, errorListener, successListener)
                     } else {
                         registerActiveConnection(token, errorListener, successListener)

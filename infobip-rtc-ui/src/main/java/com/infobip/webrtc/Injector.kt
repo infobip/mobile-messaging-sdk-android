@@ -6,7 +6,16 @@ import com.infobip.webrtc.ui.ErrorListener
 import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.InfobipRtcUiImpl
 import com.infobip.webrtc.ui.SuccessListener
-import com.infobip.webrtc.ui.delegate.*
+import com.infobip.webrtc.ui.delegate.AppCodeDelegate
+import com.infobip.webrtc.ui.delegate.AppCodeDelegateImpl
+import com.infobip.webrtc.ui.delegate.CallsDelegate
+import com.infobip.webrtc.ui.delegate.CallsDelegateImpl
+import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
+import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegateImpl
+import com.infobip.webrtc.ui.delegate.PushIdDelegate
+import com.infobip.webrtc.ui.delegate.PushIdDelegateImpl
+import com.infobip.webrtc.ui.delegate.Vibrator
+import com.infobip.webrtc.ui.delegate.VibratorImpl
 import com.infobip.webrtc.ui.model.Colors
 import com.infobip.webrtc.ui.model.Icons
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
@@ -37,18 +46,20 @@ internal object Injector {
     private val pushIdDelegate: PushIdDelegate by lazy { PushIdDelegateImpl(appContext) }
     val appCodeDelegate: AppCodeDelegate by lazy { AppCodeDelegateImpl(appContext) }
     private var webrtcUi: InfobipRtcUi? = null
+    val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { NotificationPermissionDelegateImpl(appContext) }
 
     fun getWebrtcUi(context: Context): InfobipRtcUi {
         if (!::appContext.isInitialized)
             appContext = context.applicationContext
         return webrtcUi ?: InfobipRtcUiImpl(
-            appContext,
-            tokenProvider,
-            cache,
-            callsDelegate,
-            callsScope,
-            pushIdDelegate,
-            rtcInstance
+                appContext,
+                tokenProvider,
+                cache,
+                callsDelegate,
+                callsScope,
+                pushIdDelegate,
+                rtcInstance,
+                notificationPermissionDelegate
         ).also { webrtcUi = it }
     }
 }

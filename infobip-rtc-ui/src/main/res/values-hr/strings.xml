@@ -27,4 +27,5 @@
     <string name="mm_is_calling">zove</string>
     <string name="mm_incoming_call">Dolazni poziv</string>
     <string name="mm_unknown">Nepoznato</string>
+    <string name="mm_notification_permission_required_declining_call">Nedostaje dozvola za obavijesti. Odbijanje dolaznog poziva.</string>
 </resources>

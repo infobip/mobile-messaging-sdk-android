@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Screen sharing</string>
     <string name="mm_screen_sharing_description">Your screen is shared</string>
     <string name="mm_in_call">In a call</string>
+    <string name="mm_notification_permission_required_declining_call">Missing notification permission. Declining incoming call.</string>
 </resources>

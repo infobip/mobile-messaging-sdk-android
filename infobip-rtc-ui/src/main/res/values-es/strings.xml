@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Compartir pantalla</string>
     <string name="mm_screen_sharing_description">Tu pantalla es compartida</string>
     <string name="mm_in_call">En una llamada</string>
+    <string name="mm_notification_permission_required_declining_call">Permiso de notificación faltante. Rechazar llamada entrante.</string>
 </resources>

@@ -27,4 +27,5 @@
     <string name="mm_hangup">掛斷</string>
     <string name="mm_video_permission_required">視頻通話需要攝像頭權限。</string>
     <string name="mm_screen_sharing">屏幕共享</string>
+    <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
 </resources>

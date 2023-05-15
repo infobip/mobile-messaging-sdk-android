@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">שיתוף מסך</string>
     <string name="mm_screen_sharing_description">המסך שלך משותף</string>
     <string name="mm_in_call">בשיחה</string>
+    <string name="mm_notification_permission_required_declining_call">חסרה הרשאת הודעה. דחיית שיחה נכנסת.</string>
 </resources>

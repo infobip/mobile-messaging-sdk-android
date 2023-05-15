@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Condivisione dello schermo</string>
     <string name="mm_screen_sharing_description">Il tuo schermo è condiviso</string>
     <string name="mm_in_call">In una chiamata</string>
+    <string name="mm_notification_permission_required_declining_call">Autorizzazione di notifica mancante. Chiamata in arrivo rifiutata.</string>
 </resources>

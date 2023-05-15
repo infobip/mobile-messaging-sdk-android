@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Berbagi layar</string>
     <string name="mm_screen_sharing_description">Layar Anda dibagikan</string>
     <string name="mm_in_call">Dalam panggilan</string>
+    <string name="mm_notification_permission_required_declining_call">Izin notifikasi tidak ada. Menolak panggilan masuk.</string>
 </resources>

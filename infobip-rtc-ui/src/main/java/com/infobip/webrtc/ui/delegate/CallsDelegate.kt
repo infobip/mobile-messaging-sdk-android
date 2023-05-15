@@ -19,7 +19,12 @@ import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.ui.listeners.IncomingCallEventListenerImpl
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
-import com.infobip.webrtc.ui.model.*
+import com.infobip.webrtc.ui.model.CallState
+import com.infobip.webrtc.ui.model.RtcUiAppCall
+import com.infobip.webrtc.ui.model.RtcUiCall
+import com.infobip.webrtc.ui.model.RtcUiIncomingAppCallImpl
+import com.infobip.webrtc.ui.model.RtcUiIncomingCall
+import com.infobip.webrtc.ui.model.RtcUiIncomingWebrtcCallImpl
 import kotlinx.coroutines.CoroutineScope
 
 internal interface CallsDelegate {
@@ -44,7 +49,7 @@ internal interface CallsDelegate {
     fun hasRemoteVideo(): Boolean
     fun getCallState(): CallState?
     fun getCallStatus(): CallStatus
-    fun handleIncomingCall(data: Map<String, String>) : Boolean
+    fun handleIncomingCall(data: Map<String, String>): Boolean
     fun registerActiveConnection(token: String)
     fun enablePush(token: String, onResult: (EnablePushNotificationResult) -> Unit)
     fun setNetworkQualityListener(networkQualityEventListener: NetworkQualityEventListener)
@@ -55,17 +60,18 @@ internal class CallsDelegateImpl(
     private val callsScope: CoroutineScope,
     private val infobipRtc: InfobipRTC
 ) : CallsDelegate {
-    private val call: RtcUiCall? by lazy {
-        getActiveCall(
-            { if (this is IncomingWebrtcCall) RtcUiIncomingWebrtcCallImpl(this) else null },
-            { if (this is IncomingApplicationCall) RtcUiIncomingAppCallImpl(this) else null })
-    }
+    private val call: RtcUiCall?
+        get() = getActiveCall(
+                { if (this is IncomingWebrtcCall) RtcUiIncomingWebrtcCallImpl(this) else null },
+                { if (this is IncomingApplicationCall) RtcUiIncomingAppCallImpl(this) else null }
+        )
 
     private inline fun <OUT : RtcUiCall?> getActiveCall(
-        callBlock: WebrtcCall.() -> OUT,
-        appCallBlock: ApplicationCall.() -> OUT,
+            callBlock: WebrtcCall.() -> OUT,
+            appCallBlock: ApplicationCall.() -> OUT,
     ): OUT? {
-        return (infobipRtc.activeCall as? WebrtcCall)?.callBlock() ?: infobipRtc.activeApplicationCall?.appCallBlock()
+        return (infobipRtc.activeCall as? WebrtcCall)?.callBlock()
+                ?: infobipRtc.activeApplicationCall?.appCallBlock()
     }
 
     override fun accept() {

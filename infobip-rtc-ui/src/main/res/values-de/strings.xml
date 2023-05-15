@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Bildschirm teilen</string>
     <string name="mm_screen_sharing_description">Ihr Bildschirm wird freigegeben</string>
     <string name="mm_in_call">In einem Telefongesprach</string>
+    <string name="mm_notification_permission_required_declining_call">Fehlende Benachrichtigungsberechtigung. Ablehnender eingehender Anruf.</string>
 </resources>

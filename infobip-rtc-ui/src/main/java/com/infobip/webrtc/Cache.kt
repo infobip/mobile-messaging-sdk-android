@@ -8,6 +8,7 @@ internal interface Cache {
     var identity: String
     var inAppCallsEnabled: Boolean
     var activityClass: Class<out Activity>
+    var autoDeclineOnMissingNotificationPermission: Boolean
 
     fun clear()
 }
@@ -17,10 +18,10 @@ internal class InMemoryCache : Cache {
     override var identity: String = ""
     override var inAppCallsEnabled: Boolean = false
     override var activityClass: Class<out Activity> = CallActivity::class.java
+    override var autoDeclineOnMissingNotificationPermission: Boolean = true
 
     override fun clear() {
         identity = ""
         inAppCallsEnabled = false
-        activityClass = CallActivity::class.java
     }
 }

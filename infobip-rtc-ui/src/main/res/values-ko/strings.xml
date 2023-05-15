@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">화면 공유</string>
     <string name="mm_screen_sharing_description">화면이 공유됩니다.</string>
     <string name="mm_in_call">통화 중</string>
+    <string name="mm_notification_permission_required_declining_call">알림 권한이 없습니다. 수신 전화를 거부합니다.</string>
 </resources>

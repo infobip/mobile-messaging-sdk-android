@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Sdílení obrazovky</string>
     <string name="mm_screen_sharing_description">Vaše obrazovka je sdílená</string>
     <string name="mm_in_call">Probíhající hovor</string>
+    <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
 </resources>

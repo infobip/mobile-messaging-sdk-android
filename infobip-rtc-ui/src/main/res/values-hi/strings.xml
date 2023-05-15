@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">स्क्रीन साझेदारी</string>
     <string name="mm_screen_sharing_description">आपकी स्क्रीन साझा की गई है</string>
     <string name="mm_in_call">एक कॉल में</string>
+    <string name="mm_notification_permission_required_declining_call">सूचना अनुमति गुम है। आने वाली कॉल को अस्वीकार करना।</string>
 </resources>

@@ -8,11 +8,14 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
+import com.infobip.webrtc.Cache
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.delegate.CallsDelegate
+import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.delegate.Vibrator
 import com.infobip.webrtc.ui.notifications.CALL_NOTIFICATION_ID
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
@@ -42,6 +45,8 @@ class OngoingCallService : Service() {
     private val audioManager: AudioManager by lazy { applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationHelper: CallNotificationFactory by lazy { Injector.notificationFactory }
     private val callsDelegate: CallsDelegate by lazy { Injector.callsDelegate }
+    private val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { Injector.notificationPermissionDelegate }
+    private val cache: Cache = Injector.cache
     private var peerName: String = ""
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -50,27 +55,37 @@ class OngoingCallService : Service() {
         when (intent?.action) {
             INCOMING_CALL_ACTION -> {
                 val activeCallStatus = runCatching { CallStatus.valueOf(intent.getStringExtra(CALL_STATUS_EXTRA).orEmpty()) }.getOrDefault(CallStatus.FINISHED)
-                if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING) {
-                    peerName = intent.getStringExtra(NAME_EXTRA) ?: applicationContext.getString(R.string.mm_unknown)
+                val isPermissionNeeded = notificationPermissionDelegate.isPermissionNeeded()
+                if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING && !isPermissionNeeded) {
+                    peerName = intent.getStringExtra(NAME_EXTRA)
+                            ?: applicationContext.getString(R.string.mm_unknown)
                     startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotification(peerName, getString(R.string.mm_incoming_call)))
                     startMedia()
+                } else if (isPermissionNeeded && cache.autoDeclineOnMissingNotificationPermission) {
+                    Toast.makeText(applicationContext, getString(R.string.mm_notification_permission_required_declining_call), Toast.LENGTH_LONG).show()
+                    callsDelegate.decline()
                 }
             }
+
             CALL_ENDED_ACTION -> {
                 onCallEnded()
             }
+
             CALL_ESTABLISHED_ACTION -> {
                 stopMedia()
                 startForeground(CALL_NOTIFICATION_ID, notificationHelper.createOngoingCallNotification(peerName, getString(R.string.mm_in_call)))
             }
+
             CALL_DECLINED_ACTION -> {
                 callsDelegate.decline()
                 onCallEnded()
             }
+
             CALL_HANGUP_ACTION -> {
                 callsDelegate.hangup()
                 stop()
             }
+
             else -> Log.d(TAG, "Unhandled intent action: ${intent?.action.orEmpty()}")
         }
         return START_NOT_STICKY
@@ -82,9 +97,7 @@ class OngoingCallService : Service() {
     }
 
     private fun onCallEnded() {
-        if (callsDelegate.hasScreenShare()){
-            ScreenShareService.sendScreenShareServiceIntent(applicationContext, ScreenShareService.ACTION_STOP_SCREEN_SHARE)
-        }
+        ScreenShareService.sendScreenShareServiceIntent(applicationContext, ScreenShareService.ACTION_STOP_SCREEN_SHARE)
         stopMedia()
         stop()
     }
