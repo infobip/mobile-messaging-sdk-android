@@ -10,7 +10,7 @@ import javax.net.ssl.X509TrustManager;
 
 class UntrustedSSLHelper {
 
-    private static TrustManager[] trustAllCerts = new TrustManager[]{
+    private static final TrustManager[] trustAllCerts = new TrustManager[]{
             new X509TrustManager() {
                 public X509Certificate[] getAcceptedIssuers() {
                     return null;
@@ -24,6 +24,7 @@ class UntrustedSSLHelper {
             }
     };
 
+    @SuppressWarnings("TrustAllX509TrustManager")
     static void trustAllCerts(HttpsURLConnection urlConnection) {
         try {
             SSLContext sc = SSLContext.getInstance("SSL");
