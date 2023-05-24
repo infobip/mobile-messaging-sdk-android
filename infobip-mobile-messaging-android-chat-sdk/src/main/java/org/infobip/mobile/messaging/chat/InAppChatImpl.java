@@ -2,14 +2,17 @@ package org.infobip.mobile.messaging.chat;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.TaskStackBuilder;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -32,6 +35,7 @@ import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -39,6 +43,7 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
+import java.util.Comparator;
 import java.util.Locale;
 
 
@@ -57,6 +62,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private static Result<WidgetInfo, MobileMessagingError> chatWidgetConfigSyncResult = null;
     private static Boolean isWebViewCacheCleaned = false;
     private JwtProvider jwtProvider = null;
+    private InAppChatDarkMode darkMode = null;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
@@ -165,6 +171,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!isActivated()) {
             MobileMessagingLogger.e("In-app chat wasn't activated, call activate()");
         }
+        inAppChatScreen.setDarkMode(this.darkMode);
         return inAppChatScreen;
     }
 
@@ -244,6 +251,15 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    public void setDarkMode(InAppChatDarkMode darkMode) {
+        this.darkMode = darkMode;
+        if (darkMode == null)
+            propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE);
+        else
+            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE, darkMode.name());
+    }
+
+    @Override
     public void applicationInForeground() {
         performSyncActions();
     }
@@ -253,6 +269,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
         jwtProvider = null;
+        darkMode = null;
         cleanupWidgetData();
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
@@ -260,6 +277,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE);
         resetMessageCounter();
     }
 
@@ -305,12 +323,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
         if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
-
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if (fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG) == null) {
-            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
-        } else {
+        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+        //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
+        if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
             fragmentTransaction.show(inAppChatWVFragment);
+        } else {
+            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
         }
         fragmentTransaction.commit();
     }
@@ -318,7 +337,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public void hideInAppChatFragment(FragmentManager fragmentManager) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.hide(inAppChatWVFragment);
+        //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
+        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)){
+            fragmentTransaction.remove(fragmentByTag);
+        }
         fragmentTransaction.commit();
+    }
+
+    private boolean areFragmentsEquals(Fragment f1, Fragment f2) {
+        return f1 != null && f2 != null && f1.hashCode() == f2.hashCode();
     }
 
     @Override

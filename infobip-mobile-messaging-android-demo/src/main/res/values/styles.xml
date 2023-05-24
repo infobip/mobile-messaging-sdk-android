@@ -7,9 +7,11 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-    <style name="AppTheme.NoActionBar">
+
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="isLightTheme">true</item>
     </style>
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"/>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light"/>
@@ -49,6 +51,7 @@
         <item name="ibChatAttachmentToolbarStyle">@style/InAppChat.Demo.Toolbar.AttachmentPreview</item>
         <item name="ibChatInputStyle">@style/InAppChat.Demo.Input</item>
         <item name="ibChatStyle">@style/InAppChat.Demo.Chat</item>
+        <item name="isLightTheme">true</item>
     </style>
 
     <style name="IB_AppTheme.WebView">

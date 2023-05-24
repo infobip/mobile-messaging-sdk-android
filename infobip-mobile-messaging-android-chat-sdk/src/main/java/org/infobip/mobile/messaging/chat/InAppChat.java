@@ -2,9 +2,11 @@ package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 
 /**
  * Main interface for in-app chat communication
@@ -155,5 +157,7 @@ public abstract class InAppChat {
      * @see org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
      */
     public abstract void showThreadsList();
+
+    public abstract void setDarkMode(@Nullable InAppChatDarkMode darkMode);
 
 }

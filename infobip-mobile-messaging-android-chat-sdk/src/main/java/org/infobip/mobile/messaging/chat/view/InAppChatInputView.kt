@@ -15,7 +15,10 @@ import androidx.core.view.children
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatInputBinding
+import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
+import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle.Companion.applyWidgetConfig
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -37,8 +40,17 @@ class InAppChatInputView @JvmOverloads constructor(
     private val localizationUtils = LocalizationUtils.getInstance(context)
 
     init {
+        setForceDarkAllowed()
         applyStyle(style)
         binding.sendButton.isEnabled = getInputText()?.isNotBlank() == true
+    }
+
+    private fun setForceDarkAllowed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val darkModeName = PropertyHelper(context).findString(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE)
+            isForceDarkAllowed = (darkModeName == InAppChatDarkMode.DARK_MODE_YES.name || darkModeName == InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM.name)
+            MobileMessagingLogger.d("ForceDark allowed in ChatInput: $isForceDarkAllowed")
+        }
     }
 
     fun applyWidgetInfoStyle(widgetInfo: WidgetInfo) {

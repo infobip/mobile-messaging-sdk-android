@@ -105,6 +105,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
         get() {
             return field ?: (requireActivity() as? InAppChatActionBarProvider)
         }
+
     /**
      * Allows to hide Toolbar in InAppChatFragment.
      * It is used in React Native plugin, ChatView UI component is without toolbar.
@@ -139,6 +140,8 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (this.isHidden)
+            return //on configChange (uiMode) fragment is recreated and this fun is called, skip init views
         permissionsRequestManager = PermissionsRequestManager(this, this)
         localizationUtils = LocalizationUtils.getInstance(requireContext())
         initViews()

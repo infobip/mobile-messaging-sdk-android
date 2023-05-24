@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.demo;
 
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -42,7 +43,6 @@ public class InAppChatViewDemoFragment extends Fragment {
         inAppChatView = view.findViewById(R.id.inAppChatView);
         chatNavigateBackButton = rootView.findViewById(R.id.chatNavigateBack);
         sendButton = rootView.findViewById(R.id.send);
-
 
         hideActionBar();
         setUpExitButton();

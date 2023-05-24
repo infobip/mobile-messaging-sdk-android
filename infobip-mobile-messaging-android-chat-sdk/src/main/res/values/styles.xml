@@ -2,7 +2,9 @@
 <resources>
 
     <!--    region Themes-->
-    <style name="IB_ChatDefaultTheme" parent="Theme.MaterialComponents.Light.NoActionBar" />
+    <style name="IB_ChatDefaultTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="isLightTheme">true</item>
+    </style>
 
     <style name="IB_ChatDefaultTheme.Styled" parent="IB_ChatDefaultTheme">
         <item name="ibChatDefaultStyledTheme">true</item>
@@ -12,12 +14,13 @@
         <item name="ibChatAttachmentToolbarStyle">@style/IB.Chat.Toolbar.AttachmentPreview</item>
     </style>
 
-    <style name="IB_ChatDefaultTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"/>
-    <style name="IB_ChatDefaultTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light"/>
+    <style name="IB_ChatDefaultTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+    <style name="IB_ChatDefaultTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
     <!--    endregion-->
 
     <!--    region Views Default Styles-->
-    <style name="IB"/>
+    <style name="IB" />
 
     <style name="IB.Chat.Toolbar" parent="IB">
         <item name="ibChatToolbarBackgroundColor">@android:color/black</item>

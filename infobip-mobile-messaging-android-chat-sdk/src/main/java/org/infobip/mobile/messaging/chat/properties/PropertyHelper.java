@@ -2,6 +2,8 @@ package org.infobip.mobile.messaging.chat.properties;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -40,6 +42,11 @@ public class PropertyHelper extends PreferenceHelper {
         saveString(context, property.getKey(), value);
     }
 
+    @Nullable
+    public String findString(MobileMessagingChatProperty property){
+        return findString(context, property.getKey(), (String) property.getDefaultValue());
+    }
+
     public Class[] findClasses(MobileMessagingChatProperty property) {
         String[] classNames = findStringArray(context, property.getKey(), new String[0]);
         if (classNames == null) {
@@ -76,11 +83,4 @@ public class PropertyHelper extends PreferenceHelper {
         remove(context, property.getKey());
     }
 
-    public void removeChatPrefs() {
-        PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.getKey());
-        PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.getKey());
-        PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey());
-        PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey());
-        PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey());
-    }
 }

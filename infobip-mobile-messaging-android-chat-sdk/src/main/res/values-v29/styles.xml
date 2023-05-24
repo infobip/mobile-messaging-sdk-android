@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="IB_ChatDefaultTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="isLightTheme">true</item>
+        <item name="android:forceDarkAllowed">true</item>
+    </style>
+
+    <style name="IB_ChatDefaultTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <!-- do not apply darkening on toolbar, forceDark auto darken custom toolbar color possibly defined in IB_AppTheme.Chat-->
+       <item name="android:forceDarkAllowed">false</item>
+    </style>
+
+</resources>
