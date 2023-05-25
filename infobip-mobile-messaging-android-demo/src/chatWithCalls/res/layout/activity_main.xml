@@ -206,21 +206,21 @@
                 android:id="@+id/dark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dark"
+                android:text="@string/dark_mode_dark"
                 style="?attr/materialButtonOutlinedStyle"
                 />
             <Button
                 android:id="@+id/light"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Light"
+                android:text="@string/dark_mode_light"
                 style="?attr/materialButtonOutlinedStyle"
                 />
             <Button
                 android:id="@+id/auto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Auto"
+                android:text="@string/dark_mode_auto"
                 style="?attr/materialButtonOutlinedStyle"
                 />
         </com.google.android.material.button.MaterialButtonToggleGroup>

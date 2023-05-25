@@ -42,4 +42,7 @@
     <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
     <string name="turkish">Türkçe</string>
     <string name="ukrainian">украї́нська</string>
+    <string name="dark_mode_dark">Dark</string>
+    <string name="dark_mode_light">Light</string>
+    <string name="dark_mode_auto">Auto</string>
 </resources>

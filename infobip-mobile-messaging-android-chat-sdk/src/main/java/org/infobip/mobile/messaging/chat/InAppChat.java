@@ -158,6 +158,14 @@ public abstract class InAppChat {
      */
     public abstract void showThreadsList();
 
+    /**
+     * Set color mode used by in-app chat. Available {@link InAppChatDarkMode} options:
+     * <p>DARK_MODE_YES - force dark colors</p>
+     * <p>DARK_MODE_NO - force light colors</p>
+     * <p>DARK_MODE_FOLLOW_SYSTEM - use same colors as system-wide mode has</p>
+     *
+     * @param darkMode to be set, null value removes setting and use light theme as default one.
+     */
     public abstract void setDarkMode(@Nullable InAppChatDarkMode darkMode);
 
 }

@@ -32,13 +32,16 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.SuccessPending;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.InAppChat;
+import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpAuthButton();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
+        setUpDarkModeToggle();
     }
 
     @Override
@@ -409,6 +413,45 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     );
                 }
         );
+    }
+
+    private InAppChatDarkMode darkMode;
+    private void setUpDarkModeToggle(){
+        MaterialButtonToggleGroup darkModeToggle = findViewById(R.id.darkModeToggle);
+        darkModeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            switch (group.getCheckedButtonId()){
+                case R.id.dark:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_YES);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_YES;
+                    break;
+                case R.id.light:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_NO){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_NO);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_NO;
+                    break;
+                case R.id.auto:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM;
+                    break;
+                case View.NO_ID:
+                    if (darkMode != null){
+                        setInAppChatDarkMode(null);
+                    }
+                    darkMode = null;
+                    break;
+            }
+        });
+    }
+
+    private void setInAppChatDarkMode(InAppChatDarkMode darkMode) {
+        inAppChat.setDarkMode(darkMode);
+        //For InAppChat View and Fragment cases
+        DarkModeUtils.setActivityDarkMode(this, darkMode);
     }
 
     private void showProgressBar() {
