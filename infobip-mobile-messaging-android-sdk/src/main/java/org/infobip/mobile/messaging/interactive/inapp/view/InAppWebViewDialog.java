@@ -233,6 +233,15 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             default:
                 popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
         }
+
+        setMessageSeen();
+    }
+
+    private void setMessageSeen() {
+        if (popupWindow.isShowing()) {
+            String[] ids = {message.getMessageId()};
+            MobileMessagingCore.getInstance(activityWrapper.getActivity()).setMessagesSeen(ids);
+        }
     }
 
     public void setVerticalScrollBar(int size) {
