@@ -136,9 +136,6 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         setupWebViewForDisplaying(cardView);
 
         webView.loadUrl(message.url);
-
-        setDialogTimeout(DIALOG_TIMEOUT);
-        showWebViewDialog(dialogView, message.position, message.type);
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -150,8 +147,16 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             }
 
             @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                setDialogTimeout(DIALOG_TIMEOUT);
+                showWebViewDialog(dialogView, message.position, message.type);
+            }
+
+            @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 MobileMessagingLogger.d(TAG, description);
+                webView.setVisibility(View.GONE);
+                if(popupWindow.isShowing()) popupWindow.dismiss();
             }
         });
         webView.getSettings().setJavaScriptEnabled(true);
