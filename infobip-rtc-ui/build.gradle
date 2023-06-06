@@ -69,6 +69,7 @@ dependencies {
     api("com.infobip:infobip-rtc:2.0.9") {
         transitive = true
     }
+    implementation "androidx.work:work-runtime-ktx:2.8.1"
 
     testImplementation "junit:junit:4.13.2"
 

@@ -49,7 +49,6 @@
         <service
             android:name="com.infobip.webrtc.sdk.impl.push.FcmTokenRefresher"
             android:exported="false" />
-
     </application>
 
 </manifest>
