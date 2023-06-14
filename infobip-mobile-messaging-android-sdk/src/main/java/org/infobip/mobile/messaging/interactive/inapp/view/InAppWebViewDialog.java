@@ -5,7 +5,9 @@ import static android.content.Context.WINDOW_SERVICE;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.PopupWindow;
@@ -30,22 +33,24 @@ import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.Time;
 
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "InAppWebViewDialog";
-    private static final int DIALOG_TIMEOUT = 5000;
+    private static final int DIALOG_TIMEOUT = 10000;//10 seconds
     private static final int CORNER_RADIUS = 20;
     public static final int WIDTH_PADDING = 16;
     public static final int VERTICAL_SCROLLBAR_SIZE = 30;
     public static final double SCREEN_COVER_PERCENTAGE = 0.85;
     public static final int SCREEN_MARGINS = 16;
     private final Callback callback;
-    private DisplayMetrics displayMetrics;
+    private final DisplayMetrics displayMetrics;
     private PopupWindow popupWindow;
     private WebView webView;
     private final ActivityWrapper activityWrapper;
     private InAppWebViewMessage message;
-
+    static int PAGE_LOAD_PROGRESS = 0;
+    ConnectionTimeoutHandler timeoutHandler = null;
 
     InAppWebViewDialog(Callback callback, ActivityWrapper activityWrapper) {
         this.callback = callback;
@@ -53,7 +58,6 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         displayMetrics = new DisplayMetrics();
         activityWrapper.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
     }
-
 
     @Override
     public void onActivityStopped(Activity activity) {
@@ -142,6 +146,28 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     private void setupWebViewForDisplaying(CardView dialogView) {
         webView = dialogView.findViewById(R.id.ib_webview);
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                super.onLoadResource(view, url);
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                timeoutHandler = new ConnectionTimeoutHandler();
+                timeoutHandler.execute();
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if (timeoutHandler != null) {
+                    timeoutHandler.cancel(true);
+                    timeoutHandler = null;
+                }
+            }
+
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return false;
             }
@@ -154,16 +180,37 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                MobileMessagingLogger.d(TAG, description);
-                webView.setVisibility(View.GONE);
-                if(popupWindow.isShowing()) popupWindow.dismiss();
+                showError(errorCode);
+                clearWebView();
             }
         });
+        webView.setWebChromeClient(new InAppWebChromeClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.addJavascriptInterface(new InAppWebViewInterface(), "InAppWebViewInterface");
+    }
+
+    private void clearWebView() {
+        //webView.clearCache(true);
+        //webView.clearHistory();
+        try {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                webView.clearHistory();
+                webView.clearCache(true);
+                MobileMessagingLogger.d("Deleted local history");
+            });
+        } catch (Exception e) {
+            MobileMessagingLogger.w("Failed to delete local history due to " + e.getMessage());
+        }
+        webView.clearFormData();
+        webView.clearMatches();
+        webView.destroy();
+        webView.setVisibility(View.GONE);
+        if (popupWindow.isShowing())
+            popupWindow.dismiss();
     }
 
     // Hide after some seconds
@@ -264,5 +311,123 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
      */
     private static int convertDpToPixel(float dp, Context context) {
         return Math.round(dp * ((float) context.getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static class InAppWebChromeClient extends WebChromeClient {
+
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            PAGE_LOAD_PROGRESS = newProgress;
+            MobileMessagingLogger.d(TAG, "Page progress [" + PAGE_LOAD_PROGRESS + "%]");
+            super.onProgressChanged(view, newProgress);
+        }
+    }
+
+    private static void showError(int errorCode) {
+        String message = null;
+        String title = null;
+        switch (errorCode) {
+            case WebViewClient.ERROR_AUTHENTICATION:
+                message = "User authentication failed on server";
+                title = "Auth Error";
+                break;
+            case WebViewClient.ERROR_TIMEOUT:
+                message = "The server is taking too much time to communicate. Try again later.";
+                title = "Connection Timeout";
+                break;
+            case WebViewClient.ERROR_TOO_MANY_REQUESTS:
+                message = "Too many requests during this load";
+                title = "Too Many Requests";
+                break;
+            case WebViewClient.ERROR_UNKNOWN:
+                message = "Generic error";
+                title = "Unknown Error";
+                break;
+            case WebViewClient.ERROR_BAD_URL:
+                message = "Check entered URL..";
+                title = "Malformed URL";
+                break;
+            case WebViewClient.ERROR_CONNECT:
+                message = "Failed to connect to the server";
+                title = "Connection";
+                break;
+            case WebViewClient.ERROR_FAILED_SSL_HANDSHAKE:
+                message = "Failed to perform SSL handshake";
+                title = "SSL Handshake Failed";
+                break;
+            case WebViewClient.ERROR_HOST_LOOKUP:
+                message = "Server or proxy hostname lookup failed";
+                title = "Host Lookup Error";
+                break;
+            case WebViewClient.ERROR_PROXY_AUTHENTICATION:
+                message = "User authentication failed on proxy";
+                title = "Proxy Auth Error";
+                break;
+            case WebViewClient.ERROR_REDIRECT_LOOP:
+                message = "Too many redirects";
+                title = "Redirect Loop Error";
+                break;
+            case WebViewClient.ERROR_UNSUPPORTED_AUTH_SCHEME:
+                message = "Unsupported authentication scheme (not basic or digest)";
+                title = "Auth Scheme Error";
+                break;
+            case WebViewClient.ERROR_UNSUPPORTED_SCHEME:
+                message = "Unsupported URI scheme";
+                title = "URI Scheme Error";
+                break;
+            case WebViewClient.ERROR_FILE:
+                message = "Generic file error";
+                title = "File";
+                break;
+            case WebViewClient.ERROR_FILE_NOT_FOUND:
+                message = "File not found";
+                title = "File";
+                break;
+            case WebViewClient.ERROR_IO:
+                message = "The server failed to communicate. Try again later.";
+                title = "IO Error";
+                break;
+        }
+
+        if (message != null) {
+            MobileMessagingLogger.e(title + ": " + message);
+        }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public class ConnectionTimeoutHandler extends AsyncTask<Void, Void, String> {
+
+        private static final String PAGE_LOADED = "PAGE_LOADED";
+        private static final String CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT";
+        private static final long CONNECTION_TIMEOUT_UNIT = 20000L; //20 seconds
+
+        private final long startTime;
+        private Boolean loaded = false;
+
+        public ConnectionTimeoutHandler() {
+            startTime = Time.now();
+            InAppWebViewDialog.PAGE_LOAD_PROGRESS = 0;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (CONNECTION_TIMEOUT.equalsIgnoreCase(result)) {
+                showError(WebViewClient.ERROR_TIMEOUT);
+                clearWebView();
+            }
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            while (!loaded) {
+                if (InAppWebViewDialog.PAGE_LOAD_PROGRESS != 100
+                        && (Time.now() - startTime) > CONNECTION_TIMEOUT_UNIT) {
+                    return CONNECTION_TIMEOUT;
+                } else if (InAppWebViewDialog.PAGE_LOAD_PROGRESS == 100) {
+                    loaded = true;
+                }
+            }
+            return PAGE_LOADED;
+        }
     }
 }
