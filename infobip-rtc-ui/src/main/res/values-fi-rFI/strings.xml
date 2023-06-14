@@ -16,7 +16,7 @@
     <string name="mm_unknown">Tuntematon</string>
     <string name="mm_call_finished">Puhelu päättynyt</string>
     <string name="mm_audio_permission_required">Puheluiden käsittelyyn tarvitaan äänilupa.</string>
-    <string name="mm_weak_internet_connection">Heikko Internet-yhteys</string>
+    <string name="mm_call_weak_internet_connection">Verkkosi aiheuttaa huonon puhelun laadun</string>
     <string name="mm_microphone_muted">Mykistetty</string>
     <string name="mm_unknown_error">Tuntematon virhe</string>
     <string name="mm_unmute">Poista mykistys</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Näytön jakaminen</string>
     <string name="mm_screen_sharing_description">Näyttösi on jaettu</string>
     <string name="mm_in_call">Puhelussa</string>
+    <string name="mm_notification_permission_required_declining_call">Ilmoituslupa puuttuu. Tulevan puhelun hylkääminen.</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">Desconhecido</string>
     <string name="mm_call_finished">Chamada concluída</string>
     <string name="mm_audio_permission_required">É necessária permissão de áudio para lidar com chamadas.</string>
-    <string name="mm_weak_internet_connection">Conexão de internet fraca</string>
+    <string name="mm_call_weak_internet_connection">Sua rede está causando baixa qualidade de chamada</string>
     <string name="mm_microphone_muted">Silenciado</string>
     <string name="mm_unknown_error">Erro desconhecido</string>
     <string name="mm_unmute">Ativar mudo</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Compartilhamento de tela</string>
     <string name="mm_screen_sharing_description">Sua tela é compartilhada</string>
     <string name="mm_in_call">Numa chamada</string>
+    <string name="mm_notification_permission_required_declining_call">Permissão de notificação ausente. Recusando chamada recebida.</string>
 </resources>

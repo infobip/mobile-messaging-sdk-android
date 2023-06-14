@@ -13,6 +13,8 @@ plugins {
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
     id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
+    id "org.sonarqube" version "4.0.0.2929"
+    id "jacoco"
 }
 
 ext {
@@ -22,6 +24,12 @@ ext {
     mm_buildToolsVersion = "33.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "18.0.0"
+    mm_kotlinVersion = "1.7.20"
+    mm_constraintLayoutVersion = "2.1.4"
+    mm_appCompatVersion = "1.6.1"
+    mm_materialVersion = "1.8.0"
+    mm_coreKtxVersion = "1.9.0"
+    mm_desugarJdkVersion = "1.1.8"
 }
 
 allprojects {
@@ -87,5 +95,27 @@ release {
     git {
         requireBranch = ''
         pushToRemote = 'origin'
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.host.url", "https://sonar.ib-ci.com"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.branch.name", System.getenv('BRANCH_NAME_TO_BUILD')
+        property "sonar.projectVersion", project.version
+        property "sonar.projectName", "infobip-mobile-messaging-android"
+        property "sonar.projectKey" , "infobip-mobile-messaging-android"
+        property "sonar.exclusions", "" +
+                "infobip-mobile-messaging-android-demo/**/*, " +
+                "infobip-mobile-messaging-android-cryptor-migration/**/*, " +
+                "infobip-mobile-messaging-android-test/**/*, " +
+                "infobip-rtc-ui/**/*"
+        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths", "" +
+                "${project.projectDir}/infobip-mobile-messaging-android-geo-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
+                "${project.projectDir}/infobip-mobile-messaging-android-inbox-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
+                "${project.projectDir}/infobip-mobile-messaging-android-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
+                "${project.projectDir}/infobip-mobile-messaging-api-java/build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }

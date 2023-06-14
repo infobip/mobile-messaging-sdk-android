@@ -16,7 +16,7 @@
     <string name="mm_unknown">לא ידוע</string>
     <string name="mm_call_finished">השיחה הסתיימה</string>
     <string name="mm_audio_permission_required">נדרשת הרשאת שמע לטיפול בשיחות.</string>
-    <string name="mm_weak_internet_connection">חיבור אינטרנט חלש</string>
+    <string name="mm_call_weak_internet_connection">הרשת שלך גורמת לאיכות שיחה ירודה</string>
     <string name="mm_microphone_muted">מושתק</string>
     <string name="mm_unknown_error">שגיאה לא ידועה</string>
     <string name="mm_unmute">בטל השתקה</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">שיתוף מסך</string>
     <string name="mm_screen_sharing_description">המסך שלך משותף</string>
     <string name="mm_in_call">בשיחה</string>
+    <string name="mm_notification_permission_required_declining_call">חסרה הרשאת הודעה. דחיית שיחה נכנסת.</string>
 </resources>

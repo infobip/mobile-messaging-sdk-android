@@ -16,7 +16,7 @@
     <string name="mm_unknown">알려지지 않은</string>
     <string name="mm_call_finished">통화 완료</string>
     <string name="mm_audio_permission_required">통화를 처리하려면 오디오 권한이 필요합니다.</string>
-    <string name="mm_weak_internet_connection">약한 인터넷 연결</string>
+    <string name="mm_call_weak_internet_connection">네트워크로 인해 통화 품질이 저하됩니다.</string>
     <string name="mm_microphone_muted">음소거</string>
     <string name="mm_unknown_error">알수없는 오류</string>
     <string name="mm_unmute">음소거 해제</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">화면 공유</string>
     <string name="mm_screen_sharing_description">화면이 공유됩니다.</string>
     <string name="mm_in_call">통화 중</string>
+    <string name="mm_notification_permission_required_declining_call">알림 권한이 없습니다. 수신 전화를 거부합니다.</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">Неизвестный</string>
     <string name="mm_call_finished">Вызов завершен</string>
     <string name="mm_audio_permission_required">Разрешение на аудио требуется для обработки вызовов.</string>
-    <string name="mm_weak_internet_connection">Слабое интернет-соединение</string>
+    <string name="mm_call_weak_internet_connection">Ваша сеть вызывает плохое качество связи</string>
     <string name="mm_microphone_muted">Приглушен</string>
     <string name="mm_unknown_error">Неизвестная ошибка</string>
     <string name="mm_unmute">Включить звук</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Демонстрация экрана</string>
     <string name="mm_screen_sharing_description">Ваш экран открыт</string>
     <string name="mm_in_call">Во время разговора</string>
+    <string name="mm_notification_permission_required_declining_call">Отсутствует разрешение на уведомление. Отклонение входящего вызова.</string>
 </resources>

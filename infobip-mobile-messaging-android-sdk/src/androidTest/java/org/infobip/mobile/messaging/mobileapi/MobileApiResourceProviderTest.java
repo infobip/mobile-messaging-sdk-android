@@ -42,7 +42,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         mobileApiResourceProvider.getMobileApiVersion(context).getLatestRelease();
 
         // then
-        assertEquals("customUrl", MobileMessagingCore.getApiUri(context, false));
+        assertEquals("customUrl", MobileMessagingCore.getApiUri(context));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void shouldResetBaseUrlOnError() {
+    public void shouldNotResetBaseUrlOnError() {
         // given
         MobileMessagingCore.setApiUri(context, "http://customurl");
 
@@ -90,7 +90,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         }
 
         // then
-        assertEquals(MobileMessagingProperty.API_URI.getDefaultValue(), MobileMessagingCore.getApiUri(context, false));
+        assertEquals("http://customurl", MobileMessagingCore.getApiUri(context));
     }
 
     @Test
@@ -115,17 +115,17 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
     @Test
     public void shouldReplaceNotSupportedChars() {
         Map<Integer, String> unsupportedCharCodes = new HashMap<Integer, String>();
-        unsupportedCharCodes.put(0x09,"&x09");
-        unsupportedCharCodes.put(0x0a,"&x0a");
-        unsupportedCharCodes.put(0x0b,"&x0b");
-        unsupportedCharCodes.put(0x0c,"&x0c");
-        unsupportedCharCodes.put(0x0d,"&x0d");
-        unsupportedCharCodes.put(0x11,"&x11");
+        unsupportedCharCodes.put(0x09, "&x09");
+        unsupportedCharCodes.put(0x0a, "&x0a");
+        unsupportedCharCodes.put(0x0b, "&x0b");
+        unsupportedCharCodes.put(0x0c, "&x0c");
+        unsupportedCharCodes.put(0x0d, "&x0d");
+        unsupportedCharCodes.put(0x11, "&x11");
         unsupportedCharCodes.put(0x12, "&x12");
         unsupportedCharCodes.put(0x13, "&x13");
         unsupportedCharCodes.put(0x14, "&x14");
 
-        for (int charCode: unsupportedCharCodes.keySet()) {
+        for (int charCode : unsupportedCharCodes.keySet()) {
             char unsupported = (char) charCode;
             String test = "someTest" + unsupported + "testEnd";
             String should = "someTesttestEnd";
@@ -134,4 +134,19 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
         }
     }
 
+    @Test
+    public void shouldResetUrlAfterFourFailedRequests() {
+        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
+
+        MobileApiVersion givenMobileApiVersion = mobileApiResourceProvider.getMobileApiVersion(context);
+
+        for (int i = 0; i < 5; i++) {
+            try {
+                givenMobileApiVersion.getLatestRelease();
+            } catch (ApiIOException ignored) {
+            }
+        }
+
+        assertEquals(MobileMessagingProperty.API_URI.getDefaultValue(), MobileMessagingCore.getApiUri(context));
+    }
 }

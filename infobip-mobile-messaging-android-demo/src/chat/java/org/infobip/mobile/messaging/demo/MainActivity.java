@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
@@ -31,13 +32,16 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.SuccessPending;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.InAppChat;
+import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.json.JSONObject;
 
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -113,10 +117,13 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         inAppChat.activate();
         setUpPushRegIdField();
         setUpSubjectTypeSpinner();
-        setUpOpenChatButton();
-        setUpOpenAuthChatButton();
+        setUpOpenChatActivityButton();
+        setUpOpenChatFragmentButton();
+        setUpOpenChatViewButton();
+        setUpAuthButton();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
+        setUpDarkModeToggle();
     }
 
     @Override
@@ -272,17 +279,32 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         });
     }
 
-    private void setUpOpenChatButton() {
-        Button openChat = findViewById(R.id.openChat);
-        openChat.setOnClickListener((v) -> {
-            inAppChat.setJwtProvider(null);
-            openChat();
+    private void setUpOpenChatActivityButton() {
+        Button openChatActivityButton = findViewById(R.id.openChatActivity);
+        openChatActivityButton.setOnClickListener((v) -> {
+            inAppChat.inAppChatScreen().show();
         });
     }
 
-    private void setUpOpenAuthChatButton() {
-        Button openAuthChat = findViewById(R.id.openAuthChat);
-        openAuthChat.setOnClickListener((v) -> {
+    private void setUpOpenChatFragmentButton() {
+        Button openChatFragmentButton = findViewById(R.id.openChatFragment);
+        openChatFragmentButton.setOnClickListener((v) -> {
+            inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer);
+        });
+    }
+
+    private void setUpOpenChatViewButton() {
+        Button openChatViewButton = findViewById(R.id.openChatView);
+        openChatViewButton.setOnClickListener((v) -> {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.fragmentContainer, new InAppChatViewDemoFragment(), InAppChatViewDemoFragment.class.getSimpleName());
+            fragmentTransaction.commit();
+        });
+    }
+
+    private void setUpAuthButton() {
+        Button authButton = findViewById(R.id.authenticate);
+        authButton.setOnClickListener((v) -> {
             showProgressBar();
 
             inAppChat.setJwtProvider(() -> {
@@ -310,26 +332,16 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     @Override
                     public void onResult(Result<User, MobileMessagingError> result) {
                         hideProgressBar();
-                        if (result.isSuccess()) {
-                            Toast.makeText(MainActivity.this, "Personalization done!", Toast.LENGTH_SHORT).show();
-                            openChat();
-                        } else
-                            Toast.makeText(MainActivity.this, "Personalization failed: " + result.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                        if (result.isSuccess())
+                            Toast.makeText(MainActivity.this, "Authentication done!", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Authentication failed: " + result.getError().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
                 hideProgressBar();
             }
         });
-    }
-
-    private void openChat() {
-        //Uncomment one of the following variants
-        //1. Shows in-app chat as Fragment
-        inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer);
-
-        //2. Shows in-app chat as Activity
-//        inAppChat.inAppChatView().show();
     }
 
     private void setUpPersonalizationButton() {
@@ -401,6 +413,45 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     );
                 }
         );
+    }
+
+    private InAppChatDarkMode darkMode;
+    private void setUpDarkModeToggle(){
+        MaterialButtonToggleGroup darkModeToggle = findViewById(R.id.darkModeToggle);
+        darkModeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            switch (group.getCheckedButtonId()){
+                case R.id.dark:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_YES);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_YES;
+                    break;
+                case R.id.light:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_NO){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_NO);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_NO;
+                    break;
+                case R.id.auto:
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM){
+                        setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM);
+                    }
+                    darkMode = InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM;
+                    break;
+                case View.NO_ID:
+                    if (darkMode != null){
+                        setInAppChatDarkMode(null);
+                    }
+                    darkMode = null;
+                    break;
+            }
+        });
+    }
+
+    private void setInAppChatDarkMode(InAppChatDarkMode darkMode) {
+        inAppChat.setDarkMode(darkMode);
+        //For InAppChat View and Fragment cases
+        DarkModeUtils.setActivityDarkMode(this, darkMode);
     }
 
     private void showProgressBar() {

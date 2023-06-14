@@ -16,7 +16,7 @@
     <string name="mm_unknown">Tidak diketahui</string>
     <string name="mm_call_finished">Panggilan selesai</string>
     <string name="mm_audio_permission_required">Kebenaran audio diperlukan untuk mengendalikan panggilan.</string>
-    <string name="mm_weak_internet_connection">Sambungan internet yang lemah</string>
+    <string name="mm_call_weak_internet_connection">Rangkaian anda menyebabkan kualiti panggilan yang lemah</string>
     <string name="mm_microphone_muted">Disenyapkan</string>
     <string name="mm_unknown_error">Ralat tidak diketahui</string>
     <string name="mm_unmute">Nyahredam</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Perkongsian skrin</string>
     <string name="mm_screen_sharing_description">Skrin anda dikongsi</string>
     <string name="mm_in_call">Dalam panggilan</string>
+    <string name="mm_notification_permission_required_declining_call">Kebenaran pemberitahuan tiada. Menolak panggilan masuk.</string>
 </resources>

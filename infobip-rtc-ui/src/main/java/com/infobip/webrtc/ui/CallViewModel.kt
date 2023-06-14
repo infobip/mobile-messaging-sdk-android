@@ -6,13 +6,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
-import com.infobip.webrtc.sdk.api.call.CallStatus
-import com.infobip.webrtc.sdk.api.conference.RemoteVideo
-import com.infobip.webrtc.sdk.api.video.RTCVideoTrack
-import com.infobip.webrtc.sdk.api.video.ScreenCapturer
-import com.infobip.webrtc.sdk.impl.event.DefaultApplicationCallEventListener
+import com.infobip.webrtc.sdk.api.event.network.NetworkQualityChangedEvent
+import com.infobip.webrtc.sdk.api.model.CallStatus
+import com.infobip.webrtc.sdk.api.model.RemoteVideo
+import com.infobip.webrtc.sdk.api.model.network.NetworkQuality
+import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
+import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
+import com.infobip.webrtc.sdk.impl.event.listener.DefaultNetworkQualityEventListener
+import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -61,6 +67,7 @@ class CallViewModel : ViewModel() {
 
     fun accept() {
         callsDelegate.accept()
+        setNetworkQualityListener()
         updateState { copy(isIncoming = false) }
     }
 
@@ -150,8 +157,8 @@ class CallViewModel : ViewModel() {
         callsDelegate.flipCamera()
     }
 
-    fun setEventListener(applicationCallEventListener: DefaultApplicationCallEventListener) {
-        callsDelegate.setEventListener(applicationCallEventListener)
+    fun setEventListener(callEventListener: RtcUiCallEventListener) {
+        callsDelegate.setEventListener(callEventListener)
     }
 
     fun callDuration(): Int {
@@ -165,4 +172,20 @@ class CallViewModel : ViewModel() {
     fun getRemoteVideos(): List<RemoteVideo>? = callsDelegate.remoteVideos()?.map { it.value }
 
     fun getLocalVideo(): RTCVideoTrack? = callsDelegate.localVideoTrack()
+
+    private fun setNetworkQualityListener() {
+        callsDelegate.setNetworkQualityListener(object : DefaultNetworkQualityEventListener() {
+            override fun onNetworkQualityChanged(networkQualityChangedEvent: NetworkQualityChangedEvent?) {
+                if (state.value.isPip)
+                    return
+                viewModelScope.launch {
+                    withContext(Dispatchers.Main) {
+                        val score = networkQualityChangedEvent?.networkQuality?.score
+                        val isNetworkIssue = score != null && score <= NetworkQuality.FAIR.score
+                        updateState { copy(isWeakConnection = isNetworkIssue) }
+                    }
+                }
+            }
+        })
+    }
 }

@@ -55,13 +55,23 @@ interface InfobipRtcUi {
          */
         @JvmOverloads
         fun enableInAppCalls(
-            successListener: SuccessListener? = null,
-            errorListener: ErrorListener? = null
+                successListener: SuccessListener? = null,
+                errorListener: ErrorListener? = null
         ) = apply {
             this.enableCalls = true
             Injector.cache.inAppCallsEnabled = true
             Injector.enableInAppCallsSuccess = successListener
             Injector.enableInAppCallsError = errorListener
+        }
+
+        /**
+         * Set whether incoming call should declined in case of missing notification permission. Default value is true.
+         *
+         * @param decline true if call is automatically declined, false otherwise
+         * @return [InfobipRtcUi.Builder]
+         */
+        fun autoDeclineOnMissingNotificationPermission(decline: Boolean) = apply {
+            Injector.cache.autoDeclineOnMissingNotificationPermission = decline
         }
 
         /**

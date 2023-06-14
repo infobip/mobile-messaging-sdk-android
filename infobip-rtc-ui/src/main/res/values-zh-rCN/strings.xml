@@ -17,7 +17,7 @@
     <string name="mm_unknown">未知</string>
     <string name="mm_call_finished">通话结束</string>
     <string name="mm_audio_permission_required">处理呼叫需要音频权限。</string>
-    <string name="mm_weak_internet_connection">互联网连接较弱</string>
+    <string name="mm_call_weak_internet_connection">您的網絡導致通話質量不佳</string>
     <string name="mm_microphone_muted">静音</string>
     <string name="mm_unknown_error">未知错误</string>
     <string name="mm_unmute">取消静音</string>
@@ -27,4 +27,5 @@
     <string name="mm_video_permission_required">视频通话需要摄像头权限。</string>
     <string name="mm_screen_sharing">屏幕共享</string>
     <string name="mm_screen_sharing_description">您的屏幕已共享</string>
+    <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
 </resources>

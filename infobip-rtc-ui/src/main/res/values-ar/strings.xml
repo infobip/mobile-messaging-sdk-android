@@ -16,7 +16,7 @@
     <string name="mm_unknown">مجهول</string>
     <string name="mm_call_finished">انتهت المكالمة</string>
     <string name="mm_audio_permission_required">مطلوب إذن الصوت للتعامل مع المكالمات.</string>
-    <string name="mm_weak_internet_connection">اتصال ضعيف بالإنترنت</string>
+    <string name="mm_call_weak_internet_connection">تتسبب شبكتك في ضعف جودة الاتصال</string>
     <string name="mm_microphone_muted">صامت</string>
     <string name="mm_unknown_error">خطأ غير معروف</string>
     <string name="mm_unmute">unmute</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">مشاركة الشاشة</string>
     <string name="mm_screen_sharing_description">شاشتك مشتركة</string>
     <string name="mm_in_call">في المكالمة</string>
+    <string name="mm_notification_permission_required_declining_call">إذن الإعلام مفقود. رفض المكالمة الواردة.</string>
 </resources>

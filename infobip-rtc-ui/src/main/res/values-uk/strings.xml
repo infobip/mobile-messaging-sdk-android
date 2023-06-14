@@ -16,7 +16,7 @@
     <string name="mm_unknown">Невідомий</string>
     <string name="mm_call_finished">Дзвінок завершено</string>
     <string name="mm_audio_permission_required">Для обробки викликів потрібен дозвіл на звук.</string>
-    <string name="mm_weak_internet_connection">Слабке підключення до Інтернету</string>
+    <string name="mm_call_weak_internet_connection">Ваша мережа спричиняє низьку якість зв’язку</string>
     <string name="mm_microphone_muted">Вимкнено</string>
     <string name="mm_unknown_error">Невідома помилка</string>
     <string name="mm_unmute">Увімкнути звук</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Спільне використання екрана</string>
     <string name="mm_screen_sharing_description">Ваш екран спільний</string>
     <string name="mm_in_call">У дзвінку</string>
+    <string name="mm_notification_permission_required_declining_call">Відсутній дозвіл на сповіщення. Відхилення вхідного дзвінка.</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">わからない</string>
     <string name="mm_call_finished">通話終了</string>
     <string name="mm_audio_permission_required">通話を処理するには、音声の許可が必要です。</string>
-    <string name="mm_weak_internet_connection">インターネット接続が弱い</string>
+    <string name="mm_call_weak_internet_connection">ネットワークが原因で通話品質が低下している</string>
     <string name="mm_microphone_muted">ミュート</string>
     <string name="mm_unknown_error">未知のエラー</string>
     <string name="mm_unmute">ミュート解除</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">画面共有</string>
     <string name="mm_screen_sharing_description">あなたの画面は共有されています</string>
     <string name="mm_in_call">通話中</string>
+    <string name="mm_notification_permission_required_declining_call">通知権限がありません。 着信を拒否します。</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">Ismeretlen</string>
     <string name="mm_call_finished">A hívás befejeződött</string>
     <string name="mm_audio_permission_required">A hívások kezeléséhez audioengedély szükséges.</string>
-    <string name="mm_weak_internet_connection">Gyenge internet kapcsolat</string>
+    <string name="mm_call_weak_internet_connection">A hálózat rossz hívásminőséget okoz</string>
     <string name="mm_microphone_muted">Tompított</string>
     <string name="mm_unknown_error">Ismeretlen hiba</string>
     <string name="mm_unmute">Némítás feloldása</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Képernyőmegosztás</string>
     <string name="mm_screen_sharing_description">A képernyő meg van osztva</string>
     <string name="mm_in_call">Egy hívásban</string>
+    <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
 </resources>

@@ -16,7 +16,7 @@
     <string name="mm_unknown">अनजान</string>
     <string name="mm_call_finished">कॉल समाप्त</string>
     <string name="mm_audio_permission_required">कॉल को संभालने के लिए ऑडियो अनुमति की आवश्यकता होती है।</string>
-    <string name="mm_weak_internet_connection">कमजोर इंटरनेट कनेक्शन</string>
+    <string name="mm_call_weak_internet_connection">आपका नेटवर्क खराब कॉल गुणवत्ता का कारण बन रहा है</string>
     <string name="mm_microphone_muted">म्यूट किए गए</string>
     <string name="mm_unknown_error">अज्ञात त्रुटि</string>
     <string name="mm_unmute">अनम्यूट</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">स्क्रीन साझेदारी</string>
     <string name="mm_screen_sharing_description">आपकी स्क्रीन साझा की गई है</string>
     <string name="mm_in_call">एक कॉल में</string>
+    <string name="mm_notification_permission_required_declining_call">सूचना अनुमति गुम है। आने वाली कॉल को अस्वीकार करना।</string>
 </resources>

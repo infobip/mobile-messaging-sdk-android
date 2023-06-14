@@ -16,7 +16,7 @@
     <string name="mm_unknown">Bilinmeyen</string>
     <string name="mm_call_finished">arama bitti</string>
     <string name="mm_audio_permission_required">Çağrıları işlemek için ses izni gereklidir.</string>
-    <string name="mm_weak_internet_connection">Zayıf internet bağlantısı</string>
+    <string name="mm_call_weak_internet_connection">Ağınız düşük arama kalitesine neden oluyor</string>
     <string name="mm_microphone_muted">sessiz</string>
     <string name="mm_unknown_error">Bilinmeyen hata</string>
     <string name="mm_unmute">Sesini açmak</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Ekran paylaşımı</string>
     <string name="mm_screen_sharing_description">Ekranınız paylaşıldı</string>
     <string name="mm_in_call">Telefonda</string>
+    <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
 </resources>

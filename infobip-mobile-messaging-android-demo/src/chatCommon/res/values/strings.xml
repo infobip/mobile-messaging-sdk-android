@@ -18,9 +18,11 @@
     <string name="lithuanian">Lietuvių</string>
     <string name="main_activity_button_open_title">Go to chat screen</string>
     <string name="mm_depersonalize">Depersonalize</string>
-    <string name="mm_open_chat">Open chat</string>
+    <string name="mm_open_chat_activity">Open chat activity</string>
+    <string name="mm_open_chat_fragment">Open chat fragment</string>
+    <string name="mm_open_chat_view">Open chat view</string>
     <string name="mm_personalize">Personalize</string>
-    <string name="open_auth_chat">Open authenticated chat</string>
+    <string name="authenticate">Authenticate</string>
     <string name="polish">Polski</string>
     <string name="portuguese">Português</string>
     <string name="push_registration_id">Push registration ID</string>
@@ -40,4 +42,7 @@
     <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
     <string name="turkish">Türkçe</string>
     <string name="ukrainian">украї́нська</string>
+    <string name="dark_mode_dark">Dark</string>
+    <string name="dark_mode_light">Light</string>
+    <string name="dark_mode_auto">Auto</string>
 </resources>

@@ -13,4 +13,9 @@ public interface InAppChatBroadcaster {
      */
     void unreadMessagesCounterUpdated(int unreadMessagesCount);
 
+    /**
+     * Sends broadcast when In-app chat widget view is changed
+     */
+    void chatViewChanged(InAppChatWidgetView view);
+
 }

@@ -17,12 +17,12 @@
         <activity
             android:name=".view.InAppChatAttachmentPreviewActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/IB_AppTheme" />
+            android:theme="@style/IB_ChatDefaultTheme" />
         <activity
             android:name=".view.InAppChatActivity"
             android:noHistory="false"
             android:screenOrientation="portrait"
-            android:theme="@style/IB_AppTheme" />
+            android:theme="@style/IB_ChatDefaultTheme" />
 
         <meta-data
             android:name="org.infobip.mobile.messaging.chat.InAppChatImpl"

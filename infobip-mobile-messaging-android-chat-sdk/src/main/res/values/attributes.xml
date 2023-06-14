@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--    theme attributes-->
+    <attr name="ibChatDefaultStyledTheme" format="boolean" />
+    <attr name="ibChatAttachmentToolbarStyle" format="reference" />
+    <attr name="ibChatToolbarStyle" format="reference" />
+    <attr name="ibChatInputStyle" format="reference" />
+    <attr name="ibChatStyle" format="reference" />
+
+    <!--    views styleables-->
+    <declare-styleable name="InAppChatToolbarViewStyleable">
+        <attr name="ibChatToolbarBackgroundColor" format="color|reference" />
+        <attr name="ibChatStatusBarBackgroundColor" format="color|reference" />
+        <attr name="ibChatStatusBarIconsColorMode" format="enum">
+            <enum name="light" value="0" />
+            <enum name="dark" value="1" />
+        </attr>
+        <attr name="ibChatNavigationIcon" format="reference" />
+        <attr name="ibChatNavigationIconTint" format="color|reference" />
+        <attr name="ibChatTitleTextAppearance" format="reference" />
+        <attr name="ibChatTitleTextColor" format="color|reference" />
+        <attr name="ibChatTitleText" format="string|reference" />
+        <attr name="ibChatTitleCentered" format="boolean|reference" />
+        <attr name="ibChatSubtitleTextAppearance" format="reference" />
+        <attr name="ibChatSubtitleTextColor" format="color|reference" />
+        <attr name="ibChatSubtitleText" format="string|reference" />
+        <attr name="ibChatSubtitleCentered" format="boolean|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="InAppChatViewStyleable">
+        <attr name="ibChatBackgroundColor" format="color|reference" />
+        <attr name="ibChatProgressBarColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorText" format="string|reference" />
+        <attr name="ibChatNetworkConnectionErrorTextColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorTextAppearance" format="reference" />
+        <attr name="ibChatNetworkConnectionErrorLabelBackgroundColor" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="InAppChatInputViewStyleable">
+        <attr name="ibChatInputTextAppearance" format="reference" />
+        <attr name="ibChatInputTextColor" format="color|reference" />
+        <attr name="ibChatInputBackgroundColor" format="color|reference" />
+        <attr name="ibChatInputHintText" format="string|reference" />
+        <attr name="ibChatInputHintTextColor" format="color|reference" />
+        <attr name="ibChatInputAttachmentIcon" format="reference" />
+        <attr name="ibChatInputAttachmentIconTint" format="color|reference" />
+        <attr name="ibChatInputSendIconTint" format="color|reference" />
+        <attr name="ibChatInputSendIcon" format="reference" />
+        <attr name="ibChatInputSeparatorLineColor" format="color|reference" />
+        <attr name="ibChatInputSeparatorLineVisible" format="boolean" />
+        <attr name="ibChatInputCursorColor" format="color|reference" />
+    </declare-styleable>
+
+</resources>

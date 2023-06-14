@@ -31,6 +31,12 @@ android {
         consumerProguardFiles 'proguard-rules.pro'
     }
 
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
+    }
+
     lintOptions {
         abortOnError false
     }
@@ -123,3 +129,4 @@ ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-sdk'
 }
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
+apply from: "${rootProject.projectDir}/jacoco.gradle"

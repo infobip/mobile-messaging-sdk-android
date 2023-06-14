@@ -1,7 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="IB_ChatAttachmentPreviewDefaultTheme" parent="IB_AppTheme">
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="titleTextColor">@android:color/white</item>
+
+    <!--    region Themes-->
+    <style name="IB_ChatDefaultTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="isLightTheme">true</item>
     </style>
+
+    <style name="IB_ChatDefaultTheme.Styled" parent="IB_ChatDefaultTheme">
+        <item name="ibChatDefaultStyledTheme">true</item>
+        <item name="ibChatToolbarStyle">@style/IB.Chat.Toolbar</item>
+        <item name="ibChatStyle">@style/IB.Chat</item>
+        <item name="ibChatInputStyle">@style/IB.Chat.Input</item>
+        <item name="ibChatAttachmentToolbarStyle">@style/IB.Chat.Toolbar.AttachmentPreview</item>
+    </style>
+
+    <style name="IB_ChatDefaultTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+    <style name="IB_ChatDefaultTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
+    <!--    endregion-->
+
+    <!--    region Views Default Styles-->
+    <style name="IB" />
+
+    <style name="IB.Chat.Toolbar" parent="IB">
+        <item name="ibChatToolbarBackgroundColor">@android:color/black</item>
+        <item name="ibChatStatusBarBackgroundColor">@android:color/black</item>
+        <item name="ibChatStatusBarIconsColorMode">light</item>
+        <item name="ibChatNavigationIcon">@drawable/ic_chat_arrow_back</item>
+        <item name="ibChatNavigationIconTint">@android:color/white</item>
+        <item name="ibChatTitleTextAppearance">@null</item>
+        <item name="ibChatTitleTextColor">@android:color/white</item>
+        <item name="ibChatTitleText">@null</item>
+        <item name="ibChatTitleCentered">false</item>
+        <item name="ibChatSubtitleTextAppearance">@null</item>
+        <item name="ibChatSubtitleTextColor">@android:color/white</item>
+        <item name="ibChatSubtitleText">@null</item>
+        <item name="ibChatSubtitleCentered">false</item>
+    </style>
+
+    <style name="IB.Chat.Toolbar.AttachmentPreview" parent="IB.Chat.Toolbar">
+        <item name="ibChatTitleCentered">true</item>
+    </style>
+
+    <style name="IB.Chat" parent="IB">
+        <item name="ibChatBackgroundColor">@android:color/white</item>
+        <item name="ibChatProgressBarColor">@android:color/black</item>
+        <item name="ibChatNetworkConnectionErrorText">@string/ib_chat_no_connection</item>
+        <item name="ibChatNetworkConnectionErrorTextColor">@android:color/black</item>
+        <item name="ibChatNetworkConnectionErrorTextAppearance">@null</item>
+        <item name="ibChatNetworkConnectionErrorLabelBackgroundColor">
+            @color/ib_chat_hint_text_color
+        </item>
+    </style>
+
+    <style name="IB.Chat.Input" parent="IB">
+        <item name="ibChatInputTextAppearance">@style/IB.Chat.Input.TextAppearance</item>
+        <item name="ibChatInputTextColor">@color/ib_chat_text_color</item>
+        <item name="ibChatInputBackgroundColor">@android:color/white</item>
+        <item name="ibChatInputHintText">@string/ib_chat_message_hint</item>
+        <item name="ibChatInputHintTextColor">@color/ib_chat_hint_text_color</item>
+        <item name="ibChatInputAttachmentIcon">@drawable/ib_chat_attachment_btn_icon</item>
+        <item name="ibChatInputAttachmentIconTint">@color/ib_selector_black_disabled</item>
+        <item name="ibChatInputSendIcon">@drawable/ib_chat_send_btn_icon</item>
+        <item name="ibChatInputSendIconTint">@color/ib_selector_black_disabled</item>
+        <item name="ibChatInputSeparatorLineColor">@color/ib_chat_separator_color</item>
+        <item name="ibChatInputSeparatorLineVisible">true</item>
+        <item name="ibChatInputCursorColor">@color/ib_chat_text_color</item>
+    </style>
+
+    <style name="IB.Chat.Input.TextAppearance" parent="TextAppearance.MaterialComponents.Body1" />
+    <!--    endregion-->
+
+    <!--    Internally used styles-->
+    <style name="IB.Chat.Input.Button" parent="@style/Widget.AppCompat.ImageButton">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:scaleType">center</item>
+    </style>
+    <!--    endregion-->
 </resources>

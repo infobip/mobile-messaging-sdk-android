@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <View
+        android:id="@+id/topSeparator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/ib_chat_hint_text_color"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/attachmentButton"
+        style="@style/IB.Chat.Input.Button"
+        android:enabled="false"
+        app:srcCompat="@drawable/ib_chat_attachment_btn_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/messageInput"
+        app:layout_constraintBottom_toBottomOf="@id/messageInput"/>
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/messageInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="6dp"
+        android:background="@android:color/transparent"
+        android:enabled="true"
+        android:importantForAutofill="no"
+        android:maxLines="5"
+        android:minLines="1"
+        android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+        android:minHeight="30dp"
+        android:scrollbars="vertical"
+        android:textSize="16sp"
+        android:textIsSelectable="true"
+        android:gravity="start|center_vertical"
+        app:layout_constraintStart_toEndOf="@id/attachmentButton"
+        app:layout_constraintEnd_toStartOf="@id/sendButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="Send message..."/>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/sendButton"
+        style="@style/IB.Chat.Input.Button"
+        android:enabled="false"
+        app:srcCompat="@drawable/ib_chat_send_btn_icon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/messageInput"
+        app:layout_constraintBottom_toBottomOf="@id/messageInput"
+        android:tint="@color/ib_selector_black_disabled"/>
+
+</merge>

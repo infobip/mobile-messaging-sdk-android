@@ -20,18 +20,18 @@
             android:layout_height="wrap_content"
             android:indeterminate="true"
             android:visibility="invisible"
-            tools:visibility="visible"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/pushRegIdInputLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/push_registration_id"
-            android:layout_marginTop="8dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginRight="8dp"
+            android:hint="@string/push_registration_id"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/progressBar">
@@ -50,10 +50,10 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/customer_name"
-            android:layout_marginTop="8dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginRight="8dp"
+            android:hint="@string/customer_name"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/pushRegIdInputLayout">
@@ -61,7 +61,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/nameEditText"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -70,19 +70,19 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:hint="@string/subject_type"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             app:layout_constraintTop_toBottomOf="@id/nameIdInputLayout">
 
             <AutoCompleteTextView
                 android:id="@+id/subjectTypeAutocompleteTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="none"/>
+                android:inputType="none" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -91,10 +91,10 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/subject"
-            android:layout_marginTop="8dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginRight="8dp"
+            android:hint="@string/subject"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/subjectTypeInputLayout">
@@ -103,51 +103,105 @@
                 android:id="@+id/subjectEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionDone"/>
+                android:imeOptions="actionDone" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/openChat"
+            android:id="@+id/authenticate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/mm_open_chat"
-            app:layout_constraintBottom_toTopOf="@+id/openAuthChat"
+            android:text="@string/authenticate"
+            app:layout_constraintBottom_toTopOf="@+id/openChatActivity"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/subjectInputLayout"
             app:layout_constraintVertical_chainStyle="packed" />
 
         <Button
-            android:id="@+id/openAuthChat"
+            android:id="@+id/openChatActivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/open_auth_chat"
+            android:text="@string/mm_open_chat_activity"
+            app:layout_constraintBottom_toTopOf="@+id/openChatFragment"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/authenticate" />
+
+        <Button
+            android:id="@+id/openChatFragment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mm_open_chat_fragment"
+            app:layout_constraintBottom_toTopOf="@+id/openChatView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/openChatActivity" />
+
+        <Button
+            android:id="@+id/openChatView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mm_open_chat_view"
             app:layout_constraintBottom_toTopOf="@+id/personalize"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/openChat"
-            app:layout_constraintVertical_chainStyle="packed" />
+            app:layout_constraintTop_toBottomOf="@+id/openChatFragment" />
 
         <Button
             android:id="@+id/personalize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/mm_personalize"
-            app:layout_constraintBottom_toTopOf="@+id/depersonalize"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/depersonalize"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/openAuthChat" />
+            app:layout_constraintTop_toBottomOf="@+id/openChatView"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            android:layout_marginRight="8dp" />
 
         <Button
             android:id="@+id/depersonalize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/mm_depersonalize"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/personalize"
+            app:layout_constraintTop_toTopOf="@id/personalize"
+            app:layout_constraintBottom_toBottomOf="@id/personalize" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/darkModeToggle"
+            app:singleSelection="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/personalize" />
+            app:layout_constraintTop_toBottomOf="@id/depersonalize"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/dark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dark_mode_dark"
+                style="?attr/materialButtonOutlinedStyle"
+                />
+            <Button
+                android:id="@+id/light"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dark_mode_light"
+                style="?attr/materialButtonOutlinedStyle"
+                />
+            <Button
+                android:id="@+id/auto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dark_mode_auto"
+                style="?attr/materialButtonOutlinedStyle"
+                />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -155,4 +209,5 @@
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

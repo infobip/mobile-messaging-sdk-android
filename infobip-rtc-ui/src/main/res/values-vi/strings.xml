@@ -16,7 +16,7 @@
     <string name="mm_unknown">không xác định</string>
     <string name="mm_call_finished">Cuộc gọi đã kết thúc</string>
     <string name="mm_audio_permission_required">Quyền âm thanh được yêu cầu để xử lý cuộc gọi.</string>
-    <string name="mm_weak_internet_connection">Kết nối internet yếu</string>
+    <string name="mm_call_weak_internet_connection">Mạng của bạn đang gây ra chất lượng cuộc gọi kém</string>
     <string name="mm_microphone_muted">Đã tắt tiếng</string>
     <string name="mm_unknown_error">Lỗi không rõ</string>
     <string name="mm_unmute">Bật tiếng</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Chia sẻ màn hình</string>
     <string name="mm_screen_sharing_description">Màn hình của bạn được chia sẻ</string>
     <string name="mm_in_call">Trong một cuộc gọi</string>
+    <string name="mm_notification_permission_required_declining_call">Thiếu quyền thông báo. Đang từ chối cuộc gọi đến.</string>
 </resources>

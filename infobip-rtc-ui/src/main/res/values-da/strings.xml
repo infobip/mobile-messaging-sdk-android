@@ -16,7 +16,7 @@
     <string name="mm_unknown">Ukendt</string>
     <string name="mm_call_finished">Opkald afsluttet</string>
     <string name="mm_audio_permission_required">Lydtilladelse er påkrævet for at håndtere opkald.</string>
-    <string name="mm_weak_internet_connection">Svag internetforbindelse</string>
+    <string name="mm_call_weak_internet_connection">Dit netværk forårsager dårlig opkaldskvalitet</string>
     <string name="mm_microphone_muted">Slået fra</string>
     <string name="mm_unknown_error">Ukendt fejl</string>
     <string name="mm_unmute">Slå lyden til</string>
@@ -27,4 +27,5 @@
     <string name="mm_screen_sharing">Skærmdeling</string>
     <string name="mm_screen_sharing_description">Din skærm er delt</string>
     <string name="mm_in_call">I et opkald</string>
+    <string name="mm_notification_permission_required_declining_call">Manglende notifikationstilladelse. Afviser indgående opkald.</string>
 </resources>

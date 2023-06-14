@@ -32,6 +32,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -122,3 +125,4 @@ ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-geo-sdk'
 }
 apply from: "${rootProject.projectDir}/publish-mavencentral.gradle"
+apply from: "${rootProject.projectDir}/jacoco.gradle"
