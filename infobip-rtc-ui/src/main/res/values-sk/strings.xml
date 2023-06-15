@@ -29,4 +29,6 @@
     <string name="mm_in_call">Prebiehajúci hovor</string>
     <string name="mm_notification_permission_required_declining_call">Chýbajúce povolenie notifikácii. Odmietam prichádzajúci hovor.</string>
     <string name="mm_your_microphone_is_muted">Váš mikrofón je stlmený</string>
+    <string name="mm_call_registration_notification_channel">Registrácia hovoru</string>
+    <string name="mm_call_registration_notification_description">Aktualizácia používateľských údajov</string>
 </resources>

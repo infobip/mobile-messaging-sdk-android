@@ -29,4 +29,6 @@
     <string name="mm_in_call">Puhelussa</string>
     <string name="mm_notification_permission_required_declining_call">Ilmoituslupa puuttuu. Tulevan puhelun hylkääminen.</string>
     <string name="mm_your_microphone_is_muted">Mikrofonisi on mykistetty</string>
+    <string name="mm_call_registration_notification_channel">Soiton rekisteröinti</string>
+    <string name="mm_call_registration_notification_description">Päivitetään käyttäjätietoja</string>
 </resources>

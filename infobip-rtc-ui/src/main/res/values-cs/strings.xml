@@ -29,4 +29,6 @@
     <string name="mm_in_call">Probíhající hovor</string>
     <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
     <string name="mm_your_microphone_is_muted">Váš mikrofon je ztlumený</string>
+    <string name="mm_call_registration_notification_channel">Registrace hovoru</string>
+    <string name="mm_call_registration_notification_description">Aktualizace uživatelských dat</string>
 </resources>

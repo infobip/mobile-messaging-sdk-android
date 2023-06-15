@@ -29,4 +29,6 @@
     <string name="mm_in_call">Trong một cuộc gọi</string>
     <string name="mm_notification_permission_required_declining_call">Thiếu quyền thông báo. Đang từ chối cuộc gọi đến.</string>
     <string name="mm_your_microphone_is_muted">Micrô của bạn bị tắt tiếng</string>
+    <string name="mm_call_registration_notification_channel">đăng ký cuộc gọi</string>
+    <string name="mm_call_registration_notification_description">Cập nhật dữ liệu người dùng</string>
 </resources>

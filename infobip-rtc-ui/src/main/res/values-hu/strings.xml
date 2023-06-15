@@ -29,4 +29,6 @@
     <string name="mm_in_call">Egy hívásban</string>
     <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
     <string name="mm_your_microphone_is_muted">A mikrofon el van némítva</string>
+    <string name="mm_call_registration_notification_channel">Hívás regisztráció</string>
+    <string name="mm_call_registration_notification_description">Felhasználói adatok frissítése</string>
 </resources>

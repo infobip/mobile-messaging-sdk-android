@@ -28,5 +28,7 @@
     <string name="mm_screen_sharing_description">Il tuo schermo è condiviso</string>
     <string name="mm_in_call">In una chiamata</string>
     <string name="mm_notification_permission_required_declining_call">Autorizzazione di notifica mancante. Chiamata in arrivo rifiutata.</string>
+    <string name="mm_call_registration_notification_channel">Registrazione chiamata</string>
+    <string name="mm_call_registration_notification_description">Aggiornamento dati utente</string>
     <string name="mm_your_microphone_is_muted">Il tuo microfono è disattivato</string>
 </resources>

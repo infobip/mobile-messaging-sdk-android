@@ -22,7 +22,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
-class PersonalizationWorker(
+class CallRegistrationWorker(
     private val context: Context,
     private val params: WorkerParameters
 ) : CoroutineWorker(context, params) {
@@ -32,16 +32,16 @@ class PersonalizationWorker(
 
     companion object {
         private const val PUSH_REG_ID: String =
-            "com.infobip.webrtc.PersonalizationWorker.PUSH_REG_ID"
+            "com.infobip.webrtc.CallRegistrationWorker.PUSH_REG_ID"
         private const val MAX_ATTEMPT_COUNT: Int = 3
-        private const val TAG = "PersonalizationWorker"
-        private const val PERSONALIZATION_SERVICE_CHANNEL_ID =
-            "com.infobip.webrtc.PersonalizationWorker.PERSONALIZATION_SERVICE_CHANNEL_ID"
+        private const val TAG = "CallRegistrationWorker"
+        private const val CALL_REGISTRATION_SERVICE_CHANNEL_ID =
+            "com.infobip.webrtc.CallRegistrationWorker.CALL_REGISTRATION_SERVICE_CHANNEL_ID"
         private const val NOTIFICATION_ID = 2001
 
         fun launch(context: Context, pushRegId: String?) {
             if (pushRegId?.isNotBlank() == true) {
-                val work = OneTimeWorkRequestBuilder<PersonalizationWorker>().apply {
+                val work = OneTimeWorkRequestBuilder<CallRegistrationWorker>().apply {
                     setInputData(Data.Builder().putString(PUSH_REG_ID, pushRegId).build())
                     setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     setBackoffCriteria(
@@ -93,19 +93,19 @@ class PersonalizationWorker(
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(
             NOTIFICATION_ID,
-            createNotification(context.getString(R.string.mm_personalization_notification_description))
+            createNotification(context.getString(R.string.mm_call_registration_notification_description))
         )
     }
 
     private fun createNotification(title: String): Notification {
-        val builder = NotificationCompat.Builder(context, PERSONALIZATION_SERVICE_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CALL_REGISTRATION_SERVICE_CHANNEL_ID)
             .setContentTitle(title)
             .setSmallIcon(R.drawable.ic_screen_share)
             .setOngoing(true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(
-                PERSONALIZATION_SERVICE_CHANNEL_ID,
-                context.getString(R.string.mm_personalization_notification_channel)
+                CALL_REGISTRATION_SERVICE_CHANNEL_ID,
+                context.getString(R.string.mm_call_registration_notification_channel)
             ).also {
                 builder.setChannelId(it.id)
             }

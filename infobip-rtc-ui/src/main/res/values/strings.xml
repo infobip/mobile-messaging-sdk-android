@@ -18,8 +18,8 @@
     <string name="mm_mute">Mute</string>
     <string name="mm_notification_permission_required_declining_call">Missing notification permission. Declining incoming call.</string>
     <string name="mm_ok">Ok</string>
-    <string name="mm_personalization_notification_channel">Personalization</string>
-    <string name="mm_personalization_notification_description">Updating user data</string>
+    <string name="mm_call_registration_notification_channel">Call registration</string>
+    <string name="mm_call_registration_notification_description">Updating user data</string>
     <string name="mm_screen_share">Screen share</string>
     <string name="mm_screen_sharing">Screen sharing</string>
     <string name="mm_screen_sharing_description">Your screen is shared</string>

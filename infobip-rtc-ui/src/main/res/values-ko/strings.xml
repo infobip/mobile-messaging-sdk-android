@@ -29,4 +29,6 @@
     <string name="mm_in_call">통화 중</string>
     <string name="mm_notification_permission_required_declining_call">알림 권한이 없습니다. 수신 전화를 거부합니다.</string>
     <string name="mm_your_microphone_is_muted">마이크가 음소거되었습니다.</string>
+    <string name="mm_call_registration_notification_channel">전화 등록</string>
+    <string name="mm_call_registration_notification_description">사용자 데이터 업데이트</string>
 </resources>

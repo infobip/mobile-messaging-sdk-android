@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mm_accept">Aceptar</string>
     <string name="mm_decline">Rechazar</string>
@@ -28,5 +27,7 @@
     <string name="mm_screen_sharing_description">Tu pantalla es compartida</string>
     <string name="mm_in_call">En una llamada</string>
     <string name="mm_notification_permission_required_declining_call">Permiso de notificación faltante. Rechazar llamada entrante.</string>
+    <string name="mm_call_registration_notification_channel">Registro de llamadas</string>
+    <string name="mm_call_registration_notification_description">Actualización de datos de usuario</string>
     <string name="mm_your_microphone_is_muted">Tu micrófono está silenciado</string>
 </resources>

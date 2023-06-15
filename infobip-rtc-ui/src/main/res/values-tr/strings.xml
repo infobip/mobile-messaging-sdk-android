@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mm_accept">Kabul</string>
     <string name="mm_decline">Reddetmek</string>
@@ -28,5 +27,7 @@
     <string name="mm_screen_sharing_description">Ekranınız paylaşıldı</string>
     <string name="mm_in_call">Telefonda</string>
     <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
+    <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
+    <string name="mm_call_registration_notification_description">Kullanıcı verileri güncelleniyor</string>
     <string name="mm_your_microphone_is_muted">Mikrofonunuzun sesi kapatıldı</string>
 </resources>

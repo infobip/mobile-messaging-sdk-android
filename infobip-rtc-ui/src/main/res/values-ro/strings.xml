@@ -29,4 +29,6 @@
     <string name="mm_in_call">Într-un apel</string>
     <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
     <string name="mm_your_microphone_is_muted">Microfonul dvs. este dezactivat</string>
+    <string name="mm_call_registration_notification_channel">Înregistrare apel</string>
+    <string name="mm_call_registration_notification_description">Actualizarea datelor utilizatorului</string>
 </resources>

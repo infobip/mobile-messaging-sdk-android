@@ -29,4 +29,6 @@
     <string name="mm_in_call">I et opkald</string>
     <string name="mm_notification_permission_required_declining_call">Manglende notifikationstilladelse. Afviser indgående opkald.</string>
     <string name="mm_your_microphone_is_muted">Din mikrofon er slået fra</string>
+    <string name="mm_call_registration_notification_channel">Opkaldsregistrering</string>
+    <string name="mm_call_registration_notification_description">Opdatering af brugerdata</string>
 </resources>

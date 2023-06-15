@@ -9,8 +9,6 @@
     <string name="mm_speaker">喇叭</string>
     <string name="mm_microphone">麥克風</string>
     <string name="mm_screen_share">屏幕共享</string>
-    <string name="mm_screen_sharing_description">您的屏幕已共享</string>
-    <string name="mm_in_call">通話中</string>
     <string name="mm_calls_notification_channel">來電</string>
     <string name="mm_in_call_notification_channel">通話中</string>
     <string name="mm_is_calling">正在打電話</string>
@@ -27,6 +25,10 @@
     <string name="mm_hangup">掛斷</string>
     <string name="mm_video_permission_required">視頻通話需要攝像頭權限。</string>
     <string name="mm_screen_sharing">屏幕共享</string>
+    <string name="mm_screen_sharing_description">您的屏幕已共享</string>
+    <string name="mm_in_call">通話中</string>
     <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
     <string name="mm_your_microphone_is_muted">您的麥克風已靜音</string>
+    <string name="mm_call_registration_notification_channel">來電登記</string>
+    <string name="mm_call_registration_notification_description">更新用戶數據</string>
 </resources>

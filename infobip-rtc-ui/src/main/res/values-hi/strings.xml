@@ -29,4 +29,6 @@
     <string name="mm_in_call">एक कॉल में</string>
     <string name="mm_notification_permission_required_declining_call">सूचना अनुमति गुम है। आने वाली कॉल को अस्वीकार करना।</string>
     <string name="mm_your_microphone_is_muted">आपका माइक्रोफ़ोन म्यूट है</string>
+    <string name="mm_call_registration_notification_channel">कॉल पंजीकरण</string>
+    <string name="mm_call_registration_notification_description">उपयोगकर्ता डेटा अपडेट करना</string>
 </resources>

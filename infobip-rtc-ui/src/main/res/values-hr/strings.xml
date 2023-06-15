@@ -29,4 +29,6 @@
     <string name="mm_unknown">Nepoznato</string>
     <string name="mm_notification_permission_required_declining_call">Nedostaje dozvola za obavijesti. Odbijanje dolaznog poziva.</string>
     <string name="mm_your_microphone_is_muted">Vaš mikrofon je isključen</string>
+    <string name="mm_call_registration_notification_channel">Registracija poziva</string>
+    <string name="mm_call_registration_notification_description">Ažuriranje korisničkih podataka</string>
 </resources>
