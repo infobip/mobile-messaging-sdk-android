@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">شاشتك مشتركة</string>
     <string name="mm_in_call">في المكالمة</string>
     <string name="mm_notification_permission_required_declining_call">إذن الإعلام مفقود. رفض المكالمة الواردة.</string>
+    <string name="mm_your_microphone_is_muted">تم كتم صوت الميكروفون</string>
 </resources>

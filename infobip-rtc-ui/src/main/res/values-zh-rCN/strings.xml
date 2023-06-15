@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing">屏幕共享</string>
     <string name="mm_screen_sharing_description">您的屏幕已共享</string>
     <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
+    <string name="mm_your_microphone_is_muted">您的麦克风已静音</string>
 </resources>

@@ -29,7 +29,8 @@ enum Language {
     SLOVENIAN("sl-SI"),
     UKRAINIAN("uk-UA"),
     JAPANESE("ja-JP"),
-    GERMAN("de-DE");
+    GERMAN("de-DE"),
+    ALBANIAN("sq-AL");
 
     private final String locale;
 

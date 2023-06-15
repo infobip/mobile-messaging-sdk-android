@@ -1,33 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Accept</string>
-    <string name="mm_decline">Decline</string>
-    <string name="mm_cancel">Cancel</string>
-    <string name="mm_ok">Ok</string>
-    <string name="mm_video_call">Video call</string>
-    <string name="mm_flip_camera">Flip camera</string>
-    <string name="mm_speaker">Speaker</string>
-    <string name="mm_microphone">Microphone</string>
-    <string name="mm_screen_share">Screen share</string>
-    <string name="mm_calls_notification_channel">Calls</string>
-    <string name="mm_in_call_notification_channel">In call</string>
-    <string name="mm_is_calling">is calling</string>
-    <string name="mm_incoming_call">Incoming call</string>
-    <string name="mm_unknown">Unknown</string>
-    <string name="mm_call_finished">Call finished</string>
     <string name="mm_audio_permission_required">Audio permission is required to handle calls.</string>
+    <string name="mm_call_finished">Call finished</string>
     <string name="mm_call_weak_internet_connection">Your network is causing poor call quality</string>
-    <string name="mm_microphone_muted">Muted</string>
-    <string name="mm_unknown_error">Unknown error</string>
-    <string name="mm_unmute">Unmute</string>
-    <string name="mm_mute">Mute</string>
-    <string name="mm_video">Video</string>
+    <string name="mm_calls_notification_channel">Calls</string>
+    <string name="mm_cancel">Cancel</string>
+    <string name="mm_decline">Decline</string>
+    <string name="mm_flip_camera">Flip camera</string>
     <string name="mm_hangup">Hangup</string>
-    <string name="mm_video_permission_required">Camera permission is required for video calls.</string>
-    <string name="mm_screen_sharing">Screen sharing</string>
-    <string name="mm_screen_sharing_description">Your screen is shared</string>
     <string name="mm_in_call">In a call</string>
+    <string name="mm_in_call_notification_channel">In call</string>
+    <string name="mm_incoming_call">Incoming call</string>
+    <string name="mm_is_calling">is calling</string>
+    <string name="mm_microphone">Microphone</string>
+    <string name="mm_microphone_muted">Muted</string>
+    <string name="mm_mute">Mute</string>
     <string name="mm_notification_permission_required_declining_call">Missing notification permission. Declining incoming call.</string>
+    <string name="mm_ok">Ok</string>
     <string name="mm_personalization_notification_channel">Personalization</string>
     <string name="mm_personalization_notification_description">Updating user data</string>
+    <string name="mm_screen_share">Screen share</string>
+    <string name="mm_screen_sharing">Screen sharing</string>
+    <string name="mm_screen_sharing_description">Your screen is shared</string>
+    <string name="mm_speaker">Speaker</string>
+    <string name="mm_unknown">Unknown</string>
+    <string name="mm_unknown_error">Unknown error</string>
+    <string name="mm_unmute">Unmute</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Video call</string>
+    <string name="mm_video_permission_required">Camera permission is required for video calls.</string>
+    <string name="mm_your_microphone_is_muted">Your microphone is muted</string>
 </resources>

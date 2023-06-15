@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Votre écran est partagé</string>
     <string name="mm_in_call">En appel</string>
     <string name="mm_notification_permission_required_declining_call">Autorisation de notification manquante. Refuser l\'appel entrant.</string>
+    <string name="mm_your_microphone_is_muted">Votre micro est coupé</string>
 </resources>

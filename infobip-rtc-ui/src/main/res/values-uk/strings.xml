@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Ваш екран спільний</string>
     <string name="mm_in_call">У дзвінку</string>
     <string name="mm_notification_permission_required_declining_call">Відсутній дозвіл на сповіщення. Відхилення вхідного дзвінка.</string>
+    <string name="mm_your_microphone_is_muted">Ваш мікрофон вимкнено</string>
 </resources>

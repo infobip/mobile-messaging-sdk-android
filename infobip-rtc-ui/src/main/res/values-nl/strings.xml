@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Je scherm is gedeeld</string>
     <string name="mm_in_call">In een gesprek</string>
     <string name="mm_notification_permission_required_declining_call">Ontbrekende machtiging voor meldingen. Inkomende oproep weigeren.</string>
+    <string name="mm_your_microphone_is_muted">Je microfoon is gedempt</string>
 </resources>

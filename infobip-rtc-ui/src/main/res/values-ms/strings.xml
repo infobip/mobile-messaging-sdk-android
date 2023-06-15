@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Skrin anda dikongsi</string>
     <string name="mm_in_call">Dalam panggilan</string>
     <string name="mm_notification_permission_required_declining_call">Kebenaran pemberitahuan tiada. Menolak panggilan masuk.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofon anda diredamkan</string>
 </resources>

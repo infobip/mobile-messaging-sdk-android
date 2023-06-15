@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Vaša obrazovka je zdieľaná</string>
     <string name="mm_in_call">Prebiehajúci hovor</string>
     <string name="mm_notification_permission_required_declining_call">Chýbajúce povolenie notifikácii. Odmietam prichádzajúci hovor.</string>
+    <string name="mm_your_microphone_is_muted">Váš mikrofón je stlmený</string>
 </resources>

@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 internal class InfobipRtcUiImpl(
         private val context: Context,
@@ -83,6 +84,10 @@ internal class InfobipRtcUiImpl(
             errorListener?.onError(it)
         }
 
+    }
+
+    override fun setLanguage(locale: Locale) {
+        Injector.locale = locale
     }
 
     private fun registerPush(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {

@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Ecranul dvs. este partajat</string>
     <string name="mm_in_call">Într-un apel</string>
     <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
+    <string name="mm_your_microphone_is_muted">Microfonul dvs. este dezactivat</string>
 </resources>

@@ -11,14 +11,14 @@ import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.ui.R
-import com.infobip.webrtc.ui.applyIf
+import com.infobip.webrtc.ui.utils.applyIf
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import com.infobip.webrtc.ui.listeners.toWebRtcCallEventListener
 import java.util.*
 
-interface RtcUiWebrtcCall : RtcUiCall
+internal interface RtcUiWebrtcCall : RtcUiCall
 
-abstract class BaseRtcUiWebrtcCall(
+internal abstract class BaseRtcUiWebrtcCall(
     private val activeCall: WebrtcCall
 ) : RtcUiWebrtcCall {
 
@@ -87,9 +87,9 @@ abstract class BaseRtcUiWebrtcCall(
     }
 }
 
-interface RtcUiIncomingWebRtcCall : RtcUiIncomingCall
+internal interface RtcUiIncomingWebRtcCall : RtcUiIncomingCall
 
-class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrtcCall) : BaseRtcUiWebrtcCall(activeCall), RtcUiIncomingWebRtcCall {
+internal class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrtcCall) : BaseRtcUiWebrtcCall(activeCall), RtcUiIncomingWebRtcCall {
 
     override fun peer(context: Context): String {
         return activeCall.source()?.displayIdentifier()?.takeIf { it.isNotBlank() }

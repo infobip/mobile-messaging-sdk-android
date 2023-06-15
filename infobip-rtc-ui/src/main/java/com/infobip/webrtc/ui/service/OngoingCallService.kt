@@ -1,6 +1,5 @@
 package com.infobip.webrtc.ui.service
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
@@ -19,9 +18,9 @@ import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.delegate.Vibrator
 import com.infobip.webrtc.ui.notifications.CALL_NOTIFICATION_ID
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
-import com.infobip.webrtc.ui.stopForegroundRemove
+import com.infobip.webrtc.ui.utils.stopForegroundRemove
 
-class OngoingCallService : Service() {
+class OngoingCallService : BaseService() {
 
     companion object {
 
@@ -59,7 +58,7 @@ class OngoingCallService : Service() {
                 if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING && !isPermissionNeeded) {
                     peerName = intent.getStringExtra(NAME_EXTRA)
                             ?: applicationContext.getString(R.string.mm_unknown)
-                    startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotification(peerName, getString(R.string.mm_incoming_call)))
+                    startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotification(this, peerName, getString(R.string.mm_incoming_call)))
                     startMedia()
                 } else if (isPermissionNeeded && cache.autoDeclineOnMissingNotificationPermission) {
                     Toast.makeText(applicationContext, getString(R.string.mm_notification_permission_required_declining_call), Toast.LENGTH_LONG).show()
@@ -73,7 +72,7 @@ class OngoingCallService : Service() {
 
             CALL_ESTABLISHED_ACTION -> {
                 stopMedia()
-                startForeground(CALL_NOTIFICATION_ID, notificationHelper.createOngoingCallNotification(peerName, getString(R.string.mm_in_call)))
+                startForeground(CALL_NOTIFICATION_ID, notificationHelper.createOngoingCallNotification(this, peerName, getString(R.string.mm_in_call)))
             }
 
             CALL_DECLINED_ACTION -> {

@@ -43,6 +43,8 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
 
     private final String EXTRA_AUTH_DATA = "org.infobip.mobile.messaging.demo.MainActivity.EXTRA_AUTH_DATA";
@@ -153,8 +155,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return true;
         } else if (item.getGroupId() == R.id.languages) {
             String language = langMenuIdToLocale(item.getItemId());
-            //change language of chat view
-            InAppChat.getInstance(MainActivity.this).setLanguage(language);
+            //change language of In-app chat and calls
+            InAppChat.getInstance(this).setLanguage(language);
+            InfobipRtcUi.getInstance(this).setLanguage(Locale.forLanguageTag(language));
+            Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -208,6 +212,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "uk-UA";
         else if (menuId == R.id.japanese)
             return "ja-JP";
+        else if (menuId == R.id.german)
+            return "de-DE";
+        else if (menuId == R.id.albanian)
+            return "sq-AL";
         else return null;
     }
 
@@ -244,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     }
 
     private void setUpSubjectTypeSpinner() {
-        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.subjectTypeAutocompleteTextView);
+        AutoCompleteTextView autoCompleteTextView = findViewById(R.id.subjectTypeAutocompleteTextView);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.subject_types, android.R.layout.simple_dropdown_item_1line);
         autoCompleteTextView.setAdapter(adapter);
         autoCompleteTextView.setOnItemClickListener((adapterView, view, position, id) -> {
@@ -413,30 +421,31 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     }
 
     private InAppChatDarkMode darkMode;
-    private void setUpDarkModeToggle(){
+
+    private void setUpDarkModeToggle() {
         MaterialButtonToggleGroup darkModeToggle = findViewById(R.id.darkModeToggle);
         darkModeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            switch (group.getCheckedButtonId()){
+            switch (group.getCheckedButtonId()) {
                 case R.id.dark:
-                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES){
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES) {
                         setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_YES);
                     }
                     darkMode = InAppChatDarkMode.DARK_MODE_YES;
                     break;
                 case R.id.light:
-                    if (darkMode != InAppChatDarkMode.DARK_MODE_NO){
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_NO) {
                         setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_NO);
                     }
                     darkMode = InAppChatDarkMode.DARK_MODE_NO;
                     break;
                 case R.id.auto:
-                    if (darkMode != InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM){
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM) {
                         setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM);
                     }
                     darkMode = InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM;
                     break;
                 case View.NO_ID:
-                    if (darkMode != null){
+                    if (darkMode != null) {
                         setInAppChatDarkMode(null);
                     }
                     darkMode = null;

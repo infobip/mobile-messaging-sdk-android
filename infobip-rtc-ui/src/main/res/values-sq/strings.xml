@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="mm_accept">Pranoje</string>
+    <string name="mm_audio_permission_required">Kërkohet leje audio për të trajtuar telefonatat.</string>
+    <string name="mm_call_finished">Telefonata përfundoi</string>
+    <string name="mm_call_weak_internet_connection">Rrjeti juaj po shkakton cilësi të dobët të thirrjeve</string>
+    <string name="mm_calls_notification_channel">Thirrjet</string>
+    <string name="mm_cancel">Anulo</string>
+    <string name="mm_decline">Rënia</string>
+    <string name="mm_flip_camera">Kthejeni kamerën</string>
+    <string name="mm_hangup">Ul receptorin e telefonit</string>
+    <string name="mm_in_call">Në thirrje</string>
+    <string name="mm_in_call_notification_channel">Në thirrje</string>
+    <string name="mm_incoming_call">Telefonatë në hyrje</string>
+    <string name="mm_is_calling">Po thërret</string>
+    <string name="mm_microphone">Mikrofoni</string>
+    <string name="mm_microphone_muted">I heshtur</string>
+    <string name="mm_mute">Memec</string>
+    <string name="mm_ok">Ne rregull</string>
+    <string name="mm_screen_share">Ndarjen e ekranit</string>
+    <string name="mm_screen_sharing">Ndarjen e ekranit</string>
+    <string name="mm_screen_sharing_description">Ekrani juaj është i ndarë</string>
+    <string name="mm_speaker">Folesin</string>
+    <string name="mm_unknown">Unknown</string>
+    <string name="mm_unknown_error">Gabim i panjohur</string>
+    <string name="mm_unmute">Hiq zërin</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Video thirrje</string>
+    <string name="mm_video_permission_required">Kërkohet leja e kamerës për telefonatat me video.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofoni juaj është i çaktivizuar.</string>
+</resources>

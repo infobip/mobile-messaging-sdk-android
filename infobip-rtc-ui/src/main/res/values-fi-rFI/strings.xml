@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">Näyttösi on jaettu</string>
     <string name="mm_in_call">Puhelussa</string>
     <string name="mm_notification_permission_required_declining_call">Ilmoituslupa puuttuu. Tulevan puhelun hylkääminen.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofonisi on mykistetty</string>
 </resources>

@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">あなたの画面は共有されています</string>
     <string name="mm_in_call">通話中</string>
     <string name="mm_notification_permission_required_declining_call">通知権限がありません。 着信を拒否します。</string>
+    <string name="mm_your_microphone_is_muted">マイクがミュートになっています</string>
 </resources>

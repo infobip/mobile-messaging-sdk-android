@@ -28,4 +28,5 @@
     <string name="mm_screen_sharing_description">המסך שלך משותף</string>
     <string name="mm_in_call">בשיחה</string>
     <string name="mm_notification_permission_required_declining_call">חסרה הרשאת הודעה. דחיית שיחה נכנסת.</string>
+    <string name="mm_your_microphone_is_muted">המיקרופון שלך מושתק</string>
 </resources>

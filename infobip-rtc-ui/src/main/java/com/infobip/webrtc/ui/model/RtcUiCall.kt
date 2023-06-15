@@ -11,7 +11,7 @@ import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import java.util.*
 
-interface RtcUiCall {
+internal interface RtcUiCall {
     fun id(): String?
     fun callOptions(): RtcUiCallOptions?
     fun updateCustomData(customData: Map<String, String>)
@@ -58,7 +58,7 @@ interface RtcUiCall {
     fun setNetworkQualityListener(networkQualityListener: NetworkQualityEventListener?)
 }
 
-interface RtcUiIncomingCall : RtcUiCall {
+internal interface RtcUiIncomingCall : RtcUiCall {
     fun peer(context: Context): String
     fun accept(callOptions: RtcUiCallOptions? = null)
     fun decline()

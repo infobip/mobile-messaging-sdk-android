@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="ib_chat_allowed_attachment_size_exceeded">Është tejkaluar madhësia maksimale e lejuar e bashkëngjitjes</string>
+    <string name="ib_chat_cant_create_attachment">Nuk mund të krijohet bashkëngjitje nga skedari i zgjedhur</string>
+    <string name="ib_chat_error">Dicka shkoi keq: %1$s.</string>
+    <string name="ib_chat_message_hint">Dergo nje mesazh</string>
+    <string name="ib_chat_no_connection">NUK KA LIDHJE</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_permissions_not_granted_message">Ju mund t\'i jepni ato në cilësimet e aplikacionit.</string>
+    <string name="ib_chat_permissions_not_granted_title">Lejet nuk jepen</string>
+    <string name="ib_chat_view_title">""</string>
+    <string name="ib_iv_btn_send_attachment_desc">Dërgo bashkëngjitjen</string>
+    <string name="ib_iv_btn_send_desc">Dërgo mesazh chat</string>
+    <string name="ib_iv_input_border_desc">Kufiri i sipërm</string>
+</resources>
