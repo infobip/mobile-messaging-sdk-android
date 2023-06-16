@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
     <string name="mm_accept">Pranoje</string>
     <string name="mm_audio_permission_required">Kërkohet leje audio për të trajtuar telefonatat.</string>
     <string name="mm_call_finished">Telefonata përfundoi</string>
+    <string name="mm_call_registration_notification_channel">Regjistrimi i thirrjeve</string>
+    <string name="mm_call_registration_notification_description">Përditësimi i të dhënave të përdoruesit</string>
     <string name="mm_call_weak_internet_connection">Rrjeti juaj po shkakton cilësi të dobët të thirrjeve</string>
     <string name="mm_calls_notification_channel">Thirrjet</string>
     <string name="mm_cancel">Anulo</string>
@@ -16,6 +18,7 @@
     <string name="mm_microphone">Mikrofoni</string>
     <string name="mm_microphone_muted">I heshtur</string>
     <string name="mm_mute">Memec</string>
+    <string name="mm_notification_permission_required_declining_call">Mungon leja e njoftimit. Refuzimi i thirrjes hyrëse.</string>
     <string name="mm_ok">Ne rregull</string>
     <string name="mm_screen_share">Ndarjen e ekranit</string>
     <string name="mm_screen_sharing">Ndarjen e ekranit</string>
