@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerialize
 import org.infobip.mobile.messaging.api.support.util.Base64Encoder;
 import org.infobip.mobile.messaging.api.support.util.StreamUtils;
 import org.infobip.mobile.messaging.api.support.util.StringUtils;
+import org.infobip.mobile.messaging.api.support.util.UserAgentUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class DefaultApiClient implements ApiClient {
     private final ResponsePreProcessor[] responsePreProcessors;
     private final Logger logger;
     private final boolean allowUntrustedSSLOnError;
-    private String userAgent;
+    private UserAgentUtil userAgentUtil = new UserAgentUtil();
 
     public DefaultApiClient() {
         this(DEFAULT_CONNECT_TIMEOUT, DEFAULT_READ_TIMEOUT, null, new RequestInterceptor[0], new ResponsePreProcessor[0], new Logger(), false);
@@ -158,7 +159,7 @@ public class DefaultApiClient implements ApiClient {
             urlConnection.setRequestProperty("Accept", "application/json");
             String userAgent = urlConnection.getRequestProperty("User-Agent");
             if (null == userAgent) {
-                urlConnection.setRequestProperty("User-Agent", getUserAgent());
+                urlConnection.setRequestProperty("User-Agent", userAgentUtil.getUserAgent(libraryVersion, userAgentAdditions));
             }
 
             if (null != request.body) {
@@ -245,24 +246,6 @@ public class DefaultApiClient implements ApiClient {
                 logger.e("Response interceptor " + responsePreProcessor + " thrown an exception " + e);
             }
         }
-    }
-
-    private String getUserAgent() {
-        if (null != userAgent) {
-            return userAgent;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("Infobip Mobile API Client");
-        if (StringUtils.isNotBlank(libraryVersion)) {
-            sb.append("/").append(libraryVersion);
-        }
-        sb.append("(");
-        if (null != userAgentAdditions) {
-            sb.append(StringUtils.join(";", userAgentAdditions));
-        }
-        sb.append(")");
-        userAgent = sb.toString();
-        return userAgent;
     }
 
     private Tuple<String, String> safeGetErrorInfo(ApiResponse apiResponse, String code, String message) {

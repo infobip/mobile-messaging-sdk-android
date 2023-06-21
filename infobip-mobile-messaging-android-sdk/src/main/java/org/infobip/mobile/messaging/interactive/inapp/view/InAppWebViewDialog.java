@@ -29,12 +29,17 @@ import androidx.cardview.widget.CardView;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.R;
+import org.infobip.mobile.messaging.api.support.util.UserAgentUtil;
 import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.util.UserAgentAdditions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "[InAppWebViewDialog]";
@@ -145,11 +150,31 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                     popupWindow.setOutsideTouchable(true);
                 }
                 setupWebViewForDisplaying(cardView);
-                webView.loadUrl(message.url);
+
+                Map<String, String> headers = getAuthorizationHeader();
+
+                if (headers.isEmpty()) {
+                    webView.loadUrl(message.url);
+                } else {
+                    webView.loadUrl(message.url, headers);
+                }
             });
         } catch (Exception e) {
             MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
         }
+    }
+
+    @NonNull
+    private Map<String, String> getAuthorizationHeader() {
+        String applicationCode = MobileMessagingCore.getApplicationCode(activityWrapper.getActivity());
+        UserAgentUtil userAgentUtil = new UserAgentUtil();
+        Map<String, String> headers = new HashMap<>();
+        if (applicationCode != null) {
+            headers.put("Authorization", "App " + applicationCode);
+            headers.put("User-Agent", userAgentUtil.getUserAgent(UserAgentAdditions.getLibVersion(), UserAgentAdditions.getAdditions(activityWrapper.getActivity())));
+            headers.put("pushregistrationid", MobileMessagingCore.getInstance(activityWrapper.getActivity()).getPushRegistrationId());
+        }
+        return headers;
     }
 
     private Activity getActivity() {
