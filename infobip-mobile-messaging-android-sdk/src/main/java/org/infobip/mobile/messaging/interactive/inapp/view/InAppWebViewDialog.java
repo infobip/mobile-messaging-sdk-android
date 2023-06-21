@@ -30,13 +30,14 @@ import androidx.cardview.widget.CardView;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
+import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
 
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
-    private static final String TAG = "InAppWebViewDialog";
+    private static final String TAG = "[InAppWebViewDialog]";
     private static final int DIALOG_TIMEOUT = 10000;//10 seconds
     private static final int CORNER_RADIUS = 20;
     public static final int WIDTH_PADDING = 16;
@@ -51,12 +52,15 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     private InAppWebViewMessage message;
     static int PAGE_LOAD_PROGRESS = 0;
     ConnectionTimeoutHandler timeoutHandler = null;
+    View dialogView;
+    CardView cardView;
+
 
     InAppWebViewDialog(Callback callback, ActivityWrapper activityWrapper) {
         this.callback = callback;
         this.activityWrapper = activityWrapper;
         displayMetrics = new DisplayMetrics();
-        activityWrapper.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
     }
 
     @Override
@@ -116,30 +120,40 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
         setActivityLifecycleListener(this);
 
-        LayoutInflater inflater = activityWrapper.getActivity().getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.ib_inapp_webview, null);
-        CardView cardView = dialogView.findViewById(R.id.webview_dialog_card);
-        cardView.setRadius(CORNER_RADIUS);
+        try {
+            getActivity().runOnUiThread(() -> {
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                dialogView = inflater.inflate(R.layout.ib_inapp_webview, null, false);
 
-        popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+                cardView = dialogView.findViewById(R.id.webview_dialog_card);
+                cardView.setRadius(CORNER_RADIUS);
 
-        int screenRotation = ((WindowManager) activityWrapper.getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-        if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
-            cardView.getLayoutParams().width = displayMetrics.heightPixels - WIDTH_PADDING;
+                popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+
+
+                int screenRotation = ((WindowManager) getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+                if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
+                    cardView.getLayoutParams().width = displayMetrics.heightPixels - WIDTH_PADDING;
+                }
+
+                popupWindow.setContentView(dialogView);
+
+                if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
+                    setDialogAnimations(message.position);
+                    popupWindow.setOutsideTouchable(false);
+                } else {
+                    popupWindow.setOutsideTouchable(true);
+                }
+                setupWebViewForDisplaying(cardView);
+                webView.loadUrl(message.url);
+            });
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
         }
+    }
 
-        popupWindow.setContentView(dialogView);
-
-        if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
-            setDialogAnimations(message.position);
-            popupWindow.setOutsideTouchable(false);
-        } else {
-            popupWindow.setOutsideTouchable(true);
-        }
-
-        setupWebViewForDisplaying(cardView);
-
-        webView.loadUrl(message.url);
+    private Activity getActivity() {
+        return activityWrapper.getActivity();
     }
 
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
@@ -193,17 +207,15 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     }
 
     private void clearWebView() {
-        //webView.clearCache(true);
-        //webView.clearHistory();
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
                 webView.clearHistory();
                 webView.clearCache(true);
-                MobileMessagingLogger.d("Deleted local history");
+                MobileMessagingLogger.d(TAG, "Deleted local history");
             });
         } catch (Exception e) {
-            MobileMessagingLogger.w("Failed to delete local history due to " + e.getMessage());
+            MobileMessagingLogger.e(TAG, "Failed to delete local history due to " + e.getMessage());
         }
         webView.clearFormData();
         webView.clearMatches();
@@ -237,10 +249,10 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
     void updatePageHeight(float pageHeight) {
         Rect displayRectangle = new Rect();
-        Window window = activityWrapper.getActivity().getWindow();
+        Window window = getActivity().getWindow();
 
         window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
-        int calculatedPageHeight = convertDpToPixel(pageHeight, activityWrapper.getActivity());
+        int calculatedPageHeight = convertDpToPixel(pageHeight, getActivity());
 
         if (message.type == InAppWebViewMessage.InAppWebViewType.FULLSCREEN && calculatedPageHeight > displayMetrics.heightPixels)
             setVerticalScrollBar(VERTICAL_SCROLLBAR_SIZE);
@@ -248,8 +260,8 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
-                int minHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_min_height);
-                int maxHeight = activityWrapper.getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_max_height);
+                int minHeight = getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_min_height);
+                int maxHeight = getActivity().getResources().getDimensionPixelSize(R.dimen.dialog_banner_max_height);
                 ViewGroup.LayoutParams viewFlowLayout = webView.getLayoutParams();
                 if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
                     viewFlowLayout.height = Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight));
@@ -266,7 +278,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 webView.setLayoutParams(viewFlowLayout);
             });
         } catch (Exception e) {
-            MobileMessagingLogger.w("Failed due to " + e.getMessage());
+            MobileMessagingLogger.e(TAG, "Failed due to " + e.getMessage());
         }
     }
 
@@ -292,7 +304,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     private void setMessageSeen() {
         if (popupWindow.isShowing()) {
             String[] ids = {message.getMessageId()};
-            MobileMessagingCore.getInstance(activityWrapper.getActivity()).setMessagesSeen(ids);
+            MobileMessagingCore.getInstance(getActivity()).setMessagesSeen(ids);
         }
     }
 
@@ -302,8 +314,9 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     }
 
     private void setActivityLifecycleListener(ActivityLifecycleListener listener) {
-        if (activityWrapper.getActivity() != null && MobileMessagingCore.getInstance(activityWrapper.getActivity()).getActivityLifecycleMonitor() != null)
-            MobileMessagingCore.getInstance(activityWrapper.getActivity()).getActivityLifecycleMonitor().activityListener = listener;
+        final ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(getActivity()).getActivityLifecycleMonitor();
+        if (getActivity() != null && activityLifecycleMonitor != null)
+            activityLifecycleMonitor.activityListener = listener;
     }
 
     /*
@@ -390,7 +403,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         }
 
         if (message != null) {
-            MobileMessagingLogger.e(title + ": " + message);
+            MobileMessagingLogger.e(TAG, title + ": " + message);
         }
     }
 
