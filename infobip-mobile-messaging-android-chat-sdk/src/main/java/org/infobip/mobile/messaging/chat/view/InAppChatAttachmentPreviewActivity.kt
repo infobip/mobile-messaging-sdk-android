@@ -53,7 +53,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         }
     }
 
-    var onFileDownloadingComplete: BroadcastReceiver = object : BroadcastReceiver() {
+    private var onFileDownloadingComplete: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (::binding.isInitialized)
                 binding.ibLcChatAttachPb.hide()
@@ -68,7 +68,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     private var originalStatusBarColor: Int? = null
 
     override fun attachBaseContext(newBase: Context?) {
-        super.attachBaseContext(LocalizationUtils.getInstance(newBase ?: this).updateContext())
+        super.attachBaseContext(newBase?.applyInAppChatLanguage())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

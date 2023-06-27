@@ -156,14 +156,16 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         } else if (item.getGroupId() == R.id.languages) {
             String language = langMenuIdToLocale(item.getItemId());
             //change language of In-app chat and calls
-            InAppChat.getInstance(this).setLanguage(language);
-            InfobipRtcUi.getInstance(this).setLanguage(Locale.forLanguageTag(language));
-            Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
+            if (language != null) {
+                InAppChat.getInstance(this).setLanguage(language);
+                InfobipRtcUi.getInstance(this).setLanguage(Locale.forLanguageTag(language));
+                Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public String langMenuIdToLocale(@IdRes int menuId) {
+    private String langMenuIdToLocale(@IdRes int menuId) {
         if (menuId == R.id.english)
             return "en-US";
         else if (menuId == R.id.turkish)

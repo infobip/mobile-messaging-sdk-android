@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 internal class InfobipRtcUiImpl(
@@ -38,7 +39,9 @@ internal class InfobipRtcUiImpl(
                 tokenProvider.getToken(identity, cache.applicationId)?.let { token ->
                     if (listenType == ListenType.PUSH) {
                         if (notificationPermissionDelegate.isPermissionNeeded()) {
-                            notificationPermissionDelegate.request()
+                            withContext(Dispatchers.Main) {
+                                notificationPermissionDelegate.request()
+                            }
                         }
                         registerPush(token, errorListener, successListener)
                     } else {

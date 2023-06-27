@@ -13,8 +13,6 @@ import com.infobip.webrtc.Injector
 import com.infobip.webrtc.ui.CallActivity
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.service.OngoingCallService
-import com.infobip.webrtc.ui.utils.applyLocale
-import kotlin.reflect.KProperty
 
 const val CALL_NOTIFICATION_ID = 9999
 const val SCREEN_SHARE_NOTIFICATION_ID = 9998
