@@ -58,7 +58,17 @@ task updateVersionInReadme {
     }
 }
 
-afterReleaseBuild.dependsOn updateVersionInReadme
+task updateRtcUiVersionInReadme {
+    doLast {
+        def readmeFile = new File('infobip-rtc-ui/README.md')
+        def text = readmeFile.text
+        readmeFile.withWriter { w ->
+            w << text.replaceFirst("'com.infobip:infobip-rtc-ui:\\d+\\.\\d+\\.\\S+'", "'com.infobip:infobip-rtc-ui:$version'")
+        }
+    }
+}
+
+afterReleaseBuild.dependsOn updateVersionInReadme, updateRtcUiVersionInReadme
 
 // workaround for `net.researchgate.release` plugin issue:
 // https://github.com/researchgate/gradle-release/issues/186
