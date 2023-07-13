@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            app:cardUseCompatPadding="true"
-            app:cardElevation="2dp"
-            android:id="@+id/webview_dialog_card"
-            android:orientation="vertical"
-            tools:ignore="WebViewLayout">
 
-            <WebView
-                android:id="@+id/ib_webview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
-        </androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/webview_dialog_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="true"
+        tools:ignore="WebViewLayout">
+
+        <WebView
+            android:id="@+id/ib_webview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </androidx.cardview.widget.CardView>
 </RelativeLayout>

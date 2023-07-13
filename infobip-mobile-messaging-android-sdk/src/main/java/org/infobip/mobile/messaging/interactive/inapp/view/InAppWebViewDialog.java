@@ -32,9 +32,11 @@ import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.api.support.util.UserAgentUtil;
 import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.UserAgentAdditions;
 
@@ -43,13 +45,15 @@ import java.util.Map;
 
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "[InAppWebViewDialog]";
-    private static final int DIALOG_TIMEOUT = 10000;//10 seconds
+    private static final int DIALOG_TIMEOUT_MS = 6000;//6 seconds
     private static final int CORNER_RADIUS = 20;
     public static final int WIDTH_PADDING = 16;
     public static final int VERTICAL_SCROLLBAR_SIZE = 30;
     public static final double SCREEN_COVER_PERCENTAGE = 0.85;
     public static final int SCREEN_MARGINS = 16;
     private final Callback callback;
+    private AndroidBroadcaster coreBroadcaster;
+    private NotificationAction[] action;
     private final DisplayMetrics displayMetrics;
     private PopupWindow popupWindow;
     private WebView webView;
@@ -66,6 +70,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         this.activityWrapper = activityWrapper;
         displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        coreBroadcaster();
     }
 
     @Override
@@ -88,40 +93,85 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         }
 
         /**
+         * Handling WebView height change
+         *
+         * @param pageHeight - page height in density points
+         */
+        @JavascriptInterface
+        public void heightChanged(float pageHeight) {
+            MobileMessagingLogger.d(TAG, "onHeightChanged: " + pageHeight);
+            updatePageHeight(pageHeight);
+        }
+
+        /**
          * Dismiss WebView on Close button click
          */
         @JavascriptInterface
-        public void dismissWebView() {
-            MobileMessagingLogger.d(TAG, "onDismissWebView()");
+        public void close(String closing) {
+            MobileMessagingLogger.d(TAG, "close()");
             new Handler(Looper.getMainLooper()).post(() -> {
+                if (isBanner()) {
+                    coreBroadcaster.notificationTapped(message);
+                    callback.notificationPressedFor(InAppWebViewDialog.this, message, action[0], getActivity());
+                } else
+                    callback.actionButtonPressedFor(InAppWebViewDialog.this, message, null, action[0]);
                 popupWindow.dismiss();
+                callback.dismissed(InAppWebViewDialog.this);
                 setActivityLifecycleListener(null);
                 webView.destroy();
             });
         }
 
         /**
-         * Handling WebView button clicks
+         * Handling opening deep links
+         *
+         * @param deepLink - application screen to be opened
          */
         @JavascriptInterface
-        public void onButtonClick() {
-            MobileMessagingLogger.d(TAG, "onButtonClick()");
+        public void openAppPage(String deepLink) {
+            MobileMessagingLogger.d(TAG, "openAppPage: " + deepLink);
+            message.setDeeplink(deepLink);
+            doCallbacks();
         }
 
+        /**
+         * Handling browser opening
+         *
+         * @param url - url address to be opened in browser
+         */
+        @JavascriptInterface
+        public void openBrowser(String url) {
+            MobileMessagingLogger.d(TAG, "openBrowser: " + url);
+            message.setBrowserUrl(url);
+            doCallbacks();
+        }
 
         /**
          * Handling WebView height change
+         *
+         * @param url - url address to be opened in webview
          */
         @JavascriptInterface
-        public void onHeightChanged(float pageHeight) {
-            MobileMessagingLogger.d(TAG, "onHeightChanged: " + pageHeight);
-            updatePageHeight(pageHeight);
+        public void openWebView(String url) {
+            MobileMessagingLogger.d(TAG, "openWebView: " + url);
+            message.setWebViewUrl(url);
+            doCallbacks();
+        }
+
+        private void doCallbacks() {
+            if (isBanner()) {
+                coreBroadcaster.notificationTapped(message);
+                callback.notificationPressedFor(InAppWebViewDialog.this, message, action[1], getActivity());
+            } else
+                callback.actionButtonPressedFor(InAppWebViewDialog.this, message, null, action[1]);
+            callback.dismissed(InAppWebViewDialog.this);
         }
     }
 
     @Override
-    public void show(@NonNull final InAppWebViewMessage message) {
+    public void show(@NonNull final InAppWebViewMessage message, @NonNull NotificationAction... actions) {
         this.message = message;
+        this.action = actions;
 
         setActivityLifecycleListener(this);
 
@@ -134,7 +184,6 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 cardView.setRadius(CORNER_RADIUS);
 
                 popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
-
 
                 int screenRotation = ((WindowManager) getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
                 if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
@@ -149,6 +198,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 } else {
                     popupWindow.setOutsideTouchable(true);
                 }
+
                 setupWebViewForDisplaying(cardView);
 
                 Map<String, String> headers = getAuthorizationHeader();
@@ -213,7 +263,10 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
             @Override
             public void onPageCommitVisible(WebView view, String url) {
-                setDialogTimeout(DIALOG_TIMEOUT);
+                MobileMessagingLogger.d(TAG, "onPageCommitVisible()");
+                webView.loadUrl("javascript:window.InfobipMobileMessaging.readBodyHeight()");
+                if (isBanner())
+                    setDialogTimeout(DIALOG_TIMEOUT_MS);
                 showWebViewDialog(dialogView, message.position, message.type);
             }
 
@@ -225,6 +278,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         });
         webView.setWebChromeClient(new InAppWebChromeClient());
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDisplayZoomControls(false);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
@@ -235,8 +289,11 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
-                webView.clearHistory();
-                webView.clearCache(true);
+                if (webView != null) {
+                    callback.dismissed(this);
+                    webView.clearHistory();
+                    webView.clearCache(true);
+                }
                 MobileMessagingLogger.d(TAG, "Deleted local history");
             });
         } catch (Exception e) {
@@ -250,26 +307,30 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             popupWindow.dismiss();
     }
 
-    // Hide after some seconds
+    // Dismiss after some seconds
     public void setDialogTimeout(int dialogTimeout) {
         final Handler handler = new Handler();
         final Runnable runnable = () -> {
             if (popupWindow.isShowing()) {
                 popupWindow.dismiss();
+                callback.dismissed(this);
             }
         };
         popupWindow.setOnDismissListener(() -> {
-            callback.dismissed(this);
             handler.removeCallbacks(runnable);
         });
         handler.postDelayed(runnable, dialogTimeout);
     }
 
     private void setDialogAnimations(InAppWebViewPosition position) {
-        if (position == InAppWebViewPosition.TOP)
+        MobileMessagingLogger.d(TAG, "setDialogAnimations()");
+        if (position == InAppWebViewPosition.TOP) {
             popupWindow.setAnimationStyle(R.style.BannerAnimationTop);
-        else
+        } else if (position == InAppWebViewPosition.BOTTOM) {
             popupWindow.setAnimationStyle(R.style.BannerAnimationBottom);
+        }
+//        } else
+//            popupWindow.setAnimationStyle(android.R.style.Animation);
     }
 
     void updatePageHeight(float pageHeight) {
@@ -342,6 +403,17 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         final ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(getActivity()).getActivityLifecycleMonitor();
         if (getActivity() != null && activityLifecycleMonitor != null)
             activityLifecycleMonitor.activityListener = listener;
+    }
+
+    private boolean isBanner() {
+        return message.type == InAppWebViewMessage.InAppWebViewType.BANNER;
+    }
+
+    synchronized private AndroidBroadcaster coreBroadcaster() {
+        if (coreBroadcaster == null) {
+            coreBroadcaster = new AndroidBroadcaster(getActivity());
+        }
+        return coreBroadcaster;
     }
 
     /*

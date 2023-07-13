@@ -22,7 +22,7 @@ public class InAppViewDialogClickListenerTest {
 
     private InAppViewDialogClickListener inAppViewDialogClickListener;
 
-    private InAppView inAppView = mock(InAppView.class);
+    private InAppNativeView inAppView = mock(InAppNativeView.class);
     private InAppView.Callback callback = mock(InAppView.Callback.class);
     private Message message = mock(Message.class);
     private NotificationCategory category = mock(NotificationCategory.class);

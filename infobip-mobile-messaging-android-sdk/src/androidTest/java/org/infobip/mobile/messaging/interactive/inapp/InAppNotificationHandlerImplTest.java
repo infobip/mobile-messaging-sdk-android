@@ -65,7 +65,7 @@ public class InAppNotificationHandlerImplTest {
     }
 
     @Test
-    public void testThatInAppWebViewMessageIsNotNullWhenEverythingIsProvided(){
+    public void testThatInAppWebViewMessageIsNotNullWhenEverythingIsProvided() {
         InAppWebViewMessage inAppWebViewMessage = inAppWebViewMessage(InAppWebViewMessage.InAppWebViewPosition.TOP, InAppWebViewMessage.InAppWebViewType.BANNER);
         assertEquals(InAppWebViewMessage.InAppWebViewType.BANNER, inAppWebViewMessage.type);
         assertEquals(InAppWebViewMessage.InAppWebViewPosition.TOP, inAppWebViewMessage.position);
@@ -73,13 +73,13 @@ public class InAppNotificationHandlerImplTest {
     }
 
     @Test
-    public void testThatInAppWebViewMessageIsNullWhenInternalDataIsMissing(){
+    public void testThatInAppWebViewMessageIsNullWhenInternalDataIsMissing() {
         Message message = new Message();
         assertNull(InAppWebViewMessage.createInAppWebViewMessage(message));
     }
 
     @Test
-    public void testThatInAppWebViewMessageIsNullWhenInAppDetailsIsMissing(){
+    public void testThatInAppWebViewMessageIsNullWhenInAppDetailsIsMissing() {
         Message message = new Message() {{
             setInternalData("");
         }};
@@ -87,7 +87,7 @@ public class InAppNotificationHandlerImplTest {
     }
 
     @Test
-    public void testThatInAppWebViewMessageIsNullWhenTypeIsWrong(){
+    public void testThatInAppWebViewMessageIsNullWhenTypeIsWrong() {
         Message message = new Message() {{
             setInternalData("{\"inAppDetails\":{\"url\":\"http://google.com\",\"position\":0,\"type\":3}}");
         }};
@@ -95,7 +95,7 @@ public class InAppNotificationHandlerImplTest {
     }
 
     @Test
-    public void testThatInAppWebViewMessagePositionIsSetToTopWhenBannerPositionIsMissing(){
+    public void testThatInAppWebViewMessagePositionIsSetToTopWhenBannerPositionIsMissing() {
         Message message = new Message() {{
             setInternalData("{\"inAppDetails\":{\"url\":\"http://google.com\",\"type\":0}}");
         }};
@@ -221,7 +221,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
 
-        inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
+        inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, actions[0]);
 
         verify(mobileInteractive, times(1)).triggerSdkActionsFor(eq(actions[0]), eq(message));
         verify(interactiveBroadcaster, times(1)).notificationActionTapped(eq(message), eq(category), eq(actions[0]));
@@ -237,7 +237,7 @@ public class InAppNotificationHandlerImplTest {
                 .build()};
         NotificationCategory category = category(message.getCategory(), actions);
 
-        inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
+        inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, actions[0]);
 
         assertTrue(actions[0].bringsAppToForeground());
         verify(activityStarterWrapper, times(1)).startCallbackActivity(any(Intent.class));
@@ -249,7 +249,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationAction[] actions = actions();
         NotificationCategory category = category(message.getCategory(), actions);
 
-        inAppNotificationHandler.buttonPressedFor(inAppView, message, category, actions[0]);
+        inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, actions[0]);
 
         assertFalse(actions[0].bringsAppToForeground());
         verify(activityStarterWrapper, never()).startCallbackActivity(any(Intent.class));
@@ -261,7 +261,7 @@ public class InAppNotificationHandlerImplTest {
         NotificationAction action = new NotificationAction.Builder(true).withId("mm_open").withTitleText("Open").build();
         NotificationCategory category = category(message.getCategory(), action);
 
-        inAppNotificationHandler.buttonPressedFor(inAppView, message, category, action);
+        inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, action);
 
         verify(mobileInteractive, times(1)).triggerSdkActionsFor(eq(action), eq(message));
         verify(interactiveBroadcaster, times(1)).notificationActionTapped(eq(message), eq(category), eq(action));

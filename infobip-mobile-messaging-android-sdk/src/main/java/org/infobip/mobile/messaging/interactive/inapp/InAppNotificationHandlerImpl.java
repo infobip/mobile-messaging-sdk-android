@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
@@ -45,6 +46,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     private final DialogStack dialogStack;
     private final InteractiveBroadcaster interactiveBroadcaster;
     private final ActivityStarterWrapper activityStarterWrapper;
+    private ContentIntentWrapper contentIntentWrapper;
 
     @VisibleForTesting
     InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack, InteractiveBroadcaster interactiveBroadcaster, ActivityStarterWrapper activityStarterWrapper) {
@@ -82,12 +84,12 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
             oneMessageCache.save(message);
             return;
         }
-            displayDialogFor(message, inAppRules.areModalInAppNotificationsEnabled());
+        displayDialogFor(message, inAppRules.areModalInAppNotificationsEnabled());
     }
 
     @Override
     public void handleMessage(InAppWebViewMessage message) {
-        ShowOrNot showOrNot =  inAppRules.shouldDisplayDialogFor(message);
+        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
 
         if (!showOrNot.shouldShowNow() && showOrNot.shouldShowWhenInForeground()) {
             oneMessageCache.save(message);
@@ -106,7 +108,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         }
 
         InAppWebViewMessage wvMessage = InAppWebViewMessage.createInAppWebViewMessage(message);
-        if(wvMessage != null)
+        if (wvMessage != null)
             handleMessage(wvMessage);
         else
             handleMessage(message);
@@ -116,7 +118,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     public void displayDialogFor(Message message) {
         InAppWebViewMessage wvMessage = InAppWebViewMessage.createInAppWebViewMessage(message);
 
-        if(wvMessage != null)
+        if (wvMessage != null)
             displayDialogFor(wvMessage, true);
         else
             displayDialogFor(message, true);
@@ -150,10 +152,9 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         }
     }
 
-
     private InAppCtx createInAppWebCtx(InAppWebViewMessage wvMessage, ShowOrNot showOrNot) {
         InAppWebView view = inAppViewFactory.create(showOrNot.getBaseActivityForDialog(), this, wvMessage);
-        return new InAppWebCtx(view, wvMessage);
+        return new InAppWebCtx(view, wvMessage, showOrNot.getActionsToShowFor());
     }
 
     private InAppCtx createInAppNativeCtx(Message message, ShowOrNot showOrNot) {
@@ -174,10 +175,32 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     }
 
     @Override
-    public void buttonPressedFor(@NonNull InAppView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action) {
+    public void buttonPressedFor(@NonNull InAppNativeView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action) {
         mobileInteractive.triggerSdkActionsFor(action, message);
         Intent callbackIntent = interactiveBroadcaster.notificationActionTapped(message, category, action);
+        handleButtonPress(message, action, callbackIntent);
+    }
 
+    @Override
+    public void actionButtonPressedFor(@NonNull InAppWebView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action) {
+        Intent callbackIntent = interactiveBroadcaster.notificationActionTapped(message, category, action);
+        handleButtonPress(message, action, callbackIntent);
+    }
+
+    @Override
+    public void notificationPressedFor(@NonNull InAppWebView inAppView, @NonNull Message message, @NonNull NotificationAction action, Context context) {
+        Intent callbackIntent = null;
+        if (StringUtils.isNotBlank(message.getWebViewUrl())) {
+            callbackIntent = contentIntentWrapper(context).createWebViewContentIntent(message);
+        } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
+            callbackIntent = contentIntentWrapper(context).createBrowserIntent(message.getBrowserUrl());
+        } else {
+            callbackIntent = contentIntentWrapper(context).createContentIntent(message, MobileMessagingCore.getInstance(context).getNotificationSettings());
+        }
+        handleButtonPress(message, action, callbackIntent);
+    }
+
+    private void handleButtonPress(@NonNull Message message, @NonNull NotificationAction action, Intent callbackIntent) {
         if (PredefinedActionsProvider.isOpenAction(action.getId()) || action.bringsAppToForeground()) {
             if (StringUtils.isNotBlank(message.getWebViewUrl())) {
                 activityStarterWrapper.startWebViewActivity(callbackIntent, message.getWebViewUrl());
@@ -187,6 +210,13 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 activityStarterWrapper.startCallbackActivity(callbackIntent);
             }
         }
+    }
+
+    private ContentIntentWrapper contentIntentWrapper(Context context) {
+        if (contentIntentWrapper == null) {
+            contentIntentWrapper = new ContentIntentWrapper(context);
+        }
+        return contentIntentWrapper;
     }
 
     @Override

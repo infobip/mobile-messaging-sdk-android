@@ -83,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
             JSONObject object = new JSONObject();
             JSONObject inAppDetails = new JSONObject();
             try {
-                inAppDetails.put("url", "file:///android_asset/static.html");
+                //inAppDetails.put("url", "file:///android_asset/static.html");
+                inAppDetails.put("url", "file:///android_asset/popup_static_new.html");
                 inAppDetails.put("position", 0);
                 inAppDetails.put("type", 1);
                 object.put("inAppDetails", inAppDetails);

@@ -11,13 +11,13 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
  * @since 12/04/2018.
  */
 public class InAppViewDialogClickListener implements DialogInterface.OnClickListener {
-    private final InAppView inAppView;
+    private final InAppNativeView inAppView;
     private final InAppView.Callback callback;
     private final Message message;
     private final NotificationCategory category;
     private final NotificationAction action;
 
-    InAppViewDialogClickListener(InAppView inAppView, InAppView.Callback callback, Message message, NotificationCategory category, NotificationAction action) {
+    InAppViewDialogClickListener(InAppNativeView inAppView, InAppView.Callback callback, Message message, NotificationCategory category, NotificationAction action) {
         this.inAppView = inAppView;
         this.callback = callback;
         this.message = message;
