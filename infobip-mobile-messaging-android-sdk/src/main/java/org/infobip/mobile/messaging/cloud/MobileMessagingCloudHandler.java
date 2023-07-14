@@ -76,9 +76,7 @@ public class MobileMessagingCloudHandler {
     }
 
     private void handleTokenReset(Context context, @NonNull Intent intent) {
-        RegistrationTokenHandler handler = registrationTokenHandler.get(context);
-        handler.cleanupToken();
-        handler.acquireNewToken();
+        registrationTokenHandler.get(context).reissueToken();
     }
 
     private void handleMessage(Context context, @NonNull Intent intent) {

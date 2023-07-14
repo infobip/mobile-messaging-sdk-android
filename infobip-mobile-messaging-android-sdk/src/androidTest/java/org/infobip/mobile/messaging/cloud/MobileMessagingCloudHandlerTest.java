@@ -72,8 +72,7 @@ public class MobileMessagingCloudHandlerTest extends TestCase {
 
         handler.handleWork(context, intent);
 
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).cleanupToken();
-        Mockito.verify(registrationTokenHandler, Mockito.times(1)).acquireNewToken();
+        Mockito.verify(registrationTokenHandler, Mockito.times(1)).reissueToken();
     }
 
     @Test
