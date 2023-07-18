@@ -79,10 +79,27 @@ public abstract class InAppChat {
     public abstract void showInAppChatFragment(FragmentManager fragmentManager, int containerId);
 
     /**
-     * Hides in-app chat Fragment, so that all views, especially in-app chat webView, stays in memory.
+     * Hides in-app chat Fragment, so that all views, especially in-app chat webView,
+     * stays in memory and chat connection is active while fragment is hidden.
      * @param fragmentManager manager to make interactions with Fragment
+     * @see InAppChat#hideInAppChatFragment(FragmentManager, Boolean)
      */
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager);
+
+    /**
+     * Hides in-app chat Fragment, so that all views, especially in-app chat webView, stays in memory.
+     * You can control whether chat connection stays active while fragment is hidden.
+     *
+     * @apiNote By chat connection you can control push notifications.
+     * Push notifications are active only when chat connection is not active.
+     * Disconnect chat if you want to receive push notifications while fragment is hidden.
+     * Chat connection is re-established when {@link InAppChat#showInAppChatFragment(FragmentManager, int)} is called.
+     *
+     * @param fragmentManager manager to make interactions with Fragment
+     * @param disconnectChatWhenHidden if true disconnects chat connection when fragment is hidden, otherwise chat connection stays active
+     * @see InAppChat#hideInAppChatFragment(FragmentManager)
+     */
+    public abstract void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChatWhenHidden);
 
     /**
      * Resets current unread chat push message counter to zero. MM SDK automatically resets the counter when InAppChatFragment/Activity appears on screen.

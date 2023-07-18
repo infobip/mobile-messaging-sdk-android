@@ -37,8 +37,7 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
-                if (inAppChatWebViewManager != null)
-                    inAppChatWebViewManager.setControlsEnabled(isEnabled);
+                if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsEnabled(isEnabled);
             }
         };
         handler.post(myRunnable);
@@ -63,7 +62,6 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
-                MobileMessagingLogger.d("WebView input visible: " + isVisible);
                 if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsVisibility(isVisible);
             }
         };
@@ -76,9 +74,7 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
-                if (inAppChatWebViewManager != null) {
-                    inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
-                }
+                if (inAppChatWebViewManager != null) inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
             }
         };
         handler.post(myRunnable);

@@ -1,10 +1,12 @@
 buildscript {
+    ext.mm_kotlinVersion = "1.7.20"
+    ext.mm_gradlePluginVersion = "7.2.2"
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath "com.android.tools.build:gradle:$mm_gradlePluginVersion"
     }
 }
 
@@ -12,7 +14,7 @@ plugins {
     id 'net.researchgate.release' version '2.8.1'
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
-    id 'org.jetbrains.kotlin.android' version '1.7.20' apply false
+    id 'org.jetbrains.kotlin.android' version "$mm_kotlinVersion" apply false
     id "org.sonarqube" version "4.0.0.2929"
     id "jacoco"
 }
@@ -24,12 +26,12 @@ ext {
     mm_buildToolsVersion = "33.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "18.0.0"
-    mm_kotlinVersion = "1.7.20"
     mm_constraintLayoutVersion = "2.1.4"
     mm_appCompatVersion = "1.6.1"
-    mm_materialVersion = "1.8.0"
+    mm_materialVersion = "1.9.0"
     mm_coreKtxVersion = "1.9.0"
     mm_desugarJdkVersion = "1.1.8"
+    mm_lifecycleVersion = "2.5.1"
 }
 
 allprojects {

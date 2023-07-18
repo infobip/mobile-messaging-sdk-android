@@ -19,7 +19,6 @@ import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
-import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ResourceLoader;
@@ -28,6 +27,7 @@ import org.infobip.mobile.messaging.util.StringUtils;
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
+    static final String BLANK_PAGE_URI = "about:blank";
 
     private String widgetUri;
 
@@ -64,7 +64,11 @@ public class InAppChatWebView extends WebView {
         }
     }
 
-    public void loadWebPage(Boolean force, WidgetInfo widgetInfo, String jwt) {
+    public void loadBlankPage() {
+        loadUrl(BLANK_PAGE_URI);
+    }
+
+    public void loadChatPage(Boolean force, WidgetInfo widgetInfo, String jwt) {
         if (!force && !InAppChatImpl.getIsWebViewCacheCleaned()) {
             return;
         }

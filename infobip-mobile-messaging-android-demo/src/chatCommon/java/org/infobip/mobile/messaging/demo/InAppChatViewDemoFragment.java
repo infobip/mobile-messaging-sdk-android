@@ -121,6 +121,12 @@ public class InAppChatViewDemoFragment extends Fragment {
             public void onChatLoaded(boolean controlsEnabled) {
                 //Chat was loaded, if controlsEnabled = true there was no error
             }
+
+            @Override
+            public void onChatDisconnected() {
+                //Chat was disconnected, blank page is loaded.
+            }
+
         };
         inAppChatView.setEventsListener(eventsListener);
         inAppChatView.setErrorsHandler(new InAppChatView.ErrorsHandler() {

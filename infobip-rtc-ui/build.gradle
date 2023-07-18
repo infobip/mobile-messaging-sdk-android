@@ -4,7 +4,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath "com.android.tools.build:gradle:$mm_gradlePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$mm_kotlinVersion"
     }
 }
 
@@ -57,11 +58,10 @@ android {
 dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$mm_constraintLayoutVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$mm_kotlinVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
-    def lifecycle_version = "2.5.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    implementation "androidx.fragment:fragment-ktx:1.5.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$mm_lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$mm_lifecycleVersion"
+    implementation "androidx.fragment:fragment-ktx:1.6.0"
     implementation project(":infobip-mobile-messaging-android-sdk")
     implementation "androidx.core:core-ktx:$mm_coreKtxVersion"
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"

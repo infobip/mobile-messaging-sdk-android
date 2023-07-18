@@ -19,7 +19,7 @@ public class InAppChatWebViewClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        if (inAppChatWebViewManager != null) inAppChatWebViewManager.onPageStarted();
+        if (inAppChatWebViewManager != null) inAppChatWebViewManager.onPageStarted(url);
         super.onPageStarted(view, url, favicon);
     }
 
@@ -35,7 +35,7 @@ public class InAppChatWebViewClient extends WebViewClient {
 
     @Override
     public void onPageFinished(WebView view, String url) {
-        if (inAppChatWebViewManager != null) inAppChatWebViewManager.onPageFinished();
+        if (inAppChatWebViewManager != null) inAppChatWebViewManager.onPageFinished(url);
         super.onPageFinished(view, url);
     }
 
