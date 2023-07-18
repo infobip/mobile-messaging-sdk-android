@@ -58,10 +58,10 @@ android {
 dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$mm_constraintLayoutVersion"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$mm_kotlinVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$mm_lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$mm_lifecycleVersion"
-    implementation "androidx.fragment:fragment-ktx:1.6.0"
+    implementation "androidx.fragment:fragment-ktx:1.5.4"
     implementation project(":infobip-mobile-messaging-android-sdk")
     implementation "androidx.core:core-ktx:$mm_coreKtxVersion"
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"
