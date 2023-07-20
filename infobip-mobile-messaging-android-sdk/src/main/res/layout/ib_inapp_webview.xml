@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
-        app:cardElevation="2dp"
         app:cardUseCompatPadding="true"
         tools:ignore="WebViewLayout">
 

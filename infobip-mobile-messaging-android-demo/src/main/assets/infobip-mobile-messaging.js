@@ -1,6 +1,7 @@
 (function () {
     var DOCUMENT_WAS_LOADED = 'documentWasLoaded';
     var HEIGHT_CHANGED = 'heightChanged';
+    var HEIGHT_REQUESTED = 'heightRequested';
 
     // Register click handlers to all clickable elements
     const clickableElements = document.querySelectorAll('[data-action]');
@@ -30,7 +31,7 @@
             return document.readyState;
         },
         readBodyHeight() {
-        sendMessageToWebView(HEIGHT_CHANGED, document.body.scrollHeight);
+        sendMessageToWebView(HEIGHT_REQUESTED, document.body.scrollHeight);
             return document.body.scrollHeight;
         },
     });

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -46,7 +47,7 @@ import java.util.Map;
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "[InAppWebViewDialog]";
     private static final int DIALOG_TIMEOUT_MS = 6000;//6 seconds
-    private static final int CORNER_RADIUS = 20;
+    private static final int CORNER_RADIUS = 25;
     public static final int WIDTH_PADDING = 16;
     public static final int VERTICAL_SCROLLBAR_SIZE = 30;
     public static final double SCREEN_COVER_PERCENTAGE = 0.85;
@@ -98,7 +99,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
          * @param pageHeight - page height in density points
          */
         @JavascriptInterface
-        public void heightChanged(float pageHeight) {
+        public void heightRequested(float pageHeight) {
             MobileMessagingLogger.d(TAG, "onHeightChanged: " + pageHeight);
             updatePageHeight(pageHeight);
         }
@@ -181,9 +182,16 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 dialogView = inflater.inflate(R.layout.ib_inapp_webview, null, false);
 
                 cardView = dialogView.findViewById(R.id.webview_dialog_card);
-                cardView.setRadius(CORNER_RADIUS);
 
-                popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+                if (message.type == InAppWebViewMessage.InAppWebViewType.FULLSCREEN) {
+                    setCardViewParams(0, false, 0);
+                    cardView.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
+                    popupWindow = new PopupWindow(dialogView, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, false);
+                } else {
+                    setCardViewParams(CORNER_RADIUS, true, 2);
+                    cardView.getLayoutParams().height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+                }
 
                 int screenRotation = ((WindowManager) getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
                 if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
@@ -196,6 +204,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                     setDialogAnimations(message.position);
                     popupWindow.setOutsideTouchable(false);
                 } else {
+                    popupWindow.setAnimationStyle(android.R.style.Animation);
                     popupWindow.setOutsideTouchable(true);
                 }
 
@@ -211,6 +220,14 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             });
         } catch (Exception e) {
             MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
+        }
+    }
+
+    private void setCardViewParams(float radius, boolean useCompatPadding, float elevation) {
+        cardView.setRadius(radius);
+        cardView.setUseCompatPadding(useCompatPadding);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            cardView.setElevation(elevation);
         }
     }
 
@@ -234,6 +251,12 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void setupWebViewForDisplaying(CardView dialogView) {
         webView = dialogView.findViewById(R.id.ib_webview);
+
+        if (message.type == InAppWebViewMessage.InAppWebViewType.FULLSCREEN)
+            webView.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
+        else
+            webView.getLayoutParams().height = WindowManager.LayoutParams.WRAP_CONTENT;
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -264,7 +287,8 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 MobileMessagingLogger.d(TAG, "onPageCommitVisible()");
-                webView.loadUrl("javascript:window.InfobipMobileMessaging.readBodyHeight()");
+                if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER)
+                    webView.loadUrl("javascript:window.InfobipMobileMessaging.readBodyHeight()");
                 if (isBanner())
                     setDialogTimeout(DIALOG_TIMEOUT_MS);
                 showWebViewDialog(dialogView, message.position, message.type);
@@ -279,6 +303,8 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         webView.setWebChromeClient(new InAppWebChromeClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setBuiltInZoomControls(false);
+        webView.getSettings().setSupportZoom(false);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
@@ -329,8 +355,6 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         } else if (position == InAppWebViewPosition.BOTTOM) {
             popupWindow.setAnimationStyle(R.style.BannerAnimationBottom);
         }
-//        } else
-//            popupWindow.setAnimationStyle(android.R.style.Animation);
     }
 
     void updatePageHeight(float pageHeight) {
@@ -356,7 +380,6 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                     maxHeight = (int) ((displayMetrics.heightPixels * SCREEN_COVER_PERCENTAGE) - SCREEN_MARGINS);
                     if (Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight)) == maxHeight) {
                         viewFlowLayout.height = maxHeight;
-
                     } else if (Math.min(maxHeight, Math.max(minHeight, calculatedPageHeight)) == minHeight) {
                         viewFlowLayout.height = minHeight;
                     }
@@ -409,11 +432,10 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         return message.type == InAppWebViewMessage.InAppWebViewType.BANNER;
     }
 
-    synchronized private AndroidBroadcaster coreBroadcaster() {
+    synchronized private void coreBroadcaster() {
         if (coreBroadcaster == null) {
             coreBroadcaster = new AndroidBroadcaster(getActivity());
         }
-        return coreBroadcaster;
     }
 
     /*
