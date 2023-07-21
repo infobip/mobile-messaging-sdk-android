@@ -40,6 +40,7 @@ import com.infobip.webrtc.ui.*
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
 import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.service.ScreenShareService
+import com.infobip.webrtc.ui.utils.activatedColorStateList
 import com.infobip.webrtc.ui.view.PipParamsFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

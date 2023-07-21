@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Accettare</string>
-    <string name="mm_decline">Declino</string>
-    <string name="mm_cancel">Annulla</string>
-    <string name="mm_ok">Ok</string>
-    <string name="mm_video_call">Video chiamata</string>
-    <string name="mm_flip_camera">Capovolgere la fotocamera</string>
-    <string name="mm_speaker">Relatore</string>
-    <string name="mm_microphone">Microfono</string>
-    <string name="mm_screen_share">Condivisione dello schermo</string>
-    <string name="mm_calls_notification_channel">Chiamate</string>
-    <string name="mm_in_call_notification_channel">In chiamata</string>
-    <string name="mm_is_calling">sta chiamando</string>
-    <string name="mm_incoming_call">Chiamata in arrivo</string>
-    <string name="mm_unknown">Sconosciuto</string>
-    <string name="mm_call_finished">Chiamata terminata</string>
     <string name="mm_audio_permission_required">Per gestire le chiamate è necessaria l\'autorizzazione audio.</string>
+    <string name="mm_call_finished">Chiamata terminata</string>
+    <string name="mm_call_registration_notification_channel">Registrazione chiamata</string>
+    <string name="mm_call_registration_notification_description">Aggiornamento dati utente</string>
     <string name="mm_call_weak_internet_connection">La tua rete sta causando una scarsa qualità delle chiamate</string>
-    <string name="mm_microphone_muted">Muto</string>
-    <string name="mm_unknown_error">Errore sconosciuto</string>
-    <string name="mm_unmute">Riattiva</string>
-    <string name="mm_mute">Muto</string>
-    <string name="mm_video">video</string>
+    <string name="mm_calls_notification_channel">Chiamate</string>
+    <string name="mm_cancel">Annulla</string>
+    <string name="mm_decline">Declino</string>
+    <string name="mm_flip_camera">Capovolgere la fotocamera</string>
     <string name="mm_hangup">Appendere</string>
-    <string name="mm_video_permission_required">Per le videochiamate è necessaria l\'autorizzazione della fotocamera.</string>
+    <string name="mm_in_call">In una chiamata</string>
+    <string name="mm_in_call_notification_channel">In chiamata</string>
+    <string name="mm_incoming_call">Chiamata in arrivo</string>
+    <string name="mm_is_calling">sta chiamando</string>
+    <string name="mm_microphone">Microfono</string>
+    <string name="mm_microphone_muted">Muto</string>
+    <string name="mm_mute">Muto</string>
+    <string name="mm_notification_permission_required_declining_call">Autorizzazione di notifica mancante. Chiamata in arrivo rifiutata.</string>
+    <string name="mm_ok">Ok</string>
+    <string name="mm_screen_share">Condivisione dello schermo</string>
     <string name="mm_screen_sharing">Condivisione dello schermo</string>
     <string name="mm_screen_sharing_description">Il tuo schermo è condiviso</string>
-    <string name="mm_in_call">In una chiamata</string>
-    <string name="mm_notification_permission_required_declining_call">Autorizzazione di notifica mancante. Chiamata in arrivo rifiutata.</string>
+    <string name="mm_speaker">Relatore</string>
+    <string name="mm_unknown">Sconosciuto</string>
+    <string name="mm_unknown_error">Errore sconosciuto</string>
+    <string name="mm_unmute">Riattiva</string>
+    <string name="mm_video">video</string>
+    <string name="mm_video_call">Video chiamata</string>
+    <string name="mm_video_permission_required">Per le videochiamate è necessaria l\'autorizzazione della fotocamera.</string>
+    <string name="mm_your_microphone_is_muted">Il tuo microfono è disattivato</string>
 </resources>

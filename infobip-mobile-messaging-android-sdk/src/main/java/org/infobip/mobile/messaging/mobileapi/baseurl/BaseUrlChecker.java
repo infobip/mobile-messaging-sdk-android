@@ -53,9 +53,9 @@ public class BaseUrlChecker {
             public void after(BaseUrlResponse baseUrlResponse) {
                 if (baseUrlResponse != null) {
                     String baseUrl = baseUrlResponse.getBaseUrl();
-                    if (StringUtils.isNotBlank(baseUrl)) {
-                        MobileMessagingCore.setApiUri(context, baseUrl);
-                    }
+//                    if (StringUtils.isNotBlank(baseUrl)) {
+//                        MobileMessagingCore.setApiUri(context, baseUrl);
+//                    }
                 }
                 PreferenceHelper.saveLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME, Time.now());
                 isSyncInProgress = false;

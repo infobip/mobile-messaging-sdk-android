@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="mm_button_accept">Pranoje</string>
+    <string name="mm_button_cancel">Anulo</string>
+    <string name="mm_button_decline">Rënia</string>
+    <string name="mm_button_open">Hapur</string>
+    <string name="mm_button_settings">Cilësimet</string>
+    <string name="mm_post_notifications_settings_message">Lejo aplikacionin të dërgojë njoftime shtytëse gjatë gjithë kohës për ta lejuar atë të aktivizojë njoftime edhe kur aplikacioni është i mbyllur ose jo në përdorim</string>
+    <string name="mm_post_notifications_settings_title">Përditëso cilësimet e njoftimeve</string>
+</resources>

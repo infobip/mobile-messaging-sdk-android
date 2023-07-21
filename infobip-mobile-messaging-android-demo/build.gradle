@@ -130,7 +130,7 @@ dependencies {
     implementation project(":infobip-mobile-messaging-android-inbox-sdk")
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation "com.google.android.material:material:$mm_materialVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
 

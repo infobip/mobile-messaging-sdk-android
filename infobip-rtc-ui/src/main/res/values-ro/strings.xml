@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Accept</string>
-    <string name="mm_decline">Declin</string>
-    <string name="mm_cancel">Anulare</string>
-    <string name="mm_ok">O.K</string>
-    <string name="mm_video_call">Apel video</string>
-    <string name="mm_flip_camera">Flip camera</string>
-    <string name="mm_speaker">Difuzor</string>
-    <string name="mm_microphone">Microfon</string>
-    <string name="mm_screen_share">Partajarea ecranului</string>
-    <string name="mm_calls_notification_channel">Apeluri</string>
-    <string name="mm_in_call_notification_channel">În apel</string>
-    <string name="mm_is_calling">sună</string>
-    <string name="mm_incoming_call">Apel primit</string>
-    <string name="mm_unknown">Necunoscut</string>
-    <string name="mm_call_finished">Apel terminat</string>
     <string name="mm_audio_permission_required">Este necesară permisiune audio pentru a gestiona apelurile.</string>
+    <string name="mm_call_finished">Apel terminat</string>
+    <string name="mm_call_registration_notification_channel">Înregistrare apel</string>
+    <string name="mm_call_registration_notification_description">Actualizarea datelor utilizatorului</string>
     <string name="mm_call_weak_internet_connection">Rețeaua dvs. cauzează o calitate slabă a apelurilor</string>
-    <string name="mm_microphone_muted">Dezactivat</string>
-    <string name="mm_unknown_error">Eroare necunoscută</string>
-    <string name="mm_unmute">Activați sunetul</string>
-    <string name="mm_mute">Mut</string>
-    <string name="mm_video">Video</string>
+    <string name="mm_calls_notification_channel">Apeluri</string>
+    <string name="mm_cancel">Anulare</string>
+    <string name="mm_decline">Declin</string>
+    <string name="mm_flip_camera">Flip camera</string>
     <string name="mm_hangup">Închide</string>
-    <string name="mm_video_permission_required">Este necesară permisiunea camerei pentru apelurile video.</string>
+    <string name="mm_in_call">Într-un apel</string>
+    <string name="mm_in_call_notification_channel">În apel</string>
+    <string name="mm_incoming_call">Apel primit</string>
+    <string name="mm_is_calling">sună</string>
+    <string name="mm_microphone">Microfon</string>
+    <string name="mm_microphone_muted">Dezactivat</string>
+    <string name="mm_mute">Mut</string>
+    <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
+    <string name="mm_ok">O.K</string>
+    <string name="mm_screen_share">Partajarea ecranului</string>
     <string name="mm_screen_sharing">Partajarea ecranului</string>
     <string name="mm_screen_sharing_description">Ecranul dvs. este partajat</string>
-    <string name="mm_in_call">Într-un apel</string>
-    <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
+    <string name="mm_speaker">Difuzor</string>
+    <string name="mm_unknown">Necunoscut</string>
+    <string name="mm_unknown_error">Eroare necunoscută</string>
+    <string name="mm_unmute">Activați sunetul</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Apel video</string>
+    <string name="mm_video_permission_required">Este necesară permisiunea camerei pentru apelurile video.</string>
+    <string name="mm_your_microphone_is_muted">Microfonul dvs. este dezactivat</string>
 </resources>

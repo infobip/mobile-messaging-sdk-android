@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">接受</string>
-    <string name="mm_decline">拒绝</string>
-    <string name="mm_cancel">取消</string>
-    <string name="mm_ok">确认</string>
-    <string name="mm_video_call">视频通话</string>
-    <string name="mm_flip_camera">翻转摄像头</string>
-    <string name="mm_speaker">扬声器</string>
-    <string name="mm_microphone">麦克风</string>
-    <string name="mm_screen_share">屏幕共享</string>
-    <string name="mm_in_call">通话中</string>
-    <string name="mm_calls_notification_channel">来电</string>
-    <string name="mm_in_call_notification_channel">通话中</string>
-    <string name="mm_is_calling">正在打电话</string>
-    <string name="mm_incoming_call">来电</string>
-    <string name="mm_unknown">未知</string>
-    <string name="mm_call_finished">通话结束</string>
     <string name="mm_audio_permission_required">处理呼叫需要音频权限。</string>
+    <string name="mm_call_finished">通话结束</string>
+    <string name="mm_call_registration_notification_channel">来电登记</string>
+    <string name="mm_call_registration_notification_description">更新用户数据</string>
     <string name="mm_call_weak_internet_connection">您的網絡導致通話質量不佳</string>
-    <string name="mm_microphone_muted">静音</string>
-    <string name="mm_unknown_error">未知错误</string>
-    <string name="mm_unmute">取消静音</string>
-    <string name="mm_mute">沉默的</string>
-    <string name="mm_video">视频</string>
+    <string name="mm_calls_notification_channel">来电</string>
+    <string name="mm_cancel">取消</string>
+    <string name="mm_decline">拒绝</string>
+    <string name="mm_flip_camera">翻转摄像头</string>
     <string name="mm_hangup">挂断</string>
-    <string name="mm_video_permission_required">视频通话需要摄像头权限。</string>
+    <string name="mm_in_call">通话中</string>
+    <string name="mm_in_call_notification_channel">通话中</string>
+    <string name="mm_incoming_call">来电</string>
+    <string name="mm_is_calling">正在打电话</string>
+    <string name="mm_microphone">麦克风</string>
+    <string name="mm_microphone_muted">静音</string>
+    <string name="mm_mute">沉默的</string>
+    <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
+    <string name="mm_ok">确认</string>
+    <string name="mm_screen_share">屏幕共享</string>
     <string name="mm_screen_sharing">屏幕共享</string>
     <string name="mm_screen_sharing_description">您的屏幕已共享</string>
-    <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
+    <string name="mm_speaker">扬声器</string>
+    <string name="mm_unknown">未知</string>
+    <string name="mm_unknown_error">未知错误</string>
+    <string name="mm_unmute">取消静音</string>
+    <string name="mm_video">视频</string>
+    <string name="mm_video_call">视频通话</string>
+    <string name="mm_video_permission_required">视频通话需要摄像头权限。</string>
+    <string name="mm_your_microphone_is_muted">您的麦克风已静音</string>
 </resources>

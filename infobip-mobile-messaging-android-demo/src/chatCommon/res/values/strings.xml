@@ -1,5 +1,6 @@
 <resources>
     <string name="action_registration_id_copy">Registration ID</string>
+    <string name="albanian">Shqip</string>
     <string name="arabic">العربية</string>
     <string name="bosnian">босански</string>
     <string name="chinese">繁體中文</string>
@@ -40,6 +41,7 @@
     <string name="swedish">Svenska</string>
     <string name="thai">Thai</string>
     <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
+    <string name="language_changed">Language changed to %1$s</string>
     <string name="turkish">Türkçe</string>
     <string name="ukrainian">украї́нська</string>
     <string name="dark_mode_dark">Dark</string>

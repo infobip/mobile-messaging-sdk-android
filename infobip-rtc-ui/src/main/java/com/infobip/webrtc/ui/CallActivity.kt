@@ -31,10 +31,13 @@ import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.model.Colors
 import com.infobip.webrtc.ui.model.Icons
 import com.infobip.webrtc.ui.service.OngoingCallService
+import com.infobip.webrtc.ui.utils.applyLocale
+import com.infobip.webrtc.ui.utils.navigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.util.Locale
 
 
 class CallActivity : AppCompatActivity(R.layout.activity_call) {
@@ -53,15 +56,25 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
 
     private val viewModel: CallViewModel by viewModels()
     private val requestAudioPermissionLauncher =
-            registerForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (!isGranted) {
-                    showAudioRationale()
-                }
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (!isGranted) {
+                showAudioRationale()
             }
+        }
 
-    override fun onCreateView(parent: View?, name: String, context: Context, attrs: AttributeSet): View? {
+    override fun attachBaseContext(newBase: Context) {
+        val newContext = Injector.locale?.let { newBase.applyLocale(it) } ?: newBase
+        super.attachBaseContext(newContext)
+    }
+
+    override fun onCreateView(
+        parent: View?,
+        name: String,
+        context: Context,
+        attrs: AttributeSet
+    ): View? {
         if (Injector.colors == null)
             Injector.colors = Colors(this, attrs)
         if (Injector.icons == null)
@@ -89,14 +102,18 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         applyArguments()
         showFragment()
         viewModel.state
-                .onEach(::renderState)
-                .flowOn(Dispatchers.Main)
-                .flowWithLifecycle(lifecycle)
-                .launchIn(lifecycleScope)
+            .onEach(::renderState)
+            .flowOn(Dispatchers.Main)
+            .flowWithLifecycle(lifecycle)
+            .launchIn(lifecycleScope)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             when {
-                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED -> Log.d(TAG, "Audio permission granted")
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                ) == PackageManager.PERMISSION_GRANTED -> Log.d(TAG, "Audio permission granted")
+
                 shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> showAudioRationale()
                 else -> requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
             }
@@ -105,13 +122,13 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
 
     private fun showAudioRationale() {
         AlertDialog.Builder(this)
-                .setMessage(R.string.mm_audio_permission_required)
-                .setCancelable(false)
-                .setPositiveButton(R.string.mm_ok) { _, _ ->
-                    requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                }.setNegativeButton(R.string.mm_cancel) { _, _ ->
-                    viewModel.endCall()
-                }.show()
+            .setMessage(R.string.mm_audio_permission_required)
+            .setCancelable(false)
+            .setPositiveButton(R.string.mm_ok) { _, _ ->
+                requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }.setNegativeButton(R.string.mm_cancel) { _, _ ->
+                viewModel.endCall()
+            }.show()
     }
 
     private fun showFragment() {
@@ -127,7 +144,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         val accept = intent.getBooleanExtra(ACCEPT_EXTRA_KEY, false)
         if (accept) {
             viewModel.accept()
-            OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ESTABLISHED_ACTION)
+            OngoingCallService.sendCallServiceIntent(
+                applicationContext,
+                OngoingCallService.CALL_ESTABLISHED_ACTION
+            )
         }
         viewModel.peerName = peer
     }
@@ -144,7 +164,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     }
 
     private fun finishAndHideNotifications() {
-        OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ENDED_ACTION)
+        OngoingCallService.sendCallServiceIntent(
+            applicationContext,
+            OngoingCallService.CALL_ENDED_ACTION
+        )
         finishAndRemoveTask()
     }
 
@@ -220,20 +243,29 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             override fun onRinging(callRingingEvent: CallRingingEvent?) {
                 viewModel.updateState { copy(isIncoming = true) }
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.INCOMING_CALL_ACTION)
+                    OngoingCallService.sendCallServiceIntent(
+                        applicationContext,
+                        OngoingCallService.INCOMING_CALL_ACTION
+                    )
                 }
             }
 
             override fun onEarlyMedia(callEarlyMediaEvent: CallEarlyMediaEvent?) {
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ESTABLISHED_ACTION)
+                    OngoingCallService.sendCallServiceIntent(
+                        applicationContext,
+                        OngoingCallService.CALL_ESTABLISHED_ACTION
+                    )
                 }
             }
 
             override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {
                 viewModel.updateState { copy(isIncoming = false) }
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ESTABLISHED_ACTION)
+                    OngoingCallService.sendCallServiceIntent(
+                        applicationContext,
+                        OngoingCallService.CALL_ESTABLISHED_ACTION
+                    )
                 }
             }
 
@@ -244,7 +276,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration
+    ) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         viewModel.updateState { copy(isPip = isInPictureInPictureMode) }
     }

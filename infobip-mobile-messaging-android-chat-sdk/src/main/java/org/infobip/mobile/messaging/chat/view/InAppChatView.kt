@@ -45,6 +45,7 @@ class InAppChatView @JvmOverloads constructor(
      */
     interface EventsListener {
         fun onChatLoaded(controlsEnabled: Boolean)
+        fun onChatDisconnected()
         fun onChatControlsVisibilityChanged(isVisible: Boolean)
         fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?)
         fun onChatViewChanged(widgetView: InAppChatWidgetView)
@@ -64,6 +65,7 @@ class InAppChatView @JvmOverloads constructor(
         private const val CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500L
         private const val CHAT_SERVICE_ERROR = "12"
         private const val CHAT_WIDGET_NOT_FOUND = "24"
+        private const val TAG = "InAppChatView"
     }
 
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
@@ -73,9 +75,14 @@ class InAppChatView @JvmOverloads constructor(
     private var inAppChatBroadcaster: InAppChatBroadcaster = InAppChatBroadcasterImpl(context)
     private val mmCore: MobileMessagingCore = MobileMessagingCore.getInstance(context)
     private val localizationUtils = LocalizationUtils.getInstance(context)
-    private var isChatLoaded: Boolean = false
     private var widgetInfo: WidgetInfo? = null
     private var lastControlsVisibility: Boolean? = null
+
+    /**
+     * Returns true if chat is loaded, otherwise returns false.
+     */
+    var isChatLoaded: Boolean = false
+        private set
 
     /**
      * [InAppChatView] event listener allows you to listen to Livechat widget events.
@@ -83,7 +90,7 @@ class InAppChatView @JvmOverloads constructor(
     var eventsListener: EventsListener? = null
 
     /**
-     * Returns true if chat is synchronized and multithread feature is enabled, otherwise returns false
+     * Returns true if chat is synchronized and multithread feature is enabled, otherwise returns false.
      */
     val isMultiThread: Boolean
         get() = widgetInfo?.isMultiThread() ?: false
@@ -121,13 +128,56 @@ class InAppChatView @JvmOverloads constructor(
     //region Public
     /**
      * Initialize [InAppChatView] with enclosing android component [Lifecycle].
+     *
+     * Chat connection is established and stopped based on provided [Lifecycle].
+     * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
+     *
      * @param lifecycle lifecycle of android Activity or Fragment
      */
     fun init(lifecycle: Lifecycle) {
+        updateWidgetInfo()
         inAppChat.activate()
         binding.ibLcWebView.setup(inAppChatWebViewManager)
         lifecycle.addObserver(lifecycleObserver)
-        updateWidgetInfo()
+    }
+
+    /**
+     * Load chat. Use it to re-establish chat connection when you previously called [stopConnection].
+     *
+     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
+     * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
+     *
+     * By chat connection you can control push notifications.
+     * Push notifications are suppressed while the chat is loaded.
+     *
+     * To detect if chat is loaded use [isChatLoaded] or [EventsListener.onChatLoaded] event from [EventsListener].
+     */
+    fun restartConnection() {
+        if (widgetInfo == null)
+            updateWidgetInfo()
+        loadChatPage(force = !isChatLoaded)
+        MobileMessagingLogger.d(TAG, "Chat connection established.")
+    }
+
+    /**
+     * Load blank page, chat connection is stopped.
+     *
+     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
+     * Chat connection is stopped when [Lifecycle.State] is below [Lifecycle.State.STARTED].
+     *
+     * By chat connection you can control push notifications.
+     * Push notifications are active only when chat connection is not active.
+     *
+     * Can be used to enable chat's push notifications when [InAppChatView] is not visible.
+     * Use [restartConnection] to reestablish chat connection.
+     *
+     * To detect if chat connection is stopped use [isChatLoaded] or [EventsListener.onChatDisconnected] event from [EventsListener].
+     */
+    fun stopConnection() {
+        binding.ibLcWebView.loadBlankPage()
+        isChatLoaded = false
+        eventsListener?.onChatDisconnected()
+        MobileMessagingLogger.d(TAG, "Chat connection stopped.")
     }
 
     /**
@@ -135,7 +185,7 @@ class InAppChatView @JvmOverloads constructor(
      * @param locale locale's language is used by Livechat Widget and native parts
      */
     fun setLanguage(locale: Locale) {
-        MobileMessagingLogger.d("InAppChatView", "setLanguage($locale)")
+        MobileMessagingLogger.d(TAG, "setLanguage($locale)")
         PropertyHelper(context).saveString(
             MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE,
             locale.toString()
@@ -191,22 +241,23 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onStart(owner: LifecycleOwner) {
+            restartConnection()
         }
 
         override fun onResume(owner: LifecycleOwner) {
+            binding.ibLcWebView.onResume()
             registerReceivers()
             updateErrors()
-            binding.ibLcWebView.onResume()
-            loadWebPage(force = !isChatLoaded)
             syncInAppChatConfigIfNeeded()
         }
 
         override fun onPause(owner: LifecycleOwner) {
-            unregisterReceivers()
             binding.ibLcWebView.onPause()
+            unregisterReceivers()
         }
 
         override fun onStop(owner: LifecycleOwner) {
+            stopConnection()
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
@@ -217,12 +268,12 @@ class InAppChatView @JvmOverloads constructor(
 
     //region InAppChatWebViewManager
     private val inAppChatWebViewManager = object : InAppChatWebViewManager {
-        override fun onPageStarted() {
-            binding.ibLcSpinner.visible()
-            binding.ibLcWebView.invisible()
+
+        override fun onPageStarted(url: String) {
         }
 
-        override fun onPageFinished() {
+        override fun onPageFinished(url: String) {
+            if (InAppChatWebView.BLANK_PAGE_URI == url) return
             binding.ibLcSpinner.invisible()
             binding.ibLcWebView.visible()
             applyLanguage()
@@ -347,7 +398,7 @@ class InAppChatView @JvmOverloads constructor(
             //reload webView if it wasn't loaded in case when internet connection appeared
             if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type && !isChatLoaded) {
                 hideNoInternetConnectionView()
-                loadWebPage(force = true)
+                loadChatPage(force = true)
             }
 
             //update views configuration and reload webPage in case there was config sync error
@@ -389,8 +440,12 @@ class InAppChatView @JvmOverloads constructor(
     //endregion
 
     //region Helpers
-    private fun loadWebPage(force: Boolean = false) {
-        binding.ibLcWebView.loadWebPage(force, widgetInfo, inAppChat.jwtProvider?.provideJwt())
+    private fun loadChatPage(force: Boolean = false) = with(binding) {
+        if (ibLcWebView.url != InAppChatWebView.BLANK_PAGE_URI) {
+            ibLcSpinner.visible()
+            ibLcWebView.invisible()
+        }
+        ibLcWebView.loadChatPage(force, widgetInfo, inAppChat.jwtProvider?.provideJwt())
     }
 
     private fun applyStyle(style: InAppChatStyle) = with(binding) {
@@ -414,6 +469,7 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private fun updateWidgetInfo() {
+        MobileMessagingLogger.d(TAG, "Update widget info")
         widgetInfo = prepareWidgetInfo()
         widgetInfo?.let {
             style = style.applyWidgetConfig(context, it)
@@ -424,7 +480,7 @@ class InAppChatView @JvmOverloads constructor(
 
     private fun onWidgetSynced() {
         updateWidgetInfo()
-        loadWebPage(force = true)
+        loadChatPage(force = true)
     }
 
     private fun syncInAppChatConfigIfNeeded() {

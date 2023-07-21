@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Menerima</string>
-    <string name="mm_decline">Menolak</string>
-    <string name="mm_cancel">Membatalkan</string>
-    <string name="mm_ok">Oke</string>
-    <string name="mm_video_call">Panggilan video</string>
-    <string name="mm_flip_camera">Balik kamera</string>
-    <string name="mm_speaker">Pembicara</string>
-    <string name="mm_microphone">Mikropon</string>
-    <string name="mm_screen_share">Berbagi layar</string>
-    <string name="mm_calls_notification_channel">Panggilan</string>
-    <string name="mm_in_call_notification_channel">dalam panggilan</string>
-    <string name="mm_is_calling">sedang memanggil</string>
-    <string name="mm_incoming_call">Panggilan masuk</string>
-    <string name="mm_unknown">Tidak dikenal</string>
-    <string name="mm_call_finished">Panggilan selesai</string>
     <string name="mm_audio_permission_required">Izin audio diperlukan untuk menangani panggilan.</string>
+    <string name="mm_call_finished">Panggilan selesai</string>
+    <string name="mm_call_registration_notification_channel">Pendaftaran panggilan</string>
+    <string name="mm_call_registration_notification_description">Memperbarui data pengguna</string>
     <string name="mm_call_weak_internet_connection">Jaringan Anda menyebabkan kualitas panggilan yang buruk</string>
-    <string name="mm_microphone_muted">Meredam</string>
-    <string name="mm_unknown_error">Kesalahan yang tidak diketahui</string>
-    <string name="mm_unmute">Membunyikan</string>
-    <string name="mm_mute">Bisu</string>
-    <string name="mm_video">Video</string>
+    <string name="mm_calls_notification_channel">Panggilan</string>
+    <string name="mm_cancel">Membatalkan</string>
+    <string name="mm_decline">Menolak</string>
+    <string name="mm_flip_camera">Balik kamera</string>
     <string name="mm_hangup">Tutup Telepon</string>
-    <string name="mm_video_permission_required">Izin kamera diperlukan untuk panggilan video.</string>
+    <string name="mm_in_call">Dalam panggilan</string>
+    <string name="mm_in_call_notification_channel">dalam panggilan</string>
+    <string name="mm_incoming_call">Panggilan masuk</string>
+    <string name="mm_is_calling">sedang memanggil</string>
+    <string name="mm_microphone">Mikropon</string>
+    <string name="mm_microphone_muted">Meredam</string>
+    <string name="mm_mute">Bisu</string>
+    <string name="mm_notification_permission_required_declining_call">Izin notifikasi tidak ada. Menolak panggilan masuk.</string>
+    <string name="mm_ok">Oke</string>
+    <string name="mm_screen_share">Berbagi layar</string>
     <string name="mm_screen_sharing">Berbagi layar</string>
     <string name="mm_screen_sharing_description">Layar Anda dibagikan</string>
-    <string name="mm_in_call">Dalam panggilan</string>
-    <string name="mm_notification_permission_required_declining_call">Izin notifikasi tidak ada. Menolak panggilan masuk.</string>
+    <string name="mm_speaker">Pembicara</string>
+    <string name="mm_unknown">Tidak dikenal</string>
+    <string name="mm_unknown_error">Kesalahan yang tidak diketahui</string>
+    <string name="mm_unmute">Membunyikan</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Panggilan video</string>
+    <string name="mm_video_permission_required">Izin kamera diperlukan untuk panggilan video.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofon Anda dibisukan</string>
 </resources>

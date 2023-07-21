@@ -365,7 +365,7 @@
         android:visibility="gone"
         app:alertIcon="@drawable/ic_unmute"
         app:alertIconTint="@color/rtc_ui_foreground"
-        app:alertText="@string/mm_microphone_muted"
+        app:alertText="@string/mm_your_microphone_is_muted"
         app:alertTextColor="@color/rtc_ui_foreground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -5,7 +5,7 @@ import com.infobip.webrtc.sdk.api.options.AudioOptions
 import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.sdk.api.options.WebrtcCallOptions
 
-data class RtcUiCallOptions(
+internal data class RtcUiCallOptions(
     val audio: Boolean = false,
     val video: Boolean = false,
     val audioOptions: AudioOptions? = null,

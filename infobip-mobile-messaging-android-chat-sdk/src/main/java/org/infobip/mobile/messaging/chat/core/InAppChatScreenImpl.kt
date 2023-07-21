@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.chat.core
 
 import android.content.Context
-import android.content.Intent
 import org.infobip.mobile.messaging.chat.InAppChatScreen
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper

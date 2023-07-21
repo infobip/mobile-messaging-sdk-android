@@ -12,7 +12,7 @@ import com.infobip.webrtc.Injector.icons
 import com.infobip.webrtc.ui.CallViewModel
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.FragmentIncomingCallBinding
-import com.infobip.webrtc.ui.navigate
+import com.infobip.webrtc.ui.utils.navigate
 
 class IncomingCallFragment : Fragment() {
     private var _binding: FragmentIncomingCallBinding? = null

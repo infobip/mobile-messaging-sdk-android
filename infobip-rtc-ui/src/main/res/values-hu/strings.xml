@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Elfogad</string>
-    <string name="mm_decline">Hanyatlás</string>
-    <string name="mm_cancel">Megszünteti</string>
-    <string name="mm_ok">Rendben</string>
-    <string name="mm_video_call">Videohívás</string>
-    <string name="mm_flip_camera">Flip kamera</string>
-    <string name="mm_speaker">Hangszóró</string>
-    <string name="mm_microphone">Mikrofon</string>
-    <string name="mm_screen_share">Képernyőmegosztás</string>
-    <string name="mm_calls_notification_channel">Hívások</string>
-    <string name="mm_in_call_notification_channel">Hívás közben</string>
-    <string name="mm_is_calling">hív</string>
-    <string name="mm_incoming_call">Bejövő hívás</string>
-    <string name="mm_unknown">Ismeretlen</string>
-    <string name="mm_call_finished">A hívás befejeződött</string>
     <string name="mm_audio_permission_required">A hívások kezeléséhez audioengedély szükséges.</string>
+    <string name="mm_call_finished">A hívás befejeződött</string>
+    <string name="mm_call_registration_notification_channel">Hívás regisztráció</string>
+    <string name="mm_call_registration_notification_description">Felhasználói adatok frissítése</string>
     <string name="mm_call_weak_internet_connection">A hálózat rossz hívásminőséget okoz</string>
-    <string name="mm_microphone_muted">Tompított</string>
-    <string name="mm_unknown_error">Ismeretlen hiba</string>
-    <string name="mm_unmute">Némítás feloldása</string>
-    <string name="mm_mute">Néma</string>
-    <string name="mm_video">Videó</string>
+    <string name="mm_calls_notification_channel">Hívások</string>
+    <string name="mm_cancel">Megszünteti</string>
+    <string name="mm_decline">Hanyatlás</string>
+    <string name="mm_flip_camera">Flip kamera</string>
     <string name="mm_hangup">Rakd le</string>
-    <string name="mm_video_permission_required">A videohívásokhoz kameraengedély szükséges.</string>
+    <string name="mm_in_call">Egy hívásban</string>
+    <string name="mm_in_call_notification_channel">Hívás közben</string>
+    <string name="mm_incoming_call">Bejövő hívás</string>
+    <string name="mm_is_calling">hív</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_microphone_muted">Tompított</string>
+    <string name="mm_mute">Néma</string>
+    <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
+    <string name="mm_ok">Rendben</string>
+    <string name="mm_screen_share">Képernyőmegosztás</string>
     <string name="mm_screen_sharing">Képernyőmegosztás</string>
     <string name="mm_screen_sharing_description">A képernyő meg van osztva</string>
-    <string name="mm_in_call">Egy hívásban</string>
-    <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
+    <string name="mm_speaker">Hangszóró</string>
+    <string name="mm_unknown">Ismeretlen</string>
+    <string name="mm_unknown_error">Ismeretlen hiba</string>
+    <string name="mm_unmute">Némítás feloldása</string>
+    <string name="mm_video">Videó</string>
+    <string name="mm_video_call">Videohívás</string>
+    <string name="mm_video_permission_required">A videohívásokhoz kameraengedély szükséges.</string>
+    <string name="mm_your_microphone_is_muted">A mikrofon el van némítva</string>
 </resources>

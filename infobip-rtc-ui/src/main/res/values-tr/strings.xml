@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Kabul</string>
-    <string name="mm_decline">Reddetmek</string>
-    <string name="mm_cancel">İptal</string>
-    <string name="mm_ok">Tamam</string>
-    <string name="mm_video_call">Görüntülü arama</string>
-    <string name="mm_flip_camera">kamerayı çevir</string>
-    <string name="mm_speaker">hoparlör</string>
-    <string name="mm_microphone">Mikrofon</string>
-    <string name="mm_screen_share">Ekran paylaşımı</string>
-    <string name="mm_calls_notification_channel">aramalar</string>
-    <string name="mm_in_call_notification_channel">görüşmede</string>
-    <string name="mm_is_calling">arıyor</string>
-    <string name="mm_incoming_call">Gelen çağrı</string>
-    <string name="mm_unknown">Bilinmeyen</string>
-    <string name="mm_call_finished">arama bitti</string>
     <string name="mm_audio_permission_required">Çağrıları işlemek için ses izni gereklidir.</string>
+    <string name="mm_call_finished">arama bitti</string>
+    <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
+    <string name="mm_call_registration_notification_description">Kullanıcı verileri güncelleniyor</string>
     <string name="mm_call_weak_internet_connection">Ağınız düşük arama kalitesine neden oluyor</string>
-    <string name="mm_microphone_muted">sessiz</string>
-    <string name="mm_unknown_error">Bilinmeyen hata</string>
-    <string name="mm_unmute">Sesini açmak</string>
-    <string name="mm_mute">Sesini kapatmak</string>
-    <string name="mm_video">Video</string>
+    <string name="mm_calls_notification_channel">aramalar</string>
+    <string name="mm_cancel">İptal</string>
+    <string name="mm_decline">Reddetmek</string>
+    <string name="mm_flip_camera">kamerayı çevir</string>
     <string name="mm_hangup">Telefonu kapatmak</string>
-    <string name="mm_video_permission_required">Görüntülü aramalar için kamera izni gereklidir.</string>
+    <string name="mm_in_call">Telefonda</string>
+    <string name="mm_in_call_notification_channel">görüşmede</string>
+    <string name="mm_incoming_call">Gelen çağrı</string>
+    <string name="mm_is_calling">arıyor</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_microphone_muted">sessiz</string>
+    <string name="mm_mute">Sesini kapatmak</string>
+    <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
+    <string name="mm_ok">Tamam</string>
+    <string name="mm_screen_share">Ekran paylaşımı</string>
     <string name="mm_screen_sharing">Ekran paylaşımı</string>
     <string name="mm_screen_sharing_description">Ekranınız paylaşıldı</string>
-    <string name="mm_in_call">Telefonda</string>
-    <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
+    <string name="mm_speaker">hoparlör</string>
+    <string name="mm_unknown">Bilinmeyen</string>
+    <string name="mm_unknown_error">Bilinmeyen hata</string>
+    <string name="mm_unmute">Sesini açmak</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Görüntülü arama</string>
+    <string name="mm_video_permission_required">Görüntülü aramalar için kamera izni gereklidir.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofonunuzun sesi kapatıldı</string>
 </resources>

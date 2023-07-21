@@ -4,8 +4,8 @@ package org.infobip.mobile.messaging.chat.core
  * Interface for Views with lifecycle (Activity, Fragment) that manage WebView
  */
 internal interface InAppChatWebViewManager {
-    fun onPageStarted()
-    fun onPageFinished()
+    fun onPageStarted(url: String)
+    fun onPageFinished(url: String)
     fun setControlsEnabled(enabled: Boolean)
     fun onJSError(message: String?)
     fun setControlsVisibility(isVisible: Boolean)

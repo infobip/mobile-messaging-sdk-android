@@ -7,6 +7,7 @@ import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.ui.model.ListenType
 import org.infobip.mobile.messaging.util.ResourceLoader
+import java.util.Locale
 
 /**
  * [InfobipRtcUi] is an easy to use library, that allows you to connect to [Infobip RTC](https://github.com/infobip/infobip-rtc-android) by just building library.
@@ -167,4 +168,11 @@ interface InfobipRtcUi {
         successListener: SuccessListener? = null,
         errorListener: ErrorListener? = null
     )
+
+    /**
+     * Sets the UI language. Call's UI must be recreated to apply new language.
+     *
+     * @param locale new locale to be set
+     */
+    fun setLanguage(locale: Locale)
 }

@@ -1,31 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_accept">Akceptovat</string>
-    <string name="mm_decline">Odmítnout</string>
-    <string name="mm_cancel">Zrušit</string>
-    <string name="mm_ok">OK</string>
-    <string name="mm_video_call">Videohovor</string>
-    <string name="mm_flip_camera">Změnit fotoaparát</string>
-    <string name="mm_speaker">Reproduktor</string>
-    <string name="mm_microphone">Mikrofon</string>
-    <string name="mm_screen_share">Sdílení obrazovky</string>
-    <string name="mm_calls_notification_channel">Hovory</string>
-    <string name="mm_in_call_notification_channel">Probíhající hovor</string>
-    <string name="mm_is_calling">Volá</string>
-    <string name="mm_incoming_call">Příchozí hovor</string>
-    <string name="mm_unknown">Neznámý</string>
-    <string name="mm_call_finished">Hovor ukončen</string>
     <string name="mm_audio_permission_required">Ke zpracování hovorů je vyžadováno oprávnění ke zvuku.</string>
+    <string name="mm_call_finished">Hovor ukončen</string>
+    <string name="mm_call_registration_notification_channel">Registrace hovoru</string>
+    <string name="mm_call_registration_notification_description">Aktualizace uživatelských dat</string>
     <string name="mm_call_weak_internet_connection">Vaše síť způsobuje špatnou kvalitu hovoru</string>
-    <string name="mm_microphone_muted">Ztlumeno</string>
-    <string name="mm_unknown_error">Neznámá chyba</string>
-    <string name="mm_unmute">Zapnout zvuk</string>
-    <string name="mm_mute">Ztlumit zvuk</string>
-    <string name="mm_video">Video</string>
+    <string name="mm_calls_notification_channel">Hovory</string>
+    <string name="mm_cancel">Zrušit</string>
+    <string name="mm_decline">Odmítnout</string>
+    <string name="mm_flip_camera">Změnit fotoaparát</string>
     <string name="mm_hangup">Zavěsit</string>
-    <string name="mm_video_permission_required">Pro videohovory je vyžadováno oprávnění ke kameře.</string>
+    <string name="mm_in_call">Probíhající hovor</string>
+    <string name="mm_in_call_notification_channel">Probíhající hovor</string>
+    <string name="mm_incoming_call">Příchozí hovor</string>
+    <string name="mm_is_calling">Volá</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_microphone_muted">Ztlumeno</string>
+    <string name="mm_mute">Ztlumit zvuk</string>
+    <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
+    <string name="mm_ok">OK</string>
+    <string name="mm_screen_share">Sdílení obrazovky</string>
     <string name="mm_screen_sharing">Sdílení obrazovky</string>
     <string name="mm_screen_sharing_description">Vaše obrazovka je sdílená</string>
-    <string name="mm_in_call">Probíhající hovor</string>
-    <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
+    <string name="mm_speaker">Reproduktor</string>
+    <string name="mm_unknown">Neznámý</string>
+    <string name="mm_unknown_error">Neznámá chyba</string>
+    <string name="mm_unmute">Zapnout zvuk</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Videohovor</string>
+    <string name="mm_video_permission_required">Pro videohovory je vyžadováno oprávnění ke kameře.</string>
+    <string name="mm_your_microphone_is_muted">Váš mikrofon je ztlumený</string>
 </resources>

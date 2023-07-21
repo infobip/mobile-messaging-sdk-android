@@ -26,6 +26,7 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import org.infobip.mobile.messaging.ConfigurationException
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.InAppChat
@@ -44,7 +45,7 @@ import org.infobip.mobile.messaging.permissions.PermissionsRequestManager.Permis
 import org.infobip.mobile.messaging.util.SystemInformation
 import java.util.*
 
-class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.EventsListener {
+class InAppChatFragment : Fragment(), PermissionsRequester {
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -96,6 +97,9 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
                 binding.ibLcChat.sendInputDraft(it)
         }
     private val inputCheckerHandler = Handler(Looper.getMainLooper())
+    private var _lifecycleRegistry: InAppChatFragmentLifecycleRegistry? = null
+    private val lifecycleRegistry
+        get() = _lifecycleRegistry!!
 
     /**
      * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
@@ -115,6 +119,11 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
             field = value
             _binding?.ibLcChatToolbar?.show(value)
         }
+
+    /**
+     * Allows to disconnect chat when fragment is hidden and receive push notifications.
+     */
+    var disconnectChatWhenHidden = false
 
     //region Lifecycle
     override fun onCreateView(
@@ -144,6 +153,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
             return //on configChange (uiMode) fragment is recreated and this fun is called, skip init views
         permissionsRequestManager = PermissionsRequestManager(this, this)
         localizationUtils = LocalizationUtils.getInstance(requireContext())
+        _lifecycleRegistry = InAppChatFragmentLifecycleRegistryImpl(viewLifecycleOwner, ignoreLifecycleOwnerEventsWhen = { this.isHidden })
         initViews()
         initBackPressHandler()
     }
@@ -153,6 +163,9 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
      */
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
+        if (disconnectChatWhenHidden) {
+            lifecycleRegistry.setState(if (hidden) Lifecycle.State.CREATED else Lifecycle.State.RESUMED)
+        }
         if (!hidden) {
             initToolbar()
             widgetInfo?.let { updateViews(it) }
@@ -171,6 +184,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
         removeBackPressHandler()
         binding.ibLcChat.eventsListener = null
         _binding = null
+        _lifecycleRegistry = null
     }
 
     private fun initViews() {
@@ -240,7 +254,6 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
         if (!withToolbar)
             return
         val style = InAppChatToolbarStyle.createChatToolbarStyle(requireContext(), widgetInfo)
-        binding.ibLcChatToolbar.setNavigationIcon(style.navigationIcon)
         style.apply(binding.ibLcChatToolbar)
         applyStatusBarStyle(style)
     }
@@ -269,32 +282,41 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
 
     //region Chat
     private fun initChat() = with(binding.ibLcChat) {
-        eventsListener = this@InAppChatFragment
-        init(viewLifecycleOwner.lifecycle)
-    }
+        eventsListener = object : InAppChatView.EventsListener {
+            override fun onChatLoaded(controlsEnabled: Boolean) {
+                binding.ibLcChatInput.isEnabled = controlsEnabled
+            }
 
-    override fun onChatLoaded(controlsEnabled: Boolean) {
-        binding.ibLcChatInput.isEnabled = controlsEnabled
-    }
+            override fun onChatDisconnected() {
+                binding.ibLcChatInput.isEnabled = false
+            }
 
-    override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
-        setChatInputVisibility(isVisible)
-    }
+            override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
+                setChatInputVisibility(isVisible)
+            }
 
-    override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-        val intent =
-            InAppChatAttachmentPreviewActivity.startIntent(requireContext(), url, type, caption)
-        startActivity(intent)
-    }
+            override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
+                val intent =
+                    InAppChatAttachmentPreviewActivity.startIntent(
+                        requireContext(),
+                        url,
+                        type,
+                        caption
+                    )
+                startActivity(intent)
+            }
 
-    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
-        this.widgetView = widgetView
-        updateViewsVisibilityByMultiThreadView(widgetView)
-    }
+            override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
+                this@InAppChatFragment.widgetView = widgetView
+                updateViewsVisibilityByMultiThreadView(widgetView)
+            }
 
-    override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
-        this.widgetInfo = widgetInfo
-        updateViews(widgetInfo)
+            override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
+                this@InAppChatFragment.widgetInfo = widgetInfo
+                updateViews(widgetInfo)
+            }
+        }
+        init(lifecycleRegistry.lifecycle)
     }
     //endregion
 
@@ -563,7 +585,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester, InAppChatView.Events
         R.string.ib_chat_permissions_not_granted_message
 
     override fun onPermissionGranted() {
-//        chooseFile()
+        chooseFile()
     }
 
     @SuppressLint("UnsupportedChromeOsCameraSystemFeature")

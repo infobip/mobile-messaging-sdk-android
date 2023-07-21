@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.demo;
 
 import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.LayoutInflater;
@@ -122,6 +121,12 @@ public class InAppChatViewDemoFragment extends Fragment {
             public void onChatLoaded(boolean controlsEnabled) {
                 //Chat was loaded, if controlsEnabled = true there was no error
             }
+
+            @Override
+            public void onChatDisconnected() {
+                //Chat was disconnected, blank page is loaded.
+            }
+
         };
         inAppChatView.setEventsListener(eventsListener);
         inAppChatView.setErrorsHandler(new InAppChatView.ErrorsHandler() {

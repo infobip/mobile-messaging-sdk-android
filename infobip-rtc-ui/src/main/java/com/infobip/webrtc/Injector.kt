@@ -25,6 +25,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.infobip.mobile.messaging.api.rtc.MobileApiRtc
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider
+import java.util.Locale
+import kotlin.properties.Delegates
 
 internal const val TAG = "InfobipRtcUi"
 
@@ -40,6 +42,7 @@ internal object Injector {
     var icons: Icons? = null
     var enableInAppCallsSuccess: SuccessListener? = null
     var enableInAppCallsError: ErrorListener? = null
+    var locale: Locale? = null
 
     private val rtcService: MobileApiRtc by lazy { MobileApiResourceProvider().getMobileApiRtc(appContext) }
     private val tokenProvider: TokenProvider by lazy { TokenProviderImpl(rtcService) }

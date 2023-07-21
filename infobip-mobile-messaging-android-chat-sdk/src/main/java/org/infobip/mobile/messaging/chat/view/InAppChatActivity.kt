@@ -7,6 +7,7 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.utils.DarkModeUtils
+import org.infobip.mobile.messaging.chat.utils.applyInAppChatLanguage
 import org.infobip.mobile.messaging.chat.view.InAppChatThemeResolver.getChatViewTheme
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -25,6 +26,10 @@ class InAppChatActivity: AppCompatActivity(), InAppChatFragment.InAppChatActionB
                 }
             }
         }
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(newBase?.applyInAppChatLanguage())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

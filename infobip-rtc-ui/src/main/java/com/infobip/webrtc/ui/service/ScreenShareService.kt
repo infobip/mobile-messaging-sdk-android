@@ -9,9 +9,9 @@ import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
 import com.infobip.webrtc.ui.notifications.SCREEN_SHARE_NOTIFICATION_ID
-import com.infobip.webrtc.ui.stopForegroundRemove
+import com.infobip.webrtc.ui.utils.stopForegroundRemove
 
-class ScreenShareService : Service() {
+class ScreenShareService : BaseService() {
     private val notificationHelper: CallNotificationFactory by lazy { Injector.notificationFactory }
 
     companion object {
@@ -32,7 +32,7 @@ class ScreenShareService : Service() {
             ACTION_START_SCREEN_SHARE -> {
                 startForeground(
                         SCREEN_SHARE_NOTIFICATION_ID,
-                        notificationHelper.createScreenSharingNotification(),
+                        notificationHelper.createScreenSharingNotification(this),
                 )
             }
             ACTION_STOP_SCREEN_SHARE -> {

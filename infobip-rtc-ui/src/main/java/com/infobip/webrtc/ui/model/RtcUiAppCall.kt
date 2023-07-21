@@ -13,7 +13,7 @@ import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.ui.R
-import com.infobip.webrtc.ui.applyIf
+import com.infobip.webrtc.ui.utils.applyIf
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import com.infobip.webrtc.ui.listeners.toAppCallEventListener
 import java.util.*
@@ -21,12 +21,12 @@ import java.util.*
 /**
  * Represents WebRTC 2.0 model - Application Call
  */
-interface RtcUiAppCall : RtcUiCall {
+internal interface RtcUiAppCall : RtcUiCall {
     fun applicationId(): String?
     fun participants(): List<Participant>?
 }
 
-abstract class BaseRtcUiAppCall(
+internal abstract class BaseRtcUiAppCall(
     private val activeCall: ApplicationCall
 ) : RtcUiAppCall {
 
@@ -98,9 +98,9 @@ abstract class BaseRtcUiAppCall(
     override fun participants(): List<Participant>? = activeCall.participants()
 }
 
-interface RtcUiIncomingAppCall : RtcUiIncomingCall
+internal interface RtcUiIncomingAppCall : RtcUiIncomingCall
 
-class RtcUiIncomingAppCallImpl(private val activeCall: IncomingApplicationCall) : BaseRtcUiAppCall(activeCall), RtcUiIncomingAppCall {
+internal class RtcUiIncomingAppCallImpl(private val activeCall: IncomingApplicationCall) : BaseRtcUiAppCall(activeCall), RtcUiIncomingAppCall {
 
     override fun peer(context: Context): String {
         return activeCall.fromDisplayName()?.takeIf { it.isNotBlank() }

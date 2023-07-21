@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +36,7 @@ import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
+import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -120,7 +123,37 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             Fragment inAppChatFragment = ((AppCompatActivity) activity).getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
             return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
         }
+
+        //InAppChatView is visible
+        if (isInAppChatViewPresent(activity)) return true;
+
         return false;
+    }
+
+    private boolean isInAppChatViewPresent(Activity activity) {
+        View rootView = activity.findViewById(android.R.id.content).getRootView();
+        if (rootView instanceof ViewGroup) {
+            View inAppChatView = findViewByType((ViewGroup) rootView, InAppChatView.class);
+            return inAppChatView != null && inAppChatView.getVisibility() == View.VISIBLE;
+        } else {
+            return false;
+        }
+    }
+
+    private View findViewByType(ViewGroup viewGroup, Class<?> type) {
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View childView = viewGroup.getChildAt(i);
+
+            if (type.isInstance(childView)) {
+                return childView;
+            } else if (childView instanceof ViewGroup) {
+                View foundView = findViewByType((ViewGroup) childView, type);
+                if (foundView != null) {
+                    return foundView;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -335,11 +368,19 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     public void hideInAppChatFragment(FragmentManager fragmentManager) {
+        hideInAppChatFragment(fragmentManager, false);
+    }
+
+    @Override
+    public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
+        if (inAppChatWVFragment != null){
+            inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
+        }
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.hide(inAppChatWVFragment);
         //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
         Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)){
+        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
             fragmentTransaction.remove(fragmentByTag);
         }
         fragmentTransaction.commit();

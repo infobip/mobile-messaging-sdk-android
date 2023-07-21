@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Checkable
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
@@ -13,7 +12,7 @@ import androidx.annotation.StyleableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.infobip.webrtc.ui.R
-import com.infobip.webrtc.ui.activatedColorStateList
+import com.infobip.webrtc.ui.utils.activatedColorStateList
 import com.infobip.webrtc.ui.databinding.WidgetCircleImageButtonBinding
 
 class CircleImageButton @JvmOverloads constructor(
