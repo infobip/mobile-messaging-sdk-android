@@ -75,7 +75,7 @@ import org.infobip.mobile.messaging.util.MobileNetworkInformation;
 import org.infobip.mobile.messaging.util.ModuleLoader;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
-import org.infobip.mobile.messaging.util.SHA1;
+import org.infobip.mobile.messaging.util.SHA256;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
@@ -1208,7 +1208,7 @@ public class MobileMessagingCore
 
     @NonNull
     private static String calculateAppCodeHash(String applicationCode) {
-        return SHA1.calc(applicationCode).substring(0, 10);
+        return SHA256.calc(applicationCode).substring(0, 10);
     }
 
     public static void setApiUri(Context context, String apiUri) {
