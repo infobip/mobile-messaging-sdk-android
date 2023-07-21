@@ -23,7 +23,6 @@ public class Application extends android.app.Application {
                         .withDefaultIcon(R.drawable.ic_notification)
                         .withColor(ContextCompat.getColor(this, R.color.red))
                         .build())
-                //.withApiUri("http://api-iop1.io-ancotel.local")
                 .build();
     }
 }
