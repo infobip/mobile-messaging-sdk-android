@@ -165,7 +165,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 callback.notificationPressedFor(InAppWebViewDialog.this, message, action[1], getActivity());
             } else
                 callback.actionButtonPressedFor(InAppWebViewDialog.this, message, null, action[1]);
-            callback.dismissed(InAppWebViewDialog.this);
+            clearWebView();
         }
     }
 
@@ -319,18 +319,18 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                     callback.dismissed(this);
                     webView.clearHistory();
                     webView.clearCache(true);
+                    webView.clearFormData();
+                    webView.clearMatches();
+                    webView.destroy();
+                    webView.setVisibility(View.GONE);
+                    if (popupWindow.isShowing())
+                        popupWindow.dismiss();
                 }
                 MobileMessagingLogger.d(TAG, "Deleted local history");
             });
         } catch (Exception e) {
             MobileMessagingLogger.e(TAG, "Failed to delete local history due to " + e.getMessage());
         }
-        webView.clearFormData();
-        webView.clearMatches();
-        webView.destroy();
-        webView.setVisibility(View.GONE);
-        if (popupWindow.isShowing())
-            popupWindow.dismiss();
     }
 
     // Dismiss after some seconds
