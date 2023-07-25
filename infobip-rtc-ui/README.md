@@ -57,7 +57,7 @@ Below, is the list of `normal` permissions declared in the library:
 
     ```gradle
     //get latest release version https://github.com/infobip/mobile-messaging-sdk-android/releases 
-    implementation ('com.infobip:infobip-rtc-ui:8.4.0') {
+    implementation ('com.infobip:infobip-rtc-ui:9.0.0-rc') {
         transitive = true
     }
     ```
