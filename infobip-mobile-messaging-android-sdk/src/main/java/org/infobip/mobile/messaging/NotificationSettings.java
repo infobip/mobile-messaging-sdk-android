@@ -4,10 +4,14 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.core.app.NotificationCompat;
 
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
@@ -200,8 +204,16 @@ public class NotificationSettings {
                 return;
             }
 
-            String className = componentName.getClassName();
+            ActivityInfo activityInfo = null;
+            try {
+                activityInfo = context.getPackageManager().getActivityInfo(componentName, PackageManager.GET_META_DATA);
+            } catch (PackageManager.NameNotFoundException nnfe) {
+                MobileMessagingLogger.e("activityInfo for componentName not found", nnfe);
+            }
+
+            String className = (activityInfo != null && activityInfo.targetActivity != null) ? activityInfo.targetActivity : componentName.getClassName();
             if (StringUtils.isBlank(className)) {
+                MobileMessagingLogger.e("className is blank, unable to load default callback activity");
                 return;
             }
 
