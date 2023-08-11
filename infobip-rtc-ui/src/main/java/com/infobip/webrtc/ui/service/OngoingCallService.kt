@@ -29,6 +29,7 @@ class OngoingCallService : BaseService() {
         }
 
         const val INCOMING_CALL_ACTION = "com.infobip.calls.ui.service.OngoingCallService.INCOMING_CALL_ACTION"
+        const val INCOMING_CALL_SCREEN = "com.infobip.calls.ui.service.OngoingCallService.INCOMING_CALL_SCREEN"
         const val CALL_ENDED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.END_CALL_ACTION"
         const val CALL_ESTABLISHED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_ESTABLISHED_ACTION"
         const val CALL_DECLINED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_DECLINED_ACTION"
@@ -47,6 +48,7 @@ class OngoingCallService : BaseService() {
     private val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { Injector.notificationPermissionDelegate }
     private val cache: Cache = Injector.cache
     private var peerName: String = ""
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -64,6 +66,10 @@ class OngoingCallService : BaseService() {
                     Toast.makeText(applicationContext, getString(R.string.mm_notification_permission_required_declining_call), Toast.LENGTH_LONG).show()
                     callsDelegate.decline()
                 }
+            }
+
+            INCOMING_CALL_SCREEN -> {
+                startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotificationSilent(this, peerName, getString(R.string.mm_incoming_call)))
             }
 
             CALL_ENDED_ACTION -> {

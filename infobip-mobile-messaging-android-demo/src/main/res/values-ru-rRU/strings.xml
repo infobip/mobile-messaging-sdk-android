@@ -1,0 +1,4 @@
+<resources>
+    <string name="rtc_ui_incoming_call_message">russian message</string>
+    <string name="rtc_ui_incoming_call_headline">russian headline</string>
+</resources>

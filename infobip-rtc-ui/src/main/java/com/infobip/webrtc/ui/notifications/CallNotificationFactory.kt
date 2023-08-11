@@ -1,24 +1,35 @@
 package com.infobip.webrtc.ui.notifications
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE
-import androidx.core.content.ContextCompat
+import androidx.core.app.Person
 import androidx.core.content.getSystemService
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.ui.CallActivity
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.service.OngoingCallService
+import com.infobip.webrtc.ui.utils.resolveStyledStringAttribute
 
 const val CALL_NOTIFICATION_ID = 9999
 const val SCREEN_SHARE_NOTIFICATION_ID = 9998
 
 interface CallNotificationFactory {
     fun createIncomingCallNotification(
+        context: Context,
+        callerName: String,
+        description: String,
+    ): Notification
+
+    fun createIncomingCallNotificationSilent(
         context: Context,
         callerName: String,
         description: String,
@@ -99,14 +110,22 @@ internal class CallNotificationFactoryImpl(
             })
     }
 
-    override fun createIncomingCallNotification(
+    private fun createIncomingCallNotificationBuilder(
         context: Context,
         callerName: String,
         description: String,
+        isSilent: Boolean,
     ): Notification {
+        val themedContext = ContextThemeWrapper(context, R.style.InfobipRtcUi_Call)
+        val incomeMessage: String? =
+            themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_message, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
+        val incomeHeadline: String? =
+            themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_headline, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
+        val acceptCall = incomeMessage.isNullOrEmpty() && incomeHeadline.isNullOrEmpty()
+
         val acceptIntent = PendingIntent.getActivity(
             context, CALL_ACCEPT_REQUEST_CODE,
-            CallActivity.newInstance(context, callerName, true),
+            CallActivity.newInstance(context, callerName, acceptCall),
             updateCurrentImmutableFlags
         )
         val declineIntent = PendingIntent.getService(
@@ -117,36 +136,36 @@ internal class CallNotificationFactoryImpl(
             },
             updateCurrentImmutableFlags
         )
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            Notification.Builder(context, INCOMING_CALL_NOTIFICATION_CHANNEL_ID)
-                .setFullScreenIntent(contentIntent(callerName), true)
-                .setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
-                .setSmallIcon(R.drawable.ic_calls_30)
-                .setStyle(
-                    Notification.CallStyle.forIncomingCall(
-                        Person.Builder().setName(callerName).setImportant(true).build(),
-                        declineIntent,
-                        acceptIntent
-                    )
+
+        return commonCallNotification(callerName, description, INCOMING_CALL_NOTIFICATION_CHANNEL_ID) {
+            foregroundServiceBehavior = FOREGROUND_SERVICE_IMMEDIATE
+            setStyle(
+                NotificationCompat.CallStyle.forIncomingCall(
+                    Person.Builder().setName(callerName).setImportant(true).build(),
+                    declineIntent,
+                    acceptIntent
                 )
-                .build()
-        else {
-            commonCallNotification(callerName, description, INCOMING_CALL_NOTIFICATION_CHANNEL_ID) {
-                setPriority(NotificationCompat.PRIORITY_MAX)
-                    .addAction(
-                        R.drawable.ic_calls_30,
-                        context.getString(R.string.mm_accept),
-                        acceptIntent
-                    )
-                    .addAction(
-                        R.drawable.ic_endcall,
-                        context.getString(R.string.mm_decline),
-                        declineIntent
-                    )
-                    .setFullScreenIntent(contentIntent(callerName), true)
-                    .setForegroundServiceBehavior(FOREGROUND_SERVICE_IMMEDIATE)
-            }
+            )
+            setSilent(isSilent)
+            priority = NotificationCompat.PRIORITY_MAX
+            setFullScreenIntent(contentIntent(callerName), true)
         }
+    }
+
+    override fun createIncomingCallNotification(
+        context: Context,
+        callerName: String,
+        description: String
+    ): Notification {
+        return createIncomingCallNotificationBuilder(context, callerName, description, false)
+    }
+
+    override fun createIncomingCallNotificationSilent(
+        context: Context,
+        callerName: String,
+        description: String
+    ): Notification {
+        return createIncomingCallNotificationBuilder(context, callerName, description, true)
     }
 
     override fun createOngoingCallNotification(
@@ -163,33 +182,16 @@ internal class CallNotificationFactoryImpl(
             updateCurrentImmutableFlags
         )
 
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            Notification.Builder(context, IN_CALL_NOTIFICATION_CHANNEL_ID)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setCategory(NotificationCompat.CATEGORY_CALL)
-                .setAutoCancel(false)
-                .setOngoing(true)
-                .setContentIntent(contentIntent(title))
-                .setSmallIcon(R.drawable.ic_calls_30)
-                .setStyle(
-                    Notification.CallStyle.forOngoingCall(
-                        Person.Builder().setName(title).setImportant(true).build(),
-                        hangupIntent
-                    )
-                ).build()
-        else
-            commonCallNotification(title, description, IN_CALL_NOTIFICATION_CHANNEL_ID) {
-                setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(contentIntent(title))
-                    .addAction(
-                        R.drawable.ic_endcall,
-                        context.getString(R.string.mm_hangup),
-                        hangupIntent
-                    )
-                    .setColor(ContextCompat.getColor(context, R.color.rtc_ui_notification))
-                    .setColorized(true)
-                    .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            }
+        return commonCallNotification(title, description, IN_CALL_NOTIFICATION_CHANNEL_ID) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setContentIntent(contentIntent(title))
+            setStyle(
+                NotificationCompat.CallStyle.forOngoingCall(
+                    Person.Builder().setName(title).setImportant(true).build(),
+                    hangupIntent
+                )
+            )
+        }
     }
 
     override fun createScreenSharingNotification(

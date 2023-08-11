@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Elfogad</string>
     <string name="mm_audio_permission_required">A hívások kezeléséhez audioengedély szükséges.</string>
     <string name="mm_call_finished">A hívás befejeződött</string>
-    <string name="mm_call_registration_notification_channel">Hívás regisztráció</string>
-    <string name="mm_call_registration_notification_description">Felhasználói adatok frissítése</string>
     <string name="mm_call_weak_internet_connection">A hálózat rossz hívásminőséget okoz</string>
     <string name="mm_calls_notification_channel">Hívások</string>
     <string name="mm_cancel">Megszünteti</string>
-    <string name="mm_decline">Hanyatlás</string>
     <string name="mm_flip_camera">Flip kamera</string>
     <string name="mm_hangup">Rakd le</string>
     <string name="mm_in_call">Egy hívásban</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">Néma</string>
     <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
     <string name="mm_ok">Rendben</string>
+    <string name="mm_call_registration_notification_channel">Hívás regisztráció</string>
+    <string name="mm_call_registration_notification_description">Felhasználói adatok frissítése</string>
     <string name="mm_screen_share">Képernyőmegosztás</string>
     <string name="mm_screen_sharing">Képernyőmegosztás</string>
     <string name="mm_screen_sharing_description">A képernyő meg van osztva</string>

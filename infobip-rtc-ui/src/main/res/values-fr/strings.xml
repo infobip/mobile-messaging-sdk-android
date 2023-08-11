@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Accepter</string>
     <string name="mm_audio_permission_required">Une autorisation audio est requise pour gérer les appels.</string>
     <string name="mm_call_finished">Appel terminé</string>
-    <string name="mm_call_registration_notification_channel">Enregistrement d\'appel</string>
-    <string name="mm_call_registration_notification_description">Mise à jour des données utilisateur</string>
     <string name="mm_call_weak_internet_connection">Votre réseau cause une mauvaise qualité d\'appel</string>
     <string name="mm_calls_notification_channel">Appels</string>
     <string name="mm_cancel">Annuler</string>
-    <string name="mm_decline">Déclin</string>
     <string name="mm_flip_camera">Retourner l\'appareil photo</string>
     <string name="mm_hangup">Raccrocher</string>
     <string name="mm_in_call">En appel</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">Muet</string>
     <string name="mm_notification_permission_required_declining_call">Autorisation de notification manquante. Refuser l\'appel entrant.</string>
     <string name="mm_ok">D\'accord</string>
+    <string name="mm_call_registration_notification_channel">Enregistrement d\'appel</string>
+    <string name="mm_call_registration_notification_description">Mise à jour des données utilisateur</string>
     <string name="mm_screen_share">Partage d\'écran</string>
     <string name="mm_screen_sharing">Partage d\'écran</string>
     <string name="mm_screen_sharing_description">Votre écran est partagé</string>

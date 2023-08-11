@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Accept</string>
     <string name="mm_audio_permission_required">Audio permission is required to handle calls.</string>
     <string name="mm_call_finished">Call finished</string>
     <string name="mm_call_weak_internet_connection">Your network is causing poor call quality</string>
     <string name="mm_calls_notification_channel">Calls</string>
     <string name="mm_cancel">Cancel</string>
-    <string name="mm_decline">Decline</string>
     <string name="mm_flip_camera">Flip camera</string>
     <string name="mm_hangup">Hangup</string>
     <string name="mm_in_call">In a call</string>

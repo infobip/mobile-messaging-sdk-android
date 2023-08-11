@@ -44,5 +44,7 @@
         <item name="rtc_ui_icon_decline">@drawable/ic_clear_large</item>
         <item name="rtc_ui_icon_callsIcon">@drawable/ic_calls_30</item>
         <item name="rtc_ui_icon_alertTriangle">@drawable/ic_alert_triangle</item>
+        <item name="rtc_ui_incoming_call_headline_text_color">@color/rtc_ui_white</item>
+        <item name="rtc_ui_incoming_call_message_text_color">@color/rtc_ui_white</item>
     </style>
 </resources>

@@ -6,9 +6,13 @@ import android.app.Service
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.content.res.TypedArray
 import android.os.Build
+import android.util.TypedValue
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.IdRes
+import androidx.annotation.StyleableRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
@@ -70,5 +74,39 @@ internal fun Context.applyLocale(locale: Locale): Context {
         this.createConfigurationContext(newConfig)
     } else {
         this
+    }
+}
+
+internal fun TypedArray.resolveString(@StyleableRes index: Int, context: Context): String? {
+    val nonResource = getNonResourceString(index)
+    var hintText: String?
+    var hintTextRes: Int?
+    if (nonResource != null) {
+        hintText = nonResource
+    } else {
+        hintText = getString(index)
+        hintTextRes = getResourceId(index, 0).takeIf { it != 0 }
+        if (hintTextRes != null && hintText == null) {
+            hintText = context.getString(hintTextRes)
+        }
+    }
+    return hintText
+}
+
+/**
+ * Returns string value from a theme's styled attribute
+ */
+internal fun Context.resolveStyledStringAttribute(
+    attr: Int,
+    @AttrRes styleAttr: Int,
+    @StyleableRes styleable: IntArray
+): String? {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(styleAttr, typedValue, true)
+    return if (typedValue.data != 0) {
+        val typedArray: TypedArray = obtainStyledAttributes(typedValue.data, styleable)
+        typedArray.resolveString(attr, this).also { typedArray.recycle() }
+    } else {
+        null
     }
 }

@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Kabul</string>
     <string name="mm_audio_permission_required">Çağrıları işlemek için ses izni gereklidir.</string>
     <string name="mm_call_finished">arama bitti</string>
-    <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
-    <string name="mm_call_registration_notification_description">Kullanıcı verileri güncelleniyor</string>
     <string name="mm_call_weak_internet_connection">Ağınız düşük arama kalitesine neden oluyor</string>
     <string name="mm_calls_notification_channel">aramalar</string>
     <string name="mm_cancel">İptal</string>
-    <string name="mm_decline">Reddetmek</string>
     <string name="mm_flip_camera">kamerayı çevir</string>
     <string name="mm_hangup">Telefonu kapatmak</string>
     <string name="mm_in_call">Telefonda</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">Sesini kapatmak</string>
     <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
     <string name="mm_ok">Tamam</string>
+    <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
+    <string name="mm_call_registration_notification_description">Kullanıcı verileri güncelleniyor</string>
     <string name="mm_screen_share">Ekran paylaşımı</string>
     <string name="mm_screen_sharing">Ekran paylaşımı</string>
     <string name="mm_screen_sharing_description">Ekranınız paylaşıldı</string>
