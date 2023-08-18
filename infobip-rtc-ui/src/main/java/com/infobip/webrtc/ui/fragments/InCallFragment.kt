@@ -254,10 +254,10 @@ class InCallFragment : Fragment() {
     private fun handleRemoteVideoTrack(track: RTCVideoTrack?) {
         with(binding) {
             runCatching {
-                viewModel.getRemoteVideos()?.forEach {
+                viewModel.getRemoteVideos()?.iterator()?.forEach {
                     Log.e(
-                        TAG,
-                        "Remote video camera ${it.camera != null}, screenShare ${it.screenShare != null}"
+                            TAG,
+                            "Remote video camera ${it.camera != null}, screenShare ${it.screenShare != null}"
                     )
                     it.camera?.removeSink(binding.remoteVideo)
                     it.screenShare?.removeSink(binding.remoteVideo)
