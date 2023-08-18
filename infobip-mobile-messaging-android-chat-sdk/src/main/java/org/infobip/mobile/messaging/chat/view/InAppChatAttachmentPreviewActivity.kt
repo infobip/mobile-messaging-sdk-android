@@ -25,8 +25,8 @@ import org.infobip.mobile.messaging.chat.databinding.IbActivityChatAttachPreview
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
+import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager
 import org.infobip.mobile.messaging.util.ResourceLoader
@@ -104,7 +104,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             binding.ibLcChatAttachWv.removeAllViews()
             binding.ibLcChatAttachWv.destroy()
         }
-        var style = InAppChatToolbarStyle.createChatAttachmentStyle(this, prepareWidgetInfo())
+        var style = StyleFactory.create(this, widgetInfo = prepareWidgetInfo()).attachmentToolbarStyle()
         if (style.titleText.isNullOrBlank()) {
             style = style.copy(
                 titleText = this.intent.getStringExtra(EXTRA_CAPTION),
@@ -183,9 +183,9 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
 
     private fun loadPreviewPage() {
         val previewPageUrl = ResourceLoader.loadStringResourceByName(this, RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI)
-        val attachmentUrl: String? = intent.getStringExtra(InAppChatAttachmentPreviewActivity.EXTRA_URL)
-        val attachmentType: String? = intent.getStringExtra(InAppChatAttachmentPreviewActivity.EXTRA_TYPE)
-        val attachmentCaption: String? = intent.getStringExtra(InAppChatAttachmentPreviewActivity.EXTRA_CAPTION)
+        val attachmentUrl: String? = intent.getStringExtra(EXTRA_URL)
+        val attachmentType: String? = intent.getStringExtra(EXTRA_TYPE)
+        val attachmentCaption: String? = intent.getStringExtra(EXTRA_CAPTION)
         val resultUrl = Uri.Builder()
             .encodedPath(previewPageUrl)
             .appendQueryParameter("attachmentUrl", attachmentUrl)

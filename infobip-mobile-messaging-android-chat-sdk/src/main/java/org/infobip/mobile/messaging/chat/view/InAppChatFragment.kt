@@ -38,6 +38,7 @@ import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
 import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
+import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager
@@ -253,7 +254,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
         if (!withToolbar)
             return
-        val style = InAppChatToolbarStyle.createChatToolbarStyle(requireContext(), widgetInfo)
+        val style = StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
         style.apply(binding.ibLcChatToolbar)
         applyStatusBarStyle(style)
     }

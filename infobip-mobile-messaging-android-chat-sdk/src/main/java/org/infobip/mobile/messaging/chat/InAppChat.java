@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 
 /**
  * Main interface for in-app chat communication
@@ -185,4 +186,10 @@ public abstract class InAppChat {
      */
     public abstract void setDarkMode(@Nullable InAppChatDarkMode darkMode);
 
+    /**
+     * Set theme, it is alternative to defining style in xml, if set xml values are replaced.
+     *
+     * @param theme data object holding all style attributes
+     */
+    public abstract void setTheme(InAppChatTheme theme);
 }

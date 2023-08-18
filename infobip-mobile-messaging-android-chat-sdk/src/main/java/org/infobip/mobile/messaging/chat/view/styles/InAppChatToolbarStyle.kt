@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.chat.view.styles
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import androidx.annotation.*
 import androidx.core.content.res.getBooleanOrThrow
@@ -13,22 +14,22 @@ import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 data class InAppChatToolbarStyle(
-    @ColorInt val toolbarBackgroundColor: Int,
-    @ColorInt val statusBarBackgroundColor: Int,
-    val lightStatusBarIcons: Boolean,
-    @DrawableRes val navigationIcon: Int,
-    @ColorInt val navigationIconTint: Int,
-    @StyleRes val titleTextAppearance: Int? = null,
-    @ColorInt val titleTextColor: Int,
-    val titleText: String? = null,
-    @StringRes val titleTextRes: Int? = null,
-    val isTitleCentered: Boolean? = null,
-    @StyleRes val subtitleTextAppearance: Int? = null,
-    @ColorInt val subtitleTextColor: Int,
-    val subtitleText: String? = null,
-    @StringRes val subtitleTextRes: Int? = null,
-    val isSubtitleCentered: Boolean? = null,
-    val isIbDefaultTheme: Boolean
+        @ColorInt val toolbarBackgroundColor: Int,
+        @ColorInt val statusBarBackgroundColor: Int,
+        val lightStatusBarIcons: Boolean,
+        val navigationIcon: Drawable?,
+        @ColorInt val navigationIconTint: Int,
+        @StyleRes val titleTextAppearance: Int? = null,
+        @ColorInt val titleTextColor: Int,
+        val titleText: String? = null,
+        @StringRes val titleTextRes: Int? = null,
+        val isTitleCentered: Boolean? = null,
+        @StyleRes val subtitleTextAppearance: Int? = null,
+        @ColorInt val subtitleTextColor: Int,
+        val subtitleText: String? = null,
+        @StringRes val subtitleTextRes: Int? = null,
+        val isSubtitleCentered: Boolean? = null,
+        val isIbDefaultTheme: Boolean
 ) {
 
     companion object {
@@ -40,15 +41,14 @@ data class InAppChatToolbarStyle(
 
             //load deprecated attributes
             val deprecatedToolbarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimary)
-            val deprecatedStatusBarBackgroundColor =
-                context.resolveThemeColor(R.attr.colorPrimaryDark)
+            val deprecatedStatusBarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimaryDark)
             val deprecatedTitleTextColor = context.resolveThemeColor(R.attr.titleTextColor)
             val deprecatedNavigationIconTint = context.resolveThemeColor(R.attr.colorControlNormal)
             val deprecatedTitleResId: Int = runCatching {
                 context.resources.getIdentifier(
-                    RES_ID_CHAT_VIEW_TITLE,
-                    "string",
-                    context.applicationContext.packageName
+                        RES_ID_CHAT_VIEW_TITLE,
+                        "string",
+                        context.applicationContext.packageName
                 ).takeIfDefined()
             }.onFailure {
                 MobileMessagingLogger.e("Can't load resource: $RES_ID_CHAT_VIEW_TITLE", it)
@@ -90,7 +90,7 @@ data class InAppChatToolbarStyle(
                     newTitleText = typedArray.getString(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText)
                     newTitleTextRes = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText, 0).takeIfDefined()
                 }
-                if (newTitleTextRes != null && newTitleText == null){
+                if (newTitleTextRes != null && newTitleText == null) {
                     newTitleText = context.getString(newTitleTextRes)
                 }
                 newIsTitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleCentered) }.getOrNull()
@@ -103,7 +103,7 @@ data class InAppChatToolbarStyle(
                     newSubtitleText = typedArray.getString(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText)
                     newSubtitleTextRes = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText, 0).takeIfDefined()
                 }
-                if (newSubtitleTextRes != null && newSubtitleText == null){
+                if (newSubtitleTextRes != null && newSubtitleText == null) {
                     newSubtitleText = context.getString(newSubtitleTextRes)
                 }
                 newIsSubtitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleCentered) }.getOrNull()
@@ -111,26 +111,28 @@ data class InAppChatToolbarStyle(
             }
 
             return InAppChatToolbarStyle(
-                toolbarBackgroundColor = newToolbarBackgroundColor
-                    ?: deprecatedToolbarBackgroundColor ?: Color.BLACK,
-                statusBarBackgroundColor = newStatusBarBackgroundColor
-                    ?: deprecatedStatusBarBackgroundColor ?: Color.BLACK,
-                lightStatusBarIcons = lightStatusBarIcons ?: true,
-                navigationIcon = newNavigationIcon ?: R.drawable.ic_chat_arrow_back,
-                navigationIconTint = newNavigationIconTint ?: deprecatedNavigationIconTint
-                ?: Color.WHITE,
-                titleTextAppearance = newTitleTextAppearance,
-                titleTextColor = newTitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
-                titleText = newTitleText ?: deprecatedTitle,
-                titleTextRes = newTitleTextRes
-                    ?: if (newTitleText != null) null else deprecatedTitleResId,
-                isTitleCentered = newIsTitleCentered,
-                subtitleTextAppearance = newSubtitleTextAppearance,
-                subtitleTextColor = newSubtitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
-                subtitleText = newSubtitleText,
-                subtitleTextRes = newSubtitleTextRes,
-                isSubtitleCentered = newIsSubtitleCentered,
-                isIbDefaultTheme = theme.isIbDefaultTheme()
+                    toolbarBackgroundColor = newToolbarBackgroundColor
+                            ?: deprecatedToolbarBackgroundColor ?: Color.BLACK,
+                    statusBarBackgroundColor = newStatusBarBackgroundColor
+                            ?: deprecatedStatusBarBackgroundColor ?: Color.BLACK,
+                    lightStatusBarIcons = lightStatusBarIcons ?: true,
+                    navigationIcon = (newNavigationIcon
+                            ?: R.drawable.ic_chat_arrow_back).let(context::getDrawableCompat),
+                    navigationIconTint = newNavigationIconTint ?: deprecatedNavigationIconTint
+                    ?: Color.WHITE,
+                    titleTextAppearance = newTitleTextAppearance,
+                    titleTextColor = newTitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
+                    titleText = newTitleText ?: deprecatedTitle,
+                    titleTextRes = newTitleTextRes
+                            ?: if (newTitleText != null) null else deprecatedTitleResId,
+                    isTitleCentered = newIsTitleCentered,
+                    subtitleTextAppearance = newSubtitleTextAppearance,
+                    subtitleTextColor = newSubtitleTextColor ?: deprecatedTitleTextColor
+                    ?: Color.WHITE,
+                    subtitleText = newSubtitleText,
+                    subtitleTextRes = newSubtitleTextRes,
+                    isSubtitleCentered = newIsSubtitleCentered,
+                    isIbDefaultTheme = theme.isIbDefaultTheme()
             )
 
         }
@@ -158,9 +160,9 @@ data class InAppChatToolbarStyle(
                 }
                 if (backgroundColor != null) {
                     style = style.copy(
-                        titleTextColor = backgroundColor,
-                        subtitleTextColor = backgroundColor,
-                        navigationIconTint = backgroundColor
+                            titleTextColor = backgroundColor,
+                            subtitleTextColor = backgroundColor,
+                            navigationIconTint = backgroundColor
                     )
                 }
             } else { //if it is theme provided by integrator apply widget color only to components which are not defined by integrator
@@ -169,55 +171,55 @@ data class InAppChatToolbarStyle(
                 val applyWidgetColorPrimary = (isBaseTheme || !deprecatedColorPrimaryDefined)
 
                 val newBackgroundColorDefined = theme.isAttributePresent(
-                    R.styleable.InAppChatToolbarViewStyleable_ibChatToolbarBackgroundColor,
-                    attr,
-                    R.styleable.InAppChatToolbarViewStyleable
+                        R.styleable.InAppChatToolbarViewStyleable_ibChatToolbarBackgroundColor,
+                        attr,
+                        R.styleable.InAppChatToolbarViewStyleable
                 )
                 if (applyWidgetColorPrimary && !newBackgroundColorDefined && colorPrimary != null) {
                     style = style.copy(toolbarBackgroundColor = colorPrimary)
                 }
 
                 val deprecatedColorPrimaryDarkDefined =
-                    theme.isAttributePresent(R.attr.colorPrimaryDark)
+                        theme.isAttributePresent(R.attr.colorPrimaryDark)
                 val applyWidgetColorPrimaryDark =
-                    (isBaseTheme || !deprecatedColorPrimaryDarkDefined)
+                        (isBaseTheme || !deprecatedColorPrimaryDarkDefined)
                 val newStatusBarBackgroundColorDefined = theme.isAttributePresent(
-                    R.styleable.InAppChatToolbarViewStyleable_ibChatStatusBarBackgroundColor,
-                    attr,
-                    R.styleable.InAppChatToolbarViewStyleable
+                        R.styleable.InAppChatToolbarViewStyleable_ibChatStatusBarBackgroundColor,
+                        attr,
+                        R.styleable.InAppChatToolbarViewStyleable
                 )
                 if (applyWidgetColorPrimaryDark && !newStatusBarBackgroundColorDefined && colorPrimaryDark != null) {
                     style = style.copy(statusBarBackgroundColor = colorPrimaryDark)
                 }
 
                 val deprecatedTitleTextColorDefined =
-                    theme.isAttributePresent(R.attr.titleTextColor)
+                        theme.isAttributePresent(R.attr.titleTextColor)
                 val applyWidgetTitleTextColor = (isBaseTheme || !deprecatedTitleTextColorDefined)
 
                 val newTitleTextColorDefined = theme.isAttributePresent(
-                    R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextColor,
-                    attr,
-                    R.styleable.InAppChatToolbarViewStyleable
+                        R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextColor,
+                        attr,
+                        R.styleable.InAppChatToolbarViewStyleable
                 )
                 if (applyWidgetTitleTextColor && !newTitleTextColorDefined && backgroundColor != null) {
                     style = style.copy(titleTextColor = backgroundColor)
                 }
                 val newSubtitleTextColorDefined = theme.isAttributePresent(
-                    R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextColor,
-                    attr,
-                    R.styleable.InAppChatToolbarViewStyleable
+                        R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextColor,
+                        attr,
+                        R.styleable.InAppChatToolbarViewStyleable
                 )
-                if (applyWidgetTitleTextColor && !newSubtitleTextColorDefined && backgroundColor != null){
+                if (applyWidgetTitleTextColor && !newSubtitleTextColorDefined && backgroundColor != null) {
                     style = style.copy(subtitleTextColor = backgroundColor)
                 }
                 val newNavigationIconTintDefined = theme.isAttributePresent(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIconTint, attr, R.styleable.InAppChatToolbarViewStyleable)
-                if (applyWidgetTitleTextColor && !newNavigationIconTintDefined && backgroundColor != null){
+                if (applyWidgetTitleTextColor && !newNavigationIconTintDefined && backgroundColor != null) {
                     style = style.copy(navigationIconTint = backgroundColor)
                 }
             }
 
-            if (style.titleText?.isBlank() == true && widgetInfo != null){
-                style = style.copy(titleText = widgetInfo.getTitle(), titleTextRes = null);
+            if (style.titleText?.isBlank() == true && widgetInfo != null) {
+                style = style.copy(titleText = widgetInfo.getTitle(), titleTextRes = null)
             }
 
             return style
@@ -247,7 +249,7 @@ data class InAppChatToolbarStyle(
 internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
     toolbar?.let {
         val localizationUtils = LocalizationUtils.getInstance(it.context)
-        it.setNavigationIcon(navigationIcon)
+        it.navigationIcon = navigationIcon
         it.setNavigationIconTint(navigationIconTint)
         it.setBackgroundColor(toolbarBackgroundColor)
         if (titleTextRes != null) {
@@ -257,8 +259,8 @@ internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
         }
         titleTextAppearance?.let { appearance ->
             toolbar.setTitleTextAppearance(
-                toolbar.context,
-                appearance
+                    toolbar.context,
+                    appearance
             )
         }
         it.setTitleTextColor(titleTextColor)
@@ -270,8 +272,8 @@ internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
         }
         subtitleTextAppearance?.let { appearance ->
             toolbar.setSubtitleTextAppearance(
-                toolbar.context,
-                appearance
+                    toolbar.context,
+                    appearance
             )
         }
         it.setSubtitleTextColor(subtitleTextColor)
