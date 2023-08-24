@@ -113,6 +113,6 @@ public class ActivityLifecycleMonitor implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-
+        MobileMessagingCore.getInstance(activity).getPostNotificationsPermissionRequester().onActivityDestroyed();
     }
 }
