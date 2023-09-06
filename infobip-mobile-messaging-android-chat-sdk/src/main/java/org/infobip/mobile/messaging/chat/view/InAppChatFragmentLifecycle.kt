@@ -5,29 +5,32 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 
-internal interface InAppChatFragmentLifecycleRegistry {
-    val lifecycle: Lifecycle
-    fun setState(state: Lifecycle.State)
-}
-
 /**
  * Copies lifecycle from provided [lifecycleOwner] with option to ignore event based on provided condition [ignoreLifecycleOwnerEventsWhen].
  * Allows to manually mark lifecycle state using [setState].
+ * [isEnabled] disables new lifecycle state propagation.
  */
+internal interface InAppChatFragmentLifecycleRegistry {
+    val lifecycle: Lifecycle
+    var isEnabled: Boolean
+    fun setState(state: Lifecycle.State)
+}
+
 internal class InAppChatFragmentLifecycleRegistryImpl(
     private val lifecycleOwner: LifecycleOwner,
     private val ignoreLifecycleOwnerEventsWhen: () -> Boolean,
 ) : LifecycleRegistry(lifecycleOwner), InAppChatFragmentLifecycleRegistry {
+    override var isEnabled: Boolean = true
 
     private val observer = object : LifecycleEventObserver {
 
         override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
             val state = event.targetState
-            if (!ignoreLifecycleOwnerEventsWhen()) {
+            if (!ignoreLifecycleOwnerEventsWhen() && isEnabled) {
                 if (this@InAppChatFragmentLifecycleRegistryImpl.currentState != state)
                     this@InAppChatFragmentLifecycleRegistryImpl.currentState = state
             }
-            if (state == Lifecycle.State.DESTROYED)
+            if (state == State.DESTROYED)
                 lifecycleOwner.lifecycle.removeObserver(this)
         }
 
@@ -40,7 +43,7 @@ internal class InAppChatFragmentLifecycleRegistryImpl(
     override val lifecycle: Lifecycle
         get() = this
 
-    override fun setState(state: Lifecycle.State) {
+    override fun setState(state: State) {
         this.currentState = state
     }
 

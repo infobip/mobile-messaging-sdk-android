@@ -225,7 +225,7 @@ class InAppChatView @JvmOverloads constructor(
      */
     @JvmOverloads
     fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
-        val msg = CommonUtils.escapeJsonString(message)
+        val msg = message?.let { CommonUtils.escapeJsonString(message) }
         if (attachment != null) {
             inAppChatClient.sendChatMessage(msg, attachment)
         } else {

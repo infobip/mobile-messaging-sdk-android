@@ -426,6 +426,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
 
     private val attachmentChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            lifecycleRegistry.isEnabled = true
             if (result.resultCode == Activity.RESULT_OK) {
                 val listener =
                     object : InAppChatAttachmentHelper.InAppChatAttachmentHelperListener {
@@ -521,6 +522,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
         val chooserIntent = Intent(Intent.ACTION_CHOOSER)
         chooserIntent.putExtra(Intent.EXTRA_INTENT, prepareIntentForChooser())
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser())
+        lifecycleRegistry.isEnabled = false
         attachmentChooserLauncher.launch(chooserIntent)
     }
 
