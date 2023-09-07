@@ -504,6 +504,7 @@ public abstract class MobileMessaging {
         private boolean allowUntrustedSSLOnError = false;
         private boolean usePrivateSharedPrefs = true;
         private boolean postNotificationPermissionRequest = true;
+        private boolean fullFeaturedInApps = false;
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
@@ -727,6 +728,16 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Full Featured In Apps are disabled by the default. In order to enable them, this method needs to be
+         * called. By enabling Full Featured In Apps, JavaScript is enabled in WebView.
+         * @return {@link Builder}
+         */
+        public Builder withFullFeaturedInApps() {
+            this.fullFeaturedInApps = true;
+            return this;
+        }
+
+        /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -894,6 +905,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
             MobileMessagingCore.setRemoteNotificationsEnabled(application, postNotificationPermissionRequest);
+            MobileMessagingCore.setFullFeatureInAppsEnabled(application, fullFeaturedInApps);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);

@@ -18,6 +18,7 @@ public class Application extends android.app.Application {
 
         new MobileMessaging.Builder(this)
                 .withMessageStore(SQLiteMessageStore.class)
+                .withFullFeaturedInApps()
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withMultipleNotifications()
                         .withDefaultIcon(R.drawable.ic_notification)

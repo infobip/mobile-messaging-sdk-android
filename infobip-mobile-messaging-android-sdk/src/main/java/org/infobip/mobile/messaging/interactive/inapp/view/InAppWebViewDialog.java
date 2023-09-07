@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.api.support.util.UserAgentUtil;
 import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
@@ -39,6 +40,7 @@ import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppW
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.UserAgentAdditions;
 
 import java.util.HashMap;
@@ -176,50 +178,52 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
         setActivityLifecycleListener(this);
 
-        try {
-            getActivity().runOnUiThread(() -> {
-                LayoutInflater inflater = getActivity().getLayoutInflater();
-                dialogView = inflater.inflate(R.layout.ib_inapp_webview, null, false);
+        if (PreferenceHelper.findBoolean(getActivity(), MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED)) {
+            try {
+                getActivity().runOnUiThread(() -> {
+                    LayoutInflater inflater = getActivity().getLayoutInflater();
+                    dialogView = inflater.inflate(R.layout.ib_inapp_webview, null, false);
 
-                cardView = dialogView.findViewById(R.id.webview_dialog_card);
+                    cardView = dialogView.findViewById(R.id.webview_dialog_card);
 
-                if (message.type == InAppWebViewMessage.InAppWebViewType.FULLSCREEN) {
-                    setCardViewParams(0, false, 0);
-                    cardView.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
-                    popupWindow = new PopupWindow(dialogView, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, false);
-                } else {
-                    setCardViewParams(CORNER_RADIUS, true, 2);
-                    cardView.getLayoutParams().height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
-                }
+                    if (message.type == InAppWebViewMessage.InAppWebViewType.FULLSCREEN) {
+                        setCardViewParams(0, false, 0);
+                        cardView.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
+                        popupWindow = new PopupWindow(dialogView, WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT, false);
+                    } else {
+                        setCardViewParams(CORNER_RADIUS, true, 2);
+                        cardView.getLayoutParams().height = WindowManager.LayoutParams.WRAP_CONTENT;
+                        popupWindow = new PopupWindow(dialogView, displayMetrics.widthPixels - WIDTH_PADDING, WindowManager.LayoutParams.WRAP_CONTENT, false);
+                    }
 
-                int screenRotation = ((WindowManager) getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-                if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
-                    cardView.getLayoutParams().width = displayMetrics.heightPixels - WIDTH_PADDING;
-                }
+                    int screenRotation = ((WindowManager) getActivity().getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+                    if (screenRotation == Surface.ROTATION_90 || screenRotation == Surface.ROTATION_270) { //Landscape
+                        cardView.getLayoutParams().width = displayMetrics.heightPixels - WIDTH_PADDING;
+                    }
 
-                popupWindow.setContentView(dialogView);
+                    popupWindow.setContentView(dialogView);
 
-                if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
-                    setDialogAnimations(message.position);
-                    popupWindow.setOutsideTouchable(false);
-                } else {
-                    popupWindow.setAnimationStyle(android.R.style.Animation);
-                    popupWindow.setOutsideTouchable(true);
-                }
+                    if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER) {
+                        setDialogAnimations(message.position);
+                        popupWindow.setOutsideTouchable(false);
+                    } else {
+                        popupWindow.setAnimationStyle(android.R.style.Animation);
+                        popupWindow.setOutsideTouchable(true);
+                    }
 
-                setupWebViewForDisplaying(cardView);
+                    setupWebViewForDisplaying(cardView);
 
-                Map<String, String> headers = getAuthorizationHeader();
+                    Map<String, String> headers = getAuthorizationHeader();
 
-                if (headers.isEmpty()) {
-                    webView.loadUrl(message.url);
-                } else {
-                    webView.loadUrl(message.url, headers);
-                }
-            });
-        } catch (Exception e) {
-            MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
+                    if (headers.isEmpty()) {
+                        webView.loadUrl(message.url);
+                    } else {
+                        webView.loadUrl(message.url, headers);
+                    }
+                });
+            } catch (Exception e) {
+                MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
+            }
         }
     }
 

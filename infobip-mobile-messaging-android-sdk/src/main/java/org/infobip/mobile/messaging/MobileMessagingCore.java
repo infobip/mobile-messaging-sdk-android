@@ -1242,6 +1242,10 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED, postNotificationPermissionRequest);
     }
 
+    static void setFullFeatureInAppsEnabled(Context context, boolean fullFeaturedInApps) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED, fullFeaturedInApps);
+    }
+
     public static void setShouldSaveUserData(Context context, boolean shouldSaveUserData) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK, shouldSaveUserData);
     }
@@ -1315,6 +1319,7 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME);
         PreferenceHelper.remove(context, MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS);
         PreferenceHelper.remove(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED);
 
         MobileMessagingCore mmCore = Platform.mobileMessagingCore.get(context);
         mmCore.messagesSynchronizer = null;
