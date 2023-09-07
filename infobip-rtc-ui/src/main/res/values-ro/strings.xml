@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Accept</string>
     <string name="mm_audio_permission_required">Este necesară permisiune audio pentru a gestiona apelurile.</string>
     <string name="mm_call_finished">Apel terminat</string>
-    <string name="mm_call_registration_notification_channel">Înregistrare apel</string>
-    <string name="mm_call_registration_notification_description">Actualizarea datelor utilizatorului</string>
     <string name="mm_call_weak_internet_connection">Rețeaua dvs. cauzează o calitate slabă a apelurilor</string>
     <string name="mm_calls_notification_channel">Apeluri</string>
     <string name="mm_cancel">Anulare</string>
-    <string name="mm_decline">Declin</string>
     <string name="mm_flip_camera">Flip camera</string>
     <string name="mm_hangup">Închide</string>
     <string name="mm_in_call">Într-un apel</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">Mut</string>
     <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
     <string name="mm_ok">O.K</string>
+    <string name="mm_call_registration_notification_channel">Înregistrare apel</string>
+    <string name="mm_call_registration_notification_description">Actualizarea datelor utilizatorului</string>
     <string name="mm_screen_share">Partajarea ecranului</string>
     <string name="mm_screen_sharing">Partajarea ecranului</string>
     <string name="mm_screen_sharing_description">Ecranul dvs. este partajat</string>

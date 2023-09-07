@@ -26,7 +26,7 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Companion.applyWidgetConfig
+import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
@@ -34,10 +34,10 @@ import org.infobip.mobile.messaging.util.StringUtils
 import java.util.*
 
 class InAppChatView @JvmOverloads constructor(
-    context: Context,
-    attributes: AttributeSet? = null,
-    defStyle: Int = 0,
-    defStyleRes: Int = 0
+        context: Context,
+        private val attributes: AttributeSet? = null,
+        defStyle: Int = 0,
+        defStyleRes: Int = 0
 ) : ConstraintLayout(context, attributes, defStyle, defStyleRes) {
 
     /**
@@ -69,7 +69,7 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
-    private var style = InAppChatStyle(context, attributes)
+    private var style = StyleFactory.create(context, attributes).chatStyle()
     private val inAppChat = InAppChat.getInstance(context)
     private val inAppChatClient: InAppChatClient = InAppChatClientImpl(binding.ibLcWebView)
     private var inAppChatBroadcaster: InAppChatBroadcaster = InAppChatBroadcasterImpl(context)
@@ -448,6 +448,7 @@ class InAppChatView @JvmOverloads constructor(
         ibLcWebView.loadChatPage(force, widgetInfo, inAppChat.jwtProvider?.provideJwt())
     }
 
+    @Suppress("DEPRECATION")
     private fun applyStyle(style: InAppChatStyle) = with(binding) {
         root.setBackgroundColor(style.backgroundColor)
         ibLcWebView.setBackgroundColor(style.backgroundColor)
@@ -472,7 +473,7 @@ class InAppChatView @JvmOverloads constructor(
         MobileMessagingLogger.d(TAG, "Update widget info")
         widgetInfo = prepareWidgetInfo()
         widgetInfo?.let {
-            style = style.applyWidgetConfig(context, it)
+            style = StyleFactory.create(context, attributes, widgetInfo).chatStyle()
             applyStyle(style)
             eventsListener?.onChatWidgetInfoUpdated(it)
         }

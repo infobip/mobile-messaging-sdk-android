@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">수용하다</string>
     <string name="mm_audio_permission_required">통화를 처리하려면 오디오 권한이 필요합니다.</string>
     <string name="mm_call_finished">통화 완료</string>
-    <string name="mm_call_registration_notification_channel">전화 등록</string>
-    <string name="mm_call_registration_notification_description">사용자 데이터 업데이트</string>
     <string name="mm_call_weak_internet_connection">네트워크로 인해 통화 품질이 저하됩니다.</string>
     <string name="mm_calls_notification_channel">통화</string>
     <string name="mm_cancel">취소</string>
-    <string name="mm_decline">감소</string>
     <string name="mm_flip_camera">플립 카메라</string>
     <string name="mm_hangup">전화 끊기</string>
     <string name="mm_in_call">통화 중</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">음소거</string>
     <string name="mm_notification_permission_required_declining_call">알림 권한이 없습니다. 수신 전화를 거부합니다.</string>
     <string name="mm_ok">확인</string>
+    <string name="mm_call_registration_notification_channel">전화 등록</string>
+    <string name="mm_call_registration_notification_description">사용자 데이터 업데이트</string>
     <string name="mm_screen_share">화면 공유</string>
     <string name="mm_screen_sharing">화면 공유</string>
     <string name="mm_screen_sharing_description">화면이 공유됩니다.</string>

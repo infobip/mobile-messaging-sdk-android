@@ -34,6 +34,12 @@ public class PostNotificationsPermissionRequester implements PermissionsRequestM
         }
     }
 
+    public void onActivityDestroyed() {
+        if (permissionsRequestManager != null) {
+            permissionsRequestManager = null;
+        }
+    }
+
     public void requestPermission() {
         if (permissionsRequestManager != null) {
             permissionsRequestManager.isRequiredPermissionsGranted();

@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">قبول</string>
     <string name="mm_audio_permission_required">مطلوب إذن الصوت للتعامل مع المكالمات.</string>
     <string name="mm_call_finished">انتهت المكالمة</string>
-    <string name="mm_call_registration_notification_channel">تسجيل المكالمات</string>
-    <string name="mm_call_registration_notification_description">تحديث بيانات المستخدم</string>
     <string name="mm_call_weak_internet_connection">تتسبب شبكتك في ضعف جودة الاتصال</string>
     <string name="mm_calls_notification_channel">المكالمات</string>
     <string name="mm_cancel">إلغاء</string>
-    <string name="mm_decline">رفض</string>
     <string name="mm_flip_camera">قلب الكاميرا</string>
     <string name="mm_hangup">يشنق</string>
     <string name="mm_in_call">في المكالمة</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">كتم الصوت</string>
     <string name="mm_notification_permission_required_declining_call">إذن الإعلام مفقود. رفض المكالمة الواردة.</string>
     <string name="mm_ok">حسنا</string>
+    <string name="mm_call_registration_notification_channel">تسجيل المكالمات</string>
+    <string name="mm_call_registration_notification_description">تحديث بيانات المستخدم</string>
     <string name="mm_screen_share">حصة الشاشة</string>
     <string name="mm_screen_sharing">مشاركة الشاشة</string>
     <string name="mm_screen_sharing_description">شاشتك مشتركة</string>

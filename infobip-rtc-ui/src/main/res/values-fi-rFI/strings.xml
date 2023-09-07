@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Hyväksyä</string>
     <string name="mm_audio_permission_required">Puheluiden käsittelyyn tarvitaan äänilupa.</string>
     <string name="mm_call_finished">Puhelu päättynyt</string>
     <string name="mm_call_registration_notification_channel">Soiton rekisteröinti</string>
@@ -8,7 +7,6 @@
     <string name="mm_call_weak_internet_connection">Verkkosi aiheuttaa huonon puhelun laadun</string>
     <string name="mm_calls_notification_channel">Puhelut</string>
     <string name="mm_cancel">Peruuttaa</string>
-    <string name="mm_decline">Hylkää</string>
     <string name="mm_flip_camera">Käännä kamera</string>
     <string name="mm_hangup">Lopettaa puhelu</string>
     <string name="mm_in_call">Puhelussa</string>

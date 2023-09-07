@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">स्वीकार करना</string>
     <string name="mm_audio_permission_required">कॉल को संभालने के लिए ऑडियो अनुमति की आवश्यकता होती है।</string>
     <string name="mm_call_finished">कॉल समाप्त</string>
-    <string name="mm_call_registration_notification_channel">कॉल पंजीकरण</string>
-    <string name="mm_call_registration_notification_description">उपयोगकर्ता डेटा अपडेट करना</string>
     <string name="mm_call_weak_internet_connection">आपका नेटवर्क खराब कॉल गुणवत्ता का कारण बन रहा है</string>
     <string name="mm_calls_notification_channel">कॉल</string>
     <string name="mm_cancel">रद्द करना</string>
-    <string name="mm_decline">पतन</string>
     <string name="mm_flip_camera">फ्लिप कैमरा</string>
     <string name="mm_hangup">फोन रख देना</string>
     <string name="mm_in_call">एक कॉल में</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">आवाज़ बंद करना</string>
     <string name="mm_notification_permission_required_declining_call">सूचना अनुमति गुम है। आने वाली कॉल को अस्वीकार करना।</string>
     <string name="mm_ok">ठीक</string>
+    <string name="mm_call_registration_notification_channel">कॉल पंजीकरण</string>
+    <string name="mm_call_registration_notification_description">उपयोगकर्ता डेटा अपडेट करना</string>
     <string name="mm_screen_share">स्क्रीन शेयर</string>
     <string name="mm_screen_sharing">स्क्रीन साझेदारी</string>
     <string name="mm_screen_sharing_description">आपकी स्क्रीन साझा की गई है</string>

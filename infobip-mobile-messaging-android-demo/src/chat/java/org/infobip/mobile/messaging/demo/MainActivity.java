@@ -6,10 +6,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,8 +23,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -35,24 +40,14 @@ import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.json.JSONObject;
-
-import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.textfield.TextInputEditText;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-
-import java.util.Date;
-import java.util.Locale;
-import java.util.UUID;
 
 /**
  * @author sslavin
@@ -123,6 +118,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpAuthButton();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
+        setUpRuntimeCustomization();
         setUpDarkModeToggle();
     }
 
@@ -271,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     }
 
     private void setUpSubjectTypeSpinner() {
-        AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.subjectTypeAutocompleteTextView);
+        AutoCompleteTextView autoCompleteTextView = findViewById(R.id.subjectTypeAutocompleteTextView);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.subject_types, android.R.layout.simple_dropdown_item_1line);
         autoCompleteTextView.setAdapter(adapter);
         autoCompleteTextView.setOnItemClickListener((adapterView, view, position, id) -> {
@@ -417,13 +413,70 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         );
     }
 
+    private void setUpRuntimeCustomization() {
+        findViewById(R.id.customization).setOnClickListener(v -> {
+            InAppChatToolbarStyle toolbar = new InAppChatToolbarStyle(
+                    Color.LTGRAY,
+                    Color.LTGRAY,
+                    false,
+                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_decline, getTheme()),
+                    Color.MAGENTA,
+                    R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
+                    Color.BLACK,
+                    "Chat",
+                    null,
+                    true,
+                    null,
+                    Color.DKGRAY,
+                    "#1",
+                    null,
+                    true,
+                    false
+            );
+            inAppChat.setTheme(
+                    new InAppChatTheme(
+                            toolbar,
+                            toolbar,
+                            new InAppChatStyle(
+                                    Color.LTGRAY,
+                                    Color.MAGENTA,
+                                    "Offline",
+                                    null,
+                                    null,
+                                    Color.BLACK,
+                                    Color.CYAN,
+                                    false
+                            ),
+                            new InAppChatInputViewStyle(
+                                    R.style.IB_Chat_Input_TextAppearance,
+                                    Color.BLACK,
+                                    Color.LTGRAY,
+                                    "Type message",
+                                    null,
+                                    Color.GRAY,
+                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_add, getTheme()),
+                                    ColorStateList.valueOf(Color.MAGENTA),
+                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_send, getTheme()),
+                                    ColorStateList.valueOf(Color.MAGENTA),
+                                    Color.GRAY,
+                                    true,
+                                    Color.MAGENTA
+                            )
+                    )
+            );
+            Toast.makeText(this, "Custom style applied", Toast.LENGTH_SHORT).show();
+        });
+
+    }
+
     private InAppChatDarkMode darkMode;
-    private void setUpDarkModeToggle(){
+
+    private void setUpDarkModeToggle() {
         MaterialButtonToggleGroup darkModeToggle = findViewById(R.id.darkModeToggle);
         darkModeToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
-            switch (group.getCheckedButtonId()){
+            switch (group.getCheckedButtonId()) {
                 case R.id.dark:
-                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES){
+                    if (darkMode != InAppChatDarkMode.DARK_MODE_YES) {
                         setInAppChatDarkMode(InAppChatDarkMode.DARK_MODE_YES);
                     }
                     darkMode = InAppChatDarkMode.DARK_MODE_YES;

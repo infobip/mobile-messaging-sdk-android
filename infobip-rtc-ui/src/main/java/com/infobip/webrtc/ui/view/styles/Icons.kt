@@ -1,4 +1,4 @@
-package com.infobip.webrtc.ui.model
+package com.infobip.webrtc.ui.view.styles
 
 import android.content.Context
 import android.util.AttributeSet

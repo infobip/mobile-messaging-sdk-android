@@ -16,17 +16,17 @@ import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegateImpl
 import com.infobip.webrtc.ui.delegate.Vibrator
 import com.infobip.webrtc.ui.delegate.VibratorImpl
-import com.infobip.webrtc.ui.model.Colors
-import com.infobip.webrtc.ui.model.Icons
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
 import com.infobip.webrtc.ui.notifications.CallNotificationFactoryImpl
+import com.infobip.webrtc.ui.view.styles.Colors
+import com.infobip.webrtc.ui.view.styles.Icons
+import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.infobip.mobile.messaging.api.rtc.MobileApiRtc
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider
 import java.util.Locale
-import kotlin.properties.Delegates
 
 internal const val TAG = "InfobipRtcUi"
 
@@ -40,6 +40,7 @@ internal object Injector {
     val callsDelegate: CallsDelegate by lazy { CallsDelegateImpl(appContext, callsScope, rtcInstance) }
     var colors: Colors? = null
     var icons: Icons? = null
+    var incomingCallMessageStyle: IncomingCallMessageStyle? = null
     var enableInAppCallsSuccess: SuccessListener? = null
     var enableInAppCallsError: ErrorListener? = null
     var locale: Locale? = null

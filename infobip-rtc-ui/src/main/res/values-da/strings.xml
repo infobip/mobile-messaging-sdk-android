@@ -1,14 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
-    <string name="mm_accept">Acceptere</string>
     <string name="mm_audio_permission_required">Lydtilladelse er påkrævet for at håndtere opkald.</string>
     <string name="mm_call_finished">Opkald afsluttet</string>
-    <string name="mm_call_registration_notification_channel">Opkaldsregistrering</string>
-    <string name="mm_call_registration_notification_description">Opdatering af brugerdata</string>
     <string name="mm_call_weak_internet_connection">Dit netværk forårsager dårlig opkaldskvalitet</string>
     <string name="mm_calls_notification_channel">Opkald</string>
     <string name="mm_cancel">Afbestille</string>
-    <string name="mm_decline">Nedgang</string>
     <string name="mm_flip_camera">Flip kamera</string>
     <string name="mm_hangup">Læg på</string>
     <string name="mm_in_call">I et opkald</string>
@@ -20,6 +15,8 @@
     <string name="mm_mute">Stum</string>
     <string name="mm_notification_permission_required_declining_call">Manglende notifikationstilladelse. Afviser indgående opkald.</string>
     <string name="mm_ok">Okay</string>
+    <string name="mm_call_registration_notification_channel">Opkaldsregistrering</string>
+    <string name="mm_call_registration_notification_description">Opdatering af brugerdata</string>
     <string name="mm_screen_share">Skærmdeling</string>
     <string name="mm_screen_sharing">Skærmdeling</string>
     <string name="mm_screen_sharing_description">Din skærm er delt</string>

@@ -46,5 +46,13 @@
         <attr name="rtc_ui_icon_decline" format="reference" />
         <attr name="rtc_ui_icon_callsIcon" format="reference" />
         <attr name="rtc_ui_icon_alertTriangle" format="reference" />
+        <attr name="rtc_ui_incoming_call_headline" format="string|reference" />
+        <attr name="rtc_ui_incoming_call_headline_appearance" format="reference" />
+        <attr name="rtc_ui_incoming_call_headline_text_color" format="color|reference" />
+        <attr name="rtc_ui_incoming_call_headline_background" format="reference" />
+        <attr name="rtc_ui_incoming_call_message" format="string|reference" />
+        <attr name="rtc_ui_incoming_call_message_appearance" format="reference" />
+        <attr name="rtc_ui_incoming_call_message_text_color" format="color|reference" />
+        <attr name="rtc_ui_incoming_call_message_background" format="reference" />
     </declare-styleable>
 </resources>

@@ -28,16 +28,16 @@ import com.infobip.webrtc.ui.fragments.InCallFragment
 import com.infobip.webrtc.ui.fragments.IncomingCallFragment
 import com.infobip.webrtc.ui.listeners.DefaultRtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
-import com.infobip.webrtc.ui.model.Colors
-import com.infobip.webrtc.ui.model.Icons
 import com.infobip.webrtc.ui.service.OngoingCallService
 import com.infobip.webrtc.ui.utils.applyLocale
 import com.infobip.webrtc.ui.utils.navigate
+import com.infobip.webrtc.ui.view.styles.Colors
+import com.infobip.webrtc.ui.view.styles.Icons
+import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.util.Locale
 
 
 class CallActivity : AppCompatActivity(R.layout.activity_call) {
@@ -79,6 +79,8 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             Injector.colors = Colors(this, attrs)
         if (Injector.icons == null)
             Injector.icons = Icons(this, attrs)
+        if (Injector.incomingCallMessageStyle == null)
+            Injector.incomingCallMessageStyle = IncomingCallMessageStyle(this, attrs)
         return super.onCreateView(parent, name, context, attrs)
     }
 
@@ -142,14 +144,17 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     private fun applyArguments() {
         val peer = intent.getStringExtra(CALLER_EXTRA_KEY) ?: getString(R.string.mm_unknown)
         val accept = intent.getBooleanExtra(ACCEPT_EXTRA_KEY, false)
-        if (accept) {
-            viewModel.accept()
-            OngoingCallService.sendCallServiceIntent(
-                applicationContext,
-                OngoingCallService.CALL_ESTABLISHED_ACTION
-            )
-        }
         viewModel.peerName = peer
+
+        if (viewModel.isIncomingCall()) {
+            val action = if (accept) {
+                viewModel.accept()
+                OngoingCallService.CALL_ESTABLISHED_ACTION
+            } else {
+                OngoingCallService.INCOMING_CALL_SCREEN
+            }
+            OngoingCallService.sendCallServiceIntent(applicationContext, action)
+        }
     }
 
     private fun showError(message: String) {

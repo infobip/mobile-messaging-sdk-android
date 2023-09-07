@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infobip.webrtc.Injector.colors
 import com.infobip.webrtc.Injector.icons
+import com.infobip.webrtc.Injector.incomingCallMessageStyle
 import com.infobip.webrtc.ui.CallViewModel
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.FragmentIncomingCallBinding
@@ -20,7 +23,7 @@ class IncomingCallFragment : Fragment() {
 
     private val viewModel: CallViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentIncomingCallBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
@@ -62,6 +65,22 @@ class IncomingCallFragment : Fragment() {
                 accept.setIconTint(foregroundColorStateList)
                 accept.setCircleColor(ColorStateList.valueOf(res.rtc_ui_accept))
                 background.setBackgroundColor(res.rtc_ui_background)
+            }
+            incomingCallMessageStyle?.let { res ->
+                res.headlineText?.takeIf { it.isNotEmpty() }.let {
+                    customHeadline.text = it
+                    customHeadline.visibility = View.VISIBLE
+                }
+                res.headlineTextAppearance?.let { TextViewCompat.setTextAppearance(customHeadline, it) }
+                customHeadline.setTextColor(res.headlineTextColor)
+                res.headlineBackground?.let { customHeadline.background = AppCompatResources.getDrawable(requireContext(), it) }
+                res.messageText?.takeIf { it.isNotEmpty() }.let {
+                    customMessage.text = it
+                    customMessage.visibility = View.VISIBLE
+                }
+                res.messageTextAppearance?.let { TextViewCompat.setTextAppearance(customMessage, it) }
+                customMessage.setTextColor(res.messageTextColor)
+                res.messageBackground?.let { customMessage.background = AppCompatResources.getDrawable(requireContext(), it) }
             }
         }
     }
