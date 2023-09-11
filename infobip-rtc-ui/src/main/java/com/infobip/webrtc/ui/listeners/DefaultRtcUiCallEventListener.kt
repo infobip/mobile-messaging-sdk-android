@@ -22,7 +22,7 @@ open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
 
     override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {}
 
-    override fun onScreenShareRemoved() {}
+    override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {}
 
     override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {}
 
@@ -53,4 +53,8 @@ open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?) {}
 
     override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {}
+
+    override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
+
+    override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
 }

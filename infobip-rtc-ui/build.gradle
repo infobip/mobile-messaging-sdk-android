@@ -75,7 +75,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$mm_coreKtxVersion"
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"
     implementation "com.google.android.material:material:$mm_materialVersion"
-    api("com.infobip:infobip-rtc:2.0.9") {
+    api("com.infobip:infobip-rtc:2.0.21") {
         transitive = true
     }
     implementation "androidx.work:work-runtime-ktx:2.8.1"

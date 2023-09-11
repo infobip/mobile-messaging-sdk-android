@@ -213,7 +213,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 viewModel.updateState { copy(isScreenShare = true) }
             }
 
-            override fun onScreenShareRemoved() {
+            override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
                 viewModel.updateState { copy(isScreenShare = false) }
             }
 
