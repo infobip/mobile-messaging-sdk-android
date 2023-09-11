@@ -456,8 +456,12 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                                     Color.GRAY,
                                     ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_add, getTheme()),
                                     ColorStateList.valueOf(Color.MAGENTA),
+                                    null,
+                                    Color.RED,
                                     ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_send, getTheme()),
                                     ColorStateList.valueOf(Color.MAGENTA),
+                                    null,
+                                    Color.RED,
                                     Color.GRAY,
                                     true,
                                     Color.MAGENTA

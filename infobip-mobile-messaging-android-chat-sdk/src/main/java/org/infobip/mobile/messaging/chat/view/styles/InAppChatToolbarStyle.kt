@@ -83,28 +83,16 @@ data class InAppChatToolbarStyle(
                 newNavigationIconTint = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIconTint, 0).takeIfDefined()
                 newTitleTextAppearance = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextAppearance, 0).takeIfDefined()
                 newTitleTextColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextColor, 0).takeIfDefined()
-                val newTitleTextNonResource = typedArray.getNonResourceString(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText)
-                if (newTitleTextNonResource != null) {
-                    newTitleText = newTitleTextNonResource
-                } else {
-                    newTitleText = typedArray.getString(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText)
-                    newTitleTextRes = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText, 0).takeIfDefined()
-                }
-                if (newTitleTextRes != null && newTitleText == null) {
-                    newTitleText = context.getString(newTitleTextRes)
+                typedArray.resolveStringWithResId(context, R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText).let {
+                        newTitleTextRes = it.first
+                        newTitleText = it.second
                 }
                 newIsTitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleCentered) }.getOrNull()
                 newSubtitleTextAppearance = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextAppearance, 0).takeIfDefined()
                 newSubtitleTextColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextColor, 0).takeIfDefined()
-                val newSubtitleTextNonResource = typedArray.getNonResourceString(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText)
-                if (newSubtitleTextNonResource != null) {
-                    newSubtitleText = newSubtitleTextNonResource
-                } else {
-                    newSubtitleText = typedArray.getString(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText)
-                    newSubtitleTextRes = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText, 0).takeIfDefined()
-                }
-                if (newSubtitleTextRes != null && newSubtitleText == null) {
-                    newSubtitleText = context.getString(newSubtitleTextRes)
+                typedArray.resolveStringWithResId(context, R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText).let {
+                    newSubtitleTextRes = it.first
+                    newSubtitleText = it.second
                 }
                 newIsSubtitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleCentered) }.getOrNull()
                 typedArray.recycle()
@@ -123,8 +111,7 @@ data class InAppChatToolbarStyle(
                     titleTextAppearance = newTitleTextAppearance,
                     titleTextColor = newTitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
                     titleText = newTitleText ?: deprecatedTitle,
-                    titleTextRes = newTitleTextRes
-                            ?: if (newTitleText != null) null else deprecatedTitleResId,
+                    titleTextRes = newTitleTextRes ?: if (newTitleText != null) null else deprecatedTitleResId,
                     isTitleCentered = newIsTitleCentered,
                     subtitleTextAppearance = newSubtitleTextAppearance,
                     subtitleTextColor = newSubtitleTextColor ?: deprecatedTitleTextColor
