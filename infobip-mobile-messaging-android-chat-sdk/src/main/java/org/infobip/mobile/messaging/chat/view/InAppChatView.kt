@@ -329,9 +329,8 @@ class InAppChatView @JvmOverloads constructor(
                     inAppChatErrors.removeError(InAppChatErrors.INTERNET_CONNECTION_ERROR)
                 }
             } else if (action == InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key) {
-                if (!inAppChatErrors.removeError(InAppChatErrors.CONFIG_SYNC_ERROR)) {
-                    onWidgetSynced()
-                }
+                inAppChatErrors.removeError(InAppChatErrors.CONFIG_SYNC_ERROR)
+                onWidgetSynced()
             } else if (action == Event.API_COMMUNICATION_ERROR.key && intent.hasExtra(
                     BroadcastParameter.EXTRA_EXCEPTION
                 )
@@ -379,50 +378,45 @@ class InAppChatView @JvmOverloads constructor(
             val error = chatWidgetConfigSyncResult.error
             val isInternetConnectionError =
                 DefaultApiClient.ErrorCode.API_IO_ERROR.value == error.code && error.type == MobileMessagingError.Type.SERVER_ERROR
+            val isPushRegIdMissing = mmCore.pushRegistrationId == null
             val isRegistrationPendingError =
                 InternalSdkError.NO_VALID_REGISTRATION.error.code == error.code && mmCore.isRegistrationIdReported
-            val isInitialRegistrationError = InternalSdkError.NO_VALID_REGISTRATION.error.code == error.code && mmCore.pushRegistrationId == null
+
             /**
              * 1. connection error handled separately by broadcast receiver
              * 2. sync is triggered again after registration, do not show error
-             * 3. ignore registration error after initial app installation when pushRegId is not present yet
+             * 3. ignore any error immediately after initial app installation when pushRegId is not present yet
              */
-            if (!isInternetConnectionError && !isRegistrationPendingError && !isInitialRegistrationError) {
-                inAppChatErrors.insertError(
-                    InAppChatErrors.Error(
-                        InAppChatErrors.CONFIG_SYNC_ERROR,
-                        error.message
-                    )
+            if (isInternetConnectionError || isPushRegIdMissing || isRegistrationPendingError)
+                return
+
+            inAppChatErrors.insertError(
+                InAppChatErrors.Error(
+                    InAppChatErrors.CONFIG_SYNC_ERROR,
+                    error.message
                 )
-            }
+            )
         }
     }
 
     private val inAppChatErrors = InAppChatErrors { currentErrors, removedError, _ ->
         if (removedError != null) {
             //reload webView if it wasn't loaded in case when internet connection appeared
-            if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type && !isChatLoaded) {
+            if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type) {
                 hideNoInternetConnectionView()
-                loadChatPage(force = true)
-            }
-
-            //update views configuration and reload webPage in case there was config sync error
-            if (InAppChatErrors.CONFIG_SYNC_ERROR == removedError.type) {
-                onWidgetSynced()
+                if (!isChatLoaded) {
+                    loadChatPage(force = true)
+                }
             }
         }
 
-        if (currentErrors.isEmpty()) {
-            hideNoInternetConnectionView()
-        } else {
-            for (error in currentErrors) {
-                if (InAppChatErrors.INTERNET_CONNECTION_ERROR == error.type) {
-                    errorsHandler.handlerNoInternetConnectionError()
-                } else if (InAppChatErrors.CONFIG_SYNC_ERROR == error.type || InAppChatErrors.JS_ERROR == error.type) {
-                    errorsHandler.handlerWidgetError(error.message)
-                } else {
-                    errorsHandler.handlerError(error.message)
-                }
+        for (error in currentErrors) {
+            if (InAppChatErrors.INTERNET_CONNECTION_ERROR == error.type) {
+                errorsHandler.handlerNoInternetConnectionError()
+            } else if (InAppChatErrors.CONFIG_SYNC_ERROR == error.type || InAppChatErrors.JS_ERROR == error.type) {
+                errorsHandler.handlerWidgetError(error.message)
+            } else {
+                errorsHandler.handlerError(error.message)
             }
         }
     }
@@ -485,12 +479,15 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private fun onWidgetSynced() {
-        updateWidgetInfo()
-        loadChatPage(force = true)
+        if (widgetInfo == null || !isChatLoaded) {
+            MobileMessagingLogger.d(TAG, "Widget synced")
+            updateWidgetInfo()
+            loadChatPage(force = true)
+        }
     }
 
     private fun syncInAppChatConfigIfNeeded() {
-        val pushRegistrationId = MobileMessagingCore.getInstance(context).pushRegistrationId
+        val pushRegistrationId = mmCore.pushRegistrationId
         if (pushRegistrationId != null && widgetInfo == null) {
             (inAppChat as? MessageHandlerModule)?.performSyncActions()
         }
