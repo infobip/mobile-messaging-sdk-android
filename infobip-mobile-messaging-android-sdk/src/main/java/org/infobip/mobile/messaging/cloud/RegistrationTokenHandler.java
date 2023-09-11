@@ -19,6 +19,7 @@ public abstract class RegistrationTokenHandler {
     public abstract void handleNewToken(String token);
     public abstract void cleanupToken();
     public abstract void acquireNewToken();
+    public abstract void reissueToken();
 
     protected void sendRegistrationToServer(@NonNull String token) {
         String registrationId = mobileMessagingCore.getPushRegistrationId();

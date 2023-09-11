@@ -7,8 +7,9 @@ import android.os.Build;
 
 import androidx.annotation.StringRes;
 import androidx.core.os.ConfigurationCompat;
-import androidx.core.os.LocaleListCompat;
 
+import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
+import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -33,33 +34,12 @@ public class LocalizationUtils {
         return INSTANCE;
     }
 
-    public Context updateContext() {
-        Configuration conf = resources.getConfiguration();
-        Locale locale = conf.locale;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            conf.setLayoutDirection(locale);
-        }
-        Context newContext;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            newContext = appContext.createConfigurationContext(conf);
-        } else {
-            resources.updateConfiguration(conf, resources.getDisplayMetrics());
-            newContext = appContext;
-        }
-
-        return newContext;
-    }
-
     public String getString(@StringRes int stringRes, Object... args) {
         return resources.getString(stringRes, args);
     }
 
     public void setLanguage(Locale locale) {
-        Locale.setDefault(locale);
-        Configuration conf = appContext.getResources().getConfiguration();
-        conf.locale = locale;
-        resources = new Resources(appContext.getAssets(), appContext.getResources().getDisplayMetrics(), conf);
+        resources = applyLocale(appContext, locale).getResources();
     }
 
     public Locale localeFromString(String language) {
@@ -76,8 +56,8 @@ public class LocalizationUtils {
             } else {
                 return new Locale(language);
             }
-        } catch (Throwable ignored) {
-            MobileMessagingLogger.e("Could not parse language, using device default locale.", ignored);
+        } catch (Throwable throwable) {
+            MobileMessagingLogger.e("Could not parse language, using device default locale.", throwable);
             return getApplicationLocale();
         }
     }
@@ -96,7 +76,41 @@ public class LocalizationUtils {
     }
 
     private Locale getApplicationLocale() {
-        return ConfigurationCompat.getLocales(appContext.getResources().getConfiguration()).get(0);
+        Locale locale = ConfigurationCompat.getLocales(appContext.getResources().getConfiguration()).get(0);
+        return locale != null ? locale : Locale.getDefault();
     }
 
+
+    private static Context applyLocale(Context context, Locale locale) {
+        Resources resources = context.getResources();
+        Configuration currentConfig = resources.getConfiguration();
+        Locale currentLocale = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? currentConfig.getLocales().get(0) : currentConfig.locale;
+        if (!currentLocale.getLanguage().equals(locale.getLanguage())) {
+            Locale.setDefault(locale);
+            Configuration newConfig = new Configuration(currentConfig);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                newConfig.setLayoutDirection(locale);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                newConfig.setLocale(locale);
+                return context.createConfigurationContext(newConfig);
+            } else {
+                newConfig.locale = locale;
+                resources.updateConfiguration(newConfig, resources.getDisplayMetrics());
+                return context;
+            }
+        } else {
+            return context;
+        }
+    }
+
+    public static Context applyInAppChatLanguage(Context context) {
+        String language = PropertyHelper.getDefaultMMSharedPreferences(context).getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.getKey(), null);
+        if (language != null) {
+            Locale locale = LocalizationUtils.getInstance(context).localeFromString(language);
+            return applyLocale(context, locale);
+        } else {
+            return context;
+        }
+    }
 }

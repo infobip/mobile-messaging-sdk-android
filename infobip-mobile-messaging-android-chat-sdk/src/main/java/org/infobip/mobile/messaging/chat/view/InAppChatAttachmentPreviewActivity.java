@@ -59,10 +59,17 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
     private InAppChatWebAttachment attachment;
     private PermissionsRequestManager permissionsRequestManager;
 
+    private final BroadcastReceiver onFileDownloadingComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            progressBar.setVisibility(View.GONE);
+        }
+    };
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(LocalizationUtils.getInstance(this).updateContext());
+        Context context = newBase != null ? LocalizationUtils.applyInAppChatLanguage(newBase) : null;
+        super.attachBaseContext(context);
     }
 
     @Override
@@ -203,13 +210,6 @@ public class InAppChatAttachmentPreviewActivity extends AppCompatActivity implem
 
         registerReceiver(onFileDownloadingComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
-
-    BroadcastReceiver onFileDownloadingComplete = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            progressBar.setVisibility(View.GONE);
-        }
-    };
 
     private void downloadFile() {
         if (!permissionsRequestManager.isRequiredPermissionsGranted()) {

@@ -58,4 +58,17 @@ public class FirebaseRegistrationTokenHandler extends RegistrationTokenHandler {
             }
         });
     }
+
+    public void reissueToken() {
+        try {
+            FirebaseMessaging.getInstance().deleteToken().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    acquireNewToken();
+                }
+            });
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "Error while deleting token", e);
+        }
+    }
 }
