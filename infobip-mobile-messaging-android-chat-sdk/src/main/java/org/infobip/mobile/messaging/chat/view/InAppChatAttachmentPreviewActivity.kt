@@ -17,6 +17,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import org.infobip.mobile.messaging.ConfigurationException
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
@@ -105,7 +106,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             binding.ibLcChatAttachWv.destroy()
         }
         var style = StyleFactory.create(this, widgetInfo = prepareWidgetInfo()).attachmentToolbarStyle()
-        if (style.titleText.isNullOrBlank()) {
+        if (style.titleText.isNullOrBlank() && style.titleTextRes == null) {
             style = style.copy(
                 titleText = this.intent.getStringExtra(EXTRA_CAPTION),
                 titleTextRes = null
@@ -147,7 +148,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             downloadFile()
         }
 
-        registerReceiver(onFileDownloadingComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        ContextCompat.registerReceiver(this@InAppChatAttachmentPreviewActivity, onFileDownloadingComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
     }
 
     private fun downloadFile() {

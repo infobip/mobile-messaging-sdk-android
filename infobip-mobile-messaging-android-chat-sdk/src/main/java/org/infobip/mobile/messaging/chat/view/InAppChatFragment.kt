@@ -297,13 +297,12 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
             }
 
             override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-                val intent =
-                    InAppChatAttachmentPreviewActivity.startIntent(
-                        requireContext(),
-                        url,
-                        type,
-                        caption
-                    )
+                val intent: Intent
+                if (type == "DOCUMENT") {
+                    intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
+                } else {
+                    intent = InAppChatAttachmentPreviewActivity.startIntent(requireContext(), url, type, caption)
+                }
                 startActivity(intent)
             }
 
@@ -378,6 +377,7 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
                 InAppChatWidgetView.THREAD, InAppChatWidgetView.SINGLE_MODE_THREAD -> setChatInputVisibility(
                     true
                 )
+
                 InAppChatWidgetView.LOADING, InAppChatWidgetView.THREAD_LIST, InAppChatWidgetView.CLOSED_THREAD, InAppChatWidgetView.LOADING_THREAD -> setChatInputVisibility(
                     false
                 )
@@ -416,10 +416,12 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
                 requireContext(),
                 capturedImageUri
             ) == false) -> capturedImageUri
+
             capturedVideoUri != null && (mimeType == InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4 || InAppChatAttachmentHelper.isUriFileEmpty(
                 requireContext(),
                 capturedVideoUri
             ) == false) -> capturedVideoUri
+
             else -> null
         }
     }
@@ -428,69 +430,64 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             lifecycleRegistry.isEnabled = true
             if (result.resultCode == Activity.RESULT_OK) {
-                val listener =
-                    object : InAppChatAttachmentHelper.InAppChatAttachmentHelperListener {
-                        override fun onAttachmentCreated(attachment: InAppChatMobileAttachment?) {
-                            if (attachment != null) {
-                                MobileMessagingLogger.w(
-                                    "InAppChatFragment",
-                                    "Attachment created, will send Attachment"
-                                )
-                                binding.ibLcChat.sendChatMessage(null, attachment)
-                            } else {
-                                MobileMessagingLogger.e(
-                                    "InAppChatFragment",
-                                    "Can't create attachment"
-                                )
-                                Toast.makeText(
-                                    requireContext(),
-                                    localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            deleteEmptyMediaFiles()
-                        }
-
-                        override fun onError(
-                            context: Context?,
-                            exception: InternalSdkError.InternalSdkException?
-                        ) {
-                            if (exception!!.message == InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.get()) {
-                                MobileMessagingLogger.e(
-                                    "InAppChatFragment",
-                                    "Maximum allowed attachment size exceeded" + widgetInfo?.getMaxUploadContentSize()
-                                )
-                                Toast.makeText(
-                                    context,
-                                    localizationUtils.getString(R.string.ib_chat_allowed_attachment_size_exceeded),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                MobileMessagingLogger.e(
-                                    "InAppChatFragment",
-                                    "Attachment content is not valid."
-                                )
-                                Toast.makeText(
-                                    context,
-                                    localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            deleteEmptyMediaFiles()
-                        }
-
-                    }
                 val data = result.data
-
                 InAppChatAttachmentHelper.makeAttachment(
                     requireActivity(),
                     data,
                     getCapturedMediaUrl(data),
-                    listener
+                    attachmentHelperListener
                 )
             } else {
                 deleteEmptyMediaFiles()
             }
+        }
+
+    private val attachmentHelperListener =
+        object : InAppChatAttachmentHelper.InAppChatAttachmentHelperListener {
+
+            override fun onAttachmentCreated(attachment: InAppChatMobileAttachment?) {
+                if (attachment != null) {
+                    MobileMessagingLogger.w(
+                        "InAppChatFragment",
+                        "Attachment created, will send Attachment"
+                    )
+                    binding.ibLcChat.sendChatMessage(null, attachment)
+                } else {
+                    MobileMessagingLogger.e("InAppChatFragment", "Can't create attachment")
+                    Toast.makeText(
+                        requireContext(),
+                        localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                deleteEmptyMediaFiles()
+            }
+
+            override fun onError(
+                context: Context?,
+                exception: InternalSdkError.InternalSdkException?
+            ) {
+                if (exception!!.message == InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.get()) {
+                    MobileMessagingLogger.e(
+                        "InAppChatFragment",
+                        "Maximum allowed attachment size exceeded" + widgetInfo?.getMaxUploadContentSize()
+                    )
+                    Toast.makeText(
+                        context,
+                        localizationUtils.getString(R.string.ib_chat_allowed_attachment_size_exceeded),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    MobileMessagingLogger.e("InAppChatFragment", "Attachment content is not valid.")
+                    Toast.makeText(
+                        context,
+                        localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                deleteEmptyMediaFiles()
+            }
+
         }
 
     private fun deleteEmptyMediaFiles() {
