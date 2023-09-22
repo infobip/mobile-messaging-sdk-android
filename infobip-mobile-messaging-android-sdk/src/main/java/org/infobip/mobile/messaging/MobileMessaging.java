@@ -728,7 +728,7 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * Use this method to enable Full-featured In-App notifications (more about this feature - https://github.com/infobip/mobile-messaging-sdk-ios/wiki/In-app-notifications#full-featured-in-app-notifications)
+         * Use this method to enable Full-featured In-App notifications (more about this feature - https://github.com/infobip/mobile-messaging-sdk-android/wiki/In-app-notifications#full-featured-in-app-notifications)
          * Without calling this method Full-featured In-app notifications get delivered, but not processed and not displayed within WebView.
          * @return {@link Builder}
          */
