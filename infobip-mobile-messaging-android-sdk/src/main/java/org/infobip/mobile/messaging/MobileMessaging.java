@@ -728,8 +728,8 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * Full Featured In Apps are disabled by the default. In order to enable them, this method needs to be
-         * called. By enabling Full Featured In Apps, JavaScript is enabled in WebView.
+         * Use this method to enable Full-featured In-App notifications (more about this feature - https://github.com/infobip/mobile-messaging-sdk-ios/wiki/In-app-notifications#full-featured-in-app-notifications)
+         * Without calling this method Full-featured In-app notifications get delivered, but not processed and not displayed within WebView.
          * @return {@link Builder}
          */
         public Builder withFullFeaturedInApps() {
