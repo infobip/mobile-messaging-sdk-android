@@ -45,6 +45,7 @@ import java.util.List;
  * @see Builder
  * @see Builder#withoutDisplayNotification()
  * @see Builder#withMessageStore(Class)
+ * @see Builder#withFullFeaturedInApps()
  * @see Builder#withApiUri(String)
  * @see Builder#withApplicationCode(String)
  * @see Builder#withDisplayNotification(NotificationSettings)
@@ -476,6 +477,7 @@ public abstract class MobileMessaging {
      * @see NotificationSettings
      * @see Builder#withApiUri(String)
      * @see Builder#withMessageStore(Class)
+     * @see Builder#withFullFeaturedInApps()
      * @see Builder#withoutMessageStore()
      * @see Builder#withApplicationCode(String)
      * @see Builder#withoutStoringApplicationCode(ApplicationCodeProvider)
