@@ -29,6 +29,7 @@ import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.lang.reflect.Field
 
+
 class InAppChatInputView @JvmOverloads constructor(
         context: Context,
         private val attributes: AttributeSet? = null,
@@ -86,8 +87,12 @@ class InAppChatInputView @JvmOverloads constructor(
             messageInput.setHintTextColor(style.hintTextColor)
             style.attachmentIcon?.let { attachmentButton.setImageDrawable(it) }
             style.attachmentIconTint?.let { attachmentButton.setImageTint(it) }
+            style.attachmentBackgroundDrawable?.let { attachmentButton.setBackgroundDrawable(it) }
+            style.attachmentBackgroundColor?.let { attachmentButton.setBackgroundColor(it) }
             style.sendIcon?.let { sendButton.setImageDrawable(it) }
             style.sendIconTint?.let { sendButton.setImageTint(it) }
+            style.sendBackgroundDrawable?.let { sendButton.setBackgroundDrawable(it) }
+            style.sendBackgroundColor?.let { sendButton.setBackgroundColor(it) }
             topSeparator.setBackgroundColor(style.separatorLineColor)
             topSeparator.show(style.isSeparatorLineVisible)
             messageInput.setCursorDrawableColor(style.cursorColor)

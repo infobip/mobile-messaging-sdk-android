@@ -50,7 +50,6 @@
         app:srcCompat="@drawable/ib_chat_send_btn_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/messageInput"
-        app:layout_constraintBottom_toBottomOf="@id/messageInput"
-        android:tint="@color/ib_selector_black_disabled"/>
+        app:layout_constraintBottom_toBottomOf="@id/messageInput"/>
 
 </merge>

@@ -18,7 +18,7 @@
         <item name="rtc_ui_incoming_call_message_background">@drawable/ic_rounded_corners</item>
         <item name="rtc_ui_incoming_call_headline_text_color">@color/blue</item>
         <item name="rtc_ui_incoming_call_headline_appearance">@style/TextAppearance.AppCompat.Title</item>
-        <item name="rtc_ui_incoming_call_message" translatable="false">@string/rtc_ui_incoming_call_message</item>
-        <item name="rtc_ui_incoming_call_headline" translatable="false">@string/rtc_ui_incoming_call_headline</item>
+        <item name="rtc_ui_incoming_call_message" translatable="false">Incoming call message</item>
+        <item name="rtc_ui_incoming_call_headline" translatable="false">Incoming call headline</item>
     </style>-->
 </resources>

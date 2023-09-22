@@ -45,8 +45,12 @@
         <attr name="ibChatInputHintTextColor" format="color|reference" />
         <attr name="ibChatInputAttachmentIcon" format="reference" />
         <attr name="ibChatInputAttachmentIconTint" format="color|reference" />
-        <attr name="ibChatInputSendIconTint" format="color|reference" />
+        <attr name="ibChatInputAttachmentBackgroundDrawable" format="reference" />
+        <attr name="ibChatInputAttachmentBackgroundColor" format="color|reference" />
         <attr name="ibChatInputSendIcon" format="reference" />
+        <attr name="ibChatInputSendIconTint" format="color|reference" />
+        <attr name="ibChatInputSendBackgroundDrawable" format="reference" />
+        <attr name="ibChatInputSendBackgroundColor" format="color|reference" />
         <attr name="ibChatInputSeparatorLineColor" format="color|reference" />
         <attr name="ibChatInputSeparatorLineVisible" format="boolean" />
         <attr name="ibChatInputCursorColor" format="color|reference" />

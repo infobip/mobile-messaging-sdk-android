@@ -16,7 +16,7 @@ interface RtcUiCallEventListener {
     fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?)
     fun onCameraVideoRemoved()
     fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?)
-    fun onScreenShareRemoved()
+    fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?)
 
     fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?)
     fun onConferenceLeft(conferenceLeftEvent: ConferenceLeftEvent?)
@@ -36,6 +36,9 @@ interface RtcUiCallEventListener {
     fun onParticipantUndeafen(participantUndeafEvent: ParticipantUndeafEvent?)
     fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?)
     fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?)
+
+    fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?)
+    fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?)
 }
 
 fun RtcUiCallEventListener.toWebRtcCallEventListener(): WebrtcCallEventListener {
@@ -72,8 +75,8 @@ fun RtcUiCallEventListener.toWebRtcCallEventListener(): WebrtcCallEventListener 
             this@toWebRtcCallEventListener.onScreenShareAdded(screenShareAddedEvent)
         }
 
-        override fun onScreenShareRemoved() {
-            this@toWebRtcCallEventListener.onScreenShareRemoved()
+        override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
+            this@toWebRtcCallEventListener.onScreenShareRemoved(screenShareRemovedEvent)
         }
 
         override fun onRemoteCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {
@@ -144,8 +147,8 @@ fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEventListene
             this@toAppCallEventListener.onScreenShareAdded(screenShareAddedEvent)
         }
 
-        override fun onScreenShareRemoved() {
-            this@toAppCallEventListener.onScreenShareRemoved()
+        override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
+            this@toAppCallEventListener.onScreenShareRemoved(screenShareRemovedEvent)
         }
 
         override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {
@@ -206,6 +209,14 @@ fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEventListene
 
         override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {
             this@toAppCallEventListener.onParticipantStoppedTalking(participantStoppedTalkingEvent)
+        }
+
+        override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {
+            this@toAppCallEventListener.onDialogJoined(dialogJoinedEvent)
+        }
+
+        override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {
+            this@toAppCallEventListener.onDialogLeft(dialogLeftEvent)
         }
     }
 }
