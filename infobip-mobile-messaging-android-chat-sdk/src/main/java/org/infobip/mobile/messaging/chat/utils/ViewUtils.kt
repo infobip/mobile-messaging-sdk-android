@@ -237,3 +237,17 @@ internal fun Activity?.setLightStatusBarMode(isLightStatusBar: Boolean) {
             isLightStatusBar
     }
 }
+
+internal fun TypedArray.resolveStringWithResId(
+    context: Context,
+    @StyleableRes stringAttr: Int,
+    defValue: Int? = null
+): Pair<Int?, String?> {
+    var value: String? = getString(stringAttr)
+    var resource: Int? = getResourceId(stringAttr, 0).takeIfDefined()
+    if (resource == null && value == null && defValue != null && defValue > 0) {
+        resource = defValue
+        value = context.getString(resource)
+    }
+    return Pair(resource, value)
+}

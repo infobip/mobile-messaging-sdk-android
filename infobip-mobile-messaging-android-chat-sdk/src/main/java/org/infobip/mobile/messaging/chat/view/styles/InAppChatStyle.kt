@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.chat.utils.colorBackground
 import org.infobip.mobile.messaging.chat.utils.colorPrimaryDark
 import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
 import org.infobip.mobile.messaging.chat.utils.isMMBaseTheme
+import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.resolveThemeColor
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 
@@ -64,24 +65,7 @@ data class InAppChatStyle(
                         Color.BLACK
                 )
 
-                var connectionErrorText: String?
-                var connectionErrorTextRes: Int? = null
-                val connectionErrorTextNonResource =
-                        getNonResourceString(R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorText)
-                if (connectionErrorTextNonResource != null) {
-                    connectionErrorText = connectionErrorTextNonResource
-                } else {
-                    connectionErrorText =
-                            getString(R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorText)
-                    connectionErrorTextRes = getResourceId(
-                            R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorText,
-                            0
-                    ).takeIfDefined()
-                }
-
-                if (connectionErrorTextRes != null && connectionErrorText == null) {
-                    connectionErrorText = context.getString(connectionErrorTextRes)
-                }
+                val (connectionErrorTextRes, connectionErrorText) = resolveStringWithResId(context, R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorText, R.string.ib_chat_no_connection)
 
                 val connectionErrorTextAppearance = getResourceId(
                         R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorTextAppearance,
@@ -93,8 +77,7 @@ data class InAppChatStyle(
                         backgroundColor = backgroundColor,
                         progressBarColor = progressBarColor,
                         networkConnectionText = connectionErrorText,
-                        networkConnectionTextRes = connectionErrorTextRes
-                                ?: R.string.ib_chat_no_connection,
+                        networkConnectionTextRes = connectionErrorTextRes,
                         networkConnectionTextColor = connectionErrorTextColor,
                         networkConnectionTextAppearance = connectionErrorTextAppearance,
                         networkConnectionLabelBackgroundColor = connectionErrorLabelBackgroundColor,

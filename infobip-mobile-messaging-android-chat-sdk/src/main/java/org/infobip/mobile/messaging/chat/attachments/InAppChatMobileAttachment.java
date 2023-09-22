@@ -1,7 +1,9 @@
 package org.infobip.mobile.messaging.chat.attachments;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -12,6 +14,7 @@ import android.os.ParcelFileDescriptor;
 
 import androidx.exifinterface.media.ExifInterface;
 
+import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
@@ -20,9 +23,11 @@ import org.infobip.mobile.messaging.chat.utils.CommonUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,13 +63,7 @@ public class InAppChatMobileAttachment {
 
         String encodedString = Base64.encodeToString(bytesArray, Base64.DEFAULT);
         Uri uri = (data != null && data.getData() != null) ? data.getData() : capturedMediaRealUri;
-        String fileName = (uri != null) ? uri.getLastPathSegment() : UUID.randomUUID().toString();
-
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        String extension = mime.getExtensionFromMimeType(mimeType);
-        if (extension != null) {
-            fileName += "." + extension;
-        }
+        String fileName = requireFileName(context, uri, mimeType);
 
         if (encodedString != null && mimeType != null) {
             return new InAppChatMobileAttachment(mimeType, encodedString, fileName);
@@ -76,8 +75,20 @@ public class InAppChatMobileAttachment {
         return "data:" + mimeType + ";base64," + CommonUtils.escapeJsonString(base64);
     }
 
+    public String getBase64() {
+        return base64;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
     public String getFileName() {
         return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public static String getMimeType(Context context, Intent data, Uri capturedMediaUri) {
@@ -170,7 +181,8 @@ public class InAppChatMobileAttachment {
             if (inputStream != null) {
                 try {
                     inputStream.close();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
             }
         }
         if (exif != null) {
@@ -238,5 +250,56 @@ public class InAppChatMobileAttachment {
 
     private static Long getAttachmentMaxSize(Context context) {
         return PreferenceHelper.findLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), DEFAULT_MAX_UPLOAD_CONTENT_SIZE);
+    }
+
+    /**
+     * Uses ContentResolver to query real file name for provided uri.
+     * @param context context
+     * @param uri file's uri
+     * @return real file name if success, null otherwise
+     */
+    @Nullable
+    private static String queryFileName(Context context, Uri uri) {
+        ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+        if (contentResolver != null) {
+            Cursor cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor != null) {
+                int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                cursor.moveToFirst();
+                String name = cursor.getString(nameIndex);
+                cursor.close();
+                return name;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns file name for provided uri. Value for file name is resolved from multiple source-by-source priority.
+     * The source with the highest priority defines a final file name value. If source does not provide file name value,
+     * there is fallback to the source with lower priority.
+     * Sources:
+     * 1. Real file name from ContentResolver
+     * 2. Last path segment from Uri
+     * 3. Generated random UUID
+     * @param context context
+     * @param uri file's uri
+     * @param mimeType file's mime type
+     * @return file name
+     */
+    @NotNull
+    private static String requireFileName(Context context, Uri uri, String mimeType) {
+        String fileName = UUID.randomUUID().toString();
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        if (uri != null) {
+            fileName = queryFileName(context, uri);
+            if (StringUtils.isNotBlank(fileName))
+                return fileName;
+            fileName = uri.getLastPathSegment();
+        }
+        if (extension != null) {
+            fileName += "." + extension;
+        }
+        return fileName;
     }
 }
