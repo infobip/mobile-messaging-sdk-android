@@ -39,7 +39,7 @@ import static org.mockito.Mockito.when;
  * @author sslavin
  * @since 24/04/2018.
  */
-@Ignore("mock issues")
+@Ignore("mock issues") //fix within MM-5769
 public class InAppViewDialogTest {
 
     private InAppViewDialog inAppViewDialog;

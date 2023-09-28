@@ -1,10 +1,15 @@
 package org.infobip.mobile.messaging.interactive.inapp.rules;
 
+import static org.infobip.mobile.messaging.Message.MESSAGE_TYPE_GEO;
+
+import androidx.annotation.NonNull;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundState;
 import org.infobip.mobile.messaging.interactive.inapp.foreground.ForegroundStateMonitor;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
@@ -14,8 +19,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.infobip.mobile.messaging.Message.MESSAGE_TYPE_GEO;
 
 /**
  * @author sslavin
@@ -39,10 +42,19 @@ public class InAppRules {
     }
 
     public ShowOrNot shouldDisplayDialogFor(Message message) {
+        return !hasInAppEnabled(message) ? ShowOrNot.not() : checkDialogConditions(message);
+    }
+
+    public ShowOrNot shouldDisplayDialogFor(InAppWebViewMessage message) {
+        return message == null ? ShowOrNot.not() : checkDialogConditions(message);
+    }
+
+    @NonNull
+    private ShowOrNot checkDialogConditions(Message message) {
         long inAppExpiryTimestamp = message.getInAppExpiryTimestamp();
-        if (!hasInAppEnabled(message) || isGeoSignaling(message) || (inAppExpiryTimestamp != 0 && inAppExpiryTimestamp < Time.now())) {
+
+        if (isGeoSignaling(message) || (inAppExpiryTimestamp != 0 && inAppExpiryTimestamp < Time.now()))
             return ShowOrNot.not();
-        }
 
         ForegroundState state = foregroundStateMonitor.isInForeground();
         if (state.isForeground() && state.getForegroundActivity() != null && !state.getForegroundActivity().isFinishing()) {

@@ -45,6 +45,7 @@ import java.util.List;
  * @see Builder
  * @see Builder#withoutDisplayNotification()
  * @see Builder#withMessageStore(Class)
+ * @see Builder#withFullFeaturedInApps()
  * @see Builder#withApiUri(String)
  * @see Builder#withApplicationCode(String)
  * @see Builder#withDisplayNotification(NotificationSettings)
@@ -476,6 +477,7 @@ public abstract class MobileMessaging {
      * @see NotificationSettings
      * @see Builder#withApiUri(String)
      * @see Builder#withMessageStore(Class)
+     * @see Builder#withFullFeaturedInApps()
      * @see Builder#withoutMessageStore()
      * @see Builder#withApplicationCode(String)
      * @see Builder#withoutStoringApplicationCode(ApplicationCodeProvider)
@@ -504,6 +506,7 @@ public abstract class MobileMessaging {
         private boolean allowUntrustedSSLOnError = false;
         private boolean usePrivateSharedPrefs = true;
         private boolean postNotificationPermissionRequest = true;
+        private boolean fullFeaturedInApps = false;
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
@@ -727,6 +730,17 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Use this method to enable Full-featured In-App notifications (more about this feature - https://github.com/infobip/mobile-messaging-sdk-android/wiki/In-app-notifications#full-featured-in-app-notifications)
+         * Without calling this method, event MESSAGE_RECEIVED (https://github.com/infobip/mobile-messaging-sdk-android/wiki/Library-events#message_received) is triggered, but In-App message not displayed within WebView.
+         *
+         * @return {@link Builder}
+         */
+        public Builder withFullFeaturedInApps() {
+            this.fullFeaturedInApps = true;
+            return this;
+        }
+
+        /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
          * {@code new MobileMessaging.Builder(application)
@@ -894,6 +908,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
             MobileMessagingCore.setDoMarkSeenOnNotificationTap(application, doMarkSeenOnNotificationTap);
             MobileMessagingCore.setRemoteNotificationsEnabled(application, postNotificationPermissionRequest);
+            MobileMessagingCore.setFullFeatureInAppsEnabled(application, fullFeaturedInApps);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);

@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.version.MobileApiVersion;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.util.UserAgentAdditions;
 import org.junit.Test;
 
 import java.net.UnknownHostException;
@@ -129,7 +130,7 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
             char unsupported = (char) charCode;
             String test = "someTest" + unsupported + "testEnd";
             String should = "someTesttestEnd";
-            String result = mobileApiResourceProvider.removeNotSupportedChars(test);
+            String result = UserAgentAdditions.removeNotSupportedChars(test);
             assertEquals(result, should);
         }
     }

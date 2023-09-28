@@ -1,17 +1,18 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
-import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.interactive.NotificationAction;
-import org.infobip.mobile.messaging.interactive.NotificationCategory;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InOrder;
-
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.interactive.NotificationAction;
+import org.infobip.mobile.messaging.interactive.NotificationCategory;
+import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppNativeCtx;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InOrder;
 
 /**
  * @author sslavin
@@ -28,24 +29,26 @@ public class QueuedDialogStackTest {
 
     @Test
     public void shouldShowDialog() {
-        InAppView view = mock(InAppView.class);
+        InAppNativeView view = mock(InAppNativeView.class);
         Message message = mock(Message.class);
         NotificationAction[] actions = new NotificationAction[]{mock(NotificationAction.class)};
         NotificationCategory category = mock(NotificationCategory.class);
+        InAppNativeCtx inAppCtx = new InAppNativeCtx(view, message, category, actions);
 
-        queuedDialogStack.add(view, message, category, actions);
+        queuedDialogStack.add(inAppCtx);
 
         verify(view, times(1)).show(eq(message), eq(category), eq(actions[0]));
     }
 
     @Test
     public void shouldNotShowDialogAgainIfClosed() {
-        InAppView view = mock(InAppView.class);
+        InAppNativeView view = mock(InAppViewDialog.class);
         Message message = mock(Message.class);
         NotificationAction[] actions = new NotificationAction[]{mock(NotificationAction.class)};
         NotificationCategory category = mock(NotificationCategory.class);
+        InAppNativeCtx inAppCtx = new InAppNativeCtx(view, message, category, actions);
 
-        queuedDialogStack.add(view, message, category, actions);
+        queuedDialogStack.add(inAppCtx);
         queuedDialogStack.remove(view);
 
         verify(view, times(1)).show(eq(message), eq(category), eq(actions[0]));
@@ -53,9 +56,9 @@ public class QueuedDialogStackTest {
 
     @Test
     public void shouldShowDialogsInTheOrderOfAdditionToQueue() {
-        InAppView view1 = mock(InAppView.class);
-        InAppView view2 = mock(InAppView.class);
-        InAppView view3 = mock(InAppView.class);
+        InAppNativeView view1 = mock(InAppNativeView.class);
+        InAppNativeView view2 = mock(InAppNativeView.class);
+        InAppNativeView view3 = mock(InAppNativeView.class);
         Message message1 = mock(Message.class);
         Message message2 = mock(Message.class);
         Message message3 = mock(Message.class);
@@ -65,10 +68,13 @@ public class QueuedDialogStackTest {
         NotificationCategory category1 = mock(NotificationCategory.class);
         NotificationCategory category2 = mock(NotificationCategory.class);
         NotificationCategory category3 = mock(NotificationCategory.class);
+        InAppNativeCtx inAppCtx1 = new InAppNativeCtx(view1, message1, category1, actions1);
+        InAppNativeCtx inAppCtx2 = new InAppNativeCtx(view2, message2, category2, actions2);
+        InAppNativeCtx inAppCtx3 = new InAppNativeCtx(view3, message3, category3, actions3);
 
-        queuedDialogStack.add(view1, message1, category1, actions1);
-        queuedDialogStack.add(view2, message2, category2, actions2);
-        queuedDialogStack.add(view3, message3, category3, actions3);
+        queuedDialogStack.add(inAppCtx1);
+        queuedDialogStack.add(inAppCtx2);
+        queuedDialogStack.add(inAppCtx3);
         queuedDialogStack.remove(view1);
         queuedDialogStack.remove(view2);
 

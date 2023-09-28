@@ -3,7 +3,11 @@ package org.infobip.mobile.messaging.interactive.inapp.view;
 import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.NonNull;
+
+import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 
 import java.util.concurrent.Executor;
 
@@ -29,7 +33,11 @@ public class InAppViewFactory {
         this.uiThreadExecutor = new UiThreadExecutor();
     }
 
-    public InAppView create(Activity activity, InAppView.Callback callback) {
+    public InAppWebView create(Activity activity, InAppView.Callback callback, InAppWebViewMessage message) {
+        return new InAppWebViewDialog(callback, new ActivityWrapper(activity));
+    }
+
+    public InAppNativeView create(Activity activity, InAppView.Callback callback, Message message) {
         return new InAppViewDialog(callback, uiThreadExecutor, new ActivityWrapper(activity));
     }
 }

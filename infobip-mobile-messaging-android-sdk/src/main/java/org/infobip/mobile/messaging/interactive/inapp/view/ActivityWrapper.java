@@ -1,10 +1,11 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
 import android.app.Activity;
-import androidx.appcompat.app.AlertDialog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.appcompat.app.AlertDialog;
 
 import org.infobip.mobile.messaging.R;
 

@@ -22,4 +22,14 @@
 
     <style name="IB_WebViewTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+
+    <style name="BannerAnimationTop">
+        <item name="android:windowEnterAnimation">@anim/top_banner_slide_down</item>
+        <item name="android:windowExitAnimation">@anim/top_banner_slide_up</item>
+    </style>
+
+    <style name="BannerAnimationBottom">
+        <item name="android:windowExitAnimation">@anim/bottom_banner_slide_down</item>
+        <item name="android:windowEnterAnimation">@anim/bottom_banner_slide_up</item>
+    </style>
 </resources>

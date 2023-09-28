@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
-import android.graphics.Bitmap;
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
@@ -12,11 +13,14 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
  * @since 13/04/2018.
  */
 public interface InAppView {
-    void show(@NonNull Message message, NotificationCategory category, @NonNull NotificationAction... actions);
-    void showWithImage(@NonNull Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction... actions);
-
     interface Callback {
-        void buttonPressedFor(@NonNull InAppView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action);
+        void buttonPressedFor(@NonNull InAppNativeView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action);
+
+        void actionButtonPressedFor(@NonNull InAppWebView inAppView, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction action);
+
+        void notificationPressedFor(@NonNull InAppWebView inAppView, @NonNull Message message, @NonNull NotificationAction action, Context context);
+
         void dismissed(@NonNull InAppView inAppView);
     }
 }
+
