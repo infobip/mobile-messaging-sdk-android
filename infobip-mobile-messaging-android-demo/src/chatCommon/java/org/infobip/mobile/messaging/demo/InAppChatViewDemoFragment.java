@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
@@ -157,7 +158,11 @@ public class InAppChatViewDemoFragment extends Fragment {
             if (text != null) {
                 String message = text.toString();
                 if (StringUtils.isNotBlank(message)) {
-                    inAppChatView.sendChatMessage(message);
+                    try {
+                        inAppChatView.sendChatMessage(message);
+                    } catch (IllegalArgumentException e) {
+                        Snackbar.make(rootView, e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                    }
                     text.clear();
                 }
             }

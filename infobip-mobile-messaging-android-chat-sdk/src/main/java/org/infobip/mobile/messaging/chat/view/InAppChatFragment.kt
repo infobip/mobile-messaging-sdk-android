@@ -154,7 +154,9 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
             return //on configChange (uiMode) fragment is recreated and this fun is called, skip init views
         permissionsRequestManager = PermissionsRequestManager(this, this)
         localizationUtils = LocalizationUtils.getInstance(requireContext())
-        _lifecycleRegistry = InAppChatFragmentLifecycleRegistryImpl(viewLifecycleOwner, ignoreLifecycleOwnerEventsWhen = { this.isHidden })
+        _lifecycleRegistry = InAppChatFragmentLifecycleRegistryImpl(
+            viewLifecycleOwner,
+            ignoreLifecycleOwnerEventsWhen = { this.isHidden })
         initViews()
         initBackPressHandler()
     }
@@ -301,7 +303,12 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
                 if (type == "DOCUMENT") {
                     intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
                 } else {
-                    intent = InAppChatAttachmentPreviewActivity.startIntent(requireContext(), url, type, caption)
+                    intent = InAppChatAttachmentPreviewActivity.startIntent(
+                        requireContext(),
+                        url,
+                        type,
+                        caption
+                    )
                 }
                 startActivity(intent)
             }
@@ -354,12 +361,16 @@ class InAppChatFragment : Fragment(), PermissionsRequester {
 
     private fun initSendButton() = with(binding.ibLcChatInput) {
         setSendButtonClickListener {
-            getInputText()?.let { msg ->
-                if (msg.isNotBlank()) {
-                    binding.ibLcChat.sendChatMessage(CommonUtils.escapeJsonString(msg))
+            getInputText()?.let(CommonUtils::escapeJsonString)
+                ?.let { msg ->
+                    msg.chunkedSequence(InAppChatView.MESSAGE_MAX_LENGTH)
+                        .forEach { message ->
+                            if (message.isNotBlank()) {
+                                binding.ibLcChat.sendChatMessage(message)
+                            }
+                        }
+                    clearInputText()
                 }
-                clearInputText()
-            }
         }
     }
 
