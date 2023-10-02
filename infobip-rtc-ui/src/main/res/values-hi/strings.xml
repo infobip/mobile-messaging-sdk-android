@@ -9,7 +9,6 @@
     <string name="mm_in_call">एक कॉल में</string>
     <string name="mm_in_call_notification_channel">कॉल में</string>
     <string name="mm_incoming_call">आने वाली कॉल</string>
-    <string name="mm_is_calling">कॉल कर रहा है</string>
     <string name="mm_microphone">माइक्रोफ़ोन</string>
     <string name="mm_microphone_muted">म्यूट किए गए</string>
     <string name="mm_mute">आवाज़ बंद करना</string>

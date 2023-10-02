@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ib_chat_message_hint">Pošalji poruku</string>
+    <string name="ib_chat_no_connection">Nema konekcije</string>
+    <string name="ib_iv_btn_send_desc">Pošalji čet poruku</string>
+    <string name="ib_iv_btn_send_attachment_desc">Pošalji prilog</string>
+    <string name="ib_iv_input_border_desc">Gornja granica</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Maksimalno dozvoljena veličina priloga prekoračena</string>
+    <string name="ib_chat_permissions_not_granted_title">Dozvola nije odbijena</string>
+    <string name="ib_chat_permissions_not_granted_message">Možete dobiti u podešavanju aplikacije</string>
+    <string name="ib_chat_cant_create_attachment">Ne može se kreirati prilog iz odabranog fajla</string>
+    <string name="ib_chat_ok">U redu</string>
+    <string name="ib_chat_error">Nešto je krenulo pogrešno:  %1$s.</string>
+</resources>

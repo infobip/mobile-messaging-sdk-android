@@ -12,7 +12,6 @@
     <string name="mm_in_call">Puhelussa</string>
     <string name="mm_in_call_notification_channel">Puhelussa</string>
     <string name="mm_incoming_call">Saapuva puhelu</string>
-    <string name="mm_is_calling">soittaa</string>
     <string name="mm_microphone">Mikrofoni</string>
     <string name="mm_microphone_muted">Mykistetty</string>
     <string name="mm_mute">Mykistä</string>

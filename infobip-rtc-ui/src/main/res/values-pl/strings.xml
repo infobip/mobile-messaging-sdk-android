@@ -9,7 +9,6 @@
     <string name="mm_in_call">W rozmowie</string>
     <string name="mm_in_call_notification_channel">W rozmowie</string>
     <string name="mm_incoming_call">Połączenie przychodzące</string>
-    <string name="mm_is_calling">dzwoni</string>
     <string name="mm_microphone">Mikrofon</string>
     <string name="mm_microphone_muted">Wyciszony</string>
     <string name="mm_mute">Niemy</string>

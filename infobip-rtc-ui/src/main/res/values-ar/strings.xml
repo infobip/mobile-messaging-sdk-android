@@ -9,7 +9,6 @@
     <string name="mm_in_call">في المكالمة</string>
     <string name="mm_in_call_notification_channel">في المكالمة</string>
     <string name="mm_incoming_call">مكالمة واردة</string>
-    <string name="mm_is_calling">يدعو</string>
     <string name="mm_microphone">ميكروفون</string>
     <string name="mm_microphone_muted">صامت</string>
     <string name="mm_mute">كتم الصوت</string>

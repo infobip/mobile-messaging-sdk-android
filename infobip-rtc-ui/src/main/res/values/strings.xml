@@ -10,7 +10,6 @@
     <string name="mm_in_call">In a call</string>
     <string name="mm_in_call_notification_channel">In call</string>
     <string name="mm_incoming_call">Incoming call</string>
-    <string name="mm_is_calling">is calling</string>
     <string name="mm_microphone">Microphone</string>
     <string name="mm_microphone_muted">Muted</string>
     <string name="mm_mute">Mute</string>

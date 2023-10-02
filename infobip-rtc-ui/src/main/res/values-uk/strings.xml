@@ -9,7 +9,6 @@
     <string name="mm_in_call">У дзвінку</string>
     <string name="mm_in_call_notification_channel">У дзвінку</string>
     <string name="mm_incoming_call">Вхідний виклик</string>
-    <string name="mm_is_calling">дзвонить</string>
     <string name="mm_microphone">мікрофон</string>
     <string name="mm_microphone_muted">Вимкнено</string>
     <string name="mm_mute">Вимкнути звук</string>

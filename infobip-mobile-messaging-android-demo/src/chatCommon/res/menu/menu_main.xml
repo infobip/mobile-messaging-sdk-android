@@ -138,5 +138,10 @@
             android:enabled="true"
             android:title="@string/albanian"
             app:showAsAction="never" />
+        <item
+            android:id="@+id/serbian"
+            android:enabled="true"
+            android:title="@string/serbian"
+            app:showAsAction="never" />
     </group>
 </menu>

@@ -12,7 +12,6 @@
     <string name="mm_in_call">通話中</string>
     <string name="mm_in_call_notification_channel">通話中</string>
     <string name="mm_incoming_call">來電</string>
-    <string name="mm_is_calling">正在打電話</string>
     <string name="mm_microphone">麥克風</string>
     <string name="mm_microphone_muted">靜音</string>
     <string name="mm_mute">沉默的</string>

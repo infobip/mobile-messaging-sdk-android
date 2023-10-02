@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_button_accept">Prihvati</string>
+    <string name="mm_button_decline">Odbij</string>
+    <string name="mm_button_open">Otvori</string>
+    <string name="mm_button_cancel">Otkaži</string>
+    <string name="mm_button_settings">Podešavanja</string>
+    <string name="mm_post_notifications_settings_title">Ažuriranje podešavanja obaveštenja</string>
+    <string name="mm_post_notifications_settings_message">Dozvolite aplikaciji da šalje puš notifikacije sve vreme, da pusti da se pokrene notifikacija čak i kada je aplikacija zatvorena ili nije u upotrebi.</string>
+</resources>

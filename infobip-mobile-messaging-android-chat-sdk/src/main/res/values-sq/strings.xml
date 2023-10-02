@@ -8,7 +8,6 @@
     <string name="ib_chat_ok">OK</string>
     <string name="ib_chat_permissions_not_granted_message">Ju mund t\'i jepni ato në cilësimet e aplikacionit.</string>
     <string name="ib_chat_permissions_not_granted_title">Lejet nuk jepen</string>
-    <string name="ib_chat_view_title">""</string>
     <string name="ib_iv_btn_send_attachment_desc">Dërgo bashkëngjitjen</string>
     <string name="ib_iv_btn_send_desc">Dërgo mesazh chat</string>
     <string name="ib_iv_input_border_desc">Kufiri i sipërm</string>

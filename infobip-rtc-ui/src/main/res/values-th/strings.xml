@@ -9,7 +9,6 @@
     <string name="mm_in_call">ในการโทร</string>
     <string name="mm_in_call_notification_channel">ในการโทร</string>
     <string name="mm_incoming_call">สายเรียกเข้า</string>
-    <string name="mm_is_calling">กำลังเรียก</string>
     <string name="mm_microphone">ไมโครโฟน</string>
     <string name="mm_microphone_muted">ปิดเสียง</string>
     <string name="mm_mute">ปิดเสียง</string>

@@ -9,7 +9,6 @@
     <string name="mm_in_call">Egy hívásban</string>
     <string name="mm_in_call_notification_channel">Hívás közben</string>
     <string name="mm_incoming_call">Bejövő hívás</string>
-    <string name="mm_is_calling">hív</string>
     <string name="mm_microphone">Mikrofon</string>
     <string name="mm_microphone_muted">Tompított</string>
     <string name="mm_mute">Néma</string>

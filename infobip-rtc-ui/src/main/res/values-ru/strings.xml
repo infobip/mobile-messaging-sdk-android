@@ -9,7 +9,6 @@
     <string name="mm_in_call">Во время разговора</string>
     <string name="mm_in_call_notification_channel">На связи</string>
     <string name="mm_incoming_call">Входящий звонок</string>
-    <string name="mm_is_calling">звонит</string>
     <string name="mm_microphone">Микрофон</string>
     <string name="mm_microphone_muted">Приглушен</string>
     <string name="mm_mute">Немой</string>

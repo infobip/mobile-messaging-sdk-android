@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mm_audio_permission_required">Audio dozvola zahteva preuzimanje poziva.</string>
+    <string name="mm_call_finished">Poziv završen</string>
+    <string name="mm_call_weak_internet_connection">Vaš internet izaziva loš kvalitet poziva</string>
+    <string name="mm_calls_notification_channel">Poziv</string>
+    <string name="mm_cancel">Otkaži</string>
+    <string name="mm_flip_camera">Okretanje fotoaparata</string>
+    <string name="mm_hangup">Prekinuti</string>
+    <string name="mm_in_call">U pozivu</string>
+    <string name="mm_in_call_notification_channel">U pozivu</string>
+    <string name="mm_incoming_call">Dolazeći poziv</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_microphone_muted">Mutirano</string>
+    <string name="mm_mute">Isključen zvuk</string>
+    <string name="mm_notification_permission_required_declining_call">Absentis notitia licentia. Declinatio advenientis voco.</string>
+    <string name="mm_ok">U redu</string>
+    <string name="mm_call_registration_notification_channel">Vocationem registration</string>
+    <string name="mm_call_registration_notification_description">Adaequationis user notitia</string>
+    <string name="mm_screen_share">Deljenje ekrana</string>
+    <string name="mm_screen_sharing">Podela ekrana</string>
+    <string name="mm_screen_sharing_description">Vaš ekran se deli</string>
+    <string name="mm_speaker">Zvučnik</string>
+    <string name="mm_unknown">Nepoznat</string>
+    <string name="mm_unknown_error">Nepoznat korisnik</string>
+    <string name="mm_unmute">Uključite zvuk</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Video poziv</string>
+    <string name="mm_video_permission_required">Dozvolite kameru  za video poziv.</string>
+    <string name="mm_your_microphone_is_muted">Vaš mikrofon je mutiran</string>
+</resources>

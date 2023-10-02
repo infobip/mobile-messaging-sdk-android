@@ -9,7 +9,6 @@
     <string name="mm_in_call">I et opkald</string>
     <string name="mm_in_call_notification_channel">I opkald</string>
     <string name="mm_incoming_call">Indgående opkald</string>
-    <string name="mm_is_calling">ringer</string>
     <string name="mm_microphone">Mikrofon</string>
     <string name="mm_microphone_muted">Slået fra</string>
     <string name="mm_mute">Stum</string>

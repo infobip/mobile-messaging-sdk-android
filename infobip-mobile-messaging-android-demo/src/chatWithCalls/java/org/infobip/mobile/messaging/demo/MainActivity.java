@@ -6,6 +6,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.Menu;
@@ -21,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -38,6 +41,10 @@ import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -106,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpOpenChatFragmentButton();
         setUpOpenChatViewButton();
         setUpAuthButton();
+        setUpRuntimeCustomization();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
         setUpCallsButtons();
@@ -218,6 +226,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "de-DE";
         else if (menuId == R.id.albanian)
             return "sq-AL";
+        else if (menuId == R.id.serbian)
+            return "sr_Latn";
         else return null;
     }
 
@@ -421,6 +431,67 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                         MobileMessagingLogger.e("MainActivity", throwable.getMessage(), throwable);
                     }
             );
+        });
+        enableCalls.setVisibility(View.VISIBLE);
+        disableCalls.setVisibility(View.VISIBLE);
+    }
+
+    private void setUpRuntimeCustomization() {
+        findViewById(R.id.customization).setOnClickListener(v -> {
+            InAppChatToolbarStyle toolbar = new InAppChatToolbarStyle(
+                    Color.LTGRAY,
+                    Color.LTGRAY,
+                    false,
+                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_decline, getTheme()),
+                    Color.MAGENTA,
+                    R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
+                    Color.BLACK,
+                    "Chat",
+                    null,
+                    true,
+                    null,
+                    Color.DKGRAY,
+                    "#1",
+                    null,
+                    true,
+                    false
+            );
+            inAppChat.setTheme(
+                    new InAppChatTheme(
+                            toolbar,
+                            toolbar,
+                            new InAppChatStyle(
+                                    Color.LTGRAY,
+                                    Color.MAGENTA,
+                                    "Offline",
+                                    null,
+                                    null,
+                                    Color.BLACK,
+                                    Color.CYAN,
+                                    false
+                            ),
+                            new InAppChatInputViewStyle(
+                                    R.style.IB_Chat_Input_TextAppearance,
+                                    Color.BLACK,
+                                    Color.LTGRAY,
+                                    "Type message",
+                                    null,
+                                    Color.GRAY,
+                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_add, getTheme()),
+                                    ColorStateList.valueOf(Color.MAGENTA),
+                                    null,
+                                    Color.RED,
+                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_send, getTheme()),
+                                    ColorStateList.valueOf(Color.MAGENTA),
+                                    null,
+                                    Color.RED,
+                                    Color.GRAY,
+                                    true,
+                                    Color.MAGENTA
+                            )
+                    )
+            );
+            Toast.makeText(this, "Custom style applied", Toast.LENGTH_SHORT).show();
         });
     }
 

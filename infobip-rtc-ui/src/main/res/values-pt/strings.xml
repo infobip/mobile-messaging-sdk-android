@@ -9,7 +9,6 @@
     <string name="mm_in_call">Numa chamada</string>
     <string name="mm_in_call_notification_channel">Em chamada</string>
     <string name="mm_incoming_call">Chamada recebida</string>
-    <string name="mm_is_calling">está chamando</string>
     <string name="mm_microphone">Microfone</string>
     <string name="mm_microphone_muted">Silenciado</string>
     <string name="mm_mute">Mudo</string>

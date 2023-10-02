@@ -9,7 +9,6 @@
     <string name="mm_in_call">Într-un apel</string>
     <string name="mm_in_call_notification_channel">În apel</string>
     <string name="mm_incoming_call">Apel primit</string>
-    <string name="mm_is_calling">sună</string>
     <string name="mm_microphone">Microfon</string>
     <string name="mm_microphone_muted">Dezactivat</string>
     <string name="mm_mute">Mut</string>

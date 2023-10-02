@@ -9,7 +9,6 @@
     <string name="mm_in_call">In een gesprek</string>
     <string name="mm_in_call_notification_channel">in gesprek</string>
     <string name="mm_incoming_call">Binnenkomend telefoongesprek</string>
-    <string name="mm_is_calling">is aan het bellen</string>
     <string name="mm_microphone">Microfoon</string>
     <string name="mm_microphone_muted">Gedempt</string>
     <string name="mm_mute">Stom</string>

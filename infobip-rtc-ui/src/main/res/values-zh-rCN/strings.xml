@@ -9,7 +9,6 @@
     <string name="mm_in_call">通话中</string>
     <string name="mm_in_call_notification_channel">通话中</string>
     <string name="mm_incoming_call">来电</string>
-    <string name="mm_is_calling">正在打电话</string>
     <string name="mm_microphone">麦克风</string>
     <string name="mm_microphone_muted">静音</string>
     <string name="mm_mute">沉默的</string>

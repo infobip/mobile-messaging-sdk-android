@@ -231,6 +231,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "ja-JP";
         else if (menuId == R.id.german)
             return "de-DE";
+        else if (menuId == R.id.albanian)
+            return "sq-AL";
+        else if (menuId == R.id.serbian)
+            return "sr_Latn";
         else return null;
     }
 
@@ -470,7 +474,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             );
             Toast.makeText(this, "Custom style applied", Toast.LENGTH_SHORT).show();
         });
-
     }
 
     private InAppChatDarkMode darkMode;

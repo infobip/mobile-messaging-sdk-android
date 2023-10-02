@@ -9,7 +9,6 @@
     <string name="mm_in_call">통화 중</string>
     <string name="mm_in_call_notification_channel">통화 중</string>
     <string name="mm_incoming_call">수신 전화</string>
-    <string name="mm_is_calling">전화하고있다</string>
     <string name="mm_microphone">마이크로폰</string>
     <string name="mm_microphone_muted">음소거</string>
     <string name="mm_mute">음소거</string>

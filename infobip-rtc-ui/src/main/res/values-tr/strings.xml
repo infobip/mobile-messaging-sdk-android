@@ -9,7 +9,6 @@
     <string name="mm_in_call">Telefonda</string>
     <string name="mm_in_call_notification_channel">görüşmede</string>
     <string name="mm_incoming_call">Gelen çağrı</string>
-    <string name="mm_is_calling">arıyor</string>
     <string name="mm_microphone">Mikrofon</string>
     <string name="mm_microphone_muted">sessiz</string>
     <string name="mm_mute">Sesini kapatmak</string>
