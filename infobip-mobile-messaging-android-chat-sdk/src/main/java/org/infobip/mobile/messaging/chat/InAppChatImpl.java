@@ -29,6 +29,7 @@ import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatScreenImpl;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
+import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
@@ -46,12 +47,14 @@ import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @SuppressLint("StaticFieldLeak")
     private static InAppChatImpl instance;
+    private static MobileMessagingCore mmCore;
     private Context context;
     private AndroidBroadcaster coreBroadcaster;
     private InAppChatBroadcasterImpl inAppChatBroadcaster;
@@ -65,10 +68,12 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private JwtProvider jwtProvider = null;
     private InAppChatDarkMode darkMode = null;
     private InAppChatTheme theme = null;
+    private LivechatRegistrationChecker lcRegIgChecker = null;
 
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
-            instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(InAppChatImpl.class);
+            mmCore = MobileMessagingCore.getInstance(context);
+            instance = mmCore.getMessageHandlerModule(InAppChatImpl.class);
         }
         return instance;
     }
@@ -183,7 +188,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             }
         }
 
-        NotificationSettings notificationSettings = MobileMessagingCore.getInstance(context).getNotificationSettings();
+        NotificationSettings notificationSettings = mobileMessagingCore().getNotificationSettings();
         if (stackBuilder.getIntentCount() == 0 && notificationSettings != null && notificationSettings.getCallbackActivity() != null) {
             stackBuilder.addNextIntent(new Intent(context, notificationSettings.getCallbackActivity())
                     .setAction(Event.NOTIFICATION_TAPPED.getKey())
@@ -353,9 +358,20 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
                 @Override
                 public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
                     chatWidgetConfigSyncResult = result;
+                    if (result.isSuccess()) {
+                        syncLivechatRegistrationId(result.getData());
+                    }
                 }
             });
         }
+    }
+
+    private void syncLivechatRegistrationId(WidgetInfo widgetInfo){
+        livechatRegistrationIdChecker().sync(
+                widgetInfo.getId(),
+                mobileMessagingCore().getPushRegistrationId(),
+                widgetInfo.isCallsAvailable()
+        );
     }
 
     private InAppChatFragment inAppChatWVFragment;
@@ -380,7 +396,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
-        if (inAppChatWVFragment != null){
+        if (inAppChatWVFragment != null) {
             inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
         }
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -487,6 +503,27 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             webView = new InAppChatWebView(context);
         }
         return webView;
+    }
+
+    synchronized private MobileMessagingCore mobileMessagingCore() {
+        if (mmCore == null) {
+            mmCore = MobileMessagingCore.getInstance(context);
+        }
+        return mmCore;
+    }
+
+    synchronized private LivechatRegistrationChecker livechatRegistrationIdChecker() {
+        if (lcRegIgChecker == null) {
+            lcRegIgChecker = new LivechatRegistrationChecker(
+                    context,
+                    mobileMessagingCore(),
+                    propertyHelper(),
+                    inAppChatBroadcaster(),
+                    mobileApiResourceProvider().getMobileApiAppInstance(context),
+                    Executors.newSingleThreadExecutor()
+            );
+        }
+        return lcRegIgChecker;
     }
     //endregion
 }

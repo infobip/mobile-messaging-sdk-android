@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         if (this.pushRegIdReceiverRegistered) {
             try {
                 LocalBroadcastManager.getInstance(this).unregisterReceiver(pushRegIdReceiver);
+                pushRegIdReceiverRegistered = false;
             } catch (Throwable t) {
                 MobileMessagingLogger.e("MainActivity", "Unable to unregister pushRegIdReceiver", t);
             }
@@ -237,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
     private void setUpPushRegIdField() {
         String pushRegId = getPushRegId();
-        if (!showPushRegId(pushRegId)) {
+        if (!showPushRegId(pushRegId) && !pushRegIdReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(pushRegIdReceiver, new IntentFilter(Event.REGISTRATION_CREATED.getKey()));
             this.pushRegIdReceiverRegistered = true;
         }
@@ -415,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         Button disableCalls = findViewById(R.id.disableCalls);
         InfobipRtcUi infobipRtcUi = InfobipRtcUi.getInstance(this);
         enableCalls.setOnClickListener(view -> {
-            infobipRtcUi.enableInAppCalls(
+            infobipRtcUi.enableInAppChatCalls(
                     () -> Toast.makeText(this, "Calls enabled!", Toast.LENGTH_SHORT).show(),
                     throwable -> {
                         Toast.makeText(this, "Cannot enable calls: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();

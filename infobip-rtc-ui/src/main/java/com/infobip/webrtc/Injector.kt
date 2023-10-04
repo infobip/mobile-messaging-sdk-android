@@ -2,10 +2,8 @@ package com.infobip.webrtc
 
 import android.content.Context
 import com.infobip.webrtc.sdk.api.InfobipRTC
-import com.infobip.webrtc.ui.ErrorListener
 import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.InfobipRtcUiImpl
-import com.infobip.webrtc.ui.SuccessListener
 import com.infobip.webrtc.ui.delegate.AppCodeDelegate
 import com.infobip.webrtc.ui.delegate.AppCodeDelegateImpl
 import com.infobip.webrtc.ui.delegate.CallsDelegate
@@ -41,8 +39,6 @@ internal object Injector {
     var colors: Colors? = null
     var icons: Icons? = null
     var incomingCallMessageStyle: IncomingCallMessageStyle? = null
-    var enableInAppCallsSuccess: SuccessListener? = null
-    var enableInAppCallsError: ErrorListener? = null
     var locale: Locale? = null
 
     private val rtcService: MobileApiRtc by lazy { MobileApiResourceProvider().getMobileApiRtc(appContext) }

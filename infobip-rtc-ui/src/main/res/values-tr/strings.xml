@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
     <string name="mm_ok">Tamam</string>
     <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
-    <string name="mm_call_registration_notification_description">Kullanıcı verileri güncelleniyor</string>
+    <string name="mm_call_registration_notification_description">Çağrı kaydı devam ediyor</string>
     <string name="mm_screen_share">Ekran paylaşımı</string>
     <string name="mm_screen_sharing">Ekran paylaşımı</string>
     <string name="mm_screen_sharing_description">Ekranınız paylaşıldı</string>

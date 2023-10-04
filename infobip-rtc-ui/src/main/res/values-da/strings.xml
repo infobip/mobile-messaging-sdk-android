@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Manglende notifikationstilladelse. Afviser indgående opkald.</string>
     <string name="mm_ok">Okay</string>
     <string name="mm_call_registration_notification_channel">Opkaldsregistrering</string>
-    <string name="mm_call_registration_notification_description">Opdatering af brugerdata</string>
+    <string name="mm_call_registration_notification_description">Opkaldsregistrering er i gang</string>
     <string name="mm_screen_share">Skærmdeling</string>
     <string name="mm_screen_sharing">Skærmdeling</string>
     <string name="mm_screen_sharing_description">Din skærm er delt</string>

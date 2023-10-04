@@ -10,7 +10,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 internal interface TokenProvider {
-    suspend fun getToken(identity: String, appId: String): String?
+    suspend fun getToken(identity: String): String?
 }
 
 internal class TokenProviderImpl(
@@ -20,24 +20,24 @@ internal class TokenProviderImpl(
     private var tokenResponse: TokenResponse? = null
     private val tokenLifespan = 43200L
     private var lastUsedIdentity: String? = null
-    private var lastUsedAppId: String? = null
 
-    override suspend fun getToken(identity: String, appId: String): String? {
-        val response = if (isNewTokenNeeded(identity, appId)) {
-            createToken(identity, appId)
+    override suspend fun getToken(identity: String): String? {
+        val response = if (isNewTokenNeeded(identity)) {
+            createToken(identity)
         } else {
-            tokenResponse?.takeIf { offsetDateTimeFromString(it.expirationTime)?.isBefore(OffsetDateTime.now()) == true } ?: createToken(identity, appId)
+            tokenResponse?.takeIf { offsetDateTimeFromString(it.expirationTime)?.isBefore(OffsetDateTime.now()) == true }
+                    ?: createToken(identity)
         }
 
         return response.token
     }
 
-    private suspend fun createToken(identity: String, appId: String): TokenResponse = withContext(dispatcher) {
-        rtcService.getToken(TokenBody(identity, appId, tokenLifespan))
-            .also { tokenResponse = it }
+    private suspend fun createToken(identity: String): TokenResponse = withContext(dispatcher) {
+        rtcService.getToken(TokenBody(identity, tokenLifespan))
+                .also { tokenResponse = it }
     }
 
-    private fun isNewTokenNeeded(identity: String, appId: String): Boolean = identity != lastUsedIdentity || appId != lastUsedAppId
+    private fun isNewTokenNeeded(identity: String): Boolean = identity != lastUsedIdentity
 
     private fun offsetDateTimeFromString(isoString: String): OffsetDateTime? {
         return runCatching {

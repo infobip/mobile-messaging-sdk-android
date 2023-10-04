@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Fehlende Benachrichtigungsberechtigung. Ablehnender eingehender Anruf.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Anrufregistrierung</string>
-    <string name="mm_call_registration_notification_description">Benutzerdaten aktualisieren</string>
+    <string name="mm_call_registration_notification_description">Die Anrufregistrierung ist im Gange</string>
     <string name="mm_screen_share">Bildschirm teilen</string>
     <string name="mm_screen_sharing">Bildschirm teilen</string>
     <string name="mm_screen_sharing_description">Ihr Bildschirm wird freigegeben</string>

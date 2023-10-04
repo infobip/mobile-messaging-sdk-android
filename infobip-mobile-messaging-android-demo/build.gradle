@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.google.gms:google-services:4.3.14'
     }
 }
 
@@ -74,7 +74,7 @@ android {
         chatWithCalls {
             dimension "default"
             minSdkVersion 21
-            property(project, 'infobip_webrtc_application_id', 'INFOBIP_WEBRTC_APPLICATION_ID')?.with { resValue "string", "infobip_webrtc_application_id", delegate }
+            property(project, 'infobip_webrtc_configuration_id', 'INFOBIP_WEBRTC_CONFIGURATION_ID')?.with { resValue "string", "infobip_webrtc_configuration_id", delegate }
         }
 
         deeplink {

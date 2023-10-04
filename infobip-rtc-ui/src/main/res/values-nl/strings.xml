@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Ontbrekende machtiging voor meldingen. Inkomende oproep weigeren.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Bel registratie</string>
-    <string name="mm_call_registration_notification_description">Gebruikersgegevens bijwerken</string>
+    <string name="mm_call_registration_notification_description">Oproepregistratie is bezig</string>
     <string name="mm_screen_share">Scherm delen</string>
     <string name="mm_screen_sharing">Scherm delen</string>
     <string name="mm_screen_sharing_description">Je scherm is gedeeld</string>

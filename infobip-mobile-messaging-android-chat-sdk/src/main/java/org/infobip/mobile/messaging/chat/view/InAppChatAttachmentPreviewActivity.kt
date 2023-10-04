@@ -229,7 +229,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key,
             null
         )
-        return WidgetInfo(null, null, widgetPrimaryColor, widgetBackgroundColor, 0L, null, false)
+        return WidgetInfo(null, null, widgetPrimaryColor, widgetBackgroundColor, 0L, null, false, false)
     }
 
 }

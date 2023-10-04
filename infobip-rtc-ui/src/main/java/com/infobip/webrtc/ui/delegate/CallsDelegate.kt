@@ -51,14 +51,14 @@ internal interface CallsDelegate {
     fun getCallStatus(): CallStatus
     fun handleIncomingCall(data: Map<String, String>): Boolean
     fun registerActiveConnection(token: String)
-    fun enablePush(token: String, onResult: (EnablePushNotificationResult) -> Unit)
+    fun enablePush(token: String, configId: String, onResult: (EnablePushNotificationResult) -> Unit)
     fun setNetworkQualityListener(networkQualityEventListener: NetworkQualityEventListener)
 }
 
 internal class CallsDelegateImpl(
-    private val context: Context,
-    private val callsScope: CoroutineScope,
-    private val infobipRtc: InfobipRTC
+        private val context: Context,
+        private val callsScope: CoroutineScope,
+        private val infobipRtc: InfobipRTC
 ) : CallsDelegate {
     private val call: RtcUiCall?
         get() = getActiveCall(
@@ -161,20 +161,20 @@ internal class CallsDelegateImpl(
                 val screenShareTrack = screenShareTrack()
                 val localVideoTrack = localVideoTrack()
                 CallState(
-                    isIncoming = call.duration() == 0,
-                    isMuted = call.muted(),
-                    isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
-                    elapsedTimeSeconds = call.duration(),
-                    isSpeakerOn = call.speakerphone(),
-                    isScreenShare = call.hasScreenShare(),
-                    isWeakConnection = false,
-                    isPip = false,
-                    isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
-                    showControls = true,
-                    error = "",
-                    localVideoTrack = localVideoTrack,
-                    remoteVideoTrack = remoteVideoTrack,
-                    screenShareTrack = screenShareTrack
+                        isIncoming = call.duration() == 0,
+                        isMuted = call.muted(),
+                        isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
+                        elapsedTimeSeconds = call.duration(),
+                        isSpeakerOn = call.speakerphone(),
+                        isScreenShare = call.hasScreenShare(),
+                        isWeakConnection = false,
+                        isPip = false,
+                        isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
+                        showControls = true,
+                        error = "",
+                        localVideoTrack = localVideoTrack,
+                        remoteVideoTrack = remoteVideoTrack,
+                        screenShareTrack = screenShareTrack
                 )
             }.getOrNull()
         }
@@ -199,19 +199,19 @@ internal class CallsDelegateImpl(
 
     override fun registerActiveConnection(token: String) {
         infobipRtc.registerForActiveConnection(
-            token,
-            context,
-            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingApplicationCallEventListener
+                token,
+                context,
+                IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingApplicationCallEventListener
         )
         infobipRtc.registerForActiveConnection(
-            token,
-            context,
-            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingCallEventListener
+                token,
+                context,
+                IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingCallEventListener
         )
     }
 
-    override fun enablePush(token: String, onResult: (EnablePushNotificationResult) -> Unit) {
-        infobipRtc.enablePushNotification(token, context) {
+    override fun enablePush(token: String, configId: String, onResult: (EnablePushNotificationResult) -> Unit) {
+        infobipRtc.enablePushNotification(token, context, configId) {
             onResult(it)
         }
     }

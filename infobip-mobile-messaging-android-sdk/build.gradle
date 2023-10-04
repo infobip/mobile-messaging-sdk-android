@@ -15,6 +15,7 @@ plugins {
 }
 
 android {
+    namespace "org.infobip.mobile.messaging"
     compileSdkVersion mm_compileSdkVersion
     buildToolsVersion mm_buildToolsVersion
 

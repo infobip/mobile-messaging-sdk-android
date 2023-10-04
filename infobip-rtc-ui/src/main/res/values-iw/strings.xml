@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">חסרה הרשאת הודעה. דחיית שיחה נכנסת.</string>
     <string name="mm_ok">בסדר</string>
     <string name="mm_call_registration_notification_channel">רישום שיחות</string>
-    <string name="mm_call_registration_notification_description">עדכון נתוני משתמש</string>
+    <string name="mm_call_registration_notification_description">רישום השיחה בעיצומה</string>
     <string name="mm_screen_share">שיתוף מסך</string>
     <string name="mm_screen_sharing">שיתוף מסך</string>
     <string name="mm_screen_sharing_description">המסך שלך משותף</string>

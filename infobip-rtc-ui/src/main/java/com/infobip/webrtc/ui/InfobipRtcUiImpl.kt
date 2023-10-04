@@ -12,6 +12,7 @@ import com.infobip.webrtc.ui.delegate.CallsDelegate
 import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.model.ListenType
+import com.infobip.webrtc.ui.model.RtcUiMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
@@ -30,13 +31,21 @@ internal class InfobipRtcUiImpl(
         private val notificationPermissionDelegate: NotificationPermissionDelegate,
 ) : InfobipRtcUi {
 
+    private var rtcUiMode: RtcUiMode?
+        get() = cache.rtcUiMode
+        set(value) {
+            cache.rtcUiMode = value
+        }
+
     override fun enableCalls(identity: String, listenType: ListenType, successListener: SuccessListener?, errorListener: ErrorListener?) {
-        Injector.enableInAppCallsSuccess = successListener
-        Injector.enableInAppCallsError = errorListener
+        //it can be called also from broadcast receivers when we already have mode
+        if (rtcUiMode == null)
+            rtcUiMode = RtcUiMode.CUSTOM.withListeners(successListener, errorListener)
         callsScope.launch {
             runCatching {
+                Log.d(TAG, "Enabling $rtcUiMode calls for identity $identity.")
                 cache.identity = identity
-                tokenProvider.getToken(identity, cache.applicationId)?.let { token ->
+                tokenProvider.getToken(identity)?.let { token ->
                     if (listenType == ListenType.PUSH) {
                         if (notificationPermissionDelegate.isPermissionNeeded()) {
                             withContext(Dispatchers.Main) {
@@ -58,35 +67,40 @@ internal class InfobipRtcUiImpl(
         }
     }
 
-    override fun enableInAppCalls(successListener: SuccessListener?, errorListener: ErrorListener?) {
-        cache.inAppCallsEnabled = true
+    override fun enableCalls(successListener: SuccessListener?, errorListener: ErrorListener?) {
+        rtcUiMode = RtcUiMode.DEFAULT.withListeners(successListener, errorListener)
         pushIdDelegate.getPushRegistrationId()?.let { pushRegId ->
             enableCalls(
-                    identity = pushRegId,
-                    listenType = ListenType.PUSH,
-                    successListener = successListener,
-                    errorListener = errorListener
+                identity = pushRegId,
+                listenType = ListenType.PUSH,
+                successListener = successListener,
+                errorListener = errorListener
             )
-        } ?: Log.d(TAG, "Could not obtain push registration ID, waiting for broadcast.")
+        } ?: Log.d(TAG, "Could not obtain identity value(pushRegistrationId), waiting for broadcast.")
+    }
+
+    override fun enableInAppChatCalls(
+        successListener: SuccessListener?,
+        errorListener: ErrorListener?
+    ) {
+        rtcUiMode = RtcUiMode.IN_APP_CHAT.withListeners(successListener, errorListener)
+        Log.d(TAG, "Waiting for broadcast with livechatRegistrationId.")
     }
 
     override fun disableCalls(successListener: SuccessListener?, errorListener: ErrorListener?) {
         runCatching {
             val identity = cache.identity
-            require(identity.isNotEmpty()) {
-                "Calls are not registered."
-            }
+            require(identity.isNotEmpty()) { "Calls are not registered." }
+            Log.d(TAG, "Disabling calls for identity $identity.")
             callsScope.launch {
-                rtcInstance.disablePushNotification(tokenProvider.getToken(identity, cache.applicationId), context)
+                rtcInstance.disablePushNotification(tokenProvider.getToken(identity), context)
                 cache.clear()
+                successListener?.onSuccess()
                 callsScope.coroutineContext.cancelChildren()
             }
-        }.onSuccess {
-            successListener?.onSuccess()
         }.onFailure {
             errorListener?.onError(it)
         }
-
     }
 
     override fun setLanguage(locale: Locale) {
@@ -94,7 +108,7 @@ internal class InfobipRtcUiImpl(
     }
 
     private fun registerPush(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {
-        callsDelegate.enablePush(token) {
+        callsDelegate.enablePush(token, cache.configurationId) {
             Log.d(TAG, "Registration for calls push result: ${it.status}, ${it.description}")
             runOnUiThread {
                 if (it.status != Status.SUCCESS) {
@@ -125,9 +139,8 @@ internal class InfobipRtcUiImpl(
     }
 
     private fun cleanStoredCallbacks() {
-        with(Injector) {
-            enableInAppCallsError = null
-            enableInAppCallsSuccess = null
+        with(Injector.cache) {
+            rtcUiMode?.cleanListeners()
         }
     }
 }

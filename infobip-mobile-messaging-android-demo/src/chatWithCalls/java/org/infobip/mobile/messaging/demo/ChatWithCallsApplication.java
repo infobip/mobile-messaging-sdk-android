@@ -11,7 +11,7 @@ public class ChatWithCallsApplication extends Application {
         super.onCreate();
 
         new InfobipRtcUi.Builder(this)
-                .enableInAppCalls(
+                .withInAppChatCalls(
                         () -> Toast.makeText(this, "Calls registration successful!", Toast.LENGTH_SHORT).show(),
                         throwable -> Toast.makeText(this, "Calls registration failed: " + throwable.getMessage(), Toast.LENGTH_SHORT).show()
                 ).build();

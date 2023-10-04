@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Kebenaran pemberitahuan tiada. Menolak panggilan masuk.</string>
     <string name="mm_ok">Okey</string>
     <string name="mm_call_registration_notification_channel">Pendaftaran panggilan</string>
-    <string name="mm_call_registration_notification_description">Mengemas kini data pengguna</string>
+    <string name="mm_call_registration_notification_description">Pendaftaran panggilan sedang dijalankan</string>
     <string name="mm_screen_share">Perkongsian skrin</string>
     <string name="mm_screen_sharing">Perkongsian skrin</string>
     <string name="mm_screen_sharing_description">Skrin anda dikongsi</string>

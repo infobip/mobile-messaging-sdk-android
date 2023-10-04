@@ -22,6 +22,7 @@ import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.*
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatBinding
+import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
@@ -76,6 +77,7 @@ class InAppChatView @JvmOverloads constructor(
     private var inAppChatBroadcaster: InAppChatBroadcaster = InAppChatBroadcasterImpl(context)
     private val mmCore: MobileMessagingCore = MobileMessagingCore.getInstance(context)
     private val localizationUtils = LocalizationUtils.getInstance(context)
+    private val lcRegIdChecker = LivechatRegistrationChecker(context)
     private var widgetInfo: WidgetInfo? = null
     private var lastControlsVisibility: Boolean? = null
 
@@ -286,6 +288,7 @@ class InAppChatView @JvmOverloads constructor(
         override fun setControlsEnabled(enabled: Boolean) {
             eventsListener?.onChatLoaded(enabled)
             isChatLoaded = enabled
+            lcRegIdChecker.sync()
             if (enabled)
                 inAppChat.resetMessageCounter()
         }
@@ -500,20 +503,12 @@ class InAppChatView @JvmOverloads constructor(
     private fun prepareWidgetInfo(): WidgetInfo? {
         val prefs = PropertyHelper.getDefaultMMSharedPreferences(context)
         val widgetId = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.key, null)
-        val widgetTitle =
-            prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key, null)
-        val widgetPrimaryColor =
-            prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key, null)
-        val widgetBackgroundColor = prefs.getString(
-            MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key,
-            null
-        )
-        val maxUploadContentSizeStr = prefs.getString(
-            MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.key,
-            null
-        )
-        val widgetMultiThread =
-            prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, false)
+        val widgetTitle = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key, null)
+        val widgetPrimaryColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key, null)
+        val widgetBackgroundColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key, null)
+        val maxUploadContentSizeStr = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.key, null)
+        val widgetMultiThread = prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, false)
+        val callsAvailable = prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.key, true)
         val language = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.key, null)
         var maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE
         if (StringUtils.isNotBlank(maxUploadContentSizeStr)) {
@@ -527,7 +522,8 @@ class InAppChatView @JvmOverloads constructor(
                 widgetBackgroundColor,
                 maxUploadContentSize,
                 language,
-                widgetMultiThread
+                widgetMultiThread,
+                callsAvailable
             )
         }
     }

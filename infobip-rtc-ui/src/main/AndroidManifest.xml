@@ -30,6 +30,13 @@
                 <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".receiver.LcRegIdBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.chat.LIVECHAT_REGISTRATION_ID_UPDATED" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".service.DefaultIncomingCallService"

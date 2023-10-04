@@ -289,13 +289,16 @@ public class InAppChatMobileAttachment {
      */
     @NotNull
     private static String requireFileName(Context context, Uri uri, String mimeType) {
-        String fileName = UUID.randomUUID().toString();
+        String fileName = null;
         String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
         if (uri != null) {
             fileName = queryFileName(context, uri);
             if (StringUtils.isNotBlank(fileName))
                 return fileName;
             fileName = uri.getLastPathSegment();
+        }
+        if (StringUtils.isBlank(fileName)){
+            fileName = UUID.randomUUID().toString();
         }
         if (extension != null) {
             fileName += "." + extension;

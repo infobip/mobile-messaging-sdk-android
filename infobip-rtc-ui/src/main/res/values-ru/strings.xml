@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Отсутствует разрешение на уведомление. Отклонение входящего вызова.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Регистрация звонков</string>
-    <string name="mm_call_registration_notification_description">Обновление пользовательских данных</string>
+    <string name="mm_call_registration_notification_description">Регистрация звонка выполняется</string>
     <string name="mm_screen_share">Демонстрация экрана</string>
     <string name="mm_screen_sharing">Демонстрация экрана</string>
     <string name="mm_screen_sharing_description">Ваш экран открыт</string>

@@ -66,4 +66,7 @@ public interface MobileApiAppInstance {
     void sendUserCustomEvents(@Path(name = "regId") String regId,
                               @Query(name = "validate", value = "false") boolean validate,
                               @Body UserCustomEventBody userCustomEventBody);
+
+    @HttpRequest(method = HttpMethod.GET, value = "{regId}/user/livechatinfo")
+    LivechatContactInformation getLivechatContactInformation(@Path(name = "regId") String regId);
 }

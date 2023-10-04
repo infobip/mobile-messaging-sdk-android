@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
     <string name="mm_ok">好</string>
     <string name="mm_call_registration_notification_channel">來電登記</string>
-    <string name="mm_call_registration_notification_description">更新用戶數據</string>
+    <string name="mm_call_registration_notification_description">來電登記正在進行中</string>
     <string name="mm_screen_share">屏幕共享</string>
     <string name="mm_screen_sharing">屏幕共享</string>
     <string name="mm_screen_sharing_description">您的屏幕已共享</string>

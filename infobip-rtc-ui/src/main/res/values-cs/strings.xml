@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Registrace hovoru</string>
-    <string name="mm_call_registration_notification_description">Aktualizace uživatelských dat</string>
+    <string name="mm_call_registration_notification_description">Probíhá registrace hovoru</string>
     <string name="mm_screen_share">Sdílení obrazovky</string>
     <string name="mm_screen_sharing">Sdílení obrazovky</string>
     <string name="mm_screen_sharing_description">Vaše obrazovka je sdílená</string>

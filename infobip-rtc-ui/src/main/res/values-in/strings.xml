@@ -3,7 +3,7 @@
     <string name="mm_audio_permission_required">Izin audio diperlukan untuk menangani panggilan.</string>
     <string name="mm_call_finished">Panggilan selesai</string>
     <string name="mm_call_registration_notification_channel">Pendaftaran panggilan</string>
-    <string name="mm_call_registration_notification_description">Memperbarui data pengguna</string>
+    <string name="mm_call_registration_notification_description">Registrasi panggilan sedang berlangsung</string>
     <string name="mm_call_weak_internet_connection">Jaringan Anda menyebabkan kualitas panggilan yang buruk</string>
     <string name="mm_calls_notification_channel">Panggilan</string>
     <string name="mm_cancel">Membatalkan</string>

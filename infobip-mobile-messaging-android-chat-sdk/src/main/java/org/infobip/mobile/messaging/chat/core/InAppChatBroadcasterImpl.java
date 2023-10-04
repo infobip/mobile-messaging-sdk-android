@@ -32,6 +32,12 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
                 .putExtra(BroadcastParameter.EXTRA_CHAT_VIEW, view.name()));
     }
 
+    @Override
+    public void livechatRegistrationIdUpdated(String livechatRegistrationId) {
+        send(prepare(InAppChatEvent.LIVECHAT_REGISTRATION_ID_UPDATED)
+                .putExtra(BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID, livechatRegistrationId));
+    }
+
     private void send(Intent intent) {
         try {
             context.sendBroadcast(intent);

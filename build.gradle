@@ -1,6 +1,7 @@
 buildscript {
-    ext.mm_kotlinVersion = "1.7.20"
-    ext.mm_gradlePluginVersion = "7.2.2"
+    //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+    ext.mm_kotlinVersion = "1.8.20"
+    ext.mm_gradlePluginVersion = "7.4.0"
     repositories {
         google()
         mavenCentral()

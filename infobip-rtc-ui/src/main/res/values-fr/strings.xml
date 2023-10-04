@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Autorisation de notification manquante. Refuser l\'appel entrant.</string>
     <string name="mm_ok">D\'accord</string>
     <string name="mm_call_registration_notification_channel">Enregistrement d\'appel</string>
-    <string name="mm_call_registration_notification_description">Mise à jour des données utilisateur</string>
+    <string name="mm_call_registration_notification_description">L\'enregistrement de l\'appel est en cours</string>
     <string name="mm_screen_share">Partage d\'écran</string>
     <string name="mm_screen_sharing">Partage d\'écran</string>
     <string name="mm_screen_sharing_description">Votre écran est partagé</string>

@@ -6,35 +6,48 @@ import android.util.Log
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.ui.model.ListenType
+import com.infobip.webrtc.ui.model.RtcUiMode
 import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.Locale
 
 /**
  * [InfobipRtcUi] is an easy to use library, that allows you to connect to [Infobip RTC](https://github.com/infobip/infobip-rtc-android) by just building library.
  *
- * This assumes, though, that the initial setups of [Mobile Push Notifications](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/README.md) and the [Infobip RTC](https://www.infobip.com/docs/voice-and-video/webrtc#set-up-web-and-in-app-calls) are set in both, your account and your mobile app profile.
+ * This assumes, though, that the initial setups of [Mobile Push Notifications](https://github.com/infobip/mobile-messaging-sdk-android/blob/master/README.md) and the [Infobip RTC](https://www.infobip.com/docs/voice-and-video/webrtc#getstartedwith-rtc-sdk) are set in both, your account and your mobile app profile.
  * [InfobipRtcUi] takes care of everything: the registration of your device (in order to receive and trigger calls), the handle of the calls themselves, and offers you a powerful user interface with all the features your customer may need: ability to capture video through both, front and back camera, option to mute and use the speaker, ability to capture and share the screen of your mobile device, option to minimise the call UI in a picture-on-picture mode, and more.
  * [InfobipRtcUi] also allows you to take control in any step of the flow, if you wish or need so, you can become a delegate for the FirebaseMessagingService or use your own custom user interface to handle the calls, it is up to you.
  */
 interface InfobipRtcUi {
+
     class Builder(private val context: Context) {
-        private var enableCalls = false
 
         /**
-         * Defines Infobip <a href="https://portal.infobip.com/apps/webrtc/application/create" target="_blank">`WebRTC application ID`</a> to use.
+         * [WebRTC application concept is deprecated.](https://www.infobip.com/docs/voice-and-video/webrtc#webrtc-sdk-1-x-deprecated-)
+         * You must migrate to new [push configuration approach](https://www.infobip.com/docs/voice-and-video/webrtc#set-up-web-and-in-app-calls) to make calls working.
+         * This function has no effect anymore.
          *
-         * @param appId <a href="https://portal.infobip.com/apps/webrtc/application/create" target="_blank">`WebRTC application ID`</a>
+         * @return [InfobipRtcUi.Builder]
+         */
+        @Deprecated(
+            "WebRTC application concept is deprecated. Use push configuration id instead",
+            ReplaceWith("withConfigurationId()")
+        )
+        fun applicationId(appId: String) = this
+
+        /**
+         * Defines Infobip [WebRTC configuration ID](https://www.infobip.com/docs/api/channels/webrtc-calls/webrtc/save-push-configuration) to use.
+         *
+         * @param id configuration id
          * It is mandatory parameter. Can be provided also as string resource, builder provided ID has precedent over ID provided in resources.
          * ```
          * <resources>
-         *    <string name="infobip_webrtc_application_id">WEBRTC APPLICATION ID</string>
+         *    <string name="infobip_webrtc_configuration_id">WEBRTC CONFIGURATION ID</string>
          *    ...
          * </resources>
          * ```
-         * @return [InfobipRtcUi.Builder]
          */
-        fun applicationId(appId: String) = apply {
-            Injector.cache.applicationId = appId
+        fun withConfigurationId(id: String) = apply {
+            Injector.cache.configurationId = id
         }
 
         /**
@@ -43,37 +56,78 @@ interface InfobipRtcUi {
          * @param clazz custom activity class handling call UI
          * @return [InfobipRtcUi.Builder]
          */
-        fun customActivity(clazz: Class<out Activity>) = apply {
+        fun withCustomActivity(clazz: Class<out Activity>) = apply {
             Injector.cache.activityClass = clazz
         }
 
         /**
-         * Enables calls immediately SDK is created.
+         * Set whether incoming call should be declined in case of missing notification permission. Default value is true.
+         *
+         * @param decline true if call is automatically declined, false otherwise
+         * @return [InfobipRtcUi.Builder]
+         */
+        fun withAutoDeclineOnMissingNotificationPermission(decline: Boolean) = apply {
+            Injector.cache.autoDeclineOnMissingNotificationPermission = decline
+        }
+
+        /**
+         * Enables incoming calls for InAppChat. Calls are not enabled immediately, it is waiting for InAppChat to provide livechatRegistrationId what is used as identity, listenType is PUSH.
+         * If successListener is not provided, default null is used.
+         * If errorListener is not provided, default null is used.
          *
          * @param successListener callback triggered when incoming calls are subscribed
          * @param errorListener callback triggered when incoming calls subscribe action failed
          * @return [InfobipRtcUi.Builder]
          */
         @JvmOverloads
-        fun enableInAppCalls(
-                successListener: SuccessListener? = null,
-                errorListener: ErrorListener? = null
-        ) = apply {
-            this.enableCalls = true
-            Injector.cache.inAppCallsEnabled = true
-            Injector.enableInAppCallsSuccess = successListener
-            Injector.enableInAppCallsError = errorListener
-        }
+        fun withInAppChatCalls(
+            successListener: SuccessListener? = null,
+            errorListener: ErrorListener? = null
+        ): BuilderFinalStep = BuilderFinalStepImpl(
+            context,
+            RtcUiMode.IN_APP_CHAT.withListeners(successListener, errorListener)
+        )
 
         /**
-         * Set whether incoming call should declined in case of missing notification permission. Default value is true.
+         * Enables incoming calls where internally managed pushRegistrationId is used as identity, listenType is PUSH.
+         * If successListener is not provided, default null is used.
+         * If errorListener is not provided, default null is used.
          *
-         * @param decline true if call is automatically declined, false otherwise
-         * @return [InfobipRtcUi.Builder]
+         * @param successListener callback triggered when incoming calls are subscribed
+         * @param errorListener callback triggered when incoming calls subscribe action failed
          */
-        fun autoDeclineOnMissingNotificationPermission(decline: Boolean) = apply {
-            Injector.cache.autoDeclineOnMissingNotificationPermission = decline
-        }
+        @JvmOverloads
+        fun withCalls(
+            successListener: SuccessListener? = null,
+            errorListener: ErrorListener? = null
+        ): BuilderFinalStep = BuilderFinalStepImpl(
+            context,
+            RtcUiMode.DEFAULT.withListeners(successListener, errorListener)
+        )
+
+        /**
+         * Enables incoming calls for provided identity and listenType.
+         * If listenType is not provided, default ListenType.PUSH is used.
+         * If successListener is not provided, default null is used.
+         * If errorListener is not provided, default null is used.
+         *
+         * @param identity WebRTC identity
+         * @param listenType WebRTC listenType
+         * @param successListener callback triggered when incoming calls are subscribed
+         * @param errorListener callback triggered when incoming calls subscribe action failed
+         */
+        @JvmOverloads
+        fun withCalls(
+            identity: String,
+            listenType: ListenType = ListenType.PUSH,
+            successListener: SuccessListener? = null,
+            errorListener: ErrorListener? = null
+        ): BuilderFinalStep = BuilderFinalStepImpl(
+            context,
+            RtcUiMode.CUSTOM.withListeners(successListener, errorListener),
+            identity,
+            listenType
+        )
 
         /**
          * Creates [InfobipRtcUi] SDK instance.
@@ -81,12 +135,60 @@ interface InfobipRtcUi {
          * @return [InfobipRtcUi] instance
          */
         fun build(): InfobipRtcUi {
+            return BuilderFinalStepImpl(context).build()
+        }
+
+    }
+
+    interface BuilderFinalStep {
+
+        /**
+         * Creates [InfobipRtcUi] SDK instance.
+         *
+         * @return [InfobipRtcUi] instance
+         */
+        fun build(): InfobipRtcUi
+
+    }
+
+    private class BuilderFinalStepImpl(
+        private val context: Context,
+        private val rtcUiMode: RtcUiMode? = null,
+        private val identity: String? = null,
+        private val listenType: ListenType? = null
+    ) : BuilderFinalStep {
+        override fun build(): InfobipRtcUi {
             return getInstance(context).also { sdk ->
-                if (this.enableCalls) {
-                    sdk.enableInAppCalls(
-                        successListener = Injector.enableInAppCallsSuccess ?: SuccessListener { Log.d(TAG, "InAppCalls enabled.") },
-                        errorListener = Injector.enableInAppCallsError ?: ErrorListener { Log.d(TAG, "Failed to enabled InAppCalls.", it) }
-                    )
+                this.rtcUiMode?.let { mode ->
+                    val defaultSuccessListener =
+                        SuccessListener { Log.d(TAG, "$mode calls enabled.") }
+                    val defaultErrorListener =
+                        ErrorListener { Log.d(TAG, "Failed to enabled $mode calls.", it) }
+                    when (mode) {
+                        RtcUiMode.CUSTOM -> {
+                            this.identity?.let { identity ->
+                                this.listenType?.let { listenType ->
+                                    sdk.enableCalls(
+                                        identity = identity,
+                                        listenType = listenType,
+                                        successListener = mode.successListener
+                                            ?: defaultSuccessListener,
+                                        errorListener = mode.errorListener ?: defaultErrorListener
+                                    )
+                                }
+                            }
+                        }
+
+                        RtcUiMode.DEFAULT -> sdk.enableCalls(
+                            successListener = mode.successListener ?: defaultSuccessListener,
+                            errorListener = mode.errorListener ?: defaultErrorListener
+                        )
+
+                        RtcUiMode.IN_APP_CHAT -> sdk.enableInAppChatCalls(
+                            successListener = mode.successListener ?: defaultSuccessListener,
+                            errorListener = mode.errorListener ?: defaultErrorListener
+                        )
+                    }
                 }
             }
         }
@@ -103,18 +205,22 @@ interface InfobipRtcUi {
         fun getInstance(context: Context): InfobipRtcUi {
             val sdk = Injector.getWebrtcUi(context)
 
-            if (Injector.cache.applicationId.isBlank()) {
-                getWebRtcApplicationIdFromResources(context)?.let {
-                    Injector.cache.applicationId = it
+            if (Injector.cache.configurationId.isBlank()) {
+                getWebRtcPushConfigurationIdFromResources(context)?.let {
+                    Injector.cache.configurationId = it
                 }
             }
             validateMobileMessagingApplicationCode()
-            validateWebRtcApplicationId()
+            validateWebRtcPushConfigurationId()
             return sdk
         }
 
-        private fun getWebRtcApplicationIdFromResources(context: Context): String? {
-            val resource = ResourceLoader.loadResourceByName(context, "string", "infobip_webrtc_application_id")
+        private fun getWebRtcPushConfigurationIdFromResources(context: Context): String? {
+            val resource = ResourceLoader.loadResourceByName(
+                context,
+                "string",
+                "infobip_webrtc_configuration_id"
+            )
             return if (resource > 0) {
                 context.resources.getString(resource)
             } else null
@@ -125,9 +231,9 @@ interface InfobipRtcUi {
                 throw IllegalArgumentException("Application code is not provided to MobileMessaging library, make sure it is available in resources or Mobile Messaging SDK builder.")
         }
 
-        private fun validateWebRtcApplicationId() {
-            if (Injector.cache.applicationId.isBlank())
-                throw IllegalArgumentException("Application ID is not provided to InfobipRtcUi library, make sure it is available in resources or InfobipRtcUi SDK builder.")
+        private fun validateWebRtcPushConfigurationId() {
+            if (Injector.cache.configurationId.isBlank())
+                throw IllegalArgumentException("Webrtc push configuration ID is not provided to InfobipRtcUi library, make sure it is available in resources or InfobipRtcUi SDK builder.")
         }
 
     }
@@ -144,18 +250,37 @@ interface InfobipRtcUi {
     )
 
     /**
-     * Enables incoming calls subscription for InAppChat.
+     * Enables incoming calls for InAppChat. Calls are not enabled immediately, it is waiting for InAppChat to provide livechatRegistrationId what is used as identity, listenType is PUSH.
+     * If successListener is not provided, default null is used.
+     * If errorListener is not provided, default null is used.
      *
      * @param successListener callback triggered when incoming calls are subscribed
      * @param errorListener callback triggered when incoming calls subscribe action failed
+     * @return [InfobipRtcUi.Builder]
      */
-    fun enableInAppCalls(
+    fun enableInAppChatCalls(
         successListener: SuccessListener? = null,
         errorListener: ErrorListener? = null
     )
 
     /**
-     * Enables incoming calls for custom identity and listenType.
+     * Enables incoming calls where internally managed pushRegistrationId is used as identity, listenType is PUSH.
+     * If successListener is not provided, default null is used.
+     * If errorListener is not provided, default null is used.
+     *
+     * @param successListener callback triggered when incoming calls are subscribed
+     * @param errorListener callback triggered when incoming calls subscribe action failed
+     */
+    fun enableCalls(
+        successListener: SuccessListener? = null,
+        errorListener: ErrorListener? = null
+    )
+
+    /**
+     * Enables incoming calls for provided identity and listenType.
+     * If listenType is not provided, default ListenType.PUSH is used.
+     * If successListener is not provided, default null is used.
+     * If errorListener is not provided, default null is used.
      *
      * @param identity WebRTC identity
      * @param listenType WebRTC listenType

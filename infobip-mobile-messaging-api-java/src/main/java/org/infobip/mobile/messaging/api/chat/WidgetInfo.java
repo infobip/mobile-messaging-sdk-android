@@ -15,4 +15,5 @@ public class WidgetInfo {
     private long maxUploadContentSize;
     private String language;
     private boolean multiThread;
+    private boolean callsAvailable = true;
 }

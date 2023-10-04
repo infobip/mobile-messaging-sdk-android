@@ -18,4 +18,9 @@ public interface InAppChatBroadcaster {
      */
     void chatViewChanged(InAppChatWidgetView view);
 
+    /**
+     * Sends broadcast when Livechat registration id is updated
+     */
+    void livechatRegistrationIdUpdated(String livechatRegistrationId);
+
 }

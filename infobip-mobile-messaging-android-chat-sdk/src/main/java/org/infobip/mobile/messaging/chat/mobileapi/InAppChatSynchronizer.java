@@ -75,6 +75,7 @@ public class InAppChatSynchronizer {
                 PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), widgetInfo.getBackgroundColor());
                 PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), widgetInfo.getMaxUploadContentSize());
                 PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.getKey(), widgetInfo.isMultiThread());
+                PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.getKey(), widgetInfo.isCallsAvailable());
                 if (listener != null) {
                     listener.onResult(new Result<>(widgetInfo));
                 }

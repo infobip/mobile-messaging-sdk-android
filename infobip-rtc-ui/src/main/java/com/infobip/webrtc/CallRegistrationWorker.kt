@@ -16,8 +16,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.model.ListenType
+import com.infobip.webrtc.ui.model.RtcUiMode
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -27,22 +32,29 @@ class CallRegistrationWorker(
     private val params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
-    private val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     companion object {
-        private const val PUSH_REG_ID: String =
-            "com.infobip.webrtc.CallRegistrationWorker.PUSH_REG_ID"
+        private const val ARG_IDENTITY: String = "com.infobip.webrtc.CallRegistrationWorker.IDENTITY"
+        private const val ARG_DISABLE_PREVIOUS_IDENTITY: String = "com.infobip.webrtc.CallRegistrationWorker.ARG_DISABLE_PREVIOUS_IDENTITY"
         private const val MAX_ATTEMPT_COUNT: Int = 3
         private const val TAG = "CallRegistrationWorker"
-        private const val CALL_REGISTRATION_SERVICE_CHANNEL_ID =
-            "com.infobip.webrtc.CallRegistrationWorker.CALL_REGISTRATION_SERVICE_CHANNEL_ID"
+        private const val CALL_REGISTRATION_SERVICE_CHANNEL_ID = "com.infobip.webrtc.CallRegistrationWorker.CALL_REGISTRATION_SERVICE_CHANNEL_ID"
         private const val NOTIFICATION_ID = 2001
 
-        fun launch(context: Context, pushRegId: String?) {
-            if (pushRegId?.isNotBlank() == true) {
+        fun launch(
+            context: Context,
+            identity: String?,
+            disablePreviousIdentity: Boolean = false
+        ) {
+            if (identity?.isNotBlank() == true) {
                 val work = OneTimeWorkRequestBuilder<CallRegistrationWorker>().apply {
-                    setInputData(Data.Builder().putString(PUSH_REG_ID, pushRegId).build())
+                    setInputData(
+                        Data.Builder()
+                            .putString(ARG_IDENTITY, identity)
+                            .putBoolean(ARG_DISABLE_PREVIOUS_IDENTITY, disablePreviousIdentity)
+                            .build()
+                    )
                     setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     setBackoffCriteria(
                         BackoffPolicy.LINEAR,
@@ -56,24 +68,37 @@ class CallRegistrationWorker(
     }
 
     override suspend fun doWork(): Result {
-        return suspendCancellableCoroutine { cont ->
-            params.inputData.getString(PUSH_REG_ID)?.let { pushRegId ->
-                val successListener = Injector.enableInAppCallsSuccess
-                val errorListener = Injector.enableInAppCallsError
-                Injector.getWebrtcUi(applicationContext).enableCalls(
-                    identity = pushRegId,
+        val webrtcUi = Injector.getWebrtcUi(applicationContext)
+        val identity = params.inputData.getString(ARG_IDENTITY)
+        val previousIdentity = Injector.cache.identity
+
+        if (previousIdentity.isNotBlank() && previousIdentity == identity)
+            return Result.success()
+
+        return if (identity == null) {
+            Result.failure()
+        } else {
+            val disablePreviousIdentity = params.inputData.getBoolean(ARG_DISABLE_PREVIOUS_IDENTITY, false)
+            if (disablePreviousIdentity && previousIdentity.isNotBlank())
+                webrtcUi.disableCallsForPreviousIdentity()
+            suspendCancellableCoroutine { cont ->
+                val mode = Injector.cache.rtcUiMode?.takeIf { it == RtcUiMode.DEFAULT || it == RtcUiMode.IN_APP_CHAT }
+                val successListener = mode?.successListener
+                val errorListener = mode?.errorListener
+                webrtcUi.enableCalls(
+                    identity = identity,
                     listenType = ListenType.PUSH,
                     successListener = {
                         successListener?.onSuccess()
-                        Log.d(TAG, "InAppCalls enabled from broadcast.")
+                        Log.d(TAG, "$mode calls enabled from broadcast. ")
                         if (cont.isActive)
                             cont.resume(Result.success())
                     },
                     errorListener = {
                         errorListener?.onError(it)
-                        Log.e(TAG, "Failed to enabled InAppCalls from broadcast.", it)
+                        Log.e(TAG, "Failed to enabled $mode calls from broadcast.", it)
                         if (runAttemptCount <= MAX_ATTEMPT_COUNT) {
-                            Log.d(TAG, "Exception occurred, return Retry x$runAttemptCount")
+                            Log.d(TAG, "Exception occurred, attempt: $runAttemptCount/$MAX_ATTEMPT_COUNT")
                             if (cont.isActive)
                                 cont.resume(Result.retry())
                         } else {
@@ -83,11 +108,25 @@ class CallRegistrationWorker(
                         }
                     }
                 )
-            } ?: cont.apply {
-                if (isActive)
-                    resume(Result.failure())
             }
         }
+    }
+
+    private suspend fun InfobipRtcUi.disableCallsForPreviousIdentity() = coroutineScope {
+        val mode = Injector.cache.rtcUiMode
+        val onResultAction: (CancellableContinuation<Unit>, String) -> Unit = { cont, msg ->
+            Log.d(TAG, msg)
+            if (cont.isActive)
+                cont.resume(Unit)
+        }
+        suspendCancellableCoroutine { cont ->
+            disableCalls(
+                { onResultAction(cont, "Calls disabled.") },
+                { onResultAction(cont, "Failed to disable calls.") }
+            )
+        }
+        Injector.cache.rtcUiMode = mode
+        delay(2000L) //Delay gives WebRTC BE time to process action
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {

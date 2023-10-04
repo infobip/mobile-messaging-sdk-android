@@ -15,7 +15,7 @@
     <string name="mm_notification_permission_required_declining_call">Mungon leja e njoftimit. Refuzimi i thirrjes hyrëse.</string>
     <string name="mm_ok">Ne rregull</string>
     <string name="mm_call_registration_notification_channel">Regjistrimi i thirrjeve</string>
-    <string name="mm_call_registration_notification_description">Përditësimi i të dhënave të përdoruesit</string>
+    <string name="mm_call_registration_notification_description">Regjistrimi i thirrjeve është në proces</string>
     <string name="mm_screen_share">Ndarjen e ekranit</string>
     <string name="mm_screen_sharing">Ndarjen e ekranit</string>
     <string name="mm_screen_sharing_description">Ekrani juaj është i ndarë</string>
