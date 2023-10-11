@@ -52,4 +52,6 @@
     <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
     <string name="action_registration_id_copy">Registration ID</string>
     <string name="language_changed">Language changed to %1$s</string>
+    <string name="custom_button_checked">Custom button checked</string>
+    <string name="custom_button_enabled">Custom button enabled</string>
 </resources>

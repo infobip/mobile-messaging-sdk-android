@@ -8,7 +8,6 @@ import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.sdk.api.event.network.NetworkQualityChangedEvent
 import com.infobip.webrtc.sdk.api.model.CallStatus
-import com.infobip.webrtc.sdk.api.model.RemoteVideo
 import com.infobip.webrtc.sdk.api.model.network.NetworkQuality
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
@@ -16,13 +15,22 @@ import com.infobip.webrtc.sdk.impl.event.listener.DefaultNetworkQualityEventList
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-class CallViewModel : ViewModel() {
+internal class CallViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         CallState(
             isIncoming = true,
@@ -30,7 +38,7 @@ class CallViewModel : ViewModel() {
             isPeerMuted = false,
             elapsedTimeSeconds = 0,
             isSpeakerOn = false,
-            isScreenShare = false,
+            isLocalScreenShare = false,
             isWeakConnection = false,
             isPip = false,
             isFinished = false,
@@ -48,12 +56,25 @@ class CallViewModel : ViewModel() {
     private val callsDelegate by lazy { Injector.callsDelegate }
 
     val remoteVideoTrack: StateFlow<RTCVideoTrack?> = state
-        .map { it.screenShareTrack ?: it.remoteVideoTrack }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.screenShareTrack() ?: callsDelegate.remoteVideoTrack())
+        .map { it.remoteVideoTrack }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.remoteVideoTrack())
+
+    val screenShareTrack: StateFlow<RTCVideoTrack?> = state
+        .map { it.screenShareTrack }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.screenShareTrack())
 
     val localVideoTrack: StateFlow<RTCVideoTrack?> = state
         .map { it.localVideoTrack }
         .stateIn(viewModelScope, SharingStarted.Eagerly, callsDelegate.localVideoTrack())
+
+    private val _localTrackToBeRemoved = MutableSharedFlow<RTCVideoTrack>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val localTrackToBeRemoved = _localTrackToBeRemoved.asSharedFlow()
+
+    private val _remoteTrackToBeRemoved = MutableSharedFlow<RTCVideoTrack>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val remoteTrackToBeRemoved = _remoteTrackToBeRemoved.asSharedFlow()
+
+    private val _screenShareTrackToBeRemoved = MutableSharedFlow<RTCVideoTrack>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val screenShareTrackToBeRemoved = _screenShareTrackToBeRemoved.asSharedFlow()
 
     private val timeFormatter = DateTimeFormatter.ofPattern("mm:ss")
 
@@ -103,7 +124,7 @@ class CallViewModel : ViewModel() {
     fun shareScreen(screenCapturer: ScreenCapturer) {
         runCatching {
             callsDelegate.shareScreen(screenCapturer)
-            updateState { copy(isScreenShare = true) }
+            updateState { copy(isLocalScreenShare = true) }
         }.onFailure {
             Log.e(TAG, "Action start screen share failed.", it)
         }
@@ -112,7 +133,7 @@ class CallViewModel : ViewModel() {
     fun stopScreenShare() {
         runCatching {
             callsDelegate.stopScreenShare()
-            updateState { copy(isScreenShare = false) }
+            updateState { copy(isLocalScreenShare = false) }
         }.onFailure {
             Log.e(TAG, "Action stop screen share failed.", it)
         }
@@ -149,7 +170,7 @@ class CallViewModel : ViewModel() {
     }
 
     fun toggleControlsVisibility() {
-        if (state.value.isRemoteVideo)
+        if (state.value.isRemoteVideo || state.value.isLocalScreenShare || state.value.isRemoteScreenShare)
             updateState { copy(showControls = !showControls) }
     }
 
@@ -169,10 +190,6 @@ class CallViewModel : ViewModel() {
         return state.value.isIncoming
     }
 
-    fun getRemoteVideos(): List<RemoteVideo>? = callsDelegate.remoteVideos()?.map { it.value }
-
-    fun getLocalVideo(): RTCVideoTrack? = callsDelegate.localVideoTrack()
-
     private fun setNetworkQualityListener() {
         callsDelegate.setNetworkQualityListener(object : DefaultNetworkQualityEventListener() {
             override fun onNetworkQualityChanged(networkQualityChangedEvent: NetworkQualityChangedEvent?) {
@@ -187,5 +204,22 @@ class CallViewModel : ViewModel() {
                 }
             }
         })
+    }
+
+    fun emitLocalTrackToRemove() {
+        state.value.localVideoTrack?.let {
+            _localTrackToBeRemoved.tryEmit(it)
+        }
+    }
+    fun emitRemoteTrackToRemove() {
+        state.value.remoteVideoTrack?.let {
+            _remoteTrackToBeRemoved.tryEmit(it)
+        }
+    }
+
+    fun emitScreenShareTrackToRemove() {
+        state.value.screenShareTrack?.let {
+            _screenShareTrackToBeRemoved.tryEmit(it)
+        }
     }
 }

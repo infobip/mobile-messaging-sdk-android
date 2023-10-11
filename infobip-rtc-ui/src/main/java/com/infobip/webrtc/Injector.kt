@@ -14,6 +14,7 @@ import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegateImpl
 import com.infobip.webrtc.ui.delegate.Vibrator
 import com.infobip.webrtc.ui.delegate.VibratorImpl
+import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.notifications.CallNotificationFactory
 import com.infobip.webrtc.ui.notifications.CallNotificationFactoryImpl
 import com.infobip.webrtc.ui.view.styles.Colors
@@ -40,6 +41,14 @@ internal object Injector {
     var icons: Icons? = null
     var incomingCallMessageStyle: IncomingCallMessageStyle? = null
     var locale: Locale? = null
+    var inCallButtons: List<InCallButton> = listOf(
+        InCallButton.HangUp,
+        InCallButton.Mute(),
+        InCallButton.Video(),
+        InCallButton.Speaker(),
+        InCallButton.ScreenShare(),
+        InCallButton.FlipCam(),
+    )
 
     private val rtcService: MobileApiRtc by lazy { MobileApiResourceProvider().getMobileApiRtc(appContext) }
     private val tokenProvider: TokenProvider by lazy { TokenProviderImpl(rtcService) }
@@ -52,14 +61,14 @@ internal object Injector {
         if (!::appContext.isInitialized)
             appContext = context.applicationContext
         return webrtcUi ?: InfobipRtcUiImpl(
-                appContext,
-                tokenProvider,
-                cache,
-                callsDelegate,
-                callsScope,
-                pushIdDelegate,
-                rtcInstance,
-                notificationPermissionDelegate
+            appContext,
+            tokenProvider,
+            cache,
+            callsDelegate,
+            callsScope,
+            pushIdDelegate,
+            rtcInstance,
+            notificationPermissionDelegate
         ).also { webrtcUi = it }
     }
 }

@@ -57,14 +57,14 @@ class IncomingCallFragment : Fragment() {
                 decline.setIcon(res.decline)
             }
             colors?.let { res ->
-                val foregroundColorStateList = ColorStateList.valueOf(res.rtc_ui_foreground)
+                val foregroundColorStateList = ColorStateList.valueOf(res.rtcUiForeground)
                 logo.imageTintList = foregroundColorStateList
                 name.setTextColor(foregroundColorStateList)
                 decline.setIconTint(foregroundColorStateList)
-                decline.setCircleColor(ColorStateList.valueOf(res.rtc_ui_hangup))
+                decline.setBackgroundColor(ColorStateList.valueOf(res.rtcUiHangup))
                 accept.setIconTint(foregroundColorStateList)
-                accept.setCircleColor(ColorStateList.valueOf(res.rtc_ui_accept))
-                background.setBackgroundColor(res.rtc_ui_background)
+                accept.setBackgroundColor(ColorStateList.valueOf(res.rtcUiAccept))
+                background.setBackgroundColor(res.rtcUiBackground)
             }
             incomingCallMessageStyle?.let { res ->
                 res.headlineText?.takeIf { it.isNotEmpty() }.let {

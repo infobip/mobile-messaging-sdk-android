@@ -6,17 +6,78 @@ import android.app.Service
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.content.res.TypedArray
 import android.os.Build
 import android.util.TypedValue
+import android.view.View
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.StyleableRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import java.util.Locale
+
+
+/**
+ * Set visible state of View between VISIBLE and GONE
+ *
+ * @property show true for VISIBLE, false for GONE
+ */
+fun View.show(show: Boolean = true) {
+    this.visibility = if (show) View.VISIBLE else View.GONE
+}
+
+/**
+ * Set visible state of View between GONE and VISIBLE
+ *
+ * @property hide true for GONE, false for VISIBLE
+ */
+fun View.hide(hide: Boolean = true) {
+    show(!hide)
+}
+
+/**
+ * Set visible state of View between INVISIBLE and VISIBLE
+ *
+ * @property invisible true for INVISIBLE, false for VISIBLE
+ */
+fun View.invisible(invisible: Boolean = true) {
+    this.visibility = if (invisible) View.INVISIBLE else View.VISIBLE
+}
+
+/**
+ * Set visible state of View between VISIBLE and INVISIBLE
+ *
+ * @property visible true for VISIBLE, false for INVISIBLE
+ */
+fun View.visible(visible: Boolean = true) {
+    invisible(!visible)
+}
+
+/**
+ * PX -> DP rounded int value
+ */
+internal val Int.dp: Int get() = this.dpPrecise.toInt()
+
+/**
+ * PX -> DP precise float value
+ */
+internal val Int.dpPrecise: Float get() = (this / Resources.getSystem().displayMetrics.density)
+
+/**
+ * DP -> PX rounded int value
+ */
+internal val Int.px: Int get() = this.pxPrecise.toInt()
+
+/**
+ * DP -> PX precise float value
+ */
+internal val Int.pxPrecise: Float get() = (this * Resources.getSystem().displayMetrics.density)
 
 internal fun activatedColorStateList(@ColorInt activatedColor: Int, @ColorInt color: Int) = ColorStateList(
     arrayOf(
@@ -110,3 +171,6 @@ internal fun Context.resolveStyledStringAttribute(
         null
     }
 }
+
+@ColorInt
+fun Context.getColorCompat(@ColorRes id: Int): Int = ContextCompat.getColor(this, id)

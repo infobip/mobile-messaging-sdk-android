@@ -14,11 +14,19 @@
         <item name="rtc_ui_color_alert_background">#99f00000</item>
         <item name="rtc_ui_color_accept">#000000</item>
         <item name="rtc_ui_color_hangup">#999999</item>
+        //incoming message
         <item name="rtc_ui_incoming_call_headline_background">@drawable/ic_rounded_corners</item>
         <item name="rtc_ui_incoming_call_message_background">@drawable/ic_rounded_corners</item>
         <item name="rtc_ui_incoming_call_headline_text_color">@color/blue</item>
         <item name="rtc_ui_incoming_call_headline_appearance">@style/TextAppearance.AppCompat.Title</item>
         <item name="rtc_ui_incoming_call_message" translatable="false">Incoming call message</item>
         <item name="rtc_ui_incoming_call_headline" translatable="false">Incoming call headline</item>
+        //bottom sheet
+        <item name="rtc_ui_color_actions_row_background">@color/black</item>
+        <item name="rtc_ui_color_actions_row_icon">@color/red</item>
+        <item name="rtc_ui_color_actions_pill_color">@color/red</item>
+        <item name="rtc_ui_color_actions_divider_color">@color/red</item>
+        <item name="rtc_ui_color_actions_row_label">@color/green</item>
+        <item name="rtc_ui_color_sheet_background">@color/blue</item>
     </style>-->
 </resources>

@@ -18,20 +18,22 @@ import com.infobip.webrtc.ui.fragments.InCallFragment.Companion.pipActionIntent
 object PipParamsFactory {
 
     private const val REQUEST_MUTE = 1
-    private const val REQUEST_SPEAKER = 2
-    private const val REQUEST_FLIP_CAMERA = 3
-    private const val REQUEST_HANGUP = 4
+    private const val REQUEST_UNMUTE = 2
+    private const val REQUEST_SPEAKER_ON = 3
+    private const val REQUEST_SPEAKER_OFF = 4
+    private const val REQUEST_VIDEO_OFF = 5
+    private const val REQUEST_HANGUP = 6
     private val intentFlag = intentFlag()
 
     private fun intentFlag() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        0 or PendingIntent.FLAG_IMMUTABLE
+        0 or PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     else
         0
 
     private val rational = Rational(9, 16)
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createVideoPipParams(context: Context, isMuted: Boolean, hasLocalVideo: Boolean): PictureInPictureParams {
+    fun createVideoPipParams(context: Context, isMuted: Boolean): PictureInPictureParams {
         val builder = PictureInPictureParams.Builder()
             .setAspectRatio(rational)
             .setActions(
@@ -42,18 +44,18 @@ object PipParamsFactory {
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         PendingIntent.getBroadcast(
                             context,
-                            REQUEST_MUTE,
+                            if (isMuted) REQUEST_UNMUTE else REQUEST_MUTE,
                             pipActionIntent(PIP_ACTION_MUTE),
                             intentFlag
                         )
                     ),
                     RemoteAction(
-                        Icon.createWithResource(context, if (hasLocalVideo) R.drawable.ic_video_off else R.drawable.ic_video),
+                        Icon.createWithResource(context, R.drawable.ic_video_off),
                         context.getString(R.string.mm_video),
                         context.getString(R.string.mm_video),
                         PendingIntent.getBroadcast(
                             context,
-                            REQUEST_FLIP_CAMERA,
+                            REQUEST_VIDEO_OFF ,
                             pipActionIntent(PIP_ACTION_VIDEO),
                             intentFlag
                         )
@@ -89,7 +91,7 @@ object PipParamsFactory {
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         PendingIntent.getBroadcast(
                             context,
-                            REQUEST_MUTE,
+                            if (isMuted) REQUEST_UNMUTE else REQUEST_MUTE,
                             pipActionIntent(PIP_ACTION_MUTE),
                             intentFlag
                         )
@@ -100,7 +102,7 @@ object PipParamsFactory {
                         context.getString(R.string.mm_speaker),
                         PendingIntent.getBroadcast(
                             context,
-                            REQUEST_SPEAKER,
+                            if (isSpeakerOn) REQUEST_SPEAKER_OFF else REQUEST_SPEAKER_ON,
                             pipActionIntent(PIP_ACTION_SPEAKER),
                             intentFlag
                         )

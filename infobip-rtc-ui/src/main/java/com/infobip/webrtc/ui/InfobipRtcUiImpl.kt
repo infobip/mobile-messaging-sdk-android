@@ -11,6 +11,7 @@ import com.infobip.webrtc.sdk.api.model.push.Status
 import com.infobip.webrtc.ui.delegate.CallsDelegate
 import com.infobip.webrtc.ui.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.delegate.PushIdDelegate
+import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiMode
 import kotlinx.coroutines.CoroutineScope
@@ -105,6 +106,10 @@ internal class InfobipRtcUiImpl(
 
     override fun setLanguage(locale: Locale) {
         Injector.locale = locale
+    }
+
+    override fun setInCallButtons(buttons: List<InCallButton>) {
+        Injector.inCallButtons = listOf(InCallButton.HangUp, *buttons.toTypedArray())
     }
 
     private fun registerPush(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {

@@ -221,9 +221,10 @@
                     android:id="@+id/darkModeToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/customButtonChecked"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/disableCalls"
                     app:singleSelection="true">
 
                     <Button
@@ -247,6 +248,29 @@
                         android:layout_height="wrap_content"
                         android:text="@string/dark_mode_auto" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/customButtonChecked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="@string/custom_button_checked"
+                    app:layout_constraintBottom_toTopOf="@id/customButtonEnabled"
+                    app:layout_constraintEnd_toEndOf="@id/darkModeToggle"
+                    app:layout_constraintStart_toStartOf="@id/darkModeToggle"
+                    app:layout_constraintTop_toBottomOf="@id/darkModeToggle"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/customButtonEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:checked="true"
+                    android:text="@string/custom_button_enabled"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/darkModeToggle"
+                    app:layout_constraintStart_toStartOf="@id/darkModeToggle"
+                    app:layout_constraintTop_toBottomOf="@id/customButtonChecked"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

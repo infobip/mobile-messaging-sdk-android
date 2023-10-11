@@ -166,7 +166,7 @@ internal class CallsDelegateImpl(
                         isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
                         elapsedTimeSeconds = call.duration(),
                         isSpeakerOn = call.speakerphone(),
-                        isScreenShare = call.hasScreenShare(),
+                        isLocalScreenShare = call.hasScreenShare(),
                         isWeakConnection = false,
                         isPip = false,
                         isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,

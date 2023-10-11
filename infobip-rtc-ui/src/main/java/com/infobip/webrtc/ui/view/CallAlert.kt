@@ -5,7 +5,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
+import com.infobip.webrtc.Injector
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.WidgetCallAlertBinding
 
@@ -18,12 +18,12 @@ class CallAlert @JvmOverloads constructor(
 
     init {
         WidgetCallAlertBinding.inflate(LayoutInflater.from(context), this).apply {
-
+            Injector.colors?.let {
+                setBackgroundColor(it.rtcUiAlertBackground)
+                alertText.setTextColor(it.rtcUiAlertText)
+            }
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CallAlert)
-
-            setBackgroundColor(ContextCompat.getColor(context, R.color.rtc_ui_alert_background))
             alertText.text = typedArray.getText(R.styleable.CallAlert_alertText)
-            alertText.setTextColor(typedArray.getColor(R.styleable.CallAlert_alertTextColor, ContextCompat.getColor(context, R.color.rtc_ui_foreground)))
             val iconResId = typedArray.getResourceId(R.styleable.CallAlert_alertIcon, 0)
             if (iconResId != 0)
                 alertIcon.setImageResource(iconResId)

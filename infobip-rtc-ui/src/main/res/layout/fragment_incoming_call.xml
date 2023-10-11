@@ -76,8 +76,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
         app:circleBackground="@color/rtc_ui_hangup"
-        app:icon="@drawable/ic_clear_large"
-        app:iconColor="@color/rtc_ui_foreground"
+        app:circleBtnIcon="@drawable/ic_clear_large"
+        app:circleBtnIconColor="@color/rtc_ui_foreground"
         app:layout_constraintBottom_toTopOf="@+id/bottomQuarterGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -87,8 +87,8 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="48dp"
         app:circleBackground="@color/rtc_ui_accept"
-        app:icon="@drawable/ic_calls_30"
-        app:iconColor="@color/rtc_ui_foreground"
+        app:circleBtnIcon="@drawable/ic_calls_30"
+        app:circleBtnIconColor="@color/rtc_ui_foreground"
         app:layout_constraintBottom_toTopOf="@+id/bottomQuarterGuideline"
         app:layout_constraintEnd_toEndOf="parent" />
 

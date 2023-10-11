@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
+import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiMode
 import org.infobip.mobile.messaging.util.ResourceLoader
@@ -300,4 +301,12 @@ interface InfobipRtcUi {
      * @param locale new locale to be set
      */
     fun setLanguage(locale: Locale)
+
+    /**
+     * Sets bottom sheet buttons in call screen. First three buttons are in visible area (+ hang-up button is fixed on first place.)
+     * All another buttons are place in draggable area.
+     *
+     * @param buttons sorted set of in call buttons
+     */
+    fun setInCallButtons(buttons: List<InCallButton>)
 }

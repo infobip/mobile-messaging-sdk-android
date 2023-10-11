@@ -18,7 +18,6 @@
 
     <style name="InfobipRtcUi">
         <item name="rtc_ui_color_foreground">@color/rtc_ui_foreground</item>
-        <item name="rtc_ui_color_notification">@color/rtc_ui_notification</item>
         <item name="rtc_ui_color_actions_background">@color/rtc_ui_actions_background</item>
         <item name="rtc_ui_color_actions_background_checked">@color/rtc_ui_actions_background_checked</item>
         <item name="rtc_ui_color_actions_icon">@color/rtc_ui_actions_icon</item>
@@ -26,7 +25,6 @@
         <item name="rtc_ui_color_text_secondary">@color/rtc_ui_text_secondary</item>
         <item name="rtc_ui_color_background">@color/rtc_ui_background</item>
         <item name="rtc_ui_color_overlay_background">@color/rtc_ui_overlay_background</item>
-        <item name="rtc_ui_color_alert_background">@color/rtc_ui_background</item>
         <item name="rtc_ui_color_accept">@color/rtc_ui_accept</item>
         <item name="rtc_ui_color_hangup">@color/rtc_ui_hangup</item>
         <item name="rtc_ui_icon_unMute">@drawable/ic_unmute</item>

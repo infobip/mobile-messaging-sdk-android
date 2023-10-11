@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -31,6 +32,7 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.infobip.webrtc.ui.InfobipRtcUi;
+import com.infobip.webrtc.ui.model.InCallButton;
 
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.Event;
@@ -50,7 +52,10 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.Locale;
+
+import kotlin.Unit;
 
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
 
@@ -116,8 +121,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpRuntimeCustomization();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
-        setUpCallsButtons();
         setUpDarkModeToggle();
+        setUpCallsButtons();
     }
 
     @Override
@@ -433,8 +438,35 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     }
             );
         });
+        SwitchCompat customButtonChecked = findViewById(R.id.customButtonChecked);
+        SwitchCompat customButtonEnabled = findViewById(R.id.customButtonEnabled);
+        infobipRtcUi.setInCallButtons(
+                Arrays.asList(
+                        new InCallButton.Mute(() -> {
+                            MobileMessagingLogger.i("MainActivity", "MUTE button pressed");
+                            return Unit.INSTANCE;
+                        }),
+                        new InCallButton.Custom(
+                                R.string.app_name, R.drawable.ic_calls_30,
+                                null,
+                                () -> {
+                                    MobileMessagingLogger.i("MainActivity", "CUSTOM button pressed ");
+                                    return Unit.INSTANCE;
+                                },
+                                customButtonChecked::isChecked,
+                                customButtonEnabled::isChecked
+                        ),
+                        new InCallButton.Video(() -> Unit.INSTANCE),
+                        new InCallButton.ScreenShare(() -> Unit.INSTANCE),
+                        new InCallButton.Speaker(() -> Unit.INSTANCE),
+                        new InCallButton.FlipCam(() -> Unit.INSTANCE)
+
+                )
+        );
         enableCalls.setVisibility(View.VISIBLE);
         disableCalls.setVisibility(View.VISIBLE);
+        customButtonChecked.setVisibility(View.VISIBLE);
+        customButtonEnabled.setVisibility(View.VISIBLE);
     }
 
     private void setUpRuntimeCustomization() {

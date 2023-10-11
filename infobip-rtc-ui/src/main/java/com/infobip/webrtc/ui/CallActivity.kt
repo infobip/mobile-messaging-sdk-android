@@ -198,38 +198,45 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {
+                viewModel.emitLocalTrackToRemove()
                 viewModel.updateState { copy(localVideoTrack = cameraVideoAddedEvent?.track) }
             }
 
             override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {
+                viewModel.emitLocalTrackToRemove()
                 viewModel.updateState { copy(localVideoTrack = cameraVideoUpdatedEvent?.track) }
             }
 
             override fun onCameraVideoRemoved() {
+                viewModel.emitLocalTrackToRemove()
                 viewModel.updateState { copy(localVideoTrack = null) }
             }
 
             override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
-                viewModel.updateState { copy(isScreenShare = true) }
+                viewModel.updateState { copy(isLocalScreenShare = true) }
             }
 
             override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
-                viewModel.updateState { copy(isScreenShare = false) }
+                viewModel.updateState { copy(isLocalScreenShare = false) }
             }
 
             override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {
+                viewModel.emitRemoteTrackToRemove()
                 viewModel.updateState { copy(remoteVideoTrack = participantCameraVideoAddedEvent?.track) }
             }
 
             override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {
+                viewModel.emitRemoteTrackToRemove()
                 viewModel.updateState { copy(remoteVideoTrack = null, showControls = true) }
             }
 
             override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {
+                viewModel.emitScreenShareTrackToRemove()
                 viewModel.updateState { copy(screenShareTrack = participantScreenShareAddedEvent?.track) }
             }
 
             override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {
+                viewModel.emitScreenShareTrackToRemove()
                 viewModel.updateState { copy(screenShareTrack = null, showControls = true) }
             }
 

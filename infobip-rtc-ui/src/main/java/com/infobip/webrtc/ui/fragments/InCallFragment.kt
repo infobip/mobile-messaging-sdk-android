@@ -23,15 +23,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
 import androidx.core.content.ContextCompat.registerReceiver
+import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infobip.webrtc.Injector
 import com.infobip.webrtc.Injector.colors
 import com.infobip.webrtc.TAG
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
@@ -39,17 +44,24 @@ import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.ui.*
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
 import com.infobip.webrtc.ui.model.CallState
+import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.service.ScreenShareService
-import com.infobip.webrtc.ui.utils.activatedColorStateList
+import com.infobip.webrtc.ui.utils.px
+import com.infobip.webrtc.ui.utils.show
+import com.infobip.webrtc.ui.view.CircleImageButton
+import com.infobip.webrtc.ui.view.InCallButtonAbs
 import com.infobip.webrtc.ui.view.PipParamsFactory
+import com.infobip.webrtc.ui.view.RowImageButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.webrtc.RendererCommon
 import kotlin.time.Duration.Companion.seconds
+
 
 class InCallFragment : Fragment() {
     companion object {
@@ -69,7 +81,19 @@ class InCallFragment : Fragment() {
         }
     }
 
+    private fun <T> Flow<T>.launchWithLifecycle(
+        lifecycle: Lifecycle = viewLifecycleOwner.lifecycle,
+        minActiveState: Lifecycle.State = Lifecycle.State.STARTED
+    ) = flowWithLifecycle(lifecycle, minActiveState).launchIn(lifecycle.coroutineScope)
+
     private var _binding: FragmentInCallBinding? = null
+    private val customInCallButtons: MutableList<InCallButtonAbs> = mutableListOf()
+    private val remoteVideoRenderer
+        get() =
+            if (viewModel.state.value.isLocalScreenShare || viewModel.state.value.isRemoteScreenShare) binding.remoteVideoScreenSharing else binding.remoteVideo
+    private val localVideoRenderer
+        get() =
+            if (viewModel.state.value.isLocalScreenShare || viewModel.state.value.isRemoteScreenShare) binding.localVideoScreenSharing else binding.localVideo
     private val binding get() = _binding!!
     private val requestVideoPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -83,6 +107,8 @@ class InCallFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
                 viewModel.shareScreen(ScreenCapturer(it.resultCode, it.data))
+                switchLocalTrackSink()
+                switchRemoteTrackSink()
             }
         }
     private val pipActionsReceiver = object : BroadcastReceiver() {
@@ -99,6 +125,14 @@ class InCallFragment : Fragment() {
         }
     }
 
+    private var speakerButton: InCallButtonAbs? = null
+    private var muteButton: InCallButtonAbs? = null
+    private var flipCamButton: InCallButtonAbs? = null
+    private var screenShareButton: InCallButtonAbs? = null
+    private var videoButton: InCallButtonAbs? = null
+    private var hangupButton: InCallButtonAbs? = null
+    private var bottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -110,17 +144,35 @@ class InCallFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.remoteVideoTrack
             .onEach(::handleRemoteVideoTrack)
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .launchWithLifecycle()
+        viewModel.remoteTrackToBeRemoved
+            .onEach {
+                it.removeSink(binding.remoteVideo)
+                it.removeSink(binding.remoteVideoScreenSharing)
+            }
+            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .launchWithLifecycle()
         viewModel.localVideoTrack
             .onEach(::handleLocalVideoTrack)
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .launchWithLifecycle()
+        viewModel.localTrackToBeRemoved
+            .onEach {
+                it.removeSink(binding.localVideo)
+                it.removeSink(binding.localVideoScreenSharing)
+            }
+            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .launchWithLifecycle()
+        viewModel.screenShareTrack
+            .onEach(::handleScreenShareTrack)
+            .launchWithLifecycle()
+        viewModel.screenShareTrackToBeRemoved
+            .onEach { it.removeSink(binding.remoteVideo) }
+            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .launchWithLifecycle()
         viewModel.state
             .onEach(::renderState)
             .catch { Log.e(TAG, "Failed to render state", it) }
-            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
-            .launchIn(viewLifecycleOwner.lifecycleScope)
+            .launchWithLifecycle()
         setUpScreen()
     }
 
@@ -136,51 +188,43 @@ class InCallFragment : Fragment() {
 
     @SuppressLint("NewApi", "ClickableViewAccessibility")
     private fun setUpScreen() {
+        populateBottomSheet()
         customize()
         with(binding) {
-            localVideo.init()
-            localVideo.setMirror(true)
-            localVideo.setZOrderMediaOverlay(true)
-            localVideo.setOnTouchListener(getLocalVideoTouchListener())
-            remoteVideo.init()
-            remoteVideo.setEnableHardwareScaler(true)
-            remoteVideo.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
+            localVideo.run {
+                init()
+                setMirror(true)
+                setZOrderMediaOverlay(true)
+                setOnTouchListener(getLocalVideoTouchListener())
+            }
+            remoteVideo.run {
+                init()
+                setEnableHardwareScaler(true)
+                setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
+            }
+            localVideoScreenSharing.run {
+                init()
+                setMirror(true)
+                setZOrderMediaOverlay(true)
+            }
+            remoteVideoScreenSharing.run {
+                init()
+                setEnableHardwareScaler(true)
+                setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL)
+            }
+            screenSharingRenderers.setOnTouchListener(getLocalVideoTouchListener())
             viewModel.peerName.let {
                 nameInVoice.text = it
                 nameInVideo.text = it
                 nameInPip.text = it
             }
-
             remoteVideo.setOnClickListener {
-                viewModel.toggleControlsVisibility()
+                toggleControls()
             }
             root.setOnClickListener {
-                viewModel.toggleControlsVisibility()
+                toggleControls()
             }
-            hangupButton.setOnClickListener {
-                viewModel.hangup()
-            }
-            muteButton.setOnClickListener {
-                toggleMute()
-            }
-            speakerButton.setOnClickListener {
-                toggleSpeaker()
-            }
-            flipCamButton.setOnClickListener {
-                viewModel.flipCamera()
-            }
-            videoButton.setOnClickListener {
-                val cameraPermission = Manifest.permission.CAMERA
-                when {
-                    ContextCompat.checkSelfPermission(
-                        requireContext(),
-                        cameraPermission
-                    ) == PackageManager.PERMISSION_GRANTED -> toggleVideo()
-                    shouldShowRequestPermissionRationale(cameraPermission) -> showVideoRationale()
-                    else -> requestVideoPermissionLauncher.launch(cameraPermission)
-                }
-            }
-            screenShareButton.setOnClickListener {
+            screenSharingDisable.setOnClickListener {
                 toggleScreenShare()
             }
             val isPipSupported =
@@ -188,9 +232,7 @@ class InCallFragment : Fragment() {
                     PackageManager.FEATURE_PICTURE_IN_PICTURE
                 )
             if (isPipSupported) {
-                collapseCallButton.setOnClickListener {
-                    requireActivity().enterPictureInPictureMode(createPipParams())
-                }
+                collapseCallButton.setOnClickListener { requireActivity().enterPictureInPictureMode(createPipParams()) }
                 registerReceiver(
                     requireContext(),
                     pipActionsReceiver,
@@ -202,66 +244,260 @@ class InCallFragment : Fragment() {
         }
     }
 
+    private fun toggleControls() {
+        viewModel.toggleControlsVisibility()
+        if (viewModel.state.value.showControls) {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        } else {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    private fun populateBottomSheet() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet.bottomSheetButtons)
+        bottomSheetBehavior?.isGestureInsetBottomIgnored = true
+        bottomSheetBehavior?.isFitToContents = false
+        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+
+        // main area
+        Injector.inCallButtons.take(4).forEach { inCallButton ->
+            val button = CircleImageButton(requireContext()).apply {
+                id = inCallButton.id
+                setIcon(inCallButton.iconRes)
+                inCallButton.checkedIconRes?.let { setCheckedIcon(it) }
+            }
+            binding.bottomSheet.mainButtons.addView(button)
+            initBottomSheetButton(inCallButton, button)
+        }
+        // dragged area
+        Injector.inCallButtons.asSequence().drop(4).forEach { inCallButton ->
+            val button = RowImageButton(requireContext()).apply {
+                id = inCallButton.id
+                setIcon(inCallButton.iconRes)
+                setLabelText(getString(inCallButton.labelRes))
+                inCallButton.checkedIconRes?.let { setCheckedIcon(it) }
+            }
+            binding.bottomSheet.secondaryButtons.addView(button)
+            initBottomSheetButton(inCallButton, button)
+        }
+
+        // calculate half expanded ratio
+        binding.bottomSheet.bottomSheetButtons.doOnLayout {
+            updateBottomSheetRatio()
+        }
+
+        bottomSheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    showFlipCam(viewModel.state.value.isLocalVideo)
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+        })
+    }
+
+    private fun updateBottomSheetRatio() {
+        val mainAreaWithMargins = binding.bottomSheet.mainButtons.height + 32.px + 3.px + 8.px //main buttons, button's margins, pill and pill bottom margin
+        val sheetHeight = binding.bottomSheet.bottomSheetButtons.height
+        if (sheetHeight != 0) {
+            val ratio = mainAreaWithMargins.toFloat() / sheetHeight
+            bottomSheetBehavior?.halfExpandedRatio = ratio
+        }
+        binding.bottomSheet.bottomSheetButtons.requestLayout()
+    }
+
+    private fun initBottomSheetButton(buttonDesc: InCallButton, button: InCallButtonAbs) {
+        button.run {
+            setLabelColor()
+            setBackgroundColor()
+            setIconTint()
+        }
+        when (button.id) {
+            R.id.rtc_ui_speaker_button -> {
+                speakerButton = button
+                speakerButton?.setOnClickListener {
+                    toggleSpeaker()
+                    buttonDesc.onClick()
+                }
+            }
+
+            R.id.rtc_ui_mute_button -> {
+                muteButton = button
+                muteButton?.setOnClickListener {
+                    toggleMute()
+                    buttonDesc.onClick()
+                }
+            }
+
+            R.id.rtc_ui_flip_cam_button -> {
+                flipCamButton = button
+                flipCamButton?.setOnClickListener {
+                    viewModel.flipCamera()
+                    buttonDesc.onClick()
+                }
+            }
+
+            R.id.rtc_ui_screen_share_button -> {
+                screenShareButton = button
+                screenShareButton?.setOnClickListener {
+                    toggleScreenShare()
+                    buttonDesc.onClick()
+                }
+            }
+
+            R.id.rtc_ui_video_button -> {
+                videoButton = button
+                videoButton?.setOnClickListener {
+                    val cameraPermission = Manifest.permission.CAMERA
+                    when {
+                        ContextCompat.checkSelfPermission(
+                            requireContext(),
+                            cameraPermission
+                        ) == PackageManager.PERMISSION_GRANTED -> toggleVideo()
+
+                        shouldShowRequestPermissionRationale(cameraPermission) -> showVideoRationale()
+                        else -> requestVideoPermissionLauncher.launch(cameraPermission)
+                    }
+                }
+                buttonDesc.onClick()
+            }
+
+            R.id.rtc_ui_hang_up_button -> {
+                hangupButton = button
+                colors?.let { res ->
+                    hangupButton?.setIconTint(ColorStateList.valueOf(res.rtcUiActionsIcon))
+                    hangupButton?.setBackgroundColor(ColorStateList.valueOf(res.rtcUiHangup))
+                }
+                hangupButton?.setLabelColor()
+                hangupButton?.setOnClickListener {
+                    viewModel.hangup()
+                }
+            }
+
+            else -> {
+                if (buttonDesc is InCallButton.Custom) {
+                    buttonDesc.setChecked?.let {
+                        button.checkedCondition = { it.invoke() }
+                    }
+                    buttonDesc.setEnabled?.let {
+                        button.enabledCondition = { it.invoke() }
+                    }
+                    button.setOnClickListener {
+                        buttonDesc.onClick()
+                    }
+                    customInCallButtons.add(button)
+                }
+            }
+        }
+    }
+
     private fun renderState(state: CallState) {
         with(state) {
             Log.d(TAG, state.toString())
             val timeFormatted = viewModel.formatTime(elapsedTimeSeconds)
-            if (isRemoteVideo) {
+            if (isRemoteVideo || isLocalScreenShare && !isPip) {
                 binding.elapsedTimeVideo.text = timeFormatted
             } else {
                 binding.elapsedTimeVoice.text = timeFormatted
             }
             //audio/video call views
-            binding.localVideo.isVisible = isLocalVideo
-            binding.remoteVideoWrapper.isVisible = isRemoteVideo
-            binding.voiceGroup.isVisible = !isRemoteVideo && !isPip
-            binding.videoGroup.isVisible = isRemoteVideo && !isPip && showControls
-            binding.elapsedTimeVoice.isVisible = !isRemoteVideo || isPip
+            binding.localVideoScreenSharing.isVisible = isLocalVideo && (isLocalScreenShare || isRemoteScreenShare) && !isPip
+            binding.localVideo.isVisible = isLocalVideo && !isLocalScreenShare && !isRemoteScreenShare && !isPip
+            binding.remoteVideoScreenSharing.isVisible = isRemoteVideo && (isLocalScreenShare || isRemoteScreenShare) && !isPip
+            binding.remoteVideoWrapper.isVisible = (isRemoteVideo || isRemoteScreenShare) && !isLocalScreenShare
+            binding.voiceGroup.isVisible = !isRemoteVideo && !isRemoteScreenShare && !isLocalScreenShare && !isPip
+            binding.videoGroup.isVisible = (isRemoteVideo || isLocalScreenShare || isRemoteScreenShare) && !isPip && showControls
+            binding.elapsedTimeVoice.isVisible = (!isRemoteVideo && !isRemoteScreenShare && !isLocalScreenShare) || isPip
+            //screenshare
+            binding.screenSharingGroup.isVisible = isLocalScreenShare
+            colors.let { res -> (if (isLocalScreenShare) res?.rtcUiActionsBackground else res?.rtcUiBackground)?.let { binding.background.setBackgroundColor(it) } }
             //another views
             binding.weakConnectionAlert.isVisible = isWeakConnection && !isPip && showControls
             binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip && showControls
-            binding.peerMuteIndicatorInVideo.isVisible = isRemoteVideo && isPeerMuted == true && !isPip && showControls
-            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && isPeerMuted == true && !isPip
+            binding.peerMuteIndicatorInVideo.isVisible = (isRemoteVideo || isLocalScreenShare || isRemoteScreenShare) && isPeerMuted == true && !isPip && showControls
+            binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && !isLocalScreenShare && !isRemoteScreenShare && isPeerMuted == true && !isPip
             binding.collapseCallButton.isVisible = !isPip && showControls
             //in PIP
             binding.nameInPip.isVisible = isPip
             //buttons
-            binding.flipCam.isVisible = isLocalVideo && !isPip && showControls
-            binding.mute.isVisible = !isPip && showControls
-            binding.speaker.isVisible = !isPip && showControls
-            binding.hangupButton.isVisible = !isPip && showControls
-            binding.screenShare.isVisible = !isPip && showControls
-            binding.video.isVisible = !isPip && showControls
+            binding.bottomSheet.bottomSheetButtons.isVisible = !isPip
+            showFlipCam(isLocalVideo)
             //check state
-            binding.muteButton.isChecked = !isMuted
-            binding.speakerButton.isChecked = isSpeakerOn
-            binding.screenShareButton.isChecked = isScreenShare
-            binding.videoButton.isChecked = isLocalVideo
+            muteButton?.isChecked = !isMuted
+            speakerButton?.isChecked = isSpeakerOn
+            screenShareButton?.isChecked = isLocalScreenShare
+            videoButton?.isChecked = isLocalVideo
+            customInCallButtons.forEach { it.refreshChecked(); it.refreshEnabled() }
         }
     }
 
-    private fun handleLocalVideoTrack(track: RTCVideoTrack?) {
-        with(binding) {
-            runCatching {
-                viewModel.getLocalVideo()?.removeSink(localVideo)
-                track?.addSink(localVideo)
-            }.onFailure {
-                Log.e(TAG, "Handle local video sink failed.", it)
+    /**
+     * Show/hide circle button straight away as it does not require to recalculate halfExpandedRatio and redraw
+     * For row button show/hide only in expanded state. This way we dodge awkward behaviour when button is show/hidden in half-expanded state.
+     */
+    private fun showFlipCam(isLocalVideo: Boolean) {
+        if (flipCamButton is CircleImageButton) {
+            flipCamButton?.show(isLocalVideo)
+        } else {
+            if (bottomSheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+                flipCamButton?.show(isLocalVideo)
             }
+        }
+        updateBottomSheetRatio()
+    }
+
+    private fun handleLocalVideoTrack(track: RTCVideoTrack?) {
+        if (viewModel.state.value.isPip) {
+            updatePictureInPictureMode()
+        }
+        runCatching {
+            track?.addSink(localVideoRenderer)
+        }.onFailure {
+            Log.e(TAG, "Handle local video sink failed.", it)
         }
     }
 
     private fun handleRemoteVideoTrack(track: RTCVideoTrack?) {
-        with(binding) {
-            runCatching {
-                viewModel.getRemoteVideos()?.iterator()?.forEach {
-                    it.camera?.removeSink(binding.remoteVideo)
-                    it.screenShare?.removeSink(binding.remoteVideo)
-                }
-                track?.addSink(remoteVideo)
-            }.onFailure {
-                Log.e(TAG, "Handle remote video sink failed.", it)
+        runCatching {
+            track?.addSink(remoteVideoRenderer)
+        }.onFailure {
+            Log.e(TAG, "Handle remote video sink failed.", it)
+        }
+    }
+
+    private fun handleScreenShareTrack(track: RTCVideoTrack?) {
+        runCatching {
+            track?.addSink(binding.remoteVideo)
+            switchLocalTrackSink()
+            switchRemoteTrackSink()
+        }.onFailure {
+            Log.e(TAG, "Handle remote video sink failed.", it)
+        }
+    }
+
+    private fun switchLocalTrackSink() {
+        runCatching {
+            viewModel.state.value.localVideoTrack?.run {
+                removeSink(binding.localVideo)
+                removeSink(binding.localVideoScreenSharing)
+                addSink(localVideoRenderer)
             }
+        }.onFailure {
+            Log.e(TAG, "Handle local video sink failed.", it)
+        }
+    }
+
+    private fun switchRemoteTrackSink() {
+        runCatching {
+            viewModel.state.value.remoteVideoTrack?.run {
+                removeSink(binding.remoteVideo)
+                removeSink(binding.remoteVideoScreenSharing)
+                addSink(remoteVideoRenderer)
+            }
+        }.onFailure {
+            Log.e(TAG, "Handle local video sink failed.", it)
         }
     }
 
@@ -278,13 +514,16 @@ class InCallFragment : Fragment() {
     }
 
     private fun toggleScreenShare() {
-        if (viewModel.state.value.isScreenShare) {
+        if (viewModel.state.value.isLocalScreenShare) {
             viewModel.stopScreenShare()
             ScreenShareService.sendScreenShareServiceIntent(
                 requireContext(),
                 ScreenShareService.ACTION_STOP_SCREEN_SHARE
             )
+            switchLocalTrackSink()
+            switchRemoteTrackSink()
         } else {
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             ScreenShareService.sendScreenShareServiceIntent(
                 requireContext(),
                 ScreenShareService.ACTION_START_SCREEN_SHARE
@@ -293,6 +532,7 @@ class InCallFragment : Fragment() {
                 requireActivity().getSystemService(AppCompatActivity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             requestMediaProjection.launch(mediaProjectionManager.createScreenCaptureIntent())
         }
+
     }
 
     private fun showVideoRationale() {
@@ -306,42 +546,23 @@ class InCallFragment : Fragment() {
 
     private fun customize() {
         colors?.let { res ->
-            val foregroundColorStateList = ColorStateList.valueOf(res.rtc_ui_foreground)
-            val actionsBackgroundColorStateList = activatedColorStateList(
-                res.rtc_ui_actions_background_checked,
-                res.rtc_ui_actions_background
-            )
-            val actionsIconColorStateList =
-                activatedColorStateList(
-                    res.rtc_ui_actions_icon_checked,
-                    res.rtc_ui_actions_icon
-                )
-
+            val foregroundColorStateList = ColorStateList.valueOf(res.rtcUiForeground)
             with(binding) {
-                toolbarBackground.setBackgroundColor(res.rtc_ui_overlay_background)
+                toolbarBackground.setBackgroundColor(res.rtcUiOverlayBackground)
                 nameInVideo.setTextColor(foregroundColorStateList)
                 nameInVoice.setTextColor(foregroundColorStateList)
                 nameInPip.setTextColor(foregroundColorStateList)
                 peerMuteIndicatorInVideo.imageTintList = foregroundColorStateList
                 peerMuteIndicatorInVoice.imageTintList = foregroundColorStateList
-                nameDivider.setBackgroundColor(res.rtc_ui_foreground)
+                nameDivider.setBackgroundColor(res.rtcUiForeground)
                 elapsedTimeVideo.setTextColor(foregroundColorStateList)
                 elapsedTimeVoice.setTextColor(foregroundColorStateList)
                 collapseCallButton.imageTintList = foregroundColorStateList
                 avatar.imageTintList = foregroundColorStateList
-                muteButton.setCircleColor(actionsBackgroundColorStateList)
-                muteButton.setIconTint(actionsIconColorStateList)
-                videoButton.setCircleColor(actionsBackgroundColorStateList)
-                videoButton.setIconTint(actionsIconColorStateList)
-                speakerButton.setCircleColor(actionsBackgroundColorStateList)
-                speakerButton.setIconTint(actionsIconColorStateList)
-                flipCamButton.setCircleColor(actionsBackgroundColorStateList)
-                flipCamButton.setIconTint(actionsIconColorStateList)
-                screenShareButton.setCircleColor(actionsBackgroundColorStateList)
-                screenShareButton.setIconTint(actionsIconColorStateList)
-                hangupButton.setIconTint(ColorStateList.valueOf(res.rtc_ui_actions_icon))
-                hangupButton.setCircleColor(ColorStateList.valueOf(res.rtc_ui_hangup))
-                background.setBackgroundColor(res.rtc_ui_background)
+                background.setBackgroundColor(res.rtcUiBackground)
+                bottomSheet.pill.backgroundTintList = ColorStateList.valueOf(res.rtcUiColorSheetPill)
+                bottomSheet.divider.setBackgroundColor(res.rtcUiColorActionsDivider)
+                bottomSheet.bottomSheetButtons.setBackgroundColor(res.rtcUiColorSheetBackground)
             }
         }
     }
@@ -350,7 +571,6 @@ class InCallFragment : Fragment() {
         return object : View.OnTouchListener {
             var dX = 0f
             var dY = 0f
-            var lastAction = 0
 
             @SuppressLint("ClickableViewAccessibility")
             override fun onTouch(view: View, event: MotionEvent): Boolean {
@@ -363,8 +583,8 @@ class InCallFragment : Fragment() {
                     MotionEvent.ACTION_DOWN -> {
                         dX = view.x - event.rawX
                         dY = view.y - event.rawY
-                        lastAction = MotionEvent.ACTION_DOWN
                     }
+
                     MotionEvent.ACTION_MOVE -> {
                         var x = event.rawX + dX
                         var y = event.rawY + dY
@@ -379,10 +599,11 @@ class InCallFragment : Fragment() {
                             .y(y)
                             .setDuration(0)
                             .start()
-                        lastAction = MotionEvent.ACTION_MOVE
                     }
+
                     MotionEvent.ACTION_UP -> {
                     }
+
                     else -> return false
                 }
                 return true
@@ -401,7 +622,7 @@ class InCallFragment : Fragment() {
     private fun createPipParams(): PictureInPictureParams {
         with(viewModel.state.value) {
             return if (isLocalVideo)
-                PipParamsFactory.createVideoPipParams(requireContext(), isMuted, isLocalVideo)
+                PipParamsFactory.createVideoPipParams(requireContext(), isMuted)
             else
                 PipParamsFactory.createVoicePipParams(requireContext(), isMuted, isSpeakerOn)
         }
@@ -411,17 +632,23 @@ class InCallFragment : Fragment() {
         with(binding) {
             localVideo.release()
             remoteVideo.release()
+            localVideoScreenSharing.release()
+            remoteVideoScreenSharing.release()
             root.setOnClickListener(null)
             remoteVideo.setOnClickListener(null)
-            hangupButton.setOnClickListener(null)
-            muteButton.setOnClickListener(null)
-            speakerButton.setOnClickListener(null)
-            flipCamButton.setOnClickListener(null)
-            videoButton.setOnClickListener(null)
-            screenShareButton.setOnClickListener(null)
             collapseCallButton.setOnClickListener(null)
+            localVideo.setOnTouchListener(null)
+            screenSharingRenderers.setOnTouchListener(null)
         }
         _binding = null
+        hangupButton?.setOnClickListener(null)
+        muteButton?.setOnClickListener(null)
+        speakerButton?.setOnClickListener(null)
+        flipCamButton?.setOnClickListener(null)
+        videoButton?.setOnClickListener(null)
+        screenShareButton?.setOnClickListener(null)
+        customInCallButtons.forEach { it.setOnClickListener(null) }
+        context?.unregisterReceiver(pipActionsReceiver)
         super.onDestroyView()
     }
 }

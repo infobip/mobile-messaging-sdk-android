@@ -7,18 +7,24 @@ import androidx.core.content.ContextCompat
 import com.infobip.webrtc.ui.R
 
 internal data class Colors(
-        @ColorInt val rtc_ui_foreground: Int,
-        @ColorInt val rtc_ui_notification: Int,
-        @ColorInt val rtc_ui_actions_background: Int,
-        @ColorInt val rtc_ui_actions_background_checked: Int,
-        @ColorInt val rtc_ui_actions_icon: Int,
-        @ColorInt val rtc_ui_actions_icon_checked: Int,
-        @ColorInt val rtc_ui_text_secondary: Int,
-        @ColorInt val rtc_ui_background: Int,
-        @ColorInt val rtc_ui_overlay_background: Int,
-        @ColorInt val rtc_ui_alert_background: Int,
-        @ColorInt val rtc_ui_accept: Int,
-        @ColorInt val rtc_ui_hangup: Int,
+    @ColorInt val rtcUiForeground: Int,
+    @ColorInt val rtcUiActionsBackground: Int,
+    @ColorInt val rtcUiActionsBackgroundChecked: Int,
+    @ColorInt val rtcUiActionsIcon: Int,
+    @ColorInt val rtcUiActionsIconChecked: Int,
+    @ColorInt val rtcUiTextSecondary: Int,
+    @ColorInt val rtcUiBackground: Int,
+    @ColorInt val rtcUiOverlayBackground: Int,
+    @ColorInt val rtcUiAlertBackground: Int,
+    @ColorInt val rtcUiAlertText: Int,
+    @ColorInt val rtcUiAccept: Int,
+    @ColorInt val rtcUiHangup: Int,
+    @ColorInt val rtcUiColorActionsRowBackground: Int,
+    @ColorInt val rtcUiColorActionsRowIcon: Int,
+    @ColorInt val rtcUiColorActionsRowLabel: Int,
+    @ColorInt val rtcUiColorSheetPill: Int,
+    @ColorInt val rtcUiColorActionsDivider: Int,
+    @ColorInt val rtcUiColorSheetBackground: Int,
 ) {
 
     companion object {
@@ -29,18 +35,24 @@ internal data class Colors(
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.InfobipRtcUi, R.attr.infobipRtcUiStyle, R.style.InfobipRtcUi)
             return typedArray.let {
                 Colors(
-                        rtc_ui_foreground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_foreground, ContextCompat.getColor(context, R.color.rtc_ui_foreground)),
-                        rtc_ui_notification = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_notification, ContextCompat.getColor(context, R.color.rtc_ui_notification)),
-                        rtc_ui_actions_background = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_background, ContextCompat.getColor(context, R.color.rtc_ui_actions_background)),
-                        rtc_ui_actions_background_checked = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_background_checked, ContextCompat.getColor(context, R.color.rtc_ui_actions_background_checked)),
-                        rtc_ui_actions_icon = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_icon, ContextCompat.getColor(context, R.color.rtc_ui_actions_icon)),
-                        rtc_ui_actions_icon_checked = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_icon_checked, ContextCompat.getColor(context, R.color.rtc_ui_actions_icon_checked)),
-                        rtc_ui_text_secondary = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_text_secondary, ContextCompat.getColor(context, R.color.rtc_ui_text_secondary)),
-                        rtc_ui_background = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_background, ContextCompat.getColor(context, R.color.rtc_ui_background)),
-                        rtc_ui_overlay_background = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_overlay_background, ContextCompat.getColor(context, R.color.rtc_ui_overlay_background)),
-                        rtc_ui_alert_background = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_alert_background, ContextCompat.getColor(context, R.color.rtc_ui_alert_background)),
-                        rtc_ui_accept = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_accept, ContextCompat.getColor(context, R.color.rtc_ui_accept)),
-                        rtc_ui_hangup = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_hangup, ContextCompat.getColor(context, R.color.rtc_ui_hangup)),
+                        rtcUiForeground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_foreground, ContextCompat.getColor(context, R.color.rtc_ui_foreground)),
+                        rtcUiActionsBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_background, ContextCompat.getColor(context, R.color.rtc_ui_actions_background)),
+                        rtcUiActionsBackgroundChecked = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_background_checked, ContextCompat.getColor(context, R.color.rtc_ui_actions_background_checked)),
+                        rtcUiActionsIcon = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_icon, ContextCompat.getColor(context, R.color.rtc_ui_actions_icon)),
+                        rtcUiActionsIconChecked = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_icon_checked, ContextCompat.getColor(context, R.color.rtc_ui_actions_icon_checked)),
+                        rtcUiTextSecondary = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_text_secondary, ContextCompat.getColor(context, R.color.rtc_ui_text_secondary)),
+                        rtcUiBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_background, ContextCompat.getColor(context, R.color.rtc_ui_background)),
+                        rtcUiOverlayBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_overlay_background, ContextCompat.getColor(context, R.color.rtc_ui_overlay_background)),
+                        rtcUiAlertBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_alert_background, ContextCompat.getColor(context, R.color.rtc_ui_alert_background)),
+                        rtcUiAlertText = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_alert_text, ContextCompat.getColor(context, R.color.rtc_ui_foreground)),
+                        rtcUiAccept = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_accept, ContextCompat.getColor(context, R.color.rtc_ui_accept)),
+                        rtcUiHangup = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_hangup, ContextCompat.getColor(context, R.color.rtc_ui_hangup)),
+                        rtcUiColorActionsRowBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_row_background, ContextCompat.getColor(context, R.color.rtc_ui_background)),
+                        rtcUiColorActionsRowIcon = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_row_icon, ContextCompat.getColor(context, R.color.rtc_ui_actions_icon)),
+                        rtcUiColorActionsRowLabel = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_row_label, ContextCompat.getColor(context, R.color.rtc_ui_foreground)),
+                        rtcUiColorSheetPill = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_sheet_pill, ContextCompat.getColor(context, R.color.rtc_ui_actions_background)),
+                        rtcUiColorActionsDivider = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_actions_divider, ContextCompat.getColor(context, R.color.rtc_ui_actions_background)),
+                        rtcUiColorSheetBackground = it.getColor(R.styleable.InfobipRtcUi_rtc_ui_color_sheet_background, ContextCompat.getColor(context, R.color.rtc_ui_background)),
                 )
             }.also {
                 typedArray.recycle()
