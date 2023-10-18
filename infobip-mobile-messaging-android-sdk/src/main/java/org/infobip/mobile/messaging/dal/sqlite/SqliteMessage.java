@@ -95,12 +95,12 @@ public class SqliteMessage extends Message implements DatabaseContract.DatabaseO
         dataJson = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.CUSTOM_PAYLOAD));
         setCustomPayload(dataJson == null ? null : new JSONObject(dataJson));
 
-        setDestination(cursor.getString(cursor.getColumnIndex(MessageColumns.DESTINATION)));
-        String statusName = cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS));
+        setDestination(cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.DESTINATION)));
+        String statusName = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.STATUS));
         setStatus(statusName != null ? Status.valueOf(statusName) : null);
-        setStatusMessage(cursor.getString(cursor.getColumnIndex(MessageColumns.STATUS_MESSAGE)));
+        setStatusMessage(cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.STATUS_MESSAGE)));
         try {
-            String inAppStyle = cursor.getString(cursor.getColumnIndex(MessageColumns.IN_APP_STYLE));
+            String inAppStyle = cursor.getString(cursor.getColumnIndexOrThrow(MessageColumns.IN_APP_STYLE));
             setInAppStyle(InAppStyle.valueOf(inAppStyle));
         } catch (Exception ignored) {
 

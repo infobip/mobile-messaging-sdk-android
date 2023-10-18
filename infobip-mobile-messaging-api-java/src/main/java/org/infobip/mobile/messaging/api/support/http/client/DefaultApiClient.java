@@ -185,6 +185,7 @@ public class DefaultApiClient implements ApiClient {
                     InputStream inputStream = urlConnection.getErrorStream();
                     String s = StreamUtils.readToString(inputStream, "UTF-8", contentLength);
                     apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
+                    inputStream.close();
                 }
 
                 if (responseCode >= 500) {
