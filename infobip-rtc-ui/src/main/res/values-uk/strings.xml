@@ -27,4 +27,7 @@
     <string name="mm_video_call">Відеодзвінок</string>
     <string name="mm_video_permission_required">Для відеодзвінків потрібен дозвіл камери.</string>
     <string name="mm_your_microphone_is_muted">Ваш мікрофон вимкнено</string>
+    <string name="mm_you_are_sharing_a_screen">Ви ділитеся екраном.</string>
+    <string name="mm_stop_sharing_screen"><u>Припинити показ екрана</u></string>
+    <string name="mm_connection_problems">Дзвінок розірвано. Повторне підключення…</string>
 </resources>

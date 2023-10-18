@@ -27,4 +27,7 @@
     <string name="mm_video_call">Cuộc gọi video</string>
     <string name="mm_video_permission_required">Cần có sự cho phép của máy ảnh đối với các cuộc gọi điện video.</string>
     <string name="mm_your_microphone_is_muted">Micrô của bạn bị tắt tiếng</string>
+    <string name="mm_you_are_sharing_a_screen">Bạn đang chia sẻ một màn hình.</string>
+    <string name="mm_stop_sharing_screen"><u>Dừng chia sẻ màn hình</u></string>
+    <string name="mm_connection_problems">Cuộc gọi đã bị ngắt kết nối. Đang cố gắng kết nối lại…</string>
 </resources>

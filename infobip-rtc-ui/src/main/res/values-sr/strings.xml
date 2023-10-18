@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mm_audio_permission_required">Audio dozvola zahteva preuzimanje poziva.</string>
     <string name="mm_call_finished">Poziv završen</string>
@@ -27,5 +26,8 @@
     <string name="mm_video">Video</string>
     <string name="mm_video_call">Video poziv</string>
     <string name="mm_video_permission_required">Dozvolite kameru  za video poziv.</string>
-    <string name="mm_your_microphone_is_muted">Vaš mikrofon je mutiran</string>
+    <string name="mm_you_are_sharing_a_screen">Delite ekran.</string>
+    <string name="mm_stop_sharing_screen"><u>Zaustavite deljenje ekrana</u></string>
+    <string name="mm_your_microphone_is_muted">Vaš mikrofon je mutiran.</string>
+    <string name="mm_connection_problems">Poziv je prekinut. Pokušavam da se ponovo povežem…</string>
 </resources>

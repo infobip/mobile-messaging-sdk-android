@@ -238,13 +238,11 @@
 
 
     <com.infobip.webrtc.ui.view.CallAlert
-        android:id="@+id/weakConnectionAlert"
+        android:id="@+id/connectionAlert"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:visibility="gone"
-        app:alertIcon="@drawable/ic_alert_triangle"
-        app:alertText="@string/mm_call_weak_internet_connection"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbarBarier"
@@ -263,7 +261,7 @@
         app:alertText="@string/mm_your_microphone_is_muted"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/weakConnectionAlert"
+        app:layout_constraintTop_toBottomOf="@id/connectionAlert"
         tools:visibility="visible" />
 
     <com.infobip.webrtc.sdk.api.model.video.VideoRenderer

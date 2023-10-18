@@ -1,6 +1,7 @@
 package com.infobip.webrtc.ui.model
 
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
+import com.infobip.webrtc.ui.view.CallAlert
 
 internal data class CallState(
     val isIncoming: Boolean,
@@ -9,7 +10,7 @@ internal data class CallState(
     val elapsedTimeSeconds: Int,
     val isSpeakerOn: Boolean,
     val isLocalScreenShare: Boolean,
-    val isWeakConnection: Boolean,
+    val callAlert: CallAlert.Mode? = null,
     val isPip: Boolean,
     val isFinished: Boolean,
     val showControls: Boolean,

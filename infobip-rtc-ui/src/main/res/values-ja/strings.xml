@@ -27,4 +27,7 @@
     <string name="mm_video_call">ビデオ通話</string>
     <string name="mm_video_permission_required">ビデオ通話にはカメラの許可が必要です。</string>
     <string name="mm_your_microphone_is_muted">マイクがミュートになっています</string>
+    <string name="mm_you_are_sharing_a_screen">画面を共有しています。</string>
+    <string name="mm_stop_sharing_screen"><u>画面共有を停止する</u></string>
+    <string name="mm_connection_problems">通話が切断されました。再接続しようとしています…</string>
 </resources>

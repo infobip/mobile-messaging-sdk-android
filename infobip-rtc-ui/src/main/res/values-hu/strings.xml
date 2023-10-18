@@ -27,4 +27,7 @@
     <string name="mm_video_call">Videohívás</string>
     <string name="mm_video_permission_required">A videohívásokhoz kameraengedély szükséges.</string>
     <string name="mm_your_microphone_is_muted">A mikrofon el van némítva</string>
+    <string name="mm_you_are_sharing_a_screen">Megoszt egy képernyőt.</string>
+    <string name="mm_stop_sharing_screen"><u>Állítsa le a képernyő megosztását</u></string>
+    <string name="mm_connection_problems">A hívás megszakadt. Újracsatlakozási kísérlet…</string>
 </resources>

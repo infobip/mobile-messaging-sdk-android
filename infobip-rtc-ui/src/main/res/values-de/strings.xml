@@ -27,4 +27,7 @@
     <string name="mm_video_call">Videoanruf</string>
     <string name="mm_video_permission_required">Für Videoanrufe ist eine Kameraerlaubnis erforderlich.</string>
     <string name="mm_your_microphone_is_muted">Ihr Mikrofon ist stummgeschaltet</string>
+    <string name="mm_you_are_sharing_a_screen">Sie teilen einen Bildschirm.</string>
+    <string name="mm_stop_sharing_screen"><u>Beenden Sie die Bildschirmfreigabe</u></string>
+    <string name="mm_connection_problems">Anruf wurde getrennt. Versuche, die Verbindung wiederherzustellen …</string>
 </resources>

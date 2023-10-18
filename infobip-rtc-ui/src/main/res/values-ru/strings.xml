@@ -27,4 +27,7 @@
     <string name="mm_video_call">Видеозвонок</string>
     <string name="mm_video_permission_required">Для видеозвонков требуется разрешение камеры.</string>
     <string name="mm_your_microphone_is_muted">Ваш микрофон отключен</string>
+    <string name="mm_you_are_sharing_a_screen">Вы делитесь экраном.</string>
+    <string name="mm_stop_sharing_screen"><u>Прекратить демонстрацию экрана</u></string>
+    <string name="mm_connection_problems">Звонок прервался. Пытаюсь восстановить соединение…</string>
 </resources>

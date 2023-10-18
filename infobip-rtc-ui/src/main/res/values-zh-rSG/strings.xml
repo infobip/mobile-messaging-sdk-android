@@ -28,4 +28,7 @@
     <string name="mm_video_call">视频通话</string>
     <string name="mm_video_permission_required">视频通话需要摄像头权限。</string>
     <string name="mm_your_microphone_is_muted">您的麥克風已靜音</string>
+    <string name="mm_you_are_sharing_a_screen">您正在共享一个屏幕。</string>
+    <string name="mm_stop_sharing_screen"><u>停止共享屏幕</u></string>
+    <string name="mm_connection_problems">通话被挂断。正在尝试重新连接…</string>
 </resources>

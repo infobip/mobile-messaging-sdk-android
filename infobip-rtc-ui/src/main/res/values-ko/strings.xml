@@ -27,4 +27,7 @@
     <string name="mm_video_call">영상 통화</string>
     <string name="mm_video_permission_required">영상통화를 위해서는 카메라 권한이 필요합니다.</string>
     <string name="mm_your_microphone_is_muted">마이크가 음소거되었습니다.</string>
+    <string name="mm_you_are_sharing_a_screen">화면을 공유하고 있습니다.</string>
+    <string name="mm_stop_sharing_screen"><u>화면 공유 중지</u></string>
+    <string name="mm_connection_problems">통화가 끊어졌습니다. 다시 연결하는 중…</string>
 </resources>

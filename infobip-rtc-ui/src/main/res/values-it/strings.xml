@@ -27,4 +27,7 @@
     <string name="mm_video_call">Video chiamata</string>
     <string name="mm_video_permission_required">Per le videochiamate è necessaria l\'autorizzazione della fotocamera.</string>
     <string name="mm_your_microphone_is_muted">Il tuo microfono è disattivato</string>
+    <string name="mm_you_are_sharing_a_screen">Stai condividendo uno schermo.</string>
+    <string name="mm_stop_sharing_screen"><u>Interrompi la condivisione dello schermo</u></string>
+    <string name="mm_connection_problems">La chiamata è stata disconnessa. Tentativo di riconnessione…</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="mm_video_call">Video thirrje</string>
     <string name="mm_video_permission_required">Kërkohet leja e kamerës për telefonatat me video.</string>
     <string name="mm_your_microphone_is_muted">Mikrofoni juaj është i çaktivizuar.</string>
+    <string name="mm_you_are_sharing_a_screen">Ju jeni duke ndarë një ekran.</string>
+    <string name="mm_stop_sharing_screen"><u>Ndalo ndarjen e ekranit</u></string>
+    <string name="mm_connection_problems">Telefonata u shkëput. Po përpiqet të rilidhet…</string>
 </resources>

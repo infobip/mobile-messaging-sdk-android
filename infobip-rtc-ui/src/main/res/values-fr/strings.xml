@@ -27,4 +27,7 @@
     <string name="mm_video_call">Appel vidéo</string>
     <string name="mm_video_permission_required">L\'autorisation de la caméra est requise pour les appels vidéo.</string>
     <string name="mm_your_microphone_is_muted">Votre micro est coupé</string>
+    <string name="mm_you_are_sharing_a_screen">Vous partagez un écran.</string>
+    <string name="mm_stop_sharing_screen"><u>Arrêter de partager l\'écran</u></string>
+    <string name="mm_connection_problems">L\'appel a été déconnecté. J\'essaie de me reconnecter…</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="mm_video_call">Wideo rozmowa</string>
     <string name="mm_video_permission_required">W przypadku rozmów wideo wymagane jest pozwolenie na korzystanie z aparatu.</string>
     <string name="mm_your_microphone_is_muted">Twój mikrofon jest wyciszony</string>
+    <string name="mm_you_are_sharing_a_screen">Udostępniasz ekran.</string>
+    <string name="mm_stop_sharing_screen"><u>Zatrzymaj udostępnianie ekranu</u></string>
+    <string name="mm_connection_problems">Połączenie zostało rozłączone. Próbuję ponownie połączyć…</string>
 </resources>

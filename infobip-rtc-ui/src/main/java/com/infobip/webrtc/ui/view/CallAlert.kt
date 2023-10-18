@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.ui.R
@@ -16,8 +18,10 @@ class CallAlert @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr, defStyleRes) {
 
+    private val binding = WidgetCallAlertBinding.inflate(LayoutInflater.from(context), this)
+
     init {
-        WidgetCallAlertBinding.inflate(LayoutInflater.from(context), this).apply {
+        binding.run {
             Injector.colors?.let {
                 setBackgroundColor(it.rtcUiAlertBackground)
                 alertText.setTextColor(it.rtcUiAlertText)
@@ -34,4 +38,17 @@ class CallAlert @JvmOverloads constructor(
         }
     }
 
+    sealed class Mode(@StringRes val message: Int, @DrawableRes val icon: Int) {
+        object WeakConnection : Mode(R.string.mm_call_weak_internet_connection, R.drawable.ic_alert_triangle)
+        object Reconnecting : Mode(R.string.mm_connection_problems, R.drawable.ic_alert_triangle)
+    }
+
+    fun setMode(mode: Mode?) {
+        if (mode == null)
+            return
+        with(binding) {
+            alertText.text = context.getString(mode.message)
+            alertIcon.setImageResource(mode.icon)
+        }
+    }
 }

@@ -30,4 +30,5 @@
     <string name="mm_your_microphone_is_muted">Your microphone is muted</string>
     <string name="mm_you_are_sharing_a_screen">You are sharing a screen.</string>
     <string name="mm_stop_sharing_screen"><u>Stop sharing screen</u></string>
+    <string name="mm_connection_problems">Call was disconnected. Trying to reconnect…</string>
 </resources>

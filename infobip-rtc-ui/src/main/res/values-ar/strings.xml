@@ -27,4 +27,7 @@
     <string name="mm_video_call">مكالمة فيديو</string>
     <string name="mm_video_permission_required">مطلوب إذن الكاميرا لمكالمات الفيديو.</string>
     <string name="mm_your_microphone_is_muted">تم كتم صوت الميكروفون</string>
+    <string name="mm_you_are_sharing_a_screen">أنت تشارك شاشة.</string>
+    <string name="mm_stop_sharing_screen"><u>إيقاف مشاركة الشاشة</u></string>
+    <string name="mm_connection_problems">تم قطع المكالمة. جارٍ محاولة إعادة الاتصال…</string>
 </resources>

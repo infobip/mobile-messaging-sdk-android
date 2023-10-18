@@ -27,4 +27,7 @@
     <string name="mm_video_call">Videohovor</string>
     <string name="mm_video_permission_required">Pro videohovory je vyžadováno oprávnění ke kameře.</string>
     <string name="mm_your_microphone_is_muted">Váš mikrofon je ztlumený</string>
+    <string name="mm_you_are_sharing_a_screen">Sdílíte obrazovku.</string>
+    <string name="mm_stop_sharing_screen"><u>Zastavit sdílení obrazovky</u></string>
+    <string name="mm_connection_problems">Hovor byl odpojen. Pokus o opětovné připojení…</string>
 </resources>

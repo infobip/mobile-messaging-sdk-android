@@ -27,4 +27,7 @@
     <string name="mm_video_call">Apel video</string>
     <string name="mm_video_permission_required">Este necesară permisiunea camerei pentru apelurile video.</string>
     <string name="mm_your_microphone_is_muted">Microfonul dvs. este dezactivat</string>
+    <string name="mm_you_are_sharing_a_screen">Partajați un ecran.</string>
+    <string name="mm_stop_sharing_screen"><u>Opriți partajarea ecranului</u></string>
+    <string name="mm_connection_problems">Apelul a fost deconectat. Se încearcă reconectarea…</string>
 </resources>

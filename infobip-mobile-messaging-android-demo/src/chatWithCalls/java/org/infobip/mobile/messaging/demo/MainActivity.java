@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                                 R.string.app_name, R.drawable.ic_calls_30,
                                 null,
                                 () -> {
-                                    MobileMessagingLogger.i("MainActivity", "CUSTOM button pressed ");
+                                    MobileMessagingLogger.i("MainActivity", "CUSTOM button pressed");
                                     return Unit.INSTANCE;
                                 },
                                 customButtonChecked::isChecked,

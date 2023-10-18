@@ -27,4 +27,7 @@
     <string name="mm_video_call">Panggilan video</string>
     <string name="mm_video_permission_required">Kebenaran kamera diperlukan untuk panggilan video.</string>
     <string name="mm_your_microphone_is_muted">Mikrofon anda diredamkan</string>
+    <string name="mm_you_are_sharing_a_screen">Anda berkongsi skrin.</string>
+    <string name="mm_stop_sharing_screen"><u>Berhenti berkongsi skrin</u></string>
+    <string name="mm_connection_problems">Panggilan telah diputuskan. Cuba menyambung semula…</string>
 </resources>

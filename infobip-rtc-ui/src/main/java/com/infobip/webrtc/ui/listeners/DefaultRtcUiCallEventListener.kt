@@ -1,6 +1,32 @@
 package com.infobip.webrtc.ui.listeners
 
-import com.infobip.webrtc.sdk.api.event.call.*
+import com.infobip.webrtc.sdk.api.event.call.CallEarlyMediaEvent
+import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
+import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantStoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
+import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
 
 open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
@@ -57,4 +83,8 @@ open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
 
     override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
+
+    override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
+
+    override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {}
 }

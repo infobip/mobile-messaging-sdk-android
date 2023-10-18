@@ -27,4 +27,7 @@
     <string name="mm_video_call">Videoopkald</string>
     <string name="mm_video_permission_required">Kameratilladelse er påkrævet til videoopkald.</string>
     <string name="mm_your_microphone_is_muted">Din mikrofon er slået fra</string>
+    <string name="mm_you_are_sharing_a_screen">Du deler en skærm.</string>
+    <string name="mm_stop_sharing_screen"><u>Stop med at dele skærmen</u></string>
+    <string name="mm_connection_problems">Opkaldet blev afbrudt. Forsøger at oprette forbindelse igen…</string>
 </resources>

@@ -2,7 +2,9 @@ package com.infobip.webrtc.ui.service
 
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.IBinder
@@ -36,6 +38,8 @@ class OngoingCallService : BaseService() {
         const val CALL_HANGUP_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_HANGUP_ACTION"
         const val NAME_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.NAME_EXTRA"
         const val CALL_STATUS_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.CALL_STATUS_EXTRA"
+        const val RECONNECTING = "com.infobip.calls.ui.service.OngoingCallService.RECONNECTING"
+        const val RECONNECTED = "com.infobip.calls.ui.service.OngoingCallService.RECONNECTED"
     }
 
     private val vibrateDelegate: Vibrator by lazy { Injector.vibrator }
@@ -48,6 +52,8 @@ class OngoingCallService : BaseService() {
     private val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { Injector.notificationPermissionDelegate }
     private val cache: Cache = Injector.cache
     private var peerName: String = ""
+    private var reconnectingTonePlayer: MediaPlayer? = null
+
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -91,6 +97,14 @@ class OngoingCallService : BaseService() {
                 stop()
             }
 
+            RECONNECTING -> {
+                startReconnectingTone()
+            }
+
+            RECONNECTED -> {
+                stopReconnectingToneAndPlayReconnection()
+            }
+
             else -> Log.d(TAG, "Unhandled intent action: ${intent?.action.orEmpty()}")
         }
         return START_NOT_STICKY
@@ -104,6 +118,7 @@ class OngoingCallService : BaseService() {
     private fun onCallEnded() {
         ScreenShareService.sendScreenShareServiceIntent(applicationContext, ScreenShareService.ACTION_STOP_SCREEN_SHARE)
         stopMedia()
+        stopReconnectingTone()
         stop()
     }
 
@@ -120,5 +135,78 @@ class OngoingCallService : BaseService() {
     private fun stopMedia() {
         incomingCallRingtone.stop()
         vibrateDelegate.stopVibrate()
+    }
+
+    private fun startReconnectingTone()  {
+        if (reconnectingTonePlayer != null)
+            stopReconnectingTone()
+
+        runCatching {
+            reconnectingTonePlayer = createMediaPlayer(
+                R.raw.reconnecting,
+                AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING,
+                AudioManager.STREAM_VOICE_CALL,
+                true
+            ).apply {
+                prepare()
+                start()
+            }
+        }.onFailure {
+            Log.e(TAG, "startReconnectingTone() failed")
+        }
+    }
+
+    private fun stopReconnectingTone() {
+        reconnectingTonePlayer?.releaseSafely()
+        reconnectingTonePlayer = null
+    }
+
+    private fun stopReconnectingToneAndPlayReconnection() {
+        stopReconnectingTone()
+
+        runCatching {
+            createMediaPlayer(
+                R.raw.reconnecting,
+                AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING,
+                AudioManager.STREAM_VOICE_CALL,
+                false
+            ).apply {
+                setOnCompletionListener {
+                    releaseSafely()
+                }
+                prepare()
+                start()
+            }
+        }.onFailure {
+            Log.e(TAG, "stopReconnectingTone() failed")
+        }
+    }
+
+    private fun createMediaPlayer(
+        soundId: Int,
+        usage: Int,
+        streamType: Int,
+        looping: Boolean
+    ): MediaPlayer {
+        return MediaPlayer().apply {
+            val attrs = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .setUsage(usage)
+                .setLegacyStreamType(streamType)
+                .build()
+            setAudioAttributes(attrs)
+            isLooping = looping
+            val assetFileDescriptor = resources.openRawResourceFd(soundId)
+            setDataSource(assetFileDescriptor.fileDescriptor, assetFileDescriptor.startOffset, assetFileDescriptor.length)
+        }
+    }
+
+    private fun MediaPlayer.releaseSafely() {
+        runCatching {
+            stop()
+            release()
+        }.onFailure {
+            Log.e(TAG, "stop() and released() failed")
+        }
     }
 }

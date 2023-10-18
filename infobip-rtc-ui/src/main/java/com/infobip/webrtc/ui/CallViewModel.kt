@@ -14,6 +14,7 @@ import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.impl.event.listener.DefaultNetworkQualityEventListener
 import com.infobip.webrtc.ui.listeners.RtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
+import com.infobip.webrtc.ui.view.CallAlert
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,7 +40,7 @@ internal class CallViewModel : ViewModel() {
             elapsedTimeSeconds = 0,
             isSpeakerOn = false,
             isLocalScreenShare = false,
-            isWeakConnection = false,
+            callAlert = null,
             isPip = false,
             isFinished = false,
             showControls = true,
@@ -199,7 +200,7 @@ internal class CallViewModel : ViewModel() {
                     withContext(Dispatchers.Main) {
                         val score = networkQualityChangedEvent?.networkQuality?.score
                         val isNetworkIssue = score != null && score <= NetworkQuality.FAIR.score
-                        updateState { copy(isWeakConnection = isNetworkIssue) }
+                        updateState { copy(callAlert = CallAlert.Mode.WeakConnection.takeIf { isNetworkIssue }) }
                     }
                 }
             }

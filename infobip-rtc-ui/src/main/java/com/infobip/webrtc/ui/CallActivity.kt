@@ -31,6 +31,7 @@ import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.service.OngoingCallService
 import com.infobip.webrtc.ui.utils.applyLocale
 import com.infobip.webrtc.ui.utils.navigate
+import com.infobip.webrtc.ui.view.CallAlert
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
 import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
@@ -283,6 +284,26 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
 
             override fun onHangup(callHangupEvent: CallHangupEvent?) {
                 viewModel.updateState { copy(isFinished = true) }
+            }
+
+            override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {
+                viewModel.updateState { copy(callAlert = CallAlert.Mode.Reconnecting) }
+                runOnUiThread {
+                    OngoingCallService.sendCallServiceIntent(
+                        applicationContext,
+                        OngoingCallService.RECONNECTING
+                    )
+                }
+            }
+
+            override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
+                viewModel.updateState { copy(callAlert = null) }
+                runOnUiThread {
+                    OngoingCallService.sendCallServiceIntent(
+                        applicationContext,
+                        OngoingCallService.RECONNECTED
+                    )
+                }
             }
         })
     }

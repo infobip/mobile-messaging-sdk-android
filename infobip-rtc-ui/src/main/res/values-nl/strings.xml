@@ -27,4 +27,7 @@
     <string name="mm_video_call">Video-oproep</string>
     <string name="mm_video_permission_required">Voor videogesprekken is cameratoestemming vereist.</string>
     <string name="mm_your_microphone_is_muted">Je microfoon is gedempt</string>
+    <string name="mm_you_are_sharing_a_screen">Je deelt een scherm.</string>
+    <string name="mm_stop_sharing_screen"><u>Scherm delen stoppen</u></string>
+    <string name="mm_connection_problems">De verbinding werd verbroken. Proberen opnieuw verbinding te maken…</string>
 </resources>

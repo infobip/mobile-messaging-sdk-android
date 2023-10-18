@@ -27,4 +27,7 @@
     <string name="mm_video_call">वीडियो कॉल</string>
     <string name="mm_video_permission_required">वीडियो कॉल के लिए कैमरा अनुमति आवश्यक है।</string>
     <string name="mm_your_microphone_is_muted">आपका माइक्रोफ़ोन म्यूट है</string>
+    <string name="mm_you_are_sharing_a_screen">आप एक स्क्रीन साझा कर रहे हैं.</string>
+    <string name="mm_stop_sharing_screen"><u>स्क्रीन साझा करना बंद करें</u></string>
+    <string name="mm_connection_problems">कॉल कट गया. पुनः कनेक्ट करने का प्रयास किया जा रहा है…</string>
 </resources>

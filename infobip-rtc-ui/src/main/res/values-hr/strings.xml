@@ -27,4 +27,7 @@
     <string name="mm_video_call">video poziv</string>
     <string name="mm_video_permission_required">Za videopozive potrebna je dozvola kamere.</string>
     <string name="mm_your_microphone_is_muted">Vaš mikrofon je isključen</string>
+    <string name="mm_you_are_sharing_a_screen">Dijelite zaslon.</string>
+    <string name="mm_stop_sharing_screen"><u>Zaustavi dijeljenje zaslona</u></string>
+    <string name="mm_connection_problems">Poziv je prekinut. Pokušaj ponovnog povezivanja…</string>
 </resources>

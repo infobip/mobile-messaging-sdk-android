@@ -27,4 +27,7 @@
     <string name="mm_video_call">การสนทนาทางวิดีโอ</string>
     <string name="mm_video_permission_required">ต้องได้รับอนุญาตจากกล้องสำหรับแฮงเอาท์วิดีโอ</string>
     <string name="mm_your_microphone_is_muted">ไมโครโฟนของคุณปิดอยู่</string>
+    <string name="mm_you_are_sharing_a_screen">คุณกำลังแชร์หน้าจอ</string>
+    <string name="mm_stop_sharing_screen"><u>หยุดการแชร์หน้าจอ</u></string>
+    <string name="mm_connection_problems">การโทรถูกตัด กำลังพยายามเชื่อมต่อใหม่…</string>
 </resources>

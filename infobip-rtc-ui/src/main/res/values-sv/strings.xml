@@ -27,4 +27,7 @@
     <string name="mm_video_call">Videosamtal</string>
     <string name="mm_video_permission_required">Kameratillstånd krävs för videosamtal.</string>
     <string name="mm_your_microphone_is_muted">Din mikrofon är avstängd</string>
+    <string name="mm_you_are_sharing_a_screen">Du delar en skärm.</string>
+    <string name="mm_stop_sharing_screen"><u>Sluta dela skärmen</u></string>
+    <string name="mm_connection_problems">Samtalet avbröts. Försöker ansluta igen…</string>
 </resources>

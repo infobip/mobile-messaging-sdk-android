@@ -27,4 +27,7 @@
     <string name="mm_video_call">שיחת וידאו</string>
     <string name="mm_video_permission_required">נדרשת הרשאת מצלמה לשיחות וידאו.</string>
     <string name="mm_your_microphone_is_muted">המיקרופון שלך מושתק</string>
+    <string name="mm_you_are_sharing_a_screen">אתה משתף מסך.</string>
+    <string name="mm_stop_sharing_screen"><u>הפסק לשתף מסך</u></string>
+    <string name="mm_connection_problems">השיחה נותקה. מנסה להתחבר מחדש...</string>
 </resources>

@@ -56,22 +56,22 @@ internal interface CallsDelegate {
 }
 
 internal class CallsDelegateImpl(
-        private val context: Context,
-        private val callsScope: CoroutineScope,
-        private val infobipRtc: InfobipRTC
+    private val context: Context,
+    private val callsScope: CoroutineScope,
+    private val infobipRtc: InfobipRTC
 ) : CallsDelegate {
     private val call: RtcUiCall?
         get() = getActiveCall(
-                { if (this is IncomingWebrtcCall) RtcUiIncomingWebrtcCallImpl(this) else null },
-                { if (this is IncomingApplicationCall) RtcUiIncomingAppCallImpl(this) else null }
+            { if (this is IncomingWebrtcCall) RtcUiIncomingWebrtcCallImpl(this) else null },
+            { if (this is IncomingApplicationCall) RtcUiIncomingAppCallImpl(this) else null }
         )
 
     private inline fun <OUT : RtcUiCall?> getActiveCall(
-            callBlock: WebrtcCall.() -> OUT,
-            appCallBlock: ApplicationCall.() -> OUT,
+        callBlock: WebrtcCall.() -> OUT,
+        appCallBlock: ApplicationCall.() -> OUT,
     ): OUT? {
         return (infobipRtc.activeCall as? WebrtcCall)?.callBlock()
-                ?: infobipRtc.activeApplicationCall?.appCallBlock()
+            ?: infobipRtc.activeApplicationCall?.appCallBlock()
     }
 
     override fun accept() {
@@ -161,20 +161,20 @@ internal class CallsDelegateImpl(
                 val screenShareTrack = screenShareTrack()
                 val localVideoTrack = localVideoTrack()
                 CallState(
-                        isIncoming = call.duration() == 0,
-                        isMuted = call.muted(),
-                        isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
-                        elapsedTimeSeconds = call.duration(),
-                        isSpeakerOn = call.speakerphone(),
-                        isLocalScreenShare = call.hasScreenShare(),
-                        isWeakConnection = false,
-                        isPip = false,
-                        isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
-                        showControls = true,
-                        error = "",
-                        localVideoTrack = localVideoTrack,
-                        remoteVideoTrack = remoteVideoTrack,
-                        screenShareTrack = screenShareTrack
+                    isIncoming = call.duration() == 0,
+                    isMuted = call.muted(),
+                    isPeerMuted = (call as? RtcUiAppCall)?.participants()?.firstOrNull()?.media?.audio?.muted,
+                    elapsedTimeSeconds = call.duration(),
+                    isSpeakerOn = call.speakerphone(),
+                    isLocalScreenShare = call.hasScreenShare(),
+                    callAlert = null,
+                    isPip = false,
+                    isFinished = call.status()?.let { it == CallStatus.FINISHED || it == CallStatus.FINISHING } == true,
+                    showControls = true,
+                    error = "",
+                    localVideoTrack = localVideoTrack,
+                    remoteVideoTrack = remoteVideoTrack,
+                    screenShareTrack = screenShareTrack
                 )
             }.getOrNull()
         }
@@ -199,14 +199,14 @@ internal class CallsDelegateImpl(
 
     override fun registerActiveConnection(token: String) {
         infobipRtc.registerForActiveConnection(
-                token,
-                context,
-                IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingApplicationCallEventListener
+            token,
+            context,
+            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingApplicationCallEventListener
         )
         infobipRtc.registerForActiveConnection(
-                token,
-                context,
-                IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingCallEventListener
+            token,
+            context,
+            IncomingCallEventListenerImpl(context, mapOf(), callsScope) as IncomingCallEventListener
         )
     }
 

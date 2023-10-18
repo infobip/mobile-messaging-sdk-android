@@ -414,7 +414,8 @@ class InCallFragment : Fragment() {
             binding.screenSharingGroup.isVisible = isLocalScreenShare
             colors.let { res -> (if (isLocalScreenShare) res?.rtcUiActionsBackground else res?.rtcUiBackground)?.let { binding.background.setBackgroundColor(it) } }
             //another views
-            binding.weakConnectionAlert.isVisible = isWeakConnection && !isPip && showControls
+            binding.connectionAlert.isVisible = callAlert != null && !isPip && showControls
+            binding.connectionAlert.setMode(callAlert)
             binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip && showControls
             binding.peerMuteIndicatorInVideo.isVisible = (isRemoteVideo || isLocalScreenShare || isRemoteScreenShare) && isPeerMuted == true && !isPip && showControls
             binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && !isLocalScreenShare && !isRemoteScreenShare && isPeerMuted == true && !isPip
