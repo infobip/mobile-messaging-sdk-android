@@ -25,6 +25,7 @@
         <item name="rtc_ui_color_text_secondary">@color/rtc_ui_text_secondary</item>
         <item name="rtc_ui_color_background">@color/rtc_ui_background</item>
         <item name="rtc_ui_color_overlay_background">@color/rtc_ui_overlay_background</item>
+        <item name="rtc_ui_color_alert_background">@color/rtc_ui_alert_background</item>
         <item name="rtc_ui_color_accept">@color/rtc_ui_accept</item>
         <item name="rtc_ui_color_hangup">@color/rtc_ui_hangup</item>
         <item name="rtc_ui_icon_unMute">@drawable/ic_unmute</item>
