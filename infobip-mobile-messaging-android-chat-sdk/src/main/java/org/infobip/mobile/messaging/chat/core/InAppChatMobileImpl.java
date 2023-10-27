@@ -49,7 +49,7 @@ public class InAppChatMobileImpl implements InAppChatMobile {
         Runnable myRunnable = new Runnable() {
             @Override
             public void run() {
-                MobileMessagingLogger.d("WebView loading error", errorMessage);
+                MobileMessagingLogger.d("WebView loading error: " + errorMessage);
                 if (inAppChatWebViewManager != null) inAppChatWebViewManager.onJSError(errorMessage);
             }
         };
