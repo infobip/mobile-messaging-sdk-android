@@ -16,7 +16,7 @@ plugins {
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
     id 'org.jetbrains.kotlin.android' version "$mm_kotlinVersion" apply false
-    id "org.sonarqube" version "4.0.0.2929"
+    id "org.sonarqube" version "4.4.1.3373"
     id "jacoco"
 }
 
@@ -119,12 +119,14 @@ sonar {
         property "sonar.projectVersion", project.version
         property "sonar.projectName", "infobip-mobile-messaging-android"
         property "sonar.projectKey" , "infobip-mobile-messaging-android"
+        property "sonar.androidLint.reportPaths", "${project.buildDir}/reports/lint-results-debug.xml"
         property "sonar.exclusions", "" +
                 "infobip-mobile-messaging-android-demo/**/*, " +
                 "infobip-mobile-messaging-android-cryptor-migration/**/*, " +
                 "infobip-mobile-messaging-android-test/**/*, " +
                 "infobip-rtc-ui/**/*"
         property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.junit.reportsPath", "${project.buildDir}/test-results/test/"
         property "sonar.coverage.jacoco.xmlReportPaths", "" +
                 "${project.projectDir}/infobip-mobile-messaging-android-geo-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
                 "${project.projectDir}/infobip-mobile-messaging-android-inbox-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +

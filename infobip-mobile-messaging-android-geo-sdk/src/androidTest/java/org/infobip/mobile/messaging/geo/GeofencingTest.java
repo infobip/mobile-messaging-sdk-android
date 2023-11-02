@@ -123,7 +123,7 @@ public class GeofencingTest extends MobileMessagingTestCase {
         assertTrue(geofencesAndNextRefreshDate.first.isEmpty());
         assertNull(geofencesAndNextRefreshDate.second.first);
     }
-
+    
     @Test
     public void shouldCalculateRefreshDateForGeoExpiredIfGeoExpired() throws Exception {
         // Given

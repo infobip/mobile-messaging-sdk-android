@@ -3,7 +3,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
-    id 'io.freefair.lombok' version '5.1.0'
+    id 'io.freefair.lombok' version '8.4'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
