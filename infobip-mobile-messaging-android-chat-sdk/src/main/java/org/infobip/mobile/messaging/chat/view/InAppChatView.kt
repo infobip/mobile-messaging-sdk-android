@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -32,6 +33,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
 import org.infobip.mobile.messaging.util.StringUtils
+import org.infobip.mobile.messaging.util.SystemInformation
 import java.util.*
 
 class InAppChatView @JvmOverloads constructor(
@@ -366,7 +368,11 @@ class InAppChatView @JvmOverloads constructor(
             intentFilter.addAction(InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key)
             intentFilter.addAction(Event.API_COMMUNICATION_ERROR.key)
             intentFilter.addAction(Event.REGISTRATION_CREATED.key)
-            context.registerReceiver(broadcastEventsReceiver, intentFilter)
+            if (SystemInformation.isUpsideDownCakeOrAbove()) {
+                ContextCompat.registerReceiver(context, broadcastEventsReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED)
+            } else {
+                context.registerReceiver(broadcastEventsReceiver, intentFilter)
+            }
             receiversRegistered = true
         }
     }

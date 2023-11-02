@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.geo.geofencing;
 
+import static android.content.Context.RECEIVER_EXPORTED;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -39,6 +41,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.ComponentUtil;
+import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -324,7 +327,11 @@ public class GeofencingImpl extends Geofencing {
             geoEnabledConsistencyReceiver = new GeoEnabledConsistencyReceiver();
 
             final IntentFilter intentFilter = new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION);
-            context.registerReceiver(geoEnabledConsistencyReceiver, intentFilter);
+            if (SystemInformation.isUpsideDownCakeOrAbove()) {
+                context.registerReceiver(geoEnabledConsistencyReceiver, intentFilter, RECEIVER_EXPORTED);
+            } else {
+                context.registerReceiver(geoEnabledConsistencyReceiver, intentFilter);
+            }
 
         } else {
             if (null != geoEnabledConsistencyReceiver) {

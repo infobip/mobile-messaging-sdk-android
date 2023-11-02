@@ -153,7 +153,15 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
 
     private fun downloadFile() {
         if (!permissionsRequestManager.isRequiredPermissionsGranted) {
-            if (SystemInformation.isTiramisuOrAbove()) {
+            if (SystemInformation.isUpsideDownCakeOrAbove()) {
+                MobileMessagingLogger.e(
+                    "[InAppChat] Permissions required for attachments not granted",
+                    ConfigurationException(
+                        ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,
+                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED + ", " + Manifest.permission.READ_MEDIA_IMAGES + ", " + Manifest.permission.READ_MEDIA_VIDEO + ", " + Manifest.permission.READ_MEDIA_AUDIO + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ).message
+                )
+            } else if (SystemInformation.isTiramisuOrAbove()) {
                 MobileMessagingLogger.e(
                     "[InAppChat] Permissions required for attachments not granted",
                     ConfigurationException(
@@ -204,7 +212,14 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     override fun requiredPermissions(): Array<String> {
-        return if (SystemInformation.isTiramisuOrAbove()) {
+        return if (SystemInformation.isUpsideDownCakeOrAbove()) {
+            arrayOf(
+                Manifest.permission.READ_MEDIA_AUDIO,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO,
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+            )
+        } else if (SystemInformation.isTiramisuOrAbove()) {
             arrayOf(
                 Manifest.permission.READ_MEDIA_AUDIO,
                 Manifest.permission.READ_MEDIA_IMAGES,

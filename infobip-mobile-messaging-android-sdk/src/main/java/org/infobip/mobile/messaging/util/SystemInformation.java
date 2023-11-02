@@ -84,4 +84,8 @@ public class SystemInformation {
     public static boolean isTiramisuOrAbove() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
+
+    public static boolean isUpsideDownCakeOrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+    }
 }
