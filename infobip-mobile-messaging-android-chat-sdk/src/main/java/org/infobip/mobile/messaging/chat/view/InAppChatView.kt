@@ -1,10 +1,15 @@
 package org.infobip.mobile.messaging.chat.view
 
 import android.content.*
+import android.graphics.Typeface
 import android.net.ConnectivityManager
 import android.os.Build
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -32,6 +37,8 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
 import org.infobip.mobile.messaging.util.StringUtils
+import org.json.JSONException
+import org.json.JSONObject
 import java.util.*
 
 class InAppChatView @JvmOverloads constructor(
@@ -105,17 +112,43 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun handlerWidgetError(error: String) {
-            Snackbar.make(
-                binding.root,
-                localizationUtils.getString(R.string.ib_chat_error, error),
-                Snackbar.LENGTH_INDEFINITE
-            )
-                .setAction(R.string.ib_chat_ok) {}
-                .show()
+            val parsedError = parseJsonError(error)
+            val errorMessage = parsedError.first
+            val errorCode = parsedError.second
+
+            val messageToShow = if (errorCode != null) {
+                SpannableString("\"${errorMessage}\"\nError code: $errorCode").apply {
+                    setSpan(StyleSpan(Typeface.BOLD), errorMessage.length + 1, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                }
+            } else {
+                SpannableString(errorMessage)
+            }
+
+            val snackbar = Snackbar.make(binding.root, messageToShow, Snackbar.LENGTH_INDEFINITE)
+            snackbar.setAction(R.string.ib_chat_ok) {}
+
+            val snackbarView = snackbar.view
+            val textView = snackbarView.findViewById<TextView>(R.id.snackbar_text)
+            textView.maxLines = 4 // Here we set the max lines for the TextView within the Snackbar
+
+            snackbar.show()
         }
 
         override fun handlerNoInternetConnectionError() {
             showNoInternetConnectionView()
+        }
+    }
+
+
+    // Utility function to parse the JSON error message
+    fun parseJsonError(errorJson: String): Pair<String, String?> {
+        return try {
+            val jsonObject = JSONObject(errorJson)
+            val message = jsonObject.optString("message", "Something went wrong")
+            val code = jsonObject.optString("code", null)
+            Pair(message, code?.toString())
+        } catch (e: JSONException) {
+            Pair("Error parsing error message: $errorJson", null)
         }
     }
 
