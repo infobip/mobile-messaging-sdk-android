@@ -129,7 +129,7 @@ class InAppChatView @JvmOverloads constructor(
 
             val snackbarView = snackbar.view
             val textView = snackbarView.findViewById<TextView>(R.id.snackbar_text)
-            textView.maxLines = 4 // Here we set the max lines for the TextView within the Snackbar
+            textView.maxLines = 4
 
             snackbar.show()
         }
@@ -139,8 +139,9 @@ class InAppChatView @JvmOverloads constructor(
         }
     }
 
-
-    // Utility function to parse the JSON error message
+    /**
+     * Utility function to parse the JSON error message
+     */
     fun parseJsonError(errorJson: String): Pair<String, String?> {
         return try {
             val jsonObject = JSONObject(errorJson)
