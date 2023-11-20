@@ -13,7 +13,7 @@ public class CommonUtils {
     }
 
     public static String escapeJsonString(String source) {
-        String serialize = new JsonSerializer().serialize(source);
+        String serialize = new JsonSerializer(false).serialize(source);
         return serialize.substring(1, serialize.length() - 1);
     }
 }

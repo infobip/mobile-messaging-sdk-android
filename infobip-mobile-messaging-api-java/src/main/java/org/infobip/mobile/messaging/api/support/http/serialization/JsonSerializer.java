@@ -48,15 +48,21 @@ public class JsonSerializer {
         gson = new GsonBuilder().create();
     }
 
+    public JsonSerializer(Boolean withEscaping) {
+        if (withEscaping) {
+            gson = new GsonBuilder().create();
+        } else {
+            gson = new GsonBuilder().disableHtmlEscaping().create();
+        }
+    }
+
     public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {
         GsonBuilder builder = new GsonBuilder();
         if (serializeNulls) {
             builder.serializeNulls();
         }
-        if (adapters.length > 0) {
-            for (ObjectAdapter adapter : adapters) {
-                builder.registerTypeHierarchyAdapter(adapter.getCls(), new CustomTypeAdapter(adapter));
-            }
+        for (ObjectAdapter adapter : adapters) {
+            builder.registerTypeHierarchyAdapter(adapter.getCls(), new CustomTypeAdapter(adapter));
         }
         gson = builder.create();
     }
