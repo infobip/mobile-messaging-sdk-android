@@ -31,7 +31,7 @@ ext {
     mm_appCompatVersion = "1.6.1"
     mm_materialVersion = "1.9.0"
     mm_coreKtxVersion = "1.10.1"
-    mm_desugarJdkVersion = "1.1.8"
+    mm_desugarJdkVersion = "2.0.3"
     mm_lifecycleVersion = "2.5.1"
 }
 

@@ -33,7 +33,6 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         consumerProguardFiles 'proguard-rules.pro'
         vectorDrawables.useSupportLibrary = true
-        multiDexEnabled true
     }
 
     buildFeatures {
@@ -43,6 +42,8 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled true
+            //needed for androidTests
+            multiDexEnabled = true
         }
         release {
             minifyEnabled false
@@ -50,14 +51,13 @@ android {
         }
     }
 
-    compileOptions {
-        coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     lintOptions {
@@ -93,13 +93,12 @@ dependencies {
     androidTestImplementation "junit:junit:4.12"
     androidTestImplementation "org.mockito:mockito-core:1.10.19"
     androidTestImplementation 'com.nanohttpd:nanohttpd:2.1.0'
+    androidTestImplementation 'com.android.support:multidex:2.0.1'
 
     testImplementation project(":infobip-mobile-messaging-android-test")
     testImplementation "junit:junit:4.12"
     testImplementation "org.mockito:mockito-core:1.10.19"
 
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$mm_desugarJdkVersion"
-    implementation 'com.android.support:multidex:2.0.1'
 }
 
 android.libraryVariants.all { variant ->
