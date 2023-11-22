@@ -49,6 +49,7 @@ class InAppChatView @JvmOverloads constructor(
     interface EventsListener {
         fun onChatLoaded(controlsEnabled: Boolean)
         fun onChatDisconnected()
+        fun onChatReconnected()
         fun onChatControlsVisibilityChanged(isVisible: Boolean)
         fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?)
         fun onChatViewChanged(widgetView: InAppChatWidgetView)
@@ -82,12 +83,8 @@ class InAppChatView @JvmOverloads constructor(
     private val lcRegIdChecker = LivechatRegistrationChecker(context)
     private var widgetInfo: WidgetInfo? = null
     private var lastControlsVisibility: Boolean? = null
+    private var isChatLoaded: Boolean = false
 
-    /**
-     * Returns true if chat is loaded, otherwise returns false.
-     */
-    var isChatLoaded: Boolean = false
-        private set
 
     /**
      * [InAppChatView] event listener allows you to listen to Livechat widget events.
@@ -144,28 +141,30 @@ class InAppChatView @JvmOverloads constructor(
         inAppChat.activate()
         binding.ibLcWebView.setup(inAppChatWebViewManager)
         lifecycle.addObserver(lifecycleObserver)
+        loadChatPage(force = true)
     }
 
     /**
-     * Load chat. Use it to re-establish chat connection when you previously called [stopConnection].
+     * Use it to re-establish chat connection when you previously called [stopConnection].
      *
-     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
+     * It is not needed to use it in most cases as webSocket connection is established and stopped based on [Lifecycle] provided in [init].
      * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
      *
      * By chat connection you can control push notifications.
-     * Push notifications are suppressed while the chat is loaded.
+     * Push notifications are suppressed while the chat connection is active.
      *
-     * To detect if chat is loaded use [isChatLoaded] or [EventsListener.onChatLoaded] event from [EventsListener].
+     * To detect if chat connection is reestablished use [EventsListener.onChatReconnected] event from [EventsListener].
      */
     fun restartConnection() {
         if (widgetInfo == null)
             updateWidgetInfo()
-        loadChatPage(force = !isChatLoaded)
+        inAppChatClient.mobileChatResume()
+        eventsListener?.onChatReconnected()
         MobileMessagingLogger.d(TAG, "Chat connection established.")
     }
 
     /**
-     * Load blank page, chat connection is stopped.
+     * Stops chat connection.
      *
      * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
      * Chat connection is stopped when [Lifecycle.State] is below [Lifecycle.State.STARTED].
@@ -176,11 +175,10 @@ class InAppChatView @JvmOverloads constructor(
      * Can be used to enable chat's push notifications when [InAppChatView] is not visible.
      * Use [restartConnection] to reestablish chat connection.
      *
-     * To detect if chat connection is stopped use [isChatLoaded] or [EventsListener.onChatDisconnected] event from [EventsListener].
+     * To detect if chat connection is stopped use [EventsListener.onChatDisconnected] event from [EventsListener].
      */
     fun stopConnection() {
-        binding.ibLcWebView.loadBlankPage()
-        isChatLoaded = false
+        inAppChatClient.mobileChatPause()
         eventsListener?.onChatDisconnected()
         MobileMessagingLogger.d(TAG, "Chat connection stopped.")
     }
@@ -281,7 +279,6 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onPageFinished(url: String) {
-            if (InAppChatWebView.BLANK_PAGE_URI == url) return
             binding.ibLcSpinner.invisible()
             binding.ibLcWebView.visible()
             applyLanguage()
@@ -414,7 +411,6 @@ class InAppChatView @JvmOverloads constructor(
 
     private val inAppChatErrors = InAppChatErrors { currentErrors, removedError, _ ->
         if (removedError != null) {
-            //reload webView if it wasn't loaded in case when internet connection appeared
             if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type) {
                 hideNoInternetConnectionView()
                 if (!isChatLoaded) {
@@ -453,10 +449,8 @@ class InAppChatView @JvmOverloads constructor(
 
     //region Helpers
     private fun loadChatPage(force: Boolean = false) = with(binding) {
-        if (ibLcWebView.url != InAppChatWebView.BLANK_PAGE_URI) {
-            ibLcSpinner.visible()
-            ibLcWebView.invisible()
-        }
+        ibLcSpinner.visible()
+        ibLcWebView.invisible()
         ibLcWebView.loadChatPage(force, widgetInfo, inAppChat.jwtProvider?.provideJwt())
     }
 

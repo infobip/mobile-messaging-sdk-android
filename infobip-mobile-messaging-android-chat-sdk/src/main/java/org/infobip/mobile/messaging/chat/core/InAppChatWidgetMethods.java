@@ -7,5 +7,7 @@ public enum InAppChatWidgetMethods {
     handleMessageDraftSend,
     setLanguage,
     sendContextualData,
-    showThreadList
+    showThreadList,
+    mobileChatPause,
+    mobileChatResume
 }

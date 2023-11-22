@@ -306,6 +306,10 @@ class InAppChatFragment : Fragment() {
                 binding.ibLcChatInput.isEnabled = false
             }
 
+            override fun onChatReconnected() {
+                binding.ibLcChatInput.isEnabled = true
+            }
+
             override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
                 setChatInputVisibility(isVisible)
             }

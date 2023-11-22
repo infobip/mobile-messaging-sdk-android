@@ -28,8 +28,10 @@
         const SHOW = 'show';
         const SEND = 'send';
         const SET_LANGUAGE = 'set_language';
-        const SEND_CONTEXTUAL_DATA = 'send_contextual_data'
-        const SHOW_THREAD_LIST = 'show_thread_list'
+        const SEND_CONTEXTUAL_DATA = 'send_contextual_data';
+        const SHOW_THREAD_LIST = 'show_thread_list';
+        const MOBILE_CHAT_PAUSE = 'mobile_chat_pause';
+        const MOBILE_CHAT_RESUME = 'mobile_chat_resume';
 
         const errorCallback = function(error, result) {
             if (error) {
@@ -84,6 +86,14 @@
                 },
                 errorCallback
 		     );
+        }
+
+        window.mobileChatPause = function() {
+            liveChat(MOBILE_CHAT_PAUSE);
+        }
+
+        window.mobileChatResume = function() {
+            liveChat(MOBILE_CHAT_RESUME);
         }
 
         // Override widget config

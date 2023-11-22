@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.chat.core;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageDraftSend;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageSend;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.handleMessageWithAttachmentSend;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.mobileChatPause;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.mobileChatResume;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.sendContextualData;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.setLanguage;
 import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.showThreadList;
@@ -51,8 +53,7 @@ public class InAppChatClientImpl implements InAppChatClient {
 
     @Override
     public void sendInputDraft(String draft) {
-        String script = buildWidgetMethodInvocation(handleMessageDraftSend.name(), isOSOlderThanKitkat(), draft);
-        executeScript(script);
+        executeScript(buildWidgetMethodInvocation(handleMessageDraftSend.name(), isOSOlderThanKitkat(), draft));
     }
 
     @Override
@@ -82,8 +83,17 @@ public class InAppChatClientImpl implements InAppChatClient {
 
     @Override
     public void showThreadList() {
-        String script = buildWidgetMethodInvocation(showThreadList.name(), isOSOlderThanKitkat());
-        executeScript(script);
+        executeScript(buildWidgetMethodInvocation(showThreadList.name(), isOSOlderThanKitkat()));
+    }
+
+    @Override
+    public void mobileChatPause() {
+        executeScript(buildWidgetMethodInvocation(mobileChatPause.name(), isOSOlderThanKitkat()));
+    }
+
+    @Override
+    public void mobileChatResume() {
+        executeScript(buildWidgetMethodInvocation(mobileChatResume.name(), isOSOlderThanKitkat()));
     }
 
     /**

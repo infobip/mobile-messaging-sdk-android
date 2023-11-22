@@ -27,7 +27,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
     private static final String RES_ID_IN_APP_CHAT_WIDGET_URI = "ib_inappchat_widget_uri";
-    static final String BLANK_PAGE_URI = "about:blank";
 
     private String widgetUri;
 
@@ -62,10 +61,6 @@ public class InAppChatWebView extends WebView {
             setForceDarkAllowed(InAppChatDarkMode.DARK_MODE_YES.name().equals(darkModeName) || InAppChatDarkMode.DARK_MODE_FOLLOW_SYSTEM.name().equals(darkModeName));
             MobileMessagingLogger.d("ForceDark allowed in WebView: " + isForceDarkAllowed());
         }
-    }
-
-    public void loadBlankPage() {
-        loadUrl(BLANK_PAGE_URI);
     }
 
     public void loadChatPage(Boolean force, WidgetInfo widgetInfo, String jwt) {

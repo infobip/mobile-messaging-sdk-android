@@ -125,9 +125,13 @@ public class InAppChatViewDemoFragment extends Fragment {
 
             @Override
             public void onChatDisconnected() {
-                //Chat was disconnected, blank page is loaded.
+                //Chat connection was stopped
             }
 
+            @Override
+            public void onChatReconnected() {
+                //Chat connection was reestablished
+            }
         };
         inAppChatView.setEventsListener(eventsListener);
         inAppChatView.setErrorsHandler(new InAppChatView.ErrorsHandler() {
