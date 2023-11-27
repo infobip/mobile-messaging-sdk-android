@@ -14,13 +14,13 @@ abstract class IncomingCallService : FirebaseMessagingService() {
     abstract fun onMessageReceivedDelegate(message: RemoteMessage)
     abstract fun onNewTokenDelegate(token: String)
 
-    override fun onCreate() {
-        Injector.getWebrtcUi(applicationContext)
-    }
 
     override fun onMessageReceived(message: RemoteMessage) {
         if (MobileMessagingFirebaseService.onMessageReceived(this, message))
             return
+        //Note: Service can be calls entry point therefore initialize webrtcui with app context
+        //Do not initialize it in onCreate because MM sdk may not be initialized yet
+        Injector.getWebrtcUi(applicationContext)
         if (!callsDelegate.handleIncomingCall(message.data))
             onMessageReceivedDelegate(message)
     }

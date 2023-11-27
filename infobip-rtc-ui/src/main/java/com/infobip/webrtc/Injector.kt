@@ -60,15 +60,20 @@ internal object Injector {
     fun getWebrtcUi(context: Context): InfobipRtcUi {
         if (!::appContext.isInitialized)
             appContext = context.applicationContext
-        return webrtcUi ?: InfobipRtcUiImpl(
-            appContext,
-            tokenProvider,
-            cache,
-            callsDelegate,
-            callsScope,
-            pushIdDelegate,
-            rtcInstance,
-            notificationPermissionDelegate
-        ).also { webrtcUi = it }
+        return webrtcUi ?: runCatching {
+            InfobipRtcUiImpl(
+                appContext,
+                tokenProvider,
+                cache,
+                callsDelegate,
+                callsScope,
+                pushIdDelegate,
+                rtcInstance,
+                notificationPermissionDelegate
+            ).also { webrtcUi = it }
+        }.getOrElse {
+            //MobileApiRtc may fail to create if MM is not initialized
+            throw IllegalStateException("Mobile messaging SDK not initialized. Please initialize it before calls.")
+        }
     }
 }
