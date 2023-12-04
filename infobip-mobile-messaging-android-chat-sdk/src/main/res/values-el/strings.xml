@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_message_hint">Αποστολή μηνύματος...</string>
+    <string name="ib_chat_no_connection">Χωρίς σύνδεση</string>
+    <string name="ib_iv_btn_send_desc">Αποστολή μηνύματος συνομιλίας</string>
+    <string name="ib_iv_btn_send_attachment_desc">Αποστολή συνημμένου</string>
+    <string name="ib_iv_input_border_desc">Επάνω περίγραμμα</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Υπέρβαση του μέγιστου επιτρεπόμενου μεγέθους συνημμένου</string>
+    <string name="ib_chat_permissions_not_granted_title">Άδειες δεν χορηγούνται</string>
+    <string name="ib_chat_permissions_not_granted_message">Μπορείτε να τα παραχωρήσετε στις ρυθμίσεις της εφαρμογής.</string>
     <string name="ib_chat_cant_create_attachment">Δεν είναι δυνατή η δημιουργία συνημμένου από το επιλεγμένο αρχείο</string>
+    <string name="ib_chat_ok">Εντάξει</string>
+    <string name="ib_chat_error">Κάτι πήγε στραβά: %1$s.</string>
+    <string name="ib_chat_error_code">Κωδικός σφάλματος: %1$s.</string>
 </resources>

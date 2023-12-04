@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ib_chat_message_hint">Poslat zprávu…</string>
     <string name="ib_chat_no_connection">Žádné připojení</string>
+    <string name="ib_iv_btn_send_desc">Odeslat chatovou zprávu</string>
+    <string name="ib_iv_btn_send_attachment_desc">Odeslat přílohu</string>
+    <string name="ib_iv_input_border_desc">Horní okraj</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximální povolená velikost přílohy byla překročena</string>
     <string name="ib_chat_permissions_not_granted_title">Povolení nebyla udělena</string>
     <string name="ib_chat_permissions_not_granted_message">Můžete je udělit v nastavení aplikace.</string>
     <string name="ib_chat_cant_create_attachment">Z vybraného souboru nelze vytvořit přílohu</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Něco se pokazilo: %1$s.</string>
+    <string name="ib_chat_error_code">Kód chyby: %1$s.</string>
 </resources>

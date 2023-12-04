@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ib_chat_message_hint">Enviar uma mensagem...</string>
     <string name="ib_chat_no_connection">Sem conexão</string>
+    <string name="ib_iv_btn_send_desc">Enviar mensagem de bate-papo</string>
+    <string name="ib_iv_btn_send_attachment_desc">Enviar anexo</string>
+    <string name="ib_iv_input_border_desc">Borda superior</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Tamanho máximo de anexo permitido excedido</string>
     <string name="ib_chat_permissions_not_granted_title">Permissões não concedidas</string>
     <string name="ib_chat_permissions_not_granted_message">Você pode concedê-los nas configurações do aplicativo.</string>
     <string name="ib_chat_cant_create_attachment">Não é possível criar anexo do arquivo selecionado</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Algo deu errado: %1$s.</string>
+    <string name="ib_chat_error_code">Código de erro: %1$s.</string>
 </resources>

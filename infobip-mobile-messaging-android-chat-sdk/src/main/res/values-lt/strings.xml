@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_message_hint">Siųsti žinutę...</string>
+    <string name="ib_chat_no_connection">Nėra ryšio</string>
+    <string name="ib_iv_btn_send_desc">Siųsti pokalbio pranešimą</string>
+    <string name="ib_iv_btn_send_attachment_desc">Siųsti priedą</string>
+    <string name="ib_iv_input_border_desc">Viršutinė kraštinė</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Viršytas didžiausias leistinas priedo dydis</string>
+    <string name="ib_chat_permissions_not_granted_title">Leidimai nesuteikti</string>
+    <string name="ib_chat_permissions_not_granted_message">Galite juos suteikti programos nustatymuose.</string>
     <string name="ib_chat_cant_create_attachment">Negalima sukurti priedo iš pasirinkto failo</string>
+    <string name="ib_chat_ok">Gerai</string>
+    <string name="ib_chat_error">Kažkas ne taip: %1$s.</string>
+    <string name="ib_chat_error_code">Klaidos kodas: %1$s.</string>
 </resources>

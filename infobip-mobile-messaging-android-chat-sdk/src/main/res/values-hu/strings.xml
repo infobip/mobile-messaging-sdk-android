@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Nincs kapcsolat</string>
+    <string name="ib_iv_btn_send_desc">Chat üzenet küldése</string>
+    <string name="ib_iv_btn_send_attachment_desc">Melléklet küldése</string>
+    <string name="ib_iv_input_border_desc">Felső szegély</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Túllépte a maximálisan megengedett mellékletet</string>
     <string name="ib_chat_permissions_not_granted_message">Az alkalmazás beállításaiban megadhatja őket.</string>
     <string name="ib_chat_permissions_not_granted_title">Nem adtak engedélyeket</string>
     <string name="ib_chat_message_hint">Üzenetet küldeni</string>
     <string name="ib_chat_cant_create_attachment">Nem lehet mellékletet létrehozni a kiválasztott fájlból</string>
+    <string name="ib_chat_ok">Rendben</string>
+    <string name="ib_chat_error">Hiba történt: %1$s.</string>
+    <string name="ib_chat_error_code">Hibakód: %1$s.</string>
 </resources>

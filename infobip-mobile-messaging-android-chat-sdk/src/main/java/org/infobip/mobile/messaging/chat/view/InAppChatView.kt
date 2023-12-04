@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
@@ -99,16 +100,32 @@ class InAppChatView @JvmOverloads constructor(
 
     val defaultErrorsHandler: ErrorsHandler = object : ErrorsHandler {
 
+        private fun parseWidgetError(errorJson: String): String {
+            return runCatching {
+                val error = InAppChatWidgetError.fromJson(errorJson)
+                val message: String? = error.message
+                val code: String? = error.code?.toString()
+                when {
+                    message?.isNotBlank() == true && code?.isNotBlank() == true -> "$message " + localizationUtils.getString(R.string.ib_chat_error_code, code)
+                    message?.isNotBlank() == true -> message
+                    code?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, localizationUtils.getString(R.string.ib_chat_error_code, code))
+                    else -> localizationUtils.getString(R.string.ib_chat_error, errorJson)
+                }
+            }.onFailure {
+                MobileMessagingLogger.e("Could not parse JS error json.", it)
+            }.getOrDefault(localizationUtils.getString(R.string.ib_chat_error, errorJson))
+        }
+
         override fun handlerError(error: String) {
             MobileMessagingLogger.e("InAppChatView", "Unhandled error $error")
         }
 
         override fun handlerWidgetError(error: String) {
-            Snackbar.make(
-                binding.root,
-                localizationUtils.getString(R.string.ib_chat_error, error),
-                Snackbar.LENGTH_INDEFINITE
-            )
+            Snackbar.make(binding.root, parseWidgetError(error), Snackbar.LENGTH_INDEFINITE)
+                .also {
+                    val textView = it.view.findViewById<TextView>(R.id.snackbar_text)
+                    textView.maxLines = 4
+                }
                 .setAction(R.string.ib_chat_ok) {}
                 .show()
         }
@@ -131,6 +148,7 @@ class InAppChatView @JvmOverloads constructor(
     /**
      * Initialize [InAppChatView] with enclosing android component [Lifecycle].
      *
+     * Loads chat and establish connection to be able to receive real time updates - new messages.
      * Chat connection is established and stopped based on provided [Lifecycle].
      * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
      *
@@ -147,13 +165,13 @@ class InAppChatView @JvmOverloads constructor(
     /**
      * Use it to re-establish chat connection when you previously called [stopConnection].
      *
-     * It is not needed to use it in most cases as webSocket connection is established and stopped based on [Lifecycle] provided in [init].
+     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
      * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
      *
      * By chat connection you can control push notifications.
      * Push notifications are suppressed while the chat connection is active.
      *
-     * To detect if chat connection is reestablished use [EventsListener.onChatReconnected] event from [EventsListener].
+     * To detect if chat connection was re-established use [EventsListener.onChatReconnected] event from [EventsListener].
      */
     fun restartConnection() {
         if (widgetInfo == null)

@@ -15,4 +15,5 @@
     <string name="ib_chat_cant_create_attachment">Cannot create attachment from selected file</string>
     <string name="ib_chat_ok">OK</string>
     <string name="ib_chat_error">Something went wrong: %1$s.</string>
+    <string name="ib_chat_error_code">Error code: %1$s.</string>
 </resources>

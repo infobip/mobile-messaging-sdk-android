@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Ingen förbindelse</string>
+    <string name="ib_iv_btn_send_desc">Skicka chattmeddelande</string>
+    <string name="ib_iv_btn_send_attachment_desc">Skicka bilaga</string>
+    <string name="ib_iv_input_border_desc">Överkant</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximal tillåten tillbehörsstorlek överskridits</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan bevilja dem i applikationsinställningar.</string>
     <string name="ib_chat_permissions_not_granted_title">Tillstånd inte beviljade</string>
     <string name="ib_chat_message_hint">Skicka ett meddelande...</string>
     <string name="ib_chat_cant_create_attachment">Det går inte att skapa bilaga från den valda filen</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Något gick fel: %1$s.</string>
+    <string name="ib_chat_error_code">Felkod: %1$s.</string>
 </resources>

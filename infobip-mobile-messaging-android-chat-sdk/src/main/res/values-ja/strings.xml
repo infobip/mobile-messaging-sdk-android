@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">接続なし</string>
+    <string name="ib_iv_btn_send_desc">チャットメッセージを送信する</string>
+    <string name="ib_iv_btn_send_attachment_desc">添付ファイルを送信する</string>
+    <string name="ib_iv_input_border_desc">上枠</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">添付ファイルの最大許容サイズを超えています</string>
     <string name="ib_chat_permissions_not_granted_message">アプリケーション設定でそれらを許可できます。</string>
     <string name="ib_chat_permissions_not_granted_title">許可されていない権限</string>
     <string name="ib_chat_message_hint">メッセージを送信...</string>
     <string name="ib_chat_cant_create_attachment">選択したファイルから添付ファイルを作成できません</string>
+    <string name="ib_chat_ok">わかりました</string>
+    <string name="ib_chat_error">問題が発生しました: %1$s.</string>
+    <string name="ib_chat_error_code">エラー コード: %1$s.</string>
 </resources>

@@ -9,4 +9,7 @@
     <string name="ib_iv_btn_send_attachment_desc">Надіслати вкладений файл</string>
     <string name="ib_iv_input_border_desc">Верхня межа</string>
     <string name="ib_chat_cant_create_attachment">Неможливо створити вкладення з вибраного файлу</string>
+    <string name="ib_chat_ok">в порядку</string>
+    <string name="ib_chat_error">Щось пішло не так: %1$s.</string>
+    <string name="ib_chat_error_code">Код помилки: %1$s.</string>
 </resources>

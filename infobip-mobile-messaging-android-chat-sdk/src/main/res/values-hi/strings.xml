@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ib_chat_message_hint">एक संदेश भेजो…</string>
     <string name="ib_chat_no_connection">कोई कनेक्शन नहीं</string>
+    <string name="ib_iv_btn_send_desc">चैट संदेश भेजें</string>
+    <string name="ib_iv_btn_send_attachment_desc">अनुलग्नक भेजें</string>
+    <string name="ib_iv_input_border_desc">शीर्ष सीमा</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">अधिकतम अनुमत अनुलग्नक का आकार पार हो गया</string>
     <string name="ib_chat_permissions_not_granted_message">आप उन्हें एप्लिकेशन सेटिंग में अनुदान दे सकते हैं।</string>
     <string name="ib_chat_permissions_not_granted_title">अनुमतियाँ प्रदान नहीं की गईं</string>
     <string name="ib_chat_cant_create_attachment">चयनित फ़ाइल से अटैचमेंट नहीं बना सकता</string>
+    <string name="ib_chat_ok">ठीक है</string>
+    <string name="ib_chat_error">कुछ ग़लत हुआ: %1$s.</string>
+    <string name="ib_chat_error_code">त्रुटि कोड: %1$s.</string>
 </resources>

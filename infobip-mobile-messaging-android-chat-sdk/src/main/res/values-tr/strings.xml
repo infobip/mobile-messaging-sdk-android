@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Bağlantı yok</string>
+    <string name="ib_iv_btn_send_desc">Sohbet mesajı gönder</string>
+    <string name="ib_iv_btn_send_attachment_desc">Eki gönder</string>
+    <string name="ib_iv_input_border_desc">Üst kenarlık</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">İzin verilen maksimum ek boyutu aşıldı</string>
     <string name="ib_chat_permissions_not_granted_message">Bunları uygulama ayarlarında verebilirsiniz.</string>
     <string name="ib_chat_permissions_not_granted_title">İzin verilmedi</string>
     <string name="ib_chat_message_hint">Mesaj gönder...</string>
     <string name="ib_chat_cant_create_attachment">Seçili dosyadan ek oluşturulamıyor</string>
+    <string name="ib_chat_ok">TAMAM</string>
+    <string name="ib_chat_error">Bir şeyler ters gitti: %1$s.</string>
+    <string name="ib_chat_error_code">Hata kodu: %1$s.</string>
 </resources>

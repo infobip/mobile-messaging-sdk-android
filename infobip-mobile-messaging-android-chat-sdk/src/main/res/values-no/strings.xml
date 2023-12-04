@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ib_chat_message_hint">Send en melding…</string>
     <string name="ib_chat_no_connection">Ingen forbindelse</string>
+    <string name="ib_iv_btn_send_desc">Send chatmelding</string>
+    <string name="ib_iv_btn_send_attachment_desc">Send vedlegg</string>
+    <string name="ib_iv_input_border_desc">Øvre kant</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maksimal tillatt innfestingsstørrelse overskredet</string>
     <string name="ib_chat_permissions_not_granted_title">Tillatelser ikke gitt</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan gi dem i applikasjonsinnstillinger.</string>
     <string name="ib_chat_cant_create_attachment">Kan ikke opprette vedlegg fra valgt fil</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Noe gikk galt: %1$s.</string>
+    <string name="ib_chat_error_code">Feilkode: %1$s.</string>
 </resources>

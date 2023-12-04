@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Ingen forbindelse</string>
+    <string name="ib_iv_btn_send_desc">Send chatbesked</string>
+    <string name="ib_iv_btn_send_attachment_desc">Send vedhæftet fil</string>
+    <string name="ib_iv_input_border_desc">Øverste kant</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maksimal tilladt fastgørelsesstørrelse overskredet</string>
     <string name="ib_chat_permissions_not_granted_title">Tilladelser ikke givet</string>
     <string name="ib_chat_permissions_not_granted_message">Du kan give dem i applikationsindstillinger.</string>
     <string name="ib_chat_message_hint">Send en besked...</string>
     <string name="ib_chat_cant_create_attachment">Kan ikke oprette en vedhæftet fil fra den valgte fil</string>
+    <string name="ib_chat_ok">Okay</string>
+    <string name="ib_chat_error">Noget gik galt: %1$s.</string>
+    <string name="ib_chat_error_code">Fejlkode: %1$s.</string>
 </resources>

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Sin conexión</string>
+    <string name="ib_iv_btn_send_desc">Enviar mensaje de chat</string>
+    <string name="ib_iv_btn_send_attachment_desc">Enviar archivo adjunto</string>
+    <string name="ib_iv_input_border_desc">Borde superior</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Se excedió el tamaño de archivo adjunto máximo permitido</string>
     <string name="ib_chat_permissions_not_granted_title">Permisos no otorgados</string>
     <string name="ib_chat_permissions_not_granted_message">Puede otorgarlos en la configuración de la aplicación.</string>
     <string name="ib_chat_message_hint">Enviar un mensaje...</string>
     <string name="ib_chat_cant_create_attachment">No se puede crear un archivo adjunto desde el archivo seleccionado</string>
+    <string name="ib_chat_ok">DE ACUERDO</string>
+    <string name="ib_chat_error">Algo salió mal: %1$s.</string>
+    <string name="ib_chat_error_code">Código de error: %1$s.</string>
 </resources>

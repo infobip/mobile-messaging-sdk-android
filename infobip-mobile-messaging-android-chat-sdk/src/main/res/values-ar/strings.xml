@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">لا يوجد اتصال</string>
+    <string name="ib_iv_btn_send_desc">إرسال رسالة الدردشة</string>
+    <string name="ib_iv_btn_send_attachment_desc">إرسال المرفق</string>
+    <string name="ib_iv_input_border_desc">الحدود العليا</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">تم تجاوز الحد الأقصى المسموح به لحجم المرفقات</string>
     <string name="ib_chat_permissions_not_granted_title">لم يتم منح الأذونات</string>
     <string name="ib_chat_permissions_not_granted_message">يمكنك منحهم في إعدادات التطبيق.</string>
     <string name="ib_chat_message_hint">إرسل رسالة</string>
     <string name="ib_chat_cant_create_attachment">لا يمكن إنشاء مرفق من الملف المختار</string>
+    <string name="ib_chat_ok">نعم</string>
+    <string name="ib_chat_error">حدث خطأ ما: %1$s.</string>
+    <string name="ib_chat_error_code">رمز الخطأ: %1$s.</string>
 </resources>

@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Нет соединения</string>
+    <string name="ib_iv_btn_send_desc">Отправить сообщение в чат</string>
+    <string name="ib_iv_btn_send_attachment_desc">Отправить вложение</string>
+    <string name="ib_iv_input_border_desc">Верхняя граница</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Превышен максимально допустимый размер файла</string>
     <string name="ib_chat_permissions_not_granted_title">Разрешения не предоставлены</string>
     <string name="ib_chat_permissions_not_granted_message">Вы можете предоставить их в настройках приложения.</string>
     <string name="ib_chat_message_hint">Отправить сообщение...</string>
     <string name="ib_chat_cant_create_attachment">Невозможно создать вложение из выбранного файла</string>
+    <string name="ib_chat_ok">ХОРОШО</string>
+    <string name="ib_chat_error">Что-то пошло не так: %1$s.</string>
+    <string name="ib_chat_error_code">Код ошибки: %1$s.</string>
 </resources>

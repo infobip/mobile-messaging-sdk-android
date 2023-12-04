@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Pas de connection</string>
+    <string name="ib_iv_btn_send_desc">Envoyer un message de discussion</string>
+    <string name="ib_iv_btn_send_attachment_desc">Envoyer la pièce jointe</string>
+    <string name="ib_iv_input_border_desc">Bordure supérieure</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Taille maximale autorisée des pièces jointes dépassée</string>
     <string name="ib_chat_permissions_not_granted_title">Autorisations non accordées</string>
     <string name="ib_chat_permissions_not_granted_message">Vous pouvez les accorder dans les paramètres de l\'application.</string>
     <string name="ib_chat_message_hint">Envoyer un message...</string>
     <string name="ib_chat_cant_create_attachment">Impossible de créer une pièce jointe à partir du fichier sélectionné</string>
+    <string name="ib_chat_ok">D\'ACCORD</string>
+    <string name="ib_chat_error">Quelque chose s\'est mal passé : %1$s.</string>
+    <string name="ib_chat_error_code">Code d\'erreur : %1$s.</string>
 </resources>

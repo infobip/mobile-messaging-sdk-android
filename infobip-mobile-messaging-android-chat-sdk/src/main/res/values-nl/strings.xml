@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ib_chat_message_hint">Stuur een bericht…</string>
     <string name="ib_chat_no_connection">Geen connectie</string>
+    <string name="ib_iv_btn_send_desc">Chatbericht verzenden</string>
+    <string name="ib_iv_btn_send_attachment_desc">Bijlage verzenden</string>
+    <string name="ib_iv_input_border_desc">Bovenste rand</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Maximaal toegestane bijlagegrootte overschreden</string>
     <string name="ib_chat_permissions_not_granted_title">Toestemmingen niet verleend</string>
     <string name="ib_chat_permissions_not_granted_message">U kunt ze toekennen in toepassingsinstellingen.</string>
     <string name="ib_chat_cant_create_attachment">Kan geen bijlage maken van geselecteerd bestand</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Er is iets misgegaan: %1$s.</string>
+    <string name="ib_chat_error_code">Foutcode: %1$s.</string>
 </resources>

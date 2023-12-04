@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Nessuna connessione</string>
+    <string name="ib_iv_btn_send_desc">Invia messaggio di chat</string>
+    <string name="ib_iv_btn_send_attachment_desc">Invia allegato</string>
+    <string name="ib_iv_input_border_desc">Bordo superiore</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Dimensione massima consentita per l\'allegato superata</string>
     <string name="ib_chat_permissions_not_granted_title">Autorizzazioni non concesse</string>
     <string name="ib_chat_permissions_not_granted_message">Puoi concederli nelle impostazioni dell\'applicazione.</string>
     <string name="ib_chat_message_hint">Mandare un messaggio…</string>
     <string name="ib_chat_cant_create_attachment">Impossibile creare allegato dal file selezionato</string>
+    <string name="ib_chat_ok">OK</string>
+    <string name="ib_chat_error">Ada yang tidak bere: %1$s.</string>
+    <string name="ib_chat_error_code">Codice errore: %1$s.</string>
 </resources>

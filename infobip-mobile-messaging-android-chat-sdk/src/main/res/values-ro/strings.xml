@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ib_chat_no_connection">Nici o legătură</string>
+    <string name="ib_iv_btn_send_desc">Trimite mesaj de chat</string>
+    <string name="ib_iv_btn_send_attachment_desc">Trimite atasamentul</string>
+    <string name="ib_iv_input_border_desc">Chenar de sus</string>
     <string name="ib_chat_allowed_attachment_size_exceeded">Dimensiunea maximă permisă de atașare a fost depășită</string>
     <string name="ib_chat_permissions_not_granted_message">Le puteți acorda în setările aplicației.</string>
     <string name="ib_chat_permissions_not_granted_title">Permisiuni neacordate</string>
     <string name="ib_chat_message_hint">Trimite un mesaj...</string>
     <string name="ib_chat_cant_create_attachment">Nu se poate crea atașament din fișierul selectat</string>
+    <string name="ib_chat_ok">Bine</string>
+    <string name="ib_chat_error">A apărut o eroare: %1$s.</string>
+    <string name="ib_chat_error_code">Cod de eroare: %1$s.</string>
 </resources>
