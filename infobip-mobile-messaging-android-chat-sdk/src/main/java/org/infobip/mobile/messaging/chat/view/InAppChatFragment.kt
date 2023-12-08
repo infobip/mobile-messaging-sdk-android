@@ -377,16 +377,15 @@ class InAppChatFragment : Fragment() {
 
     private fun initSendButton() = with(binding.ibLcChatInput) {
         setSendButtonClickListener {
-            getInputText()?.let(CommonUtils::escapeJsonString)
-                ?.let { msg ->
-                    msg.chunkedSequence(InAppChatView.MESSAGE_MAX_LENGTH)
-                        .forEach { message ->
-                            if (message.isNotBlank()) {
-                                binding.ibLcChat.sendChatMessage(message)
-                            }
+            getInputText()?.let { msg ->
+                msg.chunkedSequence(InAppChatView.MESSAGE_MAX_LENGTH)
+                    .forEach { message ->
+                        if (message.isNotBlank()) {
+                            binding.ibLcChat.sendChatMessage(message)
                         }
-                    clearInputText()
-                }
+                    }
+                clearInputText()
+            }
         }
     }
 
