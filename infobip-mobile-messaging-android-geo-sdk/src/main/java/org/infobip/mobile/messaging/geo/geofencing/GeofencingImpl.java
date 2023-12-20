@@ -13,11 +13,8 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.content.ContextCompat;
-
-import android.util.Log;
 import android.util.Pair;
 
 import com.google.android.gms.location.Geofence;
@@ -79,7 +76,7 @@ public class GeofencingImpl extends Geofencing {
         geofences = new ArrayList<>();
         geofencingHelper = new GeofencingHelper(context);
         messageStore = geofencingHelper.getMessageStoreForGeo();
-        mGeofencingClient = getGeofencingClient(context);
+        mGeofencingClient = LocationServices.getGeofencingClient(context);
     }
 
     public static GeofencingImpl getInstance(Context context) {
@@ -265,10 +262,6 @@ public class GeofencingImpl extends Geofencing {
 
         requestType = GoogleApiClientRequestType.ADD_GEOFENCES;
 
-        if (mGeofencingClient == null) {
-            return;
-        }
-
         mGeofencingClient.addGeofences(geofencingRequest(), geofencePendingIntent())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -290,32 +283,14 @@ public class GeofencingImpl extends Geofencing {
 
         requestType = GoogleApiClientRequestType.REMOVE_GEOFENCES;
 
-        if (mGeofencingClient == null) {
-            return;
-        }
-
-        try {
-            mGeofencingClient.removeGeofences(geofencePendingIntent())
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            logGeofenceStatus(task, true);
-                            requestType = GoogleApiClientRequestType.NONE;
-                        }
-                    });
-        } catch (Throwable e) {
-            Log.d(TAG, Log.getStackTraceString(e));
-        }
-    }
-
-    @Nullable
-    private GeofencingClient getGeofencingClient(Context context) {
-        try {
-            return LocationServices.getGeofencingClient(context);
-        } catch (Throwable e) {
-            Log.d(TAG, Log.getStackTraceString(e));
-            return null;
-        }
+        LocationServices.getGeofencingClient(context).removeGeofences(geofencePendingIntent())
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        logGeofenceStatus(task, true);
+                        requestType = GoogleApiClientRequestType.NONE;
+                    }
+                });
     }
 
     @Override

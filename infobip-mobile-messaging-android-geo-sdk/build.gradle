@@ -55,7 +55,6 @@ dependencies {
     implementation project(":infobip-mobile-messaging-android-sdk")
     implementation project(":infobip-mobile-messaging-api-java")
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation "com.google.android.gms:play-services-location:${mm_gmsLocationVersion}"
 
     androidTestImplementation project(":infobip-mobile-messaging-android-test")
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
