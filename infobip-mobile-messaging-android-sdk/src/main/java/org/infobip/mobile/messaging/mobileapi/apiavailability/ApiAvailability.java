@@ -1,12 +1,9 @@
 package org.infobip.mobile.messaging.mobileapi.apiavailability;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GoogleApiAvailabilityLight;
 
 public class ApiAvailability {
 
@@ -16,7 +13,7 @@ public class ApiAvailability {
      * @return
      */
     public int checkServicesStatus(Context context) {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        GoogleApiAvailabilityLight apiAvailability = GoogleApiAvailabilityLight.getInstance();
         return apiAvailability.isGooglePlayServicesAvailable(context);
     }
 
@@ -25,13 +22,7 @@ public class ApiAvailability {
     }
 
     public boolean isUserResolvableError(int errorCode) {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        GoogleApiAvailabilityLight apiAvailability = GoogleApiAvailabilityLight.getInstance();
         return apiAvailability.isUserResolvableError(errorCode);
     }
-
-    public Dialog getErrorDialog(Activity activity, int errorCode, int platformError, DialogInterface.OnCancelListener listner) {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        return apiAvailability.getErrorDialog(activity, errorCode, platformError, listner);
-    }
-
 }

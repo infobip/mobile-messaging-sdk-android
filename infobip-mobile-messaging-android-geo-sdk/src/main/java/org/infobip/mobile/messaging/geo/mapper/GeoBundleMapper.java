@@ -1,14 +1,22 @@
 package org.infobip.mobile.messaging.geo.mapper;
 
 import android.os.Bundle;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
+import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
 import org.infobip.mobile.messaging.geo.GeoMessage;
 import org.infobip.mobile.messaging.geo.report.GeoReport;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GeoBundleMapper extends BundleMapper {
@@ -81,5 +89,39 @@ public class GeoBundleMapper extends BundleMapper {
     @NonNull
     public static Bundle geoReportsToBundle(@NonNull List<GeoReport> reports) {
         return objectsToBundle(reports, BUNDLED_GEO_REPORTS_TAG);
+    }
+
+    /**
+     * De-serializes geo objects from bundle
+     *
+     * @param bundle where to load data from
+     * @return List of JSONObject for Geo objects
+     */
+    @NonNull
+    public static List<JSONObject> geosFromBundle(Bundle bundle) {
+        Geo geo = Geo.createFrom(bundle);
+        if (geo == null || geo.getAreasList() == null || geo.getAreasList().isEmpty()) {
+            return new ArrayList<JSONObject>();
+        }
+
+        List<JSONObject> geos = new ArrayList<JSONObject>();
+        for (final Area area : geo.getAreasList()) {
+            try {
+                geos.add(new JSONObject()
+                        .put("area", new JSONObject()
+                                .put("id", area.getId())
+                                .put("center", new JSONObject()
+                                        .put("lat", area.getLatitude())
+                                        .put("lon", area.getLongitude()))
+                                .put("radius", area.getRadius())
+                                .put("title", area.getTitle()))
+                );
+            } catch (JSONException e) {
+                MobileMessagingLogger.w( "Cannot convert geo to JSON");
+                MobileMessagingLogger.d(Log.getStackTraceString(e));
+            }
+        }
+
+        return geos;
     }
 }
