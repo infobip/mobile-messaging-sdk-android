@@ -6,7 +6,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.BundleMapper;
 import org.infobip.mobile.messaging.geo.Area;
 import org.infobip.mobile.messaging.geo.Geo;
@@ -117,7 +116,7 @@ public class GeoBundleMapper extends BundleMapper {
                                 .put("title", area.getTitle()))
                 );
             } catch (JSONException e) {
-                MobileMessagingLogger.w( "Cannot convert geo to JSON");
+                MobileMessagingLogger.w("Cannot convert geo to JSON");
                 MobileMessagingLogger.d(Log.getStackTraceString(e));
             }
         }

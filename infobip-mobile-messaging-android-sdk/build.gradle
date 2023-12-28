@@ -52,6 +52,7 @@ dependencies {
     api project(":infobip-mobile-messaging-api-java")
     api project(":infobip-mobile-messaging-android-resources")
     api "com.google.firebase:firebase-messaging:${mm_firebaseMessagingVersion}"
+    api "com.google.android.gms:play-services-base:18.2.0"
     api 'androidx.legacy:legacy-support-v4:1.0.0'
     api 'androidx.appcompat:appcompat:1.3.1'
 
