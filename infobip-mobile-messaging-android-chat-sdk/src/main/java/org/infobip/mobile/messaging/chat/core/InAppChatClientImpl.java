@@ -19,6 +19,8 @@ import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.Locale;
+
 public class InAppChatClientImpl implements InAppChatClient {
 
     private final InAppChatWebView webView;
@@ -57,11 +59,11 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     @Override
-    public void setLanguage(String language) {
-        if (StringUtils.isNotBlank(language)) {
-            Language widgetLanguage = Language.findLanguage(language);
+    public void setLanguage(Locale locale) {
+        if (locale != null) {
+            Language widgetLanguage = Language.findLanguage(locale);
             if (widgetLanguage == null) {
-                MobileMessagingLogger.e("Language " + language + " is not supported. Used default language " + Language.ENGLISH.getLocale());
+                MobileMessagingLogger.e("Language " + locale + " is not supported. Used default language " + Language.ENGLISH.getLocale());
                 widgetLanguage = Language.ENGLISH;
             }
             String script = buildWidgetMethodInvocation(setLanguage.name(), isOSOlderThanKitkat(), widgetLanguage.getLocale());
@@ -105,9 +107,8 @@ public class InAppChatClientImpl implements InAppChatClient {
         if (webView != null) {
             try {
                 handler.post(() -> webView.evaluateJavascriptMethod(script, value -> {
-                    if (value != null && !"null".equals(value)) {
-                        MobileMessagingLogger.d(TAG, value);
-                    }
+                    String valueToLog = (value != null && !"null".equals(value)) ? ":" + value : "";
+                    MobileMessagingLogger.d(TAG, "Called Widget API: " + script + valueToLog);
                 }));
             } catch (Exception e) {
                 MobileMessagingLogger.e("Failed to execute webView JS script" + e.getMessage());

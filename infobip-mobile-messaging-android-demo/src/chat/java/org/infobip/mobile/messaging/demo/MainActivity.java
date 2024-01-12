@@ -189,8 +189,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "ko-KR";
         else if (menuId == R.id.russian)
             return "ru-RU";
-        else if (menuId == R.id.chinese)
+        else if (menuId == R.id.chinese_traditional)
             return "zh-TW";
+        else if (menuId == R.id.chinese_simplified)
+            return "zh-Hans";
         else if (menuId == R.id.spanish)
             return "es-ES";
         else if (menuId == R.id.portuguese)

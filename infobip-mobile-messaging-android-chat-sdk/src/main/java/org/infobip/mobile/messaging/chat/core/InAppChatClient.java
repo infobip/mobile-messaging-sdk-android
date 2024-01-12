@@ -2,6 +2,8 @@ package org.infobip.mobile.messaging.chat.core;
 
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 
+import java.util.Locale;
+
 /**
  * Declaration of interaction with client-side.
  */
@@ -31,9 +33,9 @@ public interface InAppChatClient {
     /**
      * Set language of widget
      *
-     * @param language in locale format e.g.: en-US
+     * @param locale locale contains country and language
      */
-    void setLanguage(String language);
+    void setLanguage(Locale locale);
 
     /**
      * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag

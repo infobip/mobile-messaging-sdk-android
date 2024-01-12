@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ib_chat_no_connection">無連接</string>
+    <string name="ib_iv_btn_send_desc">發送聊天訊息</string>
+    <string name="ib_iv_btn_send_attachment_desc">發送附件</string>
+    <string name="ib_iv_input_border_desc">頂部邊框</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">超過允許的最大附件大小</string>
+    <string name="ib_chat_permissions_not_granted_title">權限未授予</string>
+    <string name="ib_chat_permissions_not_granted_message">您可以在應用程序設置中授予它們。</string>
+    <string name="ib_chat_message_hint">发送一条消息...</string>
+    <string name="ib_chat_cant_create_attachment">無法從所選文件創建附件</string>
+    <string name="ib_chat_ok">好的</string>
+    <string name="ib_chat_error">出了點問題：%1$s.</string>
+    <string name="ib_chat_error_code">錯誤代碼：%1$s.</string>
+</resources>

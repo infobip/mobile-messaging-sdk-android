@@ -29,9 +29,14 @@
             android:title="@string/russian"
             app:showAsAction="never" />
         <item
-            android:id="@+id/chinese"
+            android:id="@+id/chinese_traditional"
             android:enabled="true"
-            android:title="@string/chinese"
+            android:title="@string/chinese_traditional"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/chinese_simplified"
+            android:enabled="true"
+            android:title="@string/chinese_simplified"
             app:showAsAction="never" />
         <item
             android:id="@+id/spanish"

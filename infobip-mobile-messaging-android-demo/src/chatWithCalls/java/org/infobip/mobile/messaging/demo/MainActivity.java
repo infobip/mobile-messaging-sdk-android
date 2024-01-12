@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             //change language of In-app chat and calls
             if (language != null) {
                 InAppChat.getInstance(this).setLanguage(language);
-                InfobipRtcUi.getInstance(this).setLanguage(Locale.forLanguageTag(language));
+                InfobipRtcUi.getInstance(this).setLanguage(new Locale(language));
                 Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
             }
         }
@@ -188,8 +188,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return "ko-KR";
         else if (menuId == R.id.russian)
             return "ru-RU";
-        else if (menuId == R.id.chinese)
+        else if (menuId == R.id.chinese_traditional)
             return "zh-TW";
+        else if (menuId == R.id.chinese_simplified)
+            return "zh-Hans";
         else if (menuId == R.id.spanish)
             return "es-ES";
         else if (menuId == R.id.portuguese)

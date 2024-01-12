@@ -211,8 +211,8 @@ class InAppChatView @JvmOverloads constructor(
             MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE,
             locale.toString()
         )
-        inAppChatClient.setLanguage(locale.language) //LC widget uses only language
-        localizationUtils.setLanguage(locale) //native parts use language and country code
+        inAppChatClient.setLanguage(locale)
+        localizationUtils.setLanguage(locale)
         updateWidgetInfo()
     }
 
