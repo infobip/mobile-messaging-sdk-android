@@ -3,18 +3,17 @@
     package="org.infobip.mobile.messaging.demo">
 
     <application
-        tools:replace="android:name"
+        android:name="org.infobip.mobile.messaging.demo.CryptorMigrationApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name="org.infobip.mobile.messaging.demo.CryptorMigrationApplication"
-        >
+        tools:replace="android:name,android:allowBackup">
         <activity
             android:name=".MainActivity"
-            android:label="@string/main_activity_title"
             android:exported="true"
+            android:label="@string/main_activity_title"
             android:theme="@style/AppTheme.NoActionBar">
 
             <intent-filter>

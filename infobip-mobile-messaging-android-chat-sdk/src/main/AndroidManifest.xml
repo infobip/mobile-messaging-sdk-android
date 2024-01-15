@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
     <queries>
         <!-- Camera -->
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
     </queries>
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -13,7 +16,9 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <application>
+    <application
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false">
         <activity
             android:name=".view.InAppChatAttachmentPreviewActivity"
             android:screenOrientation="portrait"
@@ -23,6 +28,7 @@
             android:noHistory="false"
             android:screenOrientation="portrait"
             android:theme="@style/IB_ChatDefaultTheme" />
+
         <receiver
             android:name=".core.PersonalizationBroadcastReceiver"
             android:exported="false">

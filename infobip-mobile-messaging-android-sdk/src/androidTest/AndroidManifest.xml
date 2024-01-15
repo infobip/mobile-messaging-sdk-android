@@ -3,6 +3,7 @@
 
     <application
         android:usesCleartextTraffic="true"
-        tools:targetApi="m"/>
+        tools:replace="android:usesCleartextTraffic"
+        tools:targetApi="m" />
 
 </manifest>

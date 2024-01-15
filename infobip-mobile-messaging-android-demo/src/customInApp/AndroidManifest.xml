@@ -3,25 +3,24 @@
     package="org.infobip.mobile.messaging.demo">
 
     <application
-        tools:replace="android:name"
+        android:name="org.infobip.mobile.messaging.demo.InAppApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name="org.infobip.mobile.messaging.demo.InAppApplication"
-        >
+        tools:replace="android:name,android:allowBackup">
         <receiver
             android:name=".InAppReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.interactive.MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY"/>
+                <action android:name="org.infobip.mobile.messaging.interactive.MODAL_IN_APP_NOTIFICATION_IS_READY_TO_DISPLAY" />
             </intent-filter>
         </receiver>
         <activity
             android:name=".MainActivity"
-            android:label="@string/main_activity_title"
             android:exported="true"
+            android:label="@string/main_activity_title"
             android:theme="@style/AppTheme.NoActionBar">
 
             <intent-filter>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <include
+            domain="sharedpref"
+            path="MobileMessagingSDK.xml" />
+        <include
+            domain="database"
+            path="mm_infobip_database.db" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude
+            domain="sharedpref"
+            path="MobileMessagingSDK.xml" />
+        <exclude
+            domain="database"
+            path="mm_infobip_database.db" />
+    </device-transfer>
+</data-extraction-rules>

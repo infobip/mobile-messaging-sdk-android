@@ -8,13 +8,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <application>
+    <application android:allowBackup="false"
+        android:usesCleartextTraffic="false">
 
         <!--Service that's triggered by GeofenceTransitionsReceiver when geofence area is entered-->
         <service
             android:name="org.infobip.mobile.messaging.geo.transition.GeofenceTransitionsIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:enabled="false" />
+            android:enabled="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!--Receiver that triggers when geofence area is entered-->
         <receiver
@@ -35,8 +36,8 @@
         <!--Service that's triggered by GeofencingConsistencyReceiver when consistency of geo monitoring needs to be maintained-->
         <service
             android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyIntentService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:enabled="false" />
+            android:enabled="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <receiver
             android:name="org.infobip.mobile.messaging.geo.GeofencingConsistencyReceiver"
             android:enabled="false"

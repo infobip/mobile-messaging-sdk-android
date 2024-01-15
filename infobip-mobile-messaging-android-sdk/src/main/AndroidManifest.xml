@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <queries>
         <!-- Browser -->
@@ -19,8 +18,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-        android:usesCleartextTraffic="true"
-        tools:targetApi="m">
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_backup_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:usesCleartextTraffic="false">
 
         <service
             android:name="org.infobip.mobile.messaging.cloud.MobileMessagingCloudService"
@@ -30,9 +31,9 @@
 
         <service
             android:name="org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService"
-            android:exported="false" >
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
@@ -59,20 +60,20 @@
 
         <activity
             android:name=".view.WebViewActivity"
-            android:theme="@style/IB_WebViewTheme"
-            android:exported="false">
+            android:exported="false"
+            android:theme="@style/IB_WebViewTheme">
             <intent-filter>
-                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED"/>
+                <action android:name="org.infobip.mobile.messaging.NOTIFICATION_TAPPED" />
             </intent-filter>
         </activity>
 
         <activity
             android:name="org.infobip.mobile.messaging.NotificationTapReceiverActivity"
-            android:noHistory="true"
             android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="false" />
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     </application>
 </manifest>

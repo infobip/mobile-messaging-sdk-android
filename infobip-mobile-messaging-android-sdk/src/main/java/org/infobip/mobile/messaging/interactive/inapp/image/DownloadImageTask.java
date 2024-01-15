@@ -3,6 +3,8 @@ package org.infobip.mobile.messaging.interactive.inapp.image;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.security.NetworkSecurityPolicy;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
@@ -31,6 +33,13 @@ public abstract class DownloadImageTask extends AsyncTask<String, Void, Bitmap> 
                 return BitmapFactory.decodeStream(input);
             } catch (Exception e) {
                 MobileMessagingLogger.e("Cannot download picture: " + e.getMessage());
+                // If exception is caused by http, skip retries.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (!NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted() && imageUrl.substring(0, 5).toLowerCase().startsWith("http:")) {
+                        MobileMessagingLogger.e("HTTP not permitted, use https or override usesClearTextTraffic on the application level.");
+                        break;
+                    }
+                }
             } finally {
                 attempt++;
             }

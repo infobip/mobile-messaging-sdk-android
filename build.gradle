@@ -21,7 +21,7 @@ plugins {
 }
 
 ext {
-    mm_minSdkVersion = 16
+    mm_minSdkVersion = 21
     mm_compileSdkVersion = 34
     mm_targetSdkVersion = 34
     mm_buildToolsVersion = "34.0.0"
