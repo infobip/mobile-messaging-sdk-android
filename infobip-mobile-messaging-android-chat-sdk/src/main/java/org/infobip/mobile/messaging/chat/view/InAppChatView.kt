@@ -71,7 +71,7 @@ class InAppChatView @JvmOverloads constructor(
         private const val CHAT_SERVICE_ERROR = "12"
         private const val CHAT_WIDGET_NOT_FOUND = "24"
         private const val TAG = "InAppChatView"
-        const val MESSAGE_MAX_LENGTH = 1000
+        const val MESSAGE_MAX_LENGTH = 4096
     }
 
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
@@ -241,7 +241,7 @@ class InAppChatView @JvmOverloads constructor(
 
     /**
      * Sends message to the chat with optional [InAppChatMobileAttachment].
-     * @param message message to be send, max length allowed is 1000 characters
+     * @param message message to be send, max length allowed is 4096 characters
      * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
      */
     @JvmOverloads
