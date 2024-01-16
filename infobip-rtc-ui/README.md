@@ -67,7 +67,7 @@ You can find complete list of changes in [migration guide](https://github.com/in
 
     ```gradle
     //get latest release version https://github.com/infobip/mobile-messaging-sdk-android/releases 
-    implementation ('com.infobip:infobip-rtc-ui:12.0.0') {
+    implementation ('com.infobip:infobip-rtc-ui:12.1.0') {
         transitive = true
     }
     ```
