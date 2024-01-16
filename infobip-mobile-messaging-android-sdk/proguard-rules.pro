@@ -73,10 +73,12 @@
 }
 
 # Suppress lombok warnings
--dontwarn lombok.NonNull
+-dontwarn lombok.**
 
 # Mobile Messaging API classes
 -keep class org.infobip.mobile.messaging.api.** { *; }
+-keep public interface org.infobip.mobile.messaging.api.** { public *; }
+-keep public enum org.infobip.mobile.messaging.api.** { public *; }
 
 # Fix for JobIntentService
 -keep class org.infobip.mobile.messaging.platform.JobIntentService$* { *; }

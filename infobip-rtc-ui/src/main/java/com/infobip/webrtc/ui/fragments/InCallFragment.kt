@@ -103,12 +103,37 @@ class InCallFragment : Fragment() {
         }
     }
     private val viewModel: CallViewModel by activityViewModels()
-    private val requestMediaProjection =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                viewModel.shareScreen(ScreenCapturer(it.resultCode, it.data))
-                switchLocalTrackSink()
-                switchRemoteTrackSink()
+    private val startMediaProjection =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                this@InCallFragment.viewLifecycleOwner.lifecycleScope.launch {
+                    ScreenShareService.sendScreenShareServiceIntent(
+                        requireContext(),
+                        ScreenShareService.ACTION_START_SCREEN_SHARE
+                    )
+                    //ScreenShareService MUST be running before we start screen share, otherwise there is SecurityException, wait at most 200ms
+                    var counter = 0
+                    while (!ScreenShareService.isRunning) {
+                        if (counter > 10)
+                            break
+                        Log.d(TAG, "Waiting for ScreenShareService...")
+                        delay(20)
+                        counter++
+                    }
+                    if (ScreenShareService.isRunning){
+                        Log.d(TAG, "Starting screen sharing")
+                        viewModel.shareScreen(ScreenCapturer(result.resultCode, result.data))
+                            .onSuccess {
+                                switchLocalTrackSink()
+                                switchRemoteTrackSink()
+                            }.onFailure {
+                                ScreenShareService.sendScreenShareServiceIntent(
+                                    requireContext(),
+                                    ScreenShareService.ACTION_STOP_SCREEN_SHARE
+                                )
+                            }
+                    }
+                }
             }
         }
     private val pipActionsReceiver = object : BroadcastReceiver() {
@@ -525,13 +550,9 @@ class InCallFragment : Fragment() {
             switchRemoteTrackSink()
         } else {
             bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-            ScreenShareService.sendScreenShareServiceIntent(
-                requireContext(),
-                ScreenShareService.ACTION_START_SCREEN_SHARE
-            )
             val mediaProjectionManager =
                 requireActivity().getSystemService(AppCompatActivity.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-            requestMediaProjection.launch(mediaProjectionManager.createScreenCaptureIntent())
+            startMediaProjection.launch(mediaProjectionManager.createScreenCaptureIntent())
         }
 
     }

@@ -18,7 +18,8 @@
 
     <application
         android:allowBackup="false"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".view.InAppChatAttachmentPreviewActivity"
             android:screenOrientation="portrait"

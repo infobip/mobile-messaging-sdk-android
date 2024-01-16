@@ -110,7 +110,7 @@ internal class CallNotificationFactoryImpl(
             })
     }
 
-    private fun createIncomingCallNotificationBuilder(
+    private fun createIncomingCallNotification(
         context: Context,
         callerName: String,
         description: String,
@@ -148,7 +148,16 @@ internal class CallNotificationFactoryImpl(
             )
             setSilent(isSilent)
             priority = NotificationCompat.PRIORITY_MAX
-            setFullScreenIntent(contentIntent(callerName), true)
+
+            var hasFullScreenIntentPermission = true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                hasFullScreenIntentPermission = notificationManager.canUseFullScreenIntent()
+            }
+            val intent = contentIntent(callerName)
+            if (hasFullScreenIntentPermission)
+                setFullScreenIntent(intent, true)
+            else
+                setContentIntent(intent)
         }
     }
 
@@ -157,7 +166,7 @@ internal class CallNotificationFactoryImpl(
         callerName: String,
         description: String
     ): Notification {
-        return createIncomingCallNotificationBuilder(context, callerName, description, false)
+        return createIncomingCallNotification(context, callerName, description, false)
     }
 
     override fun createIncomingCallNotificationSilent(
@@ -165,7 +174,7 @@ internal class CallNotificationFactoryImpl(
         callerName: String,
         description: String
     ): Notification {
-        return createIncomingCallNotificationBuilder(context, callerName, description, true)
+        return createIncomingCallNotification(context, callerName, description, true)
     }
 
     override fun createOngoingCallNotification(

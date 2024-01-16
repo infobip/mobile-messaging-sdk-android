@@ -17,12 +17,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion mm_compileSdkVersion
-    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion mm_targetSdkVersion
+        minSdkVersion mm_minSdkVersion
+        targetSdkVersion 34
+        compileSdk mm_compileSdkVersion
+        buildToolsVersion = mm_buildToolsVersion
 
         versionCode 1
         versionName project.version
@@ -31,7 +31,7 @@ android {
         // https://issuetracker.google.com/issues/154275579
         buildConfigField "String", "VERSION_NAME", "\"$versionName\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        consumerProguardFiles "proguard-rules.pro"
     }
 
     buildFeatures {
@@ -76,7 +76,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$mm_coreKtxVersion"
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"
     implementation "com.google.android.material:material:$mm_materialVersion"
-    api ("com.infobip:infobip-rtc:2.2.6") {
+    api ("com.infobip:infobip-rtc:2.2.11") {
         transitive = true
     }
     implementation "androidx.work:work-runtime-ktx:2.8.1"
@@ -89,7 +89,7 @@ dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$mm_desugarJdkVersion"
 }
 
-android.libraryVariants.all { variant ->
+android.libraryVariants.configureEach { variant ->
     def name = variant.buildType.name
     def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
         Task javaCompileTask
@@ -122,18 +122,19 @@ android.libraryVariants.all { variant ->
     }
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     from android.sourceSets.main.java.srcDirs
     archiveClassifier.set('sources')
 }
 
-task javadoc(type: Javadoc) {
+tasks.register('javadoc', Javadoc) {
     failOnError false
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
     archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }

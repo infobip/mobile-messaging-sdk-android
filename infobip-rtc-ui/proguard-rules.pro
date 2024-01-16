@@ -1,24 +1,46 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+#Kotlin
+-dontwarn org.jetbrains.annotations.**
+-keep class kotlin.Metadata { *; }
+-keepclassmembers class kotlin.Metadata {
+    public <methods>;
+}
+-keepattributes RuntimeVisibleAnnotations
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+#Java library
+-keep public class * {
+    public protected *;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-printmapping infobip-rtc-ui-out.map
+-keepparameternames
+-renamesourcefileattribute SourceFile
+-keepattributes Signature,Exceptions,*Annotation*,
+                InnerClasses,PermittedSubclasses,EnclosingMethod,
+                Deprecated,SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
--keep class com.infobip.webrtc.api.model.** {*;}
--keep class com.infobip.webrtc.ui.InfobipRtcUi {*;}
--keep class com.infobip.webrtc.ui.InfobipRtcUi$Builder {*;}
+-keepclasseswithmembernames,includedescriptorclasses class * {
+    native <methods>;
+}
+
+-keepclassmembers,allowoptimization enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+#InfobipRtcUi
+-keep public class com.infobip.webrtc.** { public protected *;}
+-keep public interface com.infobip.webrtc.** { public protected *;}
+-keep public enum com.infobip.webrtc.** { public protected *;}
+
+-keep public class com.infobip.webrtc.ui.** { public protected *;}
+-keep public interface com.infobip.webrtc.ui.** { public protected *;}
+-keep public enum com.infobip.webrtc.ui.** { public protected *;}

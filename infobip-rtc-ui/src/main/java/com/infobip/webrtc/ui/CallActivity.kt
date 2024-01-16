@@ -11,7 +11,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
-import android.widget.*
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
@@ -22,13 +22,30 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infobip.webrtc.Injector
 import com.infobip.webrtc.TAG
-import com.infobip.webrtc.sdk.api.event.call.*
+import com.infobip.webrtc.sdk.api.event.call.CallEarlyMediaEvent
+import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
+import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
+import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
 import com.infobip.webrtc.ui.fragments.InCallFragment
 import com.infobip.webrtc.ui.fragments.IncomingCallFragment
 import com.infobip.webrtc.ui.listeners.DefaultRtcUiCallEventListener
 import com.infobip.webrtc.ui.model.CallState
 import com.infobip.webrtc.ui.service.OngoingCallService
+import com.infobip.webrtc.ui.service.ScreenShareService
 import com.infobip.webrtc.ui.utils.applyLocale
 import com.infobip.webrtc.ui.utils.navigate
 import com.infobip.webrtc.ui.view.CallAlert
@@ -152,7 +169,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 viewModel.accept()
                 OngoingCallService.CALL_ESTABLISHED_ACTION
             } else {
-                OngoingCallService.INCOMING_CALL_SCREEN
+                OngoingCallService.SILENT_INCOMING_CALL_ACTION
             }
             OngoingCallService.sendCallServiceIntent(applicationContext, action)
         }
@@ -173,6 +190,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         OngoingCallService.sendCallServiceIntent(
             applicationContext,
             OngoingCallService.CALL_ENDED_ACTION
+        )
+        ScreenShareService.sendScreenShareServiceIntent(
+            applicationContext,
+            ScreenShareService.ACTION_STOP_SCREEN_SHARE
         )
         finishAndRemoveTask()
     }
@@ -291,7 +312,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 runOnUiThread {
                     OngoingCallService.sendCallServiceIntent(
                         applicationContext,
-                        OngoingCallService.RECONNECTING
+                        OngoingCallService.CALL_RECONNECTING_ACTION
                     )
                 }
             }
@@ -301,7 +322,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 runOnUiThread {
                     OngoingCallService.sendCallServiceIntent(
                         applicationContext,
-                        OngoingCallService.RECONNECTED
+                        OngoingCallService.CALL_RECONNECTED_ACTION
                     )
                 }
             }

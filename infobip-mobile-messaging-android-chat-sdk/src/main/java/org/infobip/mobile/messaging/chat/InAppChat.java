@@ -126,7 +126,6 @@ public abstract class InAppChat {
      * @param resultListener listener to report the result on
      * @see MobileMessaging.ResultListener
      */
-
     public abstract void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener);
 
     /**

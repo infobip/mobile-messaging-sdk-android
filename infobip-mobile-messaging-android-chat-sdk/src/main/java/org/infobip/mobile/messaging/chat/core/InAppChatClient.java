@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat.core;
 
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment;
 
 import java.util.Locale;
@@ -53,10 +54,10 @@ public interface InAppChatClient {
     /**
      * Close webSocket connection and be able to receive push notifications
      */
-    void mobileChatPause();
+    void mobileChatPause(MobileMessaging.ResultListener<String> resultListener);
 
     /**
      * Resume webSocket connection
      */
-    void mobileChatResume();
+    void mobileChatResume(MobileMessaging.ResultListener<String> resultListener);
 }

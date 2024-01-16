@@ -1,12 +1,15 @@
 package com.infobip.webrtc.ui.service
 
+import android.app.Notification
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.Ringtone
 import android.media.RingtoneManager
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
@@ -31,20 +34,20 @@ class OngoingCallService : BaseService() {
         }
 
         const val INCOMING_CALL_ACTION = "com.infobip.calls.ui.service.OngoingCallService.INCOMING_CALL_ACTION"
-        const val INCOMING_CALL_SCREEN = "com.infobip.calls.ui.service.OngoingCallService.INCOMING_CALL_SCREEN"
+        const val SILENT_INCOMING_CALL_ACTION = "com.infobip.calls.ui.service.OngoingCallService.SILENT_INCOMING_CALL_ACTION"
         const val CALL_ENDED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.END_CALL_ACTION"
         const val CALL_ESTABLISHED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_ESTABLISHED_ACTION"
         const val CALL_DECLINED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_DECLINED_ACTION"
         const val CALL_HANGUP_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_HANGUP_ACTION"
+        const val CALL_RECONNECTING_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_RECONNECTING_ACTION"
+        const val CALL_RECONNECTED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_RECONNECTED_ACTION"
+
         const val NAME_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.NAME_EXTRA"
         const val CALL_STATUS_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.CALL_STATUS_EXTRA"
-        const val RECONNECTING = "com.infobip.calls.ui.service.OngoingCallService.RECONNECTING"
-        const val RECONNECTED = "com.infobip.calls.ui.service.OngoingCallService.RECONNECTED"
     }
 
     private val vibrateDelegate: Vibrator by lazy { Injector.vibrator }
 
-    //todo custom ringtone uri
     private val incomingCallRingtone: Ringtone by lazy { RingtoneManager.getRingtone(applicationContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)) }
     private val audioManager: AudioManager by lazy { applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationHelper: CallNotificationFactory by lazy { Injector.notificationFactory }
@@ -64,9 +67,8 @@ class OngoingCallService : BaseService() {
                 val activeCallStatus = runCatching { CallStatus.valueOf(intent.getStringExtra(CALL_STATUS_EXTRA).orEmpty()) }.getOrDefault(CallStatus.FINISHED)
                 val isPermissionNeeded = notificationPermissionDelegate.isPermissionNeeded()
                 if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING && !isPermissionNeeded) {
-                    peerName = intent.getStringExtra(NAME_EXTRA)
-                            ?: applicationContext.getString(R.string.mm_unknown)
-                    startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotification(this, peerName, getString(R.string.mm_incoming_call)))
+                    peerName = intent.getStringExtra(NAME_EXTRA) ?: applicationContext.getString(R.string.mm_unknown)
+                    startForeground(notificationHelper.createIncomingCallNotification(this, peerName, getString(R.string.mm_incoming_call)))
                     startMedia()
                 } else if (isPermissionNeeded && cache.autoDeclineOnMissingNotificationPermission) {
                     Toast.makeText(applicationContext, getString(R.string.mm_notification_permission_required_declining_call), Toast.LENGTH_LONG).show()
@@ -74,8 +76,8 @@ class OngoingCallService : BaseService() {
                 }
             }
 
-            INCOMING_CALL_SCREEN -> {
-                startForeground(CALL_NOTIFICATION_ID, notificationHelper.createIncomingCallNotificationSilent(this, peerName, getString(R.string.mm_incoming_call)))
+            SILENT_INCOMING_CALL_ACTION -> {
+                startForeground(notificationHelper.createIncomingCallNotificationSilent(this, peerName, getString(R.string.mm_incoming_call)))
             }
 
             CALL_ENDED_ACTION -> {
@@ -84,7 +86,7 @@ class OngoingCallService : BaseService() {
 
             CALL_ESTABLISHED_ACTION -> {
                 stopMedia()
-                startForeground(CALL_NOTIFICATION_ID, notificationHelper.createOngoingCallNotification(this, peerName, getString(R.string.mm_in_call)))
+                startForeground(notificationHelper.createOngoingCallNotification(this, peerName, getString(R.string.mm_in_call)))
             }
 
             CALL_DECLINED_ACTION -> {
@@ -97,17 +99,25 @@ class OngoingCallService : BaseService() {
                 stop()
             }
 
-            RECONNECTING -> {
+            CALL_RECONNECTING_ACTION -> {
                 startReconnectingTone()
             }
 
-            RECONNECTED -> {
+            CALL_RECONNECTED_ACTION -> {
                 stopReconnectingToneAndPlayReconnection()
             }
 
             else -> Log.d(TAG, "Unhandled intent action: ${intent?.action.orEmpty()}")
         }
         return START_NOT_STICKY
+    }
+
+    private fun startForeground(notification: Notification) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(CALL_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
+        } else {
+            startForeground(CALL_NOTIFICATION_ID, notification)
+        }
     }
 
     private fun stop() {

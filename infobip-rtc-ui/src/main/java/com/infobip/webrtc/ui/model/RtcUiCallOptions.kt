@@ -13,14 +13,15 @@ internal data class RtcUiCallOptions(
         val customData: Map<String, String>? = null
 ) {
     fun toWebRtcCallOptions(): WebrtcCallOptions = WebrtcCallOptions.builder()
-            .customData(customData ?: mapOf())
+            .audioOptions(audioOptions ?: AudioOptions(AudioOptions.AudioQualityMode.AUTO))
             .videoOptions(videoOptions ?: VideoOptions.builder().build())
-            .video(video)
+            .customData(customData ?: mapOf())
             .audio(audio)
+            .video(video)
             .build()
 
     fun toApplicationCallOptions(): ApplicationCallOptions = ApplicationCallOptions.builder()
-            .audioOptions(audioOptions ?: AudioOptions(false))
+            .audioOptions(audioOptions ?: AudioOptions(AudioOptions.AudioQualityMode.AUTO))
             .videoOptions(videoOptions ?: VideoOptions.builder().build())
             .customData(customData ?: mapOf())
             .audio(audio)

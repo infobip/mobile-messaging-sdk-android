@@ -122,19 +122,21 @@ internal class CallViewModel : ViewModel() {
         return timeFormatter.format(LocalTime.ofSecondOfDay(durationSeconds.toLong()))
     }
 
-    fun shareScreen(screenCapturer: ScreenCapturer) {
-        runCatching {
+    fun shareScreen(screenCapturer: ScreenCapturer): Result<Unit> {
+        val result = runCatching {
             callsDelegate.shareScreen(screenCapturer)
             updateState { copy(isLocalScreenShare = true) }
-        }.onFailure {
+        }
+        result.onFailure {
             Log.e(TAG, "Action start screen share failed.", it)
         }
+        return result
     }
 
     fun stopScreenShare() {
         runCatching {
-            callsDelegate.stopScreenShare()
             updateState { copy(isLocalScreenShare = false) }
+            callsDelegate.stopScreenShare()
         }.onFailure {
             Log.e(TAG, "Action stop screen share failed.", it)
         }
