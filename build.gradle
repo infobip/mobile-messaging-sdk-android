@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$mm_gradlePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$mm_kotlinVersion"
     }
 }
 
@@ -15,7 +16,6 @@ plugins {
     id 'net.researchgate.release' version '2.8.1'
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
-    id 'org.jetbrains.kotlin.android' version "$mm_kotlinVersion" apply false
     id "org.sonarqube" version "4.4.1.3373"
     id "jacoco"
 }
@@ -29,8 +29,8 @@ ext {
     mm_gmsLocationVersion = "21.0.1"
     mm_constraintLayoutVersion = "2.1.4"
     mm_appCompatVersion = "1.6.1"
-    mm_materialVersion = "1.9.0"
-    mm_coreKtxVersion = "1.10.1"
+    mm_materialVersion = "1.11.0"
+    mm_coreKtxVersion = "1.12.0"
     mm_desugarJdkVersion = "2.0.3"
     mm_lifecycleVersion = "2.5.1"
 }
@@ -47,11 +47,11 @@ subprojects {
     apply plugin: "maven-publish"
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
 
-task updateVersionInReadme {
+tasks.register('updateVersionInReadme') {
     doLast {
         def readmeFile = new File('README.md')
         def text = readmeFile.text
@@ -61,7 +61,7 @@ task updateVersionInReadme {
     }
 }
 
-task updateRtcUiVersionInReadme {
+tasks.register('updateRtcUiVersionInReadme') {
     doLast {
         def readmeFile = new File('infobip-rtc-ui/README.md')
         def text = readmeFile.text
