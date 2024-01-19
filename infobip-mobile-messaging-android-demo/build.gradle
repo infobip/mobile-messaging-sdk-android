@@ -13,16 +13,14 @@ plugins {
 }
 
 android {
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion mm_targetSdkVersion
-        compileSdk mm_compileSdkVersion
-        buildToolsVersion = mm_buildToolsVersion
-
         versionCode 1
         versionName version
-
         applicationId "org.infobip.mobile.messaging.demo"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         multiDexEnabled true
@@ -44,7 +42,7 @@ android {
     }
 
     buildTypes {
-        configureEach {
+        all {
             property(project, 'google_app_id', 'GOOGLE_APP_ID')?.with { resValue "string", "google_app_id", delegate }
             property(project, 'infobip_application_code', 'INFOBIP_APPLICATION_CODE')?.with { resValue "string", "infobip_application_code", delegate }
             property(project, 'infobip_api_uri', 'INFOBIP_API_URI')?.with { resValue "string", "infobip_api_uri", delegate }
@@ -62,7 +60,7 @@ android {
         abortOnError false
     }
 
-    flavorDimensions = ["default"]
+    flavorDimensions "default"
 
     productFlavors {
         push {
@@ -121,8 +119,8 @@ android {
 
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    testImplementation "junit:junit:4.13.2"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    testImplementation "junit:junit:4.12"
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
 
     implementation project(":infobip-mobile-messaging-android-chat-sdk")
     implementation project(":infobip-mobile-messaging-android-geo-sdk")
@@ -153,7 +151,7 @@ private static String property(Project project, String projectKey, String enviro
     return project.hasProperty(projectKey) ? project[projectKey] : System.getenv(environmentKey)
 }
 
-tasks.register('uncommentGoogleServices') {
+task uncommentGoogleServices {
     doLast {
         def readmeFile = new File('infobip-mobile-messaging-android-demo/build.gradle')
         def text = readmeFile.text

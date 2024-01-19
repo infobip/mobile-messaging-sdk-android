@@ -5,25 +5,25 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$mm_gradlePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$mm_kotlinVersion"
     }
 }
 
 plugins {
     id 'com.android.library'
     id 'maven-publish'
-    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
     namespace "org.infobip.mobile.messaging.chat"
+    compileSdkVersion mm_compileSdkVersion
+    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion mm_targetSdkVersion
-        compileSdk mm_compileSdkVersion
-        buildToolsVersion = mm_buildToolsVersion
-
         versionCode 1
         versionName project.version
 
@@ -67,11 +67,20 @@ android {
 }
 
 dependencies {
+    constraints {
+        implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
+
     implementation project(":infobip-mobile-messaging-android-sdk")
     api project(":infobip-mobile-messaging-android-resources")
     implementation project(":infobip-mobile-messaging-api-java")
 
-    implementation (platform("org.jetbrains.kotlin:kotlin-bom:$mm_kotlinVersion"))
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$mm_kotlinVersion"
     implementation "androidx.core:core-ktx:$mm_coreKtxVersion"
 
     implementation "androidx.constraintlayout:constraintlayout:$mm_constraintLayoutVersion"
@@ -80,19 +89,19 @@ dependencies {
     implementation 'androidx.exifinterface:exifinterface:1.3.6'
 
     androidTestImplementation project(":infobip-mobile-messaging-android-test")
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation "junit:junit:4.13.2"
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation "junit:junit:4.12"
     androidTestImplementation "org.mockito:mockito-core:1.10.19"
     androidTestImplementation 'com.nanohttpd:nanohttpd:2.1.0'
     androidTestImplementation 'com.android.support:multidex:2.0.1'
 
     testImplementation project(":infobip-mobile-messaging-android-test")
-    testImplementation "junit:junit:4.13.2"
+    testImplementation "junit:junit:4.12"
     testImplementation "org.mockito:mockito-core:1.10.19"
 
 }
 
-android.libraryVariants.configureEach { variant ->
+android.libraryVariants.all { variant ->
     def name = variant.buildType.name
     def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
         Task javaCompileTask
@@ -125,19 +134,18 @@ android.libraryVariants.configureEach { variant ->
     }
 }
 
-tasks.register('sourcesJar', Jar) {
+task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     archiveClassifier.set('sources')
 }
 
-tasks.register('javadoc', Javadoc) {
+task javadoc(type: Javadoc) {
     failOnError false
     source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
-tasks.register('javadocJar', Jar) {
-    dependsOn javadoc
+task javadocJar(type: Jar, dependsOn: javadoc) {
     archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
