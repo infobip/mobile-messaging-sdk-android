@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import androidx.annotation.DrawableRes
 import com.infobip.webrtc.ui.R
 
-internal data class Icons(
+data class Icons(
     @DrawableRes val mute: Int,
     @DrawableRes val unMute: Int,
     @DrawableRes val screenShare: Int,

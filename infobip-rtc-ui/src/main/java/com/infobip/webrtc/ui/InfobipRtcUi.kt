@@ -8,6 +8,7 @@ import com.infobip.webrtc.TAG
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiMode
+import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.Locale
 
@@ -309,4 +310,24 @@ interface InfobipRtcUi {
      * @param buttons sorted set of in call buttons
      */
     fun setInCallButtons(buttons: List<InCallButton>)
+
+    /**
+     * Set theme, it is alternative to defining style in xml.
+     *
+     * Final value for every theme attribute is resolved from multiple source-by-source priority.
+     * The source with the highest priority defines a final attribute value.
+     * If source does not define an attribute value, there is fallback to the source with lower priority.
+     *
+     * Sources by priority:
+     * 1. [InfobipRtcUiTheme] theme provided in runtime using this function.
+     * 2. [InfobipRtcUi] style provided in xml.
+     * 3. Default [InfobipRtcUi] style defined by InfobipRtcUi library
+     *
+     * Final value for every theme attribute is evaluated separately.
+     * It means you can define [InfobipRtcUiTheme.incomingCallMessageStyle] in runtime, colors in xml and skip icons.
+     * Library will use [InfobipRtcUiTheme.incomingCallMessageStyle] you defined in runtime, colors you defined in xml and default icons provided by library itself.
+     *
+     * @param theme data object holding all theme attributes
+     */
+    fun setTheme(theme: InfobipRtcUiTheme)
 }

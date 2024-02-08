@@ -116,10 +116,10 @@ internal class CallNotificationFactoryImpl(
         description: String,
         isSilent: Boolean,
     ): Notification {
-        val themedContext = ContextThemeWrapper(context, R.style.InfobipRtcUi_Call)
-        val incomeMessage: String? =
+        val themedContext by lazy { ContextThemeWrapper(context, R.style.InfobipRtcUi_Call) }
+        val incomeMessage: String? = Injector.incomingCallMessageStyle?.messageText ?:
             themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_message, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
-        val incomeHeadline: String? =
+        val incomeHeadline: String? = Injector.incomingCallMessageStyle?.headlineText ?:
             themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_headline, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
         val acceptCall = incomeMessage.isNullOrEmpty() && incomeHeadline.isNullOrEmpty()
 

@@ -52,6 +52,7 @@ import com.infobip.webrtc.ui.view.CallAlert
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
 import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
+import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -93,12 +94,11 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         context: Context,
         attrs: AttributeSet
     ): View? {
-        if (Injector.colors == null)
-            Injector.colors = Colors(this, attrs)
-        if (Injector.icons == null)
-            Injector.icons = Icons(this, attrs)
-        if (Injector.incomingCallMessageStyle == null)
-            Injector.incomingCallMessageStyle = IncomingCallMessageStyle(this, attrs)
+        Injector.theme = InfobipRtcUiTheme (
+            colors = Injector.colors ?: Colors(this, attrs),
+            icons = Injector.icons ?: Icons(this, attrs),
+            incomingCallMessageStyle = Injector.incomingCallMessageStyle ?: IncomingCallMessageStyle(this, attrs)
+        )
         return super.onCreateView(parent, name, context, attrs)
     }
 

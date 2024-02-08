@@ -14,6 +14,7 @@ import com.infobip.webrtc.ui.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiMode
+import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelChildren
@@ -110,6 +111,10 @@ internal class InfobipRtcUiImpl(
 
     override fun setInCallButtons(buttons: List<InCallButton>) {
         Injector.inCallButtons = listOf(InCallButton.HangUp, *buttons.toTypedArray())
+    }
+
+    override fun setTheme(theme: InfobipRtcUiTheme) {
+        Injector.theme = theme
     }
 
     private fun registerPush(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {

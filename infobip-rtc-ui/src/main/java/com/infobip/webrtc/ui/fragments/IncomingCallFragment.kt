@@ -72,14 +72,14 @@ class IncomingCallFragment : Fragment() {
                     customHeadline.visibility = View.VISIBLE
                 }
                 res.headlineTextAppearance?.let { TextViewCompat.setTextAppearance(customHeadline, it) }
-                customHeadline.setTextColor(res.headlineTextColor)
+                res.headlineTextColor?.let { customHeadline.setTextColor(it) }
                 res.headlineBackground?.let { customHeadline.background = AppCompatResources.getDrawable(requireContext(), it) }
                 res.messageText?.takeIf { it.isNotEmpty() }.let {
                     customMessage.text = it
                     customMessage.visibility = View.VISIBLE
                 }
                 res.messageTextAppearance?.let { TextViewCompat.setTextAppearance(customMessage, it) }
-                customMessage.setTextColor(res.messageTextColor)
+                res.messageTextColor?.let { customMessage.setTextColor(it) }
                 res.messageBackground?.let { customMessage.background = AppCompatResources.getDrawable(requireContext(), it) }
             }
         }

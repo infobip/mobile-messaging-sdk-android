@@ -9,15 +9,15 @@ import androidx.core.content.ContextCompat
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.utils.resolveString
 
-internal data class IncomingCallMessageStyle(
+data class IncomingCallMessageStyle(
     val headlineText: String? = null,
     @StyleRes val headlineTextAppearance: Int? = null,
-    @ColorInt val headlineTextColor: Int,
-    @DrawableRes val headlineBackground: Int?,
+    @ColorInt val headlineTextColor: Int? = null,
+    @DrawableRes val headlineBackground: Int? = null,
     val messageText: String? = null,
     @StyleRes val messageTextAppearance: Int? = null,
-    @ColorInt val messageTextColor: Int,
-    @DrawableRes val messageBackground: Int?,
+    @ColorInt val messageTextColor: Int? = null,
+    @DrawableRes val messageBackground: Int? = null,
     ) {
 
     companion object {

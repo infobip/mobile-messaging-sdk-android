@@ -6,7 +6,7 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.infobip.webrtc.ui.R
 
-internal data class Colors(
+data class Colors(
     @ColorInt val rtcUiForeground: Int,
     @ColorInt val rtcUiActionsBackground: Int,
     @ColorInt val rtcUiActionsBackgroundChecked: Int,

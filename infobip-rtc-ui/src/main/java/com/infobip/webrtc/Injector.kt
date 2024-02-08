@@ -20,6 +20,7 @@ import com.infobip.webrtc.ui.notifications.CallNotificationFactoryImpl
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
 import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
+import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,9 +38,13 @@ internal object Injector {
     val cache: Cache = InMemoryCache()
     val notificationFactory: CallNotificationFactory by lazy { CallNotificationFactoryImpl(appContext) }
     val callsDelegate: CallsDelegate by lazy { CallsDelegateImpl(appContext, callsScope, rtcInstance) }
-    var colors: Colors? = null
-    var icons: Icons? = null
-    var incomingCallMessageStyle: IncomingCallMessageStyle? = null
+    var theme: InfobipRtcUiTheme? = null
+    val colors: Colors?
+        get() = theme?.colors
+    val icons: Icons?
+        get() = theme?.icons
+    val incomingCallMessageStyle: IncomingCallMessageStyle?
+        get() = theme?.incomingCallMessageStyle
     var locale: Locale? = null
     var inCallButtons: List<InCallButton> = listOf(
         InCallButton.HangUp,
