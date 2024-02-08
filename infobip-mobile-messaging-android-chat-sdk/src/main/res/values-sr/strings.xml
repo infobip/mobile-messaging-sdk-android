@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">U redu</string>
     <string name="ib_chat_error">Nešto je krenulo pogrešno:  %1$s.</string>
     <string name="ib_chat_error_code">Код грешке: %1$с.</string>
+    <string name="ib_chat_save">сачувати</string>
 </resources>

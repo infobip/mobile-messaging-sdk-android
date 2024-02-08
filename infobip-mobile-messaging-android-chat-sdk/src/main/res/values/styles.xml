@@ -40,6 +40,8 @@
 
     <style name="IB.Chat.Toolbar.AttachmentPreview" parent="IB.Chat.Toolbar">
         <item name="ibChatTitleCentered">true</item>
+        <item name="ibChatSaveAttachmentMenuItemIcon">@drawable/ib_chat_attachment_save_btn_icon</item>
+        <item name="ibChatMenuItemsIconTint">@android:color/white</item>
     </style>
 
     <style name="IB.Chat" parent="IB">

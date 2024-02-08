@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">V redu</string>
     <string name="ib_chat_error">Nekaj ​​je šlo narobe: %1$s.</string>
     <string name="ib_chat_error_code">Koda napake: %1$s.</string>
+    <string name="ib_chat_save">Shrani</string>
 </resources>

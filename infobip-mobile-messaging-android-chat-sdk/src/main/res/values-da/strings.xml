@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">Okay</string>
     <string name="ib_chat_error">Noget gik galt: %1$s.</string>
     <string name="ib_chat_error_code">Fejlkode: %1$s.</string>
+    <string name="ib_chat_save">Gemme</string>
 </resources>

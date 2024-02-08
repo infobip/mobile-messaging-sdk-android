@@ -479,6 +479,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     false,
                     ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_decline, getTheme()),
                     Color.MAGENTA,
+                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_accept, getTheme()),
+                    Color.RED,
                     R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
                     Color.BLACK,
                     "Chat",

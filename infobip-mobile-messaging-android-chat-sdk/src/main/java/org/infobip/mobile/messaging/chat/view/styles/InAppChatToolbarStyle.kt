@@ -14,22 +14,24 @@ import org.infobip.mobile.messaging.chat.utils.*
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 data class InAppChatToolbarStyle(
-        @ColorInt val toolbarBackgroundColor: Int,
-        @ColorInt val statusBarBackgroundColor: Int,
-        val lightStatusBarIcons: Boolean,
-        val navigationIcon: Drawable?,
-        @ColorInt val navigationIconTint: Int,
-        @StyleRes val titleTextAppearance: Int? = null,
-        @ColorInt val titleTextColor: Int,
-        val titleText: String? = null,
-        @StringRes val titleTextRes: Int? = null,
-        val isTitleCentered: Boolean? = null,
-        @StyleRes val subtitleTextAppearance: Int? = null,
-        @ColorInt val subtitleTextColor: Int,
-        val subtitleText: String? = null,
-        @StringRes val subtitleTextRes: Int? = null,
-        val isSubtitleCentered: Boolean? = null,
-        val isIbDefaultTheme: Boolean
+    @ColorInt val toolbarBackgroundColor: Int,
+    @ColorInt val statusBarBackgroundColor: Int,
+    val lightStatusBarIcons: Boolean,
+    val navigationIcon: Drawable?,
+    @ColorInt val navigationIconTint: Int,
+    val saveAttachmentMenuItemIcon: Drawable?,
+    @ColorInt val menuItemsIconTint: Int,
+    @StyleRes val titleTextAppearance: Int? = null,
+    @ColorInt val titleTextColor: Int,
+    val titleText: String? = null,
+    @StringRes val titleTextRes: Int? = null,
+    val isTitleCentered: Boolean? = null,
+    @StyleRes val subtitleTextAppearance: Int? = null,
+    @ColorInt val subtitleTextColor: Int,
+    val subtitleText: String? = null,
+    @StringRes val subtitleTextRes: Int? = null,
+    val isSubtitleCentered: Boolean? = null,
+    val isIbDefaultTheme: Boolean
 ) {
 
     companion object {
@@ -43,7 +45,7 @@ data class InAppChatToolbarStyle(
             val deprecatedToolbarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimary)
             val deprecatedStatusBarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimaryDark)
             val deprecatedTitleTextColor = context.resolveThemeColor(R.attr.titleTextColor)
-            val deprecatedNavigationIconTint = context.resolveThemeColor(R.attr.colorControlNormal)
+            val deprecatedToolbarIconTint = context.resolveThemeColor(R.attr.colorControlNormal)
             val deprecatedTitleResId: Int = runCatching {
                 context.resources.getIdentifier(
                         RES_ID_CHAT_VIEW_TITLE,
@@ -61,6 +63,8 @@ data class InAppChatToolbarStyle(
             var lightStatusBarIcons: Boolean? = null
             var newNavigationIcon: Int? = null
             var newNavigationIconTint: Int? = null
+            var newSaveAttachmentMenuItemIcon: Int? = null
+            var newMenuItemsIconTint: Int? = null
             var newTitleTextAppearance: Int? = null
             var newTitleTextColor: Int? = null
             var newTitleText: String? = null
@@ -81,6 +85,8 @@ data class InAppChatToolbarStyle(
                 lightStatusBarIcons = typedArray.getInt(R.styleable.InAppChatToolbarViewStyleable_ibChatStatusBarIconsColorMode, 0) == 0
                 newNavigationIcon = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIcon, 0).takeIfDefined()
                 newNavigationIconTint = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIconTint, 0).takeIfDefined()
+                newSaveAttachmentMenuItemIcon = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatSaveAttachmentMenuItemIcon, 0).takeIfDefined()
+                newMenuItemsIconTint = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatMenuItemsIconTint, 0).takeIfDefined()
                 newTitleTextAppearance = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextAppearance, 0).takeIfDefined()
                 newTitleTextColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleTextColor, 0).takeIfDefined()
                 typedArray.resolveStringWithResId(context, R.styleable.InAppChatToolbarViewStyleable_ibChatTitleText).let {
@@ -99,23 +105,20 @@ data class InAppChatToolbarStyle(
             }
 
             return InAppChatToolbarStyle(
-                    toolbarBackgroundColor = newToolbarBackgroundColor
-                            ?: deprecatedToolbarBackgroundColor ?: Color.BLACK,
-                    statusBarBackgroundColor = newStatusBarBackgroundColor
-                            ?: deprecatedStatusBarBackgroundColor ?: Color.BLACK,
+                    toolbarBackgroundColor = newToolbarBackgroundColor ?: deprecatedToolbarBackgroundColor ?: Color.BLACK,
+                    statusBarBackgroundColor = newStatusBarBackgroundColor ?: deprecatedStatusBarBackgroundColor ?: Color.BLACK,
                     lightStatusBarIcons = lightStatusBarIcons ?: true,
-                    navigationIcon = (newNavigationIcon
-                            ?: R.drawable.ic_chat_arrow_back).let(context::getDrawableCompat),
-                    navigationIconTint = newNavigationIconTint ?: deprecatedNavigationIconTint
-                    ?: Color.WHITE,
+                    navigationIcon = (newNavigationIcon ?: R.drawable.ic_chat_arrow_back).let(context::getDrawableCompat),
+                    navigationIconTint = newNavigationIconTint ?: deprecatedToolbarIconTint ?: Color.WHITE,
+                    saveAttachmentMenuItemIcon = (newSaveAttachmentMenuItemIcon ?: R.drawable.ib_chat_attachment_save_btn_icon).let(context::getDrawableCompat),
+                    menuItemsIconTint = newMenuItemsIconTint ?: deprecatedToolbarIconTint ?: Color.WHITE,
                     titleTextAppearance = newTitleTextAppearance,
                     titleTextColor = newTitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
                     titleText = newTitleText ?: deprecatedTitle,
                     titleTextRes = newTitleTextRes ?: if (newTitleText != null) null else deprecatedTitleResId,
                     isTitleCentered = newIsTitleCentered,
                     subtitleTextAppearance = newSubtitleTextAppearance,
-                    subtitleTextColor = newSubtitleTextColor ?: deprecatedTitleTextColor
-                    ?: Color.WHITE,
+                    subtitleTextColor = newSubtitleTextColor ?: deprecatedTitleTextColor ?: Color.WHITE,
                     subtitleText = newSubtitleText,
                     subtitleTextRes = newSubtitleTextRes,
                     isSubtitleCentered = newIsSubtitleCentered,
@@ -147,9 +150,10 @@ data class InAppChatToolbarStyle(
                 }
                 if (backgroundColor != null) {
                     style = style.copy(
-                            titleTextColor = backgroundColor,
-                            subtitleTextColor = backgroundColor,
-                            navigationIconTint = backgroundColor
+                        titleTextColor = backgroundColor,
+                        subtitleTextColor = backgroundColor,
+                        navigationIconTint = backgroundColor,
+                        menuItemsIconTint = backgroundColor,
                     )
                 }
             } else { //if it is theme provided by integrator apply widget color only to components which are not defined by integrator
@@ -202,6 +206,10 @@ data class InAppChatToolbarStyle(
                 val newNavigationIconTintDefined = theme.isAttributePresent(R.styleable.InAppChatToolbarViewStyleable_ibChatNavigationIconTint, attr, R.styleable.InAppChatToolbarViewStyleable)
                 if (applyWidgetTitleTextColor && !newNavigationIconTintDefined && backgroundColor != null) {
                     style = style.copy(navigationIconTint = backgroundColor)
+                }
+                val newMenuItemsIconTintDefined = theme.isAttributePresent(R.styleable.InAppChatToolbarViewStyleable_ibChatMenuItemsIconTint, attr, R.styleable.InAppChatToolbarViewStyleable)
+                if (applyWidgetTitleTextColor && !newMenuItemsIconTintDefined && backgroundColor != null) {
+                    style = style.copy(menuItemsIconTint = backgroundColor)
                 }
             }
 

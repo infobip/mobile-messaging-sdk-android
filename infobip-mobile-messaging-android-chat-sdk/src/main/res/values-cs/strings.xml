@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">OK</string>
     <string name="ib_chat_error">Něco se pokazilo: %1$s.</string>
     <string name="ib_chat_error_code">Kód chyby: %1$s.</string>
+    <string name="ib_chat_save">Uložit</string>
 </resources>

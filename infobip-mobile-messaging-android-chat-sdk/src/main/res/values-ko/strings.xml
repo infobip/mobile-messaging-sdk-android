@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">좋아요</string>
     <string name="ib_chat_error">문제가 발생했습니다: %1$s.</string>
     <string name="ib_chat_error_code">오류 코드: %1$s.</string>
+    <string name="ib_chat_save">구하다</string>
 </resources>

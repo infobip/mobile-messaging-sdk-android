@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">ХОРОШО</string>
     <string name="ib_chat_error">Что-то пошло не так: %1$s.</string>
     <string name="ib_chat_error_code">Код ошибки: %1$s.</string>
+    <string name="ib_chat_save">Сохранять</string>
 </resources>

@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">Εντάξει</string>
     <string name="ib_chat_error">Κάτι πήγε στραβά: %1$s.</string>
     <string name="ib_chat_error_code">Κωδικός σφάλματος: %1$s.</string>
+    <string name="ib_chat_save">Αποθηκεύσετε</string>
 </resources>

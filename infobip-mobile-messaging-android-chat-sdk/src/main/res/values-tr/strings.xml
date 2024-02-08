@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">TAMAM</string>
     <string name="ib_chat_error">Bir şeyler ters gitti: %1$s.</string>
     <string name="ib_chat_error_code">Hata kodu: %1$s.</string>
+    <string name="ib_chat_save">Kaydetmek</string>
 </resources>

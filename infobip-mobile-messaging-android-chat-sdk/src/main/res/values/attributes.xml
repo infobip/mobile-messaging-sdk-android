@@ -18,6 +18,8 @@
         </attr>
         <attr name="ibChatNavigationIcon" format="reference" />
         <attr name="ibChatNavigationIconTint" format="color|reference" />
+        <attr name="ibChatSaveAttachmentMenuItemIcon" format="reference" />
+        <attr name="ibChatMenuItemsIconTint" format="color|reference" />
         <attr name="ibChatTitleTextAppearance" format="reference" />
         <attr name="ibChatTitleTextColor" format="color|reference" />
         <attr name="ibChatTitleText" format="string|reference" />

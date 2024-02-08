@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">わかりました</string>
     <string name="ib_chat_error">問題が発生しました: %1$s.</string>
     <string name="ib_chat_error_code">エラー コード: %1$s.</string>
+    <string name="ib_chat_save">保存</string>
 </resources>

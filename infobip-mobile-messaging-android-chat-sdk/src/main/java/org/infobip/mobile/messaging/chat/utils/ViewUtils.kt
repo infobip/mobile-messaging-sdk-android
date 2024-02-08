@@ -35,19 +35,11 @@ internal fun Context.getColorStateListCompat(@ColorRes id: Int): ColorStateList 
 internal fun @receiver:ColorInt Int?.toColorStateList(): ColorStateList? = this?.let { ColorStateList.valueOf(it) }
 
 internal fun ImageButton.setImageTint(color: ColorStateList) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        this.imageTintList = color
-    } else {
-        this.setImageDrawable(this.drawable?.setTint(color))
-    }
+    this.imageTintList = color
 }
 
 internal fun ProgressBar.setProgressTint(color: ColorStateList?) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        this.indeterminateTintList = color
-    } else {
-        this.indeterminateDrawable = this.indeterminateDrawable?.setTint(color)
-    }
+    this.indeterminateTintList = color
 }
 
 internal fun Drawable?.setTint(color: ColorStateList?): Drawable? {

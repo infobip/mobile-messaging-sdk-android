@@ -12,4 +12,5 @@
     <string name="ib_chat_ok">نعم</string>
     <string name="ib_chat_error">حدث خطأ ما: %1$s.</string>
     <string name="ib_chat_error_code">رمز الخطأ: %1$s.</string>
+    <string name="ib_chat_save">يحفظ</string>
 </resources>

@@ -10,8 +10,11 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.view.Menu
+import android.view.MenuItem
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -22,16 +25,19 @@ import org.infobip.mobile.messaging.ConfigurationException
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachment
+import org.infobip.mobile.messaging.chat.core.InAppChatAttachmentPreviewClient
+import org.infobip.mobile.messaging.chat.core.InAppChatAttachmentPreviewClientImpl
 import org.infobip.mobile.messaging.chat.databinding.IbActivityChatAttachPreviewBinding
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager
 import org.infobip.mobile.messaging.util.ResourceLoader
-import org.infobip.mobile.messaging.util.SystemInformation
+import java.util.UUID
 
 class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     PermissionsRequestManager.PermissionsRequester {
@@ -41,7 +47,8 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         private const val EXTRA_TYPE = "ib_chat_attachment_type"
         private const val EXTRA_CAPTION = "ib_chat_attachment_caption"
 
-        private const val RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI = "ib_inappchat_attachment_preview_uri"
+        private const val RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI =
+            "ib_inappchat_attachment_preview_uri"
 
         @JvmStatic
         fun startIntent(context: Context, url: String?, type: String?, caption: String?): Intent {
@@ -64,6 +71,9 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     private lateinit var binding: IbActivityChatAttachPreviewBinding
     private val permissionsRequestManager = PermissionsRequestManager(this, this)
     private var attachment: InAppChatWebAttachment? = null
+    private var toolbarStyle: InAppChatToolbarStyle? = null
+    private lateinit var webViewClient: InAppChatAttachmentPreviewClient
+    private var isWebViewLoaded = false
 
     @ColorInt
     private var originalStatusBarColor: Int? = null
@@ -76,9 +86,30 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         setTheme(InAppChatThemeResolver.getChatAttachPreviewTheme(this))
         super.onCreate(savedInstanceState)
         binding = IbActivityChatAttachPreviewBinding.inflate(layoutInflater)
+        webViewClient = InAppChatAttachmentPreviewClientImpl(binding.ibLcChatAttachWv)
+        ContextCompat.registerReceiver(
+            this@InAppChatAttachmentPreviewActivity,
+            onFileDownloadingComplete,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+            ContextCompat.RECEIVER_EXPORTED
+        )
         setContentView(binding.root)
         initViews()
         loadPreviewPage()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_attachment_preview, menu)
+        applyToolbarMenuStyle(menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.save_attachment) {
+            triggerDownload()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroy() {
@@ -100,23 +131,31 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             it.setDisplayShowTitleEnabled(false)
         }
         binding.ibLcChatAttachTb.setNavigationOnClickListener {
-            onBackPressed()
-            binding.ibLcChatAttachWv.freeMemory()
+            onBackPressedDispatcher.onBackPressed()
+            binding.ibLcChatAttachWv.clearCache(false)
+            binding.ibLcChatAttachWv.clearHistory()
             binding.ibLcChatAttachWv.removeAllViews()
             binding.ibLcChatAttachWv.destroy()
         }
-        var style = StyleFactory.create(this, widgetInfo = prepareWidgetInfo()).attachmentToolbarStyle()
-        if (style.titleText.isNullOrBlank() && style.titleTextRes == null) {
-            style = style.copy(
-                titleText = this.intent.getStringExtra(EXTRA_CAPTION),
-                titleTextRes = null
-            )
-        }
+        val style = getToolbarStyle()
         style.apply(binding.ibLcChatAttachTb)
         binding.ibLcChatAttachPb.setProgressTint(
             style.toolbarBackgroundColor.toColorStateList() ?: Color.WHITE.toColorStateList()
         )
         setStatusBarColor(style.statusBarBackgroundColor)
+    }
+
+    private fun applyToolbarMenuStyle(menu: Menu?) {
+        val style = getToolbarStyle()
+        runCatching {
+            val saveAttachmentMenuItem = menu?.findItem(R.id.save_attachment)
+            style.saveAttachmentMenuItemIcon?.let { icon -> saveAttachmentMenuItem?.setIcon(icon) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                saveAttachmentMenuItem?.iconTintList = style.menuItemsIconTint.toColorStateList()
+            } else {
+                saveAttachmentMenuItem?.setIcon(saveAttachmentMenuItem.icon.setTint(style.menuItemsIconTint))
+            }
+        }
     }
 
     //region WebView
@@ -134,42 +173,47 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 binding.ibLcChatAttachPb.show()
+                isWebViewLoaded = false
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 binding.ibLcChatAttachPb.hide()
+                isWebViewLoaded = true
             }
+
         }
 
         setDownloadListener { url, _, contentDisposition, mimetype, _ ->
             binding.ibLcChatAttachPb.show()
-            attachment = InAppChatWebAttachment(url, contentDisposition, mimetype)
+            this@InAppChatAttachmentPreviewActivity.attachment = InAppChatWebAttachment(
+                url,
+                contentDisposition,
+                mimetype
+            )
             downloadFile()
         }
+    }
 
-        ContextCompat.registerReceiver(this@InAppChatAttachmentPreviewActivity, onFileDownloadingComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
+    private fun triggerDownload() {
+        /**
+         * Prefer to fetch using WebView's DownloadManager, it provides contentDisposition we can parse fileName from.
+         * If WebView is not loaded there is a fallback to caption.
+         */
+        if (isWebViewLoaded && ::webViewClient.isInitialized) {
+            webViewClient.downloadAttachment()
+        } else {
+            attachment = InAppChatWebAttachment(
+                url = intent.getStringExtra(EXTRA_URL).orEmpty(),
+                fileName = intent.getStringExtra(EXTRA_CAPTION) ?: UUID.randomUUID().toString()
+            )
+            downloadFile()
+        }
     }
 
     private fun downloadFile() {
         if (!permissionsRequestManager.isRequiredPermissionsGranted) {
-            if (SystemInformation.isUpsideDownCakeOrAbove()) {
-                MobileMessagingLogger.e(
-                    "[InAppChat] Permissions required for attachments not granted",
-                    ConfigurationException(
-                        ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,
-                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED + ", " + Manifest.permission.READ_MEDIA_IMAGES + ", " + Manifest.permission.READ_MEDIA_VIDEO + ", " + Manifest.permission.READ_MEDIA_AUDIO + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ).message
-                )
-            } else if (SystemInformation.isTiramisuOrAbove()) {
-                MobileMessagingLogger.e(
-                    "[InAppChat] Permissions required for attachments not granted",
-                    ConfigurationException(
-                        ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,
-                        Manifest.permission.READ_MEDIA_IMAGES + ", " + Manifest.permission.READ_MEDIA_VIDEO + ", " + Manifest.permission.READ_MEDIA_AUDIO + ", " + Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ).message
-                )
-            } else {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 MobileMessagingLogger.e(
                     "[InAppChat] Permissions required for attachments not granted",
                     ConfigurationException(
@@ -181,6 +225,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             return
         }
         attachment?.let {
+            binding.ibLcChatAttachPb.show()
             val request = DownloadManager.Request(Uri.parse(it.url))
             request.allowScanningByMediaScanner()
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
@@ -191,15 +236,14 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     private fun loadPreviewPage() {
-        val previewPageUrl = ResourceLoader.loadStringResourceByName(this, RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI)
+        val previewPageUrl =
+            ResourceLoader.loadStringResourceByName(this, RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI)
         val attachmentUrl: String? = intent.getStringExtra(EXTRA_URL)
         val attachmentType: String? = intent.getStringExtra(EXTRA_TYPE)
-        val attachmentCaption: String? = intent.getStringExtra(EXTRA_CAPTION)
         val resultUrl = Uri.Builder()
             .encodedPath(previewPageUrl)
             .appendQueryParameter("attachmentUrl", attachmentUrl)
             .appendQueryParameter("attachmentType", attachmentType)
-            .appendQueryParameter("attachmentCaption", attachmentCaption)
             .build()
             .toString()
         binding.ibLcChatAttachWv.loadUrl(resultUrl)
@@ -212,28 +256,25 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     override fun requiredPermissions(): Array<String> {
-        return if (SystemInformation.isUpsideDownCakeOrAbove()) {
-            arrayOf(
-                Manifest.permission.READ_MEDIA_AUDIO,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-            )
-        } else if (SystemInformation.isTiramisuOrAbove()) {
-            arrayOf(
-                Manifest.permission.READ_MEDIA_AUDIO,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-        } else
+        /**
+         * We use DownloadManager.Request().setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS)
+         * by the documentation - https://developer.android.com/reference/android/app/DownloadManager.Request#setDestinationInExternalPublicDir(java.lang.String,%20java.lang.String)
+         * apps targeting above Q don't need permission.
+         */
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            emptyArray()
+        }
     }
 
     override fun shouldShowPermissionsNotGrantedDialogIfShownOnce(): Boolean = true
 
-    override fun permissionsNotGrantedDialogTitle(): Int = R.string.ib_chat_permissions_not_granted_title
+    override fun permissionsNotGrantedDialogTitle(): Int =
+        R.string.ib_chat_permissions_not_granted_title
 
-    override fun permissionsNotGrantedDialogMessage(): Int = R.string.ib_chat_permissions_not_granted_message
+    override fun permissionsNotGrantedDialogMessage(): Int =
+        R.string.ib_chat_permissions_not_granted_message
     //endregion
 
     private fun prepareWidgetInfo(): WidgetInfo {
@@ -244,7 +285,30 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key,
             null
         )
-        return WidgetInfo(null, null, widgetPrimaryColor, widgetBackgroundColor, 0L, null, false, false)
+        return WidgetInfo(
+            null,
+            null,
+            widgetPrimaryColor,
+            widgetBackgroundColor,
+            0L,
+            null,
+            false,
+            false
+        )
+    }
+
+    private fun getToolbarStyle(): InAppChatToolbarStyle {
+        return this.toolbarStyle ?: run {
+            var style =
+                StyleFactory.create(this, widgetInfo = prepareWidgetInfo()).attachmentToolbarStyle()
+            if (style.titleText.isNullOrBlank() && style.titleTextRes == null) {
+                style = style.copy(
+                    titleText = this.intent.getStringExtra(EXTRA_CAPTION),
+                    titleTextRes = null
+                )
+            }
+            style
+        }.also { this.toolbarStyle = it }
     }
 
 }
