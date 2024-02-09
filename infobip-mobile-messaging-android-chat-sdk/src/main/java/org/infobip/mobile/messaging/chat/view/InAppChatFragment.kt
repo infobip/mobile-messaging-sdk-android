@@ -7,14 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
-import android.hardware.Camera
+import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -22,7 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResult
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
@@ -46,7 +45,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import java.util.*
 
-class InAppChatFragment : Fragment() {
+class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.ResultListener {
 
     /**
      * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
@@ -100,6 +99,7 @@ class InAppChatFragment : Fragment() {
     private var _lifecycleRegistry: InAppChatFragmentLifecycleRegistry? = null
     private val lifecycleRegistry
         get() = _lifecycleRegistry!!
+    private lateinit var activityResultDelegate: InAppChatFragmentActivityResultDelegate
 
     /**
      * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
@@ -124,22 +124,14 @@ class InAppChatFragment : Fragment() {
      * Allows to disconnect chat when fragment is hidden and receive push notifications.
      */
     var disconnectChatWhenHidden = false
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            chooseFile(isCameraPermissionGranted = true)
-        } else {
-            showCameraPermissionRationale()
-        }
-    }
-    private val settingsActivityLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        MobileMessagingLogger.d("Settings intent result ${result.resultCode}")
-    }
 
     //region Lifecycle
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activityResultDelegate = InAppChatActivityResultDelegateImpl(requireActivity().activityResultRegistry, this)
+        lifecycle.addObserver(activityResultDelegate)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -459,22 +451,6 @@ class InAppChatFragment : Fragment() {
         }
     }
 
-    private val attachmentChooserLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            lifecycleRegistry.isEnabled = true
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                InAppChatAttachmentHelper.makeAttachment(
-                    requireActivity(),
-                    data,
-                    getCapturedMediaUrl(data),
-                    attachmentHelperListener
-                )
-            } else {
-                deleteEmptyMediaFiles()
-            }
-        }
-
     private val attachmentHelperListener =
         object : InAppChatAttachmentHelper.InAppChatAttachmentHelperListener {
 
@@ -535,7 +511,7 @@ class InAppChatFragment : Fragment() {
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser())
         }
         lifecycleRegistry.isEnabled = false
-        attachmentChooserLauncher.launch(chooserIntent)
+        activityResultDelegate.openAttachmentChooser(chooserIntent)
     }
 
     private fun prepareIntentForChooser(): Intent {
@@ -573,37 +549,51 @@ class InAppChatFragment : Fragment() {
 
         return intentsForChooser.toTypedArray()
     }
+
+    override fun onAttachmentChooserResult(result: ActivityResult) {
+        lifecycleRegistry.isEnabled = true
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            InAppChatAttachmentHelper.makeAttachment(
+                requireActivity(),
+                data,
+                getCapturedMediaUrl(data),
+                attachmentHelperListener
+            )
+        } else {
+            deleteEmptyMediaFiles()
+        }
+    }
     //endregion
     //endregion
 
     //region Permissions
     @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
     fun requestCameraPermissionIfNeeded() {
-        val hasCameraFeature = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-        } else {
-            requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
-        }
-        //todo replace Camera with Camera2 when minsdk >= 21
-        if (hasCameraFeature && Camera.getNumberOfCameras() > 0) {
+        val hasCameraFeature = requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+
+        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        if (hasCameraFeature && cameraManager.cameraIdList.isNotEmpty()) {
             val permission = Manifest.permission.CAMERA
             when {
                 isCameraPermissionGranted() -> {
                     //all good no need to request
                 }
-
-                shouldShowRequestPermissionRationale(permission) -> {
-                    showCameraPermissionRationale()
-                }
-
-                else -> {
-                    requestPermissionLauncher.launch(permission)
-                }
+                shouldShowRequestPermissionRationale(permission) -> showCameraPermissionRationale()
+                else -> activityResultDelegate.requestCameraPermission()
             }
         }
     }
 
-    private fun isCameraPermissionGranted(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PERMISSION_GRANTED
+    override fun onCameraPermissionResult(isGranted: Boolean) {
+        if (isGranted) {
+            chooseFile(isCameraPermissionGranted = true)
+        } else {
+            showCameraPermissionRationale()
+        }
+    }
+
+    private fun isCameraPermissionGranted(): Boolean = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PERMISSION_GRANTED
 
     private fun showCameraPermissionRationale() {
         AlertDialog.Builder(requireContext(), R.style.IB_Chat_AlertDialog)
@@ -616,10 +606,12 @@ class InAppChatFragment : Fragment() {
             }
             .setPositiveButton(R.string.mm_button_settings) { dialog, _ ->
                 dialog.dismiss()
-                settingsActivityLauncher.launch(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", context.packageName, null)
-                })
+                activityResultDelegate.openAppSettings(context.packageName)
             }.show()
+    }
+
+    override fun onSettingsResult(result: ActivityResult) {
+        MobileMessagingLogger.d("Settings intent result ${result.resultCode}")
     }
     //endregion
 
