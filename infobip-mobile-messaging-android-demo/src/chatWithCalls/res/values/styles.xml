@@ -3,7 +3,6 @@
     <!-- uncomment to override webrtc-ui style -->
 <!--    <style name="InfobipRtcUi">
         <item name="rtc_ui_color_foreground">#666666</item>
-        <item name="rtc_ui_color_notification">#009900</item>
         <item name="rtc_ui_color_actions_background">#15666666</item>
         <item name="rtc_ui_color_actions_background_checked">#222222</item>
         <item name="rtc_ui_color_actions_icon">#222222</item>
@@ -26,8 +25,6 @@
         //bottom sheet
         <item name="rtc_ui_color_actions_row_background">@color/black</item>
         <item name="rtc_ui_color_actions_row_icon">@color/red</item>
-        <item name="rtc_ui_color_actions_pill_color">@color/red</item>
-        <item name="rtc_ui_color_actions_divider_color">@color/red</item>
         <item name="rtc_ui_color_actions_row_label">@color/green</item>
         <item name="rtc_ui_color_sheet_background">@color/blue</item>
     </style>-->
