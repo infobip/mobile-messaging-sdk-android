@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">נדרשת הרשאת שמע לטיפול בשיחות.</string>
+    <string name="mm_bt_connect_permission_required">נדרשת הרשאת חיבור Bluetooth כדי להשתמש במכשיר המחובר ל-Bluetooth שלך לשיחות.</string>
+    <string name="mm_read_phone_state_permission_required">נדרשת הרשאת מצב טלפון כדי למנוע שיחות WebRTC ושיחות סלולריות מקבילות.</string>
     <string name="mm_call_finished">השיחה הסתיימה</string>
     <string name="mm_call_weak_internet_connection">הרשת שלך גורמת לאיכות שיחה ירודה</string>
     <string name="mm_calls_notification_channel">שיחות</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">מושתק</string>
     <string name="mm_mute">לְהַשְׁתִיק</string>
     <string name="mm_notification_permission_required_declining_call">חסרה הרשאת הודעה. דחיית שיחה נכנסת.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">חסרה הרשאת מצב טלפון. דחיית שיחה נכנסת.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">יש שיחה סלולרית מתמשכת. דחיית שיחה נכנסת.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">יש שיחה סלולרית מתמשכת. השיחה הסתיימה.</string>
     <string name="mm_ok">בסדר</string>
     <string name="mm_call_registration_notification_channel">רישום שיחות</string>
     <string name="mm_call_registration_notification_description">רישום השיחה בעיצומה</string>

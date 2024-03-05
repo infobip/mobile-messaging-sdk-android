@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">ต้องมีการอนุญาตเสียงเพื่อจัดการการโทร</string>
+    <string name="mm_bt_connect_permission_required">จำเป็นต้องได้รับอนุญาตในการเชื่อมต่อ Bluetooth เพื่อใช้อุปกรณ์ที่เชื่อมต่อ Bluetooth ของคุณสำหรับการโทร</string>
+    <string name="mm_read_phone_state_permission_required">ต้องได้รับอนุญาตจากสถานะโทรศัพท์เพื่อหลีกเลี่ยงการโทรผ่าน WebRTC และโทรศัพท์มือถือแบบขนาน</string>
     <string name="mm_call_finished">โทรเสร็จแล้ว</string>
     <string name="mm_call_weak_internet_connection">เครือข่ายของคุณทำให้คุณภาพการโทรไม่ดี</string>
     <string name="mm_calls_notification_channel">โทร</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">ปิดเสียง</string>
     <string name="mm_mute">ปิดเสียง</string>
     <string name="mm_notification_permission_required_declining_call">ไม่มีสิทธิ์การแจ้งเตือน ปฏิเสธสายเรียกเข้า</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">ไม่มีการอนุญาตสถานะโทรศัพท์ ปฏิเสธสายเรียกเข้า</string>
+    <string name="mm_ongoing_cellular_call_declining_call">มีการโทรมือถืออย่างต่อเนื่อง ปฏิเสธสายเรียกเข้า</string>
+    <string name="mm_ongoing_cellular_call_call_finished">มีการโทรมือถืออย่างต่อเนื่อง โทรเสร็จแล้ว.</string>
     <string name="mm_ok">ตกลง</string>
     <string name="mm_call_registration_notification_channel">โทรลงทะเบียน</string>
     <string name="mm_call_registration_notification_description">อยู่ระหว่างการลงทะเบียนการโทร</string>

@@ -31,6 +31,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.infobip.webrtc.ui.InfobipRtcUi;
 import com.infobip.webrtc.ui.model.InCallButton;
 
@@ -40,6 +41,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.SuccessPending;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.chat.InAppChat;
+import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.utils.DarkModeUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     private final String WIDGET_SECRET_KEY_JSON = "your_widget_secret_key";
     private final InAppChat inAppChat = InAppChat.getInstance(this);
     private boolean pushRegIdReceiverRegistered = false;
+    private boolean lcRegIdReceiverRegistered = false;
     private JWTSubjectType jwtSubjectType = null;
     private AuthData lastUsedAuthData = null;
     private TextInputEditText nameEditText = null;
@@ -90,6 +93,15 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
         }
     };
+    private final BroadcastReceiver lcRegIdReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                String lcRegId = intent.getStringExtra(BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID);
+                showLivechatRegId(lcRegId);
+            }
+        }
+    };
 
     /* InAppChatActionBarProvider */
     @Nullable
@@ -100,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
     @Override
     public void onInAppChatBackPressed() {
-        InAppChat.getInstance(MainActivity.this).hideInAppChatFragment(getSupportFragmentManager(), true);
+        inAppChat.hideInAppChatFragment(getSupportFragmentManager(), true);
     }
 
     @Override
@@ -113,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setSupportActionBar(this.findViewById(R.id.toolbar));
         inAppChat.activate();
         setUpPushRegIdField();
+        setUpLivechatRegIdField();
         setUpSubjectTypeSpinner();
         setUpOpenChatActivityButton();
         setUpOpenChatFragmentButton();
@@ -127,15 +140,21 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
     @Override
     protected void onDestroy() {
-        if (this.pushRegIdReceiverRegistered) {
+        pushRegIdReceiverRegistered = !unregisterBroadcastReceiver(pushRegIdReceiverRegistered, pushRegIdReceiver);
+        lcRegIdReceiverRegistered = !unregisterBroadcastReceiver(lcRegIdReceiverRegistered, lcRegIdReceiver);
+        super.onDestroy();
+    }
+
+    private boolean unregisterBroadcastReceiver(Boolean isRegistered, BroadcastReceiver receiver) {
+        if (isRegistered) {
             try {
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(pushRegIdReceiver);
-                pushRegIdReceiverRegistered = false;
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+                return true;
             } catch (Throwable t) {
-                MobileMessagingLogger.e("MainActivity", "Unable to unregister pushRegIdReceiver", t);
+                MobileMessagingLogger.e("MainActivity", "Unable to unregister broadcast receiver", t);
             }
         }
-        super.onDestroy();
+        return false;
     }
 
     @Override
@@ -164,14 +183,14 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_id) {
-            setPushRegIdToClipboard(getPushRegId());
-            Toast.makeText(this, R.string.toast_registration_id_copy, Toast.LENGTH_SHORT).show();
+            saveToClipboard(getString(R.string.push_registration_id), getPushRegId());
+            Toast.makeText(this, getString(R.string.push_registration_id) + " " + getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             return true;
         } else if (item.getGroupId() == R.id.languages) {
             String language = langMenuIdToLocale(item.getItemId());
             //change language of In-app chat and calls
             if (language != null) {
-                InAppChat.getInstance(this).setLanguage(language);
+                inAppChat.setLanguage(language);
                 InfobipRtcUi.getInstance(this).setLanguage(new Locale(language));
                 Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
             }
@@ -251,11 +270,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         }
     }
 
-    private void setPushRegIdToClipboard(String pushRegId) {
+    private void saveToClipboard(String label, String value) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText(getString(R.string.action_registration_id_copy), pushRegId);
+        ClipData clip = ClipData.newPlainText(label, value);
         clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, R.string.toast_registration_id_copy, Toast.LENGTH_SHORT).show();
     }
 
     private boolean showPushRegId(String pushRegId) {
@@ -264,11 +282,31 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             pushRegIdEditText.setText(pushRegId);
             pushRegIdEditText.setKeyListener(null);
             pushRegIdEditText.setOnClickListener(view -> {
-                setPushRegIdToClipboard(pushRegId);
+                saveToClipboard(getString(R.string.push_registration_id), pushRegId);
             });
             return true;
         }
         return false;
+    }
+
+    private void setUpLivechatRegIdField() {
+        TextInputLayout lcRegIdInputLayout = findViewById(R.id.lcRegIdInputLayout);
+        lcRegIdInputLayout.setVisibility(View.VISIBLE);
+        if (!lcRegIdReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(lcRegIdReceiver, new IntentFilter(InAppChatEvent.LIVECHAT_REGISTRATION_ID_UPDATED.getKey()));
+            this.pushRegIdReceiverRegistered = true;
+        }
+    }
+
+    private void showLivechatRegId(String lcRegId) {
+        if (StringUtils.isNotBlank(lcRegId)) {
+            TextInputEditText lcRegIdEditText = findViewById(R.id.lcRegIdEditText);
+            lcRegIdEditText.setText(lcRegId);
+            lcRegIdEditText.setKeyListener(null);
+            lcRegIdEditText.setOnClickListener(view -> {
+                saveToClipboard(getString(R.string.livechat_registration_id), lcRegId);
+            });
+        }
     }
 
     private void setUpSubjectTypeSpinner() {

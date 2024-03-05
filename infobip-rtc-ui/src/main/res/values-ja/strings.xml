@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">通話を処理するには、音声の許可が必要です。</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth 接続デバイスを通話に使用するには、Bluetooth 接続許可が必要です。</string>
+    <string name="mm_read_phone_state_permission_required">WebRTC と携帯電話の同時通話を回避するには、電話状態の許可が必要です。</string>
     <string name="mm_call_finished">通話終了</string>
     <string name="mm_call_weak_internet_connection">ネットワークが原因で通話品質が低下している</string>
     <string name="mm_calls_notification_channel">通話</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">ミュート</string>
     <string name="mm_mute">ミュート</string>
     <string name="mm_notification_permission_required_declining_call">通知権限がありません。 着信を拒否します。</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">電話の状態の許可がありません。着信を拒否します。</string>
+    <string name="mm_ongoing_cellular_call_declining_call">携帯電話の通話が継続中です。着信を拒否します。</string>
+    <string name="mm_ongoing_cellular_call_call_finished">携帯電話の通話が継続中です。通話が終了しました。</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">通話登録</string>
     <string name="mm_call_registration_notification_description">通話登録中です</string>

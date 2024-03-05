@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Zur Bearbeitung von Anrufen ist eine Audioberechtigung erforderlich.</string>
+    <string name="mm_bt_connect_permission_required">Um Ihr über Bluetooth verbundenes Gerät für Anrufe verwenden zu können, ist eine Bluetooth-Verbindungsberechtigung erforderlich.</string>
+    <string name="mm_read_phone_state_permission_required">Um parallele WebRTC- und Mobilfunkanrufe zu vermeiden, ist eine Telefonstatusberechtigung erforderlich.</string>
     <string name="mm_call_finished">Anruf beendet</string>
     <string name="mm_call_weak_internet_connection">Ihr Netzwerk verursacht eine schlechte Anrufqualität</string>
     <string name="mm_calls_notification_channel">Anrufe</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Stummgeschaltet</string>
     <string name="mm_mute">Stumm</string>
     <string name="mm_notification_permission_required_declining_call">Fehlende Benachrichtigungsberechtigung. Ablehnender eingehender Anruf.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Fehlende Berechtigung für den Telefonstatus. Ablehnender eingehender Anruf.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Es gibt einen laufenden Mobilfunkanruf. Ablehnender eingehender Anruf.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Es gibt einen laufenden Mobilfunkanruf. Anruf beendet.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Anrufregistrierung</string>
     <string name="mm_call_registration_notification_description">Die Anrufregistrierung ist im Gange</string>

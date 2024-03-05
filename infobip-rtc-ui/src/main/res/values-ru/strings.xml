@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Разрешение на аудио требуется для обработки вызовов.</string>
+    <string name="mm_bt_connect_permission_required">Разрешение на подключение Bluetooth требуется для использования устройства, подключенного по Bluetooth, для вызовов.</string>
+    <string name="mm_read_phone_state_permission_required">Разрешение на состояние телефона необходимо, чтобы избежать параллельных вызовов WebRTC и сотовой связи.</string>
     <string name="mm_call_finished">Вызов завершен</string>
     <string name="mm_call_weak_internet_connection">Ваша сеть вызывает плохое качество связи</string>
     <string name="mm_calls_notification_channel">Звонки</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Приглушен</string>
     <string name="mm_mute">Немой</string>
     <string name="mm_notification_permission_required_declining_call">Отсутствует разрешение на уведомление. Отклонение входящего вызова.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Отсутствует разрешение штата телефона. Отклонение входящего звонка.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Продолжается звонок на сотовый. Отклонение входящего звонка.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Продолжается звонок на сотовый. Вызов завершен.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Регистрация звонков</string>
     <string name="mm_call_registration_notification_description">Регистрация звонка выполняется</string>

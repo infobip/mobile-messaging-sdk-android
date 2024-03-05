@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Ke zpracování hovorů je vyžadováno oprávnění ke zvuku.</string>
+    <string name="mm_bt_connect_permission_required">K používání zařízení připojeného přes Bluetooth pro hovory je vyžadováno oprávnění k připojení Bluetooth.</string>
+    <string name="mm_read_phone_state_permission_required">Aby se zabránilo paralelním WebRTC a mobilním hovorům, je vyžadováno povolení stavu telefonu.</string>
     <string name="mm_call_finished">Hovor ukončen</string>
     <string name="mm_call_weak_internet_connection">Vaše síť způsobuje špatnou kvalitu hovoru</string>
     <string name="mm_calls_notification_channel">Hovory</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Ztlumeno</string>
     <string name="mm_mute">Ztlumit zvuk</string>
     <string name="mm_notification_permission_required_declining_call">Chybí oprávnění k oznámení. Odmítam příchozí hovor.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Chybí povolení stavu telefonu. Odmítání příchozího hovoru.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Probíhá mobilní hovor. Odmítání příchozího hovoru.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Probíhá mobilní hovor. Hovor ukončen.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Registrace hovoru</string>
     <string name="mm_call_registration_notification_description">Probíhá registrace hovoru</string>

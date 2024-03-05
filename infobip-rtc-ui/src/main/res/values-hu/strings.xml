@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">A hívások kezeléséhez audioengedély szükséges.</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth csatlakozási engedély szükséges a Bluetooth-hoz csatlakoztatott eszköz hívásokhoz való használatához.</string>
+    <string name="mm_read_phone_state_permission_required">Telefonállapot-engedély szükséges a párhuzamos WebRTC és mobilhívások elkerüléséhez.</string>
     <string name="mm_call_finished">A hívás befejeződött</string>
     <string name="mm_call_weak_internet_connection">A hálózat rossz hívásminőséget okoz</string>
     <string name="mm_calls_notification_channel">Hívások</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Tompított</string>
     <string name="mm_mute">Néma</string>
     <string name="mm_notification_permission_required_declining_call">Hiányzó értesítési engedély. Csökkenő bejövő hívás.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Hiányzó telefonállapotra vonatkozó engedély. Csökkenő bejövő hívás.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Folyamatban van a mobilhívás. Csökkenő bejövő hívás.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Folyamatban van a mobilhívás. A hívás befejeződött.</string>
     <string name="mm_ok">Rendben</string>
     <string name="mm_call_registration_notification_channel">Hívás regisztráció</string>
     <string name="mm_call_registration_notification_description">A hívás regisztrációja folyamatban van</string>

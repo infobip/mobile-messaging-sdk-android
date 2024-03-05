@@ -62,7 +62,7 @@
         tools:text="Incoming call custom integrator message"
         tools:visibility="visible"/>
 
-    <com.infobip.webrtc.ui.view.CircleImageButton
+    <com.infobip.webrtc.ui.internal.ui.view.CircleImageButton
         android:id="@+id/decline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomQuarterGuideline"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.infobip.webrtc.ui.view.CircleImageButton
+    <com.infobip.webrtc.ui.internal.ui.view.CircleImageButton
         android:id="@+id/accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

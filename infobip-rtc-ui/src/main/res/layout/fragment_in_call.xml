@@ -180,6 +180,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!--  It renders remoteVideo while local screen share is active -->
         <com.infobip.webrtc.sdk.api.model.video.VideoRenderer
             android:id="@+id/remoteVideoScreenSharing"
             android:layout_width="70dp"
@@ -187,6 +188,7 @@
             android:layout_marginHorizontal="2dp"
             android:visibility="gone" />
 
+        <!--  It renders localVideo while local screen share is active -->
         <com.infobip.webrtc.sdk.api.model.video.VideoRenderer
             android:id="@+id/localVideoScreenSharing"
             android:layout_width="70dp"
@@ -195,13 +197,6 @@
             android:visibility="gone" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/screenSharingGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        app:constraint_referenced_ids="screenSharingNotice,screenSharingDisable" />
     <!--    endregion-->
 
     <ImageView
@@ -237,7 +232,7 @@
         app:srcCompat="@drawable/ic_user_grayscale" />
 
 
-    <com.infobip.webrtc.ui.view.CallAlert
+    <com.infobip.webrtc.ui.internal.ui.view.CallAlert
         android:id="@+id/connectionAlert"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -248,7 +243,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbarBarier"
         tools:visibility="gone" />
 
-    <com.infobip.webrtc.ui.view.CallAlert
+    <com.infobip.webrtc.ui.internal.ui.view.CallAlert
         android:id="@+id/mutedMicrophoneAlert"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

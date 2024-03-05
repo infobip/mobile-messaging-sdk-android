@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Kërkohet leje audio për të trajtuar telefonatat.</string>
+    <string name="mm_bt_connect_permission_required">Kërkohet leja e lidhjes Bluetooth për të përdorur pajisjen tuaj të lidhur me Bluetooth për telefonata.</string>
+    <string name="mm_read_phone_state_permission_required">Kërkohet leja e gjendjes së telefonit për të shmangur thirrjet paralele WebRTC dhe celulare.</string>
     <string name="mm_call_finished">Telefonata përfundoi</string>
     <string name="mm_call_weak_internet_connection">Rrjeti juaj po shkakton cilësi të dobët të thirrjeve</string>
     <string name="mm_calls_notification_channel">Thirrjet</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">I heshtur</string>
     <string name="mm_mute">Memec</string>
     <string name="mm_notification_permission_required_declining_call">Mungon leja e njoftimit. Refuzimi i thirrjes hyrëse.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Mungon leja e gjendjes së telefonit. Refuzimi i thirrjes hyrëse.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Ka një telefonatë celulare në vazhdim. Refuzimi i thirrjes hyrëse.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Ka një telefonatë celulare në vazhdim. Telefonata përfundoi.</string>
     <string name="mm_ok">Ne rregull</string>
     <string name="mm_call_registration_notification_channel">Regjistrimi i thirrjeve</string>
     <string name="mm_call_registration_notification_description">Regjistrimi i thirrjeve është në proces</string>

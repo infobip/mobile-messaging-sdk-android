@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="mm_audio_permission_required">需要音频权限来处理通话</string>
+    <string name="mm_bt_connect_permission_required">需要蓝牙连接权限才能使用蓝牙连接设备进行通话。</string>
+    <string name="mm_read_phone_state_permission_required">需要电话状态许可才能避免并行 WebRTC 和蜂窝呼叫。</string>
     <string name="mm_call_finished">通话结束</string>
     <string name="mm_call_weak_internet_connection">您的网络质量差</string>
     <string name="mm_calls_notification_channel">通话</string>
@@ -14,6 +15,9 @@
     <string name="mm_microphone_muted">闭麦</string>
     <string name="mm_mute">关闭麦克风</string>
     <string name="mm_notification_permission_required_declining_call">缺少通知权限。拒绝来电。</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">缺少电话状态许可。拒绝来电。</string>
+    <string name="mm_ongoing_cellular_call_declining_call">手机通话正在进行中。拒绝来电。</string>
+    <string name="mm_ongoing_cellular_call_call_finished">手机通话正在进行中。通话完毕。</string>
     <string name="mm_ok">好的</string>
     <string name="mm_call_registration_notification_channel">致电登记</string>
     <string name="mm_call_registration_notification_description">来电登记正在进行中</string>

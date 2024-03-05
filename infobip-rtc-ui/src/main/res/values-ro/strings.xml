@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Este necesară permisiune audio pentru a gestiona apelurile.</string>
+    <string name="mm_bt_connect_permission_required">Este necesară permisiunea de conectare Bluetooth pentru a utiliza dispozitivul conectat prin Bluetooth pentru apeluri.</string>
+    <string name="mm_read_phone_state_permission_required">Este necesară permisiunea de stare a telefonului pentru a evita apelurile paralele WebRTC și celulare.</string>
     <string name="mm_call_finished">Apel terminat</string>
     <string name="mm_call_weak_internet_connection">Rețeaua dvs. cauzează o calitate slabă a apelurilor</string>
     <string name="mm_calls_notification_channel">Apeluri</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Dezactivat</string>
     <string name="mm_mute">Mut</string>
     <string name="mm_notification_permission_required_declining_call">Lipsește permisiunea de notificare. Se refuză apelul primit.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Lipsește permisiunea de stare a telefonului. Se refuză apelul primit.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Există un apel mobil în curs. Se refuză apelul primit.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Există un apel mobil în curs. Apel terminat.</string>
     <string name="mm_ok">O.K</string>
     <string name="mm_call_registration_notification_channel">Înregistrare apel</string>
     <string name="mm_call_registration_notification_description">Înregistrarea apelului este în curs</string>

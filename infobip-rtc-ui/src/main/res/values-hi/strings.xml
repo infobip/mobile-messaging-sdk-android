@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">कॉल को संभालने के लिए ऑडियो अनुमति की आवश्यकता होती है।</string>
+    <string name="mm_bt_connect_permission_required">कॉल के लिए आपके ब्लूटूथ कनेक्टेड डिवाइस का उपयोग करने के लिए ब्लूटूथ कनेक्ट अनुमति आवश्यक है।</string>
+    <string name="mm_read_phone_state_permission_required">समानांतर WebRTC और सेल्युलर कॉल से बचने के लिए फ़ोन स्थिति की अनुमति आवश्यक है।</string>
     <string name="mm_call_finished">कॉल समाप्त</string>
     <string name="mm_call_weak_internet_connection">आपका नेटवर्क खराब कॉल गुणवत्ता का कारण बन रहा है</string>
     <string name="mm_calls_notification_channel">कॉल</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">म्यूट किए गए</string>
     <string name="mm_mute">आवाज़ बंद करना</string>
     <string name="mm_notification_permission_required_declining_call">सूचना अनुमति गुम है। आने वाली कॉल को अस्वीकार करना।</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">फ़ोन स्थिति की अनुमति गुम है. इनकमिंग कॉल कम हो रही है.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">सेल्युलर कॉल चल रही है. इनकमिंग कॉल कम हो रही है.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">सेल्युलर कॉल चल रही है. कॉल ख़त्म.</string>
     <string name="mm_ok">ठीक</string>
     <string name="mm_call_registration_notification_channel">कॉल पंजीकरण</string>
     <string name="mm_call_registration_notification_description">कॉल पंजीकरण प्रगति पर है</string>

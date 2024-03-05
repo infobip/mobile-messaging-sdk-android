@@ -191,4 +191,11 @@ public abstract class InAppChat {
      * @param theme data object holding all style attributes
      */
     public abstract void setTheme(InAppChatTheme theme);
+
+    /**
+     * Get current theme. Theme is alternative to defining style in xml.
+     *
+     * @return theme data object holding all style attributes
+     */
+    public abstract InAppChatTheme getTheme();
 }

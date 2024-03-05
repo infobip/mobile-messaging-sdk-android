@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">통화를 처리하려면 오디오 권한이 필요합니다.</string>
+    <string name="mm_bt_connect_permission_required">블루투스 연결 기기를 사용하여 통화를 하기 위해서는 블루투스 연결 권한이 필요합니다.</string>
+    <string name="mm_read_phone_state_permission_required">병렬 WebRTC 및 셀룰러 통화를 방지하려면 전화 상태 권한이 필요합니다.</string>
     <string name="mm_call_finished">통화 완료</string>
     <string name="mm_call_weak_internet_connection">네트워크로 인해 통화 품질이 저하됩니다.</string>
     <string name="mm_calls_notification_channel">통화</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">음소거</string>
     <string name="mm_mute">음소거</string>
     <string name="mm_notification_permission_required_declining_call">알림 권한이 없습니다. 수신 전화를 거부합니다.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">전화 상태 권한이 없습니다. 수신 전화를 거절하고 있습니다.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">진행 중인 휴대폰 통화가 있습니다. 수신 전화를 거절하고 있습니다.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">진행 중인 휴대폰 통화가 있습니다. 통화가 완료되었습니다.</string>
     <string name="mm_ok">확인</string>
     <string name="mm_call_registration_notification_channel">전화 등록</string>
     <string name="mm_call_registration_notification_description">통화 등록이 진행 중입니다.</string>

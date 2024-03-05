@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Для обробки викликів потрібен дозвіл на звук.</string>
+    <string name="mm_bt_connect_permission_required">Дозвіл на підключення Bluetooth потрібен, щоб використовувати пристрій, підключений Bluetooth, для дзвінків.</string>
+    <string name="mm_read_phone_state_permission_required">Дозвіл на стан телефону потрібен, щоб уникнути паралельних викликів WebRTC і стільникових дзвінків.</string>
     <string name="mm_call_finished">Дзвінок завершено</string>
     <string name="mm_call_weak_internet_connection">Ваша мережа спричиняє низьку якість зв’язку</string>
     <string name="mm_calls_notification_channel">Дзвінки</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Вимкнено</string>
     <string name="mm_mute">Вимкнути звук</string>
     <string name="mm_notification_permission_required_declining_call">Відсутній дозвіл на сповіщення. Відхилення вхідного дзвінка.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Відсутній дозвіл стану телефону. Відхилення вхідного дзвінка.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Триває мобільний виклик. Відхилення вхідного дзвінка.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Триває мобільний виклик. Дзвінок завершено.</string>
     <string name="mm_ok">В порядку</string>
     <string name="mm_call_registration_notification_channel">Реєстрація дзвінка</string>
     <string name="mm_call_registration_notification_description">Триває реєстрація дзвінків</string>

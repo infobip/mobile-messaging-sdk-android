@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Za upravljanje pozivima potrebno je audiodopuštenje.</string>
+    <string name="mm_bt_connect_permission_required">Za korištenje vašeg Bluetooth povezanog uređaja za pozive potrebno je dopuštenje za Bluetooth povezivanje.</string>
+    <string name="mm_read_phone_state_permission_required">Potrebno je dopuštenje za stanje telefona kako bi se izbjegli paralelni WebRTC i mobilni pozivi.</string>
     <string name="mm_call_finished">Poziv završen</string>
     <string name="mm_call_weak_internet_connection">Vaša mreža uzrokuje lošu kvalitetu poziva</string>
     <string name="mm_calls_notification_channel">Pozivi</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">prigušen</string>
     <string name="mm_mute">utišati</string>
     <string name="mm_notification_permission_required_declining_call">Nedostaje dozvola za obavijesti. Odbijanje dolaznog poziva.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Nedostaje dopuštenje za stanje telefona. Odbijanje dolaznog poziva.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">U tijeku je mobilni poziv. Odbijanje dolaznog poziva.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">U tijeku je mobilni poziv. Poziv završen.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Registracija poziva</string>
     <string name="mm_call_registration_notification_description">Prijave poziva su u tijeku</string>

@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Do obsługi połączeń wymagane jest zezwolenie na dźwięk.</string>
+    <string name="mm_bt_connect_permission_required">Aby używać urządzenia podłączonego przez Bluetooth do wykonywania połączeń, wymagane jest zezwolenie na połączenie Bluetooth.</string>
+    <string name="mm_read_phone_state_permission_required">Aby uniknąć równoległych połączeń WebRTC i komórkowych, wymagane jest zezwolenie na stan telefonu.</string>
     <string name="mm_call_finished">Rozmowa zakończona</string>
     <string name="mm_call_weak_internet_connection">Twoja sieć powoduje niską jakość połączenia</string>
     <string name="mm_calls_notification_channel">Połączenia</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Wyciszony</string>
     <string name="mm_mute">Niemy</string>
     <string name="mm_notification_permission_required_declining_call">Brak uprawnień do powiadomień. Odrzucanie połączenia przychodzącego.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Brak pozwolenia na stan telefonu. Odrzucanie połączenia przychodzącego.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Trwa rozmowa komórkowa. Odrzucanie połączenia przychodzącego.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Trwa rozmowa komórkowa. Rozmowa zakończona.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Rejestracja połączeń</string>
     <string name="mm_call_registration_notification_description">Trwa rejestracja rozmów</string>

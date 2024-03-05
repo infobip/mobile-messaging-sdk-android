@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="mm_audio_permission_required">Izin audio diperlukan untuk menangani panggilan.</string>
+    <string name="mm_bt_connect_permission_required">Izin koneksi Bluetooth diperlukan untuk menggunakan perangkat Anda yang terhubung Bluetooth untuk panggilan.</string>
+    <string name="mm_read_phone_state_permission_required">Izin negara telepon diperlukan untuk menghindari panggilan WebRTC dan seluler paralel.</string>
     <string name="mm_call_finished">Panggilan selesai</string>
     <string name="mm_call_registration_notification_channel">Pendaftaran panggilan</string>
     <string name="mm_call_registration_notification_description">Registrasi panggilan sedang berlangsung</string>
@@ -16,6 +18,9 @@
     <string name="mm_microphone_muted">Meredam</string>
     <string name="mm_mute">Bisu</string>
     <string name="mm_notification_permission_required_declining_call">Izin notifikasi tidak ada. Menolak panggilan masuk.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Izin negara telepon tidak ada. Menolak panggilan masuk.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Ada panggilan seluler yang sedang berlangsung. Menolak panggilan masuk.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Ada panggilan seluler yang sedang berlangsung. Panggilan selesai.</string>
     <string name="mm_ok">Oke</string>
     <string name="mm_screen_share">Berbagi layar</string>
     <string name="mm_screen_sharing">Berbagi layar</string>

@@ -30,6 +30,7 @@
     <string name="chinese_simplified">简体中文</string>
 
     <string name="push_registration_id">Push registration ID</string>
+    <string name="livechat_registration_id">Livechat registration ID</string>
     <string name="customer_name">Customer name</string>
     <string name="subject_type">Subject type</string>
     <string-array name="subject_types">
@@ -50,8 +51,7 @@
     <string name="dark_mode_dark">Dark</string>
     <string name="dark_mode_light">Light</string>
     <string name="dark_mode_auto">Auto</string>
-    <string name="toast_registration_id_copy">Registration ID copied to clipboard</string>
-    <string name="action_registration_id_copy">Registration ID</string>
+    <string name="copied_to_clipboard">copied to clipboard</string>
     <string name="language_changed">Language changed to %1$s</string>
     <string name="custom_button_checked">Custom button checked</string>
     <string name="custom_button_enabled">Custom button enabled</string>

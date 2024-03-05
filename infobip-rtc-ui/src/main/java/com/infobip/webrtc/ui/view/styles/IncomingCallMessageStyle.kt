@@ -7,7 +7,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.core.content.ContextCompat
 import com.infobip.webrtc.ui.R
-import com.infobip.webrtc.ui.utils.resolveString
+import com.infobip.webrtc.ui.internal.utils.resolveString
 
 data class IncomingCallMessageStyle(
     val headlineText: String? = null,

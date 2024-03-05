@@ -217,7 +217,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     fun sendContextualMetaData(data: String, allMultiThreadStrategy: Boolean) {
-        binding.ibLcChat.sendContextualMetaData(data, allMultiThreadStrategy)
+        binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
     }
     //endregion
 

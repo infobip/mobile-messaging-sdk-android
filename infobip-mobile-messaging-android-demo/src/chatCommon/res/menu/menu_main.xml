@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_id"
         android:icon="@drawable/ic_content_copy_white_24dp"
-        android:title="@string/action_registration_id_copy"
+        android:title="@string/push_registration_id"
         app:showAsAction="always" />
     <group android:id="@+id/languages">
         <item

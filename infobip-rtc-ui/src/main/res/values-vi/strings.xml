@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Quyền âm thanh được yêu cầu để xử lý cuộc gọi.</string>
+    <string name="mm_bt_connect_permission_required">Cần có quyền kết nối Bluetooth để sử dụng thiết bị được kết nối Bluetooth của bạn cho các cuộc gọi.</string>
+    <string name="mm_read_phone_state_permission_required">Cần có quyền trạng thái điện thoại để tránh các cuộc gọi di động và WebRTC song song.</string>
     <string name="mm_call_finished">Cuộc gọi đã kết thúc</string>
     <string name="mm_call_weak_internet_connection">Mạng của bạn đang gây ra chất lượng cuộc gọi kém</string>
     <string name="mm_calls_notification_channel">Cuộc gọi</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Đã tắt tiếng</string>
     <string name="mm_mute">Tắt tiếng</string>
     <string name="mm_notification_permission_required_declining_call">Thiếu quyền thông báo. Đang từ chối cuộc gọi đến.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Thiếu quyền trạng thái điện thoại. Đang từ chối cuộc gọi đến.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Có cuộc gọi di động đang diễn ra. Đang từ chối cuộc gọi đến.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Có cuộc gọi di động đang diễn ra. Cuộc gọi kết thúc.</string>
     <string name="mm_ok">Được</string>
     <string name="mm_call_registration_notification_channel">đăng ký cuộc gọi</string>
     <string name="mm_call_registration_notification_description">Đang tiến hành đăng ký cuộc gọi</string>

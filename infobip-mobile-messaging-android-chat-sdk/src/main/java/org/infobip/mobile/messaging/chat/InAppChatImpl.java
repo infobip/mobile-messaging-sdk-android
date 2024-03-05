@@ -299,6 +299,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         this.theme = theme;
     }
 
+    @Override
     @Nullable
     public InAppChatTheme getTheme() {
         return theme;

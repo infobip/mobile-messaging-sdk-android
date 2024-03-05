@@ -1,13 +1,15 @@
 package com.infobip.webrtc.ui
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.infobip.webrtc.Injector
-import com.infobip.webrtc.TAG
+import com.infobip.webrtc.ui.internal.core.Injector
+import com.infobip.webrtc.ui.internal.core.TAG
+import com.infobip.webrtc.ui.internal.model.RtcUiMode
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
-import com.infobip.webrtc.ui.model.RtcUiMode
+import com.infobip.webrtc.ui.model.RtcUiError
 import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.Locale
@@ -22,19 +24,6 @@ import java.util.Locale
 interface InfobipRtcUi {
 
     class Builder(private val context: Context) {
-
-        /**
-         * [WebRTC application concept is deprecated.](https://www.infobip.com/docs/voice-and-video/webrtc#webrtc-sdk-1-x-deprecated-)
-         * You must migrate to new [push configuration approach](https://www.infobip.com/docs/voice-and-video/webrtc#set-up-web-and-in-app-calls) to make calls working.
-         * This function has no effect anymore.
-         *
-         * @return [InfobipRtcUi.Builder]
-         */
-        @Deprecated(
-            "WebRTC application concept is deprecated. Use push configuration id instead",
-            ReplaceWith("withConfigurationId()")
-        )
-        fun applicationId(appId: String) = this
 
         /**
          * Defines Infobip [WebRTC configuration ID](https://www.infobip.com/docs/api/channels/webrtc-calls/webrtc/save-push-configuration) to use.
@@ -63,13 +52,52 @@ interface InfobipRtcUi {
         }
 
         /**
-         * Set whether incoming call should be declined in case of missing notification permission. Default value is true.
+         * Set whether incoming InfobipRtcUi call should be declined in case of missing [Manifest.permission.POST_NOTIFICATIONS] permission. Default value is true.
          *
          * @param decline true if call is automatically declined, false otherwise
          * @return [InfobipRtcUi.Builder]
          */
         fun withAutoDeclineOnMissingNotificationPermission(decline: Boolean) = apply {
             Injector.cache.autoDeclineOnMissingNotificationPermission = decline
+        }
+
+        /**
+         * Set whether incoming InfobipRtcUi call should be declined in case of missing [Manifest.permission.READ_PHONE_STATE] permission. Default value is false.
+         *
+         * Default value ensures to not miss first call ever. [Manifest.permission.READ_PHONE_STATE] permission is required only on Android 12 (API 31)
+         * and higher and it is requested in runtime by InfobipRtcUi library once call UI appears. Your application can request the permission, ensures is granted and set the value to true.
+         *
+         * @param decline true if call is automatically declined, false otherwise
+         * @return [InfobipRtcUi.Builder]
+         */
+        fun withAutoDeclineOnMissingReadPhoneStatePermission(decline: Boolean) = apply {
+            Injector.cache.autoDeclineOnMissingReadPhoneStatePermission = decline
+        }
+
+        /**
+         * Set whether incoming InfobipRtcUi call should be declined when there is ringing or ongoing cellular call. Default value is true.
+         *
+         * Default value ensures to not miss first call ever. [Manifest.permission.READ_PHONE_STATE] permission is required only on Android 12 (API 31)
+         * and higher and it is requested in runtime by InfobipRtcUi library once call UI appears. Your application can request the permission, ensures is granted and set the value to true.
+         *
+         * @param decline true if call is automatically declined, false otherwise
+         * @return [InfobipRtcUi.Builder]
+         */
+        fun withAutoDeclineWhenOngoingCellularCall(decline: Boolean) = apply {
+            Injector.cache.autoDeclineWhenOngoingCellularCall = decline
+        }
+
+        /**
+         * Set whether ongoing InfobipRtcUi call should be finished when incoming cellular call is accepted. Default value is true.
+         *
+         * On Android 12 (API 31) and higher, the setting is ignored if [Manifest.permission.READ_PHONE_STATE] permission is not granted.
+         * [Manifest.permission.READ_PHONE_STATE] permission is requested in runtime by InfobipRtcUi library once call UI appears.
+         *
+         * @param finish true if call is automatically declined, false otherwise
+         * @return [InfobipRtcUi.Builder]
+         */
+        fun withAutoFinishWhenIncomingCellularCallAccepted(finish: Boolean) = apply {
+            Injector.cache.autoFinishWhenIncomingCellularCallAccepted = finish
         }
 
         /**
@@ -162,10 +190,8 @@ interface InfobipRtcUi {
         override fun build(): InfobipRtcUi {
             return getInstance(context).also { sdk ->
                 this.rtcUiMode?.let { mode ->
-                    val defaultSuccessListener =
-                        SuccessListener { Log.d(TAG, "$mode calls enabled.") }
-                    val defaultErrorListener =
-                        ErrorListener { Log.d(TAG, "Failed to enabled $mode calls.", it) }
+                    val defaultSuccessListener = SuccessListener { Log.d(TAG, "$mode calls enabled.") }
+                    val defaultErrorListener = ErrorListener { Log.d(TAG, "Failed to enabled $mode calls.", it) }
                     when (mode) {
                         RtcUiMode.CUSTOM -> {
                             this.identity?.let { identity ->
@@ -173,8 +199,7 @@ interface InfobipRtcUi {
                                     sdk.enableCalls(
                                         identity = identity,
                                         listenType = listenType,
-                                        successListener = mode.successListener
-                                            ?: defaultSuccessListener,
+                                        successListener = mode.successListener ?: defaultSuccessListener,
                                         errorListener = mode.errorListener ?: defaultErrorListener
                                     )
                                 }
@@ -330,4 +355,15 @@ interface InfobipRtcUi {
      * @param theme data object holding all theme attributes
      */
     fun setTheme(theme: InfobipRtcUiTheme)
+
+    /**
+     * Set custom error mapper which allows you to control what message is displayed to the user when certain error appears.
+     * InfobipRtcUi library uses default localised messages when mapper is not set.
+     *
+     * You can find all possible error codes defined by InfobipRtcUi library in [RtcUiError] class plus there
+     * are general WebRTC errors defined in Infobip WebRTC [documentation](https://www.infobip.com/docs/essentials/response-status-and-error-codes#webrtc-error-codes).
+     *
+     * @param errorMapper mapper to be used by InfobipRtcUi library
+     */
+    fun setErrorMapper(errorMapper: RtcUiCallErrorMapper)
 }

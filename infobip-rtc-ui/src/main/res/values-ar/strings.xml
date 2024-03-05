@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">مطلوب إذن الصوت للتعامل مع المكالمات.</string>
+    <string name="mm_bt_connect_permission_required">مطلوب إذن اتصال Bluetooth لاستخدام جهازك المتصل بتقنية Bluetooth لإجراء المكالمات.</string>
+    <string name="mm_read_phone_state_permission_required">مطلوب إذن حالة الهاتف لتجنب WebRTC والمكالمات الخلوية الموازية.</string>
     <string name="mm_call_finished">انتهت المكالمة</string>
     <string name="mm_call_weak_internet_connection">تتسبب شبكتك في ضعف جودة الاتصال</string>
     <string name="mm_calls_notification_channel">المكالمات</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">صامت</string>
     <string name="mm_mute">كتم الصوت</string>
     <string name="mm_notification_permission_required_declining_call">إذن الإعلام مفقود. رفض المكالمة الواردة.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">إذن حالة الهاتف مفقود. رفض المكالمة الواردة.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">هناك مكالمة خلوية جارية. رفض المكالمة الواردة.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">هناك مكالمة خلوية جارية. انتهت المكالمة.</string>
     <string name="mm_ok">حسنا</string>
     <string name="mm_call_registration_notification_channel">تسجيل المكالمات</string>
     <string name="mm_call_registration_notification_description">تسجيل المكالمات قيد التقدم</string>

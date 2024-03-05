@@ -270,9 +270,19 @@ class InAppChatView @JvmOverloads constructor(
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      */
+    @Deprecated("Use new sendContextualData() instead.", replaceWith = ReplaceWith("sendContextualData(data, allMultiThreadStrategy)"), level = DeprecationLevel.WARNING)
     fun sendContextualMetaData(data: String, allMultiThreadStrategy: Boolean) {
-        val flag =
-            if (allMultiThreadStrategy) InAppChatMultiThreadFlag.ALL else InAppChatMultiThreadFlag.ACTIVE
+        sendContextualData(data, allMultiThreadStrategy)
+    }
+
+    /**
+     * Set contextual data of the Livechat Widget
+     *
+     * @param data                   contextual data in the form of JSON string
+     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     */
+    fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
+        val flag = if (allMultiThreadStrategy) InAppChatMultiThreadFlag.ALL else InAppChatMultiThreadFlag.ACTIVE
         inAppChatClient.sendContextualData(data, flag)
     }
 

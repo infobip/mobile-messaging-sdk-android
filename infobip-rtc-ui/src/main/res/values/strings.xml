@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="mm_audio_permission_required">Audio permission is required to handle calls.</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth connect permission is required to use your Bluetooth connected device for calls.</string>
+    <string name="mm_read_phone_state_permission_required">Phone state permission is required to avoid parallel WebRTC and cellular calls.</string>
     <string name="mm_call_finished">Call finished</string>
     <string name="mm_call_weak_internet_connection">Your network is causing poor call quality</string>
     <string name="mm_calls_notification_channel">Calls</string>
@@ -14,6 +16,9 @@
     <string name="mm_microphone_muted">Muted</string>
     <string name="mm_mute">Mute</string>
     <string name="mm_notification_permission_required_declining_call">Missing notification permission. Declining incoming call.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Missing phone state permission. Declining incoming call.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">There is ongoing cellular call. Declining incoming call.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">There is ongoing cellular call. Call finished.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Call registration</string>
     <string name="mm_call_registration_notification_description">Call registration is in progress</string>

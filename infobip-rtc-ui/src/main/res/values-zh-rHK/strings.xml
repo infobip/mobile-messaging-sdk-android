@@ -1,13 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="mm_audio_permission_required">處理呼叫需要音頻權限。</string>
+    <string name="mm_bt_connect_permission_required">需要藍牙連線權限才能使用藍牙連接裝置進行通話。</string>
+    <string name="mm_read_phone_state_permission_required">需要電話狀態許可才能避免並行 WebRTC 和蜂窩呼叫。</string>
     <string name="mm_call_finished">通話結束</string>
-    <string name="mm_call_registration_notification_channel">來電登記</string>
-    <string name="mm_call_registration_notification_description">來電登記正在進行中</string>
     <string name="mm_call_weak_internet_connection">互聯網連接較弱</string>
     <string name="mm_calls_notification_channel">來電</string>
     <string name="mm_cancel">取消</string>
-    <string name="mm_connection_problems">通話被掛斷。正在嘗試重新連線…</string>
     <string name="mm_flip_camera">翻轉相機</string>
     <string name="mm_hangup">掛斷</string>
     <string name="mm_in_call">通話中</string>
@@ -17,18 +15,24 @@
     <string name="mm_microphone_muted">靜音</string>
     <string name="mm_mute">沉默的</string>
     <string name="mm_notification_permission_required_declining_call">缺少通知權限。 拒絕來電。</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">缺少電話狀態許可。拒絕來電。</string>
+    <string name="mm_ongoing_cellular_call_declining_call">手機通話正在進行中。拒絕來電。</string>
+    <string name="mm_ongoing_cellular_call_call_finished">手機通話正在進行中。通話完畢。</string>
     <string name="mm_ok">好</string>
+    <string name="mm_call_registration_notification_channel">來電登記</string>
+    <string name="mm_call_registration_notification_description">來電登記正在進行中</string>
     <string name="mm_screen_share">屏幕共享</string>
     <string name="mm_screen_sharing">屏幕共享</string>
     <string name="mm_screen_sharing_description">您的屏幕已共享</string>
     <string name="mm_speaker">喇叭</string>
-    <string name="mm_stop_sharing_screen"><u>停止共享螢幕</u></string>
     <string name="mm_unknown">未知</string>
     <string name="mm_unknown_error">未知錯誤</string>
     <string name="mm_unmute">取消靜音</string>
     <string name="mm_video">視頻</string>
     <string name="mm_video_call">視訊通話</string>
     <string name="mm_video_permission_required">視頻通話需要攝像頭權限。</string>
-    <string name="mm_you_are_sharing_a_screen">您正在共享一個螢幕。</string>
     <string name="mm_your_microphone_is_muted">您的麥克風已靜音</string>
+    <string name="mm_you_are_sharing_a_screen">您正在共享一個螢幕。</string>
+    <string name="mm_stop_sharing_screen"><u>停止共享螢幕</u></string>
+    <string name="mm_connection_problems">通話被掛斷。正在嘗試重新連線…</string>
 </resources>

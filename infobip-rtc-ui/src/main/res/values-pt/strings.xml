@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">É necessária permissão de áudio para lidar com chamadas.</string>
+    <string name="mm_bt_connect_permission_required">É necessária permissão de conexão Bluetooth para usar seu dispositivo conectado por Bluetooth para chamadas.</string>
+    <string name="mm_read_phone_state_permission_required">A permissão de estado do telefone é necessária para evitar chamadas paralelas de WebRTC e de celular.</string>
     <string name="mm_call_finished">Chamada concluída</string>
     <string name="mm_call_weak_internet_connection">Sua rede está causando baixa qualidade de chamada</string>
     <string name="mm_calls_notification_channel">Chamadas</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Silenciado</string>
     <string name="mm_mute">Mudo</string>
     <string name="mm_notification_permission_required_declining_call">Permissão de notificação ausente. Recusando chamada recebida.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Permissão de estado do telefone ausente. Recusando chamada recebida.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Há uma chamada de celular em andamento. Recusando chamada recebida.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Há uma chamada de celular em andamento. Chamada finalizada.</string>
     <string name="mm_ok">OK</string>
     <string name="mm_call_registration_notification_channel">Registro de chamadas</string>
     <string name="mm_call_registration_notification_description">O registro da chamada está em andamento</string>

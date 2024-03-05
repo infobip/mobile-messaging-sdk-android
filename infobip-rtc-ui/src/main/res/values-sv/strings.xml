@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Ljudtillstånd krävs för att hantera samtal.</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth-anslutningsbehörighet krävs för att använda din Bluetooth-anslutna enhet för samtal.</string>
+    <string name="mm_read_phone_state_permission_required">Tillstånd för telefonstatus krävs för att undvika parallella WebRTC- och mobilsamtal.</string>
     <string name="mm_call_finished">Samtalet avslutat</string>
     <string name="mm_call_weak_internet_connection">Ditt nätverk orsakar dålig samtalskvalitet</string>
     <string name="mm_calls_notification_channel">Samtal</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Dämpad</string>
     <string name="mm_mute">Stum</string>
     <string name="mm_notification_permission_required_declining_call">Aviseringsbehörighet saknas. Avvisar inkommande samtal.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Tillstånd för telefonstatus saknas. Avvisar inkommande samtal.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Det pågår mobilsamtal. Avvisar inkommande samtal.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Det pågår mobilsamtal. Samtalet avslutat.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Ring registrering</string>
     <string name="mm_call_registration_notification_description">Samtalsregistrering pågår</string>

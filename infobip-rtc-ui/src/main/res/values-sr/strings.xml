@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Audio dozvola zahteva preuzimanje poziva.</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth dozvola za povezivanje je potrebna za korišćenje Bluetooth povezanog uređaja za pozive.</string>
+    <string name="mm_read_phone_state_permission_required">Potrebna je dozvola za stanje telefona da bi se izbegli paralelni WebRTC i mobilni pozivi.</string>
     <string name="mm_call_finished">Poziv završen</string>
     <string name="mm_call_weak_internet_connection">Vaš internet izaziva loš kvalitet poziva</string>
     <string name="mm_calls_notification_channel">Poziv</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Mutirano</string>
     <string name="mm_mute">Isključen zvuk</string>
     <string name="mm_notification_permission_required_declining_call">Absentis notitia licentia. Declinatio advenientis voco.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Nedostaje dozvola telefonskog stanja. Odbijanje dolaznog poziva.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">U toku je mobilni poziv. Odbijanje dolaznog poziva.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">U toku je mobilni poziv. Poziv je završen.</string>
     <string name="mm_ok">U redu</string>
     <string name="mm_call_registration_notification_channel">Vocationem registration</string>
     <string name="mm_call_registration_notification_description">Adaequationis user notitia</string>
@@ -26,8 +31,8 @@
     <string name="mm_video">Video</string>
     <string name="mm_video_call">Video poziv</string>
     <string name="mm_video_permission_required">Dozvolite kameru  za video poziv.</string>
+    <string name="mm_your_microphone_is_muted">Vaš mikrofon je mutiran.</string>
     <string name="mm_you_are_sharing_a_screen">Delite ekran.</string>
     <string name="mm_stop_sharing_screen"><u>Zaustavite deljenje ekrana</u></string>
-    <string name="mm_your_microphone_is_muted">Vaš mikrofon je mutiran.</string>
     <string name="mm_connection_problems">Poziv je prekinut. Pokušavam da se ponovo povežem…</string>
 </resources>

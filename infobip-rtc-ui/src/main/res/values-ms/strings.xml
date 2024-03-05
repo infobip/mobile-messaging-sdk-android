@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Kebenaran audio diperlukan untuk mengendalikan panggilan.</string>
+    <string name="mm_bt_connect_permission_required">Kebenaran sambungan Bluetooth diperlukan untuk menggunakan peranti bersambung Bluetooth anda untuk panggilan.</string>
+    <string name="mm_read_phone_state_permission_required">Kebenaran keadaan telefon diperlukan untuk mengelakkan panggilan WebRTC dan selular selari.</string>
     <string name="mm_call_finished">Panggilan selesai</string>
     <string name="mm_call_weak_internet_connection">Rangkaian anda menyebabkan kualiti panggilan yang lemah</string>
     <string name="mm_calls_notification_channel">Panggilan</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Disenyapkan</string>
     <string name="mm_mute">bisu</string>
     <string name="mm_notification_permission_required_declining_call">Kebenaran pemberitahuan tiada. Menolak panggilan masuk.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Kebenaran keadaan telefon hilang. Menolak panggilan masuk.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Terdapat panggilan selular yang sedang berjalan. Menolak panggilan masuk.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Terdapat panggilan selular yang sedang berjalan. Panggilan selesai.</string>
     <string name="mm_ok">Okey</string>
     <string name="mm_call_registration_notification_channel">Pendaftaran panggilan</string>
     <string name="mm_call_registration_notification_description">Pendaftaran panggilan sedang dijalankan</string>

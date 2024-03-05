@@ -3,9 +3,9 @@ package com.infobip.webrtc.ui.service
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.infobip.webrtc.Injector
-import com.infobip.webrtc.TAG
-import com.infobip.webrtc.ui.delegate.CallsDelegate
+import com.infobip.webrtc.ui.internal.core.Injector
+import com.infobip.webrtc.ui.internal.core.TAG
+import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
 import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService
 
 abstract class IncomingCallService : FirebaseMessagingService() {

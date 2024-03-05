@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Çağrıları işlemek için ses izni gereklidir.</string>
+    <string name="mm_bt_connect_permission_required">Bluetooth bağlantılı cihazınızı aramalar amacıyla kullanmak için Bluetooth bağlantı izni gereklidir.</string>
+    <string name="mm_read_phone_state_permission_required">Paralel WebRTC ve hücresel aramalardan kaçınmak için telefon durumu izni gereklidir.</string>
     <string name="mm_call_finished">arama bitti</string>
     <string name="mm_call_weak_internet_connection">Ağınız düşük arama kalitesine neden oluyor</string>
     <string name="mm_calls_notification_channel">aramalar</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">sessiz</string>
     <string name="mm_mute">Sesini kapatmak</string>
     <string name="mm_notification_permission_required_declining_call">Eksik bildirim izni. Gelen çağrı reddediliyor.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Telefon durumu izni eksik. Gelen çağrı reddediliyor.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Devam eden bir cep telefonu görüşmesi var. Gelen çağrı reddediliyor.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Devam eden bir cep telefonu görüşmesi var. Arama bitti.</string>
     <string name="mm_ok">Tamam</string>
     <string name="mm_call_registration_notification_channel">Çağrı kaydı</string>
     <string name="mm_call_registration_notification_description">Çağrı kaydı devam ediyor</string>

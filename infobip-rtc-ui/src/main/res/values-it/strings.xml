@@ -1,5 +1,7 @@
 <resources>
     <string name="mm_audio_permission_required">Per gestire le chiamate è necessaria l\'autorizzazione audio.</string>
+    <string name="mm_bt_connect_permission_required">Per utilizzare il dispositivo connesso Bluetooth per le chiamate è necessaria l\'autorizzazione alla connessione Bluetooth.</string>
+    <string name="mm_read_phone_state_permission_required">È necessaria l\'autorizzazione dello stato del telefono per evitare chiamate WebRTC e cellulari parallele.</string>
     <string name="mm_call_finished">Chiamata terminata</string>
     <string name="mm_call_weak_internet_connection">La tua rete sta causando una scarsa qualità delle chiamate</string>
     <string name="mm_calls_notification_channel">Chiamate</string>
@@ -13,6 +15,9 @@
     <string name="mm_microphone_muted">Muto</string>
     <string name="mm_mute">Muto</string>
     <string name="mm_notification_permission_required_declining_call">Autorizzazione di notifica mancante. Chiamata in arrivo rifiutata.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Autorizzazione dello stato del telefono mancante. Rifiuto della chiamata in arrivo.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">C\'è una chiamata cellulare in corso. Rifiuto della chiamata in arrivo.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">C\'è una chiamata cellulare in corso. Chiamata terminata.</string>
     <string name="mm_ok">Ok</string>
     <string name="mm_call_registration_notification_channel">Registrazione chiamata</string>
     <string name="mm_call_registration_notification_description">La registrazione della chiamata è in corso</string>
