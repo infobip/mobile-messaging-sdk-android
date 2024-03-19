@@ -1,13 +1,11 @@
 package org.infobip.mobile.messaging.chat.view;
 
-import static org.infobip.mobile.messaging.chat.utils.CommonUtils.isOSOlderThanKitkat;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
@@ -85,12 +83,4 @@ public class InAppChatWebView extends WebView {
         }
     }
 
-    public void evaluateJavascriptMethod(String script, ValueCallback<String> resultCallback) {
-        if (isOSOlderThanKitkat()) {
-            // FIXME: not safety call. Can be reason of invisible OutOfMemory error (data transfer limit). More info: [CHAT-821]
-            this.loadUrl(script);
-        } else {
-            this.evaluateJavascript(script, resultCallback);
-        }
-    }
 }

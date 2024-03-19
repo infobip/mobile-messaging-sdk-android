@@ -31,7 +31,6 @@ data class InAppChatToolbarStyle(
     val subtitleText: String? = null,
     @StringRes val subtitleTextRes: Int? = null,
     val isSubtitleCentered: Boolean? = null,
-    val isIbDefaultTheme: Boolean
 ) {
 
     companion object {
@@ -122,7 +121,6 @@ data class InAppChatToolbarStyle(
                     subtitleText = newSubtitleText,
                     subtitleTextRes = newSubtitleTextRes,
                     isSubtitleCentered = newIsSubtitleCentered,
-                    isIbDefaultTheme = theme.isIbDefaultTheme()
             )
 
         }
@@ -131,6 +129,7 @@ data class InAppChatToolbarStyle(
             //theme config
             var style = invoke(attr, context)
             val theme = context.theme
+            val isIbDefaultTheme = theme.isIbDefaultTheme()
 
             @ColorInt
             val colorPrimary = widgetInfo?.colorPrimary
@@ -141,7 +140,7 @@ data class InAppChatToolbarStyle(
             @ColorInt
             val colorPrimaryDark = widgetInfo?.colorPrimaryDark
 
-            if (style.isIbDefaultTheme) { //if it is IB default theme apply widget color automatically to all components
+            if (isIbDefaultTheme) { //if it is IB default theme apply widget color automatically to all components
                 if (colorPrimary != null) {
                     style = style.copy(toolbarBackgroundColor = colorPrimary)
                 }

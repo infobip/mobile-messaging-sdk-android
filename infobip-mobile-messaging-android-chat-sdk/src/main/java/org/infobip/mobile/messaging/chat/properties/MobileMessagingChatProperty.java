@@ -9,7 +9,11 @@ public enum MobileMessagingChatProperty {
     IN_APP_CHAT_WIDGET_BACKGROUND_COLOR("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR", null),
     IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE", null),
     IN_APP_CHAT_WIDGET_MULTITHREAD("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTITHREAD", false),
+    IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION", false),
+    //TODO replaced with IN_APP_CHAT_WIDGET_CALLS_ENABLED, remove it in next version
     IN_APP_CHAT_WIDGET_CALLS_AVAILABLE("org.infobip.mobile.messaging.infobip.CALLS_AVAILABLE", false),
+    IN_APP_CHAT_WIDGET_CALLS_ENABLED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_CALLS_ENABLED", false),
+    IN_APP_CHAT_WIDGET_THEMES("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_THEMES", null),
     IN_APP_CHAT_ACTIVATED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_ACTIVATED", false),
     IN_APP_CHAT_LANGUAGE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_LANGUAGE", null),
     UNREAD_CHAT_MESSAGES_COUNT("org.infobip.mobile.messaging.infobip.UNREAD_CHAT_MESSAGES_COUNT", 0),

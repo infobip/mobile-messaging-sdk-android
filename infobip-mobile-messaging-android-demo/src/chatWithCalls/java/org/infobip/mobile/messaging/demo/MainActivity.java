@@ -528,8 +528,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     Color.DKGRAY,
                     "#1",
                     null,
-                    true,
-                    false
+                    true
             );
             inAppChat.setTheme(
                     new InAppChatTheme(
@@ -542,8 +541,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                                     null,
                                     null,
                                     Color.BLACK,
-                                    Color.CYAN,
-                                    false
+                                    Color.CYAN
                             ),
                             new InAppChatInputViewStyle(
                                     R.style.IB_Chat_Input_TextAppearance,

@@ -52,7 +52,7 @@ class InAppChatActivity: AppCompatActivity(), InAppChatFragment.InAppChatActionB
         get() = supportActionBar
 
     override fun onInAppChatBackPressed() {
-        onBackPressed()
+        onBackPressedDispatcher.onBackPressed()
     }
 
 }

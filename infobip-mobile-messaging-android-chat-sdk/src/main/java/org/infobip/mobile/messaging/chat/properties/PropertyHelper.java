@@ -8,10 +8,12 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author sslavin
  * @since 01/11/2017.
+ * @noinspection rawtypes
  */
 
 public class PropertyHelper extends PreferenceHelper {
@@ -81,6 +83,24 @@ public class PropertyHelper extends PreferenceHelper {
 
     public void remove(MobileMessagingChatProperty property) {
         remove(context, property.getKey());
+    }
+
+    public void saveStringSet(MobileMessagingChatProperty property, Set<String> strings) {
+        if (strings == null || strings.isEmpty()){
+            return;
+        }
+        List<String> arrayList = new ArrayList<>(strings.size());
+        for (String s: strings) {
+            if (s == null) {
+                continue;
+            }
+            arrayList.add(s);
+        }
+        saveStringArray(context, property.getKey(), arrayList.toArray(new String[0]));
+    }
+
+    public Set<String> findStringSet(MobileMessagingChatProperty property){
+       return findStringSet(context, property.getKey(), (Set<String>) property.getDefaultValue());
     }
 
 }

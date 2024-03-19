@@ -19,6 +19,9 @@ import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidPa
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
+import java.util.HashSet;
+import java.util.List;
+
 
 public class InAppChatSynchronizer {
 
@@ -75,7 +78,14 @@ public class InAppChatSynchronizer {
                 PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), widgetInfo.getBackgroundColor());
                 PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), widgetInfo.getMaxUploadContentSize());
                 PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.getKey(), widgetInfo.isMultiThread());
-                PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.getKey(), widgetInfo.isCallsAvailable());
+                PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.getKey(), widgetInfo.isMultiChannelConversationEnabled());
+                PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.getKey(), widgetInfo.isCallsEnabled());
+                List<String> themes = widgetInfo.getThemeNames();
+                if (themes != null) {
+                    PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.getKey(), new HashSet<String>(themes));
+                }
+                //just cleanup, remove it in next version
+                PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.getKey());
                 if (listener != null) {
                     listener.onResult(new Result<>(widgetInfo));
                 }

@@ -95,17 +95,9 @@ internal fun Context.applyLocale(locale: Locale): Context {
     return if (currentLocale.language != locale.language) {
         Locale.setDefault(locale)
         val newConfig = Configuration(currentConfig)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            newConfig.setLayoutDirection(locale)
-        }
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            newConfig.setLocale(locale)
-            this.createConfigurationContext(newConfig)
-        } else {
-            newConfig.locale = locale
-            resources.updateConfiguration(newConfig, resources.displayMetrics)
-            this
-        }
+        newConfig.setLayoutDirection(locale)
+        newConfig.setLocale(locale)
+        return this.createConfigurationContext(newConfig)
     } else {
         this
     }

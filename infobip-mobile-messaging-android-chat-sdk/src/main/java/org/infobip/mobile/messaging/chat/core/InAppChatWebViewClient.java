@@ -9,6 +9,8 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
 public class InAppChatWebViewClient extends WebViewClient {
 
     private final InAppChatWebViewManager inAppChatWebViewManager;
@@ -48,8 +50,13 @@ public class InAppChatWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
-            view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-            return true;
+            try {
+                view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                return true;
+            } catch (Throwable throwable) {
+                MobileMessagingLogger.e("Could not open URL.", throwable);
+                return false;
+            }
         } else {
             return false;
         }

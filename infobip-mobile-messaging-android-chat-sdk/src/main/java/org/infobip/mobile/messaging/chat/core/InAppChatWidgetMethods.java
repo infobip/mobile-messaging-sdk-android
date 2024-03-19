@@ -2,12 +2,13 @@ package org.infobip.mobile.messaging.chat.core;
 
 public enum InAppChatWidgetMethods {
 
-    handleMessageSend,
-    handleMessageWithAttachmentSend,
-    handleMessageDraftSend,
+    sendMessage,
+    sendMessageWithAttachment,
+    sendDraft,
     setLanguage,
     sendContextualData,
     showThreadList,
     mobileChatPause,
-    mobileChatResume
+    mobileChatResume,
+    setTheme
 }

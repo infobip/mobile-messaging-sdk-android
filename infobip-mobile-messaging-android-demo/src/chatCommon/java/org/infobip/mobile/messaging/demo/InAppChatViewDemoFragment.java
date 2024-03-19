@@ -74,6 +74,11 @@ public class InAppChatViewDemoFragment extends Fragment {
         InAppChatView.EventsListener eventsListener = new InAppChatView.EventsListener() {
 
             @Override
+            public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
+                //Applied widget theme
+            }
+
+            @Override
             public void onChatWidgetInfoUpdated(@NonNull WidgetInfo widgetInfo) {
                 //Useful livechat widget information
             }
@@ -165,7 +170,10 @@ public class InAppChatViewDemoFragment extends Fragment {
                     try {
                         inAppChatView.sendChatMessage(message);
                     } catch (IllegalArgumentException e) {
-                        Snackbar.make(rootView, e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                        String error = e.getMessage();
+                        if (StringUtils.isNotBlank(error)) {
+                            Snackbar.make(rootView, error, Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                     text.clear();
                 }

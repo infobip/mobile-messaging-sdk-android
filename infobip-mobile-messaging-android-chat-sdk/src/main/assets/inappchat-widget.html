@@ -1,6 +1,10 @@
 <html lang="En">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+            name="viewport"
+            charset="UTF-8"
+            content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
     <script>
           (function(I,n,f,o,b,i,p){
             I[b]=I[b]||function(){(I[b].q=I[b].q||[]).push(arguments)};
@@ -21,83 +25,8 @@
 <body>
     <div id="ib-widget-container"></div>
     <script>
-        // Api call naming section
-        const CONFIG = 'config';
-        const IDENTIFY = 'identify';
-        const INIT = 'init';
-        const SHOW = 'show';
-        const SEND = 'send';
-        const SET_LANGUAGE = 'set_language';
-        const SEND_CONTEXTUAL_DATA = 'send_contextual_data';
-        const SHOW_THREAD_LIST = 'show_thread_list';
-        const MOBILE_CHAT_PAUSE = 'mobile_chat_pause';
-        const MOBILE_CHAT_RESUME = 'mobile_chat_resume';
-
-        const errorCallback = function(error, result) {
-            if (error) {
-                if ((typeof error === 'object' || Array.isArray(error)) && error !== null) {
-                    window.InAppChatMobile.onError(JSON.stringify(error));
-                } else {
-                    window.InAppChatMobile.onError(error);
-                }
-            }
-        };
-
-        window.handleMessageSend = function(message) {
-            liveChat(SEND, message);
-        }
-
-        window.handleMessageWithAttachmentSend = function(message, attachment, fileName) {
-            liveChat(SEND, {
-                'message': message,
-                'attachment': attachment,
-                'fileName': fileName,
-                'type': 'BASIC'
-            });
-        }
-
-        window.handleMessageDraftSend = function(draft) {
-            liveChat(SEND, {
-                'message': draft,
-                'type': 'DRAFT'
-            });
-        }
-
-        window.showThreadList = function() {
-            liveChat(SHOW_THREAD_LIST, null, errorCallback);
-        }
-
-        window.addEventListener('message', (event) => {
-            if(event.data.destination === 'viewChange') {
-                window.InAppChatMobile.onViewChanged(event.data.view);
-            }
-        })
-
-        window.setLanguage = function(language) {
-            liveChat(SET_LANGUAGE, language, errorCallback);
-        }
-
-        window.sendContextualData = function(data, strategy) {
-             liveChat(
-                SEND_CONTEXTUAL_DATA,
-                {
-                   metadata: data,
-                   multiThreadStrategy: strategy
-                },
-                errorCallback
-		     );
-        }
-
-        window.mobileChatPause = function() {
-            liveChat(MOBILE_CHAT_PAUSE);
-        }
-
-        window.mobileChatResume = function() {
-            liveChat(MOBILE_CHAT_RESUME);
-        }
-
         // Override widget config
-        liveChat(CONFIG, {
+        liveChat('config', {
             widgetId: getQueryParameter('widgetId'),
             container: document.getElementById('ib-widget-container'),
             showHeader: false,
@@ -110,10 +39,10 @@
             'pushRegistrationId' : getQueryParameter('pushRegId'),
 		};
         const jwt = getQueryParameter('jwt');
-		if(jwt != null){
+		if (jwt != null){
             inputParams.jwt = jwt;
 		}
-		liveChat(IDENTIFY, inputParams, function(error, result) {
+		liveChat('identify', inputParams, function(error, result) {
 		    if (error) {
 		        errorCallback(error);
 			} else {
@@ -123,24 +52,90 @@
 
 		// If all is OK -> initialize widget, enable native controls and show widget
 		function init() {
-		    liveChat(INIT);
-			liveChat(SHOW, null, function() {
-			    onShowCallback();
-			});
+		    liveChat('init');
+			liveChat('show', null, onShowCallback);
 		}
-
-		function getQueryParameter(name){
-           if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
-               return decodeURIComponent(name[1]);
-           }
-        }
 
         function onShowCallback(error, result) {
             if (error) {
             	errorCallback(error);
             } else {
-                window.InAppChatMobile.setControlsEnabled(true);
+                InAppChatMobile.setControlsEnabled(true);
             }
+        }
+
+        function errorCallback(error, result) {
+            if (error) {
+                if (error !== null && (typeof error === 'object' || Array.isArray(error))) {
+                    InAppChatMobile.onError(JSON.stringify(error));
+                } else {
+                    InAppChatMobile.onError(error);
+                }
+            }
+        };
+
+        window.addEventListener('message', (event) => {
+            if (event.data.destination === 'viewChange') {
+                InAppChatMobile.onViewChanged(event.data.view);
+            }
+        })
+
+		//Widget API
+        function sendMessage(message) {
+            liveChat('send', message);
+        }
+
+        function sendMessageWithAttachment(message, attachment, fileName) {
+            liveChat('send', {
+                'message': message,
+                'attachment': attachment,
+                'fileName': fileName,
+                'type': 'BASIC'
+            });
+        }
+
+        function sendDraft(draft) {
+            liveChat('send', {
+                'message': draft,
+                'type': 'DRAFT'
+            });
+        }
+
+        function showThreadList() {
+            liveChat('show_thread_list', null, errorCallback);
+        }
+
+        function setLanguage(language) {
+            liveChat('set_language', language, errorCallback);
+        }
+
+        function sendContextualData(data, strategy) {
+             liveChat(
+                'send_contextual_data',
+                {
+                   metadata: data,
+                   multiThreadStrategy: strategy
+                },
+                errorCallback
+		     );
+        }
+
+        function mobileChatPause() {
+            liveChat('mobile_chat_pause');
+        }
+
+        function mobileChatResume() {
+            liveChat('mobile_chat_resume');
+        }
+
+        function setTheme(theme) {
+            liveChat('set_theme', theme);
+        }
+
+		function getQueryParameter(name) {
+           if (name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
+               return decodeURIComponent(name[1]);
+           }
         }
     </script>
 </body>

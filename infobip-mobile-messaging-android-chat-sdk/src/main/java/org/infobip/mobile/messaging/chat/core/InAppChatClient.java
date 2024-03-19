@@ -60,4 +60,11 @@ public interface InAppChatClient {
      * Resume webSocket connection
      */
     void mobileChatResume(MobileMessaging.ResultListener<String> resultListener);
+
+    /**
+     * Set widget theme. Widget themes are defined in Livechat widget in Infobip Portal, section Advanced customization.
+     * @param themeName theme name to be set
+     * @param resultListener action listener
+     */
+    void setWidgetTheme(String themeName, MobileMessaging.ResultListener<String> resultListener);
 }

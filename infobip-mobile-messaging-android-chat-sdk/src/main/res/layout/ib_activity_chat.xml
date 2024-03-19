@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="org.infobip.mobile.messaging.chat.view.InAppChatActivity">
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:name="org.infobip.mobile.messaging.chat.view.InAppChatFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

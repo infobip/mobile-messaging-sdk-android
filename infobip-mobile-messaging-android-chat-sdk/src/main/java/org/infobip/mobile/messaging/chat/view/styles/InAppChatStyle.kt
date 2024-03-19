@@ -26,7 +26,6 @@ data class InAppChatStyle(
         @StyleRes val networkConnectionTextAppearance: Int? = null,
         @ColorInt val networkConnectionTextColor: Int,
         @ColorInt val networkConnectionLabelBackgroundColor: Int,
-        val isIbDefaultTheme: Boolean,
 ) {
     companion object {
 
@@ -81,7 +80,6 @@ data class InAppChatStyle(
                         networkConnectionTextColor = connectionErrorTextColor,
                         networkConnectionTextAppearance = connectionErrorTextAppearance,
                         networkConnectionLabelBackgroundColor = connectionErrorLabelBackgroundColor,
-                        isIbDefaultTheme = isIbDefaultTheme
                 )
             }
         }

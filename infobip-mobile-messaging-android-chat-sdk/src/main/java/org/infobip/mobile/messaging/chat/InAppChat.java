@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
@@ -27,6 +28,7 @@ public abstract class InAppChat {
          *
          * @return JWT
          */
+        @Nullable
         String provideJwt();
     }
 
@@ -36,6 +38,7 @@ public abstract class InAppChat {
      * @param context android context
      * @return instance of chat api
      */
+    @NonNull
     public synchronized static InAppChat getInstance(Context context) {
         return InAppChatImpl.getInstance(context);
     }
@@ -51,6 +54,7 @@ public abstract class InAppChat {
      * @return chat view object
      * @see InAppChatScreen#show()
      */
+    @NonNull
     public abstract InAppChatScreen inAppChatScreen();
 
     /**
@@ -167,6 +171,7 @@ public abstract class InAppChat {
      * @return instance of {@link JwtProvider}
      * @see JwtProvider
      */
+    @Nullable
     public abstract InAppChat.JwtProvider getJwtProvider();
 
     /**
@@ -180,22 +185,43 @@ public abstract class InAppChat {
      * <p>DARK_MODE_YES - force dark colors</p>
      * <p>DARK_MODE_NO - force light colors</p>
      * <p>DARK_MODE_FOLLOW_SYSTEM - use same colors as system-wide mode has</p>
+     * @deprecated Use combination of InAppChat.setWidgetTheme() and InAppChat.setTheme() instead to achieve dark theme. This function will be removed in a future release.
      *
      * @param darkMode to be set, null value removes setting and use light theme as default one.
      */
+    @Deprecated(since = "12.4.0", forRemoval = true)
     public abstract void setDarkMode(@Nullable InAppChatDarkMode darkMode);
 
     /**
-     * Set theme, it is alternative to defining style in xml, if set xml values are replaced.
+     * Set theme, it is alternative to `IB_AppTheme.Chat` defined in xml, if set xml values are replaced.
+     * It allows to customise native views of In-app chat.
      *
      * @param theme data object holding all style attributes
      */
-    public abstract void setTheme(InAppChatTheme theme);
+    public abstract void setTheme(@Nullable InAppChatTheme theme);
 
     /**
-     * Get current theme. Theme is alternative to defining style in xml.
+     * Get current theme. Theme is alternative to `IB_AppTheme.Chat` defined in xml.
      *
      * @return theme data object holding all style attributes
      */
+    @Nullable
     public abstract InAppChatTheme getTheme();
+
+    /**
+     * Set the theme of the Livechat Widget.
+     * You can define widget themes in <a href="https://portal.infobip.com/apps/livechat/widgets">Live chat widget setup page</a> in Infobip Portal, section `Advanced customization`.
+     * Please check widget <a href="https://www.infobip.com/docs/live-chat/widget-customization">documentation</a> for more details.
+     *
+     * @param widgetThemeName unique theme name, empty or blank value is ignored
+     */
+    public abstract void setWidgetTheme(@Nullable String widgetThemeName);
+
+    /**
+     * Get current Livechat Widget theme.
+     *
+     * @return applied theme name of Livechat Widget
+     */
+    @Nullable
+    public abstract String getWidgetTheme();
 }

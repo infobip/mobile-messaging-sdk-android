@@ -42,14 +42,14 @@ class LivechatRegistrationChecker(
     fun sync(
         widgetId: String? = null,
         pushRegistrationId: String? = null,
-        callsAvailable: Boolean? = null,
+        callsEnabled: Boolean? = null,
     ) {
         if (isSyncInProgress) {
             MobileMessagingLogger.d("LivechatRegistration check skipped. Another check of livechat registration id is progress.")
             return
         }
-        val callsEnabled = callsAvailable ?: propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE)
-        if (!callsEnabled){
+        val enableCalls = callsEnabled ?: propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED)
+        if (!enableCalls){
             MobileMessagingLogger.d("LivechatRegistration check skipped. Call feature is disabled.")
             return
         }

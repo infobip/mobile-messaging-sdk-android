@@ -184,7 +184,7 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
 
         PreferenceHelper.saveBoolean(
             context,
-            MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.key,
+            MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key,
             true
         )
         PreferenceHelper.saveString(

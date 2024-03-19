@@ -69,7 +69,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatDarkMode darkMode = null;
     private InAppChatTheme theme = null;
     private LivechatRegistrationChecker lcRegIgChecker = null;
+    private String widgetTheme = null;
 
+    @NonNull
     public static InAppChatImpl getInstance(Context context) {
         if (instance == null) {
             mmCore = MobileMessagingCore.getInstance(context);
@@ -199,6 +201,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @NonNull
     public InAppChatScreenImpl inAppChatScreen() {
         if (inAppChatScreen == null) {
             inAppChatScreen = new InAppChatScreenImpl(context);
@@ -272,6 +275,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @Nullable
     public InAppChat.JwtProvider getJwtProvider() {
         return jwtProvider;
     }
@@ -286,6 +290,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @Deprecated(since = "12.4.0", forRemoval = true)
     public void setDarkMode(InAppChatDarkMode darkMode) {
         this.darkMode = darkMode;
         if (darkMode == null)
@@ -295,7 +300,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public void setTheme(InAppChatTheme theme) {
+    public void setTheme(@Nullable InAppChatTheme theme) {
         this.theme = theme;
     }
 
@@ -303,6 +308,17 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Nullable
     public InAppChatTheme getTheme() {
         return theme;
+    }
+
+    @Override
+    public void setWidgetTheme(@Nullable String widgetThemeName) {
+        this.widgetTheme = widgetThemeName;
+    }
+
+    @Override
+    @Nullable
+    public String getWidgetTheme() {
+        return widgetTheme;
     }
 
     @Override
@@ -314,14 +330,23 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public void cleanup() {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
+        lcRegIgChecker = null;
         jwtProvider = null;
         darkMode = null;
+        theme = null;
+        widgetTheme = null;
         cleanupWidgetData();
+        propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE);
         resetMessageCounter();
@@ -371,7 +396,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         livechatRegistrationIdChecker().sync(
                 widgetInfo.getId(),
                 mobileMessagingCore().getPushRegistrationId(),
-                widgetInfo.isCallsAvailable()
+                widgetInfo.isCallsEnabled()
         );
     }
 

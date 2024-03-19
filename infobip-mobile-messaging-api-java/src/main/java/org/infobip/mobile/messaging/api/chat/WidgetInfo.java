@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.api.chat;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +15,8 @@ public class WidgetInfo {
     private String primaryColor;
     private String backgroundColor;
     private long maxUploadContentSize;
-    private String language;
     private boolean multiThread;
-    private boolean callsAvailable = true;
+    private boolean multiChannelConversationEnabled;
+    private boolean callsEnabled;
+    private List<String> themeNames;
 }

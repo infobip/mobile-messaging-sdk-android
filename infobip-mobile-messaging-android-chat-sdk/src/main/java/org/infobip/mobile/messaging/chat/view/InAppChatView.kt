@@ -85,6 +85,11 @@ class InAppChatView @JvmOverloads constructor(
          * Chat [WidgetInfo] has been updated.
          */
         fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo)
+
+        /**
+         * Chat theme has changed.
+         */
+        fun onChatWidgetThemeChanged(widgetThemeName: String)
     }
 
     /**
@@ -112,6 +117,7 @@ class InAppChatView @JvmOverloads constructor(
     private val mmCore: MobileMessagingCore = MobileMessagingCore.getInstance(context)
     private val localizationUtils = LocalizationUtils.getInstance(context)
     private val lcRegIdChecker = LivechatRegistrationChecker(context)
+    private val propertyHelper = PropertyHelper(context)
     private var widgetInfo: WidgetInfo? = null
     private var lastControlsVisibility: Boolean? = null
     private var isChatLoaded: Boolean = false
@@ -255,10 +261,7 @@ class InAppChatView @JvmOverloads constructor(
      */
     fun setLanguage(locale: Locale) {
         MobileMessagingLogger.d(TAG, "setLanguage($locale)")
-        PropertyHelper(context).saveString(
-            MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE,
-            locale.toString()
-        )
+        propertyHelper.saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, locale.toString())
         inAppChatClient.setLanguage(locale)
         localizationUtils.setLanguage(locale)
         updateWidgetInfo()
@@ -270,7 +273,11 @@ class InAppChatView @JvmOverloads constructor(
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      */
-    @Deprecated("Use new sendContextualData() instead.", replaceWith = ReplaceWith("sendContextualData(data, allMultiThreadStrategy)"), level = DeprecationLevel.WARNING)
+    @Deprecated(
+        "Use new sendContextualData() instead.",
+        replaceWith = ReplaceWith("sendContextualData(data, allMultiThreadStrategy)"),
+        level = DeprecationLevel.WARNING
+    )
     fun sendContextualMetaData(data: String, allMultiThreadStrategy: Boolean) {
         sendContextualData(data, allMultiThreadStrategy)
     }
@@ -303,6 +310,7 @@ class InAppChatView @JvmOverloads constructor(
      * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
      */
     @JvmOverloads
+    @Throws(IllegalArgumentException::class)
     fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
         val messageEscaped = message?.let(CommonUtils::escapeJsonString)
 
@@ -312,6 +320,31 @@ class InAppChatView @JvmOverloads constructor(
             inAppChatClient.sendChatMessage(messageEscaped, attachment)
         } else {
             inAppChatClient.sendChatMessage(messageEscaped)
+        }
+    }
+
+    /**
+     * Set the theme of the Livechat Widget.
+     * You can define widget themes in <a href="https://portal.infobip.com/apps/livechat/widgets">Live chat widget setup page</a> in Infobip Portal, section `Advanced customization`.
+     * Please check widget <a href="https://www.infobip.com/docs/live-chat/widget-customization">documentation</a> for more details.
+     *
+     * @param widgetThemeName unique theme name, empty or blank value is ignored
+     */
+    fun setWidgetTheme(widgetThemeName: String) {
+        if (widgetThemeName.isNotBlank()) {
+            val listener = object : ResultListener<String>() {
+                override fun onResult(result: Result<String, MobileMessagingError>) {
+                    if (result.isSuccess) {
+                        eventsListener?.onChatWidgetThemeChanged(widgetThemeName)
+                    } else {
+                        MobileMessagingLogger.e(
+                            TAG,
+                            "Could not set widget theme: ${result.error.message}"
+                        )
+                    }
+                }
+            }
+            inAppChatClient.setWidgetTheme(widgetThemeName, listener)
         }
     }
     //endregion
@@ -578,19 +611,19 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private fun prepareWidgetInfo(): WidgetInfo? {
-        val prefs = PropertyHelper.getDefaultMMSharedPreferences(context)
-        val widgetId = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.key, null)
-        val widgetTitle = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key, null)
-        val widgetPrimaryColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key, null)
-        val widgetBackgroundColor = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key, null)
-        val maxUploadContentSizeStr = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.key, null)
-        val widgetMultiThread = prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, false)
-        val callsAvailable = prefs.getBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.key, true)
-        val language = prefs.getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.key, null)
+        val widgetId = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID)
+        val widgetTitle = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE)
+        val widgetPrimaryColor = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR)
+        val widgetBackgroundColor = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR)
+        val maxUploadContentSizeStr = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE)
+        val widgetMultiThread = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD)
+        val widgetMultichannelConversation = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION)
+        val callsEnabled = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED)
         var maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE
         if (StringUtils.isNotBlank(maxUploadContentSizeStr)) {
             maxUploadContentSize = maxUploadContentSizeStr!!.toLong()
         }
+        val themeNames: Set<String>? = propertyHelper.findStringSet(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES)
         return widgetId?.let {
             WidgetInfo(
                 it,
@@ -598,15 +631,16 @@ class InAppChatView @JvmOverloads constructor(
                 widgetPrimaryColor,
                 widgetBackgroundColor,
                 maxUploadContentSize,
-                language,
                 widgetMultiThread,
-                callsAvailable
+                widgetMultichannelConversation,
+                callsEnabled,
+                themeNames?.toList()
             )
         }
     }
 
     private fun applyLanguage() {
-        val storedLanguage: String? = widgetInfo?.getLanguage()
+        val storedLanguage: String? = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE)
         val language: String = if (storedLanguage?.isNotBlank() == true) {
             storedLanguage
         } else {

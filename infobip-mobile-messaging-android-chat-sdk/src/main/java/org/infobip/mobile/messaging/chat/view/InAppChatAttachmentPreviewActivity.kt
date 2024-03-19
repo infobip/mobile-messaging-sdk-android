@@ -291,9 +291,10 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             widgetPrimaryColor,
             widgetBackgroundColor,
             0L,
-            null,
             false,
-            false
+            false,
+            false,
+            null
         )
     }
 
