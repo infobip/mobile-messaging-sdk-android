@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat.view
 
+import android.annotation.SuppressLint
 import android.content.*
 import android.net.ConnectivityManager
 import android.os.Build
@@ -122,6 +123,8 @@ class InAppChatView @JvmOverloads constructor(
     private var lastControlsVisibility: Boolean? = null
     private var isChatLoaded: Boolean = false
     private var lifecycle: Lifecycle? = null
+    private val pushRegistrationId
+        get() = mmCore.pushRegistrationId
 
     /**
      * [InAppChatView] event listener allows you to listen to Livechat widget events.
@@ -132,7 +135,7 @@ class InAppChatView @JvmOverloads constructor(
      * Returns true if chat is synchronized and multithread feature is enabled, otherwise returns false.
      */
     val isMultiThread: Boolean
-        get() = widgetInfo?.isMultiThread() ?: false
+        get() = widgetInfo?.isMultiThread ?: false
 
     val defaultErrorsHandler: ErrorsHandler = object : ErrorsHandler {
 
@@ -157,7 +160,8 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun handlerWidgetError(error: String) {
-            Snackbar.make(binding.root, parseWidgetError(error), Snackbar.LENGTH_INDEFINITE)
+            val message = if (CommonUtils.isJSON(error)) parseWidgetError(error) else error
+            Snackbar.make(binding.root, message, Snackbar.LENGTH_INDEFINITE)
                 .also {
                     val textView = it.view.findViewById<TextView>(R.id.snackbar_text)
                     textView.maxLines = 4
@@ -435,32 +439,18 @@ class InAppChatView @JvmOverloads constructor(
             val action = intent.action ?: return
             if (action == ConnectivityManager.CONNECTIVITY_ACTION) {
                 if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)) {
-                    inAppChatErrors.insertError(
-                        InAppChatErrors.Error(
-                            InAppChatErrors.INTERNET_CONNECTION_ERROR,
-                            localizationUtils.getString(R.string.ib_chat_no_connection)
-                        )
-                    )
+                    inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.INTERNET_CONNECTION_ERROR, localizationUtils.getString(R.string.ib_chat_no_connection)))
                 } else {
                     inAppChatErrors.removeError(InAppChatErrors.INTERNET_CONNECTION_ERROR)
                 }
             } else if (action == InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key) {
                 inAppChatErrors.removeError(InAppChatErrors.CONFIG_SYNC_ERROR)
                 onWidgetSynced()
-            } else if (action == Event.API_COMMUNICATION_ERROR.key && intent.hasExtra(
-                    BroadcastParameter.EXTRA_EXCEPTION
-                )
-            ) {
-                val mobileMessagingError =
-                    intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as MobileMessagingError?
+            } else if (action == Event.API_COMMUNICATION_ERROR.key && intent.hasExtra(BroadcastParameter.EXTRA_EXCEPTION)) {
+                val mobileMessagingError = intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as MobileMessagingError?
                 val errorCode = mobileMessagingError!!.code
                 if (errorCode == CHAT_SERVICE_ERROR || errorCode == CHAT_WIDGET_NOT_FOUND) {
-                    inAppChatErrors.insertError(
-                        InAppChatErrors.Error(
-                            InAppChatErrors.CONFIG_SYNC_ERROR,
-                            mobileMessagingError.message
-                        )
-                    )
+                    inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, mobileMessagingError.message))
                 }
             } else if (action == Event.REGISTRATION_CREATED.key) {
                 syncInAppChatConfigIfNeeded()
@@ -468,6 +458,7 @@ class InAppChatView @JvmOverloads constructor(
         }
     }
 
+    @SuppressLint("WrongConstant")
     private fun registerReceivers() {
         if (!receiversRegistered) {
             val intentFilter = IntentFilter()
@@ -496,11 +487,9 @@ class InAppChatView @JvmOverloads constructor(
         val chatWidgetConfigSyncResult = InAppChatImpl.getChatWidgetConfigSyncResult()
         if (chatWidgetConfigSyncResult != null && !chatWidgetConfigSyncResult.isSuccess) {
             val error = chatWidgetConfigSyncResult.error
-            val isInternetConnectionError =
-                DefaultApiClient.ErrorCode.API_IO_ERROR.value == error.code && error.type == MobileMessagingError.Type.SERVER_ERROR
-            val isPushRegIdMissing = mmCore.pushRegistrationId == null
-            val isRegistrationPendingError =
-                InternalSdkError.NO_VALID_REGISTRATION.error.code == error.code && mmCore.isRegistrationIdReported
+            val isInternetConnectionError = DefaultApiClient.ErrorCode.API_IO_ERROR.value == error.code && error.type == MobileMessagingError.Type.SERVER_ERROR
+            val isPushRegIdMissing = pushRegistrationId == null
+            val isRegistrationPendingError = InternalSdkError.NO_VALID_REGISTRATION.error.code == error.code && mmCore.isRegistrationIdReported
 
             /**
              * 1. connection error handled separately by broadcast receiver
@@ -510,12 +499,7 @@ class InAppChatView @JvmOverloads constructor(
             if (isInternetConnectionError || isPushRegIdMissing || isRegistrationPendingError)
                 return
 
-            inAppChatErrors.insertError(
-                InAppChatErrors.Error(
-                    InAppChatErrors.CONFIG_SYNC_ERROR,
-                    error.message
-                )
-            )
+            inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, error.message))
         }
     }
 
@@ -558,10 +542,25 @@ class InAppChatView @JvmOverloads constructor(
     //endregion
 
     //region Helpers
-    private fun loadChatPage(force: Boolean = false) = with(binding) {
-        ibLcSpinner.visible()
-        ibLcWebView.invisible()
-        ibLcWebView.loadChatPage(force, widgetInfo, inAppChat.jwtProvider?.provideJwt())
+    private fun loadChatPage(force: Boolean = false) {
+        val pushRegId = pushRegistrationId
+        val widgetId = widgetInfo?.id
+        val jwt = inAppChat.jwtProvider?.provideJwt()
+        val domain = inAppChat.domain
+
+        if (pushRegId.isNullOrBlank() || widgetId.isNullOrBlank()) {
+            MobileMessagingLogger.e("InAppChatView", "Chat loading skipped, pushRegId($pushRegId) or widgetId($widgetId) is missing.")
+            return
+        }
+
+        if (force || !isChatLoaded || InAppChatImpl.getIsWebViewCacheCleaned()) {
+            with(binding) {
+                ibLcSpinner.visible()
+                ibLcWebView.invisible()
+                InAppChatImpl.setIsWebViewCacheCleaned(false)
+                ibLcWebView.loadChatPage(pushRegId, widgetId, jwt, domain)
+            }
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -604,7 +603,6 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private fun syncInAppChatConfigIfNeeded() {
-        val pushRegistrationId = mmCore.pushRegistrationId
         if (pushRegistrationId != null && widgetInfo == null) {
             (inAppChat as? MessageHandlerModule)?.performSyncActions()
         }

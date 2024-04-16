@@ -1,17 +1,8 @@
 <html lang="En">
+
 <head>
-    <meta
-            name="viewport"
-            charset="UTF-8"
-            content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-    <script>
-          (function(I,n,f,o,b,i,p){
-            I[b]=I[b]||function(){(I[b].q=I[b].q||[]).push(arguments)};
-            I[b].t=1*new Date();i=n.createElement(f);i.async=1;i.src=o;
-            p=n.getElementsByTagName(f)[0];p.parentNode.insertBefore(i,p)})
-          (window,document,'script','https://livechat.infobip.com/widget.js','liveChat');
-    </script>
+    <meta name="viewport" charset="UTF-8"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
             margin: 0;
@@ -22,12 +13,30 @@
         }
     </style>
 </head>
+
 <body>
     <div id="ib-widget-container"></div>
     <script>
+        const domain = getQueryParameter('domain');
+        const jwt = getQueryParameter('jwt');
+        const pushRegId = getQueryParameter('pushRegId');
+        const widgetId = getQueryParameter('widgetId');
+
+        let widgetAddress = 'https://livechat.infobip.com/widget.js';
+        if (!isNullOrBlank(domain)) {
+            widgetAddress = `https://livechat-${domain.toLocaleLowerCase()}.infobip.com/widget.js`;
+        }
+
+        (function (I, n, f, o, b, i, p) {
+            I[b] = I[b] || function () { (I[b].q = I[b].q || []).push(arguments) };
+            I[b].t = 1 * new Date(); i = n.createElement(f); i.async = 1; i.src = o;
+            p = n.getElementsByTagName(f)[0]; p.parentNode.insertBefore(i, p)
+        })
+            (window, document, 'script', widgetAddress, 'liveChat');
+
         // Override widget config
         liveChat('config', {
-            widgetId: getQueryParameter('widgetId'),
+            widgetId: widgetId,
             container: document.getElementById('ib-widget-container'),
             showHeader: false,
             showFooter: false,
@@ -35,30 +44,33 @@
         });
 
         // Try identify user by pushRegId and (optional) jwt
-		let inputParams = {
-            'pushRegistrationId' : getQueryParameter('pushRegId'),
-		};
-        const jwt = getQueryParameter('jwt');
-		if (jwt != null){
+        let inputParams = {
+            'pushRegistrationId': pushRegId,
+        };
+        if (jwt != null) {
             inputParams.jwt = jwt;
-		}
-		liveChat('identify', inputParams, function(error, result) {
-		    if (error) {
-		        errorCallback(error);
-			} else {
-				init();
-			}
-		});
+        }
+        liveChat('identify', inputParams, function (error, result) {
+            if (error) {
+                errorCallback(error);
+            } else {
+                init();
+            }
+        });
 
-		// If all is OK -> initialize widget, enable native controls and show widget
-		function init() {
-		    liveChat('init');
-			liveChat('show', null, onShowCallback);
-		}
+        // If all is OK -> initialize widget, enable native controls and show widget
+        function init() {
+            if (domain != null) {
+                liveChat('init', { widgetId: widgetId, domain: domain }, errorCallback);
+            } else {
+                liveChat('init', null, errorCallback);
+            }
+            liveChat('show', null, onShowCallback);
+        }
 
         function onShowCallback(error, result) {
             if (error) {
-            	errorCallback(error);
+                errorCallback(error);
             } else {
                 InAppChatMobile.setControlsEnabled(true);
             }
@@ -80,7 +92,7 @@
             }
         })
 
-		//Widget API
+        //Widget API
         function sendMessage(message) {
             liveChat('send', message);
         }
@@ -102,22 +114,21 @@
         }
 
         function showThreadList() {
-            liveChat('show_thread_list', null, errorCallback);
+            liveChat('show_thread_list');
         }
 
         function setLanguage(language) {
-            liveChat('set_language', language, errorCallback);
+            liveChat('set_language', language);
         }
 
         function sendContextualData(data, strategy) {
-             liveChat(
+            liveChat(
                 'send_contextual_data',
                 {
-                   metadata: data,
-                   multiThreadStrategy: strategy
-                },
-                errorCallback
-		     );
+                    metadata: data,
+                    multiThreadStrategy: strategy
+                }
+            );
         }
 
         function mobileChatPause() {
@@ -132,11 +143,16 @@
             liveChat('set_theme', theme);
         }
 
-		function getQueryParameter(name) {
-           if (name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
-               return decodeURIComponent(name[1]);
-           }
+        function getQueryParameter(name) {
+            if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search)) {
+                return decodeURIComponent(name[1]);
+            }
+        }
+
+        function isNullOrBlank(value) {
+            return !value?.toString().trim()
         }
     </script>
 </body>
+
 </html>

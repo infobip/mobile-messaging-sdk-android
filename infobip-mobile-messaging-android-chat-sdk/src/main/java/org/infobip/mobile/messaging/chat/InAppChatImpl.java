@@ -70,31 +70,17 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatTheme theme = null;
     private LivechatRegistrationChecker lcRegIgChecker = null;
     private String widgetTheme = null;
+    private String domain = null;
+    private InAppChatFragment inAppChatWVFragment;
+    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
 
-    @NonNull
-    public static InAppChatImpl getInstance(Context context) {
-        if (instance == null) {
-            mmCore = MobileMessagingCore.getInstance(context);
-            instance = mmCore.getMessageHandlerModule(InAppChatImpl.class);
-        }
-        return instance;
-    }
-
+    //region MessageHandlerModule
     public InAppChatImpl() {
     }
 
     @Override
     public void init(Context appContext) {
         this.context = appContext;
-    }
-
-    @Override
-    public void activate() {
-        propertyHelper().saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
-    }
-
-    public boolean isActivated() {
-        return propertyHelper().findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
     }
 
     @Override
@@ -201,6 +187,72 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    public void applicationInForeground() {
+        performSyncActions();
+    }
+
+    // must be done on separate thread if it's not invoked by UI thread
+    private void cleanupWidgetData() {
+        chatWidgetConfigSyncResult = null;
+        setIsWebViewCacheCleaned(true);
+        try {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(() -> {
+                webView().clearHistory();
+                webView().clearCache(true);
+                MobileMessagingLogger.d("Deleted local widget history");
+            });
+        } catch (Exception e) {
+            MobileMessagingLogger.w("Failed to delete local widget history due to " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void depersonalize() {
+        cleanupWidgetData();
+        resetMessageCounter();
+    }
+
+    @Override
+    public void performSyncActions() {
+        if (isActivated() && (chatWidgetConfigSyncResult == null || !chatWidgetConfigSyncResult.isSuccess())) {
+            inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
+                @Override
+                public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
+                    chatWidgetConfigSyncResult = result;
+                    if (result.isSuccess()) {
+                        syncLivechatRegistrationId(result.getData());
+                    }
+                }
+            });
+        }
+    }
+
+    private void syncLivechatRegistrationId(WidgetInfo widgetInfo){
+        livechatRegistrationIdChecker().sync(
+                widgetInfo.getId(),
+                mobileMessagingCore().getPushRegistrationId(),
+                widgetInfo.isCallsEnabled()
+        );
+    }
+    //endregion
+
+    //region InAppChat public functions
+    @NonNull
+    public static InAppChatImpl getInstance(Context context) {
+        if (instance == null) {
+            mmCore = MobileMessagingCore.getInstance(context);
+            instance = mmCore.getMessageHandlerModule(InAppChatImpl.class);
+        }
+        return instance;
+    }
+
+    @Override
+    public void activate() {
+        propertyHelper().saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
+    }
+
+    @Override
     @NonNull
     public InAppChatScreenImpl inAppChatScreen() {
         if (inAppChatScreen == null) {
@@ -218,16 +270,111 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
     }
 
-    public static Result<WidgetInfo, MobileMessagingError> getChatWidgetConfigSyncResult() {
-        return chatWidgetConfigSyncResult;
+    @Override
+    public void cleanup() {
+        mobileApiResourceProvider = null;
+        inAppChatSynchronizer = null;
+        lcRegIgChecker = null;
+        jwtProvider = null;
+        darkMode = null;
+        theme = null;
+        widgetTheme = null;
+        domain = null;
+        cleanupWidgetData();
+        propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE);
+        resetMessageCounter();
     }
 
-    public static Boolean getIsWebViewCacheCleaned() {
-        return isWebViewCacheCleaned;
+    public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
+        if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+        //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
+        if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
+            fragmentTransaction.show(inAppChatWVFragment);
+        } else {
+            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
+        }
+        fragmentTransaction.commit();
     }
 
-    public static void setIsWebViewCacheCleaned(Boolean webViewCacheCleaned) {
-        isWebViewCacheCleaned = webViewCacheCleaned;
+    public void hideInAppChatFragment(FragmentManager fragmentManager) {
+        hideInAppChatFragment(fragmentManager, false);
+    }
+
+    @Override
+    public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
+        if (inAppChatWVFragment != null) {
+            inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
+        }
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.hide(inAppChatWVFragment);
+        //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
+        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
+            fragmentTransaction.remove(fragmentByTag);
+        }
+        fragmentTransaction.commit();
+    }
+
+    private boolean areFragmentsEquals(Fragment f1, Fragment f2) {
+        return f1 != null && f2 != null && f1.hashCode() == f2.hashCode();
+    }
+
+    @Override
+    public void resetMessageCounter() {
+        MobileMessagingLogger.d("Resetting unread message counter to 0");
+        propertyHelper().remove(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
+        inAppChatBroadcaster().unreadMessagesCounterUpdated(0);
+    }
+
+    @Override
+    public int getMessageCounter() {
+        return propertyHelper().findInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
+    }
+
+    @Override
+    public void setLanguage(String language) {
+        setLanguage(language, new MobileMessaging.ResultListener<String>() {
+            @Override
+            public void onResult(Result<String, MobileMessagingError> result) {
+                if (!result.isSuccess()) {
+                    MobileMessagingLogger.e("Set language error: " + result.getError().getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener) {
+        try {
+            LocalizationUtils localizationUtils = LocalizationUtils.getInstance(context);
+            Locale locale = localizationUtils.localeFromString(language);
+            String appliedLocale = locale.toString();
+            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, appliedLocale);
+            if (inAppChatWVFragment != null) {
+                inAppChatWVFragment.setLanguage(locale);
+            }
+            if (resultListener != null) {
+                resultListener.onResult(new Result<>(appliedLocale));
+            }
+        } catch (Throwable t) {
+            if (resultListener != null) {
+                resultListener.onResult(new Result<>(MobileMessagingError.createFrom(t)));
+            }
+        }
     }
 
     @Override
@@ -322,168 +469,31 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public void applicationInForeground() {
-        performSyncActions();
+    public String getDomain() {
+        return domain;
     }
 
     @Override
-    public void cleanup() {
-        mobileApiResourceProvider = null;
-        inAppChatSynchronizer = null;
-        lcRegIgChecker = null;
-        jwtProvider = null;
-        darkMode = null;
-        theme = null;
-        widgetTheme = null;
-        cleanupWidgetData();
-        propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_DARK_MODE);
-        resetMessageCounter();
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+    //endregion
+
+    //region internal functions
+    public static Result<WidgetInfo, MobileMessagingError> getChatWidgetConfigSyncResult() {
+        return chatWidgetConfigSyncResult;
     }
 
-    // must be done on separate thread if it's not invoked by UI thread
-    private void cleanupWidgetData() {
-        chatWidgetConfigSyncResult = null;
-        isWebViewCacheCleaned = true;
-        try {
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    webView().clearHistory();
-                    webView().clearCache(true);
-                    MobileMessagingLogger.d("Deleted local widget history");
-                }
-            });
-        } catch (Exception e) {
-            MobileMessagingLogger.w("Failed to delete local widget history due to " + e.getMessage());
-        }
+    public static Boolean getIsWebViewCacheCleaned() {
+        return isWebViewCacheCleaned;
     }
 
-    @Override
-    public void depersonalize() {
-        cleanupWidgetData();
-        resetMessageCounter();
+    public static void setIsWebViewCacheCleaned(Boolean webViewCacheCleaned) {
+        isWebViewCacheCleaned = webViewCacheCleaned;
     }
+    //endregion
 
-    @Override
-    public void performSyncActions() {
-        if (isActivated() && (chatWidgetConfigSyncResult == null || !chatWidgetConfigSyncResult.isSuccess())) {
-            inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
-                @Override
-                public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
-                    chatWidgetConfigSyncResult = result;
-                    if (result.isSuccess()) {
-                        syncLivechatRegistrationId(result.getData());
-                    }
-                }
-            });
-        }
-    }
-
-    private void syncLivechatRegistrationId(WidgetInfo widgetInfo){
-        livechatRegistrationIdChecker().sync(
-                widgetInfo.getId(),
-                mobileMessagingCore().getPushRegistrationId(),
-                widgetInfo.isCallsEnabled()
-        );
-    }
-
-    private InAppChatFragment inAppChatWVFragment;
-    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
-
-    public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
-        if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
-        if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
-            fragmentTransaction.show(inAppChatWVFragment);
-        } else {
-            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
-        }
-        fragmentTransaction.commit();
-    }
-
-    public void hideInAppChatFragment(FragmentManager fragmentManager) {
-        hideInAppChatFragment(fragmentManager, false);
-    }
-
-    @Override
-    public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
-        if (inAppChatWVFragment != null) {
-            inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
-        }
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.hide(inAppChatWVFragment);
-        //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
-        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
-            fragmentTransaction.remove(fragmentByTag);
-        }
-        fragmentTransaction.commit();
-    }
-
-    private boolean areFragmentsEquals(Fragment f1, Fragment f2) {
-        return f1 != null && f2 != null && f1.hashCode() == f2.hashCode();
-    }
-
-    @Override
-    public void resetMessageCounter() {
-        MobileMessagingLogger.d("Resetting unread message counter to 0");
-        propertyHelper().remove(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
-        inAppChatBroadcaster().unreadMessagesCounterUpdated(0);
-    }
-
-    @Override
-    public int getMessageCounter() {
-        return propertyHelper().findInt(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
-    }
-
-    @Override
-    public void setLanguage(String language) {
-        setLanguage(language, new MobileMessaging.ResultListener<String>() {
-            @Override
-            public void onResult(Result<String, MobileMessagingError> result) {
-                if (!result.isSuccess()) {
-                    MobileMessagingLogger.e("Set language error: " + result.getError().getMessage());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener) {
-        try {
-            LocalizationUtils localizationUtils = LocalizationUtils.getInstance(context);
-            Locale locale = localizationUtils.localeFromString(language);
-            String appliedLocale = locale.toString();
-            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, appliedLocale);
-            if (inAppChatWVFragment != null) {
-                inAppChatWVFragment.setLanguage(locale);
-            }
-            if (resultListener != null) {
-                resultListener.onResult(new Result<>(appliedLocale));
-            }
-        } catch (Throwable t) {
-            if (resultListener != null) {
-                resultListener.onResult(new Result<>(MobileMessagingError.createFrom(t)));
-            }
-        }
-    }
-
-    // region private methods
+    // region private functions
     synchronized private AndroidBroadcaster coreBroadcaster() {
         if (coreBroadcaster == null) {
             coreBroadcaster = new AndroidBroadcaster(context);
@@ -550,6 +560,10 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             );
         }
         return lcRegIgChecker;
+    }
+
+    private boolean isActivated() {
+        return propertyHelper().findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
     }
     //endregion
 }

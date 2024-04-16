@@ -224,4 +224,20 @@ public abstract class InAppChat {
      */
     @Nullable
     public abstract String getWidgetTheme();
+
+    /**
+     * Set the domain of the Livechat Widget.
+     *
+     * @param domain domain of the widget
+     */
+    public abstract void setDomain(String domain);
+
+    /**
+     * Get current domain of the Livechat Widget.
+     *
+     * @return domain of the widget
+     */
+    @Nullable
+    public abstract String getDomain();
+
 }

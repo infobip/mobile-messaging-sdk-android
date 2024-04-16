@@ -80,6 +80,10 @@ public class MobileApiResourceProvider {
 
         @Override
         public void beforeResponse(int responseCode, Map<String, List<String>> headers) {
+            if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.API_URI_PROVIDED_BY_INTEGRATOR)) {
+                return;
+            }
+
             boolean isFailedNotThrottlingRequest = responseCode >= 400 && responseCode != 429 && responseCode != 404;
 
             if (isFailedNotThrottlingRequest) {

@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -54,7 +53,6 @@ import java.util.List;
  * @see Builder#withoutSystemInfo()
  * @since 29.02.2016.
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public abstract class MobileMessaging {
 
     /**
@@ -902,7 +900,6 @@ public abstract class MobileMessaging {
         public MobileMessaging build(@Nullable InitListener initListener) {
             validateApplicationCodeAvailability();
 
-            MobileMessagingCore.setApiUri(application, apiUri);
             MobileMessagingCore.setMessageStoreClass(application, messageStoreClass);
             MobileMessagingCore.setReportCarrierInfo(application, reportCarrierInfo);
             MobileMessagingCore.setReportSystemInfo(application, reportSystemInfo);
@@ -927,7 +924,10 @@ public abstract class MobileMessaging {
                 mobileMessagingCoreBuilder.withApplicationCode(applicationCodeProvider);
             }
 
-            return mobileMessagingCoreBuilder.build(initListener);
+            MobileMessaging mmCore = mobileMessagingCoreBuilder.build(initListener);
+            //must be called after build(), otherwise would be reset on appCode change
+            MobileMessagingCore.setProvidedApiUri(application, apiUri);
+            return mmCore;
         }
     }
 }

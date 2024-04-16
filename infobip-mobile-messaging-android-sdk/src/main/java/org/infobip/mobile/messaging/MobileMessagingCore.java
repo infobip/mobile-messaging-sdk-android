@@ -352,7 +352,9 @@ public class MobileMessagingCore
         }
 
         lastSyncTimeMillis = Time.now();
-        baseUrlChecker().sync();
+        if (!PreferenceHelper.findBoolean(context, MobileMessagingProperty.API_URI_PROVIDED_BY_INTEGRATOR)) {
+            baseUrlChecker().sync();
+        }
         if (foreground) {
             lastForegroundSyncMillis = lastSyncTimeMillis;
             userEventsSynchronizer().reportSessions();
@@ -1212,6 +1214,15 @@ public class MobileMessagingCore
         return SHA256.calc(applicationCode).substring(0, 10);
     }
 
+    public static void setProvidedApiUri(Context context, String apiUri) {
+        if (StringUtils.isBlank(apiUri)) {
+            resetApiUri(context);
+        } else {
+            setApiUri(context, apiUri);
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.API_URI_PROVIDED_BY_INTEGRATOR, true);
+        }
+    }
+
     public static void setApiUri(Context context, String apiUri) {
         if (StringUtils.isBlank(apiUri)) {
             return;
@@ -1221,6 +1232,7 @@ public class MobileMessagingCore
 
     public static void resetApiUri(Context context) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, (String) MobileMessagingProperty.API_URI.getDefaultValue());
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.API_URI_PROVIDED_BY_INTEGRATOR, false);
     }
 
     public static String getApiUri(Context context) {

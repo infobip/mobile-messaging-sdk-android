@@ -9,10 +9,11 @@ import android.util.AttributeSet;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.api.chat.WidgetInfo;
-import org.infobip.mobile.messaging.chat.InAppChatImpl;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
+import org.infobip.mobile.messaging.chat.core.InAppChatWebChromeClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
@@ -51,6 +52,7 @@ public class InAppChatWebView extends WebView {
         setClickable(true);
         setWebViewClient(new InAppChatWebViewClient(webViewManager));
         addJavascriptInterface(new InAppChatMobileImpl(webViewManager), IN_APP_CHAT_MOBILE_INTERFACE);
+        setWebChromeClient(new InAppChatWebChromeClient());
     }
 
     private void setForceDarkAllowed() {
@@ -61,26 +63,27 @@ public class InAppChatWebView extends WebView {
         }
     }
 
-    public void loadChatPage(Boolean force, WidgetInfo widgetInfo, String jwt) {
-        if (!force && !InAppChatImpl.getIsWebViewCacheCleaned()) {
-            return;
+    public void loadChatPage(
+            @NonNull String pushRegistrationId,
+            @NonNull String widgetId,
+            @Nullable String jwt,
+            @Nullable String domain
+    ) {
+        Uri.Builder builder = new Uri.Builder()
+                .encodedPath(widgetUri)
+                .appendQueryParameter("pushRegId", pushRegistrationId)
+                .appendQueryParameter("widgetId", widgetId);
+
+        if (StringUtils.isNotBlank(jwt)) {
+            builder.appendQueryParameter("jwt", jwt);
         }
-        InAppChatImpl.setIsWebViewCacheCleaned(false);
 
-        String pushRegistrationId = MobileMessagingCore.getInstance(getContext()).getPushRegistrationId();
-        if (pushRegistrationId != null && widgetInfo != null) {
-            Uri.Builder builder = new Uri.Builder()
-                    .encodedPath(widgetUri)
-                    .appendQueryParameter("pushRegId", pushRegistrationId)
-                    .appendQueryParameter("widgetId", widgetInfo.getId());
-
-            if (StringUtils.isNotBlank(jwt)) {
-                builder.appendQueryParameter("jwt", jwt);
-            }
-
-            String resultUrl = builder.build().toString();
-            loadUrl(resultUrl);
+        if (StringUtils.isNotBlank(domain)) {
+            builder.appendQueryParameter("domain", domain);
         }
+
+        String resultUrl = builder.build().toString();
+        loadUrl(resultUrl);
     }
 
 }
