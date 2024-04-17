@@ -224,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:text="@string/enable_calls"
-                    app:layout_constraintBottom_toTopOf="@id/darkModeToggle"
+                    app:layout_constraintBottom_toTopOf="@id/customButtonChecked"
                     app:layout_constraintEnd_toStartOf="@id/disableCalls"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
@@ -242,38 +242,6 @@
                     app:layout_constraintTop_toTopOf="@id/enableCalls"
                     android:visibility="gone"/>
 
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/darkModeToggle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toTopOf="@id/customButtonChecked"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/disableCalls"
-                    app:singleSelection="true">
-
-                    <Button
-                        android:id="@+id/dark"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dark_mode_dark" />
-
-                    <Button
-                        android:id="@+id/light"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dark_mode_light" />
-
-                    <Button
-                        android:id="@+id/auto"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dark_mode_auto" />
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/customButtonChecked"
                     android:layout_width="wrap_content"
@@ -282,9 +250,9 @@
                     tools:visibility="visible"
                     android:text="@string/custom_button_checked"
                     app:layout_constraintBottom_toTopOf="@id/customButtonEnabled"
-                    app:layout_constraintEnd_toEndOf="@id/darkModeToggle"
-                    app:layout_constraintStart_toStartOf="@id/darkModeToggle"
-                    app:layout_constraintTop_toBottomOf="@id/darkModeToggle"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/enableCalls"/>
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/customButtonEnabled"
@@ -295,8 +263,8 @@
                     android:checked="true"
                     android:text="@string/custom_button_enabled"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@id/darkModeToggle"
-                    app:layout_constraintStart_toStartOf="@id/darkModeToggle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/customButtonChecked"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>

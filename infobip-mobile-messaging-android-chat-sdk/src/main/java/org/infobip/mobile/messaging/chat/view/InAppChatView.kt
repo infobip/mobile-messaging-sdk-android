@@ -351,6 +351,13 @@ class InAppChatView @JvmOverloads constructor(
             inAppChatClient.setWidgetTheme(widgetThemeName, listener)
         }
     }
+
+    override fun setForceDarkAllowed(allow: Boolean) {
+        super.setForceDarkAllowed(allow)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            binding.ibLcWebView.isForceDarkAllowed = allow
+        }
+    }
     //endregion
 
     //region Lifecycle

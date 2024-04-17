@@ -84,8 +84,6 @@ public class InAppChatSynchronizer {
                 if (themes != null) {
                     PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.getKey(), new HashSet<String>(themes));
                 }
-                //just cleanup, remove it in next version
-                PreferenceHelper.remove(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.getKey());
                 if (listener != null) {
                     listener.onResult(new Result<>(widgetInfo));
                 }

@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
 import org.infobip.mobile.messaging.MobileMessaging;
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatDarkMode;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 
 /**
@@ -179,18 +178,6 @@ public abstract class InAppChat {
      * @see org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
      */
     public abstract void showThreadsList();
-
-    /**
-     * Set color mode used by in-app chat. Available {@link InAppChatDarkMode} options:
-     * <p>DARK_MODE_YES - force dark colors</p>
-     * <p>DARK_MODE_NO - force light colors</p>
-     * <p>DARK_MODE_FOLLOW_SYSTEM - use same colors as system-wide mode has</p>
-     * @deprecated Use combination of InAppChat.setWidgetTheme() and InAppChat.setTheme() instead to achieve dark theme. This function will be removed in a future release.
-     *
-     * @param darkMode to be set, null value removes setting and use light theme as default one.
-     */
-    @Deprecated(since = "12.4.0", forRemoval = true)
-    public abstract void setDarkMode(@Nullable InAppChatDarkMode darkMode);
 
     /**
      * Set theme, it is alternative to `IB_AppTheme.Chat` defined in xml, if set xml values are replaced.

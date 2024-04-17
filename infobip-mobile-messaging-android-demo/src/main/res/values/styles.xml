@@ -51,7 +51,6 @@
         <item name="ibChatAttachmentToolbarStyle">@style/InAppChat.Demo.Toolbar.AttachmentPreview</item>
         <item name="ibChatInputStyle">@style/InAppChat.Demo.Input</item>
         <item name="ibChatStyle">@style/InAppChat.Demo.Chat</item>
-        <item name="isLightTheme">true</item>
     </style>
 
     <style name="IB_AppTheme.WebView">

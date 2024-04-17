@@ -87,7 +87,6 @@ abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
         PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.key , 10L)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key , true)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.key , true)
-        PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_AVAILABLE.key , true)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key , true)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED.key , true)
         propertyHelper = PropertyHelper(context)

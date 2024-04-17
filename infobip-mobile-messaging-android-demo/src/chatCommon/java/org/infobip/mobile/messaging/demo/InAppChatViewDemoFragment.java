@@ -70,6 +70,7 @@ public class InAppChatViewDemoFragment extends Fragment {
     }
 
     private void setUpInAppChatView() {
+        inAppChatView.setForceDarkAllowed(false);
         inAppChatView.init(getViewLifecycleOwner().getLifecycle());
         InAppChatView.EventsListener eventsListener = new InAppChatView.EventsListener() {
 
