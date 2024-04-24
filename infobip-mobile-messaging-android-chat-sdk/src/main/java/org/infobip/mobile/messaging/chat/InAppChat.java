@@ -200,6 +200,8 @@ public abstract class InAppChat {
      * You can define widget themes in <a href="https://portal.infobip.com/apps/livechat/widgets">Live chat widget setup page</a> in Infobip Portal, section `Advanced customization`.
      * Please check widget <a href="https://www.infobip.com/docs/live-chat/widget-customization">documentation</a> for more details.
      *
+     * <p>You must set widget theme before chat is shown. Function does not change theme once chat is already presented - in runtime.</p>
+     *
      * @param widgetThemeName unique theme name, empty or blank value is ignored
      */
     public abstract void setWidgetTheme(@Nullable String widgetThemeName);

@@ -8,4 +8,12 @@
         <item name="android:forceDarkAllowed">true</item>
     </style>
 
+    <style name="IB_AppTheme.Chat">
+        <item name="ibChatToolbarStyle">@style/InAppChat.Demo.Toolbar</item>
+        <item name="ibChatAttachmentToolbarStyle">@style/InAppChat.Demo.Toolbar.AttachmentPreview</item>
+        <item name="ibChatInputStyle">@style/InAppChat.Demo.Input</item>
+        <item name="ibChatStyle">@style/InAppChat.Demo.Chat</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+
 </resources>

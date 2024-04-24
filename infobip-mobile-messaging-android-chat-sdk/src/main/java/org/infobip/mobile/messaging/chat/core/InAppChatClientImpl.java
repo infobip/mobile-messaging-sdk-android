@@ -1,14 +1,14 @@
 package org.infobip.mobile.messaging.chat.core;
 
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.mobileChatPause;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.mobileChatResume;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.sendContextualData;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.sendDraft;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.sendMessage;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.sendMessageWithAttachment;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.setLanguage;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.setTheme;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethods.showThreadList;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatPause;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatResume;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendContextualData;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendDraft;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessage;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessageWithAttachment;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setLanguage;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setTheme;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.showThreadList;
 import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
 
 import android.os.Handler;
@@ -52,7 +52,7 @@ public class InAppChatClientImpl implements InAppChatClient {
             String script = buildWidgetMethodInvocation(sendMessageWithAttachment.name(), message, base64UrlString, fileName);
             executeScript(script);
         } else {
-            MobileMessagingLogger.e("[InAppChat] can't send attachment, base64 is empty");
+            MobileMessagingLogger.e(TAG,"[InAppChat] can't send attachment, base64 is empty");
         }
     }
 
@@ -66,7 +66,7 @@ public class InAppChatClientImpl implements InAppChatClient {
         if (locale != null) {
             Language widgetLanguage = Language.findLanguage(locale);
             if (widgetLanguage == null) {
-                MobileMessagingLogger.e("Language " + locale + " is not supported. Used default language " + Language.ENGLISH.getLocale());
+                MobileMessagingLogger.e(TAG,"Language " + locale + " is not supported. Used default language " + Language.ENGLISH.getLocale());
                 widgetLanguage = Language.ENGLISH;
             }
             String script = buildWidgetMethodInvocation(setLanguage.name(), widgetLanguage.getLocale());
@@ -120,7 +120,7 @@ public class InAppChatClientImpl implements InAppChatClient {
         if (webView != null) {
             try {
                 handler.post(() -> webView.evaluateJavascript(script, value -> {
-                    String valueToLog = (value != null && !"null".equals(value)) ? ":" + value : "";
+                    String valueToLog = (value != null && !"null".equals(value)) ? " => " + value : "";
                     MobileMessagingLogger.d(TAG, "Called Widget API: " + script + valueToLog);
                     if (resultListener != null)
                         resultListener.onResult(new Result<>(valueToLog));
@@ -128,10 +128,10 @@ public class InAppChatClientImpl implements InAppChatClient {
             } catch (Exception e) {
                 if (resultListener != null)
                     resultListener.onResult(new Result<>(MobileMessagingError.createFrom(e)));
-                MobileMessagingLogger.e("Failed to execute webView JS script" + e.getMessage());
+                MobileMessagingLogger.e(TAG,"Failed to execute webView JS script " + script + " " + e.getMessage());
             }
         } else if (resultListener != null) {
-            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalStateException("InAppChatWebView is null."))));
+            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalStateException("Failed to execute webView JS script " + script + " InAppChatWebView is null."))));
         }
     }
 

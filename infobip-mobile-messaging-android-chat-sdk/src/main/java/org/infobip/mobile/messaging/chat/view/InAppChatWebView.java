@@ -53,7 +53,8 @@ public class InAppChatWebView extends WebView {
             @NonNull String pushRegistrationId,
             @NonNull String widgetId,
             @Nullable String jwt,
-            @Nullable String domain
+            @Nullable String domain,
+            @Nullable String widgetTheme
     ) {
         Uri.Builder builder = new Uri.Builder()
                 .encodedPath(widgetUri)
@@ -66,6 +67,10 @@ public class InAppChatWebView extends WebView {
 
         if (StringUtils.isNotBlank(domain)) {
             builder.appendQueryParameter("domain", domain);
+        }
+
+        if (StringUtils.isNotBlank(widgetTheme)) {
+            builder.appendQueryParameter("widgetTheme", widgetTheme);
         }
 
         String resultUrl = builder.build().toString();

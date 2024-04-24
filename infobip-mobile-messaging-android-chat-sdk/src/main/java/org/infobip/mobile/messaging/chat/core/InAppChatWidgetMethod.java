@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.chat.core;
 
-public enum InAppChatWidgetMethods {
-
+public enum InAppChatWidgetMethod {
     sendMessage,
     sendMessageWithAttachment,
     sendDraft,

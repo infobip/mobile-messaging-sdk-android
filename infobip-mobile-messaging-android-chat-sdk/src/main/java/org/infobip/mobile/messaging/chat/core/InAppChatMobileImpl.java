@@ -9,11 +9,13 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 public class InAppChatMobileImpl implements InAppChatMobile {
 
     private final InAppChatWebViewManager inAppChatWebViewManager;
     private Handler handler;
+    private static final String TAG = InAppChatMobile.class.getSimpleName();
 
     public InAppChatMobileImpl(InAppChatWebViewManager inAppChatWebViewManager) {
         this.inAppChatWebViewManager = inAppChatWebViewManager;
@@ -32,38 +34,9 @@ public class InAppChatMobileImpl implements InAppChatMobile {
 
     @Override
     @JavascriptInterface
-    public void setControlsEnabled(final boolean isEnabled) {
-        MobileMessagingLogger.d("WebView setting controls enabled: " + isEnabled);
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsEnabled(isEnabled);
-            }
-        };
-        handler.post(myRunnable);
-    }
-
-    @Override
-    @JavascriptInterface
-    public void onError(final String errorMessage) {
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                MobileMessagingLogger.d("WebView loading error: " + errorMessage);
-                if (inAppChatWebViewManager != null) inAppChatWebViewManager.onJSError(errorMessage);
-            }
-        };
-        handler.post(myRunnable);
-    }
-
-    @Override
-    @JavascriptInterface
     public void setControlsVisibility(final boolean isVisible) {
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsVisibility(isVisible);
-            }
+        Runnable myRunnable = () -> {
+            if (inAppChatWebViewManager != null) inAppChatWebViewManager.setControlsVisibility(isVisible);
         };
         handler.post(myRunnable);
     }
@@ -71,11 +44,8 @@ public class InAppChatMobileImpl implements InAppChatMobile {
     @Override
     @JavascriptInterface
     public void openAttachmentPreview(final String url, final String type, final String caption) {
-        Runnable myRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (inAppChatWebViewManager != null) inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
-            }
+        Runnable myRunnable = () -> {
+            if (inAppChatWebViewManager != null) inAppChatWebViewManager.openAttachmentPreview(url, type, caption);
         };
         handler.post(myRunnable);
     }
@@ -84,12 +54,46 @@ public class InAppChatMobileImpl implements InAppChatMobile {
     @JavascriptInterface
     public void onViewChanged(String view) {
         Runnable myRunnable = () -> {
-            MobileMessagingLogger.d("WebView onViewChanged: " + view);
+            MobileMessagingLogger.d(TAG,"Widget onViewChanged: " + view);
             if (inAppChatWebViewManager != null) {
                 try {
                     inAppChatWebViewManager.onWidgetViewChanged(InAppChatWidgetView.valueOf(view));
                 } catch (IllegalArgumentException exception) {
                     MobileMessagingLogger.e("Could not parse InAppChatWidgetView from " + view, exception);
+                }
+            }
+        };
+        handler.post(myRunnable);
+    }
+
+    @Override
+    @JavascriptInterface
+    public void onWidgetApiError(String method, String errorPayload) {
+        Runnable myRunnable = () -> {
+            String result = StringUtils.isNotBlank(errorPayload) ? " => " + errorPayload : "";
+            MobileMessagingLogger.e(TAG,"Widget API call error: " + method + "()" + result);
+            if (inAppChatWebViewManager != null) {
+                try {
+                    inAppChatWebViewManager.onWidgetApiError(InAppChatWidgetApiMethod.valueOf(method), errorPayload);
+                } catch (IllegalArgumentException exception) {
+                    MobileMessagingLogger.e(TAG,"Could not parse InAppChatWidgetApiMethod from " + method, exception);
+                }
+            }
+        };
+        handler.post(myRunnable);
+    }
+
+    @Override
+    @JavascriptInterface
+    public void onWidgetApiSuccess(String method, String successPayload) {
+        Runnable myRunnable = () -> {
+            String result = StringUtils.isNotBlank(successPayload) ? " => " + successPayload : "";
+            MobileMessagingLogger.d(TAG,"Widget API call result: " + method + "()" + result);
+            if (inAppChatWebViewManager != null) {
+                try {
+                    inAppChatWebViewManager.onWidgetApiSuccess(InAppChatWidgetApiMethod.valueOf(method), successPayload);
+                } catch (IllegalArgumentException exception) {
+                    MobileMessagingLogger.e(TAG,"Could not parse InAppChatWidgetApiMethod from " + method, exception);
                 }
             }
         };

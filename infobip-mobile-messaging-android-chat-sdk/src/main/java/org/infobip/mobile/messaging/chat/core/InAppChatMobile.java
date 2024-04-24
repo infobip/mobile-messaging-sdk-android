@@ -7,21 +7,6 @@ package org.infobip.mobile.messaging.chat.core;
 interface InAppChatMobile {
 
     /**
-     * Enables/disables control elements (such as text input view, send button etc).
-     * Will be applied after widget initialization.
-     *
-     * @param isEnabled set to true to enable control elements or to false otherwise
-     */
-    void setControlsEnabled(boolean isEnabled);
-
-    /**
-     * Provides widget (client-side) errors.
-     *
-     * @param errorMessage description of an error
-     */
-    void onError(String errorMessage);
-
-    /**
      * Show/Hide input field
      *
      * @param isVisible
@@ -37,8 +22,22 @@ interface InAppChatMobile {
     void openAttachmentPreview(String url, String type, String caption);
 
     /**
-     * Provides widget (client-side) current view name.
+     * Provides Livechat widget current view name.
      * @param view name of current widget destination
      */
     void onViewChanged(String view);
+
+    /**
+     * Provides Livechat widget api call error result.
+     * @param method name of widget api function that caused error
+     * @param errorPayload error payload
+     */
+    void onWidgetApiError(String method, String errorPayload);
+
+    /**
+     * Provides Livechat widget api call success result.
+     * @param method name of widget api function that returned result
+     * @param successPayload result payload
+     */
+    void onWidgetApiSuccess(String method, String successPayload);
 }

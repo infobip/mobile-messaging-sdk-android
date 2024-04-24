@@ -63,7 +63,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
     private static Result<WidgetInfo, MobileMessagingError> chatWidgetConfigSyncResult = null;
-    private static Boolean isWebViewCacheCleaned = false;
     private JwtProvider jwtProvider = null;
     private InAppChatTheme theme = null;
     private LivechatRegistrationChecker lcRegIgChecker = null;
@@ -192,7 +191,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         chatWidgetConfigSyncResult = null;
-        setIsWebViewCacheCleaned(true);
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
@@ -444,6 +442,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void setWidgetTheme(@Nullable String widgetThemeName) {
         this.widgetTheme = widgetThemeName;
+        if (inAppChatWVFragment != null && widgetThemeName != null) {
+            inAppChatWVFragment.setWidgetTheme(widgetThemeName);
+        }
     }
 
     @Override
@@ -466,14 +467,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     //region internal functions
     public static Result<WidgetInfo, MobileMessagingError> getChatWidgetConfigSyncResult() {
         return chatWidgetConfigSyncResult;
-    }
-
-    public static Boolean getIsWebViewCacheCleaned() {
-        return isWebViewCacheCleaned;
-    }
-
-    public static void setIsWebViewCacheCleaned(Boolean webViewCacheCleaned) {
-        isWebViewCacheCleaned = webViewCacheCleaned;
     }
     //endregion
 

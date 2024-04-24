@@ -23,7 +23,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.annotation.ColorInt
-import androidx.annotation.Nullable
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
@@ -38,13 +37,19 @@ import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
-import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
+import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.hide
+import org.infobip.mobile.messaging.chat.utils.isLightStatusBarMode
+import org.infobip.mobile.messaging.chat.utils.setLightStatusBarMode
+import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.show
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
-import java.util.*
+import java.util.Locale
 
 class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.ResultListener {
 
@@ -88,7 +93,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private var appliedWidgetTheme: String? = null
     private val isMultiThread
         get() = binding.ibLcChat.isMultiThread
-    private val inAppChat by lazy { InAppChat.getInstance(requireContext()) }
     private val backPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             navigateBack()
@@ -224,7 +228,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
     }
 
-    @Nullable
     fun setWidgetTheme(widgetThemeName: String) {
         binding.ibLcChat.setWidgetTheme(widgetThemeName)
     }
@@ -301,7 +304,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         eventsListener = object : InAppChatView.EventsListener {
             override fun onChatLoaded(controlsEnabled: Boolean) {
                 binding.ibLcChatInput.isEnabled = controlsEnabled
-                updateWidgetTheme()
             }
 
             override fun onChatDisconnected() {
@@ -338,7 +340,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
                 this@InAppChatFragment.widgetView = widgetView
                 updateInputVisibilityByMultiThreadView(widgetView)
-                updateWidgetTheme(widgetView)
             }
 
             override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
@@ -352,19 +353,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             }
         }
         init(lifecycleRegistry.lifecycle)
-    }
-
-    private fun updateWidgetTheme(widgetView: InAppChatWidgetView) {
-        if (widgetView != InAppChatWidgetView.LOADING && widgetView != InAppChatWidgetView.LOADING_THREAD) {
-            updateWidgetTheme()
-        }
-    }
-
-    private fun updateWidgetTheme() {
-        val theme = inAppChat.widgetTheme
-        if (theme?.isNotBlank() == true && appliedWidgetTheme != theme) {
-            setWidgetTheme(theme)
-        }
     }
     //endregion
 
