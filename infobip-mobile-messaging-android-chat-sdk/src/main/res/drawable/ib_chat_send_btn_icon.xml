@@ -2,12 +2,14 @@
     android:width="30dp"
     android:height="30dp"
     android:viewportWidth="30"
-    android:viewportHeight="30">
+    android:viewportHeight="30"
+    android:tint="?attr/colorControlNormal"
+    android:autoMirrored="true">
 
   <group android:translateX="3.1" android:translateY="6">
     <path
         android:pathData="M1,19.981l22.217,-9.526a0.5,0.5 0,0 0,0 -0.92L1.005,0.013a0.5,0.5 0,0 0,-0.697 0.462l0.04,7.605a0.5,0.5 0,0 0,0.447 0.495l14.092,1.48 -14.15,1.243a0.5,0.5 0,0 0,-0.457 0.5l0.022,7.726a0.5,0.5 0,0 0,0.697 0.458z"
-        android:fillColor="#B4B4B4"
+        android:fillColor="@android:color/white"
         android:fillType="nonZero"/>
   </group>
 
