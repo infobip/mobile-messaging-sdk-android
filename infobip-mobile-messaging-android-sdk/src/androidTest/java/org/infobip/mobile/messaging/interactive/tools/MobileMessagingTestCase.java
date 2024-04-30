@@ -105,7 +105,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
 
         PreferenceHelper.getDefaultMMSharedPreferences(context).edit().clear().commit();
 
-        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
+//        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.getListeningPort() + "/");
         PreferenceHelper.saveString(context, MobileMessagingProperty.APPLICATION_CODE, "TestApplicationCode");
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestDeviceInstanceId");
         PreferenceHelper.saveString(context, MobileMessagingProperty.UNIVERSAL_INSTALLATION_ID, "UniversalInstallationId");
@@ -136,12 +136,12 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         super.tearDown();
 
         time.reset();
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception ignored) {
-            }
-        }
+//        if (null != debugServer) {
+//            try {
+//                debugServer.stop();
+//            } catch (Exception ignored) {
+//            }
+//        }
 
         if (databaseProvider != null)
             databaseProvider.deleteDatabase();

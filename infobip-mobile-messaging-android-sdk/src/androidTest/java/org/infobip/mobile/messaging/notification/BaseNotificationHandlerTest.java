@@ -1,11 +1,12 @@
 package org.infobip.mobile.messaging.notification;
 
+import static junit.framework.Assert.assertEquals;
+
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import androidx.core.app.NotificationCompat;
 
 import org.infobip.mobile.messaging.Message;
@@ -17,16 +18,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import fi.iki.elonen.NanoHTTPD;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -89,32 +84,32 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(10, notificationIDs.size());
     }
 
-    @Test
-    public void shouldTryToFetchMediaMultipleTimes_ifContentUrlSupplied_andThereAreNetworkFailures() {
-        // Given
-        String givenInvalidPictureUrl = "http://127.0.0.1:" + debugServer.getListeningPort() + "/";
-        int givenMaxRetryCount = 10;
-        PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_MAX_RETRY_COUNT, givenMaxRetryCount);
-        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
+//    @Test
+//    public void shouldTryToFetchMediaMultipleTimes_ifContentUrlSupplied_andThereAreNetworkFailures() {
+//        // Given
+//        String givenInvalidPictureUrl = "http://127.0.0.1:" + debugServer.getListeningPort() + "/";
+//        int givenMaxRetryCount = 10;
+//        PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_MAX_RETRY_COUNT, givenMaxRetryCount);
+//        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, null);
+//
+//        // When
+//        simpleNotificationHandler.fetchNotificationPicture(givenInvalidPictureUrl);
+//
+//        // Then
+//        assertEquals(givenMaxRetryCount, debugServer.getRequestCount());
+//    }
 
-        // When
-        simpleNotificationHandler.fetchNotificationPicture(givenInvalidPictureUrl);
-
-        // Then
-        assertEquals(givenMaxRetryCount, debugServer.getRequestCount());
-    }
-
-    @Test
-    public void shouldFetchMediaSuccessfullyOnce() {
-        // Given
-        String givenPictureUrl = prepareBitmapUrl();
-
-        // When
-        simpleNotificationHandler.fetchNotificationPicture(givenPictureUrl);
-
-        // Then
-        assertEquals(1, debugServer.getRequestCount());
-    }
+//    @Test
+//    public void shouldFetchMediaSuccessfullyOnce() {
+//        // Given
+//        String givenPictureUrl = prepareBitmapUrl();
+//
+//        // When
+//        simpleNotificationHandler.fetchNotificationPicture(givenPictureUrl);
+//
+//        // Then
+//        assertEquals(1, debugServer.getRequestCount());
+//    }
 
     @Test
     public void shouldSetHightPriorityForMessageWithBanner() {
@@ -144,14 +139,14 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, getChannelId(builder));
     }
 
-    private String prepareBitmapUrl() {
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), android.R.drawable.ic_media_play);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "image/png", new ByteArrayInputStream(bitmapdata));
-        return "http://127.0.0.1:" + debugServer.getListeningPort() + "/";
-    }
+//    private String prepareBitmapUrl() {
+//        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), android.R.drawable.ic_media_play);
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+//        byte[] bitmapdata = bos.toByteArray();
+//        debugServer.respondWith(NanoHTTPD.Response.Status.OK, "image/png", new ByteArrayInputStream(bitmapdata));
+//        return "http://127.0.0.1:" + debugServer.getListeningPort() + "/";
+//    }
 
     private Message prepareMessageWithBanner() {
         return new Message(

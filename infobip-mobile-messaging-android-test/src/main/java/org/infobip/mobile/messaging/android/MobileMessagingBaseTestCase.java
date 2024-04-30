@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.android;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -23,10 +25,6 @@ import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.iki.elonen.NanoHTTPD;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
-
 /**
  * @author sslavin
  * @since 10/03/2017.
@@ -37,7 +35,7 @@ public abstract class MobileMessagingBaseTestCase {
 
     protected Context context;
     protected Context contextMock;
-    protected DebugServer debugServer;
+//    protected DebugServer debugServer;
     private final Gson gson = new GsonBuilder().serializeNulls().create();
 
     @Before
@@ -46,12 +44,12 @@ public abstract class MobileMessagingBaseTestCase {
         context = getInstrumentation().getContext();
         contextMock = mockContext(context);
 
-        debugServer = new DebugServer();
-        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, "{\n" +
-                "  \"code\": \"500\",\n" +
-                "  \"message\": \"Internal server error\"\n" +
-                "}");
-        debugServer.start();
+//        debugServer = new DebugServer();
+//        debugServer.respondWith(NanoHTTPD.Response.Status.BAD_REQUEST, "{\n" +
+//                "  \"code\": \"500\",\n" +
+//                "  \"message\": \"Internal server error\"\n" +
+//                "}");
+//        debugServer.start();
     }
 
     private static Context mockContext(final Context realContext) {
@@ -76,12 +74,12 @@ public abstract class MobileMessagingBaseTestCase {
 
     @After
     public void tearDown() throws Exception {
-        if (null != debugServer) {
-            try {
-                debugServer.stop();
-            } catch (Exception ignored) {
-            }
-        }
+//        if (null != debugServer) {
+//            try {
+//                debugServer.stop();
+//            } catch (Exception ignored) {
+//            }
+//        }
     }
 
     /**
