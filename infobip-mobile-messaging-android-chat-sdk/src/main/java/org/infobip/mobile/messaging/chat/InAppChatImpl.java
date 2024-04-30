@@ -397,7 +397,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener) {
         try {
             if (inAppChatWVFragment != null) {
-                inAppChatWVFragment.sendContextualMetaData(data, allMultiThreadStrategy);
+                inAppChatWVFragment.sendContextualData(data, allMultiThreadStrategy);
             }
             if (resultListener != null)
                 resultListener.onResult(new Result<>(null));

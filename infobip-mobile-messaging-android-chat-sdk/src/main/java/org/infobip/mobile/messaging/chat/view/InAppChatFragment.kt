@@ -224,7 +224,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         binding.ibLcChat.setLanguage(locale)
     }
 
+    @Deprecated("Use new sendContextualData() instead.", replaceWith = ReplaceWith("sendContextualData(data, allMultiThreadStrategy)"), level = DeprecationLevel.WARNING)
     fun sendContextualMetaData(data: String, allMultiThreadStrategy: Boolean) {
+        binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
+    }
+
+    fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
         binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
     }
 
