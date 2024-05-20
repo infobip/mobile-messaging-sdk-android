@@ -41,8 +41,19 @@ public enum InAppChatEvent {
      * }
      * </pre>
      */
-    LIVECHAT_REGISTRATION_ID_UPDATED("org.infobip.mobile.messaging.chat.LIVECHAT_REGISTRATION_ID_UPDATED");
+    LIVECHAT_REGISTRATION_ID_UPDATED("org.infobip.mobile.messaging.chat.LIVECHAT_REGISTRATION_ID_UPDATED"),
 
+    /**
+     * It is triggered when chat availability is updated.
+     * <p>
+     * Contains chat availability flag.
+     * <pre>
+     * {@code
+     * boolean isChatAvailable = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE);
+     * }
+     * </pre>
+     */
+    IN_APP_CHAT_AVAILABILITY_UPDATED("org.infobip.mobile.messaging.chat.CHAT_AVAILABILITY_UPDATED");
     private final String key;
 
     InAppChatEvent(String key) {

@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.core;
 
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -36,6 +37,12 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
     public void livechatRegistrationIdUpdated(String livechatRegistrationId) {
         send(prepare(InAppChatEvent.LIVECHAT_REGISTRATION_ID_UPDATED)
                 .putExtra(BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID, livechatRegistrationId));
+    }
+
+    @Override
+    public void chatAvailabilityUpdated(boolean isChatAvailable) {
+        send(prepare(InAppChatEvent.IN_APP_CHAT_AVAILABILITY_UPDATED)
+                .putExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, isChatAvailable));
     }
 
     private void send(Intent intent) {

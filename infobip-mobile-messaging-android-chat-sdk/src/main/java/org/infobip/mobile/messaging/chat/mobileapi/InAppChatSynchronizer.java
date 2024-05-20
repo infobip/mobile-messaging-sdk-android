@@ -18,6 +18,7 @@ import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -88,6 +89,8 @@ public class InAppChatSynchronizer {
                     listener.onResult(new Result<>(widgetInfo));
                 }
                 inAppChatBroadcaster.chatConfigurationSynced();
+                boolean chatAvailability = StringUtils.isNotBlank(widgetInfo.getId()) && StringUtils.isNotBlank(mobileMessagingCore.getPushRegistrationId());
+                inAppChatBroadcaster.chatAvailabilityUpdated(chatAvailability);
             }
 
             @Override
@@ -104,6 +107,7 @@ public class InAppChatSynchronizer {
                 if (listener != null) {
                     listener.onResult(new Result<WidgetInfo, MobileMessagingError>(MobileMessagingError.createFrom(error)));
                 }
+                inAppChatBroadcaster.chatAvailabilityUpdated(false);
             }
         }
                 .retryWith(retryPolicy)

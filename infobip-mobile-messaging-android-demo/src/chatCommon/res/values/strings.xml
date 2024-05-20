@@ -55,4 +55,5 @@
     <string name="language_changed">Language changed to %1$s</string>
     <string name="custom_button_checked">Custom button checked</string>
     <string name="custom_button_enabled">Custom button enabled</string>
+    <string name="chat_availability">Chat available: %1$b</string>
 </resources>

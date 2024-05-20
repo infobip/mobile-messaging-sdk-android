@@ -23,6 +23,7 @@ public final class BroadcastParameter {
     public static final String EXTRA_UNREAD_CHAT_MESSAGES_COUNT = "org.infobip.mobile.messaging.unread.chat.messages.count";
     public static final String EXTRA_CHAT_VIEW = "org.infobip.mobile.messaging.chat.view";
     public static final String EXTRA_LIVECHAT_REGISTRATION_ID = "org.infobip.mobile.messaging.livechat.registration.id";
+    public static final String EXTRA_IS_CHAT_AVAILABLE = "org.infobip.mobile.messaging.is.chat.available";
 
     public static final String EXTRA_INBOX = "org.infobip.mobile.messaging.inbox";
     public static final String EXTRA_INBOX_SEEN_IDS = "org.infobip.mobile.messaging.inbox.seen.ids";

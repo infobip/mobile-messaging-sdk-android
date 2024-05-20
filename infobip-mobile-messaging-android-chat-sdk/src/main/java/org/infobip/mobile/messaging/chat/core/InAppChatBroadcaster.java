@@ -23,4 +23,9 @@ public interface InAppChatBroadcaster {
      */
     void livechatRegistrationIdUpdated(String livechatRegistrationId);
 
+    /**
+     * Sends broadcast with new In-app chat's availability
+     * @param isChatAvailable true if In-app chat is ready to be presented to the user, false otherwise
+     */
+    void chatAvailabilityUpdated(boolean isChatAvailable);
 }
