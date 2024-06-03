@@ -2120,8 +2120,7 @@ public class MobileMessagingCore
                 String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(applicationContext);
                 if (applicationCode != null) {
                     String resolvedApplicationCodeHash = MobileMessagingCore.calculateAppCodeHash(applicationCode);
-                    if ((existingApplicationCode != null && !applicationCode.equals(existingApplicationCode) ||
-                            existingApplicationCodeHash != null && !MessageDigest.isEqual(resolvedApplicationCodeHash.getBytes(), existingApplicationCodeHash.getBytes()))) {
+                    if ((existingApplicationCode != null && !applicationCode.equals(existingApplicationCode))) {
                         MobileMessagingLogger.d("Cleaning up push registration data because application code has changed");
                         MobileMessagingCore.cleanup(application);
                     }
