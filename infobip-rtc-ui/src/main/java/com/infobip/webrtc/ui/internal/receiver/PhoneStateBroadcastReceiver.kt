@@ -25,6 +25,9 @@ class PhoneStateBroadcastReceiver : BroadcastReceiver() {
                     TelephonyManager.EXTRA_STATE_RINGING -> {} // Incoming call ringing
 
                     TelephonyManager.EXTRA_STATE_OFFHOOK -> { // Call ongoing
+                        //Note: Broadcast can be SDK entry point therefore initialize webrtcui with app context
+                        Injector.getWebrtcUi(context)
+
                         callDelegate.getCallState()?.let { rtcCall ->
                             if (!rtcCall.isFinished && Injector.cache.autoFinishWhenIncomingCellularCallAccepted){
                                 if (rtcCall.isEstablished)
