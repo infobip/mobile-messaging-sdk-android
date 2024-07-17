@@ -29,7 +29,7 @@ public interface InAppChatClient {
      *
      * @param draft user message draft
      */
-    void sendInputDraft(String draft);
+    void sendChatMessageDraft(String draft);
 
     /**
      * Set language of widget

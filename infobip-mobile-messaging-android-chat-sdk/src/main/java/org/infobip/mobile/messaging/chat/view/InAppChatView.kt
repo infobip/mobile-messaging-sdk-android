@@ -48,59 +48,19 @@ class InAppChatView @JvmOverloads constructor(
 ) : ConstraintLayout(context, attributes, defStyle, defStyleRes) {
 
     /**
-     * [InAppChatView] events listener propagates events coming from Livechat Widget
+     * [InAppChatView] events listener propagates chat related events
      */
-    interface EventsListener {
-        /**
-         * Called once chat has been loaded and connection established. If controlsEnabled == true there was no error.
-         */
-        fun onChatLoaded(controlsEnabled: Boolean)
-
-        /**
-         * Chat connection has been stopped by [stopConnection].
-         * Chat loaded and connected state is not the same. Chat can be loaded but connection can be stopped.
-         */
-        fun onChatDisconnected()
-
-        /**
-         * Chat connection has been re-established by [restartConnection].
-         */
-        fun onChatReconnected()
-
-        /**
-         * Chat controls visibility has changed.
-         */
-        fun onChatControlsVisibilityChanged(isVisible: Boolean)
-
+    interface EventsListener : InAppChatEventsListener {
         /**
          * Attachment from chat has been interacted.
          */
         fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?)
-
-        /**
-         * Chat view has changed.
-         */
-        fun onChatViewChanged(widgetView: InAppChatWidgetView)
-
-        /**
-         * Chat [WidgetInfo] has been updated.
-         */
-        fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo)
-
-        /**
-         * Chat theme has changed.
-         */
-        fun onChatWidgetThemeChanged(widgetThemeName: String)
     }
 
     /**
      * [InAppChatView] errors handler allows you to define custom way to process [InAppChatView] errors.
      */
-    interface ErrorsHandler {
-        fun handlerError(error: String)
-        fun handlerWidgetError(error: String)
-        fun handlerNoInternetConnectionError()
-    }
+    interface ErrorsHandler : InAppChatErrorHandler
 
     companion object {
         private const val CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500L
@@ -170,9 +130,14 @@ class InAppChatView @JvmOverloads constructor(
                 .show()
         }
 
-        override fun handlerNoInternetConnectionError() {
-            showNoInternetConnectionView()
+        override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
+            if (hasConnection) {
+                hideNoInternetConnectionView()
+            } else {
+                showNoInternetConnectionView()
+            }
         }
+
     }
 
     /**
@@ -279,7 +244,7 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     /**
-     * Navigates Livechat widget from thread detail back to thread's list destination in multithread widget. It does nothing if widget is not multithread.
+     * Navigates Livechat widget from [InAppChatWidgetView.THREAD] back to [InAppChatWidgetView.THREAD_LIST] destination in multithread widget. It does nothing if widget is not multithread.
      */
     fun showThreadList() = inAppChatClient.showThreadList()
 
@@ -287,7 +252,18 @@ class InAppChatView @JvmOverloads constructor(
      * Sends draft message to be show in chat to peer's chat.
      * @param draft message
      */
-    fun sendInputDraft(draft: String) = inAppChatClient.sendInputDraft(draft)
+    fun sendChatMessageDraft(draft: String) {
+        inAppChatClient.sendChatMessageDraft(draft)
+    }
+
+    /**
+     * DEPRECATED: Use new sendChatMessageDraft() instead.
+     *
+     * Sends draft message to be show in chat to peer's chat.
+     * @param draft message
+     */
+    @Deprecated("Use new sendChatMessageDraft() instead.", replaceWith = ReplaceWith("sendChatMessageDraft(draft)"), level = DeprecationLevel.WARNING)
+    fun sendInputDraft(draft: String) = sendChatMessageDraft(draft)
 
     /**
      * Sends message to the chat with optional [InAppChatMobileAttachment].
@@ -497,7 +473,7 @@ class InAppChatView @JvmOverloads constructor(
     private val inAppChatErrors = InAppChatErrors { currentErrors, removedError, _ ->
         if (removedError != null) {
             if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type) {
-                hideNoInternetConnectionView()
+                errorsHandler.handlerNoInternetConnectionError(true)
                 if (!isChatLoaded) {
                     loadChatPage()
                 }
@@ -506,7 +482,7 @@ class InAppChatView @JvmOverloads constructor(
 
         for (error in currentErrors) {
             if (InAppChatErrors.INTERNET_CONNECTION_ERROR == error.type) {
-                errorsHandler.handlerNoInternetConnectionError()
+                errorsHandler.handlerNoInternetConnectionError(false)
             } else if (InAppChatErrors.CONFIG_SYNC_ERROR == error.type || InAppChatErrors.JS_ERROR == error.type) {
                 errorsHandler.handlerWidgetError(error.message)
             } else {

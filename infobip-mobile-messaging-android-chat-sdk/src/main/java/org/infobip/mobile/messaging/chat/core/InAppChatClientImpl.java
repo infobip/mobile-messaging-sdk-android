@@ -57,7 +57,7 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     @Override
-    public void sendInputDraft(String draft) {
+    public void sendChatMessageDraft(String draft) {
         executeScript(buildWidgetMethodInvocation(sendDraft.name(), draft));
     }
 

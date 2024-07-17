@@ -39,7 +39,6 @@ import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
-import org.infobip.mobile.messaging.chat.utils.hide
 import org.infobip.mobile.messaging.chat.utils.isLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
@@ -73,6 +72,41 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         fun onInAppChatBackPressed()
     }
 
+    /**
+     * [InAppChatFragment] events listener propagates chat related events.
+     *
+     * It is intended to be used for more advanced integrations of [InAppChatFragment].
+     * Together with another public properties and functions it offers you more control over chat.
+     */
+    interface EventsListener : InAppChatEventsListener {
+
+        /**
+         * Called when attachment from chat has been interacted.
+         *
+         * It allows you to handle attachment preview on your own. Return true if you handled attachment preview.
+         * Return false to let [InAppChatFragment] handle attachment preview.
+         *
+         * @param url attachment url
+         * @param type attachment type
+         * @param caption attachment caption
+         * @return true if attachment preview has been handled, false otherwise
+         */
+        fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean
+
+        /**
+         * Called by default InAppChat's Toolbar back navigation logic to exit chat. You are supposed to hide/remove [InAppChatFragment].
+         *
+         * If you showed [InAppChatFragment] using [InAppChat.showInAppChatFragment] use [InAppChat.hideInAppChatFragment] to hide InAppChatFragment.
+         * If you added [InAppChatFragment] using custom logic, it is up to you to get rid of [InAppChatFragment].
+         */
+        fun onExitChatPressed()
+    }
+
+    /**
+     * [InAppChatFragment] errors handler allows you to define custom way to process chat errors.
+     */
+    interface ErrorsHandler : InAppChatErrorHandler
+
     companion object {
         private const val USER_INPUT_CHECKER_DELAY_MS = 250
         private const val TAG = "InAppChatFragment"
@@ -91,23 +125,91 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private var widgetInfo: WidgetInfo? = null
     private var widgetView: InAppChatWidgetView? = null
     private var appliedWidgetTheme: String? = null
-    private val isMultiThread
-        get() = binding.ibLcChat.isMultiThread
     private val backPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            navigateBack()
+            if (handleBackPress)
+                navigateBack()
         }
     }
     private val inputFinishChecker: InAppChatInputFinishChecker =
-        InAppChatInputFinishChecker {
-            if (_binding != null)
-                binding.ibLcChat.sendInputDraft(it)
+        InAppChatInputFinishChecker { draft ->
+            withBinding { it.ibLcChat.sendChatMessageDraft(draft) }
         }
     private val inputCheckerHandler = Handler(Looper.getMainLooper())
-    private var _lifecycleRegistry: InAppChatFragmentLifecycleRegistry? = null
-    private val lifecycleRegistry
-        get() = _lifecycleRegistry!!
+    private var lifecycleRegistry: InAppChatFragmentLifecycleRegistry? = null
     private lateinit var activityResultDelegate: InAppChatFragmentActivityResultDelegate
+
+    /**
+     * [InAppChatFragment] events listener allows you to listen to chat related events.
+     */
+    var eventsListener: EventsListener? = null
+
+    val defaultErrorsHandler = object : ErrorsHandler {
+        override fun handlerError(error: String) {
+            withBinding {
+                it.ibLcChat.defaultErrorsHandler.handlerError(error)
+            }
+        }
+
+        override fun handlerWidgetError(error: String) {
+            withBinding {
+                it.ibLcChat.defaultErrorsHandler.handlerWidgetError(error)
+            }
+        }
+
+        override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
+            withBinding {
+                it.ibLcChat.defaultErrorsHandler.handlerNoInternetConnectionError(hasConnection)
+            }
+        }
+    }
+
+    /**
+     * Allows you to set custom [InAppChatFragment.ErrorsHandler] handler to process chat errors on your own.
+     */
+    var errorsHandler: ErrorsHandler = defaultErrorsHandler
+
+    /**
+     * Returns true if chat is loaded and multithread feature is enabled, otherwise returns false.
+     */
+    val isMultiThread
+        get() = _binding?.ibLcChat?.isMultiThread ?: false
+
+    /**
+     * Allows you to control presence of InAppChatFragment's Toolbar.
+     * If you want to use your own Toolbar, set it to false. Default value is true.
+     *
+     * When you use own Toolbar it is up to you to handle back navigation logic.
+     * You can use [InAppChatFragment.navigateBackOrCloseChat] for default back navigation logic,
+     * what handles internal multithread widget navigation together with android native navigation.
+     * In case you want to handle back navigation on your own, there is [InAppChatFragment.showThreadList]
+     * to navigate from [InAppChatWidgetView.THREAD] back to [InAppChatWidgetView.THREAD_LIST] in multithread widget.
+     */
+    var withToolbar = true
+        set(value) {
+            field = value
+            //it can be called before fragment is attached/view is created
+            if (_binding != null)
+                initToolbar(value)
+        }
+
+    /**
+     * Allows you to control presence of InAppChatFragment's message input.
+     * If you want to use your own message input, set it to false. Default value is true.
+     *
+     * When you use own message input it is up to you to handle message and attachment sending logic
+     * including request Android permissions for attachment picker.
+     * You can reuse provided [InAppChatInputView] or create custom UI.
+     * Use [InAppChatFragment.sendChatMessage] to send message.
+     * Use [InAppChatFragment.sendChatMessageDraft] to send draft message.
+     */
+    var withInput = true
+        set(value) {
+            field = value
+            //it can be called before fragment is attached/view is created
+            if (_binding != null)
+                initChatInput(value)
+        }
 
     /**
      * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
@@ -119,19 +221,26 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         }
 
     /**
-     * Allows to hide Toolbar in InAppChatFragment.
-     * It is used in React Native plugin, ChatView UI component is without toolbar.
-     */
-    var withToolbar = true
-        set(value) {
-            field = value
-            _binding?.ibLcChatToolbar?.show(value)
-        }
-
-    /**
-     * Allows to disconnect chat when fragment is hidden and receive push notifications.
+     * Allows to stop chat connection when fragment is hidden.
+     * Chat is reconnected automatically once fragment is shown again.
+     * Default value is false.
+     *
+     * By chat connection you can control push notifications.
+     * Push notifications are active only when chat connection is not active.
+     *
+     * It calls [InAppChatView.stopConnection] when fragment is hidden and [InAppChatView.restartConnection] once fragment is visible again.
      */
     var disconnectChatWhenHidden = false
+
+    /**
+     * Allows to enable/disable back press handling logic.
+     * If true, it triggers default back navigation logic [navigateBackOrCloseChat], useful especially for multithread widgets.
+     * If false, back press events are not handled.
+     * It does not affect ActionBar back button.
+     *
+     * Default value is true.
+     */
+    var handleBackPress = true
 
     //region Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -166,9 +275,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         if (this.isHidden)
             return //on configChange (uiMode) fragment is recreated and this fun is called, skip init views
         localizationUtils = LocalizationUtils.getInstance(requireContext())
-        _lifecycleRegistry = InAppChatFragmentLifecycleRegistryImpl(
-            viewLifecycleOwner,
-            ignoreLifecycleOwnerEventsWhen = { this.isHidden })
+        getLifecycleRegistry()
         initViews()
         initBackPressHandler()
     }
@@ -179,10 +286,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
         if (disconnectChatWhenHidden) {
-            lifecycleRegistry.setState(if (hidden) Lifecycle.State.CREATED else Lifecycle.State.RESUMED)
+            getLifecycleRegistry().setState(if (hidden) Lifecycle.State.CREATED else Lifecycle.State.RESUMED)
         }
         if (!hidden) {
-            initToolbar()
+            initToolbar(withToolbar)
             widgetInfo?.let { updateViews(it) }
         }
         backPressedCallback.isEnabled = !isHidden
@@ -199,16 +306,19 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         removeBackPressHandler()
         binding.ibLcChat.eventsListener = null
         _binding = null
-        _lifecycleRegistry = null
+        lifecycleRegistry = null
     }
 
     private fun initViews() {
         binding.ibLcChatInput.isEnabled = false
         initChat()
-        initToolbar()
-        initChatInput()
+        initToolbar(withToolbar)
+        initChatInput(withInput)
     }
 
+    /**
+     * Every time [WidgetInfo] is updated, views are updated to apply widget colors.
+     */
     private fun updateViews(widgetInfo: WidgetInfo) {
         applyToolbarStyle(widgetInfo)
         applyChatInputStyle(widgetInfo)
@@ -219,41 +329,111 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     //endregion
 
     //region Public
+    /**
+     * Set the language of the Livechat Widget.
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     *
+     * @param locale locale's language is used by Livechat Widget and native parts
+     */
     fun setLanguage(locale: Locale) {
         MobileMessagingLogger.d(TAG, "setLanguage($locale)")
-        binding.ibLcChat.setLanguage(locale)
+        withBinding { it.ibLcChat.setLanguage(locale) }
     }
 
-    @Deprecated("Use new sendContextualData() instead.", replaceWith = ReplaceWith("sendContextualData(data, allMultiThreadStrategy)"), level = DeprecationLevel.WARNING)
-    fun sendContextualMetaData(data: String, allMultiThreadStrategy: Boolean) {
-        binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
-    }
-
+    /**
+     * Set contextual data of the Livechat Widget.
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     *
+     * @param data                   contextual data in the form of JSON string
+     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     */
     fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
-        binding.ibLcChat.sendContextualData(data, allMultiThreadStrategy)
+        withBinding { it.ibLcChat.sendContextualData(data, allMultiThreadStrategy) }
     }
 
+    /**
+     * Navigates Livechat widget from [InAppChatWidgetView.THREAD] back to [InAppChatWidgetView.THREAD_LIST]
+     * destination in multithread widget. It does nothing if widget is not multithread.
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     */
+    fun showThreadList() {
+        withBinding { it.ibLcChat.showThreadList() }
+    }
+
+    /**
+     * Sends draft message to be show in chat to peer's chat.
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     *
+     * @param draft message
+     */
+    fun sendChatMessageDraft(draft: String) {
+        withBinding { it.ibLcChat.sendChatMessageDraft(draft) }
+    }
+
+    /**
+     * Sends message to the chat with optional [InAppChatMobileAttachment].
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     *
+     * @param message message to be send, max length allowed is 4096 characters
+     * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
+     */
+    @JvmOverloads
+    @Throws(IllegalArgumentException::class)
+    fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
+        withBinding { it.ibLcChat.sendChatMessage(message, attachment) }
+    }
+
+    /**
+     * Set the theme of the Livechat Widget.
+     * You can define widget themes in <a href="https://portal.infobip.com/apps/livechat/widgets">Live chat widget setup page</a> in Infobip Portal, section `Advanced customization`.
+     * Please check widget <a href="https://www.infobip.com/docs/live-chat/widget-customization">documentation</a> for more details.
+     *
+     * Function allows to change widget theme while chat is shown - in runtime.
+     * If you set widget theme before [InAppChatFragment] is shown the theme will be used once chat is loaded.
+     *
+     * It does nothing if [InAppChatFragment] is not attached.
+     *
+     * @param widgetThemeName unique theme name, empty or blank value is ignored
+     */
     fun setWidgetTheme(widgetThemeName: String) {
-        binding.ibLcChat.setWidgetTheme(widgetThemeName)
+        withBinding { it.ibLcChat.setWidgetTheme(widgetThemeName) }
+    }
+
+    /**
+     * Executes back navigation. In multithread widget it handles internal navigation
+     * from [InAppChatWidgetView.THREAD] back to [InAppChatWidgetView.THREAD_LIST] using
+     * [InAppChatFragment.showThreadList], otherwise it triggers [InAppChatFragment.EventsListener.onExitChatPressed] event
+     * and [InAppChatFragment.InAppChatActionBarProvider.onInAppChatBackPressed].
+     *
+     * It is default InAppChatFragment back navigation logic.
+     */
+    fun navigateBackOrCloseChat() {
+        navigateBack()
     }
     //endregion
 
     //region Toolbar
-    private fun initToolbar() {
-        if (!withToolbar) {
-            if (binding.ibLcChatToolbar.isVisible)
-                binding.ibLcChatToolbar.hide()
-            return
+    private fun initToolbar(withToolbar: Boolean) {
+        withBinding { binding ->
+            binding.ibLcAppbar.show(withToolbar)
+            binding.ibLcAppbar.invalidate()
+            if (withToolbar) {
+                if (inAppChatActionBarProvider?.originalSupportActionBar?.isShowing == true)
+                    inAppChatActionBarProvider?.originalSupportActionBar?.hide()
+                binding.ibLcChatToolbar.setNavigationOnClickListener { navigateBack() }
+            } else {
+                binding.ibLcChatToolbar.setNavigationOnClickListener(null)
+            }
         }
-        //If Activity has it's own ActionBar, it should be hidden.
-        inAppChatActionBarProvider?.originalSupportActionBar?.hide()
-        binding.ibLcChatToolbar.setNavigationOnClickListener { navigateBack() }
     }
 
     private fun navigateBack() {
-        if (!withToolbar)
-            return
-        binding.ibLcChatInput.hideKeyboard()
+        withBinding { it.ibLcChatInput.hideKeyboard() }
         val view = widgetView
         if (isMultiThread && view != null) {
             when (view) {
@@ -267,22 +447,23 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     private fun closeChatPage() {
         revertStatusBarStyle()
-        inAppChatActionBarProvider?.originalSupportActionBar?.show()
+        if (withToolbar)
+            inAppChatActionBarProvider?.originalSupportActionBar?.show()
         backPressedCallback.isEnabled = false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
         inAppChatActionBarProvider?.onInAppChatBackPressed()
+        eventsListener?.onExitChatPressed()
     }
 
-    fun showThreadList() = binding.ibLcChat.showThreadList()
-
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
-        if (!withToolbar)
-            return
-        val style = StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
-        style.apply(binding.ibLcChatToolbar)
+        val style =
+            StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
+        withBinding { style.apply(it.ibLcChatToolbar) }
         applyStatusBarStyle(style)
     }
 
     private fun applyStatusBarStyle(style: InAppChatToolbarStyle) {
+        if (!withToolbar)
+            return
         requireActivity().apply {
             val currentColor = getStatusBarColor() ?: 0
             if (currentColor != style.statusBarBackgroundColor)
@@ -296,6 +477,8 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun revertStatusBarStyle() {
+        if (!withToolbar)
+            return
         if (originalStatusBarColor != 0)
             requireActivity().setStatusBarColor(originalStatusBarColor)
         originalLightStatusBar?.let {
@@ -305,67 +488,98 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     //endregion
 
     //region Chat
-    private fun initChat() = with(binding.ibLcChat) {
-        eventsListener = object : InAppChatView.EventsListener {
+    private fun initChat() {
+        binding.ibLcChat.eventsListener = object : InAppChatView.EventsListener {
             override fun onChatLoaded(controlsEnabled: Boolean) {
                 binding.ibLcChatInput.isEnabled = controlsEnabled
+                eventsListener?.onChatLoaded(controlsEnabled)
             }
 
             override fun onChatDisconnected() {
                 binding.ibLcChatInput.isEnabled = false
+                eventsListener?.onChatDisconnected()
             }
 
             override fun onChatReconnected() {
                 binding.ibLcChatInput.isEnabled = true
+                eventsListener?.onChatReconnected()
             }
 
             override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
                 setChatInputVisibility(isVisible)
+                eventsListener?.onChatControlsVisibilityChanged(isVisible)
             }
 
             override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-                val intent: Intent
-                if (type == "DOCUMENT") {
-                    intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
-                } else {
-                    intent = InAppChatAttachmentPreviewActivity.startIntent(
-                        requireContext(),
-                        url,
-                        type,
-                        caption
-                    )
-                }
-                runCatching {
-                    startActivity(intent)
-                }.onFailure {
-                    MobileMessagingLogger.e(TAG, "Could not open attachment preview.", it)
+                val handled = eventsListener?.onAttachmentPreviewOpened(url, type, caption) ?: false
+                if (!handled) {
+                    val intent: Intent
+                    if (type == "DOCUMENT") {
+                        intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
+                    } else {
+                        intent = InAppChatAttachmentPreviewActivity.startIntent(
+                            requireContext(),
+                            url,
+                            type,
+                            caption
+                        )
+                    }
+                    runCatching {
+                        startActivity(intent)
+                    }.onFailure {
+                        MobileMessagingLogger.e(TAG, "Could not open attachment preview.", it)
+                    }
                 }
             }
 
             override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
                 this@InAppChatFragment.widgetView = widgetView
                 updateInputVisibilityByMultiThreadView(widgetView)
+                eventsListener?.onChatViewChanged(widgetView)
             }
 
             override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
                 this@InAppChatFragment.widgetInfo = widgetInfo
                 updateViews(widgetInfo)
                 MobileMessagingLogger.w(TAG, "WidgetInfo updated $widgetInfo")
+                eventsListener?.onChatWidgetInfoUpdated(widgetInfo)
             }
 
             override fun onChatWidgetThemeChanged(widgetThemeName: String) {
                 appliedWidgetTheme = widgetThemeName
+                eventsListener?.onChatWidgetThemeChanged(widgetThemeName)
             }
         }
-        init(lifecycleRegistry.lifecycle)
+        binding.ibLcChat.errorsHandler = object : InAppChatView.ErrorsHandler {
+            override fun handlerError(error: String) {
+                errorsHandler.handlerError(error)
+            }
+
+            override fun handlerWidgetError(error: String) {
+                errorsHandler.handlerWidgetError(error)
+            }
+
+            override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
+                errorsHandler.handlerNoInternetConnectionError(hasConnection)
+            }
+
+        }
+        binding.ibLcChat.init(getLifecycleRegistry().lifecycle)
     }
     //endregion
 
     //region ChatInput
-    private fun initChatInput() {
-        initTextBar()
-        initSendButton()
-        initAttachmentButton()
+    private fun initChatInput(withInput: Boolean) {
+        withBinding {
+            if (withInput) {
+                initTextBar()
+                initSendButton()
+                initAttachmentButton()
+                setChatInputVisibility(true)
+            } else {
+                it.ibLcChatInput.visibility = View.GONE
+            }
+        }
     }
 
     private fun initTextBar() {
@@ -419,19 +633,20 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun applyChatInputStyle(widgetInfo: WidgetInfo) {
-        binding.ibLcChatInput.applyWidgetInfoStyle(widgetInfo)
+        withBinding { it.ibLcChatInput.applyWidgetInfoStyle(widgetInfo) }
     }
 
     private fun updateInputVisibilityByMultiThreadView(widgetView: InAppChatWidgetView) {
+        if (!withInput)
+            return
         if (isMultiThread) {
             when (widgetView) {
-                InAppChatWidgetView.THREAD, InAppChatWidgetView.SINGLE_MODE_THREAD -> setChatInputVisibility(
-                    true
-                )
-
-                InAppChatWidgetView.LOADING, InAppChatWidgetView.THREAD_LIST, InAppChatWidgetView.CLOSED_THREAD, InAppChatWidgetView.LOADING_THREAD -> setChatInputVisibility(
-                    false
-                )
+                InAppChatWidgetView.THREAD,
+                InAppChatWidgetView.SINGLE_MODE_THREAD -> setChatInputVisibility(true)
+                InAppChatWidgetView.LOADING,
+                InAppChatWidgetView.THREAD_LIST,
+                InAppChatWidgetView.CLOSED_THREAD,
+                InAppChatWidgetView.LOADING_THREAD -> setChatInputVisibility(false)
             }
         } else {
             setChatInputVisibility(true)
@@ -439,20 +654,24 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun setChatInputVisibility(isVisible: Boolean) {
-        val canShowInMultiThread =
-            isMultiThread && (widgetView == InAppChatWidgetView.THREAD || widgetView == InAppChatWidgetView.SINGLE_MODE_THREAD)
-        val isNotMultiThread: Boolean = !isMultiThread
-        val isVisibleMultiThreadSafe = isVisible && (canShowInMultiThread || isNotMultiThread)
-        if (binding.ibLcChatInput.isVisible == isVisibleMultiThreadSafe) {
-            return
-        } else if (isVisibleMultiThreadSafe) {
-            binding.ibLcChatInput.show(true)
-        } else {
-            binding.ibLcChatInput.show(false)
+        withBinding { binding ->
+            if (!withInput)
+                return@withBinding
+            val canShowInMultiThread =
+                isMultiThread && (widgetView == InAppChatWidgetView.THREAD || widgetView == InAppChatWidgetView.SINGLE_MODE_THREAD)
+            val isNotMultiThread: Boolean = !isMultiThread
+            val isVisibleMultiThreadSafe = isVisible && (canShowInMultiThread || isNotMultiThread)
+            if (binding.ibLcChatInput.isVisible == isVisibleMultiThreadSafe) {
+                return@withBinding
+            } else {
+                binding.ibLcChatInput.show(isVisibleMultiThreadSafe)
+            }
         }
     }
 
     private fun sendInputDraftImmediately() {
+        if (!withInput)
+            return
         inputCheckerHandler.removeCallbacks(inputFinishChecker)
         inputCheckerHandler.post(inputFinishChecker)
     }
@@ -533,7 +752,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         if (isCameraPermissionGranted) {
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser())
         }
-        lifecycleRegistry.isEnabled = false
+        getLifecycleRegistry().isEnabled = false
         activityResultDelegate.openAttachmentChooser(chooserIntent)
     }
 
@@ -574,7 +793,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     override fun onAttachmentChooserResult(result: ActivityResult) {
-        lifecycleRegistry.isEnabled = true
+        getLifecycleRegistry().isEnabled = true
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data
             InAppChatAttachmentHelper.makeAttachment(
@@ -602,6 +821,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 isCameraPermissionGranted() -> {
                     //all good no need to request
                 }
+
                 shouldShowRequestPermissionRationale(permission) -> showCameraPermissionRationale()
                 else -> activityResultDelegate.requestCameraPermission()
             }
@@ -647,6 +867,19 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     private fun removeBackPressHandler() {
         backPressedCallback.remove()
+    }
+
+    private fun withBinding(block: (IbFragmentChatBinding) -> Unit) {
+        _binding?.let(block) ?: MobileMessagingLogger.e(TAG, "Could not execute action, fragment is not attached yet")
+    }
+
+    private fun getLifecycleRegistry(): InAppChatFragmentLifecycleRegistry {
+        return lifecycleRegistry ?: InAppChatFragmentLifecycleRegistryImpl(
+            viewLifecycleOwner,
+            ignoreLifecycleOwnerEventsWhen = { this.isHidden }
+        ).also {
+            lifecycleRegistry = it
+        }
     }
 
 }

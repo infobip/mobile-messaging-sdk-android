@@ -41,7 +41,10 @@
     <string name="subject">Subject</string>
     <string name="authenticate">Authenticate</string>
     <string name="mm_open_chat_activity">Open chat activity</string>
-    <string name="mm_open_chat_fragment">Open chat fragment</string>
+    <string name="mm_open_chat_fragment">Open chat fragment with:</string>
+    <string name="mm_toolbar">Toolbar</string>
+    <string name="mm_input">Input</string>
+    <string name="mm_show_chat_fragment">Show chat fragment</string>
     <string name="mm_open_chat_view">Open chat view</string>
     <string name="mm_personalize">Personalize</string>
     <string name="mm_depersonalize">Depersonalize</string>

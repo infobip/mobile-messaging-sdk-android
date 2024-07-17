@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
@@ -24,8 +25,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.constraintlayout.widget.Group;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     private TextInputEditText subjectEditText = null;
     private LinearProgressIndicator progressBar = null;
     private Button openChatActivityButton = null;
+    private Button showChatFragmentButton = null;
     private Button openChatFragmentButton = null;
     private Button openChatViewButton = null;
 
@@ -91,8 +93,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                String pushRegId = intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID);
-                showPushRegId(pushRegId);
+                showPushRegId(intent.getStringExtra(BroadcastParameter.EXTRA_INFOBIP_ID));
             }
         }
     };
@@ -100,8 +101,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                String lcRegId = intent.getStringExtra(BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID);
-                showLivechatRegId(lcRegId);
+                showLivechatRegId(intent.getStringExtra(BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID));
             }
         }
     };
@@ -109,11 +109,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                boolean availability = intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, false);
-                MainActivity.this.openChatActivityButton.setEnabled(availability);
-                MainActivity.this.openChatFragmentButton.setEnabled(availability);
-                MainActivity.this.openChatViewButton.setEnabled(availability);
-                Toast.makeText(context, getString(R.string.chat_availability, availability), Toast.LENGTH_SHORT).show();
+                onChatAvailabilityUpdated(intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, false));
             }
         }
     };
@@ -138,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         this.subjectEditText = this.findViewById(R.id.subjectEditText);
         this.progressBar = this.findViewById(R.id.progressBar);
         this.openChatActivityButton = findViewById(R.id.openChatActivity);
+        this.showChatFragmentButton = findViewById(R.id.showChatFragment);
         this.openChatFragmentButton = findViewById(R.id.openChatFragment);
         this.openChatViewButton = findViewById(R.id.openChatView);
         setSupportActionBar(this.findViewById(R.id.toolbar));
@@ -146,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpLivechatRegIdField();
         setUpSubjectTypeSpinner();
         setUpOpenChatActivityButton();
+        setUpShowChatFragmentButton();
         setUpOpenChatFragmentButton();
         setUpOpenChatViewButton();
         setUpAuthButton();
@@ -317,13 +315,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         }
     }
 
-    private void setUpInAppChatAvailabilityReceiver() {
-        if (!inAppChatAvailabilityReceiverRegistered) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(isInAppChatAvailableReceiver, new IntentFilter(InAppChatEvent.IN_APP_CHAT_AVAILABILITY_UPDATED.getKey()));
-            this.inAppChatAvailabilityReceiverRegistered = true;
-        }
-    }
-
     private void showLivechatRegId(String lcRegId) {
         if (StringUtils.isNotBlank(lcRegId)) {
             TextInputEditText lcRegIdEditText = findViewById(R.id.lcRegIdEditText);
@@ -344,12 +335,42 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         });
     }
 
+    private void setUpInAppChatAvailabilityReceiver() {
+        if (!inAppChatAvailabilityReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(isInAppChatAvailableReceiver, new IntentFilter(InAppChatEvent.IN_APP_CHAT_AVAILABILITY_UPDATED.getKey()));
+            this.inAppChatAvailabilityReceiverRegistered = true;
+        }
+    }
+
+    private void onChatAvailabilityUpdated(boolean isAvailable) {
+        openChatActivityButton.setEnabled(isAvailable);
+        showChatFragmentButton.setEnabled(isAvailable);
+        openChatFragmentButton.setEnabled(isAvailable);
+        openChatViewButton.setEnabled(isAvailable);
+        Toast.makeText(this, getString(R.string.chat_availability, isAvailable), Toast.LENGTH_SHORT).show();
+    }
+
     private void setUpOpenChatActivityButton() {
         openChatActivityButton.setOnClickListener((v) -> inAppChat.inAppChatScreen().show());
     }
 
+    private void setUpShowChatFragmentButton() {
+        showChatFragmentButton.setOnClickListener((v) -> inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer));
+    }
+
     private void setUpOpenChatFragmentButton() {
-        openChatFragmentButton.setOnClickListener((v) -> inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer));
+        CheckBox toolbarCheckbox = findViewById(R.id.toolbarCheckbox);
+        CheckBox inputCheckbox = findViewById(R.id.inputCheckbox);
+        openChatFragmentButton.setOnClickListener((v) -> {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            Fragment fragment = new InAppChatFragmentDemoFragment();
+            Bundle args = new Bundle();
+            args.putBoolean(InAppChatFragmentDemoFragment.ARG_WITH_TOOLBAR, toolbarCheckbox.isChecked());
+            args.putBoolean(InAppChatFragmentDemoFragment.ARG_WITH_INPUT, inputCheckbox.isChecked());
+            fragment.setArguments(args);
+            fragmentTransaction.add(R.id.fragmentContainer, fragment, InAppChatFragmentDemoFragment.class.getSimpleName());
+            fragmentTransaction.commit();
+        });
     }
 
     private void setUpOpenChatViewButton() {

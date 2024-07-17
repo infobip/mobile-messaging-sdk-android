@@ -172,10 +172,21 @@
                     android:layout_height="wrap_content"
                     android:text="@string/mm_open_chat_activity"
                     android:enabled="false"
-                    app:layout_constraintBottom_toTopOf="@+id/openChatFragment"
+                    app:layout_constraintBottom_toTopOf="@+id/showChatFragment"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/customization" />
+
+                <Button
+                    android:id="@+id/showChatFragment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mm_show_chat_fragment"
+                    android:enabled="false"
+                    app:layout_constraintBottom_toTopOf="@+id/openChatFragment"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/openChatActivity" />
 
                 <Button
                     android:id="@+id/openChatFragment"
@@ -183,10 +194,33 @@
                     android:layout_height="wrap_content"
                     android:text="@string/mm_open_chat_fragment"
                     android:enabled="false"
-                    app:layout_constraintBottom_toTopOf="@+id/openChatView"
+                    app:layout_constraintBottom_toTopOf="@+id/toolbarCheckbox"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/openChatActivity" />
+                    app:layout_constraintTop_toBottomOf="@+id/showChatFragment" />
+
+                <CheckBox
+                    android:id="@+id/toolbarCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mm_toolbar"
+                    app:layout_constraintTop_toBottomOf="@id/openChatFragment"
+                    app:layout_constraintBottom_toTopOf="@id/openChatView"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/inputCheckbox"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    />
+
+                <CheckBox
+                    android:id="@+id/inputCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mm_input"
+                    app:layout_constraintTop_toTopOf="@id/toolbarCheckbox"
+                    app:layout_constraintBottom_toBottomOf="@id/toolbarCheckbox"
+                    app:layout_constraintStart_toEndOf="@id/toolbarCheckbox"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    />
 
                 <Button
                     android:id="@+id/openChatView"
@@ -197,7 +231,7 @@
                     app:layout_constraintBottom_toTopOf="@+id/personalize"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/openChatFragment" />
+                    app:layout_constraintTop_toBottomOf="@+id/toolbarCheckbox" />
 
                 <Button
                     android:id="@+id/personalize"

@@ -41,7 +41,7 @@ public class InAppChatViewDemoFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         rootView = view;
         inAppChatView = view.findViewById(R.id.inAppChatView);
-        chatNavigateBackButton = rootView.findViewById(R.id.chatNavigateBack);
+        chatNavigateBackButton = rootView.findViewById(R.id.navigateBack);
         sendButton = rootView.findViewById(R.id.send);
 
         hideActionBar();
@@ -154,9 +154,9 @@ public class InAppChatViewDemoFragment extends Fragment {
             }
 
             @Override
-            public void handlerNoInternetConnectionError() {
+            public void handlerNoInternetConnectionError(boolean hasConnection) {
                 //Your custom handling of missing network connection error or use default handler
-                inAppChatView.getDefaultErrorsHandler().handlerNoInternetConnectionError();
+                inAppChatView.getDefaultErrorsHandler().handlerNoInternetConnectionError(hasConnection);
             }
         });
     }

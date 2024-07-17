@@ -224,7 +224,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         }
     }
 
-    private void syncLivechatRegistrationId(WidgetInfo widgetInfo){
+    private void syncLivechatRegistrationId(WidgetInfo widgetInfo) {
         livechatRegistrationIdChecker().sync(
                 widgetInfo.getId(),
                 mobileMessagingCore().getPushRegistrationId(),
@@ -290,16 +290,18 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
-        if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
-        if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
-            fragmentTransaction.show(inAppChatWVFragment);
-        } else {
-            fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
+        if (fragmentManager != null) {
+            if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+            //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
+            if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
+                fragmentTransaction.show(inAppChatWVFragment);
+            } else {
+                fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
+            }
+            fragmentTransaction.commit();
         }
-        fragmentTransaction.commit();
     }
 
     public void hideInAppChatFragment(FragmentManager fragmentManager) {
@@ -308,17 +310,19 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
-        if (inAppChatWVFragment != null) {
-            inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
+        if (fragmentManager != null) {
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            if (inAppChatWVFragment != null) {
+                inAppChatWVFragment.setDisconnectChatWhenHidden(disconnectChat);
+                fragmentTransaction.hide(inAppChatWVFragment);
+            }
+            //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
+            Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
+            if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
+                fragmentTransaction.remove(fragmentByTag);
+            }
+            fragmentTransaction.commit();
         }
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.hide(inAppChatWVFragment);
-        //on any configuration change activity is recreated -> new fragment manager instance -> remove "old" fragment found by tag
-        Fragment fragmentByTag = fragmentManager.findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-        if (fragmentByTag != null && !areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
-            fragmentTransaction.remove(fragmentByTag);
-        }
-        fragmentTransaction.commit();
     }
 
     private boolean areFragmentsEquals(Fragment f1, Fragment f2) {
