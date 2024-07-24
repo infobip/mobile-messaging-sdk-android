@@ -21,12 +21,12 @@ import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient
 import org.infobip.mobile.messaging.chat.InAppChat
 import org.infobip.mobile.messaging.chat.InAppChatErrors
-import org.infobip.mobile.messaging.chat.InAppChatImpl
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.*
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatBinding
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker
+import org.infobip.mobile.messaging.chat.models.ContextualData
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
@@ -233,14 +233,33 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     /**
-     * Set contextual data of the Livechat Widget
+     * Set contextual data of the Livechat Widget.
+     *
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     *
+     * Every function invocation will overwrite the previous contextual data.
      *
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     * @see [InAppChatView.EventsListener.onChatLoaded] to detect if chat is loaded
      */
     fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
-        val flag = if (allMultiThreadStrategy) InAppChatMultiThreadFlag.ALL else InAppChatMultiThreadFlag.ACTIVE
-        inAppChatClient.sendContextualData(data, flag)
+        if (isChatLoaded) {
+            val flag = if (allMultiThreadStrategy) InAppChatMultiThreadFlag.ALL else InAppChatMultiThreadFlag.ACTIVE
+            val listener = object : ResultListener<String>() {
+                override fun onResult(result: Result<String, MobileMessagingError>) {
+                    SessionStorage.contextualData = null
+                    if (result.error != null) {
+                        MobileMessagingLogger.e(TAG, "Could not send contextual data: ${result.error.message}")
+                    }
+                }
+            }
+            inAppChatClient.sendContextualData(data, flag, listener)
+        } else {
+            SessionStorage.contextualData = ContextualData(data, allMultiThreadStrategy)
+            MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.")
+        }
     }
 
     /**
@@ -451,9 +470,9 @@ class InAppChatView @JvmOverloads constructor(
     //endregion
 
     private fun updateErrors() {
-        val chatWidgetConfigSyncResult = InAppChatImpl.getChatWidgetConfigSyncResult()
-        if (chatWidgetConfigSyncResult != null && !chatWidgetConfigSyncResult.isSuccess) {
-            val error = chatWidgetConfigSyncResult.error
+        val configSyncResult = SessionStorage.configSyncResult
+        if (configSyncResult != null && !configSyncResult.isSuccess) {
+            val error = configSyncResult.error
             val isInternetConnectionError = DefaultApiClient.ErrorCode.API_IO_ERROR.value == error.code && error.type == MobileMessagingError.Type.SERVER_ERROR
             val isPushRegIdMissing = pushRegistrationId == null
             val isRegistrationPendingError = InternalSdkError.NO_VALID_REGISTRATION.error.code == error.code && mmCore.isRegistrationIdReported
@@ -532,8 +551,12 @@ class InAppChatView @JvmOverloads constructor(
         eventsListener?.onChatLoaded(isLoaded)
         isChatLoaded = isLoaded
         lcRegIdChecker.sync()
-        if (isLoaded)
+        if (isLoaded) {
             inAppChat.resetMessageCounter()
+            SessionStorage.contextualData?.let {
+                sendContextualData(it.data, it.allMultiThreadStrategy)
+            }
+        }
     }
 
     private fun onWidgetLoadError(message: String?) {

@@ -28,8 +28,10 @@ import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatScreenImpl;
+import org.infobip.mobile.messaging.chat.core.SessionStorage;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker;
+import org.infobip.mobile.messaging.chat.models.ContextualData;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
@@ -51,6 +53,8 @@ import java.util.concurrent.Executors;
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
+    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
+    private final static String TAG = "InAppChat";
     @SuppressLint("StaticFieldLeak")
     private static InAppChatImpl instance;
     private static MobileMessagingCore mmCore;
@@ -62,14 +66,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatWebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
-    private static Result<WidgetInfo, MobileMessagingError> chatWidgetConfigSyncResult = null;
-    private JwtProvider jwtProvider = null;
-    private InAppChatTheme theme = null;
-    private LivechatRegistrationChecker lcRegIgChecker = null;
-    private String widgetTheme = null;
-    private String domain = null;
+    private LivechatRegistrationChecker lcRegIgChecker;
     private InAppChatFragment inAppChatWVFragment;
-    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
 
     //region MessageHandlerModule
     public InAppChatImpl() {
@@ -92,7 +90,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (!isChatWidgetOnForeground() && !message.isSilent()) {
             MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
         }
-        MobileMessagingLogger.d("Message with id: " + message.getMessageId() + " will be handled by inAppChat MessageHandler");
+        MobileMessagingLogger.d(TAG, "Message with id: " + message.getMessageId() + " will be handled by inAppChat MessageHandler");
         return true;
     }
 
@@ -190,16 +188,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
-        chatWidgetConfigSyncResult = null;
+        sessionStorage().setConfigSyncResult(null);
         try {
             Handler handler = new Handler(Looper.getMainLooper());
             handler.post(() -> {
                 webView().clearHistory();
                 webView().clearCache(true);
-                MobileMessagingLogger.d("Deleted local widget history");
+                MobileMessagingLogger.d(TAG,"Deleted local widget history");
             });
         } catch (Exception e) {
-            MobileMessagingLogger.w("Failed to delete local widget history due to " + e.getMessage());
+            MobileMessagingLogger.w(TAG,"Failed to delete local widget history due to " + e.getMessage());
         }
     }
 
@@ -211,11 +209,12 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void performSyncActions() {
-        if (isActivated() && (chatWidgetConfigSyncResult == null || !chatWidgetConfigSyncResult.isSuccess())) {
+        Result<WidgetInfo, MobileMessagingError> syncResult = sessionStorage().getConfigSyncResult();
+        if (isActivated() && (syncResult == null || !syncResult.isSuccess())) {
             inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
                 @Override
                 public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
-                    chatWidgetConfigSyncResult = result;
+                    sessionStorage().setConfigSyncResult(result);
                     if (result.isSuccess()) {
                         syncLivechatRegistrationId(result.getData());
                     }
@@ -235,7 +234,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     //region InAppChat public functions
     @NonNull
-    public static InAppChatImpl getInstance(Context context) {
+    public static InAppChat getInstance(Context context) {
         if (instance == null) {
             mmCore = MobileMessagingCore.getInstance(context);
             instance = mmCore.getMessageHandlerModule(InAppChatImpl.class);
@@ -255,7 +254,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             inAppChatScreen = new InAppChatScreenImpl(context);
         }
         if (!isActivated()) {
-            MobileMessagingLogger.e("In-app chat wasn't activated, call activate()");
+            MobileMessagingLogger.e(TAG,"In-app chat wasn't activated, call activate()");
         }
         return inAppChatScreen;
     }
@@ -270,10 +269,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
         lcRegIgChecker = null;
-        jwtProvider = null;
-        theme = null;
-        widgetTheme = null;
-        domain = null;
+        sessionStorage().clean();
         cleanupWidgetData();
         propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID);
@@ -331,7 +327,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void resetMessageCounter() {
-        MobileMessagingLogger.d("Resetting unread message counter to 0");
+        MobileMessagingLogger.d(TAG,"Resetting unread message counter to 0");
         propertyHelper().remove(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
         inAppChatBroadcaster().unreadMessagesCounterUpdated(0);
     }
@@ -347,7 +343,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             @Override
             public void onResult(Result<String, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e("Set language error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG,"Set language error: " + result.getError().getMessage());
                 }
             }
         });
@@ -374,53 +370,69 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public void sendContextualData(String data) {
+    public void sendContextualData(@Nullable String data) {
         sendContextualData(data, false, new MobileMessaging.ResultListener<Void>() {
             @Override
             public void onResult(Result<Void, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e("Send contextual data error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG,"Send contextual data error: " + result.getError().getMessage());
                 }
             }
         });
     }
 
     @Override
-    public void sendContextualData(String data, Boolean allMultiThreadStrategy) {
+    public void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy) {
         sendContextualData(data, allMultiThreadStrategy, new MobileMessaging.ResultListener<Void>() {
             @Override
             public void onResult(Result<Void, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e("Send contextual data error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG,"Send contextual data error: " + result.getError().getMessage());
                 }
             }
         });
     }
 
     @Override
-    public void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener) {
+    public void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy, @Nullable MobileMessaging.ResultListener<Void> resultListener) {
+        Result<Void, MobileMessagingError> result = null;
         try {
-            if (inAppChatWVFragment != null) {
+            if (data == null || data.isEmpty()) {
+                sessionStorage().setContextualData(null);
+                result = new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. Data is null or empty.")));
+            } else if (allMultiThreadStrategy == null) {
+                sessionStorage().setContextualData(null);
+                result = new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. Strategy flag is null.")));
+            } else if (inAppChatWVFragment != null) {
                 inAppChatWVFragment.sendContextualData(data, allMultiThreadStrategy);
+                result = new Result<>(null);
+            } else {
+                sessionStorage().setContextualData(new ContextualData(data, allMultiThreadStrategy));
+                MobileMessagingLogger.d(TAG,"Contextual data is stored, will be sent once chat is loaded.");
+                result = new Result<>(null);
             }
-            if (resultListener != null)
-                resultListener.onResult(new Result<>(null));
         } catch (Throwable throwable) {
-            MobileMessagingLogger.e("sendContextualData() failed", throwable);
-            if (resultListener != null)
-                resultListener.onResult(new Result<>(MobileMessagingError.createFrom(throwable)));
+            result = new Result<>(MobileMessagingError.createFrom(throwable));
+        } finally {
+            if (result != null) {
+                if (resultListener != null) {
+                    resultListener.onResult(result);
+                } else if (!result.isSuccess()) {
+                    MobileMessagingLogger.e(TAG,"sendContextualData() failed: " + result.getError().getMessage());
+                }
+            }
         }
     }
 
     @Override
     public void setJwtProvider(InAppChat.JwtProvider jwtProvider) {
-        this.jwtProvider = jwtProvider;
+        sessionStorage().setJwtProvider(jwtProvider);
     }
 
     @Override
     @Nullable
     public InAppChat.JwtProvider getJwtProvider() {
-        return jwtProvider;
+        return sessionStorage().getJwtProvider();
     }
 
     @Override
@@ -428,24 +440,24 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (inAppChatWVFragment != null) {
             inAppChatWVFragment.showThreadList();
         } else {
-            MobileMessagingLogger.e("Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
+            MobileMessagingLogger.e(TAG,"Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
         }
     }
 
     @Override
     public void setTheme(@Nullable InAppChatTheme theme) {
-        this.theme = theme;
+        sessionStorage().setTheme(theme);
     }
 
     @Override
     @Nullable
     public InAppChatTheme getTheme() {
-        return theme;
+        return sessionStorage().getTheme();
     }
 
     @Override
     public void setWidgetTheme(@Nullable String widgetThemeName) {
-        this.widgetTheme = widgetThemeName;
+        sessionStorage().setWidgetTheme(widgetThemeName);
         if (inAppChatWVFragment != null && widgetThemeName != null) {
             inAppChatWVFragment.setWidgetTheme(widgetThemeName);
         }
@@ -454,23 +466,17 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     @Nullable
     public String getWidgetTheme() {
-        return widgetTheme;
+        return sessionStorage().getWidgetTheme();
     }
 
     @Override
     public String getDomain() {
-        return domain;
+        return sessionStorage().getDomain();
     }
 
     @Override
     public void setDomain(String domain) {
-        this.domain = domain;
-    }
-    //endregion
-
-    //region internal functions
-    public static Result<WidgetInfo, MobileMessagingError> getChatWidgetConfigSyncResult() {
-        return chatWidgetConfigSyncResult;
+        sessionStorage().setDomain(domain);
     }
     //endregion
 
@@ -541,6 +547,10 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             );
         }
         return lcRegIgChecker;
+    }
+
+    synchronized private SessionStorage sessionStorage() {
+        return SessionStorage.INSTANCE;
     }
 
     private boolean isActivated() {

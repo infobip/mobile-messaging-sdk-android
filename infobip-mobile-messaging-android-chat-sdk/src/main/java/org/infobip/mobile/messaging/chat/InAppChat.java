@@ -132,29 +132,38 @@ public abstract class InAppChat {
     public abstract void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener);
 
     /**
-     * Set contextual data of the widget
+     * Set contextual data of the Livechat Widget.
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     * Every function invocation will overwrite the previous contextual data.
      *
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      */
-    public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy);
+    public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy);
 
     /**
-     * Set contextual data of the widget with false (ACTIVE) value for multithread strategy
+     * Set contextual data of the Livechat Widget with false (ACTIVE) value for multithread strategy.
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     * Every function invocation will overwrite the previous contextual data.
      *
-     * @param data contextual data in the form of JSON string
+     * @param data                   contextual data in the form of JSON string
      */
-    public abstract void sendContextualData(String data);
+    public abstract void sendContextualData(@Nullable String data);
 
     /**
-     * Set contextual data of the widget
+     * Set contextual data of the Livechat Widget.
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     * Every function invocation will overwrite the previous contextual data.
      *
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      * @param resultListener         listener to report the result on
      * @see MobileMessaging.ResultListener
      */
-    public abstract void sendContextualData(String data, Boolean allMultiThreadStrategy, MobileMessaging.ResultListener<Void> resultListener);
+    public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy, @Nullable MobileMessaging.ResultListener<Void> resultListener);
 
     /**
      * Set {@link JwtProvider} to give in-app chat ability to authenticate.

@@ -43,8 +43,9 @@ public interface InAppChatClient {
      *
      * @param data            contextual data in the form of JSON string
      * @param multiThreadFlag multithread strategy flag
+     * @param resultListener result listener
      */
-    void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag);
+    void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag, MobileMessaging.ResultListener<String> resultListener);
 
     /**
      * Change destination from thread to list in multiThread widget. For non multiThread widget it does nothing.

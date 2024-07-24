@@ -75,10 +75,16 @@ public class InAppChatClientImpl implements InAppChatClient {
     }
 
     @Override
-    public void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag) {
-        if (!data.isEmpty()) {
-            executeScript(sendContextualData.name() + "(" + data + ", '" + multiThreadFlag + "')");
+    public void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag, MobileMessaging.ResultListener<String> resultListener) {
+        if (data == null || data.isEmpty()){
+            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. Data is null or empty."))));
+            return;
         }
+        if (multiThreadFlag == null){
+            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. MultiThreadFlag is null."))));
+            return;
+        }
+        executeScript(sendContextualData.name() + "(" + data + ", '" + multiThreadFlag + "')", resultListener);
     }
 
     @Override

@@ -1,0 +1,51 @@
+package org.infobip.mobile.messaging.chat.core
+
+import org.infobip.mobile.messaging.api.chat.WidgetInfo
+import org.infobip.mobile.messaging.chat.InAppChat.JwtProvider
+import org.infobip.mobile.messaging.chat.models.ContextualData
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
+import org.infobip.mobile.messaging.mobileapi.Result
+
+
+/**
+ * Session storage stores InAppChat data only during SDK lifetime.
+ *
+ * It is internal class and used to store data that are needed to access in multiple places in the Chat SDK.
+ */
+internal object SessionStorage {
+
+    @get:Synchronized
+    @set:Synchronized
+    var domain: String? = null
+
+    @get:Synchronized
+    @set:Synchronized
+    var widgetTheme: String? = null
+
+    @get:Synchronized
+    @set:Synchronized
+    var theme: InAppChatTheme? = null
+
+    @get:Synchronized
+    @set:Synchronized
+    var jwtProvider: JwtProvider? = null
+
+    @get:Synchronized
+    @set:Synchronized
+    var contextualData: ContextualData? = null
+
+    @get:Synchronized
+    @set:Synchronized
+    var configSyncResult: Result<WidgetInfo, MobileMessagingError>? = null
+
+    fun clean() {
+        domain = null
+        widgetTheme = null
+        theme = null
+        jwtProvider = null
+        contextualData = null
+        configSyncResult = null
+    }
+
+}
