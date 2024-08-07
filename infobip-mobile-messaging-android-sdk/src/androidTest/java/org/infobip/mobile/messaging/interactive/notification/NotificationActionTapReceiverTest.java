@@ -14,6 +14,8 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.platform.MockActivity;
 import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -33,6 +35,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
     private ArgumentCaptor<Message> messageArgumentCaptor;
     private NotificationActionTapReceiver notificationActionTapReceiver;
     private ActivityStarterWrapper activityStarterWrapper;
+    private JSONObject userInfo;
 
     @Override
     public void setUp() throws Exception {
@@ -56,6 +59,33 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
 
         //noinspection WrongConstant
         Mockito.when(contextMock.getSystemService(eq(Context.NOTIFICATION_SERVICE))).thenReturn(notificationManagerMock);
+
+        try {
+            userInfo = new JSONObject();
+            userInfo.put("messageId", "random-message-id-123456");
+
+            JSONObject aps = new JSONObject();
+            JSONObject alert = new JSONObject();
+            alert.put("body", "text");
+            aps.put("alert", alert);
+            aps.put("category", "categoryId");
+            userInfo.put("aps", aps);
+
+            JSONObject customPayload = new JSONObject();
+            customPayload.put("key", "value");
+
+            JSONObject nestedObject = new JSONObject();
+            nestedObject.put("key", "value");
+            customPayload.put("nestedObject", nestedObject);
+
+            customPayload.put("nullAttribute", JSONObject.NULL);
+            customPayload.put("numberAttribute", 123);
+
+            userInfo.put("customPayload", customPayload);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -65,6 +95,8 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         NotificationAction givenTappedNotificationAction = givenNotificationAction("actionId").build();
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
         Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
+        givenMessage.setCustomPayload(userInfo);
+
         int givenNotificationId = 1234;
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId);
 
@@ -92,6 +124,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
         Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
         int givenNotificationId = 1234;
+        givenMessage.setCustomPayload(userInfo);
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId);
         Mockito.when(broadcastSender.notificationActionTapped(any(Message.class), any(NotificationCategory.class), any(NotificationAction.class))).thenReturn(givenIntent);
 
@@ -119,6 +152,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         NotificationCategory givenNotificationCategory = givenNotificationCategory(givenTappedNotificationAction);
         Message givenMessage = createMessage(context, "SomeMessageId", givenNotificationCategory.getCategoryId(), false);
         int givenNotificationId = 1234;
+        givenMessage.setCustomPayload(userInfo);
         Intent givenIntent = givenIntent(givenMessage, givenNotificationCategory, givenTappedNotificationAction, givenNotificationId);
         Mockito.when(broadcastSender.notificationActionTapped(any(Message.class), any(NotificationCategory.class), any(NotificationAction.class))).thenReturn(givenIntent);
 
@@ -167,6 +201,7 @@ public class NotificationActionTapReceiverTest extends MobileMessagingTestCase {
         assertJEquals(givenTappedNotificationAction, actualAction);
         assertJEquals(givenNotificationCategory, actualCategory);
         assertJEquals(givenMessage, actualMessage);
+        assertJEquals(givenMessage.getCustomPayload(), actualMessage.getCustomPayload());
 
         Mockito.verify(mobileInteractive, Mockito.times(1)).triggerSdkActionsFor(actualAction, actualMessage);
     }

@@ -137,6 +137,7 @@ public class MobileInteractiveImpl extends MobileInteractive implements MessageH
         message.setBody(categoryId + " " + action.getId());
         HashMap<String, String> map = new HashMap<>();
         map.put("initialMessageId", initialMessage.getMessageId());
+        message.setCustomPayload(initialMessage.getCustomPayload());
         message.setInternalData(InternalDataMapper.mergeExistingInternalDataWithAnythingToJson(initialMessage.getInternalData(), map));
         return message;
     }

@@ -17,6 +17,8 @@ import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -129,6 +131,38 @@ public class MoMessageSenderTest extends MobileMessagingTestCase {
         assertEquals(2.0, messages.get(1).getCustomPayload().optDouble("myNumberKey"), 0.01);
         assertEquals(false, messages.get(1).getCustomPayload().opt("myBooleanKey"));
     }
+
+    @Test
+    public void testCustomPayloadNestedObjects() {
+        String jsonStr = "{\n" +
+                "    \"messageId\": \"messageId\",\n" +
+                "    \"aps\": {\n" +
+                "        \"badge\": 6,\n" +
+                "        \"sound\": \"default\",\n" +
+                "        \"alert\": {\n" +
+                "            \"bidy\":\"text\"\n" +
+                "        }\n" +
+                "    },\n" +
+                "    \"customPayload\": {\n" +
+                "        \"key\": \"value\",\n" +
+                "        \"nestedObject\": {\n" +
+                "            \"key\": \"value\"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+
+        JSONObject message = null;
+        JSONObject expectedCustomPayload = new JSONObject();
+        try {
+            message = new JSONObject(jsonStr);
+            expectedCustomPayload.put("key", "value");
+            expectedCustomPayload.put("nestedObject", new JSONObject().put("key", "value"));
+            assertEquals(expectedCustomPayload.toString(), message.getJSONObject("customPayload").toString());
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Test
     public void shouldOnlyKeepMessagesToBeRetried() {
