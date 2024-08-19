@@ -39,7 +39,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
-import com.infobip.webrtc.ui.*
+import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.TAG
@@ -570,7 +570,9 @@ class InCallFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setMessage(R.string.mm_video_permission_required)
             .setCancelable(false)
-            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+            .setPositiveButton(R.string.mm_ok) { _, _ ->
+                requestVideoPermissionLauncher.launch(Manifest.permission.CAMERA)
+            }.setNegativeButton(R.string.mm_cancel) { dialog, _ ->
                 dialog.dismiss()
             }.show()
     }
