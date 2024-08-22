@@ -43,6 +43,7 @@ public enum MobileMessagingProperty {
     // START: MO/MT messages related prefs
     INFOBIP_UNREPORTED_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_MESSAGE_IDS", new String[0]),
     INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_SEEN_MESSAGE_IDS", new String[0]),
+    INFOBIP_UNREPORTED_IN_APP_CLICK_URLS("org.infobip.mobile.messaging.infobip.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS", new String[0]),
     INFOBIP_GENERATED_MESSAGE_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_GENERATED_MESSAGE_IDS", new String[0]),
     INFOBIP_SYNC_MESSAGES_IDS("org.infobip.mobile.messaging.infobip.INFOBIP_SYNC_MESSAGES_IDS", new String[0]),
     MESSAGE_STORE_CLASS("org.infobip.mobile.messaging.infobip.MESSAGE_STORE_CLASS"),

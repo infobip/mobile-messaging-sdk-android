@@ -113,4 +113,11 @@ public interface Broadcaster {
      * Sends broadcast that user's custom events are reported
      */
     void customEventsReported();
+
+    /**
+     * Sends broadcast with URLs which were reported as clicked for in-apps
+     *
+     * @param clickUrls URLs of in-app actions clicked
+     */
+    void inAppClickReported(String... clickUrls);
 }

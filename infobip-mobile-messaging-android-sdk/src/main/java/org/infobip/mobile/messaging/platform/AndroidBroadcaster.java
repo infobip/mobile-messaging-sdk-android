@@ -135,6 +135,19 @@ public class AndroidBroadcaster implements Broadcaster {
         send(prepare(Event.CUSTOM_EVENTS_SENT));
     }
 
+    @Override
+    public void inAppClickReported(@NonNull String... clickUrls) {
+        if (clickUrls.length == 0) {
+            return;
+        }
+
+        Intent inAppClickReported = prepare(Event.IN_APP_CLICKS_REPORTED);
+        Bundle extras = new Bundle();
+        extras.putStringArray(BroadcastParameter.EXTRA_MESSAGE_IDS, clickUrls);
+        inAppClickReported.putExtras(extras);
+        send(inAppClickReported);
+    }
+
     private void send(Intent intent) {
         try {
             context.sendBroadcast(intent);

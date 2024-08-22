@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -31,7 +30,6 @@ import androidx.cardview.widget.CardView;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.R;
-import org.infobip.mobile.messaging.api.support.CustomApiHeaders;
 import org.infobip.mobile.messaging.api.support.util.UserAgentUtil;
 import org.infobip.mobile.messaging.app.ActivityLifecycleListener;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -42,6 +40,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.UserAgentAdditions;
 
 import java.util.HashMap;
@@ -55,6 +54,10 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     public static final int VERTICAL_SCROLLBAR_SIZE = 30;
     public static final double SCREEN_COVER_PERCENTAGE = 0.85;
     public static final int SCREEN_MARGINS = 16;
+    public static final String BANNER_CLICKED = "banner";
+    public static final String PRIMARY_BUTTON_CLICKED = "primary_button";
+    public static final int ACTION_TYPE_OPEN = 1;
+    public static final int ACTION_TYPE_CLOSE = 0;
     private final Callback callback;
     private AndroidBroadcaster coreBroadcaster;
     private NotificationAction[] action;
@@ -84,9 +87,9 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         }
     }
 
-    /*
+    /**
      * This Interface is binding JavaScript code from WebView to Android code
-     * */
+     */
     public class InAppWebViewInterface {
 
         /**
@@ -113,7 +116,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         public void close(String closing) {
             MobileMessagingLogger.d(TAG, "close()");
             new Handler(Looper.getMainLooper()).post(() -> {
-                doCallbacks(0);
+                doCallbacks(ACTION_TYPE_CLOSE);
                 popupWindow.dismiss();
                 callback.dismissed(InAppWebViewDialog.this);
                 setActivityLifecycleListener(null);
@@ -130,7 +133,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         public void openAppPage(String deepLink) {
             MobileMessagingLogger.d(TAG, "openAppPage: " + deepLink);
             message.setDeeplink(deepLink);
-            doCallbacks(1);
+            doCallbacks(ACTION_TYPE_OPEN);
             clearWebView();
         }
 
@@ -143,7 +146,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         public void openBrowser(String url) {
             MobileMessagingLogger.d(TAG, "openBrowser: " + url);
             message.setBrowserUrl(url);
-            doCallbacks(1);
+            doCallbacks(ACTION_TYPE_OPEN);
             clearWebView();
         }
 
@@ -156,7 +159,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         public void openWebView(String url) {
             MobileMessagingLogger.d(TAG, "openWebView: " + url);
             message.setWebViewUrl(url);
-            doCallbacks(1);
+            doCallbacks(ACTION_TYPE_OPEN);
             clearWebView();
         }
 
@@ -164,8 +167,23 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             if (isBanner()) {
                 coreBroadcaster.notificationTapped(message);
                 callback.notificationPressedFor(InAppWebViewDialog.this, message, action[actionType], getActivity());
-            } else
+                reportInAppClick(BANNER_CLICKED);
+            } else {
                 callback.actionButtonPressedFor(InAppWebViewDialog.this, message, null, action[actionType]);
+            }
+            if (actionType == ACTION_TYPE_OPEN && popupWindow.isShowing()) {
+                reportInAppClick(PRIMARY_BUTTON_CLICKED);
+            }
+        }
+
+        private void reportInAppClick(String clickType) {
+            UserAgentUtil userAgentUtil = new UserAgentUtil();
+            String userAgent = userAgentUtil.getUserAgent(UserAgentAdditions.getLibVersion(), UserAgentAdditions.getAdditions(activityWrapper.getActivity()));
+            if (StringUtils.isNotBlank(message.clickUrl)) {
+                String temp = StringUtils.concat(message.clickUrl, clickType, StringUtils.COMMA_WITH_SPACE);
+                String clickReport = StringUtils.concat(temp, userAgent, StringUtils.COMMA_WITH_SPACE);
+                MobileMessagingCore.getInstance(getActivity()).reportInAppClick(clickReport);
+            }
         }
     }
 
@@ -230,20 +248,19 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     private void setCardViewParams(float radius, boolean useCompatPadding, float elevation) {
         cardView.setRadius(radius);
         cardView.setUseCompatPadding(useCompatPadding);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            cardView.setElevation(elevation);
-        }
+        cardView.setElevation(elevation);
     }
 
     @NonNull
     private Map<String, String> getAuthorizationHeader() {
         String applicationCode = MobileMessagingCore.getApplicationCode(activityWrapper.getActivity());
+        String pushRegistrationId = MobileMessagingCore.getInstance(getActivity()).getPushRegistrationId();
         UserAgentUtil userAgentUtil = new UserAgentUtil();
         Map<String, String> headers = new HashMap<>();
         if (applicationCode != null) {
             headers.put("Authorization", "App " + applicationCode);
             headers.put("User-Agent", userAgentUtil.getUserAgent(UserAgentAdditions.getLibVersion(), UserAgentAdditions.getAdditions(activityWrapper.getActivity())));
-            headers.put("pushregistrationid", CustomApiHeaders.PUSH_REGISTRATION_ID.getValue());
+            headers.put("pushregistrationid", pushRegistrationId);
         }
         return headers;
     }
@@ -440,7 +457,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         }
     }
 
-    /*
+    /**
      * This method converts dp(density point) unit to equivalent pixels, depending on device density.
      */
     private static int convertDpToPixel(float dp, Context context) {

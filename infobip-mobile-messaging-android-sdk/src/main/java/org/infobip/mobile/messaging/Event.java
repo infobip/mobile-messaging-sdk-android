@@ -244,6 +244,11 @@ public enum Event {
     CUSTOM_EVENTS_SENT("org.infobip.mobile.messaging.CUSTOM_EVENTS_SENT"),
 
     /**
+     * It is triggered when in-app click events are sent to the server.
+     */
+    IN_APP_CLICKS_REPORTED("org.infobip.mobile.messaging.IN_APP_CLICKS_REPORTED"),
+
+    /**
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code

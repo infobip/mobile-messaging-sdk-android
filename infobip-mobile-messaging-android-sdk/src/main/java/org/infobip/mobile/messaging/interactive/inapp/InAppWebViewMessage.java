@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 public class InAppWebViewMessage extends Message {
 
+    @Nullable
+    public String clickUrl;
     @NonNull
     public String url;
     @Nullable
