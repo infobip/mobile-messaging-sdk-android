@@ -48,14 +48,6 @@ public class JsonSerializer {
         gson = new GsonBuilder().create();
     }
 
-    public JsonSerializer(Boolean withEscaping) {
-        if (withEscaping) {
-            gson = new GsonBuilder().create();
-        } else {
-            gson = new GsonBuilder().disableHtmlEscaping().create();
-        }
-    }
-
     public JsonSerializer(boolean serializeNulls, ObjectAdapter... adapters) {
         GsonBuilder builder = new GsonBuilder();
         if (serializeNulls) {

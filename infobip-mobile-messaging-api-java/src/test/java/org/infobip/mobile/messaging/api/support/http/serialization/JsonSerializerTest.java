@@ -1,14 +1,15 @@
 package org.infobip.mobile.messaging.api.support.http.serialization;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author sslavin
@@ -68,8 +69,41 @@ public class JsonSerializerTest {
         assertEquals(givenObject.string, actualDeserialized.string);
     }
 
-    private String getMessageForClassMismatch(Class expeceted, Class observed) {
-        return "Expected <" + expeceted.toString() + "> found <" + observed.toString() + ">";
+    @Test
+    public void default_constructor_mapper_should_not_serialize_nulls() throws Exception {
+        JsonSerializer givenSerializer = new JsonSerializer();
+
+        Map<String, String> map = new HashMap<>();
+        map.put("KITTENS", null);
+
+        String actualSerialized = givenSerializer.serialize(map);
+        JSONAssert.assertEquals("{}", actualSerialized, true);
+    }
+
+    @Test
+    public void parametrized_constructor_mapper_should_serialize_nulls_for_serialize_true() throws Exception {
+        JsonSerializer givenSerializer = new JsonSerializer(true);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("KITTENS", null);
+
+        String actualSerialized = givenSerializer.serialize(map);
+        JSONAssert.assertEquals("{\"KITTENS\":null}", actualSerialized, true);
+    }
+
+    @Test
+    public void parametrized_constructor_mapper_should_not_serialize_nulls_for_serialize_false() throws Exception {
+        JsonSerializer givenSerializer = new JsonSerializer(false);
+
+        Map<String, String> map = new HashMap<>();
+        map.put("KITTENS", null);
+
+        String actualSerialized = givenSerializer.serialize(map);
+        JSONAssert.assertEquals("{}", actualSerialized, true);
+    }
+
+    private String getMessageForClassMismatch(Class expected, Class observed) {
+        return "Expected <" + expected.toString() + "> found <" + observed.toString() + ">";
     }
 
     // Given
