@@ -23,6 +23,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
@@ -46,6 +47,7 @@ import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -282,6 +284,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
         resetMessageCounter();
     }
 
@@ -477,6 +481,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void setDomain(String domain) {
         sessionStorage().setDomain(domain);
+    }
+
+    @Override
+    public void setChatPushTitle(@Nullable String title) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE, title);
+    }
+
+    @Override
+    public void setChatPushBody(@Nullable  String body) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY, body);
     }
     //endregion
 

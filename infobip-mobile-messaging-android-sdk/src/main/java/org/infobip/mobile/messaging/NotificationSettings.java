@@ -57,6 +57,14 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED);
     }
 
+    public String getChatDefaultTitle() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE);
+    }
+
+    public String getChatDefaultBody() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
+    }
+
     public String getDefaultTitle() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_TITLE);
     }

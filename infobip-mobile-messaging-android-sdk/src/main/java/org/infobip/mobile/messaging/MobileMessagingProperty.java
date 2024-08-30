@@ -56,6 +56,8 @@ public enum MobileMessagingProperty {
     DEFAULT_ICON("org.infobip.mobile.messaging.notification.DEFAULT_ICON", 0),
     DEFAULT_COLOR("org.infobip.mobile.messaging.notification.DEFAULT_COLOR", 0),
     DEFAULT_TITLE("org.infobip.mobile.messaging.notification.DEFAULT_TITLE", "Message"),
+    DEFAULT_IN_APP_CHAT_PUSH_TITLE("org.infobip.mobile.messaging.notification.DEFAULT_INN_APP_CHAT_TITLE", ""),
+    DEFAULT_IN_APP_CHAT_PUSH_BODY("org.infobip.mobile.messaging.notification.DEFAULT_INN_APP_CHAT_BODY", ""),
     INTENT_FLAGS("org.infobip.mobile.messaging.notification.INTENT_FLAGS", Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP),
     PENDING_INTENT_FLAGS("org.infobip.mobile.messaging.notification.PENDING_INTENT_FLAGS", (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_CANCEL_CURRENT),
     NOTIFICATION_AUTO_CANCEL("org.infobip.mobile.messaging.notification.NOTIFICATION_AUTO_CANCEL", true),

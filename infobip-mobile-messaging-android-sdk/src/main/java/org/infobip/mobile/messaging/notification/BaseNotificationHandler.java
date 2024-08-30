@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.notification;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,13 +13,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.BitmapCompat;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
@@ -37,9 +40,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 
 /**
  * @author sslavin
@@ -109,15 +109,27 @@ public class BaseNotificationHandler {
         if (notificationSettings == null) return null;
 
         String title = StringUtils.isNotBlank(message.getTitle()) ? message.getTitle() : notificationSettings.getDefaultTitle();
+        String body = message.getBody();
+        if (message.isChatMessage()) {
+            String chatDefaultTitle = notificationSettings.getChatDefaultTitle();
+            String chatDefaultBody = notificationSettings.getChatDefaultBody();
+            if (StringUtils.isNotBlank(chatDefaultTitle)) {
+                title = chatDefaultTitle;
+            }
+            if (StringUtils.isNotBlank(chatDefaultBody)) {
+                body = chatDefaultBody;
+            }
+        }
+
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, getChannelIdForNotification(notificationSettings, message))
                 .setContentTitle(title)
-                .setContentText(message.getBody())
+                .setContentText(body)
                 .setColor(notificationSettings.getColor())
                 .setAutoCancel(notificationSettings.isNotificationAutoCancel())
                 .setContentIntent(createTapPendingIntent(notificationSettings, message))
                 .setWhen(message.getReceivedTimestamp());
 
-        setNotificationStyle(notificationBuilder, message, title);
+        setNotificationStyle(notificationBuilder, message, title, body);
         setNotificationSoundAndVibrate(notificationBuilder, message);
         setNotificationIcon(notificationBuilder, message);
         setNotificationPriority(notificationBuilder, notificationSettings, message);
@@ -125,13 +137,13 @@ public class BaseNotificationHandler {
         return notificationBuilder;
     }
 
-    private void setNotificationStyle(NotificationCompat.Builder notificationBuilder, Message message, String title) {
+    private void setNotificationStyle(NotificationCompat.Builder notificationBuilder, Message message, String title, String body) {
         String contentUrl = message.getContentUrl();
         Bitmap notificationPicture = fetchNotificationPicture(contentUrl);
 
         if (notificationPicture == null) {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle()
-                    .bigText(message.getBody())
+                    .bigText(body)
                     .setBigContentTitle(title));
             return;
         }
@@ -143,7 +155,7 @@ public class BaseNotificationHandler {
                         .bigPicture(notificationPicture)
                         .bigLargeIcon(null)
                         .setBigContentTitle(title)
-                        .setSummaryText(message.getBody()));
+                        .setSummaryText(body));
     }
 
     @Nullable
@@ -262,7 +274,7 @@ public class BaseNotificationHandler {
             return null;
         }
 
-        if (StringUtils.isBlank(message.getBody())) {
+        if (StringUtils.isBlank(message.getBody()) && StringUtils.isBlank(notificationSettings.getChatDefaultBody())) {
             return null;
         }
 

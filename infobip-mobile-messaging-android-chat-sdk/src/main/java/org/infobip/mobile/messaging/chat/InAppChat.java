@@ -238,4 +238,17 @@ public abstract class InAppChat {
     @Nullable
     public abstract String getDomain();
 
+    /**
+     * Set custom title for in-app chat notifications
+     *
+     * @param title custom title to be set for notifications
+     */
+    public abstract void setChatPushTitle(@Nullable String title);
+
+    /**
+     * Set custom body for in-app chat notifications
+     *
+     * @param body custom body to be set for notifications
+     */
+    public abstract void setChatPushBody(@Nullable String body);
 }
