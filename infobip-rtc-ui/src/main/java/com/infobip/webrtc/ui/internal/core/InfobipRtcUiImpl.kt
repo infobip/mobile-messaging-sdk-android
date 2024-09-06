@@ -39,7 +39,12 @@ internal class InfobipRtcUiImpl(
             cache.rtcUiMode = value
         }
 
-    override fun enableCalls(identity: String, listenType: ListenType, successListener: SuccessListener?, errorListener: ErrorListener?) {
+    override fun enableCalls(
+        identity: String,
+        listenType: ListenType,
+        successListener: SuccessListener?,
+        errorListener: ErrorListener?
+    ) {
         //it can be called also from broadcast receivers when we already have mode
         if (rtcUiMode == null)
             rtcUiMode = RtcUiMode.CUSTOM.withListeners(successListener, errorListener)
@@ -98,7 +103,9 @@ internal class InfobipRtcUiImpl(
             require(identity.isNotEmpty()) { "Calls are not registered." }
             Log.d(TAG, "Disabling calls for identity $identity.")
             callsScope.launch {
-                rtcInstance.disablePushNotification(tokenProvider.getToken(identity), context)
+                val webRtcToken = tokenProvider.getToken(identity)
+                require(webRtcToken?.isNotBlank() == true) { "Missing WebRTC token." }
+                rtcInstance.disablePushNotification(webRtcToken.orEmpty(), context)
                 cache.clear()
                 successListener?.onSuccess()
                 callsScope.coroutineContext.cancelChildren()
@@ -124,7 +131,11 @@ internal class InfobipRtcUiImpl(
         cache.callErrorMapper = errorMapper
     }
 
-    private fun registerPush(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {
+    private fun registerPush(
+        token: String,
+        errorListener: ErrorListener?,
+        successListener: SuccessListener?
+    ) {
         callsDelegate.enablePush(token, cache.configurationId) {
             Log.d(TAG, "Registration for calls push result: ${it.status}, ${it.description}")
             runOnUiThread {
@@ -138,7 +149,11 @@ internal class InfobipRtcUiImpl(
         }
     }
 
-    private fun registerActiveConnection(token: String, errorListener: ErrorListener?, successListener: SuccessListener?) {
+    private fun registerActiveConnection(
+        token: String,
+        errorListener: ErrorListener?,
+        successListener: SuccessListener?
+    ) {
         runCatching {
             callsDelegate.registerActiveConnection(token)
         }.onSuccess {

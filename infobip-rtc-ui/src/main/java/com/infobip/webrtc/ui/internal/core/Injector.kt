@@ -28,21 +28,15 @@ internal object Injector {
 
     private val callsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val rtcInstance = InfobipRTC.getInstance()
-    private val rtcService: MobileApiRtc by lazy { MobileApiResourceProvider().getMobileApiRtc(
-        appContext
-    ) }
+    private val rtcService: MobileApiRtc by lazy { MobileApiResourceProvider().getMobileApiRtc(appContext) }
     private val tokenProvider: TokenProvider by lazy { TokenProviderImpl(rtcService) }
     private val pushIdDelegate: PushIdDelegate by lazy { PushIdDelegateImpl(appContext) }
 
     val cache: Cache = InMemoryCache()
-    val notificationFactory: CallNotificationFactory by lazy { CallNotificationFactoryImpl(
-        appContext
-    ) }
+    val notificationFactory: CallNotificationFactory by lazy { CallNotificationFactoryImpl(appContext) }
     val callsDelegate: CallsDelegate by lazy { CallsDelegateImpl(appContext, rtcInstance) }
     val appCodeDelegate: AppCodeDelegate by lazy { AppCodeDelegateImpl(appContext) }
-    val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { NotificationPermissionDelegateImpl(
-        appContext
-    ) }
+    val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { NotificationPermissionDelegateImpl(appContext) }
 
     fun getWebrtcUi(context: Context): InfobipRtcUi {
         if (!Injector::appContext.isInitialized)

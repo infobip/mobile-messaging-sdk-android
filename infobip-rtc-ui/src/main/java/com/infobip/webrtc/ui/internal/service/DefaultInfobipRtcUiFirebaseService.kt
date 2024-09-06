@@ -2,10 +2,11 @@ package com.infobip.webrtc.ui.internal.service
 
 import android.annotation.SuppressLint
 import com.google.firebase.messaging.RemoteMessage
-import com.infobip.webrtc.ui.service.IncomingCallService
+import com.infobip.webrtc.ui.service.InfobipRtcUiFirebaseService
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
-class DefaultIncomingCallService : IncomingCallService() {
+internal class DefaultInfobipRtcUiFirebaseService: InfobipRtcUiFirebaseService() {
     override fun onMessageReceivedDelegate(message: RemoteMessage) {}
+
     override fun onNewTokenDelegate(token: String) {}
 }

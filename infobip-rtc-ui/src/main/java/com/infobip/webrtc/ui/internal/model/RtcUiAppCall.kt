@@ -31,7 +31,7 @@ internal abstract class BaseRtcUiAppCall(
 ) : RtcUiAppCall {
 
     override fun id(): String? = activeCall.id()
-    override fun applicationId(): String? = activeCall.applicationId()
+    override fun applicationId(): String? = activeCall.options().platform?.applicationId
     override fun callOptions(): RtcUiCallOptions? = activeCall.options().run { RtcUiCallOptions(isAudio, isVideo, audioOptions, videoOptions, customData) }
     override fun updateCustomData(customData: Map<String, String>) {
         activeCall.options().customData.applyIf({ isEmpty() }, { putAll(customData) })

@@ -50,7 +50,7 @@
             </intent-filter>
         </receiver>
         <service
-            android:name=".internal.service.DefaultIncomingCallService"
+            android:name=".internal.service.DefaultInfobipRtcUiFirebaseService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

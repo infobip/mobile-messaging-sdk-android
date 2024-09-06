@@ -8,12 +8,12 @@ import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
 import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService
 
+@Deprecated("Use InfobipRtcUiFirebaseService instead.", ReplaceWith("InfobipRtcUiFirebaseService", "com.infobip.webrtc.ui.service.InfobipRtcUiFirebaseService"))
 abstract class IncomingCallService : FirebaseMessagingService() {
     private val callsDelegate: CallsDelegate by lazy { Injector.callsDelegate }
 
     abstract fun onMessageReceivedDelegate(message: RemoteMessage)
     abstract fun onNewTokenDelegate(token: String)
-
 
     override fun onMessageReceived(message: RemoteMessage) {
         if (MobileMessagingFirebaseService.onMessageReceived(this, message))

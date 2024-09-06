@@ -3,13 +3,19 @@ package com.infobip.webrtc.ui.internal.listener
 import com.infobip.webrtc.sdk.api.event.call.CallEarlyMediaEvent
 import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
@@ -85,6 +91,18 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
 
     override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
+
+    override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {}
+
+    override fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?) {}
+
+    override fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?) {}
+
+    override fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?) {}
+
+    override fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?) {}
+
+    override fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?) {}
 
     override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {}
 }
