@@ -58,6 +58,12 @@
             }
         });
 
+        window.addEventListener('message', (event) => {
+            if (event.data.destination === 'viewChange') {
+                InAppChatMobile.onViewChanged(event.data.view);
+            }
+        });
+
         // If all is OK -> initialize widget, enable native controls and show widget
         function init() {
             if (domain != null) {
@@ -71,13 +77,15 @@
                     setTheme(widgetTheme);
                 }
             });
+            addLiveChatEventsListener();
         }
 
-        window.addEventListener('message', (event) => {
-            if (event.data.destination === 'viewChange') {
-                InAppChatMobile.onViewChanged(event.data.view);
-            }
-        })
+        function addLiveChatEventsListener() {
+            const liveChatSDK = new LiveChatSDK();
+            liveChatSDK.on('messageReceived', (payload) => {
+                InAppChatMobile.onRawMessageReceived(stringify(payload));
+            });
+        }
 
         //Widget API
         function sendMessage(message) {
@@ -141,19 +149,29 @@
             return !value?.toString().trim()
         }
 
+        function stringify(value) {
+            switch (typeof value) {
+                case 'string': case 'object': return JSON.stringify(value);
+                default: return String(value);
+            }
+        };
+
         function widgetApiCallback(name, error, result) {
             if (error) {
-                if (error !== null && (typeof error === 'object' || Array.isArray(error))) {
-                    InAppChatMobile.onWidgetApiError(name, JSON.stringify(error));
+                if (error === undefined || error === null) {
+                    InAppChatMobile.onWidgetApiError(name, null);
                 } else {
-                    InAppChatMobile.onWidgetApiError(name, error);
+                    InAppChatMobile.onWidgetApiError(name, stringify(error));
                 }
-            } else if (result === undefined) {
-                InAppChatMobile.onWidgetApiSuccess(name, null);
             } else {
-                InAppChatMobile.onWidgetApiSuccess(name, result);
+                if (result === undefined || result === null) {
+                    InAppChatMobile.onWidgetApiSuccess(name, null);
+                } else {
+                    InAppChatMobile.onWidgetApiSuccess(name, stringify(result));
+                }
             }
         }
+
     </script>
 </body>
 

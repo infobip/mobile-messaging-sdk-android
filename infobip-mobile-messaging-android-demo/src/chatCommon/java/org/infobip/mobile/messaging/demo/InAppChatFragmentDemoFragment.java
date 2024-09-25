@@ -90,6 +90,11 @@ public class InAppChatFragmentDemoFragment extends Fragment {
         return new InAppChatFragment.EventsListener() {
 
             @Override
+            public void onChatRawMessageReceived(@NonNull String rawMessage) {
+                //You can use raw message for further processing on your side
+            }
+
+            @Override
             public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
                 //Applied widget theme
             }

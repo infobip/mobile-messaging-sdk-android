@@ -11,4 +11,5 @@ internal interface InAppChatWebViewManager {
     fun setControlsVisibility(isVisible: Boolean)
     fun openAttachmentPreview(url: String?, type: String?, caption: String?)
     fun onWidgetViewChanged(widgetView: InAppChatWidgetView)
+    fun onWidgetRawMessageReceived(message: String?)
 }

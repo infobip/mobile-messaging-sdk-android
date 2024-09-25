@@ -37,6 +37,7 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
+import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
@@ -491,6 +492,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void setChatPushBody(@Nullable  String body) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY, body);
+    }
+
+    @Override
+    public void setEventsListener(InAppChatEventsListener inAppChatEventsListener) {
+        sessionStorage().setInAppChatEventsListener(inAppChatEventsListener);
+    }
+
+    @Override
+    public InAppChatEventsListener getEventsListener() {
+        return sessionStorage().getInAppChatEventsListener();
     }
     //endregion
 

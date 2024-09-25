@@ -143,8 +143,9 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     /**
      * [InAppChatFragment] events listener allows you to listen to chat related events.
+     * Your in-app chat events listener set using [InAppChat.setEventsListener] is used as initial default value.
      */
-    var eventsListener: EventsListener? = null
+    var eventsListener: EventsListener? = SessionStorage.inAppChatEventsListener?.toFragmentEventsListener()
 
     val defaultErrorsHandler = object : ErrorsHandler {
         override fun handlerError(error: String) {
@@ -521,7 +522,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
             override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
                 setChatInputVisibility(isVisible)
-                eventsListener?.onChatControlsVisibilityChanged(isVisible)
             }
 
             override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
@@ -562,6 +562,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             override fun onChatWidgetThemeChanged(widgetThemeName: String) {
                 appliedWidgetTheme = widgetThemeName
                 eventsListener?.onChatWidgetThemeChanged(widgetThemeName)
+            }
+
+            override fun onChatRawMessageReceived(rawMessage: String) {
+                eventsListener?.onChatRawMessageReceived(rawMessage)
             }
         }
         binding.ibLcChat.errorsHandler = object : InAppChatView.ErrorsHandler {
@@ -657,6 +661,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             when (widgetView) {
                 InAppChatWidgetView.THREAD,
                 InAppChatWidgetView.SINGLE_MODE_THREAD -> setChatInputVisibility(true)
+
                 InAppChatWidgetView.LOADING,
                 InAppChatWidgetView.THREAD_LIST,
                 InAppChatWidgetView.CLOSED_THREAD,
@@ -679,6 +684,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 return@withBinding
             } else {
                 binding.ibLcChatInput.show(isVisibleMultiThreadSafe)
+                eventsListener?.onChatControlsVisibilityChanged(isVisibleMultiThreadSafe)
             }
         }
     }
@@ -898,5 +904,52 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             lifecycleRegistry = it
         }
     }
+
+    /**
+     * Converts [InAppChatEventsListener] to [InAppChatFragment.EventsListener].
+     */
+    private fun InAppChatEventsListener.toFragmentEventsListener(): EventsListener {
+        return object : EventsListener {
+            override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean {
+                return false
+            }
+
+            override fun onExitChatPressed() {
+            }
+
+            override fun onChatLoaded(controlsEnabled: Boolean) {
+                this@toFragmentEventsListener.onChatLoaded(controlsEnabled)
+            }
+
+            override fun onChatDisconnected() {
+                this@toFragmentEventsListener.onChatDisconnected()
+            }
+
+            override fun onChatReconnected() {
+                this@toFragmentEventsListener.onChatReconnected()
+            }
+
+            override fun onChatControlsVisibilityChanged(isVisible: Boolean) {
+                this@toFragmentEventsListener.onChatControlsVisibilityChanged(isVisible)
+            }
+
+            override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
+                this@toFragmentEventsListener.onChatViewChanged(widgetView)
+            }
+
+            override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
+                this@toFragmentEventsListener.onChatWidgetInfoUpdated(widgetInfo)
+            }
+
+            override fun onChatWidgetThemeChanged(widgetThemeName: String) {
+                this@toFragmentEventsListener.onChatWidgetThemeChanged(widgetThemeName)
+            }
+
+            override fun onChatRawMessageReceived(rawMessage: String) {
+                this@toFragmentEventsListener.onChatRawMessageReceived(rawMessage)
+            }
+        }
+    }
+
 
 }

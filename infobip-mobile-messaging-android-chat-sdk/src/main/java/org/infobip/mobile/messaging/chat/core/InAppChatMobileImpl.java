@@ -68,6 +68,17 @@ public class InAppChatMobileImpl implements InAppChatMobile {
 
     @Override
     @JavascriptInterface
+    public void onRawMessageReceived(String message) {
+        Runnable myRunnable = () -> {
+            if (inAppChatWebViewManager != null) {
+                inAppChatWebViewManager.onWidgetRawMessageReceived(message);
+            }
+        };
+        handler.post(myRunnable);
+    }
+
+    @Override
+    @JavascriptInterface
     public void onWidgetApiError(String method, String errorPayload) {
         Runnable myRunnable = () -> {
             String result = StringUtils.isNotBlank(errorPayload) ? " => " + errorPayload : "";
