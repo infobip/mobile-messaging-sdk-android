@@ -21,23 +21,29 @@ import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 
 data class InAppChatInputViewStyle(
-        @StyleRes val textAppearance: Int? = null,
-        @ColorInt val textColor: Int,
-        @ColorInt val backgroundColor: Int,
-        val hintText: String? = null,
-        @StringRes val hintTextRes: Int? = null,
-        @ColorInt val hintTextColor: Int,
-        val attachmentIcon: Drawable? = null,
-        val attachmentIconTint: ColorStateList? = null,
-        val attachmentBackgroundDrawable: Drawable? = null,
-        @ColorInt val attachmentBackgroundColor: Int? = null,
-        val sendIcon: Drawable? = null,
-        val sendIconTint: ColorStateList? = null,
-        val sendBackgroundDrawable: Drawable? = null,
-        @ColorInt val sendBackgroundColor: Int? = null,
-        @ColorInt val separatorLineColor: Int,
-        val isSeparatorLineVisible: Boolean,
-        @ColorInt val cursorColor: Int,
+    @StyleRes val textAppearance: Int? = R.style.IB_Chat_Input_TextAppearance,
+    @ColorInt val textColor: Int = Color.parseColor("#242424"),
+    @ColorInt val backgroundColor: Int = Color.WHITE,
+    val hintText: String? = null,
+    @StringRes val hintTextRes: Int? = R.string.ib_chat_message_hint,
+    @ColorInt val hintTextColor: Int = Color.parseColor("#808080"),
+    val attachmentIcon: Drawable? = null,
+    val attachmentIconTint: ColorStateList? = colorStateListOf(
+        intArrayOf(-android.R.attr.state_enabled) to Color.parseColor("#808080"),
+        intArrayOf(android.R.attr.state_enabled) to Color.BLACK,
+        ),
+    val attachmentBackgroundDrawable: Drawable? = null,
+    @ColorInt val attachmentBackgroundColor: Int? = null,
+    val sendIcon: Drawable? = null,
+    val sendIconTint: ColorStateList? = colorStateListOf(
+        intArrayOf(-android.R.attr.state_enabled) to Color.parseColor("#808080"),
+        intArrayOf(android.R.attr.state_enabled) to Color.BLACK,
+    ),
+    val sendBackgroundDrawable: Drawable? = null,
+    @ColorInt val sendBackgroundColor: Int? = null,
+    @ColorInt val separatorLineColor: Int = Color.parseColor("#19000000"),
+    val isSeparatorLineVisible: Boolean = true,
+    @ColorInt val cursorColor: Int = Color.parseColor("#242424"),
 ) {
     companion object {
 
@@ -107,23 +113,23 @@ data class InAppChatInputViewStyle(
 
                 recycle()
                 return InAppChatInputViewStyle(
-                    textAppearance,
-                    textColor,
-                    backgroundColor,
-                    hintText,
-                    hintTextRes,
-                    hintTextColor,
-                    attachmentIcon?.let(context::getDrawableCompat),
-                    attachmentIconTint,
-                    attachmentBackgroundDrawable?.let(context::getDrawableCompat),
-                    attachmentBackgroundColor,
-                    sendIcon?.let(context::getDrawableCompat),
-                    sendIconTint,
-                    sendBackgroundDrawable?.let(context::getDrawableCompat),
-                    sendBackgroundColor,
-                    separatorLineColor,
-                    isSeparatorLineVisible,
-                    cursorColor
+                    textAppearance = textAppearance,
+                    textColor = textColor,
+                    backgroundColor = backgroundColor,
+                    hintText = hintText,
+                    hintTextRes = hintTextRes,
+                    hintTextColor = hintTextColor,
+                    attachmentIcon = attachmentIcon?.let(context::getDrawableCompat),
+                    attachmentIconTint = attachmentIconTint,
+                    attachmentBackgroundDrawable = attachmentBackgroundDrawable?.let(context::getDrawableCompat),
+                    attachmentBackgroundColor = attachmentBackgroundColor,
+                    sendIcon = sendIcon?.let(context::getDrawableCompat),
+                    sendIconTint = sendIconTint,
+                    sendBackgroundDrawable = sendBackgroundDrawable?.let(context::getDrawableCompat),
+                    sendBackgroundColor = sendBackgroundColor,
+                    separatorLineColor = separatorLineColor,
+                    isSeparatorLineVisible = isSeparatorLineVisible,
+                    cursorColor = cursorColor
                 )
             }
         }

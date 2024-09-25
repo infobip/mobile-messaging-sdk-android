@@ -5,32 +5,45 @@ import android.content.res.TypedArray
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
-import androidx.annotation.*
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.annotation.StringRes
+import androidx.annotation.StyleRes
 import androidx.core.content.res.getBooleanOrThrow
 import com.google.android.material.appbar.MaterialToolbar
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
+import org.infobip.mobile.messaging.chat.utils.colorBackground
+import org.infobip.mobile.messaging.chat.utils.colorPrimary
+import org.infobip.mobile.messaging.chat.utils.colorPrimaryDark
+import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
+import org.infobip.mobile.messaging.chat.utils.isAttributePresent
+import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
+import org.infobip.mobile.messaging.chat.utils.isMMBaseTheme
+import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
+import org.infobip.mobile.messaging.chat.utils.resolveThemeColor
+import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 data class InAppChatToolbarStyle(
-    @ColorInt val toolbarBackgroundColor: Int,
-    @ColorInt val statusBarBackgroundColor: Int,
-    val lightStatusBarIcons: Boolean,
-    val navigationIcon: Drawable?,
-    @ColorInt val navigationIconTint: Int,
-    val saveAttachmentMenuItemIcon: Drawable?,
-    @ColorInt val menuItemsIconTint: Int,
+    @ColorInt val toolbarBackgroundColor: Int = Color.BLACK,
+    @ColorInt val statusBarBackgroundColor: Int = Color.BLACK,
+    val lightStatusBarIcons: Boolean = true,
+    val navigationIcon: Drawable? = null,
+    @ColorInt val navigationIconTint: Int = Color.WHITE,
+    val saveAttachmentMenuItemIcon: Drawable? = null,
+    @ColorInt val menuItemsIconTint: Int = Color.WHITE,
     @StyleRes val titleTextAppearance: Int? = null,
-    @ColorInt val titleTextColor: Int,
+    @ColorInt val titleTextColor: Int = Color.WHITE,
     val titleText: String? = null,
     @StringRes val titleTextRes: Int? = null,
-    val isTitleCentered: Boolean? = null,
+    val isTitleCentered: Boolean = false,
     @StyleRes val subtitleTextAppearance: Int? = null,
-    @ColorInt val subtitleTextColor: Int,
+    @ColorInt val subtitleTextColor: Int = Color.WHITE,
     val subtitleText: String? = null,
     @StringRes val subtitleTextRes: Int? = null,
-    val isSubtitleCentered: Boolean? = null,
+    val isSubtitleCentered: Boolean = false,
 ) {
 
     companion object {
@@ -68,12 +81,12 @@ data class InAppChatToolbarStyle(
             var newTitleTextColor: Int? = null
             var newTitleText: String? = null
             var newTitleTextRes: Int? = null
-            var newIsTitleCentered: Boolean? = null
+            var newIsTitleCentered = false
             var newSubtitleTextAppearance: Int? = null
             var newSubtitleTextColor: Int? = null
             var newSubtitleText: String? = null
             var newSubtitleTextRes: Int? = null
-            var newIsSubtitleCentered: Boolean? = null
+            var newIsSubtitleCentered = false
 
             val typedValue = TypedValue()
             theme.resolveAttribute(attr, typedValue, true)
@@ -92,14 +105,14 @@ data class InAppChatToolbarStyle(
                         newTitleTextRes = it.first
                         newTitleText = it.second
                 }
-                newIsTitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleCentered) }.getOrNull()
+                newIsTitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatTitleCentered) }.getOrDefault(false)
                 newSubtitleTextAppearance = typedArray.getResourceId(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextAppearance, 0).takeIfDefined()
                 newSubtitleTextColor = typedArray.getColor(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleTextColor, 0).takeIfDefined()
                 typedArray.resolveStringWithResId(context, R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleText).let {
                     newSubtitleTextRes = it.first
                     newSubtitleText = it.second
                 }
-                newIsSubtitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleCentered) }.getOrNull()
+                newIsSubtitleCentered = runCatching { typedArray.getBooleanOrThrow(R.styleable.InAppChatToolbarViewStyleable_ibChatSubtitleCentered) }.getOrDefault(false)
                 typedArray.recycle()
             }
 
@@ -243,7 +256,7 @@ data class InAppChatToolbarStyle(
 internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
     toolbar?.let {
         val localizationUtils = LocalizationUtils.getInstance(it.context)
-        it.navigationIcon = navigationIcon
+        it.navigationIcon = navigationIcon ?: it.context.getDrawableCompat(R.drawable.ic_chat_arrow_back)
         it.setNavigationIconTint(navigationIconTint)
         it.setBackgroundColor(toolbarBackgroundColor)
         if (titleTextRes != null) {
@@ -258,7 +271,7 @@ internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
             )
         }
         it.setTitleTextColor(titleTextColor)
-        isTitleCentered?.let { isCentered -> it.isTitleCentered = isCentered }
+        isTitleCentered.let { isCentered -> it.isTitleCentered = isCentered }
         if (subtitleTextRes != null) {
             it.subtitle = localizationUtils.getString(subtitleTextRes)
         } else if (subtitleText != null) {
@@ -271,6 +284,6 @@ internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
             )
         }
         it.setSubtitleTextColor(subtitleTextColor)
-        isSubtitleCentered?.let { isCentered -> it.isSubtitleCentered = isCentered }
+        isSubtitleCentered.let { isCentered -> it.isSubtitleCentered = isCentered }
     }
 }

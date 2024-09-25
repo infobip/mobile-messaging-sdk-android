@@ -43,6 +43,12 @@ class InAppChatInputView @JvmOverloads constructor(
     private val localizationUtils = LocalizationUtils.getInstance(context)
 
     init {
+        if (style.attachmentIcon == null) {
+            style = style.copy(attachmentIcon = ContextCompat.getDrawable(context, R.drawable.ib_chat_attachment_btn_icon))
+        }
+        if (style.sendIcon == null) {
+            style = style.copy(sendIcon = ContextCompat.getDrawable(context, R.drawable.ib_chat_send_btn_icon))
+        }
         applyStyle(style)
         binding.sendButton.isEnabled = getInputText()?.isNotBlank() == true
     }

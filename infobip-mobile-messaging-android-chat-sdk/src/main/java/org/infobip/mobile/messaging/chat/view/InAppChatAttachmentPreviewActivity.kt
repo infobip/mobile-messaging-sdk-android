@@ -30,7 +30,15 @@ import org.infobip.mobile.messaging.chat.core.InAppChatAttachmentPreviewClientIm
 import org.infobip.mobile.messaging.chat.databinding.IbActivityChatAttachPreviewBinding
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
-import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.utils.applyInAppChatLanguage
+import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
+import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.hide
+import org.infobip.mobile.messaging.chat.utils.setProgressTint
+import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.setTint
+import org.infobip.mobile.messaging.chat.utils.show
+import org.infobip.mobile.messaging.chat.utils.toColorStateList
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
@@ -306,6 +314,11 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
                 style = style.copy(
                     titleText = this.intent.getStringExtra(EXTRA_CAPTION),
                     titleTextRes = null
+                )
+            }
+            if (style.saveAttachmentMenuItemIcon == null) {
+                style = style.copy(
+                    saveAttachmentMenuItemIcon = getDrawableCompat(R.drawable.ib_chat_attachment_save_btn_icon)
                 )
             }
             style

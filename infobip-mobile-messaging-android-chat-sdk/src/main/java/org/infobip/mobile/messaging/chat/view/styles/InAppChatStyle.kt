@@ -19,13 +19,13 @@ import org.infobip.mobile.messaging.chat.utils.resolveThemeColor
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 
 data class InAppChatStyle(
-        @ColorInt val backgroundColor: Int,
-        @ColorInt val progressBarColor: Int,
+        @ColorInt val backgroundColor: Int = Color.WHITE,
+        @ColorInt val progressBarColor: Int = Color.BLACK,
         val networkConnectionText: String? = null,
-        @StringRes val networkConnectionTextRes: Int? = null,
+        @StringRes val networkConnectionTextRes: Int? = R.string.ib_chat_no_connection,
         @StyleRes val networkConnectionTextAppearance: Int? = null,
-        @ColorInt val networkConnectionTextColor: Int,
-        @ColorInt val networkConnectionLabelBackgroundColor: Int,
+        @ColorInt val networkConnectionTextColor: Int = Color.BLACK,
+        @ColorInt val networkConnectionLabelBackgroundColor: Int = Color.parseColor("#808080"),
 ) {
     companion object {
 
