@@ -26,25 +26,94 @@ import org.infobip.mobile.messaging.chat.utils.resolveThemeColor
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
-data class InAppChatToolbarStyle(
-    @ColorInt val toolbarBackgroundColor: Int = Color.BLACK,
-    @ColorInt val statusBarBackgroundColor: Int = Color.BLACK,
-    val lightStatusBarIcons: Boolean = true,
+data class InAppChatToolbarStyle @JvmOverloads constructor(
+    @ColorInt val toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor,
+    @ColorInt val statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor,
+    val lightStatusBarIcons: Boolean = Defaults.lightStatusBarIcons,
     val navigationIcon: Drawable? = null,
-    @ColorInt val navigationIconTint: Int = Color.WHITE,
+    @ColorInt val navigationIconTint: Int = Defaults.navigationIconTint,
     val saveAttachmentMenuItemIcon: Drawable? = null,
-    @ColorInt val menuItemsIconTint: Int = Color.WHITE,
+    @ColorInt val menuItemsIconTint: Int = Defaults.menuItemsIconTint,
     @StyleRes val titleTextAppearance: Int? = null,
-    @ColorInt val titleTextColor: Int = Color.WHITE,
+    @ColorInt val titleTextColor: Int = Defaults.titleTextColor,
     val titleText: String? = null,
     @StringRes val titleTextRes: Int? = null,
-    val isTitleCentered: Boolean = false,
+    val isTitleCentered: Boolean = Defaults.isTitleCentered,
     @StyleRes val subtitleTextAppearance: Int? = null,
-    @ColorInt val subtitleTextColor: Int = Color.WHITE,
+    @ColorInt val subtitleTextColor: Int = Defaults.subtitleTextColor,
     val subtitleText: String? = null,
     @StringRes val subtitleTextRes: Int? = null,
-    val isSubtitleCentered: Boolean = false,
+    val isSubtitleCentered: Boolean = Defaults.isSubtitleCentered
 ) {
+    object Defaults {
+        @ColorInt val toolbarBackgroundColor: Int = Color.BLACK
+        @ColorInt val statusBarBackgroundColor: Int = Color.BLACK
+        const val lightStatusBarIcons: Boolean = true
+        @ColorInt val navigationIconTint: Int = Color.WHITE
+        @ColorInt val menuItemsIconTint: Int = Color.WHITE
+        @ColorInt val titleTextColor: Int = Color.WHITE
+        const val isTitleCentered: Boolean = false
+        @ColorInt val subtitleTextColor: Int = Color.WHITE
+        const val isSubtitleCentered: Boolean = false
+    }
+
+    class Builder {
+        private var toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor
+        private var statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor
+        private var lightStatusBarIcons: Boolean = Defaults.lightStatusBarIcons
+        private var navigationIcon: Drawable? = null
+        private var navigationIconTint: Int = Defaults.navigationIconTint
+        private var saveAttachmentMenuItemIcon: Drawable? = null
+        private var menuItemsIconTint: Int = Defaults.menuItemsIconTint
+        private var titleTextAppearance: Int? = null
+        private var titleTextColor: Int = Defaults.titleTextColor
+        private var titleText: String? = null
+        private var titleTextRes: Int? = null
+        private var isTitleCentered: Boolean = Defaults.isTitleCentered
+        private var subtitleTextAppearance: Int? = null
+        private var subtitleTextColor: Int = Defaults.subtitleTextColor
+        private var subtitleText: String? = null
+        private var subtitleTextRes: Int? = null
+        private var isSubtitleCentered: Boolean = Defaults.isSubtitleCentered
+
+        fun setToolbarBackgroundColor(@ColorInt toolbarBackgroundColor: Int?) = apply { toolbarBackgroundColor?.let { this.toolbarBackgroundColor = it } }
+        fun setStatusBarBackgroundColor(@ColorInt statusBarBackgroundColor: Int?) = apply { statusBarBackgroundColor?.let { this.statusBarBackgroundColor = it } }
+        fun setLightStatusBarIcons(lightStatusBarIcons: Boolean?) = apply { lightStatusBarIcons?.let { this.lightStatusBarIcons = it } }
+        fun setNavigationIcon(navigationIcon: Drawable?) = apply { navigationIcon?.let { this.navigationIcon = it } }
+        fun setNavigationIconTint(@ColorInt navigationIconTint: Int?) = apply { navigationIconTint?.let { this.navigationIconTint = it } }
+        fun setSaveAttachmentMenuItemIcon(saveAttachmentMenuItemIcon: Drawable?) = apply { saveAttachmentMenuItemIcon?.let { this.saveAttachmentMenuItemIcon = it } }
+        fun setMenuItemsIconTint(@ColorInt menuItemsIconTint: Int?) = apply { menuItemsIconTint?.let { this.menuItemsIconTint = it } }
+        fun setTitleTextAppearance(@StyleRes titleTextAppearance: Int?) = apply { titleTextAppearance?.let { this.titleTextAppearance = it } }
+        fun setTitleTextColor(@ColorInt titleTextColor: Int?) = apply { titleTextColor?.let { this.titleTextColor = it } }
+        fun setTitleText(titleText: String?) = apply { titleText?.let { this.titleText = it } }
+        fun setTitleTextRes(@StringRes titleTextRes: Int?) = apply { titleTextRes?.let { this.titleTextRes = it } }
+        fun setIsTitleCentered(isTitleCentered: Boolean?) = apply { isTitleCentered?.let { this.isTitleCentered = it } }
+        fun setSubtitleTextAppearance(@StyleRes subtitleTextAppearance: Int?) = apply { subtitleTextAppearance?.let { this.subtitleTextAppearance = it } }
+        fun setSubtitleTextColor(@ColorInt subtitleTextColor: Int?) = apply { subtitleTextColor?.let { this.subtitleTextColor = it } }
+        fun setSubtitleText(subtitleText: String?) = apply { subtitleText?.let { this.subtitleText = it } }
+        fun setSubtitleTextRes(@StringRes subtitleTextRes: Int?) = apply { subtitleTextRes?.let { this.subtitleTextRes = it } }
+        fun setIsSubtitleCentered(isSubtitleCentered: Boolean?) = apply { isSubtitleCentered?.let { this.isSubtitleCentered = it } }
+
+        fun build() = InAppChatToolbarStyle(
+            toolbarBackgroundColor = toolbarBackgroundColor,
+            statusBarBackgroundColor = statusBarBackgroundColor,
+            lightStatusBarIcons = lightStatusBarIcons,
+            navigationIcon = navigationIcon,
+            navigationIconTint = navigationIconTint,
+            saveAttachmentMenuItemIcon = saveAttachmentMenuItemIcon,
+            menuItemsIconTint = menuItemsIconTint,
+            titleTextAppearance = titleTextAppearance,
+            titleTextColor = titleTextColor,
+            titleText = titleText,
+            titleTextRes = titleTextRes,
+            isTitleCentered = isTitleCentered,
+            subtitleTextAppearance = subtitleTextAppearance,
+            subtitleTextColor = subtitleTextColor,
+            subtitleText = subtitleText,
+            subtitleTextRes = subtitleTextRes,
+            isSubtitleCentered = isSubtitleCentered
+        )
+    }
 
     companion object {
 

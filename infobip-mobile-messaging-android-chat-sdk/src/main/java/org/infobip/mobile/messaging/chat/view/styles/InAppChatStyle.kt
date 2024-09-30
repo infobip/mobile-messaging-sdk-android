@@ -18,15 +18,51 @@ import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.resolveThemeColor
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 
-data class InAppChatStyle(
-        @ColorInt val backgroundColor: Int = Color.WHITE,
-        @ColorInt val progressBarColor: Int = Color.BLACK,
+data class InAppChatStyle @JvmOverloads constructor(
+        @ColorInt val backgroundColor: Int = Defaults.backgroundColor,
+        @ColorInt val progressBarColor: Int = Defaults.progressBarColor,
         val networkConnectionText: String? = null,
-        @StringRes val networkConnectionTextRes: Int? = R.string.ib_chat_no_connection,
+        @StringRes val networkConnectionTextRes: Int? = Defaults.networkConnectionTextRes,
         @StyleRes val networkConnectionTextAppearance: Int? = null,
-        @ColorInt val networkConnectionTextColor: Int = Color.BLACK,
-        @ColorInt val networkConnectionLabelBackgroundColor: Int = Color.parseColor("#808080"),
+        @ColorInt val networkConnectionTextColor: Int = Defaults.networkConnectionTextColor,
+        @ColorInt val networkConnectionLabelBackgroundColor: Int = Defaults.networkConnectionLabelBackgroundColor,
 ) {
+    object Defaults {
+        @ColorInt val backgroundColor: Int = Color.WHITE
+        @ColorInt val progressBarColor: Int = Color.BLACK
+        @StringRes val networkConnectionTextRes: Int = R.string.ib_chat_no_connection
+        @ColorInt val networkConnectionTextColor: Int = Color.BLACK
+        @ColorInt val networkConnectionLabelBackgroundColor: Int = Color.parseColor("#808080")
+    }
+
+    class Builder {
+        private var backgroundColor: Int = Defaults.backgroundColor
+        private var progressBarColor: Int = Defaults.progressBarColor
+        private var networkConnectionText: String? = null
+        private var networkConnectionTextRes: Int? = Defaults.networkConnectionTextRes
+        private var networkConnectionTextAppearance: Int? = null
+        private var networkConnectionTextColor: Int = Defaults.networkConnectionTextColor
+        private var networkConnectionLabelBackgroundColor: Int = Defaults.networkConnectionLabelBackgroundColor
+
+        fun setBackgroundColor(@ColorInt backgroundColor: Int?) = apply { backgroundColor?.let { this.backgroundColor = it } }
+        fun setProgressBarColor(@ColorInt progressBarColor: Int?) = apply { progressBarColor?.let { this.progressBarColor = it } }
+        fun setNetworkConnectionText(networkConnectionText: String?) = apply { networkConnectionText?.let { this.networkConnectionText = it } }
+        fun setNetworkConnectionTextRes(@StringRes networkConnectionTextRes: Int?) = apply { networkConnectionTextRes?.let { this.networkConnectionTextRes = it } }
+        fun setNetworkConnectionTextAppearance(@StyleRes networkConnectionTextAppearance: Int?) = apply { networkConnectionTextAppearance?.let { this.networkConnectionTextAppearance = it } }
+        fun setNetworkConnectionTextColor(@ColorInt networkConnectionTextColor: Int?) = apply { networkConnectionTextColor?.let { this.networkConnectionTextColor = it } }
+        fun setNetworkConnectionLabelBackgroundColor(@ColorInt networkConnectionLabelBackgroundColor: Int?) = apply { networkConnectionLabelBackgroundColor?.let { this.networkConnectionLabelBackgroundColor = it } }
+
+        fun build() = InAppChatStyle(
+            backgroundColor = backgroundColor,
+            progressBarColor = progressBarColor,
+            networkConnectionText = networkConnectionText,
+            networkConnectionTextRes = networkConnectionTextRes,
+            networkConnectionTextAppearance = networkConnectionTextAppearance,
+            networkConnectionTextColor = networkConnectionTextColor,
+            networkConnectionLabelBackgroundColor = networkConnectionLabelBackgroundColor
+        )
+    }
+
     companion object {
 
         /**
