@@ -13,7 +13,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 
 ## Quick start guide
 
-1. Make sure to <a href="https://www.infobip.com/docs/mobile-app-messaging/create-mobile-application-profile" target="_blank">setup application at Infobip portal</a>, if you haven't already.
+1. Make sure to <a href="https://www.infobip.com/docs/mobile-app-messaging/getting-started#create-and-enable-a-mobile-application-profile" target="_blank">setup application at Infobip portal</a>, if you haven't already.
 2. Add dependencies to `app/build.gradle`
     ```groovy
     dependencies {
@@ -29,7 +29,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 > ### Notice: 
 > Check <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Applying-Firebase-configuration-in-MobileMessaging-SDK">Applying Firebase configuration in MobileMessaging SDK Guide</a> for alternatives.
 
-4. Add Infobip <a href="https://dev.infobip.com/push-messaging/create-application" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
+4. Add Infobip <a href="https://www.infobip.com/docs/mobile-app-messaging/getting-started#copy-application-code-create-and-enable-a-mobile-application-profile" target="_blank">`Application Code`</a> obtained in step 1 to `values/strings.xml`
     ```groovy
     <resources>
         <string name="infobip_application_code">APPLICATION CODE</string>
