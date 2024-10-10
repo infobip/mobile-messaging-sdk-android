@@ -1,18 +1,19 @@
 buildscript {
     //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
     ext.mm_kotlinVersion = "1.8.20"
-    ext.mm_gradlePluginVersion = '7.4.0'
+    ext.mm_gradlePluginVersion = '8.5.2'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$mm_gradlePluginVersion"
+        classpath "com.android.tools:desugar_jdk_libs:1.1.5"
     }
 }
 
 plugins {
-    id 'net.researchgate.release' version '2.8.1'
+    id 'net.researchgate.release' version '3.0.2'
     id 'maven-publish'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
     id 'org.jetbrains.kotlin.android' version "$mm_kotlinVersion" apply false
@@ -22,16 +23,16 @@ plugins {
 
 ext {
     mm_minSdkVersion = 21
-    mm_compileSdkVersion = 34
-    mm_targetSdkVersion = 34
-    mm_buildToolsVersion = "34.0.0"
+    mm_compileSdkVersion = 35
+    mm_targetSdkVersion = 35
+    mm_buildToolsVersion = "35.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "21.0.1"
     mm_constraintLayoutVersion = "2.1.4"
     mm_appCompatVersion = "1.6.1"
     mm_materialVersion = "1.9.0"
     mm_coreKtxVersion = "1.10.1"
-    mm_desugarJdkVersion = "2.0.3"
+    mm_desugarJdkVersion = "1.1.5"
     mm_lifecycleVersion = "2.5.1"
 }
 
@@ -45,10 +46,22 @@ allprojects {
 //It's required to be applied here, to have `subprojects.publish` task available
 subprojects {
     apply plugin: "maven-publish"
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                if (namespace == null) {
+                    namespace project.group
+                }
+            }
+        }
+    }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.register('publishAllPublicationsToMavenRepository') {
+    dependsOn subprojects.collect { it.tasks.named('publishReleasePublicationToSonatypeRepository') }
 }
 
 task updateVersionInReadme {
@@ -73,20 +86,6 @@ task updateRtcUiVersionInReadme {
 
 afterReleaseBuild.dependsOn updateVersionInReadme, updateRtcUiVersionInReadme
 
-// workaround for `net.researchgate.release` plugin issue:
-// https://github.com/researchgate/gradle-release/issues/186
-
-task build {}
-
-build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-chat-sdk:build')
-build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-geo-sdk:build')
-build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-inbox-sdk:build')
-build.dependsOn tasks.getByPath('infobip-mobile-messaging-android-cryptor-migration:build')
-build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-resources:build')
-build.dependsOn tasks.getByPath(':infobip-mobile-messaging-android-sdk:build')
-build.dependsOn tasks.getByPath(':infobip-mobile-messaging-api-java:build')
-build.dependsOn tasks.getByPath(':infobip-rtc-ui:build')
-
 nexusPublishing {
     repositories {
         sonatype {
@@ -106,9 +105,14 @@ afterReleaseBuild.dependsOn subprojects.publish, closeAndReleaseSonatypeStagingR
 release {
     buildTasks = ['clean', 'build']
     git {
-        requireBranch = ''
-        pushToRemote = 'origin'
+        requireBranch.set('')
+        pushToRemote.set('origin')
     }
+}
+
+project.tasks.named("sonarqube").configure {
+    dependsOn 'lint'
+    dependsOn 'lintReportRelease'
 }
 
 sonar {
@@ -118,17 +122,16 @@ sonar {
         property "sonar.branch.name", System.getenv('BRANCH_NAME_TO_BUILD')
         property "sonar.projectVersion", project.version
         property "sonar.projectName", "infobip-mobile-messaging-android"
-        property "sonar.projectKey" , "infobip-mobile-messaging-android"
-        property "sonar.androidLint.reportPaths", "${project.buildDir}/reports/lint-results-debug.xml"
+        property "sonar.projectKey", "infobip-mobile-messaging-android"
+        property "sonar.androidLint.reportPaths", "${layout.buildDirectory}/reports/lint-results.xml"
         property "sonar.exclusions", "" +
                 "infobip-mobile-messaging-android-demo/**/*, " +
                 "infobip-mobile-messaging-android-cryptor-migration/**/*, " +
                 "infobip-mobile-messaging-android-test/**/*, " +
                 "infobip-rtc-ui/**/*"
         property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.junit.reportsPath", "${project.buildDir}/test-results/test/"
+        property "sonar.junit.reportsPath", "${layout.buildDirectory}/test-results/test/"
         property "sonar.coverage.jacoco.xmlReportPaths", "" +
-                "${project.projectDir}/infobip-mobile-messaging-android-geo-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
                 "${project.projectDir}/infobip-mobile-messaging-android-inbox-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
                 "${project.projectDir}/infobip-mobile-messaging-android-sdk/build/reports/jacoco/debugCoverage/debugCoverage.xml, " +
                 "${project.projectDir}/infobip-mobile-messaging-api-java/build/reports/jacoco/test/jacocoTestReport.xml"

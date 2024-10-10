@@ -14,7 +14,6 @@ public class AppInstance {
     private String pushRegId;
     private Boolean regEnabled;
     private Boolean notificationsEnabled;
-    private Boolean geoEnabled;
     private String sdkVersion;
     private String appVersion;
     private String os;

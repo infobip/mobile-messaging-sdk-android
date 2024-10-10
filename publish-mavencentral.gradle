@@ -13,60 +13,45 @@ ext["ossrhPassword"] = project.hasProperty('ossrhPassword') ? project.property('
 //for auto close and release staging repository
 ext["sonatypeStagingProfileId"] = project.hasProperty('sonatypeStagingProfileId') ? project.property('sonatypeStagingProfileId') : System.getenv('SONATYPE_STAGING_PROFILE_ID')
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId group
-            artifactId PUBLISH_ARTIFACT_ID
-            if (System.getenv('RELEASE_VERSION') != null) {
-                version System.getenv('RELEASE_VERSION')
-            } else {
-                version version
-            }
-            if (project.plugins.findPlugin("com.android.library")) {
-                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
-            } else {
-                artifact("$buildDir/libs/${project.getName()}-${version}.jar")
-            }
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.findByName('release')
 
-            artifact sourcesJar
-            artifact javadocJar
+                groupId group
+                artifactId PUBLISH_ARTIFACT_ID
+                if (System.getenv('RELEASE_VERSION') != null) {
+                    version System.getenv('RELEASE_VERSION')
+                } else {
+                    version version
+                }
 
-            pom {
-                name = PUBLISH_ARTIFACT_ID
-                description = 'Mobile Messaging SDK for Android'
-                url = 'https://github.com/infobip/mobile-messaging-sdk-android'
-                licenses {
-                    license {
-                        name = 'Apache License 2.0'
-                        url = 'https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'infobip'
-                        name = 'Infobip'
-                        email = 'support@infobip.com'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:github.com/infobip/mobile-messaging-sdk-android.git'
-                    developerConnection = 'scm:git:ssh://github.com/infobip/mobile-messaging-sdk-android.git'
+                pom {
+                    name = PUBLISH_ARTIFACT_ID
+                    description = 'Mobile Messaging SDK for Android'
                     url = 'https://github.com/infobip/mobile-messaging-sdk-android'
-                }
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
+                    licenses {
+                        license {
+                            name = 'Apache License 2.0'
+                            url = 'https://github.com/infobip/mobile-messaging-sdk-android/blob/master/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'infobip'
+                            name = 'Infobip'
+                            email = 'support@infobip.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/infobip/mobile-messaging-sdk-android.git'
+                        developerConnection = 'scm:git:ssh://github.com/infobip/mobile-messaging-sdk-android.git'
+                        url = 'https://github.com/infobip/mobile-messaging-sdk-android'
                     }
                 }
             }
         }
-    }
 //    repositories {
 //        maven {
 //            name = "SonatypeReleases"
@@ -78,6 +63,7 @@ publishing {
 //            }
 //        }
 //    }
+    }
 }
 
 //Comment out for making local version

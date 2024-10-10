@@ -1,4 +1,3 @@
-
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -6,8 +5,21 @@ plugins {
     id 'io.freefair.lombok' version '8.4'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            mavenJar(MavenPublication) {
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
+    }
+}
 
 configurations {
     provided

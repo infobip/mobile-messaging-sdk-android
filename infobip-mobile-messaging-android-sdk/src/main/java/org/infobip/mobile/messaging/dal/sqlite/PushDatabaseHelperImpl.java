@@ -51,35 +51,11 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
             MessageColumns.STATUS + " TEXT," +
             MessageColumns.STATUS_MESSAGE + " TEXT)";
 
-    private static final String SQL_CREATE_GEO_MESSAGES_TABLE = "CREATE TABLE " + Tables.GEO_MESSAGES + " (" +
-            MessageColumns.MESSAGE_ID + " TEXT PRIMARY KEY NOT NULL ON CONFLICT FAIL, " +
-            MessageColumns.TITLE + " TEXT, " +
-            MessageColumns.BODY + " TEXT, " +
-            MessageColumns.SOUND + " TEXT, " +
-            MessageColumns.VIBRATE + " INTEGER NOT NULL DEFAULT 1, " +
-            MessageColumns.ICON + " TEXT, " +
-            MessageColumns.SILENT + " INTEGER NOT NULL DEFAULT 0, " +
-            MessageColumns.CATEGORY + " TEXT, " +
-            MessageColumns.FROM + " TEXT, " +
-            MessageColumns.RECEIVED_TIMESTAMP + " INTEGER, " +
-            MessageColumns.SEEN_TIMESTAMP + " INTEGER, " +
-            MessageColumns.INTERNAL_DATA + " TEXT, " +
-            MessageColumns.CUSTOM_PAYLOAD + " TEXT, " +
-            MessageColumns.DESTINATION + " TEXT, " +
-            MessageColumns.STATUS + " TEXT," +
-            MessageColumns.STATUS_MESSAGE + " TEXT)";
-
     private static final String SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL = "ALTER TABLE "
             + Tables.MESSAGES + " ADD COLUMN " + MessageColumns.CONTENT_URL + " TEXT;";
 
-    private static final String SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL = "ALTER TABLE "
-            + Tables.GEO_MESSAGES + " ADD COLUMN " + MessageColumns.CONTENT_URL + " TEXT;";
-
     private static final String SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE = "ALTER TABLE "
             + Tables.MESSAGES + " ADD COLUMN " + MessageColumns.IN_APP_STYLE + " TEXT;";
-
-    private static final String SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE  = "ALTER TABLE "
-            + Tables.GEO_MESSAGES + " ADD COLUMN " + MessageColumns.IN_APP_STYLE + " TEXT;";
 
     public PushDatabaseHelperImpl(Context context) {
         super(context, DATABASE_NAME, VER_CURRENT);
@@ -90,10 +66,7 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
         db.beginTransaction();
         db.execSQL(SQL_CREATE_MESSAGES_TABLE);
         db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL);
-        db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
-        db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL);
         db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE);
-        db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE);
         db.setTransactionSuccessful();
         db.endTransaction();
         SharedPreferencesMigrator.migrateMessages(context, db);
@@ -103,13 +76,11 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         int version = oldVersion;
         if (version <= VER_2017_JAN_12) {
-            db.execSQL(SQL_CREATE_GEO_MESSAGES_TABLE);
             version = VER_2017_FEB_14;
         }
 
         if (version <= VER_2017_FEB_14) {
             db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_CONTENT_URL);
-            db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_CONTENT_URL);
             version = VER_2017_MAY_15;
         }
 
@@ -120,7 +91,6 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
 
         if (version <= VER_2017_AUG_25) {
             db.execSQL(SQL_ALTER_TABLE_MESSAGES_WITH_IN_APP_STYLE);
-            db.execSQL(SQL_ALTER_TABLE_GEO_MESSAGES_WITH_IN_APP_STYLE);
             version = VER_2019_JAN_21;
         }
 

@@ -15,11 +15,6 @@ public interface DatabaseContract {
          * Table for messages
          */
         String MESSAGES = "messages";
-
-        /**
-         * Table for geo messages
-         */
-        String  GEO_MESSAGES = "geo_messages";
     }
 
     interface MessageColumns {

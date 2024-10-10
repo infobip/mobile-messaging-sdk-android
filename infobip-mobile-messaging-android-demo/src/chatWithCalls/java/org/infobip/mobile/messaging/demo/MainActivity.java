@@ -581,7 +581,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                             return Unit.INSTANCE;
                         }),
                         new InCallButton.Custom(
-                                R.string.app_name, R.drawable.ic_calls_30,
+                                R.string.app_name, com.infobip.webrtc.ui.R.drawable.ic_calls_30,
                                 null,
                                 () -> {
                                     MobileMessagingLogger.i("MainActivity", "CUSTOM button pressed");
@@ -609,9 +609,9 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     Color.LTGRAY,
                     Color.LTGRAY,
                     false,
-                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_decline, getTheme()),
+                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_decline, getTheme()),
                     Color.MAGENTA,
-                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_accept, getTheme()),
+                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_accept, getTheme()),
                     Color.RED,
                     R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
                     Color.BLACK,
@@ -638,7 +638,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                                     Color.CYAN
                             ),
                             new InAppChatInputViewStyle(
-                                    R.style.IB_Chat_Input_TextAppearance,
+                                    org.infobip.mobile.messaging.chat.R.style.IB_Chat_Input_TextAppearance,
                                     Color.BLACK,
                                     Color.LTGRAY,
                                     "Type message",

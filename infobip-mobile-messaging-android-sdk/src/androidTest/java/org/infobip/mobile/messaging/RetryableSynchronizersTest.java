@@ -99,7 +99,6 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
                 reportEnabled ? DeviceInformation.getDeviceManufacturer() : "",
                 reportEnabled ? DeviceInformation.getDeviceModel() : "",
                 reportEnabled ? SoftwareInformation.getAppVersion(context) : "",
-                mobileMessagingCore.isGeofencingActivated(),
                 SoftwareInformation.areNotificationsEnabled(context),
                 DeviceInformation.isDeviceSecure(context),
                 reportEnabled ? SystemInformation.getAndroidSystemLanguage() : "",

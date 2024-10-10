@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">İzin verilmedi</string>
-    <string name="geofencing_permissions_not_granted_message">Bunları uygulama ayarlarında verebilirsiniz.</string>
-    <string name="geofencing_update_location_settings_message">Uygulama kapalıyken veya kullanımda değilken bile coğrafi bildirimleri tetiklemesine izin vermek için uygulamanın konumunuza her zaman erişmesine izin verin</string>
-    <string name="geofencing_update_location_settings_title">Konum ayarlarını guncelle</string>
-</resources>

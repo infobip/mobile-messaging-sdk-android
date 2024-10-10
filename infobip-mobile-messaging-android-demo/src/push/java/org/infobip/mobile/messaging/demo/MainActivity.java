@@ -21,7 +21,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.Message;

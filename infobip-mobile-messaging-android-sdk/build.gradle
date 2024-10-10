@@ -12,9 +12,18 @@ plugins {
     id 'com.android.library'
     id 'maven-publish'
     id 'idea'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
+    publishing {
+        multipleVariants {
+            allVariants()
+            withJavadocJar()
+            withSourcesJar()
+        }
+    }
     namespace "org.infobip.mobile.messaging"
     compileSdkVersion mm_compileSdkVersion
     buildToolsVersion mm_buildToolsVersion
@@ -22,8 +31,6 @@ android {
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion mm_targetSdkVersion
-        versionCode 1
-        versionName project.version
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -31,20 +38,24 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         consumerProguardFiles 'proguard-rules.pro'
     }
-
+    buildFeatures {
+        buildConfig true
+    }
     buildTypes {
         debug {
-            testCoverageEnabled true
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lint {
+        abortOnError false
     }
 }
 
@@ -83,7 +94,7 @@ android.libraryVariants.all { variant ->
         }
 
         dependsOn javaCompileTask
-        from javaCompileTask.destinationDir
+        from javaCompileTask.destinationDirectory
 
         manifest {
             attributes(
@@ -102,27 +113,6 @@ android.libraryVariants.all { variant ->
     artifacts {
         archives jar
     }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-task javadoc(type: Javadoc) {
-    failOnError false
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
 }
 
 ext {

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Kebenaran tidak diberikan</string>
-    <string name="geofencing_permissions_not_granted_message">Anda boleh memberikannya dalam tetapan aplikasi.</string>
-</resources>

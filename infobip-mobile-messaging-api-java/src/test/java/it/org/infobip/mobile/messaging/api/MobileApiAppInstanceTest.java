@@ -209,7 +209,6 @@ public class MobileApiAppInstanceTest {
 //                "      \"deviceModel\": \"Nexus 6\",\n" +
 //                "      \"deviceName\": \"Nexus 6\",\n" +
 //                "      \"deviceSecure\": true,\n" +
-//                "      \"geoEnabled\": true,\n" +
 //                "      \"isPrimary\": false,\n" +
 //                "      \"notificationsEnabled\": true,\n" +
 //                "      \"os\": \"Android\",\n" +
@@ -267,7 +266,6 @@ public class MobileApiAppInstanceTest {
 //                "      \"deviceModel\": \"Nexus 6\",\n" +
 //                "      \"deviceName\": \"Nexus 6\",\n" +
 //                "      \"deviceSecure\": true,\n" +
-//                "      \"geoEnabled\": true,\n" +
 //                "      \"isPrimary\": false,\n" +
 //                "      \"notificationsEnabled\": true,\n" +
 //                "      \"os\": \"Android\",\n" +
@@ -295,7 +293,6 @@ public class MobileApiAppInstanceTest {
 //        assertEquals("Nexus 6", response.getDeviceModel());
 //        assertEquals("Nexus 6", response.getDeviceName());
 //        assertEquals(true, response.getDeviceSecure());
-//        assertEquals(true, response.getGeoEnabled());
 //        assertEquals(false, response.getIsPrimary());
 //        assertEquals(true, response.getNotificationsEnabled());
 //        assertEquals("Android", response.getOs());

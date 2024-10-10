@@ -17,15 +17,20 @@ plugins {
 }
 
 android {
-
+    publishing {
+        multipleVariants {
+            allVariants()
+            withJavadocJar()
+            withSourcesJar()
+        }
+    }
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion 34
         compileSdk mm_compileSdkVersion
         buildToolsVersion = mm_buildToolsVersion
+        namespace "com.infobip.webrtc.ui"
 
-        versionCode 1
-        versionName project.version
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -36,6 +41,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     buildTypes {
@@ -58,7 +64,7 @@ android {
 
 dependencies {
     constraints {
-        implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
         }
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
@@ -101,7 +107,7 @@ android.libraryVariants.configureEach { variant ->
         }
 
         dependsOn javaCompileTask
-        from javaCompileTask.destinationDir
+        from javaCompileTask.destinationDirectory
 
         manifest {
             attributes(
@@ -120,28 +126,6 @@ android.libraryVariants.configureEach { variant ->
     artifacts {
         archives jar
     }
-}
-
-tasks.register('sourcesJar', Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-tasks.register('javadoc', Javadoc) {
-    failOnError false
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-tasks.register('javadocJar', Jar) {
-    dependsOn javadoc
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
 }
 
 ext {

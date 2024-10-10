@@ -18,7 +18,6 @@ public class InstallationMapper {
                 appInstance.getPushRegId(),
                 appInstance.getRegEnabled(),
                 appInstance.getNotificationsEnabled(),
-                appInstance.getGeoEnabled(),
                 appInstance.getSdkVersion(),
                 appInstance.getAppVersion(),
                 appInstance.getOs(),
@@ -40,7 +39,6 @@ public class InstallationMapper {
         AppInstance appInstance = new AppInstance();
         appInstance.setRegEnabled(installation.isPushRegistrationEnabled());
         appInstance.setNotificationsEnabled(installation.getNotificationsEnabled());
-        appInstance.setGeoEnabled(installation.getGeoEnabled());
         appInstance.setSdkVersion(installation.getSdkVersion());
         appInstance.setAppVersion(installation.getAppVersion());
         appInstance.setOs(installation.getOs());

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Разрешения не предоставлены</string>
-    <string name="geofencing_permissions_not_granted_message">Геофенсинг не будет работать. Предоставьте разрешения в настройках приложения.</string>
-    <string name="geofencing_update_location_settings_message">Разрешите приложению постоянно получать доступ к вашему местоположению, чтобы оно могло запускать гео-уведомления, даже когда приложение закрыто или не используется.</string>
-    <string name="geofencing_update_location_settings_title">Обновите настройки местоположения</string>
-</resources>

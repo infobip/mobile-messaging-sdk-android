@@ -128,10 +128,10 @@ internal fun Theme?.isThemeAttributePresent(attr: Int): Boolean {
 internal fun Theme?.isMMBaseTheme(): Boolean {
     return this?.let {
         listOf(
-            resolveThemeColor(R.attr.colorPrimary),
-            resolveThemeColor(R.attr.colorPrimaryDark),
-            resolveThemeColor(R.attr.colorControlNormal),
-            resolveThemeColor(R.attr.titleTextColor),
+            resolveThemeColor(androidx.appcompat.R.attr.colorPrimary),
+            resolveThemeColor(androidx.appcompat.R.attr.colorPrimaryDark),
+            resolveThemeColor(androidx.appcompat.R.attr.colorControlNormal),
+            resolveThemeColor(androidx.appcompat.R.attr.titleTextColor),
         ).all { it == Color.BLACK }
     } ?: false
 }

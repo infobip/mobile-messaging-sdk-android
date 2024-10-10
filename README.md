@@ -18,7 +18,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     ```groovy
     dependencies {
         ...
-        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:12.12.1@aar') {
+        implementation ('com.infobip:infobip-mobile-messaging-android-sdk:13.0.0@aar') {
             transitive = true
         }
     }
@@ -66,8 +66,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 
 > ### Notes
 > 1. All required manifest components are merged to application manifest automatically by manifest merger. Please include <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Android-Manifest-components#push-notifications" target="_blank">push-related components</a> to manifest manually if manifest merger was disabled.
-> 2. MobileMessaging library has geofencing service disabled by default. In order to opt-in the service, follow <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Geofencing-API" target="_blank">this guide</a>.
-> 3. Keep in mind that some proprietary android versions may restrict network traffic for your app. It may in turn affect delivery of push notifications.
+> 2. Keep in mind that some proprietary android versions may restrict network traffic for your app. It may in turn affect delivery of push notifications.
 
 <br>
 

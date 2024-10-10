@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Nie przyznano uprawnień</string>
-    <string name="geofencing_permissions_not_granted_message">Możesz je przyznać w ustawieniach aplikacji.</string>
-    <string name="geofencing_update_location_settings_message">Zezwalaj aplikacji na dostęp do Twojej lokalizacji przez cały czas, aby mogła uruchamiać powiadomienia geograficzne, nawet gdy aplikacja jest zamknięta lub nie jest używana</string>
-    <string name="geofencing_update_location_settings_title">Zaktualizuj ustawienia lokalizacji</string>
-</resources>

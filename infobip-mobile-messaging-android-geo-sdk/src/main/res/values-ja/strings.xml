@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">許可されていない権限</string>
-    <string name="geofencing_permissions_not_granted_message">アプリケーション設定でそれらを許可できます。</string>
-</resources>

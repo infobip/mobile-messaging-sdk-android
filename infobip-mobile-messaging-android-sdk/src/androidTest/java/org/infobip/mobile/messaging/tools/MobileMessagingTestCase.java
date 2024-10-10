@@ -58,7 +58,6 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     protected MobileMessaging mobileMessaging;
     protected MobileMessagingTestable mobileMessagingCore;
     protected MobileApiResourceProvider mobileApiResourceProvider;
-    protected MessageStore geoStore;
     protected DatabaseHelper databaseHelper;
     protected SqliteDatabaseProvider databaseProvider;
     protected Broadcaster broadcaster;
@@ -231,7 +230,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     }
 
     /**
-     * Generates messages with provided ids and geo campaign object
+     * Generates messages with provided ids
      *
      * @param saveToStorage set to true to save messages to message store
      * @param messageId     message id for a message

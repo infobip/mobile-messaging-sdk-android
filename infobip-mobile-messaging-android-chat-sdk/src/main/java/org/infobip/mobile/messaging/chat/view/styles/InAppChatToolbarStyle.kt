@@ -123,10 +123,10 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
             val theme = context.theme
 
             //load deprecated attributes
-            val deprecatedToolbarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimary)
-            val deprecatedStatusBarBackgroundColor = context.resolveThemeColor(R.attr.colorPrimaryDark)
-            val deprecatedTitleTextColor = context.resolveThemeColor(R.attr.titleTextColor)
-            val deprecatedToolbarIconTint = context.resolveThemeColor(R.attr.colorControlNormal)
+            val deprecatedToolbarBackgroundColor = context.resolveThemeColor(androidx.appcompat.R.attr.colorPrimary)
+            val deprecatedStatusBarBackgroundColor = context.resolveThemeColor(androidx.appcompat.R.attr.colorPrimaryDark)
+            val deprecatedTitleTextColor = context.resolveThemeColor(androidx.appcompat.R.attr.titleTextColor)
+            val deprecatedToolbarIconTint = context.resolveThemeColor(androidx.appcompat.R.attr.colorControlNormal)
             val deprecatedTitleResId: Int = runCatching {
                 context.resources.getIdentifier(
                         RES_ID_CHAT_VIEW_TITLE,
@@ -239,7 +239,7 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
                 }
             } else { //if it is theme provided by integrator apply widget color only to components which are not defined by integrator
                 val isBaseTheme = theme.isMMBaseTheme()
-                val deprecatedColorPrimaryDefined = theme.isAttributePresent(R.attr.colorPrimary)
+                val deprecatedColorPrimaryDefined = theme.isAttributePresent(com.google.android.material.R.attr.colorPrimary)
                 val applyWidgetColorPrimary = (isBaseTheme || !deprecatedColorPrimaryDefined)
 
                 val newBackgroundColorDefined = theme.isAttributePresent(
@@ -252,7 +252,7 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
                 }
 
                 val deprecatedColorPrimaryDarkDefined =
-                        theme.isAttributePresent(R.attr.colorPrimaryDark)
+                        theme.isAttributePresent(androidx.appcompat.R.attr.colorPrimaryDark)
                 val applyWidgetColorPrimaryDark =
                         (isBaseTheme || !deprecatedColorPrimaryDarkDefined)
                 val newStatusBarBackgroundColorDefined = theme.isAttributePresent(
@@ -265,7 +265,7 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
                 }
 
                 val deprecatedTitleTextColorDefined =
-                        theme.isAttributePresent(R.attr.titleTextColor)
+                        theme.isAttributePresent(androidx.appcompat.R.attr.titleTextColor)
                 val applyWidgetTitleTextColor = (isBaseTheme || !deprecatedTitleTextColorDefined)
 
                 val newTitleTextColorDefined = theme.isAttributePresent(

@@ -1,13 +1,12 @@
 package org.infobip.mobile.messaging.permissions;
 
 import android.Manifest;
-import android.app.Activity;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.activity.ComponentActivity;
 
-import org.infobip.mobile.messaging.R;
+import org.infobip.mobile.messaging.resources.R;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 public class PostNotificationsPermissionRequester implements PermissionsRequestManager.PermissionsRequester {

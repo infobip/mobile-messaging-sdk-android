@@ -137,7 +137,7 @@ data class InAppChatInputViewStyle(
 
                 val buttonDefaultTint by lazy {
                     val colorPrimary = TypedValue().run {
-                        context.theme.resolveAttribute(R.attr.colorPrimary, this, true)
+                        context.theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, this, true)
                         this.data
                     }
 

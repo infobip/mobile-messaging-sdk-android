@@ -108,16 +108,6 @@ public class InAppRulesTest extends MobileMessagingBaseTestCase {
         assertEquals(false, showOrNot.shouldShowWhenInForeground());
     }
 
-    @Test
-    public void shouldNotDisplayIfGeoSignaling() {
-        when(message.isSilent()).thenReturn(true);
-        when(message.getMessageType()).thenReturn(org.infobip.mobile.messaging.Message.MESSAGE_TYPE_GEO);
-        when(foregroundStateMonitor.isInForeground()).thenReturn(ForegroundState.foreground(activity));
-
-        ShowOrNot showOrNot = inAppRules.shouldDisplayDialogFor(message);
-        assertEquals(false, showOrNot.shouldShowNow());
-        assertEquals(false, showOrNot.shouldShowWhenInForeground());
-    }
 
     @Test
     public void shouldDisplayWithDefaultActionsIfNoCategoryAndForeground() {

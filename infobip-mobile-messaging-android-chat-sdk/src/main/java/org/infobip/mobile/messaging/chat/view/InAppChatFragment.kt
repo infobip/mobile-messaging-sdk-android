@@ -863,11 +863,11 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             .setTitle(R.string.ib_chat_permissions_not_granted_title)
             .setMessage(R.string.ib_chat_permissions_not_granted_message)
             .setCancelable(false)
-            .setNegativeButton(R.string.mm_button_cancel) { dialog, _ ->
+            .setNegativeButton(org.infobip.mobile.messaging.resources.R.string.mm_button_cancel) { dialog, _ ->
                 dialog.dismiss()
                 chooseFile(false)
             }
-            .setPositiveButton(R.string.mm_button_settings) { dialog, _ ->
+            .setPositiveButton(org.infobip.mobile.messaging.resources.R.string.mm_button_settings) { dialog, _ ->
                 dialog.dismiss()
                 activityResultDelegate.openAppSettings(context.packageName)
             }.show()

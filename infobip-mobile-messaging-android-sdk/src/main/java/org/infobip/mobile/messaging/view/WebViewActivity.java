@@ -201,16 +201,16 @@ public class WebViewActivity extends AppCompatActivity {
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getTheme();
         // toolbar background color
-        theme.resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
         toolbar.setBackgroundColor(typedValue.data);
 
-        tvToolbarTitle.setTextAppearance(this, R.style.TextAppearance_AppCompat_Widget_ActionBar_Title);
+        tvToolbarTitle.setTextAppearance(this, androidx.appcompat.R.style.TextAppearance_AppCompat_Widget_ActionBar_Title);
 
-        theme.resolveAttribute(R.attr.titleTextColor, typedValue, true);
+        theme.resolveAttribute(androidx.appcompat.R.attr.titleTextColor, typedValue, true);
         tvToolbarTitle.setTextColor(typedValue.data);
 
         progressBar = findViewById(R.id.ib_pb_webview);
-        theme.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true);
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimaryDark, typedValue, true);
         try {
             progressBar.getIndeterminateDrawable().setColorFilter(typedValue.data, PorterDuff.Mode.SRC_IN);
         } catch (Exception ignored) {
@@ -244,7 +244,7 @@ public class WebViewActivity extends AppCompatActivity {
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getTheme();
-        theme.resolveAttribute(R.attr.colorControlNormal, typedValue, true);
+        theme.resolveAttribute(androidx.appcompat.R.attr.colorControlNormal, typedValue, true);
         drawable.setColorFilter(typedValue.data, PorterDuff.Mode.SRC_IN);
         return drawable;
     }

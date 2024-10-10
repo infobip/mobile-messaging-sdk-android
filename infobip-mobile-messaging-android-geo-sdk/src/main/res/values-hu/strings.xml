@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Nem adtak engedélyeket</string>
-    <string name="geofencing_permissions_not_granted_message">Az alkalmazás beállításaiban megadhatja őket.</string>
-    <string name="geofencing_update_location_settings_title">Frissitse a helybeallitasokat</string>
-    <string name="geofencing_update_location_settings_message">Engedélyezze az alkalmazásnak, hogy mindig hozzáférjen a tartózkodási helyéhez, hogy földrajzi értesítéseket indítson el, még akkor is, ha az alkalmazás be van zárva vagy nincs használatban</string>
-</resources>

@@ -87,7 +87,7 @@ data class InAppChatStyle @JvmOverloads constructor(
                 val theme = context.theme
                 val isIbDefaultTheme = context.theme.isIbDefaultTheme()
 
-                val deprecatedProgressBarColor by lazy { context.resolveThemeColor(R.attr.colorPrimaryDark) }
+                val deprecatedProgressBarColor by lazy { context.resolveThemeColor(androidx.appcompat.R.attr.colorPrimaryDark) }
                 val backgroundColor = resolveBackgroundColor(widgetInfo, isIbDefaultTheme)
                 val progressBarColor = resolveProgressBarColor(widgetInfo, isIbDefaultTheme, deprecatedProgressBarColor, theme)
 

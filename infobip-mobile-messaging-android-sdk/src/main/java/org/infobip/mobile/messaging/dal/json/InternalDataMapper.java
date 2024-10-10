@@ -84,7 +84,7 @@ public class InternalDataMapper {
     }
 
     /**
-     * Updates message fields based on what is set in internal data (such as geo data and silent data)
+     * Updates message fields based on what is set in internal data (such as silent data)
      *
      * @param message          message to update
      * @param internalDataJson json object with internal data

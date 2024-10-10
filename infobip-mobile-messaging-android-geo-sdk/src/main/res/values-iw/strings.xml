@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">לא ניתנו הרשאות</string>
-    <string name="geofencing_permissions_not_granted_message">אתה יכול להעניק להם הגדרות יישום.</string>
-</resources>

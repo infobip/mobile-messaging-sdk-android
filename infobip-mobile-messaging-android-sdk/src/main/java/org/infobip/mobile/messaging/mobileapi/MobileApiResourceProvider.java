@@ -7,7 +7,6 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.baseurl.MobileApiBaseUrl;
 import org.infobip.mobile.messaging.api.chat.MobileApiChat;
-import org.infobip.mobile.messaging.api.geo.MobileApiGeo;
 import org.infobip.mobile.messaging.api.inbox.MobileApiInbox;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.rtc.MobileApiRtc;
@@ -120,7 +119,6 @@ public class MobileApiResourceProvider {
     private Generator generator;
     private MobileApiMessages mobileApiMessages;
     private MobileApiVersion mobileApiVersion;
-    private MobileApiGeo mobileApiGeo;
     private MobileApiAppInstance mobileApiAppInstance;
     private MobileApiChat mobileApiChat;
     private MobileApiBaseUrl mobileApiBaseUrl;
@@ -145,16 +143,6 @@ public class MobileApiResourceProvider {
         mobileApiVersion = getGenerator(context).create(MobileApiVersion.class);
 
         return mobileApiVersion;
-    }
-
-    public MobileApiGeo getMobileApiGeo(Context context) {
-        if (null != mobileApiGeo) {
-            return mobileApiGeo;
-        }
-
-        mobileApiGeo = getGenerator(context).create(MobileApiGeo.class);
-
-        return mobileApiGeo;
     }
 
     public MobileApiAppInstance getMobileApiAppInstance(Context context) {

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Povolenia neboli udelené</string>
-    <string name="geofencing_permissions_not_granted_message">Môžete ich udeliť v nastaveniach aplikácie.</string>
-    <string name="geofencing_update_location_settings_title">Aktualizujte nastavenia polohy</string>
-    <string name="geofencing_update_location_settings_message">Povoľte aplikácii neustále pristupovať k vašej polohe, aby mohla spúšťať geografické upozornenia, aj keď je aplikácia zatvorená alebo sa nepoužíva</string>
-</resources>

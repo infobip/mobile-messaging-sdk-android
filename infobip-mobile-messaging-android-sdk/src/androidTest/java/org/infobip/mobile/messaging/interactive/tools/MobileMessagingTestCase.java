@@ -179,7 +179,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
     }
 
     /**
-     * Generates messages with provided ids and geo campaign object
+     * Generates messages with provided ids
      *
      * @param saveToStorage set to true to save messages to message store
      * @param messageId     message id for a message

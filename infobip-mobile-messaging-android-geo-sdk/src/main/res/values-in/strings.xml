@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Izin tidak diberikan</string>
-    <string name="geofencing_permissions_not_granted_message">Anda dapat memberi mereka dalam pengaturan aplikasi.</string>
-    <string name="geofencing_update_location_settings_message">Izinkan aplikasi mengakses lokasi Anda setiap saat untuk membiarkannya memicu pemberitahuan geografis bahkan ketika aplikasi ditutup atau tidak digunakan</string>
-    <string name="geofencing_update_location_settings_title">Perbarui pengaturan lokasi</string>
-</resources>

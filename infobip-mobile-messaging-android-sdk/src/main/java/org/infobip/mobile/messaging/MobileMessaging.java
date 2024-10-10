@@ -420,7 +420,7 @@ public abstract class MobileMessaging {
 
     /**
      * Synchronously cleans up all persisted data.
-     * This method deletes SDK data related to current application code (also, deletes data for other modules: geo, interactive, chat).
+     * This method deletes SDK data related to current application code (also, deletes data for other modules: interactive, chat).
      * There might be a situation where you'll want to switch between different Application Codes during development/testing.
      * If you disable the Application Code storing {@link Builder#withoutStoringApplicationCode(ApplicationCodeProvider)},
      * the SDK won't detect the Application Code changes, thus won't cleanup the old Application Code related data.
@@ -497,7 +497,6 @@ public abstract class MobileMessaging {
         private NotificationSettings notificationSettings = null;
         private boolean reportCarrierInfo = true;
         private boolean reportSystemInfo = true;
-        private boolean geofencingActivated = false;
         private boolean doMarkSeenOnNotificationTap = true;
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;

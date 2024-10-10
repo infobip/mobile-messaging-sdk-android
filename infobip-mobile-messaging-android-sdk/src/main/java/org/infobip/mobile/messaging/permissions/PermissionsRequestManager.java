@@ -15,7 +15,7 @@ import androidx.annotation.StringRes;
 import androidx.collection.ArraySet;
 import androidx.fragment.app.Fragment;
 
-import org.infobip.mobile.messaging.R;
+import org.infobip.mobile.messaging.resources.R;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.util.Map;

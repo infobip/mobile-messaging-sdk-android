@@ -4,7 +4,6 @@ public class AppInstanceAtts {
     public static final String pushRegId = "pushRegId";
     public static final String regEnabled = "regEnabled";
     public static final String notificationsEnabled = "notificationsEnabled";
-    public static final String geoEnabled = "geoEnabled";
     public static final String sdkVersion = "sdkVersion";
     public static final String appVersion = "appVersion";
     public static final String os = "os";

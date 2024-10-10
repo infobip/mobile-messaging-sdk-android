@@ -21,6 +21,14 @@ android {
     compileSdkVersion mm_compileSdkVersion
     buildToolsVersion mm_buildToolsVersion
 
+    publishing {
+        multipleVariants {
+            allVariants()
+            withJavadocJar()
+            withSourcesJar()
+        }
+    }
+
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion mm_targetSdkVersion
@@ -37,13 +45,15 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     buildTypes {
         debug {
-            testCoverageEnabled true
             //needed for androidTests
             multiDexEnabled = true
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
         release {
             minifyEnabled false
@@ -59,16 +69,16 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    lintOptions {
+    lint {
         abortOnError false
     }
+
 
 }
 
 dependencies {
     constraints {
-        implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
         }
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
@@ -112,7 +122,7 @@ android.libraryVariants.all { variant ->
         }
 
         dependsOn javaCompileTask
-        from javaCompileTask.destinationDir
+        from javaCompileTask.destinationDirectory
 
         manifest {
             attributes(
@@ -131,27 +141,6 @@ android.libraryVariants.all { variant ->
     artifacts {
         archives jar
     }
-}
-
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier.set('sources')
-}
-
-task javadoc(type: Javadoc) {
-    failOnError false
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    archiveClassifier.set('javadoc')
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
 }
 
 ext {

@@ -3,7 +3,7 @@ afterEvaluate {
     project.plugins.apply('jacoco')
 
     project.jacoco {
-        toolVersion '0.8.7'
+        toolVersion '0.8.10'
     }
 
     project.tasks.withType(Test) {
@@ -15,8 +15,8 @@ afterEvaluate {
     if (!project.plugins.hasPlugin('com.android.library')) {
         jacocoTestReport {
             reports {
-                xml.enabled(true)
-                html.enabled(true)
+                xml.required = true
+                html.required = true
             }
         }.dependsOn(test)
         return
@@ -40,8 +40,8 @@ private void createCoverageTask(variantName, uiTestTaskName, unitTestTaskName, f
         group = "Reporting"
         description = "Generate Jacoco coverage reports for the ${variantName} build."
         reports {
-            xml.enabled(true)
-            html.enabled(true)
+            xml.required = true
+            html.required = true
         }
         def excludes = [
                 '**/R.class',
@@ -64,8 +64,8 @@ private void createCoverageTask(variantName, uiTestTaskName, unitTestTaskName, f
                 '**/*Directions.*',
                 '**/*Binding.*'
         ]
-        def jClassPaths = "${project.buildDir}/intermediates/javac/${variantName}/classes"
-        def kClassPaths = "${project.buildDir}/tmp/kotlin-classes/${variantName}"
+        def jClassPaths = "${layout.buildDirectory}/intermediates/javac/${variantName}/classes"
+        def kClassPaths = "${layout.buildDirectory}/tmp/kotlin-classes/${variantName}"
         def javaClasses = fileTree(dir: jClassPaths, excludes: excludes)
         def kotlinClasses = fileTree(dir: kClassPaths, excludes: excludes)
         classDirectories.from = files([javaClasses, kotlinClasses])

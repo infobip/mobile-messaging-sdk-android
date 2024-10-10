@@ -20,8 +20,6 @@ public class MobileMessagingJob {
 
     public static final int ON_NETWORK_AVAILABLE_JOB_ID = 1;
     public static final int CLOUD_INTENT_JOB_ID = 2;
-    public static final int GEO_TRANSITION_JOB_ID = 3;
-    public static final int GEO_CONSISTENCY_JOB_ID = 4;
 
     /**
      * Gets schedule ID that's used as job ID for scheduling jobs with {@link JobScheduler}.

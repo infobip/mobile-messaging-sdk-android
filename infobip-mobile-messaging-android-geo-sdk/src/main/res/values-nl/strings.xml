@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Voit myöntää heille sovellusasetuksissa.</string>
-    <string name="geofencing_permissions_not_granted_message">U kunt ze toekennen in toepassingsinstellingen.</string>
-</resources>

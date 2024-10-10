@@ -556,9 +556,9 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     Color.LTGRAY,
                     Color.LTGRAY,
                     false,
-                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_decline, getTheme()),
+                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_decline, getTheme()),
                     Color.MAGENTA,
-                    ResourcesCompat.getDrawable(getResources(), R.drawable.mm_ic_button_accept, getTheme()),
+                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_accept, getTheme()),
                     Color.RED,
                     R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
                     Color.BLACK,
@@ -585,7 +585,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                                     Color.CYAN
                             ),
                             new InAppChatInputViewStyle(
-                                    R.style.IB_Chat_Input_TextAppearance,
+                                    org.infobip.mobile.messaging.chat.R.style.IB_Chat_Input_TextAppearance,
                                     Color.BLACK,
                                     Color.LTGRAY,
                                     "Type message",

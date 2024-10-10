@@ -290,7 +290,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         user.setBirthday(givenBirthday);
         user.setCustomAttributes(givenCustomAtts);
         user.setListCustomAttribute(KEY_FOR_LIST, new ListCustomAttributeValue(getListCustomValueItems()));
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", false, true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
+        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion",  true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
 
         String savedUser = UserMapper.toJson(user);
         PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, savedUser);

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Tillstånd inte beviljade</string>
-    <string name="geofencing_permissions_not_granted_message">Du kan bevilja dem i applikationsinställningar.</string>
-    <string name="geofencing_update_location_settings_title">Uppdatera platsinställningar</string>
-    <string name="geofencing_update_location_settings_message">Tillåt appen att komma åt din plats hela tiden för att låta den utlösa geografiska aviseringar även när appen är stängd eller inte används</string>
-</resources>

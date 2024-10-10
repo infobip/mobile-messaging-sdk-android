@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Dozvole nisu odobrene</string>
-    <string name="geofencing_permissions_not_granted_message">Dozvole nisu odobrene</string>
-    <string name="geofencing_update_location_settings_message">Dopustite aplikaciji pristup vašoj lokaciji cijelo vrijeme kako biste joj omogućili da pokreće geografske obavijesti čak i kada je aplikacija zatvorena ili se ne koristi</string>
-    <string name="geofencing_update_location_settings_title">Ažurirajte postavke lokacije</string>
-</resources>

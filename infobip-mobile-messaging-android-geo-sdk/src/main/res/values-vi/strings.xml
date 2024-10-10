@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Geofencing -->
-    <string name="geofencing_permissions_not_granted_title">Quyền không được cấp</string>
-    <string name="geofencing_permissions_not_granted_message">Bạn có thể cấp chúng trong cài đặt ứng dụng.</string>
-    <string name="geofencing_update_location_settings_title">Cập nhật cài đặt vị trí</string>
-    <string name="geofencing_update_location_settings_message">CHO PHÉP ứNG DụNG TRUY CậP VÀO Vị TRí CủA BạN MọI LúC để CHO Phép ứNG DụNG Kích Hoạt Thông Báo địa Lý ngay Cả KHI ứNG DụNG Bị đóng Hoặc Không được Sử DụNG</string>
-</resources>
