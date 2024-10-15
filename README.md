@@ -8,7 +8,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 ## Requirements
 
 - Android Studio
-- Supported API Levels: 21 (Android 5.0 - Lollipop) - 34 (Android 14)
+- Supported API Levels: 21 (Android 5.0 - Lollipop) - 35 (Android 15)
 - <a href="https://developer.android.com/jetpack/androidx/migrate" target="_blank">AndroidX</a>
 
 ## Quick start guide
@@ -61,7 +61,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 
 
 <br>
-<p align="center"><b>NEXT STEPS: <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/User-profile">User profile</a></b></p>
+<p align="center"><b>NEXT STEPS: <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations">Users and installations</a></b></p>
 <br>
 
 > ### Notes
@@ -71,7 +71,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 <br>
 
 | If you have any questions or suggestions, feel free to send an email to support@infobip.com or create an <a href="https://github.com/infobip/mobile-messaging-sdk-android/issues" target="_blank">issue</a>. |
-|---|
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
 
 

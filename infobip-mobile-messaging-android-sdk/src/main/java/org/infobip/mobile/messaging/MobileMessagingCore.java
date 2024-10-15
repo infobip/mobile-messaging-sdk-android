@@ -15,6 +15,7 @@ import android.util.Pair;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstanceAtts;
@@ -151,8 +152,8 @@ public class MobileMessagingCore
     private volatile boolean didSyncAtLeastOnce;
     private volatile Long lastSyncTimeMillis;
     private volatile Long lastForegroundSyncMillis;
-    private FirebaseAppProvider firebaseAppProvider;
-    private PostNotificationsPermissionRequester postNotificationsPermissionRequester;
+    private final FirebaseAppProvider firebaseAppProvider;
+    private final PostNotificationsPermissionRequester postNotificationsPermissionRequester;
     private InAppClickReporter inAppClickReporter;
 
     protected MobileMessagingCore(Context context) {
@@ -1869,7 +1870,7 @@ public class MobileMessagingCore
     /**
      * This method handles issues with absent registration and forces library to get back to the working state
      *
-     * @param mobileMessagingError
+     * @param mobileMessagingError {@link MobileMessagingError}
      */
     public void handleNoRegistrationError(MobileMessagingError mobileMessagingError) {
         if (ApiErrorCode.NO_REGISTRATION.equalsIgnoreCase(mobileMessagingError.getCode())) {
@@ -2116,7 +2117,7 @@ public class MobileMessagingCore
          * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
          * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
          * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
-         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         * For code snippets (old cryptor implementation) and more details - <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration">check docs on GitHub</a>.
          *
          * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
          * @return {@link Builder}

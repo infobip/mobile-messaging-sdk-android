@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
@@ -101,10 +102,10 @@ public abstract class MobileMessaging {
     /**
      * Asynchronously saves changed installation on the server.
      * <p>
-     * This method will synchronize new installation data (such as setting of primary device, application user ID, custom atts...) with server
+     * This method will synchronize new installation data (such as setting of primary device, application user ID, custom attributes...) with server
      * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param installation installation object with desired changes
      * @see Event#INSTALLATION_UPDATED
@@ -114,10 +115,10 @@ public abstract class MobileMessaging {
     /**
      * Asynchronously saves changed installation on the server.
      * <p>
-     * This method will save new installation data (such as setting of primary device, application user ID, custom atts...) with server
+     * This method will save new installation data (such as setting of primary device, application user ID, custom attributes...) with server
      * and will also trigger {@link Event#INSTALLATION_UPDATED} event with the currently available data in local cache for this installation. The result will be provided via listener.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param installation installation object with desired changes
      * @param listener     listener to report the result on
@@ -129,7 +130,7 @@ public abstract class MobileMessaging {
     /**
      * Asynchronously fetches the installation data from the server.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param listener listener to report the result on
      * @see ResultListener
@@ -139,7 +140,7 @@ public abstract class MobileMessaging {
     /**
      * Synchronously retrieves current installation data stored locally such as push registration ID, language, push token, etc.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @return installation installation data object with locally stored data
      */
@@ -150,7 +151,7 @@ public abstract class MobileMessaging {
      * <br>
      * Use this method to let SDK decide when it is best time to try to send request to server. The result will be provided via listener.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param pushRegistrationId set the push registration ID to make some other device installation a primary one
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise
@@ -163,7 +164,7 @@ public abstract class MobileMessaging {
      * <br>
      * Use this method to let SDK decide when it is best time to try to send request to server.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param pushRegistrationId set the push registration ID to make some other device installation a primary one.
      * @param isPrimary          set to true to make the provided installation as primary or to false otherwise.
@@ -176,7 +177,7 @@ public abstract class MobileMessaging {
      * This method will save new data on server and will also trigger {@link Event#USER_UPDATED}
      * with the currently available data in local cache for this user.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param user user data object with desired changes
      * @see Event#USER_UPDATED
@@ -189,7 +190,7 @@ public abstract class MobileMessaging {
      * This method will save new data with server. The result will be provided via listener.
      * It will also trigger {@link Event#USER_UPDATED} with the currently available data in local cache for this user.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param user     user data object with desired changes
      * @param listener listener to report the result on
@@ -203,7 +204,7 @@ public abstract class MobileMessaging {
      * <br>
      * The result of fetching operation will be provided via listener with all the data currently available on a server for this user.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param listener listener to report the result on
      * @see ResultListener
@@ -230,7 +231,7 @@ public abstract class MobileMessaging {
      * current possible person from current installation and personalize it with another person at once, use another API
      * {@link MobileMessaging#personalize(UserIdentity, UserAttributes, boolean, ResultListener)}
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param userIdentity   required combination of phones, emails and an external user id that will form a unique key for a person
      * @param userAttributes optional user data to be saved for the person
@@ -249,7 +250,7 @@ public abstract class MobileMessaging {
      * current possible person from current installation and personalize it with another person at once, use another API
      * {@link MobileMessaging#personalize(UserIdentity, UserAttributes, boolean, ResultListener)}
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param userIdentity   required combination of phones, emails and an external user id that will form a unique key for a person
      * @param userAttributes optional user data to be saved for the person
@@ -265,7 +266,7 @@ public abstract class MobileMessaging {
      * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
      * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
      * @param userAttributes     optional user data to be saved for the person
@@ -281,7 +282,7 @@ public abstract class MobileMessaging {
      * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
      * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
      * @param userAttributes     optional user data to be saved for the person
@@ -305,7 +306,7 @@ public abstract class MobileMessaging {
      * <li>you're syncing user data to our server</li>
      * <li>your application has logout functionality</li>
      * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
-     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registrationvia {@link Installation#setPushRegistrationEnabled(Boolean)}
+     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registration via {@link Installation#setPushRegistrationEnabled(Boolean)}
      * with <i>false</i> value to disable all messages and {@link MobileMessaging#saveInstallation(Installation)} to update it to the server</li>
      * </ul>
      *
@@ -331,7 +332,7 @@ public abstract class MobileMessaging {
      * <li>you're syncing user data to our server</li>
      * <li>your application has logout functionality</li>
      * <li>you don't want new personalized installation to be targeted by other user's data, e.g. first name</li>
-     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registrationvia {@link Installation#setPushRegistrationEnabled(Boolean)}
+     * <li>you want to depersonalize installation from user and still be able to receive broadcast notifications (otherwise, you need to disable push registration via {@link Installation#setPushRegistrationEnabled(Boolean)}
      * with <i>false</i> value to disable all messages and {@link MobileMessaging#saveInstallation(Installation)} to update it to the server</li>
      * </ul>
      * <p>
@@ -347,7 +348,7 @@ public abstract class MobileMessaging {
     /**
      * Asynchronously depersonalizes some other device among others devices of a single user.
      * <p>
-     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-ios/wiki/Users-and-installations>Users and installations</a>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
      *
      * @param pushRegistrationId push registration ID of the installation to be depersonalized
      * @param listener           listener to report the result on
@@ -727,8 +728,8 @@ public abstract class MobileMessaging {
         }
 
         /**
-         * Use this method to enable Full-featured In-App notifications (more about this feature - https://github.com/infobip/mobile-messaging-sdk-android/wiki/In-app-notifications#full-featured-in-app-notifications)
-         * Without calling this method, event MESSAGE_RECEIVED (https://github.com/infobip/mobile-messaging-sdk-android/wiki/Library-events#message_received) is triggered, but In-App message not displayed within WebView.
+         * Use this method to enable Full-featured In-App notifications <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In-app-notifications#full-featured-in-app-notifications">(more about this feature)</a>
+         * Without calling this method, event (<a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/Library-events#message_received">MESSAGE_RECEIVED </a>) is triggered, but In-App message not displayed within WebView.
          *
          * @return {@link Builder}
          */
@@ -869,7 +870,7 @@ public abstract class MobileMessaging {
          * This method will migrate data, encrypted with old unsecure algorithm (ECB) to new one {@link CryptorImpl} (CBC).
          * If you have installations of the application with MobileMessaging SDK version < 5.0.0,
          * use this method with providing old cryptor, so MobileMessaging SDK will migrate data using the new cryptor.
-         * For code snippets (old cryptor implementation) and more details check docs on github - https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration.
+         * For code snippets (old cryptor implementation) and more details - <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/ECB-Cryptor-migration">check docs on GitHub</a>.
          *
          * @param oldCryptor, provide old cryptor, to migrate encrypted data to new one {@link CryptorImpl}.
          * @return {@link Builder}
@@ -893,7 +894,7 @@ public abstract class MobileMessaging {
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
-         * @param initListener provide listener to handle any errors during intialization
+         * @param initListener provide listener to handle any errors during initialization
          * @return {@link MobileMessaging}
          */
         public MobileMessaging build(@Nullable InitListener initListener) {
