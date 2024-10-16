@@ -235,9 +235,24 @@ public class MobileApiResourceProvider {
         }
 
         Properties properties = new Properties();
-        properties.putAll(System.getProperties());
-        properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
-        properties.put("library.version", SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context));
+        try {
+            properties.putAll(System.getProperties());
+        } catch (Exception e) {
+            MobileMessagingLogger.e("System properties not included in Http client headers.", e);
+        }
+
+        String appCode = MobileMessagingCore.getApplicationCode(context);
+        if (StringUtils.isNotBlank(appCode))
+            properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
+        else
+            MobileMessagingLogger.e("Missing api.key value, application code is not provided to MobileMessaging library.");
+
+        String sdkVersion = SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context);
+        if (StringUtils.isNotBlank(sdkVersion))
+            properties.put("library.version", sdkVersion);
+        else
+            MobileMessagingLogger.e("Missing library.version value, sdk version is not available.");
+
 
         generator = new Generator.Builder()
                 .withBaseUrl(MobileMessagingCore.getApiUri(context))

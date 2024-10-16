@@ -10,14 +10,6 @@ import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.TaskStackBuilder;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
@@ -52,6 +44,14 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Locale;
 import java.util.concurrent.Executors;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.TaskStackBuilder;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
@@ -223,6 +223,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
                     }
                 }
             });
+        }
+        else {
+            MobileMessagingLogger.i(TAG, "Widget sync skipped. In-app chat is not activated or widget configuration is already synced");
         }
     }
 

@@ -72,12 +72,12 @@ class InAppChatView @JvmOverloads constructor(
 
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
     private var style = StyleFactory.create(context, attributes).chatStyle()
-    private val inAppChat = InAppChat.getInstance(context)
+    private val mmCore: MobileMessagingCore by lazy { MobileMessagingCore.getInstance(context) }
+    private val inAppChat by lazy { InAppChat.getInstance(context) }
+    private val lcRegIdChecker by lazy { LivechatRegistrationChecker(context) }
     private val inAppChatClient: InAppChatClient = InAppChatClientImpl(binding.ibLcWebView)
     private var inAppChatBroadcaster: InAppChatBroadcaster = InAppChatBroadcasterImpl(context)
-    private val mmCore: MobileMessagingCore = MobileMessagingCore.getInstance(context)
     private val localizationUtils = LocalizationUtils.getInstance(context)
-    private val lcRegIdChecker = LivechatRegistrationChecker(context)
     private val propertyHelper = PropertyHelper(context)
     private var widgetInfo: WidgetInfo? = null
     private var lastControlsVisibility: Boolean? = null

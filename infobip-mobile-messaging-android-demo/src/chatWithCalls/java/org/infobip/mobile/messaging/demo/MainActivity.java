@@ -19,17 +19,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-import androidx.annotation.IdRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -59,6 +48,16 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.util.Arrays;
 import java.util.Locale;
 
+import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import kotlin.Unit;
 
 public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
@@ -113,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                onChatAvailabilityUpdated(intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, false));
+                onChatAvailabilityUpdated(intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, false), true);
             }
         }
     };
@@ -183,6 +182,9 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         if (this.lastUsedAuthData != null) {
             outState.putParcelable(EXTRA_AUTH_DATA, this.lastUsedAuthData);
         }
+        if (this.openChatActivityButton != null) {
+            outState.putBoolean(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, this.openChatActivityButton.isEnabled());
+        }
         super.onSaveInstanceState(outState);
     }
 
@@ -193,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         if (parcelable instanceof AuthData) {
             this.lastUsedAuthData = (AuthData) parcelable;
         }
+        onChatAvailabilityUpdated(savedInstanceState.getBoolean(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE), false);
     }
 
     @Override
@@ -207,7 +210,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             saveToClipboard(getString(R.string.push_registration_id), getPushRegId());
             Toast.makeText(this, getString(R.string.push_registration_id) + " " + getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show();
             return true;
-        } else if (item.getGroupId() == R.id.languages) {
+        }
+        else if (item.getGroupId() == R.id.languages) {
             String language = langMenuIdToLocale(item.getItemId());
             //change language of In-app chat and calls
             if (language != null) {
@@ -346,12 +350,13 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         }
     }
 
-    private void onChatAvailabilityUpdated(boolean isAvailable) {
+    private void onChatAvailabilityUpdated(boolean isAvailable, boolean showToast) {
         openChatActivityButton.setEnabled(isAvailable);
         showChatFragmentButton.setEnabled(isAvailable);
         openChatFragmentButton.setEnabled(isAvailable);
         openChatViewButton.setEnabled(isAvailable);
-        Toast.makeText(this, getString(R.string.chat_availability, isAvailable), Toast.LENGTH_SHORT).show();
+        if (showToast)
+            Toast.makeText(this, getString(R.string.chat_availability, isAvailable), Toast.LENGTH_SHORT).show();
     }
 
     private void setInAppChatEventsListener() {
@@ -471,7 +476,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                             Toast.makeText(MainActivity.this, "Authentication failed: " + result.getError().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-            } else {
+            }
+            else {
                 hideProgressBar();
             }
         });
@@ -503,7 +509,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     true,
                     resultListener
             );
-        } else {
+        }
+        else {
             hideProgressBar();
         }
     }
