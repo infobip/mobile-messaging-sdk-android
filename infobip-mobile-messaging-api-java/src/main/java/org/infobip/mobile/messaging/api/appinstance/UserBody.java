@@ -28,6 +28,7 @@ public class UserBody {
     private String middleName;
     private String birthday;
     private String gender;
+    private String type;
 
     private Set<Email> emails;
     private Set<Phone> phones;

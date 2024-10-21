@@ -1,6 +1,11 @@
 package org.infobip.mobile.messaging;
 
+import static org.infobip.mobile.messaging.UserMapper.fromBundle;
+import static org.infobip.mobile.messaging.UserMapper.mapEmailsToBackend;
+import static org.infobip.mobile.messaging.UserMapper.mapPhonesToBackend;
+
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
@@ -9,16 +14,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.infobip.mobile.messaging.UserMapper.fromBundle;
-import static org.infobip.mobile.messaging.UserMapper.mapEmailsToBackend;
-import static org.infobip.mobile.messaging.UserMapper.mapPhonesToBackend;
-
 public class User extends UserAttributes {
 
     private String externalUserId;
     private Set<String> phones;
     private Set<String> emails;
     private List<Installation> installations;
+    private Type type;
+
+    public enum Type {
+        LEAD, CUSTOMER
+    }
 
     public User() {
 
@@ -60,6 +66,7 @@ public class User extends UserAttributes {
                 String middleName,
                 Gender gender,
                 String birthday,
+                Type type,
                 Set<String> phones,
                 Set<String> emails,
                 Set<String> tags,
@@ -72,6 +79,7 @@ public class User extends UserAttributes {
         this.middleName = middleName;
         this.gender = gender;
         this.birthday = birthday;
+        this.type = type;
         this.phones = phones;
         this.emails = emails;
         this.tags = tags;
@@ -102,6 +110,24 @@ public class User extends UserAttributes {
     public void setExternalUserId(String externalUserId) {
         this.externalUserId = externalUserId;
         setField(UserAtts.externalUserId, externalUserId);
+    }
+
+    /**
+     * Gets user's type - LEAD or CUSTOMER. Indicating if user was personalized or not.
+     * 
+     * @see MobileMessaging#personalize(UserIdentity, UserAttributes) 
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Package private function. Used only in SDK, do not make public.
+     *
+     * @param type user's type
+     */
+    void setType(Type type) {
+        this.type = type;
     }
 
     /**

@@ -1,8 +1,9 @@
 package org.infobip.mobile.messaging;
 
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.util.Pair;
+
+import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
@@ -95,6 +96,7 @@ public class UserMapper {
                 userResponseBody.getMiddleName(),
                 genderFromBackend(userResponseBody.getGender()),
                 userResponseBody.getBirthday(),
+                typeFromBackend(userResponseBody.getType()),
                 destinationsFromBackend(userResponseBody.getPhones()),
                 destinationsFromBackend(userResponseBody.getEmails()),
                 userResponseBody.getTags(),
@@ -212,6 +214,9 @@ public class UserMapper {
             existing.setCustomAttributes(MapUtils.concat(existing.getCustomAttributes(), data.getCustomAttributes()));
         }
         existing.setInstallations(CollectionUtils.concat(existing.getInstallations(), data.getInstallations()));
+        if (data.getType() != null) {
+            existing.setType(data.getType());
+        }
     }
 
     public static User filterOutDeletedData(User user) {
@@ -232,6 +237,7 @@ public class UserMapper {
                 user.getMiddleName(),
                 user.getGender(),
                 user.getBirthdayString(),
+                user.getType(),
                 user.getPhones(),
                 user.getEmails(),
                 user.getTags(),
@@ -244,6 +250,15 @@ public class UserMapper {
             return gender != null ? User.Gender.valueOf(gender) : null;
         } catch (Exception e) {
             MobileMessagingLogger.w("Cannot parse gender", e);
+            return null;
+        }
+    }
+
+    public static User.Type typeFromBackend(String type) {
+        try {
+            return type != null ? User.Type.valueOf(type) : null;
+        } catch (Exception e) {
+            MobileMessagingLogger.w("Cannot parse user type", e);
             return null;
         }
     }

@@ -1,5 +1,8 @@
 package org.infobip.mobile.messaging;
 
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -7,9 +10,6 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 
 public class UserStoreTest extends MobileMessagingTestCase {
 
@@ -80,6 +80,7 @@ public class UserStoreTest extends MobileMessagingTestCase {
                 null,
                 null,
                 "2000-01-01",
+                null,
                 null,
                 null,
                 null,
