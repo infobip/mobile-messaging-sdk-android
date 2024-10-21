@@ -1461,7 +1461,7 @@ public class MobileMessagingCore
 
     @Override
     public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes) {
-        personalize(userIdentity, userAttributes, false, null);
+        personalize(userIdentity, userAttributes, false, false, null);
     }
 
     @Override
@@ -1470,12 +1470,22 @@ public class MobileMessagingCore
     }
 
     @Override
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, boolean keepAsLead) {
+        personalize(userIdentity, userAttributes, forceDepersonalize, keepAsLead, null);
+    }
+
+    @Override
     public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, ResultListener<User> listener) {
-        personalize(userIdentity, userAttributes, false, listener);
+        personalize(userIdentity, userAttributes, false, false, listener);
     }
 
     @Override
     public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, final ResultListener<User> listener) {
+        personalize(userIdentity, userAttributes, forceDepersonalize, false, null);
+    }
+
+    @Override
+    public void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, boolean keepAsLead, final ResultListener<User> listener) {
         if (!isRegistrationAvailable()) {
             if (listener != null) {
                 listener.onResult(new Result<>(getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
@@ -1513,7 +1523,7 @@ public class MobileMessagingCore
                 userAttributes.getMap().remove(UserAtts.externalUserId);
         }
 
-        personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, listener);
+        personalizeSynchronizer().personalize(userIdentity, userAttributes, forceDepersonalize, keepAsLead, listener);
     }
 
     private boolean areInstallationsExpired() {

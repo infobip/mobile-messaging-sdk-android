@@ -292,6 +292,41 @@ public abstract class MobileMessaging {
     public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, ResultListener<User> listener);
 
     /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes     optional user data to be saved for the person
+     * @param forceDepersonalize determines whether or not the depersonalization should be performed on our server in order to depersonalize the installation from previous user profile
+     * @param keepAsLead         you can set this parameter to true If you want to prevent the promotion from Lead to Customer, only for specific use cases where the default behaviour wants to be avoided
+     */
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, boolean keepAsLead);
+
+    /**
+     * Asynchronously personalizes current installation with a person on the server.
+     * <br>
+     * Each user can have Phone numbers, Emails and External user ID. These fields are unique identifiers of a user profile on Infobip platform
+     * and provide capability to personalize any app installation with a user profile. The platform provides data grouping functions based on these parameters.
+     * For example, if two installations of a particular app will try to save the same Phone number, then both of them will be collected under a single user.
+     * Phone number, Email and External user ID are also widely used when targeting users with messages across different channels via Infobip platform.
+     * <p>
+     * For more information and examples see: <a href=https://github.com/infobip/mobile-messaging-sdk-android/wiki/Users-and-installations>Users and installations</a>
+     *
+     * @param userIdentity       required combination of phones, emails and an external user id that will form a unique key for a person
+     * @param userAttributes     optional user data to be saved for the person
+     * @param forceDepersonalize determines whether or not the depersonalization should be performed on our server in order to depersonalize the installation from previous user profile
+     * @param keepAsLead         you can set this parameter to true If you want to prevent the promotion from Lead to Customer, only for specific use cases where the default behaviour wants to be avoided
+     * @param listener           listener to report the result on
+     */
+    public abstract void personalize(@NonNull UserIdentity userIdentity, @Nullable UserAttributes userAttributes, boolean forceDepersonalize, boolean keepAsLead, ResultListener<User> listener);
+
+    /**
      * Asynchronously erases currently stored {@link User} on SDK and server associated with push registration, along with messages in SDK storage (also, deletes data for chat module).
      * <p>
      * {@link User}'s data synced over MobileMessaging is by default associated with created push registration. Depersonalizing an installation means that a push registration and

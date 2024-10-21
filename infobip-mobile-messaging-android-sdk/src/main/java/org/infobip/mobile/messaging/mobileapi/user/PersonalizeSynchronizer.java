@@ -49,7 +49,7 @@ public class PersonalizeSynchronizer {
         this.serverListener = serverListener;
     }
 
-    public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, final MobileMessaging.ResultListener<User> listener) {
+    public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, boolean keepAsLead, final MobileMessaging.ResultListener<User> listener) {
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
@@ -69,7 +69,7 @@ public class PersonalizeSynchronizer {
             @Override
             public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("PERSONALIZE >>>", userPersonalizeBody);
-                mobileApiAppInstance.personalize(mobileMessagingCore.getPushRegistrationId(), forceDepersonalize, userPersonalizeBody);
+                mobileApiAppInstance.personalize(mobileMessagingCore.getPushRegistrationId(), forceDepersonalize, keepAsLead, userPersonalizeBody);
                 return null;
             }
 

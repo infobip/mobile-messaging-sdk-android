@@ -56,6 +56,7 @@ public interface MobileApiAppInstance {
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/personalize")
     void personalize(@Path(name = "regId") String regId,
                      @Query(name = "forceDepersonalize", value = "false") boolean forceDepersonalize,
+                     @Query(name = "keepAsLead", value = "false") boolean keepAsLead,
                      @Body UserPersonalizeBody userPersonalizeBody);
 
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/user/events/session")

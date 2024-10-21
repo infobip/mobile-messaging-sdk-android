@@ -506,6 +506,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     authData.getUserIdentity(),
                     authData.getUserAttributes(),
                     true,
+                    true,
                     resultListener
             );
         } else {
