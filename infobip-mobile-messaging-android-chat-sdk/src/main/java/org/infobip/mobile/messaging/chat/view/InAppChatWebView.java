@@ -8,15 +8,15 @@ import android.util.AttributeSet;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebChromeClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient;
 import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class InAppChatWebView extends WebView {
     private static final String IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile";
@@ -43,6 +43,7 @@ public class InAppChatWebView extends WebView {
         webViewSettings.setJavaScriptEnabled(true);
         webViewSettings.setDomStorageEnabled(true);
         webViewSettings.setDatabaseEnabled(true);
+        webViewSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         setClickable(true);
         setWebViewClient(new InAppChatWebViewClient(webViewManager));
         addJavascriptInterface(new InAppChatMobileImpl(webViewManager), IN_APP_CHAT_MOBILE_INTERFACE);

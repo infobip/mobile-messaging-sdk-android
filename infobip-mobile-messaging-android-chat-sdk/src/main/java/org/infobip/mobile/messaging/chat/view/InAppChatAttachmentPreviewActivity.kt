@@ -16,6 +16,7 @@ import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.ColorInt
@@ -170,6 +171,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() = with(binding.ibLcChatAttachWv) {
         settings.javaScriptEnabled = true
+        settings.cacheMode = WebSettings.LOAD_NO_CACHE
         isClickable = true
         webViewClient = object : WebViewClient() {
 
