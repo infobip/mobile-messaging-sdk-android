@@ -2,6 +2,11 @@
 
     <style name="InAppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowNoTitle">true</item>
+        <item name="buttonBarButtonStyle">@style/DialogButtonStyle</item>
+    </style>
+
+    <style name="DialogButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/buttonTextColor</item>
     </style>
 
     <style name="IB_AppTheme" parent="Theme.AppCompat.Light.NoActionBar">

@@ -24,8 +24,8 @@ public class ActivityWrapper {
         this.layoutInflater = LayoutInflater.from(activity);
     }
 
-    public AlertDialog.Builder createAlertDialogBuilder(boolean useAppTheme) {
-        return new AlertDialog.Builder(useAppTheme ? activity : new ContextThemeWrapper(activity, R.style.InAppDialog));
+    public AlertDialog.Builder createAlertDialogBuilder() {
+        return new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.InAppDialog));
     }
 
     public View inflateView(int layoutResId) {

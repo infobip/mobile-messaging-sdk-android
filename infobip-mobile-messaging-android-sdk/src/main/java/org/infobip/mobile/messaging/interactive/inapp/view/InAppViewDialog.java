@@ -63,10 +63,9 @@ public class InAppViewDialog implements InAppNativeView {
             @Override
             public void run() {
                 try {
-                    showOnUiThreadWithAppTheme(bitmap, message, category, actions);
+                    showOnUiThread(bitmap, message, category, actions);
                 } catch (Exception e) {
                     if (e instanceof IllegalStateException && e.getMessage().contains("You need to use a Theme.AppCompat theme")) {
-                        showOnUiThreadWithOwnTheme(bitmap, message, category, actions);
                         return;
                     }
                     // better not displaying in-app than crashing UI
@@ -76,15 +75,7 @@ public class InAppViewDialog implements InAppNativeView {
         });
     }
 
-    private void showOnUiThreadWithOwnTheme(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
-        showOnUiThread(bitmap, message, category, actions, false);
-    }
-
-    private void showOnUiThreadWithAppTheme(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
-        showOnUiThread(bitmap, message, category, actions, true);
-    }
-
-    private void showOnUiThread(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions, boolean useAppTheme) {
+    private void showOnUiThread(Bitmap bitmap, @NonNull Message message, NotificationCategory category, @NonNull NotificationAction[] actions) {
         if (bitmap != null) {
             image.setImageBitmap(bitmap);
             rlDialogImage.setVisibility(View.VISIBLE);
@@ -97,7 +88,7 @@ public class InAppViewDialog implements InAppNativeView {
         }
         tvMessageText.setText(message.getBody());
 
-        final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder(useAppTheme)
+        final AlertDialog.Builder builder = activityWrapper.createAlertDialogBuilder()
                 .setOnDismissListener(new InAppViewDialogDismissListener(this, callback))
                 .setView(dialogView);
 
