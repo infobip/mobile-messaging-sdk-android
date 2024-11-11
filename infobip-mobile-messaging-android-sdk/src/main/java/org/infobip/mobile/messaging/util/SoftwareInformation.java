@@ -3,12 +3,13 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import androidx.core.app.NotificationManagerCompat;
 import android.util.Log;
 
+import androidx.core.app.NotificationManagerCompat;
+
 import org.infobip.mobile.messaging.BuildConfig;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -96,7 +97,7 @@ public class SoftwareInformation {
     }
 
     public static String getSDKVersion() {
-        return BuildConfig.VERSION_NAME;
+        return BuildConfig.MM_SDK_VERSION;
     }
 
     public static boolean isDebuggableApplicationBuild(Context context) {

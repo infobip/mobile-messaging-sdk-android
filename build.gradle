@@ -34,6 +34,7 @@ ext {
     mm_coreKtxVersion = "1.10.1"
     mm_desugarJdkVersion = "1.1.5"
     mm_lifecycleVersion = "2.5.1"
+    mm_version = "$version"
 }
 
 allprojects {

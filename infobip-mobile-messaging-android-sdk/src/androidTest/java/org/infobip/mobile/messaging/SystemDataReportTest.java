@@ -1,5 +1,16 @@
 package org.infobip.mobile.messaging;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -9,16 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.BDDMockito;
 
 import java.util.Map;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author sslavin
@@ -51,6 +52,7 @@ public class SystemDataReportTest extends MobileMessagingTestCase {
         assertFalse(data.getDeviceModel().isEmpty());
         assertFalse(data.getOsVersion().isEmpty());
         assertFalse(data.getSdkVersion().isEmpty());
+        assertNotEquals("null", data.getSdkVersion());
 //        assertFalse(data.getDeviceSecure());
     }
 
