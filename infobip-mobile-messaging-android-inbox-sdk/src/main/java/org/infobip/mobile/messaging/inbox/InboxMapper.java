@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,7 +34,7 @@ public class InboxMapper {
         try {
             customPayload = response.getCustomPayload() != null ? new JSONObject(response.getCustomPayload()) : null;
         } catch (JSONException e) {
-            e.printStackTrace();
+            MobileMessagingLogger.w("Cannot get Inbox response", e);
         }
 
         final String internalData = response.getInternalData();
@@ -68,5 +69,17 @@ public class InboxMapper {
 
         InternalDataMapper.updateMessageWithInternalData(message, internalData);
         return message;
+    }
+
+    public static JSONObject toJSON(final Inbox inbox) {
+        if (inbox == null) {
+            return new JSONObject();
+        }
+        try {
+            return new JSONObject(inbox.toString());
+        } catch (Exception e) {
+            MobileMessagingLogger.w("Cannot convert Inbox toJSON", e);
+            return new JSONObject();
+        }
     }
 }

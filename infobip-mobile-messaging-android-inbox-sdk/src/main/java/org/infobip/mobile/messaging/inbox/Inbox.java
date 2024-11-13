@@ -21,7 +21,7 @@ public class Inbox {
 
     /**
      * Total number of messages available in the Inbox. Maximum is limited to 100 messages.
-     */ 
+     */
     public int getCountTotal() {
         return countTotal;
     }
