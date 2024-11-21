@@ -1,12 +1,24 @@
 package org.infobip.mobile.messaging;
 
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
+import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationChannelCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -75,6 +87,7 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.StringUtils;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -92,13 +105,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.UserMapper.toJson;
-import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
 /**
  * @author sslavin
@@ -186,6 +192,11 @@ public class MobileMessagingCore
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
 
         initDefaultChannels();
+
+        if (PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO) != null) {
+            initCustomChannels();
+        }
+
         migratePrefsIfNecessary(context);
 
         this.installationId = getUniversalInstallationId();
@@ -263,6 +274,52 @@ public class MobileMessagingCore
             notificationManager.createNotificationChannel(highPriorityNotificationChannel);
         }
     }
+
+    private void initCustomChannels() {
+        if (Build.VERSION.SDK_INT < 26) {
+            return;
+        }
+
+        String channelId = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
+        String channelName = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_NAME);
+        String notificationAudio = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO);
+
+
+        Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/raw/" + notificationAudio);
+        try {
+            context.getContentResolver().openInputStream(uri).close();
+        } catch (IOException ioException) {
+            throw new IllegalArgumentException("Notification audio file doesn't exist: " + notificationAudio);
+        }
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null) {
+            return;
+        }
+
+        CharSequence appName = SoftwareInformation.getAppName(context);
+        if (channelName != null)
+            appName = appName +" "+ channelName;
+
+
+        NotificationChannelCompat.Builder notificationChannelBuilder = new NotificationChannelCompat.Builder(channelId, NotificationManagerCompat.IMPORTANCE_DEFAULT)
+                .setName(appName)
+                .setLightsEnabled(true)
+                .setVibrationEnabled(true)
+                .setSound(uri, new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+        NotificationManagerCompat.from(context).createNotificationChannel(notificationChannelBuilder.build());
+
+
+        if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
+            NotificationChannelCompat.Builder highPriorityNotificationChannelBuilder = new NotificationChannelCompat.Builder(channelId + "_high_priority", NotificationManager.IMPORTANCE_HIGH)
+                    .setName(appName + " High Priority")
+                    .setLightsEnabled(true)
+                    .setVibrationEnabled(true)
+                    .setSound(uri, new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+            NotificationManagerCompat.from(context).createNotificationChannel(highPriorityNotificationChannelBuilder.build());
+        }
+    }
+
 
     /**
      * Gets an instance of MobileMessagingCore after it is initialized via {@link MobileMessagingCore.Builder}.
@@ -1300,6 +1357,12 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED, fullFeaturedInApps);
     }
 
+    static void setCustomNotificationChannel(Context context, String channelId, String channelName, String notificationAudio) {
+        PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID, channelId);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_NAME, channelName);
+        PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO, notificationAudio);
+    }
+
     public static void setShouldSaveUserData(Context context, boolean shouldSaveUserData) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK, shouldSaveUserData);
     }
@@ -1374,6 +1437,8 @@ public class MobileMessagingCore
         PreferenceHelper.remove(context, MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS);
         PreferenceHelper.remove(context, MobileMessagingProperty.POST_NOTIFICATIONS_REQUEST_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO);
 
         MobileMessagingCore mmCore = Platform.mobileMessagingCore.get(context);
         mmCore.messagesSynchronizer = null;

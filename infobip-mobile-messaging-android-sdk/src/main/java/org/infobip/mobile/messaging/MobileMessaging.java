@@ -540,6 +540,9 @@ public abstract class MobileMessaging {
         private boolean usePrivateSharedPrefs = true;
         private boolean postNotificationPermissionRequest = true;
         private boolean fullFeaturedInApps = false;
+        private String channelId;
+        private String channelName;
+        private String notificationAudio;
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
@@ -773,6 +776,22 @@ public abstract class MobileMessaging {
             return this;
         }
 
+
+        /**
+         * Use this to create a custom notification channel with custom sound.
+         *
+         * @param channelId the channel id to be used
+         * @param channelName the channel name to be used
+         * @param notificationAudio the sound file name to be used for the notification (added to the res/raw folder) - without extension
+         * @return {@link Builder}
+         */
+        public Builder withCustomNotificationChannel(String channelId, String channelName, String notificationAudio) {
+            this.channelId = channelId;
+            this.channelName = channelName;
+            this.notificationAudio = notificationAudio;
+            return this;
+        }
+
         /**
          * It will not use <i>MessageStore</i> and will not store the messages upon arrival.
          * <pre>
@@ -945,6 +964,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
+            MobileMessagingCore.setCustomNotificationChannel(application, channelId, channelName, notificationAudio);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)

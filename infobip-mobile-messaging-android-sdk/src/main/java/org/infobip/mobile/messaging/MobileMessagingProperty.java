@@ -69,6 +69,9 @@ public enum MobileMessagingProperty {
     MODAL_IN_APP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MODAL_IN_APP_NOTIFICATIONS_ENABLED", true),
     POST_NOTIFICATIONS_REQUEST_ENABLED("org.infobip.mobile.messaging.infobip.POST_NOTIFICATIONS_REQUEST_ENABLED", true),
     FULL_FEATURE_IN_APPS_ENABLED("org.infobip.mobile.messaging.infobip.FULL_FEATURE_IN_APPS_ENABLED", false),
+    NOTIFICATION_CHANNEL_ID("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_ID", null),
+    NOTIFICATION_CHANNEL_NAME("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_NAME", null),
+    NOTIFICATION_CHANNEL_AUDIO("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_AUDIO", null),
     // END
 
     // START: privacy settings prefs

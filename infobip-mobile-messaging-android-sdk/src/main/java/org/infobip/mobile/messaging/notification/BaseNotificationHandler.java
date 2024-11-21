@@ -346,6 +346,11 @@ public class BaseNotificationHandler {
      */
     @NonNull
     private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings, Message message) {
+        if(message.getSound() != null && !message.getSound().equals("default")) {
+            return shouldDisplayHeadsUpNotification(notificationSettings, message)
+                    ? PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID)+"_high_priority"
+                    : PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
+        }
         return shouldDisplayHeadsUpNotification(notificationSettings, message)
                 ? MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID
                 : MobileMessagingCore.MM_DEFAULT_CHANNEL_ID;

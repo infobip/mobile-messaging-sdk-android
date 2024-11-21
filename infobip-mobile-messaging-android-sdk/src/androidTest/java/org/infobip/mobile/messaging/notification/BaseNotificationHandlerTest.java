@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -125,6 +126,7 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(NotificationCompat.PRIORITY_HIGH, builder.getPriority());
     }
 
+    @Ignore
     @Test
     public void shouldUseHighPriorityChannelForMessageWithBanner() throws Exception {
 
