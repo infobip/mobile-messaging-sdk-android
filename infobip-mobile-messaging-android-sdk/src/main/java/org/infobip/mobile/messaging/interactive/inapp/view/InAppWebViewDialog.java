@@ -58,6 +58,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     public static final String PRIMARY_BUTTON_CLICKED = "primary_button";
     public static final int ACTION_TYPE_OPEN = 1;
     public static final int ACTION_TYPE_CLOSE = 0;
+    public static final String SET_START_ATTEMPTS = "0";
     private final Callback callback;
     private AndroidBroadcaster coreBroadcaster;
     private NotificationAction[] action;
@@ -182,7 +183,8 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             if (StringUtils.isNotBlank(message.clickUrl)) {
                 String temp = StringUtils.concat(message.clickUrl, clickType, StringUtils.COMMA_WITH_SPACE);
                 String clickReport = StringUtils.concat(temp, userAgent, StringUtils.COMMA_WITH_SPACE);
-                MobileMessagingCore.getInstance(getActivity()).reportInAppClick(clickReport);
+                String clickToReport = StringUtils.concat(clickReport, SET_START_ATTEMPTS, StringUtils.COMMA_WITH_SPACE);
+                MobileMessagingCore.getInstance(getActivity()).reportInAppClick(clickToReport);
             }
         }
     }

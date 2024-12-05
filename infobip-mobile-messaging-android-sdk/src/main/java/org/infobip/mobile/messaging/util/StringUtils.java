@@ -31,6 +31,10 @@ public abstract class StringUtils {
         return String.format(Locale.getDefault(), "%s%s%s", s1, separator, s2);
     }
 
+    public static String concat(String[] stringArray, String separator) {
+        return StringUtils.join(separator, stringArray);
+    }
+
     public static String join(CharSequence delimiter, CharSequence... values) {
         return join(delimiter, "", "", values);
     }

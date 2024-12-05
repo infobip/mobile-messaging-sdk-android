@@ -33,7 +33,7 @@ public class ClickUrlReporterTest extends MobileMessagingTestCase {
 
         MobileMessagingStats stats = mobileMessagingCore.getStats();
         executor = mock(Executor.class);
-        inAppClickReporter = new InAppClickReporter(mobileMessagingCore, stats, executor, broadcaster, batchReporter, retryPolicy);
+        inAppClickReporter = new InAppClickReporter(mobileMessagingCore, context, stats, executor, broadcaster, batchReporter, retryPolicy);
     }
 
     @Test

@@ -299,7 +299,7 @@ public class MobileMessagingCore
 
         CharSequence appName = SoftwareInformation.getAppName(context);
         if (channelName != null)
-            appName = appName +" "+ channelName;
+            appName = appName + " " + channelName;
 
 
         NotificationChannelCompat.Builder notificationChannelBuilder = new NotificationChannelCompat.Builder(channelId, NotificationManagerCompat.IMPORTANCE_DEFAULT)
@@ -1006,7 +1006,7 @@ public class MobileMessagingCore
         return PreferenceHelper.findStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS);
     }
 
-    public void removeUnreportedInAppClickActions(final String... clickUrls) {
+    public void removeReportedInAppClickActions(final String... clickUrls) {
         PreferenceHelper.deleteFromStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS, clickUrls);
     }
 
@@ -2036,7 +2036,7 @@ public class MobileMessagingCore
     @NonNull
     private InAppClickReporter inAppClickReporter() {
         if (inAppClickReporter == null) {
-            inAppClickReporter = new InAppClickReporter(this, stats, registrationAlignedExecutor, broadcaster, new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)), retryPolicyProvider.DEFAULT());
+            inAppClickReporter = new InAppClickReporter(this, context, stats, registrationAlignedExecutor, broadcaster, new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)), retryPolicyProvider.DEFAULT());
         }
         return inAppClickReporter;
     }

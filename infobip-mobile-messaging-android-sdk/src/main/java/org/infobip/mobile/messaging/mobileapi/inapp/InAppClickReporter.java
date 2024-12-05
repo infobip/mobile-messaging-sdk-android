@@ -1,8 +1,11 @@
 package org.infobip.mobile.messaging.mobileapi.inapp;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.util.ApiConstants;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
@@ -12,11 +15,10 @@ import org.infobip.mobile.messaging.mobileapi.common.MRetryableTask;
 import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import java.util.concurrent.Executor;
 
 public class InAppClickReporter {
     private final MobileMessagingCore mobileMessagingCore;
+    private final Context context;
     private final MobileMessagingStats stats;
     private final Executor executor;
     private final Broadcaster broadcaster;
@@ -33,12 +36,14 @@ public class InAppClickReporter {
 
     public InAppClickReporter(
             MobileMessagingCore mobileMessagingCore,
+            Context context,
             MobileMessagingStats stats,
             Executor executor,
             Broadcaster broadcaster,
             BatchReporter batchReporter,
             MRetryPolicy retryPolicy) {
         this.mobileMessagingCore = mobileMessagingCore;
+        this.context = context;
         this.stats = stats;
         this.executor = executor;
         this.broadcaster = broadcaster;
@@ -51,6 +56,7 @@ public class InAppClickReporter {
         if (unreportedInAppClickIds.length == 0) {
             return;
         }
+
 
         batchReporter.put(() -> new MRetryableTask<Void, String[]>() {
             @Override
@@ -66,12 +72,10 @@ public class InAppClickReporter {
 
                 MobileMessagingLogger.v("INAPPCLICK >>>");
                 for (String clickAction : clickActions) {
-                    String[] payload = clickAction.split(StringUtils.COMMA_WITH_SPACE); // [0] - clickUrl, [1] - buttonIdx, [2] - userAgent
-                    makeHttpRequest(payload[0], getHeaders(payload));
+                    makeHttpRequest(clickAction);
                 }
                 MobileMessagingLogger.v("INAPPCLICK DONE <<<");
 
-                mobileMessagingCore.removeUnreportedInAppClickActions(clickActions);
                 return clickActions;
             }
 
@@ -103,30 +107,30 @@ public class InAppClickReporter {
         return headers;
     }
 
-    private void makeHttpRequest(String urlString, Map<String, String> headers) {
-        URL url;
+    private void makeHttpRequest(String clickAction) {
+        String[] payload = clickAction.split(StringUtils.COMMA_WITH_SPACE); // [0] - clickUrl, [1] - buttonIdx, [2] - userAgent, [3] - attempt
+        if (Integer.parseInt(payload[3]) == retryPolicy.getMaxRetries()) {
+            mobileMessagingCore.removeReportedInAppClickActions(clickAction);
+            return;
+        }
         try {
-            url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) new URL(payload[0]).openConnection();
 
             conn.setRequestMethod("GET");
 
-            for (Map.Entry<String, String> header : headers.entrySet()) {
+            for (Map.Entry<String, String> header : getHeaders(payload).entrySet()) {
                 conn.setRequestProperty(header.getKey(), header.getValue());
             }
 
             int responseCode = conn.getResponseCode();
-            MobileMessagingLogger.i("Response Code : " + responseCode);
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
-            StringBuilder response = new StringBuilder();
-
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
+            MobileMessagingLogger.d("Response Code : " + responseCode);
+            if (responseCode == 200) {
+                mobileMessagingCore.removeReportedInAppClickActions(clickAction);
+            } else {
+                mobileMessagingCore.removeReportedInAppClickActions(clickAction);
+                payload[3] = String.valueOf(Integer.parseInt(payload[3]) + 1);
+                PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS, StringUtils.concat(payload, StringUtils.COMMA_WITH_SPACE));
             }
-            in.close();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
