@@ -39,13 +39,13 @@ internal object PipParamsFactory {
             .setActions(
                 listOf(
                     RemoteAction(
-                        Icon.createWithResource(context, if (isMuted) R.drawable.ic_unmute else R.drawable.ic_mute),
+                        Icon.createWithResource(context, if (isMuted) R.drawable.ic_mic_off else R.drawable.ic_mic),
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         PendingIntent.getBroadcast(
                             context,
                             if (isMuted) REQUEST_UNMUTE else REQUEST_MUTE,
-                            pipActionIntent(PIP_ACTION_MUTE),
+                            pipActionIntent(context, PIP_ACTION_MUTE),
                             intentFlag
                         )
                     ),
@@ -56,7 +56,7 @@ internal object PipParamsFactory {
                         PendingIntent.getBroadcast(
                             context,
                             REQUEST_VIDEO_OFF ,
-                            pipActionIntent(PIP_ACTION_VIDEO),
+                            pipActionIntent(context, PIP_ACTION_VIDEO),
                             intentFlag
                         )
                     ),
@@ -67,7 +67,7 @@ internal object PipParamsFactory {
                         PendingIntent.getBroadcast(
                             context,
                             REQUEST_HANGUP,
-                            pipActionIntent(PIP_ACTION_HANGUP),
+                            pipActionIntent(context, PIP_ACTION_HANGUP),
                             intentFlag
                         )
                     )
@@ -86,13 +86,13 @@ internal object PipParamsFactory {
             .setActions(
                 listOf(
                     RemoteAction(
-                        Icon.createWithResource(context, if (isMuted) R.drawable.ic_unmute else R.drawable.ic_mute),
+                        Icon.createWithResource(context, if (isMuted) R.drawable.ic_mic_off else R.drawable.ic_mic),
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         if (isMuted) context.getString(R.string.mm_unmute) else context.getString(R.string.mm_mute),
                         PendingIntent.getBroadcast(
                             context,
                             if (isMuted) REQUEST_UNMUTE else REQUEST_MUTE,
-                            pipActionIntent(PIP_ACTION_MUTE),
+                            pipActionIntent(context, PIP_ACTION_MUTE),
                             intentFlag
                         )
                     ),
@@ -103,7 +103,7 @@ internal object PipParamsFactory {
                         PendingIntent.getBroadcast(
                             context,
                             if (isSpeakerOn) REQUEST_SPEAKER_OFF else REQUEST_SPEAKER_ON,
-                            pipActionIntent(PIP_ACTION_SPEAKER),
+                            pipActionIntent(context, PIP_ACTION_SPEAKER),
                             intentFlag
                         )
                     ),
@@ -114,7 +114,7 @@ internal object PipParamsFactory {
                         PendingIntent.getBroadcast(
                             context,
                             REQUEST_HANGUP,
-                            pipActionIntent(PIP_ACTION_HANGUP),
+                            pipActionIntent(context, PIP_ACTION_HANGUP),
                             intentFlag
                         )
                     )

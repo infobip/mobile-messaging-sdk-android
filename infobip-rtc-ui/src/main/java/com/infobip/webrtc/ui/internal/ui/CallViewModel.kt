@@ -160,7 +160,7 @@ internal class CallViewModel : ViewModel() {
         }
     }
 
-    fun toggleMute() {
+    fun toggleMic() {
         runCatching {
             val newValue = !state.value.isMuted
             callsDelegate.mute(newValue)

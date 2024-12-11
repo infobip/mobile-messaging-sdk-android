@@ -55,7 +55,7 @@
         app:layout_constraintBottom_toBottomOf="@id/nameInVideo"
         app:layout_constraintStart_toEndOf="@id/nameInVideo"
         app:layout_constraintTop_toTopOf="@id/nameInVideo"
-        app:srcCompat="@drawable/ic_unmute"
+        app:srcCompat="@drawable/ic_mic_off"
         app:tint="@color/rtc_ui_foreground"
         tools:visibility="gone" />
 
@@ -134,7 +134,7 @@
         app:layout_constraintBottom_toBottomOf="@id/nameInVoice"
         app:layout_constraintStart_toEndOf="@id/nameInVoice"
         app:layout_constraintTop_toTopOf="@id/nameInVoice"
-        app:srcCompat="@drawable/ic_unmute"
+        app:srcCompat="@drawable/ic_mic_off"
         app:tint="@color/rtc_ui_foreground"
         tools:visibility="gone" />
     <!--    endregion-->
@@ -147,7 +147,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="@string/mm_you_are_sharing_a_screen"
-        android:textColor="@color/rtc_ui_white"
+        android:textColor="@color/rtc_ui_foreground"
         app:layout_constraintBottom_toTopOf="@id/screenSharingDisable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -162,7 +162,7 @@
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:text="@string/mm_stop_sharing_screen"
-        android:textColor="@color/rtc_ui_white"
+        android:textColor="@color/rtc_ui_foreground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -240,7 +240,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbarBarier"
+        app:layout_constraintTop_toBottomOf="@id/toolbarBarrier"
         tools:visibility="gone" />
 
     <com.infobip.webrtc.ui.internal.ui.view.CallAlert
@@ -251,9 +251,6 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:visibility="gone"
-        app:alertIcon="@drawable/ic_unmute"
-        app:alertIconTint="@color/rtc_ui_foreground"
-        app:alertText="@string/mm_your_microphone_is_muted"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/connectionAlert"
@@ -269,7 +266,7 @@
         app:layout_constraintDimensionRatio="1:1.6"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.25"
-        app:layout_constraintTop_toBottomOf="@id/toolbarBarier"
+        app:layout_constraintTop_toBottomOf="@id/toolbarBarrier"
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Group
@@ -287,7 +284,7 @@
         app:constraint_referenced_ids="nameInVoice,avatar" />
 
     <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/toolbarBarier"
+        android:id="@+id/toolbarBarrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"

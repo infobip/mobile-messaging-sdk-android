@@ -117,11 +117,23 @@ internal class CallNotificationFactoryImpl(
         isSilent: Boolean,
     ): Notification {
         val themedContext by lazy { ContextThemeWrapper(context, R.style.InfobipRtcUi_Call) }
-        val incomeMessage: String? = Injector.cache.incomingCallMessageStyle?.messageText ?:
-            themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_message, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
-        val incomeHeadline: String? = Injector.cache.incomingCallMessageStyle?.headlineText ?:
-            themedContext.resolveStyledStringAttribute(R.styleable.InfobipRtcUi_rtc_ui_incoming_call_headline, R.attr.infobipRtcUiStyle, R.styleable.InfobipRtcUi)
-        val acceptCall = incomeMessage.isNullOrEmpty() && incomeHeadline.isNullOrEmpty()
+        val incomingCallScreenMessage: String? = Injector.cache.incomingCallScreenStyle?.messageText ?: themedContext.resolveStyledStringAttribute(
+            R.styleable.InfobipRtcUi_rtc_ui_incoming_call_message,
+            R.attr.infobipRtcUiStyle,
+            R.styleable.InfobipRtcUi
+        )
+        val incomingCallScreenHeadline: String? = Injector.cache.incomingCallScreenStyle?.headlineText ?: themedContext.resolveStyledStringAttribute(
+            R.styleable.InfobipRtcUi_rtc_ui_incoming_call_headline,
+            R.attr.infobipRtcUiStyle,
+            R.styleable.InfobipRtcUi
+        )
+        val incomingCallScreenCallerName: String? = Injector.cache.incomingCallScreenStyle?.callerName ?: themedContext.resolveStyledStringAttribute(
+            R.styleable.InfobipRtcUi_rtc_ui_incoming_call_caller_name,
+            R.attr.infobipRtcUiStyle,
+            R.styleable.InfobipRtcUi
+        )
+        val acceptCall = incomingCallScreenMessage.isNullOrEmpty() && incomingCallScreenHeadline.isNullOrEmpty()
+        val displayName = incomingCallScreenCallerName ?: callerName
 
         val acceptIntent = PendingIntent.getActivity(
             context, CALL_ACCEPT_REQUEST_CODE,
@@ -137,11 +149,11 @@ internal class CallNotificationFactoryImpl(
             updateCurrentImmutableFlags
         )
 
-        return commonCallNotification(callerName, description, INCOMING_CALL_NOTIFICATION_CHANNEL_ID) {
+        return commonCallNotification(displayName, description, INCOMING_CALL_NOTIFICATION_CHANNEL_ID) {
             foregroundServiceBehavior = FOREGROUND_SERVICE_IMMEDIATE
             setStyle(
                 NotificationCompat.CallStyle.forIncomingCall(
-                    Person.Builder().setName(callerName).setImportant(true).build(),
+                    Person.Builder().setName(displayName).setImportant(true).build(),
                     declineIntent,
                     acceptIntent
                 )

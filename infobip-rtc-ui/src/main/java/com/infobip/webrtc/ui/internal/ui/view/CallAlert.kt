@@ -23,8 +23,8 @@ internal class CallAlert @JvmOverloads constructor(
     init {
         binding.run {
             Injector.cache.colors?.let {
-                setBackgroundColor(it.rtcUiAlertBackground)
-                alertText.setTextColor(it.rtcUiAlertText)
+                setBackgroundColor(it.alertBackground)
+                alertText.setTextColor(it.alertText)
             }
             val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CallAlert)
             alertText.text = typedArray.getText(R.styleable.CallAlert_alertText)
@@ -41,6 +41,7 @@ internal class CallAlert @JvmOverloads constructor(
     sealed class Mode(@StringRes val message: Int, @DrawableRes val icon: Int) {
         object WeakConnection : Mode(R.string.mm_call_weak_internet_connection, R.drawable.ic_alert_triangle)
         object Reconnecting : Mode(R.string.mm_connection_problems, R.drawable.ic_alert_triangle)
+        object DisabledMic : Mode(R.string.mm_your_microphone_is_muted, R.drawable.ic_mic_off)
     }
 
     fun setMode(mode: Mode?) {

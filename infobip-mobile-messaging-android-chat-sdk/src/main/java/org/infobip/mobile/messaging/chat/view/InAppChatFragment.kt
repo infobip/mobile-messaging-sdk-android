@@ -736,7 +736,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
             override fun onError(
                 context: Context?,
-                exception: InternalSdkError.InternalSdkException?
+                exception: Exception?
             ) {
                 if (exception!!.message == InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.get()) {
                     MobileMessagingLogger.e(

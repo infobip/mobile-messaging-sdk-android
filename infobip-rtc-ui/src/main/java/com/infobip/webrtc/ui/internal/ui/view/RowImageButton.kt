@@ -37,7 +37,7 @@ internal class RowImageButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         binding.clicker.isEnabled = enabled
-        val labelColor = if (enabled) Injector.cache.colors?.rtcUiForeground else Injector.cache.colors?.rtcUiTextSecondary
+        val labelColor = if (enabled) Injector.cache.colors?.foreground else Injector.cache.colors?.textSecondary
         labelColor?.let { binding.label.setTextColor(it) }
     }
 
@@ -57,24 +57,19 @@ internal class RowImageButton @JvmOverloads constructor(
     }
 
     override fun setIconTint(colorStateList: ColorStateList?) {
-        Injector.cache.colors?.rtcUiColorActionsRowIcon?.let { customizedColor ->
-            val color = colorStateList?.getColorForState(intArrayOf(-android.R.attr.state_activated), customizedColor) ?: customizedColor
-            binding.icon.imageTintList = ColorStateList.valueOf(color)
-        }
+        val color: ColorStateList? = colorStateList ?: Injector.cache.colors?.actionsRowIcon?.let { ColorStateList.valueOf(it) }
+        binding.icon.imageTintList = color
     }
 
     override fun setBackgroundColor(colorStateList: ColorStateList?) {
-        Injector.cache.colors?.rtcUiColorActionsRowBackground?.let { customizedColor ->
-            val color = colorStateList?.getColorForState(intArrayOf(-android.R.attr.state_activated), customizedColor) ?: customizedColor
-            binding.clicker.setCardBackgroundColor(color)
-        }
+        val color: ColorStateList? = colorStateList ?: Injector.cache.colors?.actionsRowBackground?.let { ColorStateList.valueOf(it) }
+        binding.clicker.setCardBackgroundColor(color)
     }
 
     override fun setLabelColor(color: Int?) {
-        Injector.cache.colors?.let { customized ->
-            val textColor = color?.let { ContextCompat.getColor(context, color) } ?: customized.rtcUiColorActionsRowLabel
+        val textColor: Int? = color?.let { ContextCompat.getColor(context, color) } ?: Injector.cache.colors?.actionsRowLabel
+        if (textColor != null)
             binding.label.setTextColor(textColor)
-        }
     }
 
     fun setLabelText(text: String?) {

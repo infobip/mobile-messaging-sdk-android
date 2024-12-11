@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="rtc_ui_hang_up_button" type="id" />
-    <item name="rtc_ui_mute_button" type="id" />
+    <item name="rtc_ui_mic_button" type="id" />
     <item name="rtc_ui_video_button" type="id" />
     <item name="rtc_ui_speaker_button" type="id" />
     <item name="rtc_ui_flip_cam_button" type="id" />

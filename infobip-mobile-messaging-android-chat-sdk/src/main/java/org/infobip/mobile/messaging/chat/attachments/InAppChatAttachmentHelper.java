@@ -11,10 +11,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
-
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
@@ -22,6 +18,10 @@ import org.infobip.mobile.messaging.util.SoftwareInformation;
 
 import java.io.File;
 import java.util.Date;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 public class InAppChatAttachmentHelper {
     private static final String JPEG_FILE_PREFIX = "IMG_";
@@ -169,6 +169,6 @@ public class InAppChatAttachmentHelper {
     public interface InAppChatAttachmentHelperListener {
         void onAttachmentCreated(InAppChatMobileAttachment attachment);
 
-        void onError(Context context, InternalSdkError.InternalSdkException exception);
+        void onError(Context context, Exception exception);
     }
 }

@@ -46,6 +46,7 @@ import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.model.CallState
 import com.infobip.webrtc.ui.internal.service.ScreenShareService
 import com.infobip.webrtc.ui.internal.ui.CallViewModel
+import com.infobip.webrtc.ui.internal.ui.view.CallAlert
 import com.infobip.webrtc.ui.internal.ui.view.CircleImageButton
 import com.infobip.webrtc.ui.internal.ui.view.InCallButtonAbs
 import com.infobip.webrtc.ui.internal.ui.view.PipParamsFactory
@@ -75,8 +76,12 @@ class InCallFragment : Fragment() {
         const val PIP_ACTION_VIDEO = 3
         const val PIP_ACTION_HANGUP = 4
 
-        fun pipActionIntent(pipAction: Int): Intent {
+        fun pipActionIntent(
+            context: Context,
+            pipAction: Int
+        ): Intent {
             return Intent(ACTION_PIP).apply {
+                setPackage(context.packageName)
                 putExtra(EXTRAS_PIP_ACTION, pipAction)
             }
         }
@@ -145,7 +150,7 @@ class InCallFragment : Fragment() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == ACTION_PIP) {
                 when (intent.getIntExtra(EXTRAS_PIP_ACTION, 0)) {
-                    PIP_ACTION_MUTE -> toggleMute()
+                    PIP_ACTION_MUTE -> toggleMic()
                     PIP_ACTION_SPEAKER -> toggleSpeaker()
                     PIP_ACTION_VIDEO -> toggleVideo()
                     PIP_ACTION_HANGUP -> viewModel.hangup()
@@ -156,7 +161,7 @@ class InCallFragment : Fragment() {
     }
 
     private var speakerButton: InCallButtonAbs? = null
-    private var muteButton: InCallButtonAbs? = null
+    private var micButton: InCallButtonAbs? = null
     private var flipCamButton: InCallButtonAbs? = null
     private var screenShareButton: InCallButtonAbs? = null
     private var videoButton: InCallButtonAbs? = null
@@ -243,7 +248,7 @@ class InCallFragment : Fragment() {
                 setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL)
             }
             screenSharingRenderers.setOnTouchListener(getLocalVideoTouchListener())
-            viewModel.peerName.let {
+            (Injector.cache.inCallScreenStyle?.callerName ?: viewModel.peerName).let {
                 nameInVoice.text = it
                 nameInVideo.text = it
                 nameInPip.text = it
@@ -348,10 +353,10 @@ class InCallFragment : Fragment() {
                 }
             }
 
-            R.id.rtc_ui_mute_button -> {
-                muteButton = button
-                muteButton?.setOnClickListener {
-                    toggleMute()
+            R.id.rtc_ui_mic_button -> {
+                micButton = button
+                micButton?.setOnClickListener {
+                    toggleMic()
                     buttonDesc.onClick()
                 }
             }
@@ -392,10 +397,9 @@ class InCallFragment : Fragment() {
             R.id.rtc_ui_hang_up_button -> {
                 hangupButton = button
                 Injector.cache.colors?.let { res ->
-                    hangupButton?.setIconTint(ColorStateList.valueOf(res.rtcUiActionsIcon))
-                    hangupButton?.setBackgroundColor(ColorStateList.valueOf(res.rtcUiHangup))
+                    hangupButton?.setIconTint(ColorStateList.valueOf(res.actionsIcon))
+                    hangupButton?.setBackgroundColor(ColorStateList.valueOf(res.hangup))
                 }
-                hangupButton?.setLabelColor()
                 hangupButton?.setOnClickListener {
                     viewModel.hangup()
                 }
@@ -438,10 +442,11 @@ class InCallFragment : Fragment() {
             //screenshare
             binding.screenSharingNotice.isVisible = isLocalScreenShare
             binding.screenSharingDisable.isVisible = isLocalScreenShare && !isPip
-            Injector.cache.colors.let { res -> (if (isLocalScreenShare) res?.rtcUiActionsBackground else res?.rtcUiBackground)?.let { binding.background.setBackgroundColor(it) } }
+            Injector.cache.colors.let { res -> (if (isLocalScreenShare) res?.actionsBackground else res?.background)?.let { binding.background.setBackgroundColor(it) } }
             //another views
             binding.connectionAlert.isVisible = callAlert != null && !isPip && showControls
             binding.connectionAlert.setMode(callAlert)
+            binding.mutedMicrophoneAlert.setMode(CallAlert.Mode.DisabledMic)
             binding.mutedMicrophoneAlert.isVisible = isMuted && !isPip && showControls
             binding.peerMuteIndicatorInVideo.isVisible = (isRemoteVideo || isLocalScreenShare || isRemoteScreenShare) && isPeerMuted == true && !isPip && showControls
             binding.peerMuteIndicatorInVoice.isVisible = !isRemoteVideo && !isLocalScreenShare && !isRemoteScreenShare && isPeerMuted == true && !isPip
@@ -452,11 +457,14 @@ class InCallFragment : Fragment() {
             binding.bottomSheet.bottomSheetButtons.isVisible = !isPip
             showFlipCam(isLocalVideo)
             //check state
-            muteButton?.isChecked = !isMuted
+            micButton?.isChecked = isMuted
             speakerButton?.isChecked = isSpeakerOn
             screenShareButton?.isChecked = isLocalScreenShare
             videoButton?.isChecked = isLocalVideo
-            customInCallButtons.forEach { it.refreshChecked(); it.refreshEnabled() }
+            customInCallButtons.forEach {
+                it.refreshChecked()
+                it.refreshEnabled()
+            }
         }
     }
 
@@ -541,8 +549,8 @@ class InCallFragment : Fragment() {
         viewModel.toggleVideo()
     }
 
-    private fun toggleMute() {
-        viewModel.toggleMute()
+    private fun toggleMic() {
+        viewModel.toggleMic()
     }
 
     private fun toggleSpeaker() {
@@ -579,23 +587,23 @@ class InCallFragment : Fragment() {
 
     private fun customize() {
         Injector.cache.colors?.let { res ->
-            val foregroundColorStateList = ColorStateList.valueOf(res.rtcUiForeground)
+            val foregroundColorStateList = ColorStateList.valueOf(res.foreground)
             with(binding) {
-                toolbarBackground.setBackgroundColor(res.rtcUiOverlayBackground)
+                toolbarBackground.setBackgroundColor(res.overlayBackground)
                 nameInVideo.setTextColor(foregroundColorStateList)
                 nameInVoice.setTextColor(foregroundColorStateList)
                 nameInPip.setTextColor(foregroundColorStateList)
                 peerMuteIndicatorInVideo.imageTintList = foregroundColorStateList
                 peerMuteIndicatorInVoice.imageTintList = foregroundColorStateList
-                nameDivider.setBackgroundColor(res.rtcUiForeground)
+                nameDivider.setBackgroundColor(res.foreground)
                 elapsedTimeVideo.setTextColor(foregroundColorStateList)
                 elapsedTimeVoice.setTextColor(foregroundColorStateList)
                 collapseCallButton.imageTintList = foregroundColorStateList
                 avatar.imageTintList = foregroundColorStateList
-                background.setBackgroundColor(res.rtcUiBackground)
-                bottomSheet.pill.backgroundTintList = ColorStateList.valueOf(res.rtcUiColorSheetPill)
-                bottomSheet.divider.setBackgroundColor(res.rtcUiColorActionsDivider)
-                bottomSheet.bottomSheetButtons.setBackgroundColor(res.rtcUiColorSheetBackground)
+                background.setBackgroundColor(res.background)
+                bottomSheet.pill.backgroundTintList = ColorStateList.valueOf(res.sheetPill)
+                bottomSheet.divider.setBackgroundColor(res.actionsDivider)
+                bottomSheet.bottomSheetButtons.setBackgroundColor(res.sheetBackground)
             }
         }
     }
@@ -700,7 +708,7 @@ class InCallFragment : Fragment() {
             }
             _binding = null
             hangupButton?.setOnClickListener(null)
-            muteButton?.setOnClickListener(null)
+            micButton?.setOnClickListener(null)
             speakerButton?.setOnClickListener(null)
             flipCamButton?.setOnClickListener(null)
             videoButton?.setOnClickListener(null)

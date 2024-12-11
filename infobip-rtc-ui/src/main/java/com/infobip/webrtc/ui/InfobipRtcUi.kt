@@ -349,8 +349,8 @@ interface InfobipRtcUi {
      * 3. Default [InfobipRtcUi] style defined by InfobipRtcUi library
      *
      * Final value for every theme attribute is evaluated separately.
-     * It means you can define [InfobipRtcUiTheme.incomingCallMessageStyle] in runtime, colors in xml and skip icons.
-     * Library will use [InfobipRtcUiTheme.incomingCallMessageStyle] you defined in runtime, colors you defined in xml and default icons provided by library itself.
+     * It means you can define [InfobipRtcUiTheme.incomingCallScreenStyle] in runtime, colors in xml and skip icons.
+     * Library will use [InfobipRtcUiTheme.incomingCallScreenStyle] you defined in runtime, colors you defined in xml and default icons provided by library itself.
      *
      * @param theme data object holding all theme attributes
      */

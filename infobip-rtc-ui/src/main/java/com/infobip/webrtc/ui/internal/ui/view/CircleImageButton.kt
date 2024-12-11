@@ -21,16 +21,16 @@ internal class CircleImageButton @JvmOverloads constructor(
     private val actionsBackgroundColorStateList by lazy {
         Injector.cache.colors?.let {
             activatedColorStateList(
-                it.rtcUiActionsBackgroundChecked,
-                it.rtcUiActionsBackground
+                it.actionsBackgroundChecked,
+                it.actionsBackground
             )
         }
     }
     private val actionsIconColorStateList by lazy {
         Injector.cache.colors?.let {
             activatedColorStateList(
-                it.rtcUiActionsIconChecked,
-                it.rtcUiActionsIcon
+                it.actionsIconChecked,
+                it.actionsIcon
             )
         }
     }

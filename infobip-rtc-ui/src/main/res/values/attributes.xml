@@ -19,7 +19,20 @@
     <attr name="infobipRtcUiStyle" format="reference" />
 
     <declare-styleable name="InfobipRtcUi">
+        <!-- general-->
         <attr name="rtc_ui_color_foreground" format="color|reference" />
+        <attr name="rtc_ui_color_background" format="color|reference" />
+        <attr name="rtc_ui_color_text_secondary" format="color|reference" />
+        <attr name="rtc_ui_color_overlay_background" format="color|reference" />
+        <attr name="rtc_ui_color_accept" format="color|reference" />
+        <attr name="rtc_ui_color_hangup" format="color|reference" />
+        <!-- alert-->
+        <attr name="rtc_ui_color_alert_background" format="color|reference" />
+        <attr name="rtc_ui_color_alert_text" format="color|reference" />
+        <attr name="rtc_ui_icon_alert_mic_off" format="reference" />
+        <attr name="rtc_ui_icon_alert_weak_connection" format="reference" />
+        <attr name="rtc_ui_icon_alert_reconnecting" format="reference" />
+        <!-- actions bottom sheet-->
         <attr name="rtc_ui_color_actions_background" format="color|reference" />
         <attr name="rtc_ui_color_actions_background_checked" format="color|reference" />
         <attr name="rtc_ui_color_actions_icon" format="color|reference" />
@@ -30,29 +43,23 @@
         <attr name="rtc_ui_color_sheet_pill" format="color|reference" />
         <attr name="rtc_ui_color_actions_divider" format="color|reference" />
         <attr name="rtc_ui_color_sheet_background" format="color|reference" />
-        <attr name="rtc_ui_color_text_secondary" format="color|reference" />
-        <attr name="rtc_ui_color_background" format="color|reference" />
-        <attr name="rtc_ui_color_overlay_background" format="color|reference" />
-        <attr name="rtc_ui_color_alert_background" format="color|reference" />
-        <attr name="rtc_ui_color_alert_text" format="color|reference" />
-        <attr name="rtc_ui_color_accept" format="color|reference" />
-        <attr name="rtc_ui_color_hangup" format="color|reference" />
-        <attr name="rtc_ui_icon_unMute" format="reference" />
+        <!-- icons-->
+        <attr name="rtc_ui_icon_mic" format="reference" />
+        <attr name="rtc_ui_icon_micOff" format="reference" />
         <attr name="rtc_ui_icon_screenShare" format="reference" />
         <attr name="rtc_ui_icon_screenShareOff" format="reference" />
-        <attr name="rtc_ui_icon_avatar" format="reference" />
         <attr name="rtc_ui_icon_video" format="reference" />
         <attr name="rtc_ui_icon_videoOff" format="reference" />
         <attr name="rtc_ui_icon_speaker" format="reference" />
         <attr name="rtc_ui_icon_speakerOff" format="reference" />
-        <attr name="rtc_ui_icon_mute" format="reference" />
-        <attr name="rtc_ui_icon_accept" format="reference" />
         <attr name="rtc_ui_icon_flipCamera" format="reference" />
-        <attr name="rtc_ui_icon_endCall" format="reference" />
         <attr name="rtc_ui_icon_collapse" format="reference" />
+        <attr name="rtc_ui_icon_accept" format="reference" />
         <attr name="rtc_ui_icon_decline" format="reference" />
-        <attr name="rtc_ui_icon_callsIcon" format="reference" />
-        <attr name="rtc_ui_icon_alertTriangle" format="reference" />
+        <attr name="rtc_ui_icon_endCall" format="reference" />
+        <attr name="rtc_ui_icon_avatar" format="reference" />
+        <attr name="rtc_ui_icon_caller" format="reference" />
+        <!-- incoming call screen -->
         <attr name="rtc_ui_incoming_call_headline" format="string|reference" />
         <attr name="rtc_ui_incoming_call_headline_appearance" format="reference" />
         <attr name="rtc_ui_incoming_call_headline_text_color" format="color|reference" />
@@ -61,5 +68,11 @@
         <attr name="rtc_ui_incoming_call_message_appearance" format="reference" />
         <attr name="rtc_ui_incoming_call_message_text_color" format="color|reference" />
         <attr name="rtc_ui_incoming_call_message_background" format="reference" />
+        <attr name="rtc_ui_incoming_call_caller_name" format="string|reference" />
+        <attr name="rtc_ui_incoming_call_caller_name_appearance" format="reference" />
+        <attr name="rtc_ui_incoming_call_caller_icon_visible" format="boolean|reference" />
+        <!-- in call screen -->
+        <attr name="rtc_ui_in_call_caller_name" format="string|reference" />
+
     </declare-styleable>
 </resources>

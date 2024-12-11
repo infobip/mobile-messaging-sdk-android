@@ -7,7 +7,8 @@ import com.infobip.webrtc.ui.internal.ui.CallActivity
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
-import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
+import com.infobip.webrtc.ui.view.styles.InCallScreenStyle
+import com.infobip.webrtc.ui.view.styles.IncomingCallScreenStyle
 import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import java.util.Locale
 
@@ -66,11 +67,9 @@ internal interface SdkLifetimeCache {
     var locale: Locale?
     var theme: InfobipRtcUiTheme?
     val colors: Colors?
-        get() = theme?.colors
     val icons: Icons?
-        get() = theme?.icons
-    val incomingCallMessageStyle: IncomingCallMessageStyle?
-        get() = theme?.incomingCallMessageStyle
+    val incomingCallScreenStyle: IncomingCallScreenStyle?
+    val inCallScreenStyle: InCallScreenStyle?
     var inCallButtons: List<InCallButton>
     var callErrorMapper: RtcUiCallErrorMapper?
 }
@@ -89,8 +88,11 @@ internal class SdkLifetimeCacheImpl : SdkLifetimeCache {
         get() = theme?.colors
     override val icons: Icons?
         get() = theme?.icons
-    override val incomingCallMessageStyle: IncomingCallMessageStyle?
-        get() = theme?.incomingCallMessageStyle
+    override val incomingCallScreenStyle: IncomingCallScreenStyle?
+        get() = theme?.incomingCallScreenStyle
+    override val inCallScreenStyle: InCallScreenStyle?
+        get() = theme?.inCallScreenStyle
+
     override var inCallButtons: List<InCallButton> = emptyList()
         get() = field.takeIf { it.isNotEmpty() } ?: listOf(
             InCallButton.HangUp,

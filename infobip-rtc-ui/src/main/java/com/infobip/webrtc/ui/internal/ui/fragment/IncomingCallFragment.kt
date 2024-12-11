@@ -14,6 +14,7 @@ import com.infobip.webrtc.ui.databinding.FragmentIncomingCallBinding
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.ui.CallViewModel
 import com.infobip.webrtc.ui.internal.utils.navigate
+import com.infobip.webrtc.ui.internal.utils.show
 
 class IncomingCallFragment : Fragment() {
     private var _binding: FragmentIncomingCallBinding? = null
@@ -28,7 +29,7 @@ class IncomingCallFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         customize()
         with(binding) {
-            name.text = viewModel.peerName
+            name.text = (Injector.cache.incomingCallScreenStyle?.callerName ?: viewModel.peerName)
             accept.setOnClickListener {
                 viewModel.accept()
                 parentFragmentManager.navigate(InCallFragment(), R.id.navHost)
@@ -49,34 +50,35 @@ class IncomingCallFragment : Fragment() {
     private fun customize() {
         with(binding) {
             Injector.cache.icons?.let { res ->
-                logo.setImageResource(res.callsIcon)
+                logo.setImageResource(res.caller)
                 accept.setIcon(res.accept)
                 decline.setIcon(res.decline)
             }
             Injector.cache.colors?.let { res ->
-                val foregroundColorStateList = ColorStateList.valueOf(res.rtcUiForeground)
+                val foregroundColorStateList = ColorStateList.valueOf(res.foreground)
                 logo.imageTintList = foregroundColorStateList
                 name.setTextColor(foregroundColorStateList)
                 decline.setIconTint(foregroundColorStateList)
-                decline.setBackgroundColor(ColorStateList.valueOf(res.rtcUiHangup))
+                decline.setBackgroundColor(ColorStateList.valueOf(res.hangup))
                 accept.setIconTint(foregroundColorStateList)
-                accept.setBackgroundColor(ColorStateList.valueOf(res.rtcUiAccept))
-                background.setBackgroundColor(res.rtcUiBackground)
+                accept.setBackgroundColor(ColorStateList.valueOf(res.accept))
+                background.setBackgroundColor(res.background)
             }
-            Injector.cache.incomingCallMessageStyle?.let { res ->
+            Injector.cache.incomingCallScreenStyle?.let { res ->
+                logo.show(res.callerIconVisible)
                 res.headlineText?.takeIf { it.isNotEmpty() }.let {
                     customHeadline.text = it
                     customHeadline.visibility = View.VISIBLE
                 }
                 res.headlineTextAppearance?.let { TextViewCompat.setTextAppearance(customHeadline, it) }
-                res.headlineTextColor?.let { customHeadline.setTextColor(it) }
+                customHeadline.setTextColor(res.headlineTextColor)
                 res.headlineBackground?.let { customHeadline.background = AppCompatResources.getDrawable(requireContext(), it) }
                 res.messageText?.takeIf { it.isNotEmpty() }.let {
                     customMessage.text = it
                     customMessage.visibility = View.VISIBLE
                 }
                 res.messageTextAppearance?.let { TextViewCompat.setTextAppearance(customMessage, it) }
-                res.messageTextColor?.let { customMessage.setTextColor(it) }
+                customMessage.setTextColor(res.messageTextColor)
                 res.messageBackground?.let { customMessage.background = AppCompatResources.getDrawable(requireContext(), it) }
             }
         }

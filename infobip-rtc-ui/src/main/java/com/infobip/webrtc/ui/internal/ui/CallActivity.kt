@@ -57,7 +57,8 @@ import com.infobip.webrtc.ui.internal.utils.throttleFirst
 import com.infobip.webrtc.ui.model.RtcUiError
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
-import com.infobip.webrtc.ui.view.styles.IncomingCallMessageStyle
+import com.infobip.webrtc.ui.view.styles.InCallScreenStyle
+import com.infobip.webrtc.ui.view.styles.IncomingCallScreenStyle
 import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -116,9 +117,10 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         attrs: AttributeSet
     ): View? {
         Injector.cache.theme = InfobipRtcUiTheme(
+            incomingCallScreenStyle = Injector.cache.incomingCallScreenStyle ?: IncomingCallScreenStyle(this, attrs),
+            inCallScreenStyle = Injector.cache.inCallScreenStyle ?: InCallScreenStyle(this, attrs),
             colors = Injector.cache.colors ?: Colors(this, attrs),
             icons = Injector.cache.icons ?: Icons(this, attrs),
-            incomingCallMessageStyle = Injector.cache.incomingCallMessageStyle ?: IncomingCallMessageStyle(this, attrs)
         )
         return super.onCreateView(parent, name, context, attrs)
     }

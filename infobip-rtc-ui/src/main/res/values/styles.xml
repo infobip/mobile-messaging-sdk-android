@@ -17,33 +17,60 @@
     </style>
 
     <style name="InfobipRtcUi">
+        <!-- general-->
         <item name="rtc_ui_color_foreground">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_color_background">@color/rtc_ui_background</item>
+        <item name="rtc_ui_color_text_secondary">@color/rtc_ui_text_secondary</item>
+        <item name="rtc_ui_color_overlay_background">@color/rtc_ui_overlay_background</item>
+        <item name="rtc_ui_color_accept">@color/rtc_ui_accept</item>
+        <item name="rtc_ui_color_hangup">@color/rtc_ui_hangup</item>
+        <!-- alert-->
+        <item name="rtc_ui_color_alert_background">@color/rtc_ui_alert_background</item>
+        <item name="rtc_ui_color_alert_text">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_icon_alert_mic_off">@drawable/ic_mic_off</item>
+        <item name="rtc_ui_icon_alert_weak_connection">@drawable/ic_alert_triangle</item>
+        <item name="rtc_ui_icon_alert_reconnecting">@drawable/ic_alert_triangle</item>
+        <!-- actions bottom sheet-->
         <item name="rtc_ui_color_actions_background">@color/rtc_ui_actions_background</item>
         <item name="rtc_ui_color_actions_background_checked">@color/rtc_ui_actions_background_checked</item>
         <item name="rtc_ui_color_actions_icon">@color/rtc_ui_actions_icon</item>
         <item name="rtc_ui_color_actions_icon_checked">@color/rtc_ui_actions_icon_checked</item>
-        <item name="rtc_ui_color_text_secondary">@color/rtc_ui_text_secondary</item>
-        <item name="rtc_ui_color_background">@color/rtc_ui_background</item>
-        <item name="rtc_ui_color_overlay_background">@color/rtc_ui_overlay_background</item>
-        <item name="rtc_ui_color_alert_background">@color/rtc_ui_alert_background</item>
-        <item name="rtc_ui_color_accept">@color/rtc_ui_accept</item>
-        <item name="rtc_ui_color_hangup">@color/rtc_ui_hangup</item>
-        <item name="rtc_ui_icon_unMute">@drawable/ic_unmute</item>
+        <item name="rtc_ui_color_actions_row_background">@color/rtc_ui_background</item>
+        <item name="rtc_ui_color_actions_row_icon">@color/rtc_ui_actions_icon</item>
+        <item name="rtc_ui_color_actions_row_label">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_color_sheet_pill">@color/rtc_ui_actions_background</item>
+        <item name="rtc_ui_color_actions_divider">@color/rtc_ui_actions_background</item>
+        <item name="rtc_ui_color_sheet_background">@color/rtc_ui_background</item>
+        <!-- icons-->
+        <item name="rtc_ui_icon_mic">@drawable/ic_mic</item>
+        <item name="rtc_ui_icon_micOff">@drawable/ic_mic_off</item>
         <item name="rtc_ui_icon_screenShare">@drawable/ic_screen_share</item>
-        <item name="rtc_ui_icon_avatar">@drawable/ic_user_grayscale</item>
+        <item name="rtc_ui_icon_screenShareOff">@drawable/ic_screen_share_off</item>
         <item name="rtc_ui_icon_video">@drawable/ic_video</item>
         <item name="rtc_ui_icon_videoOff">@drawable/ic_video_off</item>
         <item name="rtc_ui_icon_speaker">@drawable/ic_speaker</item>
         <item name="rtc_ui_icon_speakerOff">@drawable/ic_speaker_off</item>
-        <item name="rtc_ui_icon_mute">@drawable/ic_mute</item>
-        <item name="rtc_ui_icon_accept">@drawable/ic_calls_30</item>
         <item name="rtc_ui_icon_flipCamera">@drawable/ic_flip_camera</item>
-        <item name="rtc_ui_icon_endCall">@drawable/ic_endcall</item>
         <item name="rtc_ui_icon_collapse">@drawable/ic_collapse</item>
+        <item name="rtc_ui_icon_accept">@drawable/ic_calls_30</item>
         <item name="rtc_ui_icon_decline">@drawable/ic_clear_large</item>
-        <item name="rtc_ui_icon_callsIcon">@drawable/ic_calls_30</item>
-        <item name="rtc_ui_icon_alertTriangle">@drawable/ic_alert_triangle</item>
-        <item name="rtc_ui_incoming_call_headline_text_color">@color/rtc_ui_white</item>
-        <item name="rtc_ui_incoming_call_message_text_color">@color/rtc_ui_white</item>
+        <item name="rtc_ui_icon_endCall">@drawable/ic_endcall</item>
+        <item name="rtc_ui_icon_avatar">@drawable/ic_user_grayscale</item>
+        <item name="rtc_ui_icon_caller">@drawable/ic_calls_30</item>
+        <!-- incoming call screen -->
+        <item name="rtc_ui_incoming_call_headline">@null</item>
+        <item name="rtc_ui_incoming_call_headline_appearance">@null</item>
+        <item name="rtc_ui_incoming_call_headline_text_color">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_incoming_call_headline_background">@null</item>
+        <item name="rtc_ui_incoming_call_message">@null</item>
+        <item name="rtc_ui_incoming_call_message_appearance">@null</item>
+        <item name="rtc_ui_incoming_call_message_text_color">@color/rtc_ui_foreground</item>
+        <item name="rtc_ui_incoming_call_message_background">@null</item>
+        <item name="rtc_ui_incoming_call_caller_name">@null</item>
+        <item name="rtc_ui_incoming_call_caller_name_appearance">@null</item>
+        <item name="rtc_ui_incoming_call_caller_icon_visible">true</item>
+        <!-- in call screen -->
+        <item name="rtc_ui_in_call_caller_name">@null</item>
+
     </style>
 </resources>

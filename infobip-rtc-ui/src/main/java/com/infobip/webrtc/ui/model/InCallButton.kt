@@ -24,10 +24,10 @@ sealed class InCallButton(
 
     data class Mute(override var onClick: () -> Unit = {}) : InCallButton(
         R.string.mm_microphone,
-        Injector.cache.icons?.mute ?: R.drawable.ic_unmute,
-        Injector.cache.icons?.unMute ?: R.drawable.ic_mute,
+        Injector.cache.icons?.mic ?: R.drawable.ic_mic,
+        Injector.cache.icons?.micOff ?: R.drawable.ic_mic_off,
     ) {
-        override val id: Int = R.id.rtc_ui_mute_button
+        override val id: Int = R.id.rtc_ui_mic_button
     }
 
     data class Speaker (override var onClick: () -> Unit = {})  : InCallButton(
