@@ -39,13 +39,13 @@ public interface InAppChatClient {
     void setLanguage(Locale locale);
 
     /**
-     * Send contextual metadata of conversation and a InAppChatMultiThreadFlag flag
+     * Send contextual metadata of conversation and a MultithreadStrategy flag
      *
      * @param data            contextual data in the form of JSON string
      * @param multiThreadFlag multithread strategy flag
      * @param resultListener result listener
      */
-    void sendContextualData(String data, InAppChatMultiThreadFlag multiThreadFlag, MobileMessaging.ResultListener<String> resultListener);
+    void sendContextualData(String data, MultithreadStrategy multiThreadFlag, MobileMessaging.ResultListener<String> resultListener);
 
     /**
      * Change destination from thread to list in multiThread widget. For non multiThread widget it does nothing.

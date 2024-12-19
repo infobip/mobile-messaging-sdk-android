@@ -36,6 +36,7 @@ import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.SessionStorage
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
 import org.infobip.mobile.messaging.chat.models.ContextualData
@@ -354,15 +355,34 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      * Every function invocation will overwrite the previous contextual data.
      *
      *
-     * @param data                   contextual data in the form of JSON string
+     * @param data contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      * @see [InAppChatFragment.EventsListener.onChatLoaded] to detect if chat is loaded
      */
+    @Deprecated("Use sendContextualData(data: String, flag: MultithreadStrategy) instead")
     fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
+        val flag = if (allMultiThreadStrategy) MultithreadStrategy.ALL else MultithreadStrategy.ACTIVE
+        sendContextualData(data, flag)
+    }
+
+    /**
+     * Set contextual data of the Livechat Widget.
+     *
+     * If the function is called when [InAppChatFragment] is attached and the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     *
+     * Every function invocation will overwrite the previous contextual data.
+     *
+     *
+     * @param data contextual data in the form of JSON string
+     * @param flag multithread strategy [MultithreadStrategy]
+     * @see [InAppChatFragment.EventsListener.onChatLoaded] to detect if chat is loaded
+     */
+    fun sendContextualData(data: String, flag: MultithreadStrategy) {
         withBinding(
-            action = { it.ibLcChat.sendContextualData(data, allMultiThreadStrategy) },
+            action = { it.ibLcChat.sendContextualData(data, flag) },
             fallback = {
-                SessionStorage.contextualData = ContextualData(data, allMultiThreadStrategy)
+                SessionStorage.contextualData = ContextualData(data, flag)
                 MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.")
             }
         )

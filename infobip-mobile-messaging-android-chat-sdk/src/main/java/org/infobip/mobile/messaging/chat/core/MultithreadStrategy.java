@@ -1,6 +1,7 @@
 package org.infobip.mobile.messaging.chat.core;
 
-public enum InAppChatMultiThreadFlag {
+public enum MultithreadStrategy {
     ACTIVE,
-    ALL
+    ALL,
+    ALL_PLUS_NEW
 }

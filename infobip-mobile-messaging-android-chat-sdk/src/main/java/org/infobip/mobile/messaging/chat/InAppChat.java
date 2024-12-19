@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 
@@ -78,14 +79,16 @@ public abstract class InAppChat {
 
     /**
      * Adds in-app chat Fragment to the Activity or shows it if it was already added and hidden.
+     *
      * @param fragmentManager manager to make interactions with Fragment
-     * @param containerId identifier of the container in-app chat Fragment is to be placed in
+     * @param containerId     identifier of the container in-app chat Fragment is to be placed in
      */
     public abstract void showInAppChatFragment(FragmentManager fragmentManager, int containerId);
 
     /**
      * Hides in-app chat Fragment, so that all views, especially in-app chat webView,
      * stays in memory and chat connection is active while fragment is hidden.
+     *
      * @param fragmentManager manager to make interactions with Fragment
      * @see InAppChat#hideInAppChatFragment(FragmentManager, Boolean)
      */
@@ -95,13 +98,12 @@ public abstract class InAppChat {
      * Hides in-app chat Fragment, so that all views, especially in-app chat webView, stays in memory.
      * You can control whether chat connection stays active while fragment is hidden.
      *
+     * @param fragmentManager          manager to make interactions with Fragment
+     * @param disconnectChatWhenHidden if true disconnects chat connection when fragment is hidden, otherwise chat connection stays active
      * @apiNote By chat connection you can control push notifications.
      * Push notifications are active only when chat connection is not active.
      * Disconnect chat if you want to receive push notifications while fragment is hidden.
      * Chat connection is re-established when {@link InAppChat#showInAppChatFragment(FragmentManager, int)} is called.
-     *
-     * @param fragmentManager manager to make interactions with Fragment
-     * @param disconnectChatWhenHidden if true disconnects chat connection when fragment is hidden, otherwise chat connection stays active
      * @see InAppChat#hideInAppChatFragment(FragmentManager)
      */
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChatWhenHidden);
@@ -140,16 +142,29 @@ public abstract class InAppChat {
      *
      * @param data                   contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
+     * @deprecated Use {@link InAppChat#sendContextualData(String, MultithreadStrategy, MobileMessaging.ResultListener)} instead
      */
+    @Deprecated
     public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy);
 
     /**
-     * Set contextual data of the Livechat Widget with false (ACTIVE) value for multithread strategy.
+     * Set contextual data of the Livechat Widget.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
      *
-     * @param data                   contextual data in the form of JSON string
+     * @param data contextual data in the form of JSON string
+     * @param flag multithread strategy [MultithreadStrategy]
+     */
+    public abstract void sendContextualData(@Nullable String data, @Nullable MultithreadStrategy flag);
+
+    /**
+     * Set contextual data of the Livechat Widget with false (MultithreadStrategy.ACTIVE) value for multithread strategy.
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     * Every function invocation will overwrite the previous contextual data.
+     *
+     * @param data contextual data in the form of JSON string
      */
     public abstract void sendContextualData(@Nullable String data);
 
@@ -163,8 +178,23 @@ public abstract class InAppChat {
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      * @param resultListener         listener to report the result on
      * @see MobileMessaging.ResultListener
+     * @deprecated Use {@link InAppChat#sendContextualData(String, MultithreadStrategy, MobileMessaging.ResultListener)} instead
      */
+    @Deprecated
     public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy, @Nullable MobileMessaging.ResultListener<Void> resultListener);
+
+    /**
+     * Set contextual data of the Livechat Widget.
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     * Every function invocation will overwrite the previous contextual data.
+     *
+     * @param data contextual data in the form of JSON string
+     * @param flag multithread strategy [MultithreadStrategy]
+     * @param resultListener listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+    public abstract void sendContextualData(@Nullable String data, @Nullable MultithreadStrategy flag, @Nullable MobileMessaging.ResultListener<Void> resultListener);
 
     /**
      * Set {@link JwtProvider} to give in-app chat ability to authenticate.
@@ -185,6 +215,7 @@ public abstract class InAppChat {
 
     /**
      * Navigates to THREAD_LIST view in multithread widget if in-app chat is shown as Fragment.
+     *
      * @see org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
      */
     public abstract void showThreadsList();

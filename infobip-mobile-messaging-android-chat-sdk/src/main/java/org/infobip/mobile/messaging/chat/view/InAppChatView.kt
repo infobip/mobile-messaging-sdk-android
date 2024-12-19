@@ -247,13 +247,30 @@ class InAppChatView @JvmOverloads constructor(
      *
      * Every function invocation will overwrite the previous contextual data.
      *
-     * @param data                   contextual data in the form of JSON string
+     * @param data contextual data in the form of JSON string
      * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
      * @see [InAppChatView.EventsListener.onChatLoaded] to detect if chat is loaded
      */
+    @Deprecated("Use sendContextualData(data: String, flag: MultithreadStrategy) instead")
     fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
+        val flag = if (allMultiThreadStrategy) MultithreadStrategy.ALL else MultithreadStrategy.ACTIVE
+        sendContextualData(data, flag)
+    }
+
+    /**
+     * Set contextual data of the Livechat Widget.
+     *
+     * If the function is called when the chat is loaded,
+     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
+     *
+     * Every function invocation will overwrite the previous contextual data.
+     *
+     * @param data contextual data in the form of JSON string
+     * @param flag multithread strategy [MultithreadStrategy]
+     * @see [InAppChatView.EventsListener.onChatLoaded] to detect if chat is loaded
+     */
+    fun sendContextualData(data: String, flag: MultithreadStrategy) {
         if (isChatLoaded) {
-            val flag = if (allMultiThreadStrategy) InAppChatMultiThreadFlag.ALL else InAppChatMultiThreadFlag.ACTIVE
             val listener = object : ResultListener<String>() {
                 override fun onResult(result: Result<String, MobileMessagingError>) {
                     SessionStorage.contextualData = null
@@ -264,7 +281,7 @@ class InAppChatView @JvmOverloads constructor(
             }
             inAppChatClient.sendContextualData(data, flag, listener)
         } else {
-            SessionStorage.contextualData = ContextualData(data, allMultiThreadStrategy)
+            SessionStorage.contextualData = ContextualData(data, flag)
             MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.")
         }
     }
