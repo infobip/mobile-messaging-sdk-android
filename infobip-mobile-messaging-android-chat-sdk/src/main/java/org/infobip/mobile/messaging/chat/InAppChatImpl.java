@@ -10,21 +10,12 @@ import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.TaskStackBuilder;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
@@ -53,6 +44,14 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.Locale;
 import java.util.concurrent.Executors;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.TaskStackBuilder;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
@@ -157,32 +156,27 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     private void doCoreTappedActions(Message chatMessage) {
         TaskStackBuilder stackBuilder = stackBuilderForNotificationTap(chatMessage);
-        if (stackBuilder.getIntentCount() != 0) {
+        if (stackBuilder != null && stackBuilder.getIntentCount() > 0) {
             stackBuilder.startActivities();
         }
     }
 
-    @NonNull
+    @Nullable
     private TaskStackBuilder stackBuilderForNotificationTap(Message message) {
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        Bundle messageBundle = MessageBundleMapper.messageToBundle(message);
-        Class[] classes = propertyHelper().findClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
+        Class<?>[] classes = propertyHelper().findClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
         if (classes != null) {
-            for (Class cls : classes) {
-                stackBuilder.addNextIntent(new Intent(context, cls)
-                        .setAction(Event.NOTIFICATION_TAPPED.getKey())
-                        .putExtras(messageBundle));
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            Bundle messageBundle = MessageBundleMapper.messageToBundle(message);
+            for (Class<?> cls : classes) {
+                stackBuilder.addNextIntent(
+                        new Intent(context, cls)
+                                .setAction(Event.NOTIFICATION_TAPPED.getKey())
+                                .putExtras(messageBundle)
+                );
             }
+            return stackBuilder;
         }
-
-        NotificationSettings notificationSettings = mobileMessagingCore().getNotificationSettings();
-        if (stackBuilder.getIntentCount() == 0 && notificationSettings != null && notificationSettings.getCallbackActivity() != null) {
-            stackBuilder.addNextIntent(new Intent(context, notificationSettings.getCallbackActivity())
-                    .setAction(Event.NOTIFICATION_TAPPED.getKey())
-                    .putExtras(messageBundle));
-        }
-
-        return stackBuilder;
+        return null;
     }
 
     @Override
@@ -198,10 +192,10 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             handler.post(() -> {
                 webView().clearHistory();
                 webView().clearCache(true);
-                MobileMessagingLogger.d(TAG,"Deleted local widget history");
+                MobileMessagingLogger.d(TAG, "Deleted local widget history");
             });
         } catch (Exception e) {
-            MobileMessagingLogger.w(TAG,"Failed to delete local widget history due to " + e.getMessage());
+            MobileMessagingLogger.w(TAG, "Failed to delete local widget history due to " + e.getMessage());
         }
     }
 
@@ -261,13 +255,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             inAppChatScreen = new InAppChatScreenImpl(context);
         }
         if (!isActivated()) {
-            MobileMessagingLogger.e(TAG,"In-app chat wasn't activated, call activate()");
+            MobileMessagingLogger.e(TAG, "In-app chat wasn't activated, call activate()");
         }
         return inAppChatScreen;
     }
 
     @Override
-    public void setActivitiesToStartOnMessageTap(Class... activityClasses) {
+    public void setActivitiesToStartOnMessageTap(Class<?>... activityClasses) {
         propertyHelper().saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
     }
 
@@ -336,7 +330,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void resetMessageCounter() {
-        MobileMessagingLogger.d(TAG,"Resetting unread message counter to 0");
+        MobileMessagingLogger.d(TAG, "Resetting unread message counter to 0");
         propertyHelper().remove(MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT);
         inAppChatBroadcaster().unreadMessagesCounterUpdated(0);
     }
@@ -352,7 +346,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             @Override
             public void onResult(Result<String, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG,"Set language error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG, "Set language error: " + result.getError().getMessage());
                 }
             }
         });
@@ -384,7 +378,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             @Override
             public void onResult(Result<Void, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG,"Send contextual data error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG, "Send contextual data error: " + result.getError().getMessage());
                 }
             }
         });
@@ -396,7 +390,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             @Override
             public void onResult(Result<Void, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG,"Send contextual data error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG, "Send contextual data error: " + result.getError().getMessage());
                 }
             }
         });
@@ -467,7 +461,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (inAppChatWVFragment != null) {
             inAppChatWVFragment.showThreadList();
         } else {
-            MobileMessagingLogger.e(TAG,"Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
+            MobileMessagingLogger.e(TAG, "Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
         }
     }
 
@@ -512,7 +506,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    public void setChatPushBody(@Nullable  String body) {
+    public void setChatPushBody(@Nullable String body) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY, body);
     }
 

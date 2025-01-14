@@ -5,11 +5,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
 
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 public class InAppChatMobileImpl implements InAppChatMobile {
 
@@ -98,11 +98,15 @@ public class InAppChatMobileImpl implements InAppChatMobile {
     @JavascriptInterface
     public void onWidgetApiSuccess(String method, String successPayload) {
         Runnable myRunnable = () -> {
-            String result = StringUtils.isNotBlank(successPayload) ? " => " + successPayload : "";
+            String payload = successPayload;
+            if (StringUtils.isNotBlank(payload) && payload.startsWith("\"") && payload.endsWith("\"") && payload.length() > 2) {
+                payload = payload.substring(1, payload.length() - 1);
+            }
+            String result = StringUtils.isNotBlank(payload) ? " => " + payload : "";
             MobileMessagingLogger.d(TAG,"Widget API call result: " + method + "()" + result);
             if (inAppChatWebViewManager != null) {
                 try {
-                    inAppChatWebViewManager.onWidgetApiSuccess(InAppChatWidgetApiMethod.valueOf(method), successPayload);
+                    inAppChatWebViewManager.onWidgetApiSuccess(InAppChatWidgetApiMethod.valueOf(method), payload);
                 } catch (IllegalArgumentException exception) {
                     MobileMessagingLogger.e(TAG,"Could not parse InAppChatWidgetApiMethod from " + method, exception);
                 }

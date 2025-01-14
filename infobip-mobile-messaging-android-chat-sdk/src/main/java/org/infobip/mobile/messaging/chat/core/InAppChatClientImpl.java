@@ -1,16 +1,5 @@
 package org.infobip.mobile.messaging.chat.core;
 
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatPause;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatResume;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendContextualData;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendDraft;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessage;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessageWithAttachment;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setLanguage;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setTheme;
-import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.showThreadList;
-import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
-
 import android.os.Handler;
 import android.os.Looper;
 
@@ -22,9 +11,26 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatPause;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.mobileChatResume;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendContextualData;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendDraft;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessage;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.sendMessageWithAttachment;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setLanguage;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.setTheme;
+import static org.infobip.mobile.messaging.chat.core.InAppChatWidgetMethod.showThreadList;
+import static org.infobip.mobile.messaging.util.StringUtils.isNotBlank;
+
 public class InAppChatClientImpl implements InAppChatClient {
+
+    private static final int MAX_ALLOWED_SCRIPT_LENGTH = 200;
+    private static final int MAX_ALLOWED_ARGUMENT_LENGTH = 50;
+    private static final int ARGUMENT_VISIBLE_PART_LENGTH = 15;
 
     private final InAppChatWebView webView;
     private static final String TAG = InAppChatClient.class.getSimpleName();
@@ -127,17 +133,18 @@ public class InAppChatClientImpl implements InAppChatClient {
             try {
                 handler.post(() -> webView.evaluateJavascript(script, value -> {
                     String valueToLog = (value != null && !"null".equals(value)) ? " => " + value : "";
-                    MobileMessagingLogger.d(TAG, "Called Widget API: " + script + valueToLog);
+                    String scriptToLog = shortenScript(script);
+                    MobileMessagingLogger.d(TAG, "Called Widget API: " + scriptToLog + valueToLog);
                     if (resultListener != null)
                         resultListener.onResult(new Result<>(valueToLog));
                 }));
             } catch (Exception e) {
                 if (resultListener != null)
                     resultListener.onResult(new Result<>(MobileMessagingError.createFrom(e)));
-                MobileMessagingLogger.e(TAG,"Failed to execute webView JS script " + script + " " + e.getMessage());
+                MobileMessagingLogger.e(TAG, "Failed to execute webView JS script " + shortenScript(script) + " " + e.getMessage());
             }
         } else if (resultListener != null) {
-            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalStateException("Failed to execute webView JS script " + script + " InAppChatWebView is null."))));
+            resultListener.onResult(new Result<>(MobileMessagingError.createFrom(new IllegalStateException("Failed to execute webView JS script " + shortenScript(script) + " InAppChatWebView is null."))));
         }
     }
 
@@ -157,5 +164,35 @@ public class InAppChatClientImpl implements InAppChatClient {
         }
 
         return builder.toString();
+    }
+
+    private String shortenScript(String script) {
+        if (script != null && script.length() > MAX_ALLOWED_SCRIPT_LENGTH) {
+            StringBuilder builder = new StringBuilder();
+            int methodNameEndIndex = script.indexOf("(");
+            if (methodNameEndIndex > 0) {
+                String methodName = script.substring(0, methodNameEndIndex);
+                builder.append(methodName);
+                String paramsSubstring = script.substring(methodNameEndIndex + 1, script.length() - 1);
+                String[] paramsArray = paramsSubstring.split(",");
+                if (paramsArray.length > 0) {
+                    List<String> shortenedParams = new ArrayList<>();
+                    for (String param : paramsArray) {
+                        String value = param.replace("'", "");
+                        if (value.length() > MAX_ALLOWED_ARGUMENT_LENGTH) {
+                            value = value.substring(0, ARGUMENT_VISIBLE_PART_LENGTH) + "..." + value.substring(value.length() - ARGUMENT_VISIBLE_PART_LENGTH);
+                        }
+                        shortenedParams.add(value);
+                    }
+                    String params = StringUtils.join("','", "('", "')", shortenedParams.toArray(new String[0]));
+                    builder.append(params);
+                }
+                else {
+                    builder.append("()");
+                }
+            }
+            return builder.toString();
+        }
+        return script;
     }
 }

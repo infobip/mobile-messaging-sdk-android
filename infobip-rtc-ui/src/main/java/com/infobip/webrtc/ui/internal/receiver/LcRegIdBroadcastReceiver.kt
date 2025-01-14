@@ -8,13 +8,15 @@ import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
 import org.infobip.mobile.messaging.BroadcastParameter.EXTRA_LIVECHAT_REGISTRATION_ID
 
-class LcRegIdBroadcastReceiver: BroadcastReceiver() {
+class LcRegIdBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
-        if (Injector.cache.rtcUiMode == RtcUiMode.IN_APP_CHAT) {
-            intent?.getStringExtra(EXTRA_LIVECHAT_REGISTRATION_ID)?.let { lcRegId ->
+        intent?.getStringExtra(EXTRA_LIVECHAT_REGISTRATION_ID)?.let { lcRegId ->
+            if (Injector.cache.rtcUiMode == RtcUiMode.IN_APP_CHAT) {
                 CallRegistrationWorker.launch(context, lcRegId, true)
             }
+            if (lcRegId.isNotBlank())
+                Injector.cache.livechatRegistrationId = lcRegId
         }
     }
 

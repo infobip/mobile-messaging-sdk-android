@@ -72,6 +72,11 @@ internal interface SdkLifetimeCache {
     val inCallScreenStyle: InCallScreenStyle?
     var inCallButtons: List<InCallButton>
     var callErrorMapper: RtcUiCallErrorMapper?
+
+    /**
+     * Last reported livechat registration id. It can be used to re-enable in-app chat calls multiple times.
+     */
+    var livechatRegistrationId: String?
 }
 
 internal class SdkLifetimeCacheImpl : SdkLifetimeCache {
@@ -103,6 +108,7 @@ internal class SdkLifetimeCacheImpl : SdkLifetimeCache {
             InCallButton.FlipCam(),
         )
     override var callErrorMapper: RtcUiCallErrorMapper? = null
+    override var livechatRegistrationId: String? = null
 }
 //endregion
 

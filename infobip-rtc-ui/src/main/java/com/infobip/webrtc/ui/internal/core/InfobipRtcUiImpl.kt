@@ -48,10 +48,21 @@ internal class InfobipRtcUiImpl(
         //it can be called also from broadcast receivers when we already have mode
         if (rtcUiMode == null)
             rtcUiMode = RtcUiMode.CUSTOM.withListeners(successListener, errorListener)
+
+        val onError: (Throwable) -> Unit = {
+            runOnUiThread { errorListener?.onError(it) }
+            cleanStoredCallbacks()
+        }
+
+        val onSuccess: (Unit) -> Unit = {
+            cache.identity = identity
+            runOnUiThread { successListener?.onSuccess() }
+            cleanStoredCallbacks()
+        }
+
         callsScope.launch {
             runCatching {
                 Log.d(TAG, "Enabling $rtcUiMode calls for identity $identity.")
-                cache.identity = identity
                 tokenProvider.getToken(identity)?.let { token ->
                     if (listenType == ListenType.PUSH) {
                         if (!notificationPermissionDelegate.hasPermission()) {
@@ -59,18 +70,12 @@ internal class InfobipRtcUiImpl(
                                 notificationPermissionDelegate.request()
                             }
                         }
-                        registerPush(token, errorListener, successListener)
+                        registerPush(token, onError, onSuccess)
                     } else {
-                        registerActiveConnection(token, errorListener, successListener)
+                        registerActiveConnection(token, onError, onSuccess)
                     }
-                } ?: runOnUiThread {
-                    errorListener?.onError(IllegalStateException("Could not create WebRTC token."))
-                    cleanStoredCallbacks()
-                }
-            }.onFailure {
-                runOnUiThread { errorListener?.onError(it) }
-                cleanStoredCallbacks()
-            }
+                } ?: onError(IllegalStateException("Missing WebRTC token."))
+            }.onFailure(onError)
         }
     }
 
@@ -94,7 +99,14 @@ internal class InfobipRtcUiImpl(
         errorListener: ErrorListener?
     ) {
         rtcUiMode = RtcUiMode.IN_APP_CHAT.withListeners(successListener, errorListener)
-        Log.d(TAG, "Waiting for broadcast with livechatRegistrationId.")
+        cache.livechatRegistrationId?.let {
+            enableCalls(
+                identity = it,
+                listenType = ListenType.PUSH,
+                successListener = successListener,
+                errorListener = errorListener
+            )
+        } ?: Log.d(TAG, "Waiting for broadcast with livechatRegistrationId.")
     }
 
     override fun disableCalls(successListener: SuccessListener?, errorListener: ErrorListener?) {
@@ -107,11 +119,11 @@ internal class InfobipRtcUiImpl(
                 require(webRtcToken?.isNotBlank() == true) { "Missing WebRTC token." }
                 rtcInstance.disablePushNotification(webRtcToken.orEmpty(), context)
                 cache.clear()
-                successListener?.onSuccess()
+                runOnUiThread { successListener?.onSuccess() }
                 callsScope.coroutineContext.cancelChildren()
             }
         }.onFailure {
-            errorListener?.onError(it)
+            runOnUiThread { errorListener?.onError(it) }
         }
     }
 
@@ -133,35 +145,26 @@ internal class InfobipRtcUiImpl(
 
     private fun registerPush(
         token: String,
-        errorListener: ErrorListener?,
-        successListener: SuccessListener?
+        onError: (Throwable) -> Unit = {},
+        onSuccess: (Unit) -> Unit = {},
     ) {
         callsDelegate.enablePush(token, cache.configurationId) {
             Log.d(TAG, "Registration for calls push result: ${it.status}, ${it.description}")
-            runOnUiThread {
-                if (it.status != Status.SUCCESS) {
-                    errorListener?.onError(IllegalStateException("Registration for calls push failed. Reason: ${it.description}"))
-                } else {
-                    successListener?.onSuccess()
-                }
-                cleanStoredCallbacks()
+            if (it.status != Status.SUCCESS) {
+                onError(IllegalStateException("Registration for calls push failed. Reason: ${it.description}"))
+            } else {
+                onSuccess(Unit)
             }
         }
     }
 
     private fun registerActiveConnection(
         token: String,
-        errorListener: ErrorListener?,
-        successListener: SuccessListener?
+        onError: (Throwable) -> Unit = {},
+        onSuccess: (Unit) -> Unit = {},
     ) {
-        runCatching {
-            callsDelegate.registerActiveConnection(token)
-        }.onSuccess {
-            runOnUiThread { successListener?.onSuccess() }
-        }.onFailure {
-            runOnUiThread { errorListener?.onError(it) }
-        }
-        cleanStoredCallbacks()
+        runCatching { callsDelegate.registerActiveConnection(token) }
+            .fold(onSuccess, onError)
     }
 
     private fun runOnUiThread(action: () -> Unit) {

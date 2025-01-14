@@ -2,14 +2,14 @@ package org.infobip.mobile.messaging.chat;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.FragmentManager;
-
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
 
 /**
  * Main interface for in-app chat communication
@@ -69,7 +69,7 @@ public abstract class InAppChat {
      *
      * @param activityClasses array of activities to put into task stack when message is tapped
      */
-    public abstract void setActivitiesToStartOnMessageTap(Class... activityClasses);
+    public abstract void setActivitiesToStartOnMessageTap(Class<?>... activityClasses);
 
     /**
      * Cleans up all InAppChat data.
