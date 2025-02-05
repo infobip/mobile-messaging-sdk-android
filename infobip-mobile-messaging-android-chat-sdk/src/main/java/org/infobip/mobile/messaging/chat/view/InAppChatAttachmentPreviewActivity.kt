@@ -45,7 +45,6 @@ import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager
-import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.UUID
 
 class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
@@ -55,9 +54,6 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         private const val EXTRA_URL = "ib_chat_attachment_url"
         private const val EXTRA_TYPE = "ib_chat_attachment_type"
         private const val EXTRA_CAPTION = "ib_chat_attachment_caption"
-
-        private const val RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI =
-            "ib_inappchat_attachment_preview_uri"
 
         @JvmStatic
         fun startIntent(context: Context, url: String?, type: String?, caption: String?): Intent {
@@ -246,8 +242,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     private fun loadPreviewPage() {
-        val previewPageUrl =
-            ResourceLoader.loadStringResourceByName(this, RES_ID_IN_APP_CHAT_ATTACH_PREVIEW_URI)
+        val previewPageUrl = getString(R.string.ib_inappchat_attachment_preview_uri)
         val attachmentUrl: String? = intent.getStringExtra(EXTRA_URL)
         val attachmentType: String? = intent.getStringExtra(EXTRA_TYPE)
         val resultUrl = Uri.Builder()

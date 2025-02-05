@@ -17,15 +17,24 @@
 <body>
     <div id="ib-widget-container"></div>
     <script>
+        const widgetUri = getQueryParameter('widgetUri');
         const domain = getQueryParameter('domain');
         const jwt = getQueryParameter('jwt');
         const pushRegId = getQueryParameter('pushRegId');
         const widgetId = getQueryParameter('widgetId');
         const widgetTheme = getQueryParameter('widgetTheme');
 
-        let widgetAddress = 'https://livechat.infobip.com/widget.js';
+        let uri = 'https://livechat.infobip.com/widget.js';
+
+        let decodedWidgetUri = null;
+        if (!isNullOrBlank(widgetUri)) {
+            decodedWidgetUri = decodeURIComponent(widgetUri);
+        }
+
         if (!isNullOrBlank(domain)) {
-            widgetAddress = `https://livechat-${domain.toLocaleLowerCase()}.infobip.com/widget.js`;
+            uri = `https://livechat-${domain.toLocaleLowerCase()}.infobip.com/widget.js`;
+        } else if (!isNullOrBlank(decodedWidgetUri)) {
+            uri = decodedWidgetUri;
         }
 
         (function (I, n, f, o, b, i, p) {
@@ -33,7 +42,7 @@
             I[b].t = 1 * new Date(); i = n.createElement(f); i.async = 1; i.src = o;
             p = n.getElementsByTagName(f)[0]; p.parentNode.insertBefore(i, p)
         })
-            (window, document, 'script', widgetAddress, 'liveChat');
+            (window, document, 'script', uri, 'liveChat');
 
         // Override widget config
         liveChat('config', {

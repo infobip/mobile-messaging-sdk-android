@@ -17,9 +17,9 @@ plugins {
 }
 
 android {
-    namespace "org.infobip.mobile.messaging.chat"
-    compileSdkVersion mm_compileSdkVersion
-    buildToolsVersion mm_buildToolsVersion
+    namespace = "org.infobip.mobile.messaging.chat"
+    buildToolsVersion = mm_buildToolsVersion
+    compileSdk = mm_compileSdkVersion
 
     publishing {
         multipleVariants {
@@ -69,6 +69,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     lint {
         abortOnError false
     }

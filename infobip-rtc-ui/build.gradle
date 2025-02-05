@@ -17,6 +17,10 @@ plugins {
 }
 
 android {
+    namespace = "com.infobip.webrtc.ui"
+    buildToolsVersion = mm_buildToolsVersion
+    compileSdk = mm_compileSdkVersion
+
     publishing {
         multipleVariants {
             allVariants()
@@ -27,10 +31,6 @@ android {
     defaultConfig {
         minSdkVersion mm_minSdkVersion
         targetSdkVersion 34
-        compileSdk mm_compileSdkVersion
-        buildToolsVersion = mm_buildToolsVersion
-        namespace "com.infobip.webrtc.ui"
-
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579

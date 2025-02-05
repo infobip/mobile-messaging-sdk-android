@@ -17,6 +17,10 @@ plugins {
 }
 
 android {
+    namespace = "org.infobip.mobile.messaging"
+    buildToolsVersion = mm_buildToolsVersion
+    compileSdk = mm_compileSdkVersion
+
     publishing {
         multipleVariants {
             allVariants()
@@ -24,9 +28,6 @@ android {
             withSourcesJar()
         }
     }
-    namespace "org.infobip.mobile.messaging"
-    compileSdkVersion mm_compileSdkVersion
-    buildToolsVersion mm_buildToolsVersion
 
     defaultConfig {
         minSdkVersion mm_minSdkVersion
