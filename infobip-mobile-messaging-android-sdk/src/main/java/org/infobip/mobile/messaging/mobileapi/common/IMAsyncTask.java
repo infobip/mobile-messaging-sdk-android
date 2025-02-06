@@ -11,6 +11,7 @@ public abstract class IMAsyncTask<IN, OUT> {
 
     /**
      * Executed on background thread as a last step before running the main block
+     *
      * @return return true to skip execution, in this case only the {@link IMAsyncTask#cancelled(Object[])} will be called.
      */
     public boolean shouldCancel() {
@@ -67,6 +68,7 @@ public abstract class IMAsyncTask<IN, OUT> {
 
     /**
      * Executed on UI thread if execution was cancelled ({@link IMAsyncTask#shouldCancel()} returned `true`).
+     *
      * @param ins input parameters
      */
     public void cancelled(IN[] ins) {

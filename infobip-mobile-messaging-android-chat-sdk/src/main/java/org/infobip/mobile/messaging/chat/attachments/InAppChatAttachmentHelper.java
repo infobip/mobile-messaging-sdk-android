@@ -6,13 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
+import org.infobip.mobile.messaging.mobileapi.common.MMAsyncTask;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 
@@ -32,7 +32,7 @@ public class InAppChatAttachmentHelper {
     public static final String MIME_TYPE_IMAGE_JPEG = "image/jpeg";
 
     public static void makeAttachment(final FragmentActivity context, final Intent data, final Uri capturedMediaStoreUri, final InAppChatAttachmentHelper.InAppChatAttachmentHelperListener listener) {
-        AsyncTask.execute(() -> {
+        MMAsyncTask.execute(() -> {
             try {
                 //From media store Uri we need to get real Uri of the file
                 Uri capturedMediaRealUri = getUriFromMediaStoreURI(capturedMediaStoreUri, context);

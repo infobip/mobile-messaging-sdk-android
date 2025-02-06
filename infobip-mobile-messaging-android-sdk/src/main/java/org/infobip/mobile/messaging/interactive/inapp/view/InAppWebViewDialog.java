@@ -7,7 +7,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
@@ -37,6 +36,7 @@ import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage.InAppWebViewPosition;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.common.MMAsyncTask;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
@@ -548,7 +548,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     }
 
     @SuppressLint("StaticFieldLeak")
-    public class ConnectionTimeoutHandler extends AsyncTask<Void, Void, String> {
+    public class ConnectionTimeoutHandler extends MMAsyncTask<Void, Void, String> {
 
         private static final String PAGE_LOADED = "PAGE_LOADED";
         private static final String CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT";

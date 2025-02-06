@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.mobileapi.common;
 
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.Nullable;
 
 import java.util.concurrent.Executor;
@@ -107,7 +108,7 @@ public abstract class MRetryableTask<IN, OUT> extends IMAsyncTask<IN, OUT> {
                     public void run() {
                         MRetryableTask.this.execute();
                     }
-                }, TimeUnit.SECONDS.toMillis(executionContext.attempts * executionContext.attempts * executionContext.retryPolicy.getBackoffMultiplier()));
+                }, TimeUnit.SECONDS.toMillis((long) executionContext.attempts * executionContext.attempts * executionContext.retryPolicy.getBackoffMultiplier()));
             }
 
             @Override

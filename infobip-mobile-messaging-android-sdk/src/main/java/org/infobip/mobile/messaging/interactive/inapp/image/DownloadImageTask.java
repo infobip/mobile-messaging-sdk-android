@@ -2,11 +2,11 @@ package org.infobip.mobile.messaging.interactive.inapp.image;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.security.NetworkSecurityPolicy;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.common.MMAsyncTask;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -15,7 +15,7 @@ import java.net.URL;
  * @author sslavin
  * @since 12/04/2018.
  */
-public abstract class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+public abstract class DownloadImageTask extends MMAsyncTask<String, Void, Bitmap> {
 
     private final static int MAX_DOWNLOAD_ATTEMPTS = 3;
 

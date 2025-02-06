@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.platform;
 
 import android.content.Context;
 import android.os.Build;
+
 import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Installation;
