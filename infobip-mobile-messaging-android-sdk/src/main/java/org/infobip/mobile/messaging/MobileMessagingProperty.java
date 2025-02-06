@@ -67,7 +67,7 @@ public enum MobileMessagingProperty {
     MARK_SEEN_ON_NOTIFICATION_TAP("org.infobip.mobile.messaging.infobip.MARK_SEEN_ON_NOTIFICATION_TAP", true),
     INTERACTIVE_CATEGORIES("org.infobip.mobile.messaging.infobip.INTERACTIVE_CATEGORIES"),
     MODAL_IN_APP_NOTIFICATIONS_ENABLED("org.infobip.mobile.messaging.infobip.MODAL_IN_APP_NOTIFICATIONS_ENABLED", true),
-    POST_NOTIFICATIONS_REQUEST_ENABLED("org.infobip.mobile.messaging.infobip.POST_NOTIFICATIONS_REQUEST_ENABLED", true),
+    POST_NOTIFICATIONS_REQUEST_ENABLED("org.infobip.mobile.messaging.infobip.POST_NOTIFICATIONS_REQUEST_ENABLED", false),
     FULL_FEATURE_IN_APPS_ENABLED("org.infobip.mobile.messaging.infobip.FULL_FEATURE_IN_APPS_ENABLED", false),
     NOTIFICATION_CHANNEL_ID("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_ID", null),
     NOTIFICATION_CHANNEL_NAME("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_NAME", null),
