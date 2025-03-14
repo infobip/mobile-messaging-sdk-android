@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Coś poszło nie tak: %1$s.</string>
     <string name="ib_chat_error_code">Kod błędu: %1$s.</string>
     <string name="ib_chat_save">Ratować</string>
+    <string name="ib_chat_attachments_take_a_photo">Zrób zdjęcie</string>
+    <string name="ib_chat_attachments_record_video">Nagrywać wideo</string>
+    <string name="ib_chat_attachments_select_file">Wybierz plik</string>
+    <string name="ib_chat_attachments_select_from_gallery">Wybierz z galerii</string>
 </resources>

@@ -13,4 +13,8 @@
     <string name="ib_chat_error">A apărut o eroare: %1$s.</string>
     <string name="ib_chat_error_code">Cod de eroare: %1$s.</string>
     <string name="ib_chat_save">Salvați</string>
+    <string name="ib_chat_attachments_take_a_photo">Faceți o fotografie</string>
+    <string name="ib_chat_attachments_record_video">Înregistrați videoclipuri</string>
+    <string name="ib_chat_attachments_select_file">Selectați fișier</string>
+    <string name="ib_chat_attachments_select_from_gallery">Selectați din galerie</string>
 </resources>

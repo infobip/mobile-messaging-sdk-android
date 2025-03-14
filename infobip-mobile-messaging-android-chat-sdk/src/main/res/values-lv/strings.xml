@@ -1,2 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+
+    <!-- Default resources for customizable strings -->
+    <string name="ib_chat_message_hint">Nosūtiet ziņojumu ...</string>
+    <string name="ib_chat_no_connection">Nav savienojuma</string>
+    <string name="ib_iv_btn_send_desc">Nosūtiet tērzēšanas ziņojumu</string>
+    <string name="ib_iv_btn_send_attachment_desc">Nosūtīt pielikumu</string>
+    <string name="ib_iv_input_border_desc">Augšējā robeža</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Maksimālais pieļaujamais stiprinājuma lielums pārsniedza</string>
+    <string name="ib_chat_permissions_not_granted_title">Atļaujas nav piešķirtas</string>
+    <string name="ib_chat_permissions_not_granted_message">Varat tos piešķirt lietojumprogrammas iestatījumos.</string>
+    <string name="ib_chat_cant_create_attachment">Nevar izveidot pielikumu no atlasītā faila</string>
+    <string name="ib_chat_ok">Labi</string>
+    <string name="ib_chat_error">Kaut kas nogāja greizi: %1$s.</string>
+    <string name="ib_chat_error_code">Kļūdas kods: %1$s.</string>
+    <string name="ib_chat_save">Saglabāt</string>
+    <string name="ib_chat_attachments_take_a_photo">Nofotografēt</string>
+    <string name="ib_chat_attachments_record_video">Ierakstīt video</string>
+    <string name="ib_chat_attachments_select_file">Atlasīt failu</string>
+    <string name="ib_chat_attachments_select_from_gallery">Izvēlēties no galerijas</string>
+</resources>

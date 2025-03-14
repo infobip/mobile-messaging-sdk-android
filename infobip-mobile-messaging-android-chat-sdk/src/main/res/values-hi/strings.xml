@@ -13,4 +13,8 @@
     <string name="ib_chat_error">कुछ ग़लत हुआ: %1$s.</string>
     <string name="ib_chat_error_code">त्रुटि कोड: %1$s.</string>
     <string name="ib_chat_save">बचाना</string>
+    <string name="ib_chat_attachments_take_a_photo">एक तस्वीर लें</string>
+    <string name="ib_chat_attachments_record_video">रिकॉर्ड वीडियो</string>
+    <string name="ib_chat_attachments_select_file">फ़ाइल का चयन करें</string>
+    <string name="ib_chat_attachments_select_from_gallery">गैलरी से चयन करें</string>
 </resources>

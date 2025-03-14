@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Sesuatu telah berlaku: %1$s.</string>
     <string name="ib_chat_error_code">Kod ralat: %1$s.</string>
     <string name="ib_chat_save">Jimat</string>
+    <string name="ib_chat_attachments_take_a_photo">Ambil gambar</string>
+    <string name="ib_chat_attachments_record_video">Rakam video</string>
+    <string name="ib_chat_attachments_select_file">Pilih fail</string>
+    <string name="ib_chat_attachments_select_from_gallery">Pilih daripada galeri</string>
 </resources>

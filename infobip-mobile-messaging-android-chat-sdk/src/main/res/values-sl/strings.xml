@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Nekaj ​​je šlo narobe: %1$s.</string>
     <string name="ib_chat_error_code">Koda napake: %1$s.</string>
     <string name="ib_chat_save">Shrani</string>
+    <string name="ib_chat_attachments_take_a_photo">Posnemite fotografijo</string>
+    <string name="ib_chat_attachments_record_video">Snemanje video</string>
+    <string name="ib_chat_attachments_select_file">Izberite datoteko</string>
+    <string name="ib_chat_attachments_select_from_gallery">Izberite v galeriji</string>
 </resources>

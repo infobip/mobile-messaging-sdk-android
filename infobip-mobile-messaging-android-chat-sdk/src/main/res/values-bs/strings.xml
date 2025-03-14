@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Nešto nije u redu: %1$s.</string>
     <string name="ib_chat_error_code">Kôd greške: %1$s.</string>
     <string name="ib_chat_save">Sačuvaj</string>
+    <string name="ib_chat_attachments_take_a_photo">Fotografirajte</string>
+    <string name="ib_chat_attachments_record_video">Snimi video</string>
+    <string name="ib_chat_attachments_select_file">Odaberite datoteku</string>
+    <string name="ib_chat_attachments_select_from_gallery">Odaberite iz galerije</string>
 </resources>

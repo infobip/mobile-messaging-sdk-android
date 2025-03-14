@@ -11,12 +11,11 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-
-import androidx.exifinterface.media.ExifInterface;
-
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
+
+import androidx.exifinterface.media.ExifInterface;
 
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
@@ -46,6 +45,18 @@ public class InAppChatMobileAttachment {
         this.fileName = filename;
     }
 
+    /**
+     * Creates {@link InAppChatMobileAttachment} from provided data.
+     *
+     * @param context               context
+     * @param data                  intent with data
+     * @param capturedMediaStoreUri media store uri
+     * @param capturedMediaRealUri  real uri
+     * @return InAppChatMobileAttachment
+     * @throws InternalSdkError.InternalSdkException if attachment is not valid or exceeds max size {@link #DEFAULT_MAX_UPLOAD_CONTENT_SIZE}
+     * @deprecated use {@link #makeAttachment(Context, Uri)} instead
+     */
+    @Deprecated
     public static InAppChatMobileAttachment makeAttachment(Context context, Intent data, Uri capturedMediaStoreUri, Uri capturedMediaRealUri) throws InternalSdkError.InternalSdkException {
         String mimeType = getMimeType(context, data, capturedMediaRealUri);
         byte[] bytesArray = getBytes(context, data, capturedMediaStoreUri, capturedMediaRealUri, mimeType);
@@ -71,6 +82,18 @@ public class InAppChatMobileAttachment {
         return null;
     }
 
+    /**
+     * Creates {@link InAppChatMobileAttachment} from provided {@link Uri}.
+     *
+     * @param context context
+     * @param uri     attachment file's uri
+     * @return {@link InAppChatMobileAttachment} you can sent in in-app chat
+     * @throws IllegalStateException if attachment is not valid or exceeds max size {@link #DEFAULT_MAX_UPLOAD_CONTENT_SIZE}
+     */
+    public static InAppChatMobileAttachment makeAttachment(Context context, Uri uri) throws IllegalStateException {
+        return AttachmentHelper.createInAppChatAttachment(context, uri, (int) DEFAULT_MAX_UPLOAD_CONTENT_SIZE);
+    }
+
     public String base64UrlString() {
         return "data:" + mimeType + ";base64," + CommonUtils.escapeJsonString(base64);
     }
@@ -91,6 +114,7 @@ public class InAppChatMobileAttachment {
         this.fileName = fileName;
     }
 
+    @Deprecated
     public static String getMimeType(Context context, Intent data, Uri capturedMediaUri) {
         String mimeType = "application/octet-stream";
         if (data != null && data.getData() != null) {

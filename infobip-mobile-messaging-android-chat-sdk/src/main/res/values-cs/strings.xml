@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Něco se pokazilo: %1$s.</string>
     <string name="ib_chat_error_code">Kód chyby: %1$s.</string>
     <string name="ib_chat_save">Uložit</string>
+    <string name="ib_chat_attachments_take_a_photo">Pořídit fotografii</string>
+    <string name="ib_chat_attachments_record_video">Nahrávat video</string>
+    <string name="ib_chat_attachments_select_file">Vyberte soubor</string>
+    <string name="ib_chat_attachments_select_from_gallery">Vyberte z galerie</string>
 </resources>

@@ -13,4 +13,8 @@
     <string name="ib_chat_error">حدث خطأ ما: %1$s.</string>
     <string name="ib_chat_error_code">رمز الخطأ: %1$s.</string>
     <string name="ib_chat_save">يحفظ</string>
+    <string name="ib_chat_attachments_take_a_photo">التقط صورة</string>
+    <string name="ib_chat_attachments_record_video">تسجيل الفيديو</string>
+    <string name="ib_chat_attachments_select_file">حدد الملف</string>
+    <string name="ib_chat_attachments_select_from_gallery">اختر من المعرض</string>
 </resources>

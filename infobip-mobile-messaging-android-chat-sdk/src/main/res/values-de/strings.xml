@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Es ist ein Fehler aufgetreten: %1$s.</string>
     <string name="ib_chat_error_code">Fehlercode: %1$s.</string>
     <string name="ib_chat_save">Speichern</string>
+    <string name="ib_chat_attachments_take_a_photo">Machen Sie ein Foto</string>
+    <string name="ib_chat_attachments_record_video">Video aufnehmen</string>
+    <string name="ib_chat_attachments_select_file">Datei auswählen</string>
+    <string name="ib_chat_attachments_select_from_gallery">Wählen Sie aus der Galerie</string>
 </resources>

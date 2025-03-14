@@ -1,56 +1,56 @@
 package org.infobip.mobile.messaging.chat.view
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.hardware.camera2.CameraManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.ActivityResult
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.InAppChat
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentHelper
+import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.SessionStorage
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
+import org.infobip.mobile.messaging.chat.models.AttachmentSource
 import org.infobip.mobile.messaging.chat.models.ContextualData
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
+import org.infobip.mobile.messaging.chat.utils.copyFileToPublicDir
+import org.infobip.mobile.messaging.chat.utils.deleteFile
 import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
 import org.infobip.mobile.messaging.chat.utils.isLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
 import org.infobip.mobile.messaging.chat.utils.show
+import org.infobip.mobile.messaging.chat.view.chooser.BottomSheetChooser
+import org.infobip.mobile.messaging.chat.view.chooser.BottomSheetRow
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
-import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import java.util.Locale
 
 class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.ResultListener {
@@ -123,8 +123,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private var originalStatusBarColor = 0
     private var originalLightStatusBar: Boolean? = null
     private lateinit var localizationUtils: LocalizationUtils
-    private var capturedImageUri: Uri? = null
-    private var capturedVideoUri: Uri? = null
     private var widgetInfo: WidgetInfo? = null
     private var widgetView: InAppChatWidgetView? = null
     private var appliedWidgetTheme: String? = null
@@ -249,7 +247,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     //region Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        activityResultDelegate = InAppChatActivityResultDelegateImpl(requireActivity().activityResultRegistry, this)
+        activityResultDelegate = InAppChatActivityResultDelegateImpl(requireActivity(), this)
         lifecycle.addObserver(activityResultDelegate)
     }
 
@@ -661,12 +659,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     private fun initAttachmentButton() {
         binding.ibLcChatInput.setAttachmentButtonClickListener {
-            val isCameraPermissionGranted = isCameraPermissionGranted()
-            if (isCameraPermissionGranted) {
-                chooseFile(isCameraPermissionGranted = true)
-            } else {
-                requestCameraPermissionIfNeeded()
-            }
+            chooseAttachmentSource()
         }
     }
 
@@ -717,186 +710,87 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     //region Attachment picker
-    private fun getCapturedMediaUrl(data: Intent?): Uri? {
-        val uri = data?.data
-        val mimeType =
-            uri?.let { InAppChatMobileAttachment.getMimeType(requireActivity(), data, it) }
-        return when {
-            capturedImageUri != null && (mimeType == InAppChatAttachmentHelper.MIME_TYPE_IMAGE_JPEG || InAppChatAttachmentHelper.isUriFileEmpty(
-                requireContext(),
-                capturedImageUri
-            ) == false) -> capturedImageUri
 
-            capturedVideoUri != null && (mimeType == InAppChatAttachmentHelper.MIME_TYPE_VIDEO_MP_4 || InAppChatAttachmentHelper.isUriFileEmpty(
-                requireContext(),
-                capturedVideoUri
-            ) == false) -> capturedVideoUri
-
-            else -> null
-        }
-    }
-
-    private val attachmentHelperListener =
-        object : InAppChatAttachmentHelper.InAppChatAttachmentHelperListener {
-
-            override fun onAttachmentCreated(attachment: InAppChatMobileAttachment?) {
-                if (attachment != null) {
-                    MobileMessagingLogger.w(TAG, "Attachment created, will send Attachment")
-                    binding.ibLcChat.sendChatMessage(null, attachment)
-                } else {
-                    MobileMessagingLogger.e(TAG, "Can't create attachment")
-                    Toast.makeText(
-                        requireContext(),
-                        localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
-                        Toast.LENGTH_SHORT
-                    ).show()
+    private fun chooseAttachmentSource() {
+        val chooser = attachmentBottomSheetChooser()
+        val dialog = chooser.createDialog()
+        chooser.setOnItemSelectedListener { attachmentSource, bottomSheetDialog ->
+            (bottomSheetDialog ?: dialog).dismiss()
+            getLifecycleRegistry().isEnabled = false
+            when (attachmentSource) {
+                AttachmentSource.Camera -> activityResultDelegate.capturePhoto()
+                AttachmentSource.VideoRecorder -> activityResultDelegate.recordVideo()
+                AttachmentSource.VisualMediaPicker -> {
+                    activityResultDelegate.selectMedia()
                 }
-                deleteEmptyMediaFiles()
-            }
 
-            override fun onError(
-                context: Context?,
-                exception: Exception?
-            ) {
-                if (exception!!.message == InternalSdkError.ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED.get()) {
-                    MobileMessagingLogger.e(
-                        TAG,
-                        "Maximum allowed attachment size exceeded" + widgetInfo?.getMaxUploadContentSize()
-                    )
-                    Toast.makeText(
-                        context,
-                        localizationUtils.getString(R.string.ib_chat_allowed_attachment_size_exceeded),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    MobileMessagingLogger.e(TAG, "Attachment content is not valid.")
-                    Toast.makeText(
-                        context,
-                        localizationUtils.getString(R.string.ib_chat_cant_create_attachment),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                AttachmentSource.FilePicker -> {
+                    activityResultDelegate.selectFile()
                 }
-                deleteEmptyMediaFiles()
             }
-
         }
-
-    private fun deleteEmptyMediaFiles() {
-        InAppChatAttachmentHelper.deleteEmptyFileByUri(context, capturedImageUri)
-        InAppChatAttachmentHelper.deleteEmptyFileByUri(context, capturedVideoUri)
+        dialog.show()
     }
 
-    private fun chooseFile(isCameraPermissionGranted: Boolean) {
-        val chooserIntent = Intent(Intent.ACTION_CHOOSER)
-        chooserIntent.putExtra(Intent.EXTRA_INTENT, prepareIntentForChooser())
-        if (isCameraPermissionGranted) {
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, prepareInitialIntentsForChooser())
-        }
-        getLifecycleRegistry().isEnabled = false
-        activityResultDelegate.openAttachmentChooser(chooserIntent)
-    }
-
-    private fun prepareIntentForChooser(): Intent {
-        val contentSelectionIntent = Intent(Intent.ACTION_GET_CONTENT)
-        contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE)
-        contentSelectionIntent.type = "*/*"
-        return contentSelectionIntent
-    }
-
-    private fun prepareInitialIntentsForChooser(): Array<Intent> {
-        val packageManager: PackageManager = requireActivity().packageManager
-        val intentsForChooser: MutableList<Intent> = ArrayList()
-
-        //picture
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        capturedImageUri = if (Build.VERSION.SDK_INT < 29) {
-            InAppChatAttachmentHelper.getOutputImageUri(requireActivity())
-        } else {
-            InAppChatAttachmentHelper.getOutputImageUrlAPI29(requireActivity())
-        }
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedImageUri)
-        if (takePictureIntent.resolveActivity(packageManager) != null && capturedImageUri != null) {
-            intentsForChooser.add(takePictureIntent)
-        }
-
-        //video
-        val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-        if (Build.VERSION.SDK_INT > 30) {
-            capturedVideoUri = InAppChatAttachmentHelper.getOutputVideoUrl(requireActivity())
-            takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, capturedVideoUri)
-        }
-        if (takeVideoIntent.resolveActivity(packageManager) != null) {
-            intentsForChooser.add(takeVideoIntent)
-        }
-
-        return intentsForChooser.toTypedArray()
-    }
-
-    override fun onAttachmentChooserResult(result: ActivityResult) {
-        getLifecycleRegistry().isEnabled = true
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            InAppChatAttachmentHelper.makeAttachment(
-                requireActivity(),
-                data,
-                getCapturedMediaUrl(data),
-                attachmentHelperListener
+    private fun attachmentBottomSheetChooser(): BottomSheetChooser<AttachmentSource> {
+        return BottomSheetChooser<AttachmentSource>(context).apply {
+            setRows(
+                listOfNotNull(
+                    BottomSheetRow(
+                        text = localizationUtils.getString(R.string.ib_chat_attachments_take_a_photo),
+                        identifier = AttachmentSource.Camera
+                    ).takeIf { hasCameraFeature() },
+                    BottomSheetRow(
+                        text = localizationUtils.getString(R.string.ib_chat_attachments_record_video),
+                        identifier = AttachmentSource.VideoRecorder
+                    ).takeIf { hasCameraFeature() },
+                    BottomSheetRow(
+                        text = localizationUtils.getString(R.string.ib_chat_attachments_select_from_gallery),
+                        identifier = AttachmentSource.VisualMediaPicker
+                    ),
+                    BottomSheetRow(
+                        text = localizationUtils.getString(R.string.ib_chat_attachments_select_file),
+                        identifier = AttachmentSource.FilePicker
+                    ),
+                )
             )
-        } else {
-            deleteEmptyMediaFiles()
         }
     }
-    //endregion
-    //endregion
 
-    //region Permissions
-    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
-    fun requestCameraPermissionIfNeeded() {
-        val hasCameraFeature = requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-
-        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        if (hasCameraFeature && cameraManager.cameraIdList.isNotEmpty()) {
-            val permission = Manifest.permission.CAMERA
-            when {
-                isCameraPermissionGranted() -> {
-                    //all good no need to request
+    override fun onAttachmentLauncherResult(uri: Uri, source: AttachmentSource) {
+        getLifecycleRegistry().isEnabled = true
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            runCatching {
+                withContext(Dispatchers.Default) {
+                    AttachmentHelper.createInAppChatAttachment(context, uri)
                 }
-
-                shouldShowRequestPermissionRationale(permission) -> showCameraPermissionRationale()
-                else -> activityResultDelegate.requestCameraPermission()
+            }.onFailure {
+                Log.e("InAppChatScreen", "Failed to create In-app chat attachment", it)
+                val messageRes =
+                    if (it.message == "Attachment data is too large") R.string.ib_chat_allowed_attachment_size_exceeded else R.string.ib_chat_cant_create_attachment
+                Toast.makeText(
+                    context,
+                    localizationUtils.getString(messageRes),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }.onSuccess {
+                binding.ibLcChat.sendChatMessage(null, it)
+                if (source == AttachmentSource.Camera || source == AttachmentSource.VideoRecorder) {
+                    uri.copyFileToPublicDir(context)
+                    uri.deleteFile(context)
+                }
             }
         }
     }
 
-    override fun onCameraPermissionResult(isGranted: Boolean) {
-        if (isGranted) {
-            chooseFile(isCameraPermissionGranted = true)
-        } else {
-            showCameraPermissionRationale()
-        }
-    }
-
-    private fun isCameraPermissionGranted(): Boolean = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PERMISSION_GRANTED
-
-    private fun showCameraPermissionRationale() {
-        AlertDialog.Builder(requireContext(), R.style.IB_Chat_AlertDialog)
-            .setTitle(R.string.ib_chat_permissions_not_granted_title)
-            .setMessage(R.string.ib_chat_permissions_not_granted_message)
-            .setCancelable(false)
-            .setNegativeButton(org.infobip.mobile.messaging.resources.R.string.mm_button_cancel) { dialog, _ ->
-                dialog.dismiss()
-                chooseFile(false)
-            }
-            .setPositiveButton(org.infobip.mobile.messaging.resources.R.string.mm_button_settings) { dialog, _ ->
-                dialog.dismiss()
-                activityResultDelegate.openAppSettings(context.packageName)
-            }.show()
-    }
-
-    override fun onSettingsResult(result: ActivityResult) {
-        MobileMessagingLogger.d(TAG, "Settings intent result ${result.resultCode}")
+    private fun hasCameraFeature(): Boolean {
+        val hasCameraFeature = requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        return hasCameraFeature && cameraManager.cameraIdList.isNotEmpty()
     }
     //endregion
+    //endregion
+
 
     private fun initBackPressHandler() {
         requireActivity().onBackPressedDispatcher.addCallback(

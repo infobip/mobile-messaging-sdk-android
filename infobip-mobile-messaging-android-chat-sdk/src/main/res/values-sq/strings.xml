@@ -13,4 +13,8 @@
     <string name="ib_iv_input_border_desc">Kufiri i sipërm</string>
     <string name="ib_chat_error_code">Kodi i gabimit: %1$s.</string>
     <string name="ib_chat_save">Ruaj</string>
+    <string name="ib_chat_attachments_take_a_photo">Bëj një foto</string>
+    <string name="ib_chat_attachments_record_video">Video Regjistro</string>
+    <string name="ib_chat_attachments_select_file">Zgjidhni skedarin</string>
+    <string name="ib_chat_attachments_select_from_gallery">Zgjidhni nga Galeria</string>
 </resources>

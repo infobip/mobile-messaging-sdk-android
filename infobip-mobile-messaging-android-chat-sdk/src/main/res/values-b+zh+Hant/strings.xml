@@ -13,4 +13,8 @@
     <string name="ib_chat_error">出了點問題：%1$s.</string>
     <string name="ib_chat_error_code">錯誤代碼：%1$s.</string>
     <string name="ib_chat_save">節省</string>
+    <string name="ib_chat_attachments_take_a_photo">拍照</string>
+    <string name="ib_chat_attachments_record_video">记录视频</string>
+    <string name="ib_chat_attachments_select_file">选择文件</string>
+    <string name="ib_chat_attachments_select_from_gallery">从画廊中选择</string>
 </resources>

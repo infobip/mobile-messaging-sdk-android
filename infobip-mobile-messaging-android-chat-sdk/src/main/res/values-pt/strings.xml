@@ -13,4 +13,8 @@
     <string name="ib_chat_error">Algo deu errado: %1$s.</string>
     <string name="ib_chat_error_code">Código de erro: %1$s.</string>
     <string name="ib_chat_save">Salvar</string>
+    <string name="ib_chat_attachments_take_a_photo">Tire uma foto</string>
+    <string name="ib_chat_attachments_record_video">Gravar vídeo</string>
+    <string name="ib_chat_attachments_select_file">Selecione Arquivo</string>
+    <string name="ib_chat_attachments_select_from_gallery">Selecione na galeria</string>
 </resources>

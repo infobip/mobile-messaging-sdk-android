@@ -13,4 +13,8 @@
     <string name="ib_chat_error">משהו השתבש: %1$s.</string>
     <string name="ib_chat_error_code">קוד שגיאה: %1$s.</string>
     <string name="ib_chat_save">להציל</string>
+    <string name="ib_chat_attachments_take_a_photo">צלם תמונה</string>
+    <string name="ib_chat_attachments_record_video">הקלט וידאו</string>
+    <string name="ib_chat_attachments_select_file">בחר קובץ</string>
+    <string name="ib_chat_attachments_select_from_gallery">בחר מהגלריה</string>
 </resources>
