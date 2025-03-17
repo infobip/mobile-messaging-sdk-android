@@ -1,7 +1,7 @@
 buildscript {
     //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-    ext.mm_kotlinVersion = "1.8.20"
-    ext.mm_gradlePluginVersion = '8.5.2'
+    ext.mm_kotlinVersion = "2.0.21"
+    ext.mm_gradlePluginVersion = "8.5.2"
     ext.mm_desugarJdkVersion = "2.1.4"
 
     repositories {
@@ -35,6 +35,10 @@ ext {
     mm_materialVersion = "1.12.0"
     mm_coreKtxVersion = "1.10.1"
     mm_lifecycleVersion = "2.5.1"
+    mm_junitVersion = "4.13.2"
+    mm_mockitoCoreVersion = "1.10.19"
+    mm_multidexVersion = "2.0.1"
+    mm_coroutinesVersion = "1.9.0"
     mm_version = "$version"
 }
 
@@ -48,8 +52,10 @@ allprojects {
 //It's required to be applied here, to have `subprojects.publish` task available
 subprojects {
     apply plugin: "maven-publish"
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-        kotlinOptions.jvmTarget = "1.8"
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
     }
     afterEvaluate { project ->
         if (project.hasProperty('android')) {

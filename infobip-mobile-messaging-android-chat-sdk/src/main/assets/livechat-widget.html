@@ -45,41 +45,51 @@
             (window, document, 'script', uri, 'liveChat');
 
         // Override widget config
-        liveChat('config', {
+        const widgetConfig = {
             widgetId: widgetId,
             container: document.getElementById('ib-widget-container'),
             showHeader: false,
             showFooter: false,
             showFab: false
-        }, (error, result) => widgetApiCallback('config', error, result));
+        };
+        liveChat('config', widgetConfig, function (error, result) {
+            widgetApiCallback('config', error, result);
+            if (!error) {
+                identify();
+            }
+        });
 
         // Try identify user by pushRegId and (optional) jwt
-        let inputParams = {
-            'pushRegistrationId': pushRegId,
-        };
-        if (jwt != null) {
-            inputParams.jwt = jwt;
+        function identify() {
+            const inputParams = {
+                'pushRegistrationId': pushRegId,
+            };
+            if (jwt != null) {
+                inputParams.jwt = jwt;
+            }
+            liveChat('identify', inputParams, function (error, result) {
+                widgetApiCallback('identify', error, result);
+                if (!error) {
+                    init();
+                }
+            });
         }
-        liveChat('identify', inputParams, function (error, result) {
-            widgetApiCallback('identify', error, result);
-            if (!error) {
-                init();
-            }
-        });
-
-        window.addEventListener('message', (event) => {
-            if (event.data.destination === 'viewChange') {
-                InAppChatMobile.onViewChanged(event.data.view);
-            }
-        });
 
         // If all is OK -> initialize widget, enable native controls and show widget
         function init() {
+            let initParams = null;
             if (domain != null) {
-                liveChat('init', { widgetId: widgetId, domain: domain }, (error, result) => widgetApiCallback('init_chat', error, result));
-            } else {
-                liveChat('init', null, (error, result) => widgetApiCallback('init_chat', error, result));
+                initParams = { widgetId: widgetId, domain: domain };
             }
+            liveChat('init', initParams, function (error, result) {
+                widgetApiCallback('initWidget', error, result);
+                if(!error) {
+                   show();
+                }
+            });
+        }
+
+        function show() {
             liveChat('show', null, function (error, result) {
                 widgetApiCallback('show', error, result);
                 if (!error && widgetTheme != null) {
@@ -88,6 +98,12 @@
             });
             addLiveChatEventsListener();
         }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.destination === 'viewChange') {
+                InAppChatMobile.onViewChanged(event.data.view);
+            }
+        });
 
         function addLiveChatEventsListener() {
             const liveChatSDK = new LiveChatSDK();
@@ -98,7 +114,7 @@
 
         //Widget API
         function sendMessage(message) {
-            liveChat('send', message, (error, result) => widgetApiCallback('send_message', error, message));
+            liveChat('send', message, (error, result) => widgetApiCallback('sendMessage', error, message));
         }
 
         function sendMessageWithAttachment(message, attachment, fileName) {
@@ -107,22 +123,22 @@
                 'attachment': attachment,
                 'fileName': fileName,
                 'type': 'BASIC'
-            }, (error, result) => widgetApiCallback('send_message_with_attachment', error, message));
+            }, (error, result) => widgetApiCallback('sendMessageWithAttachment', error, message));
         }
 
         function sendDraft(draft) {
             liveChat('send', {
                 'message': draft,
                 'type': 'DRAFT'
-            }, (error, result) => widgetApiCallback('send_draft', error, draft));
+            }, (error, result) => widgetApiCallback('sendDraft', error, draft));
         }
 
         function showThreadList() {
-            liveChat('show_thread_list', null, (error, result) => widgetApiCallback('show_thread_list', error, result));
+            liveChat('show_thread_list', null, (error, result) => widgetApiCallback('showThreadList', error, result));
         }
 
         function setLanguage(language) {
-            liveChat('set_language', language, (error, result) => widgetApiCallback('set_language', error, language));
+            liveChat('set_language', language, (error, result) => widgetApiCallback('setLanguage', error, language));
         }
 
         function sendContextualData(data, strategy) {
@@ -132,20 +148,20 @@
                     metadata: data,
                     multiThreadStrategy: strategy
                 },
-                (error, result) => widgetApiCallback('send_contextual_data', error, result)
+                (error, result) => widgetApiCallback('sendContextualData', error, result)
             );
         }
 
-        function mobileChatPause() {
-            liveChat('mobile_chat_pause', null, (error, result) => widgetApiCallback('mobile_chat_pause', error, result));
+        function pauseConnection() {
+            liveChat('mobile_chat_pause', null, (error, result) => widgetApiCallback('pauseConnection', error, result));
         }
 
-        function mobileChatResume() {
-            liveChat('mobile_chat_resume', null, (error, result) => widgetApiCallback('mobile_chat_resume', error, result));
+        function resumeConnection() {
+            liveChat('mobile_chat_resume', null, (error, result) => widgetApiCallback('resumeConnection', error, result));
         }
 
         function setTheme(theme) {
-            liveChat('set_theme', theme, (error, result) => widgetApiCallback('set_theme', error, result));
+            liveChat('set_theme', theme, (error, result) => widgetApiCallback('setTheme', error, result));
         }
 
         function getQueryParameter(name) {

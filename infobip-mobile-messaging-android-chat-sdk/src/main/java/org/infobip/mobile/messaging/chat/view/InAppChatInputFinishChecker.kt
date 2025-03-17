@@ -5,7 +5,7 @@ class InAppChatInputFinishChecker(private val sendInputDraft: (String) -> Unit) 
     private var inputValue: String? = null
 
     override fun run() {
-        inputValue?.let(sendInputDraft)
+        inputValue?.takeIf { it.isNotBlank() }?.let(sendInputDraft)
     }
 
     fun setInputValue(inputValue: String?) {

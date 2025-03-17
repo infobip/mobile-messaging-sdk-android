@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.chat.core;
 
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
+
 public interface InAppChatBroadcaster {
 
     /**
@@ -16,7 +18,7 @@ public interface InAppChatBroadcaster {
     /**
      * Sends broadcast when In-app chat widget view is changed
      */
-    void chatViewChanged(InAppChatWidgetView view);
+    void chatViewChanged(LivechatWidgetView view);
 
     /**
      * Sends broadcast when Livechat registration id is updated

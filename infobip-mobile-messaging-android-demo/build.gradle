@@ -118,8 +118,8 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
-    testImplementation "junit:junit:4.13.2"
+    implementation "androidx.constraintlayout:constraintlayout:$mm_constraintLayoutVersion"
+    testImplementation "junit:junit:$mm_junitVersion"
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
 
     implementation project(":infobip-mobile-messaging-android-chat-sdk")
@@ -145,7 +145,7 @@ dependencies {
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
 
-    implementation 'com.android.support:multidex:2.0.1'
+    implementation "com.android.support:multidex:$mm_multidexVersion"
 }
 
 private static String property(Project project, String projectKey, String environmentKey) {

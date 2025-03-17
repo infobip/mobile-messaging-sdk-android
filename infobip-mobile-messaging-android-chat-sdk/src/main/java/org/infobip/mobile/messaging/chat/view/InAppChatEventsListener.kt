@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.view
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView
 
 /**
  * Events listener propagates InAppChat related events.
@@ -37,7 +38,15 @@ interface InAppChatEventsListener {
      *
      * @param widgetView current chat view
      */
+    @Deprecated("Use onChatViewChanged(widgetView: LivechatWidgetView) instead")
     fun onChatViewChanged(widgetView: InAppChatWidgetView)
+
+    /**
+     * Chat view has changed.
+     *
+     * @param widgetView current chat view
+     */
+    fun onChatViewChanged(widgetView: LivechatWidgetView)
 
     /**
      * Chat [WidgetInfo] has been updated.
@@ -60,4 +69,20 @@ interface InAppChatEventsListener {
      */
     fun onChatRawMessageReceived(rawMessage: String)
 
+}
+
+/**
+ * Default implementation of [InAppChatEventsListener] with empty methods.
+ * It allows you to override only necessary methods.
+ */
+open class DefaultInAppChatEventsListener : InAppChatEventsListener {
+    override fun onChatLoaded(controlsEnabled: Boolean) {}
+    override fun onChatDisconnected() {}
+    override fun onChatReconnected() {}
+    override fun onChatControlsVisibilityChanged(isVisible: Boolean) {}
+    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {}
+    override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
+    override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
+    override fun onChatWidgetThemeChanged(widgetThemeName: String) {}
+    override fun onChatRawMessageReceived(rawMessage: String) {}
 }

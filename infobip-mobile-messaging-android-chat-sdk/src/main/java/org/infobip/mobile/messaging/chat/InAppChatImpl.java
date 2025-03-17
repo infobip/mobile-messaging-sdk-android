@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -22,17 +20,19 @@ import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
 import org.infobip.mobile.messaging.chat.core.InAppChatScreenImpl;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.core.SessionStorage;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetWebView;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker;
 import org.infobip.mobile.messaging.chat.models.ContextualData;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
-import org.infobip.mobile.messaging.chat.utils.LocalizationUtils;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
-import org.infobip.mobile.messaging.chat.view.InAppChatWebView;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -41,8 +41,8 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.util.Locale;
 import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
@@ -52,7 +52,6 @@ import androidx.core.app.TaskStackBuilder;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
@@ -66,10 +65,11 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private InAppChatBroadcasterImpl inAppChatBroadcaster;
     private InAppChatScreenImpl inAppChatScreen;
     private PropertyHelper propertyHelper;
-    private InAppChatWebView webView;
+    private LivechatWidgetWebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
     private LivechatRegistrationChecker lcRegIgChecker;
+    private LivechatWidgetApi lcWidgetApi;
     private InAppChatFragment inAppChatWVFragment;
 
     //region MessageHandlerModule
@@ -123,7 +123,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (rootView instanceof ViewGroup) {
             View inAppChatView = findViewByType((ViewGroup) rootView, InAppChatView.class);
             return inAppChatView != null && inAppChatView.getVisibility() == View.VISIBLE;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -134,7 +135,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
             if (type.isInstance(childView)) {
                 return childView;
-            } else if (childView instanceof ViewGroup) {
+            }
+            else if (childView instanceof ViewGroup) {
                 View foundView = findViewByType((ViewGroup) childView, type);
                 if (foundView != null) {
                     return foundView;
@@ -187,16 +189,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         sessionStorage().setConfigSyncResult(null);
-        try {
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(() -> {
-                webView().clearHistory();
-                webView().clearCache(true);
-                MobileMessagingLogger.d(TAG, "Deleted local widget history");
-            });
-        } catch (Exception e) {
-            MobileMessagingLogger.w(TAG, "Failed to delete local widget history due to " + e.getMessage());
-        }
+        livechatWidgetApi().reset();
     }
 
     @Override
@@ -270,6 +263,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         mobileApiResourceProvider = null;
         inAppChatSynchronizer = null;
         lcRegIgChecker = null;
+        lcWidgetApi = null;
         sessionStorage().clean();
         cleanupWidgetData();
         propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
@@ -288,6 +282,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         resetMessageCounter();
     }
 
+    @Deprecated
     public void showInAppChatFragment(FragmentManager fragmentManager, int containerId) {
         if (fragmentManager != null) {
             if (inAppChatWVFragment == null) inAppChatWVFragment = new InAppChatFragment();
@@ -296,18 +291,21 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             //on any configuration change activity is recreated -> new fragment manager instance -> show() does nothing
             if (areFragmentsEquals(fragmentByTag, inAppChatWVFragment)) {
                 fragmentTransaction.show(inAppChatWVFragment);
-            } else {
+            }
+            else {
                 fragmentTransaction.add(containerId, inAppChatWVFragment, IN_APP_CHAT_FRAGMENT_TAG);
             }
             fragmentTransaction.commit();
         }
     }
 
+    @Deprecated
     public void hideInAppChatFragment(FragmentManager fragmentManager) {
         hideInAppChatFragment(fragmentManager, false);
     }
 
     @Override
+    @Deprecated
     public void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChat) {
         if (fragmentManager != null) {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -341,6 +339,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @Deprecated
     public void setLanguage(String language) {
         setLanguage(language, new MobileMessaging.ResultListener<String>() {
             @Override
@@ -353,23 +352,58 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @Deprecated
     public void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener) {
+        LivechatWidgetLanguage widgetLanguage = LivechatWidgetLanguage.findLanguageOrDefault(language);
+        setLanguage(widgetLanguage, new MobileMessaging.ResultListener<LivechatWidgetLanguage>() {
+            @Override
+            public void onResult(Result<LivechatWidgetLanguage, MobileMessagingError> result) {
+                resultListener.onResult(new Result<>(widgetLanguage.getWidgetCode()));
+            }
+        });
+    }
+
+    @Override
+    public void setLanguage(@NonNull LivechatWidgetLanguage language) {
+        setLanguage(language, new MobileMessaging.ResultListener<LivechatWidgetLanguage>() {
+            @Override
+            public void onResult(Result<LivechatWidgetLanguage, MobileMessagingError> result) {
+                if (!result.isSuccess()) {
+                    MobileMessagingLogger.e(TAG, "Set language error: " + result.getError().getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setLanguage(@NonNull LivechatWidgetLanguage language, @Nullable MobileMessaging.ResultListener<LivechatWidgetLanguage> resultListener) {
         try {
-            LocalizationUtils localizationUtils = LocalizationUtils.getInstance(context);
-            Locale locale = localizationUtils.localeFromString(language);
-            String appliedLocale = locale.toString();
-            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, appliedLocale);
+            propertyHelper().saveString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE, language.getWidgetCode());
             if (inAppChatWVFragment != null) {
-                inAppChatWVFragment.setLanguage(locale);
+                inAppChatWVFragment.setLanguage(language);
             }
             if (resultListener != null) {
-                resultListener.onResult(new Result<>(appliedLocale));
+                resultListener.onResult(new Result<>(language));
             }
         } catch (Throwable t) {
             if (resultListener != null) {
                 resultListener.onResult(new Result<>(MobileMessagingError.createFrom(t)));
             }
         }
+    }
+
+    @NonNull
+    @Override
+    public LivechatWidgetLanguage getLanguage() {
+        String storedLanguage = propertyHelper().findString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
+        String language = null;
+        if (StringUtils.isNotBlank(storedLanguage)) {
+            language = storedLanguage;
+        }
+        else if (mmCore != null && mmCore.getInstallation() != null) {
+            language = mmCore.getInstallation().getLanguage();
+        }
+        return LivechatWidgetLanguage.findLanguageOrDefault(language);
     }
 
     @Override
@@ -385,6 +419,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
+    @Deprecated
     public void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy) {
         sendContextualData(data, allMultiThreadStrategy, new MobileMessaging.ResultListener<Void>() {
             @Override
@@ -402,13 +437,14 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             @Override
             public void onResult(Result<Void, MobileMessagingError> result) {
                 if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG,"Send contextual data error: " + result.getError().getMessage());
+                    MobileMessagingLogger.e(TAG, "Send contextual data error: " + result.getError().getMessage());
                 }
             }
         });
     }
 
     @Override
+    @Deprecated
     public void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy, @Nullable MobileMessaging.ResultListener<Void> resultListener) {
         MultithreadStrategy flag = Boolean.TRUE.equals(allMultiThreadStrategy) ? MultithreadStrategy.ALL : MultithreadStrategy.ACTIVE;
         sendContextualData(data, flag, resultListener);
@@ -421,15 +457,18 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             if (data == null || data.isEmpty()) {
                 sessionStorage().setContextualData(null);
                 result = new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. Data is null or empty.")));
-            } else if (flag == null) {
+            }
+            else if (flag == null) {
                 sessionStorage().setContextualData(null);
                 result = new Result<>(MobileMessagingError.createFrom(new IllegalArgumentException("Could not send contextual data. Strategy flag is null.")));
-            } else if (inAppChatWVFragment != null) {
+            }
+            else if (inAppChatWVFragment != null) {
                 inAppChatWVFragment.sendContextualData(data, flag);
                 result = new Result<>(null);
-            } else {
+            }
+            else {
                 sessionStorage().setContextualData(new ContextualData(data, flag));
-                MobileMessagingLogger.d(TAG,"Contextual data is stored, will be sent once chat is loaded.");
+                MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.");
                 result = new Result<>(null);
             }
         } catch (Throwable throwable) {
@@ -438,29 +477,62 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             if (result != null) {
                 if (resultListener != null) {
                     resultListener.onResult(result);
-                } else if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG,"sendContextualData() failed: " + result.getError().getMessage());
+                }
+                else if (!result.isSuccess()) {
+                    MobileMessagingLogger.e(TAG, "sendContextualData() failed: " + result.getError().getMessage());
                 }
             }
         }
     }
 
     @Override
+    @Deprecated
     public void setJwtProvider(InAppChat.JwtProvider jwtProvider) {
-        sessionStorage().setJwtProvider(jwtProvider);
+        sessionStorage().setJwtProvider(new org.infobip.mobile.messaging.chat.core.JwtProvider() {
+            @Nullable
+            @Override
+            public String provideJwt() {
+                return jwtProvider.provideJwt();
+            }
+        });
     }
 
     @Override
     @Nullable
+    @Deprecated
     public InAppChat.JwtProvider getJwtProvider() {
+        return new JwtProvider() {
+            @Nullable
+            @Override
+            public String provideJwt() {
+                if (sessionStorage().getJwtProvider() != null) {
+                    return sessionStorage().getJwtProvider().provideJwt();
+                }
+                else {
+                    return null;
+                }
+            }
+        };
+    }
+
+    @Override
+    public void setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider jwtProvider) {
+        sessionStorage().setJwtProvider(jwtProvider);
+    }
+
+    @Nullable
+    @Override
+    public org.infobip.mobile.messaging.chat.core.JwtProvider getWidgetJwtProvider() {
         return sessionStorage().getJwtProvider();
     }
 
     @Override
+    @Deprecated
     public void showThreadsList() {
         if (inAppChatWVFragment != null) {
             inAppChatWVFragment.showThreadList();
-        } else {
+        }
+        else {
             MobileMessagingLogger.e(TAG, "Function showThreadsList() skipped, InAppChatFragment has not been shown yet.");
         }
     }
@@ -505,9 +577,21 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE, title);
     }
 
+    @Nullable
+    @Override
+    public String getChatPushTitle() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE);
+    }
+
     @Override
     public void setChatPushBody(@Nullable String body) {
         PreferenceHelper.saveString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY, body);
+    }
+
+    @Nullable
+    @Override
+    public String getChatPushBody() {
+        return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
     }
 
     @Override
@@ -519,9 +603,27 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public InAppChatEventsListener getEventsListener() {
         return sessionStorage().getInAppChatEventsListener();
     }
+
+    @Override
+    public LivechatWidgetApi getLivechatWidgetApi() {
+        return livechatWidgetApi();
+    }
     //endregion
 
     // region private functions
+    synchronized private LivechatWidgetApi livechatWidgetApi() {
+        if (lcWidgetApi == null) {
+            lcWidgetApi = new LivechatWidgetApiImpl(
+                    new LivechatWidgetWebView(context),
+                    mobileMessagingCore(),
+                    this,
+                    propertyHelper(),
+                    sessionStorage().getScope()
+            );
+        }
+        return lcWidgetApi;
+    }
+
     synchronized private AndroidBroadcaster coreBroadcaster() {
         if (coreBroadcaster == null) {
             coreBroadcaster = new AndroidBroadcaster(context);
@@ -560,13 +662,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             propertyHelper = new PropertyHelper(context);
         }
         return propertyHelper;
-    }
-
-    synchronized private InAppChatWebView webView() {
-        if (webView == null) {
-            webView = new InAppChatWebView(context);
-        }
-        return webView;
     }
 
     synchronized private MobileMessagingCore mobileMessagingCore() {

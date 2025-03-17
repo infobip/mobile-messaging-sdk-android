@@ -25,7 +25,7 @@ public enum InAppChatEvent {
      * <pre>
      * {@code
      * String viewName = intent.getStringExtra(BroadcastParameter.EXTRA_CHAT_VIEW);
-     * InAppChatWidgetView inAppChatWidgetView = InAppChatWidgetView.valueOf(viewName)
+     * LivechatWidgetView livechatWidgetView = LivechatWidgetView.valueOf(viewName)
      * }
      * </pre>
      */

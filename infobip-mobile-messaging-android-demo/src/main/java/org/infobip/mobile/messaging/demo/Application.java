@@ -1,10 +1,10 @@
 package org.infobip.mobile.messaging.demo;
 
-import androidx.core.content.ContextCompat;
-
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.storage.SQLiteMessageStore;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * @author sslavin
@@ -19,6 +19,7 @@ public class Application extends android.app.Application {
 
         new MobileMessaging.Builder(this)
                 .withMessageStore(SQLiteMessageStore.class)
+                .withFullFeaturedInApps()
                 .withDisplayNotification(new NotificationSettings.Builder(this)
                         .withMultipleNotifications()
                         .withDefaultIcon(R.drawable.ic_notification)

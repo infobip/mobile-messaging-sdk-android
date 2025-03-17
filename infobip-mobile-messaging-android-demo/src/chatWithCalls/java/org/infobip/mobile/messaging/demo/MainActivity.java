@@ -34,6 +34,9 @@ import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
+import org.infobip.mobile.messaging.chat.core.JwtProvider;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle;
@@ -215,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             String language = langMenuIdToLocale(item.getItemId());
             //change language of In-app chat and calls
             if (language != null) {
-                inAppChat.setLanguage(language);
+                inAppChat.setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(language));
                 InfobipRtcUi.getInstance(this).setLanguage(new Locale(language));
                 Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
             }
@@ -279,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         else if (menuId == R.id.albanian)
             return "sq-AL";
         else if (menuId == R.id.serbian)
-            return "sr_Latn";
+            return "sr-Latn";
         else return null;
     }
 
@@ -362,6 +365,11 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     private void setInAppChatEventsListener() {
         inAppChat.setEventsListener(new InAppChatEventsListener() {
             @Override
+            public void onChatViewChanged(@NonNull LivechatWidgetView widgetView) {
+                MobileMessagingLogger.d(TAG, "On chat view changed: " + widgetView);
+            }
+
+            @Override
             public void onChatRawMessageReceived(@NonNull String rawMessage) {
                 MobileMessagingLogger.d(TAG, "On chat raw message received: " + rawMessage);
             }
@@ -378,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
             @Override
             public void onChatViewChanged(@NonNull InAppChatWidgetView widgetView) {
-                MobileMessagingLogger.d(TAG, "On chat view changed: " + widgetView);
             }
 
             @Override
@@ -445,18 +452,25 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         authButton.setOnClickListener((v) -> {
             showProgressBar();
 
-            inAppChat.setJwtProvider(() -> {
-                AuthData authData = MainActivity.this.lastUsedAuthData;
-                String jwt = null;
-                if (authData != null) {
-                    jwt = JWTUtils.createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
-                    if (jwt == null) {
-                        Toast.makeText(MainActivity.this, "Create JWT process failed!", Toast.LENGTH_SHORT).show();
+            JwtProvider livechatWidgetJwtProvider = new JwtProvider() {
+
+                @Nullable
+                @Override
+                public String provideJwt() {
+                    AuthData authData = MainActivity.this.lastUsedAuthData;
+                    String jwt = null;
+                    if (authData != null) {
+                        jwt = JWTUtils.createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
+                        if (jwt == null) {
+                            Toast.makeText(MainActivity.this, "Create JWT process failed!", Toast.LENGTH_SHORT).show();
+                        }
                     }
+                    MobileMessagingLogger.d("Providing JWT for " + authData + " = " + jwt);
+                    return jwt;
                 }
-                MobileMessagingLogger.d("Providing JWT for " + authData + " = " + jwt);
-                return jwt;
-            });
+
+            };
+            inAppChat.setWidgetJwtProvider(livechatWidgetJwtProvider);
 
             AuthData authData = createAuthData();
             if (authData != null) {

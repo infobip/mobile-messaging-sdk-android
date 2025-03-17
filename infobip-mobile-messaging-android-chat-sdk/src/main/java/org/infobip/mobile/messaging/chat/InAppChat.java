@@ -4,6 +4,8 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 
@@ -19,7 +21,10 @@ public abstract class InAppChat {
 
     /**
      * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
+     *
+     * @deprecated Use {@link org.infobip.mobile.messaging.chat.core.JwtProvider} instead
      */
+    @Deprecated
     public interface JwtProvider {
         /**
          * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
@@ -72,7 +77,7 @@ public abstract class InAppChat {
     public abstract void setActivitiesToStartOnMessageTap(Class<?>... activityClasses);
 
     /**
-     * Cleans up all InAppChat data.
+     * Cleans up all in-app chat data.
      * <p>NOTE: There is no need to invoke this method manually as library manages web view data</p>
      */
     public abstract void cleanup();
@@ -82,7 +87,11 @@ public abstract class InAppChat {
      *
      * @param fragmentManager manager to make interactions with Fragment
      * @param containerId     identifier of the container in-app chat Fragment is to be placed in
+     * @deprecated <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#assisted-approach">Assisted approach</a> to show fragment is deprecated, you are
+     * supposed create and manage {@link org.infobip.mobile.messaging.chat.view.InAppChatFragment} on your own, so you have
+     * <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#full-ownership">full ownership</a>.
      */
+    @Deprecated
     public abstract void showInAppChatFragment(FragmentManager fragmentManager, int containerId);
 
     /**
@@ -91,7 +100,11 @@ public abstract class InAppChat {
      *
      * @param fragmentManager manager to make interactions with Fragment
      * @see InAppChat#hideInAppChatFragment(FragmentManager, Boolean)
+     * @deprecated <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#assisted-approach">Assisted approach</a> to show fragment is deprecated, you are
+     * supposed create and manage {@link org.infobip.mobile.messaging.chat.view.InAppChatFragment} on your own, so you have
+     * <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#full-ownership">full ownership</a>.
      */
+    @Deprecated
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager);
 
     /**
@@ -105,7 +118,11 @@ public abstract class InAppChat {
      * Disconnect chat if you want to receive push notifications while fragment is hidden.
      * Chat connection is re-established when {@link InAppChat#showInAppChatFragment(FragmentManager, int)} is called.
      * @see InAppChat#hideInAppChatFragment(FragmentManager)
+     * @deprecated <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#assisted-approach">Assisted approach</a> to show fragment is deprecated, you are
+     * supposed create and manage {@link org.infobip.mobile.messaging.chat.view.InAppChatFragment} on your own, so you have
+     * <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#full-ownership">full ownership</a>.
      */
+    @Deprecated
     public abstract void hideInAppChatFragment(FragmentManager fragmentManager, Boolean disconnectChatWhenHidden);
 
     /**
@@ -119,23 +136,51 @@ public abstract class InAppChat {
     public abstract int getMessageCounter();
 
     /**
-     * Set the language of the widget
-     *
+     * Set an in-app chat's language
      * @param language in locale format e.g.: en-US
+     * @deprecated Use {@link InAppChat#setLanguage(LivechatWidgetLanguage)} instead
      */
+    @Deprecated
     public abstract void setLanguage(String language);
 
     /**
-     * Set the language of the widget
+     * Set an in-app chat's language
      *
      * @param language       in locale format e.g.: en-US
      * @param resultListener listener to report the result on
+     * @deprecated Use {@link InAppChat#setLanguage(LivechatWidgetLanguage, MobileMessaging.ResultListener)} instead
      * @see MobileMessaging.ResultListener
      */
+    @Deprecated
     public abstract void setLanguage(String language, MobileMessaging.ResultListener<String> resultListener);
 
     /**
-     * Set contextual data of the Livechat Widget.
+     * Set an in-app chat's language
+     *
+     * @param language language is used by livechat widget and in-app chat native parts
+     * @see MobileMessaging.ResultListener
+     */
+    public abstract void setLanguage(@NonNull LivechatWidgetLanguage language);
+
+    /**
+     * Set an in-app chat's language
+     *
+     * @param language       language is used by livechat widget and in-app chat native parts
+     * @param resultListener listener to report the result on
+     * @see MobileMessaging.ResultListener
+     */
+    public abstract void setLanguage(@NonNull LivechatWidgetLanguage language, @Nullable MobileMessaging.ResultListener<LivechatWidgetLanguage> resultListener);
+
+    /**
+     * Returns current in-app chat language
+     *
+     * @return current in-app chat language or default {@code LivechatWidgetLanguage.ENGLISH}
+     */
+    @NonNull
+    public abstract LivechatWidgetLanguage getLanguage();
+
+    /**
+     * Set contextual data of the livechat widget.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
@@ -148,18 +193,18 @@ public abstract class InAppChat {
     public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy);
 
     /**
-     * Set contextual data of the Livechat Widget.
+     * Set contextual data of the livechat widget.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
      *
      * @param data contextual data in the form of JSON string
-     * @param flag multithread strategy [MultithreadStrategy]
+     * @param flag multithread strategy {@code MultithreadStrategy}
      */
     public abstract void sendContextualData(@Nullable String data, @Nullable MultithreadStrategy flag);
 
     /**
-     * Set contextual data of the Livechat Widget with false (MultithreadStrategy.ACTIVE) value for multithread strategy.
+     * Set contextual data of the livechat widget with false ({@code MultithreadStrategy.ACTIVE}) value for multithread strategy.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
@@ -169,7 +214,7 @@ public abstract class InAppChat {
     public abstract void sendContextualData(@Nullable String data);
 
     /**
-     * Set contextual data of the Livechat Widget.
+     * Set contextual data of the livechat widget.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
@@ -184,13 +229,13 @@ public abstract class InAppChat {
     public abstract void sendContextualData(@Nullable String data, @Nullable Boolean allMultiThreadStrategy, @Nullable MobileMessaging.ResultListener<Void> resultListener);
 
     /**
-     * Set contextual data of the Livechat Widget.
+     * Set contextual data of the livechat widget.
      * If the function is called when the chat is loaded,
      * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
      * Every function invocation will overwrite the previous contextual data.
      *
      * @param data contextual data in the form of JSON string
-     * @param flag multithread strategy [MultithreadStrategy]
+     * @param flag multithread strategy {@code MultithreadStrategy}
      * @param resultListener listener to report the result on
      * @see MobileMessaging.ResultListener
      */
@@ -199,10 +244,33 @@ public abstract class InAppChat {
     /**
      * Set {@link JwtProvider} to give in-app chat ability to authenticate.
      *
+     * @deprecated Use {@link InAppChat#setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider)} instead
+     *
      * @param jwtProvider provider instance
      * @see JwtProvider
      */
+    @Deprecated
     public abstract void setJwtProvider(InAppChat.JwtProvider jwtProvider);
+
+    /**
+     * Returns instance of {@link JwtProvider}
+     *
+     * @deprecated Use {@link JwtProvider InAppChat#getJwtProvider()} instead
+     *
+     * @return instance of {@link JwtProvider}
+     * @see JwtProvider
+     */
+    @Nullable
+    @Deprecated
+    public abstract InAppChat.JwtProvider getJwtProvider();
+
+    /**
+     * Set {@link JwtProvider} to give in-app chat ability to authenticate.
+     *
+     * @param jwtProvider provider instance
+     * @see JwtProvider
+     */
+    public abstract void setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider jwtProvider);
 
     /**
      * Returns instance of {@link JwtProvider}
@@ -211,13 +279,18 @@ public abstract class InAppChat {
      * @see JwtProvider
      */
     @Nullable
-    public abstract InAppChat.JwtProvider getJwtProvider();
+    public abstract org.infobip.mobile.messaging.chat.core.JwtProvider getWidgetJwtProvider();
 
     /**
      * Navigates to THREAD_LIST view in multithread widget if in-app chat is shown as Fragment.
      *
-     * @see org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+     * @see org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView
+     * @deprecated <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#assisted-approach">Assisted approach</a> to show fragment is deprecated, you are
+     * supposed create and manage {@link org.infobip.mobile.messaging.chat.view.InAppChatFragment} on your own, so you have
+     * <a href="https://github.com/infobip/mobile-messaging-sdk-android/wiki/In%E2%80%90app-chat#full-ownership">full ownership</a>
+     * and can use {@code InAppChatFragment.showThreadList()}.
      */
+    @Deprecated
     public abstract void showThreadsList();
 
     /**
@@ -237,7 +310,7 @@ public abstract class InAppChat {
     public abstract InAppChatTheme getTheme();
 
     /**
-     * Set the theme of the Livechat Widget.
+     * Sets a livechat widget's theme.
      * You can define widget themes in <a href="https://portal.infobip.com/apps/livechat/widgets">Live chat widget setup page</a> in Infobip Portal, section `Advanced customization`.
      * Please check widget <a href="https://www.infobip.com/docs/live-chat/widget-customization">documentation</a> for more details.
      *
@@ -248,22 +321,22 @@ public abstract class InAppChat {
     public abstract void setWidgetTheme(@Nullable String widgetThemeName);
 
     /**
-     * Get current Livechat Widget theme.
+     * Get current livechat widget theme.
      *
-     * @return applied theme name of Livechat Widget
+     * @return applied theme name of livechat widget
      */
     @Nullable
     public abstract String getWidgetTheme();
 
     /**
-     * Set the domain of the Livechat Widget.
+     * Set the domain of the livechat widget.
      *
      * @param domain domain of the widget
      */
     public abstract void setDomain(String domain);
 
     /**
-     * Get current domain of the Livechat Widget.
+     * Get current domain of the livechat widget.
      *
      * @return domain of the widget
      */
@@ -278,11 +351,27 @@ public abstract class InAppChat {
     public abstract void setChatPushTitle(@Nullable String title);
 
     /**
+     * Get current custom in-app chat notifications title
+     *
+     * @return custom title for chat notifications
+     */
+    @Nullable
+    public abstract String getChatPushTitle();
+
+    /**
      * Set custom body for in-app chat notifications
      *
      * @param body custom body to be set for notifications
      */
     public abstract void setChatPushBody(@Nullable String body);
+
+    /**
+     * Get current custom in-app chat notifications body
+     *
+     * @return custom body for chat notifications
+     */
+    @Nullable
+    public abstract String getChatPushBody();
 
     /**
      * Set {@link InAppChatEventsListener} to listen for various in-app chat events.
@@ -300,4 +389,13 @@ public abstract class InAppChat {
      * @see org.infobip.mobile.messaging.chat.view.InAppChatEventsListener
      */
     public abstract InAppChatEventsListener getEventsListener();
+
+    /**
+     * Get instance of {@link LivechatWidgetApi} to interact with livechat widget
+     * without need to show either {@code InAppChatView} or {@code InAppChatFragment} in UI.
+     *
+     * @return {@link LivechatWidgetApi} instance
+     * @see org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
+     */
+    public abstract LivechatWidgetApi getLivechatWidgetApi();
 }

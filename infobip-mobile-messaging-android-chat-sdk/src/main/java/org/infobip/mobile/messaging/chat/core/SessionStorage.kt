@@ -1,7 +1,10 @@
 package org.infobip.mobile.messaging.chat.core
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
-import org.infobip.mobile.messaging.chat.InAppChat.JwtProvider
 import org.infobip.mobile.messaging.chat.models.ContextualData
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme
@@ -44,6 +47,11 @@ internal object SessionStorage {
     @set:Synchronized
     var inAppChatEventsListener: InAppChatEventsListener? = null
 
+    /**
+     * InAppChat SDK coroutine scope
+     */
+    val scope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
     fun clean() {
         domain = null
         widgetTheme = null
@@ -52,6 +60,7 @@ internal object SessionStorage {
         contextualData = null
         configSyncResult = null
         inAppChatEventsListener = null
+        scope.coroutineContext.cancelChildren()
     }
 
 }

@@ -9,6 +9,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+
+import org.infobip.mobile.messaging.api.chat.WidgetInfo;
+import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
+import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
+import org.infobip.mobile.messaging.util.StringUtils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -18,14 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentContainerView;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
-
-import org.infobip.mobile.messaging.api.chat.WidgetInfo;
-import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
-import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
-import org.infobip.mobile.messaging.util.StringUtils;
 
 public class InAppChatFragmentDemoFragment extends Fragment {
 
@@ -106,6 +107,11 @@ public class InAppChatFragmentDemoFragment extends Fragment {
 
             @Override
             public void onChatViewChanged(@NonNull InAppChatWidgetView widgetView) {
+                //Deprecated, use onChatViewChanged(LivechatWidgetView widgetView) instead
+            }
+
+            @Override
+            public void onChatViewChanged(@NonNull LivechatWidgetView widgetView) {
                 //Handle message input multithread livechat widget if don't use InAppChatFragment's MessageInput
                 switch (widgetView) {
                     case LOADING:
@@ -213,7 +219,8 @@ public class InAppChatFragmentDemoFragment extends Fragment {
         navigateBackButton.setVisibility(withInAppChatToolbar ? View.GONE : View.VISIBLE);
         if (withInAppChatToolbar) {
             hideActionBar();
-        } else {
+        }
+        else {
             setUpNavigateBackButton();
         }
     }

@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.chat.view
+package org.infobip.mobile.messaging.chat.core.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,15 +6,12 @@ import android.net.Uri
 import android.util.AttributeSet
 import android.webkit.WebSettings.LOAD_NO_CACHE
 import android.webkit.WebView
+import kotlinx.coroutines.CoroutineScope
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.core.InAppChatMobileImpl
-import org.infobip.mobile.messaging.chat.core.InAppChatWebChromeClient
-import org.infobip.mobile.messaging.chat.core.InAppChatWebViewClient
-import org.infobip.mobile.messaging.chat.core.InAppChatWebViewManager
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 @SuppressLint("SetJavaScriptEnabled")
-internal class InAppChatWebView @JvmOverloads constructor(
+internal class LivechatWidgetWebView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -22,13 +19,14 @@ internal class InAppChatWebView @JvmOverloads constructor(
 ) : WebView(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
-        private const val TAG = "InAppChatWebView"
-        private const val IN_APP_CHAT_MOBILE_INTERFACE = "InAppChatMobile"
+        const val TAG = "LivechatWidgetWebView"
         private const val DEFAULT_WIDGET_URI = "https://livechat.infobip.com/widget.js"
     }
 
-    private val widgetPageUri = context.getString(R.string.ib_inappchat_widget_page_uri)
-    private val widgetUri = context.getString(R.string.ib_inappchat_widget_uri)
+    private val widgetPageUri = context.getString(R.string.ib_livechat_widget_page_uri)
+    private val widgetUri = context.getString(R.string.ib_livechat_widget_uri)
+
+    var livechatWidgetClient: LivechatWidgetClient? = null
 
     init {
         settings.apply {
@@ -37,15 +35,19 @@ internal class InAppChatWebView @JvmOverloads constructor(
             cacheMode = LOAD_NO_CACHE
         }
         isClickable = true
-        webChromeClient = InAppChatWebChromeClient()
+        webChromeClient = LivechatWidgetWebChromeClient()
     }
 
-    fun setup(webViewManager: InAppChatWebViewManager) {
-        webViewClient = InAppChatWebViewClient(webViewManager)
-        addJavascriptInterface(InAppChatMobileImpl(webViewManager), IN_APP_CHAT_MOBILE_INTERFACE)
+    fun setup(
+        webViewManager: LivechatWidgetWebViewManager,
+        coroutineScope: CoroutineScope
+    ) {
+        webViewClient = LivechatWidgetWebViewClient(webViewManager)
+        addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, coroutineScope), LivechatWidgetJsInterface.name)
+        livechatWidgetClient = LivechatWidgetClientImpl(this, coroutineScope)
     }
 
-    fun loadChatPage(
+    fun loadWidgetPage(
         pushRegistrationId: String,
         widgetId: String,
         jwt: String? = null,

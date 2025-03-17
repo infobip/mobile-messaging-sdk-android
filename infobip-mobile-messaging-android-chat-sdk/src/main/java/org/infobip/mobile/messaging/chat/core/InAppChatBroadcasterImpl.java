@@ -3,11 +3,12 @@ package org.infobip.mobile.messaging.chat.core;
 import android.content.Context;
 import android.content.Intent;
 
+import org.infobip.mobile.messaging.BroadcastParameter;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import org.infobip.mobile.messaging.BroadcastParameter;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
     private final Context context;
@@ -28,7 +29,7 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
     }
 
     @Override
-    public void chatViewChanged(InAppChatWidgetView view) {
+    public void chatViewChanged(LivechatWidgetView view) {
         send(prepare(InAppChatEvent.CHAT_VIEW_CHANGED)
                 .putExtra(BroadcastParameter.EXTRA_CHAT_VIEW, view.name()));
     }

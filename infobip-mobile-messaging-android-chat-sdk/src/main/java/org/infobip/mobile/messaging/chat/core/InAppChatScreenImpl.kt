@@ -6,7 +6,7 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity
 
-class InAppChatScreenImpl(val context: Context): InAppChatScreen {
+internal class InAppChatScreenImpl(val context: Context) : InAppChatScreen {
 
     private val propertyHelper = PropertyHelper(context)
 

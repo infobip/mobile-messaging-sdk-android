@@ -1,4 +1,4 @@
-package org.infobip.mobile.messaging.chat.core
+package org.infobip.mobile.messaging.chat.core.widget
 
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
@@ -6,7 +6,7 @@ import android.webkit.WebView
 import org.infobip.mobile.messaging.chat.BuildConfig
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
-internal class InAppChatWebChromeClient : WebChromeClient() {
+internal class LivechatWidgetWebChromeClient : WebChromeClient() {
 
     init {
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
@@ -14,7 +14,7 @@ internal class InAppChatWebChromeClient : WebChromeClient() {
 
     override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
         if (BuildConfig.DEBUG)
-            MobileMessagingLogger.d("InAppChatWebChromeClient", consoleMessage.format())
+            MobileMessagingLogger.d(LivechatWidgetWebView.TAG, consoleMessage.format())
         return true
     }
 

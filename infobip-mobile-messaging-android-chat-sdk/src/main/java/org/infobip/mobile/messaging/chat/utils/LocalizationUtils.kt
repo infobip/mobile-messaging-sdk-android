@@ -5,20 +5,15 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.core.os.ConfigurationCompat
-import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
-import org.infobip.mobile.messaging.chat.properties.PropertyHelper
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger
-import org.infobip.mobile.messaging.util.StringUtils
+import org.infobip.mobile.messaging.chat.InAppChat
 import java.util.Locale
 
 class LocalizationUtils private constructor(context: Context) {
 
-    private val appContext: Context
+    private val appContext: Context = context.applicationContext
     private var resources: Resources
 
     init {
-        appContext = context.applicationContext
         resources = context.resources
     }
 
@@ -41,45 +36,6 @@ class LocalizationUtils private constructor(context: Context) {
     fun setLanguage(locale: Locale) {
         resources = appContext.applyLocale(locale).resources
     }
-
-    fun localeFromString(language: String): Locale {
-        return try {
-            if (StringUtils.isBlank(language)) {
-                MobileMessagingLogger.d("Language is empty, using device default locale.")
-                return applicationLocale
-            }
-            if (language.contains("-")) {
-                parseLocaleWithDelimiter(language, "-")
-            } else if (language.contains("_")) {
-                parseLocaleWithDelimiter(language, "_")
-            } else {
-                Locale(language)
-            }
-        } catch (ignored: Throwable) {
-            MobileMessagingLogger.e(
-                "Could not parse language, using device default locale.",
-                ignored
-            )
-            applicationLocale
-        }
-    }
-
-    private fun parseLocaleWithDelimiter(language: String, delimiter: String): Locale {
-        val parts = language.split(delimiter)
-        return if (parts.size >= 3) {
-            Locale(parts[0], parts[1], parts[2])
-        } else if (parts.size == 2) {
-            Locale(parts[0], parts[1])
-        } else if (parts.size == 1) {
-            Locale(parts[0])
-        } else {
-            Locale(language)
-        }
-    }
-
-    private val applicationLocale: Locale
-        get() = ConfigurationCompat.getLocales(appContext.resources.configuration)[0]
-            ?: Locale.getDefault()
 
 }
 
@@ -104,12 +60,5 @@ internal fun Context.applyLocale(locale: Locale): Context {
 }
 
 internal fun Context.applyInAppChatLanguage(): Context {
-    val language = PropertyHelper.getDefaultMMSharedPreferences(this)
-        .getString(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.key, null)
-    return if (language != null) {
-        val locale = LocalizationUtils.getInstance(this).localeFromString(language)
-        this.applyLocale(locale)
-    } else {
-        this
-    }
+    return this.applyLocale(InAppChat.getInstance(this).language.locale)
 }
