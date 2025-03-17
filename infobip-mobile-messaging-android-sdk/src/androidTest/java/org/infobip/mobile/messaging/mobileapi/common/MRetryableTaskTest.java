@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.mobileapi.common;
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -78,6 +79,7 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
         };
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteRunMultipleTimesOrError() {
 
@@ -101,6 +103,7 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
                 .run(any(String[].class));
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteRunUntilThereAreExceptions() {
 

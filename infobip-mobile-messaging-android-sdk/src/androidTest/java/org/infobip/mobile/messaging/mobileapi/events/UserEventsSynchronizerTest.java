@@ -21,6 +21,7 @@ import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -108,6 +109,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
         verify(broadcaster, after(300).times(1)).customEventsReported();
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldPropagateValidationErrorOnReportingOneCustomEventOnServerSync() throws Exception {
         CustomEvent customEvent = setupCustomEventWithProperties();

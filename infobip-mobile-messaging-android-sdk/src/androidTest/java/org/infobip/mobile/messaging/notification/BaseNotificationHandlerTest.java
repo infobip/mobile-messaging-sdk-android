@@ -126,7 +126,7 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(NotificationCompat.PRIORITY_HIGH, builder.getPriority());
     }
 
-    @Ignore
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldUseHighPriorityChannelForMessageWithBanner() throws Exception {
 

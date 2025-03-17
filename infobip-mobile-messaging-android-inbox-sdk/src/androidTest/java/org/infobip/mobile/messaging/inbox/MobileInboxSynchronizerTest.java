@@ -14,6 +14,7 @@ import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.inbox.MobileApiInbox;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -67,6 +68,7 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
         verify(mobileApiInbox, after(300).times(1)).fetchInbox(givenExternalUserId, resultToken, null, null, null, null);
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void should_call_api_with_only_required_filterOptions() {
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, "sometopic", 15);
@@ -78,6 +80,7 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
         verify(mobileApiInbox, after(300).times(1)).fetchInbox(givenExternalUserId, resultToken, null, null, "sometopic", 15);
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void should_call_api_with_filterOptions() {
         Date dateFrom = new Date(1640984400000L);

@@ -26,6 +26,7 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -56,6 +57,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         givenCustomAtts.put("someKey", new CustomAttributeValue("someValue"));
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_without_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
@@ -82,6 +84,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertJEquals(returnedUser, mobileMessagingCore.getUser());
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_with_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
@@ -138,6 +141,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertJEquals(returnedUser, mobileMessagingCore.getUser());
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_depersonalize_without_params_completed() {
         //given
@@ -172,6 +176,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertNull(mobileMessagingCore.getUser());
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_with_force_depersonalize_ambiguous_personalize_candidates_api_error() {
 

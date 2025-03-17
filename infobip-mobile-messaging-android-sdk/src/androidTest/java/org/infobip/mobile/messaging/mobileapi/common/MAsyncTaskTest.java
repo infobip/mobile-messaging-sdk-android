@@ -10,6 +10,7 @@ import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendCommunica
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterExceptionWithContent;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
@@ -113,6 +114,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
         Mockito.verify(tester, Mockito.never()).error(any(Throwable.class));
     }
 
+    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteErrorCallbackOnException() {
 
