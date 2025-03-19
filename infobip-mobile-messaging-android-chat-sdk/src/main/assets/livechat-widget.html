@@ -25,6 +25,7 @@
         const widgetTheme = getQueryParameter('widgetTheme');
 
         let uri = 'https://livechat.infobip.com/widget.js';
+        let livechatSdk = null;
 
         let decodedWidgetUri = null;
         if (!isNullOrBlank(widgetUri)) {
@@ -77,16 +78,17 @@
 
         // If all is OK -> initialize widget, enable native controls and show widget
         function init() {
-            let initParams = null;
-            if (domain != null) {
-                initParams = { widgetId: widgetId, domain: domain };
-            }
-            liveChat('init', initParams, function (error, result) {
+            const callback = function (error, result) {
                 widgetApiCallback('initWidget', error, result);
-                if(!error) {
-                   show();
+                if (!error) {
+                    show();
                 }
-            });
+            };
+            if (domain != null) {
+                liveChat('init', { widgetId: widgetId, domain: domain }, callback);
+            } else {
+                liveChat('init', widgetId, callback);
+            }
         }
 
         function show() {
@@ -106,10 +108,13 @@
         });
 
         function addLiveChatEventsListener() {
-            const liveChatSDK = new LiveChatSDK();
-            liveChatSDK.on('messageReceived', (payload) => {
-                InAppChatMobile.onRawMessageReceived(stringify(payload));
-            });
+            try {
+                getLivechatSdk().on('messageReceived', (payload) => {
+                    InAppChatMobile.onRawMessageReceived(stringify(payload));
+                });
+            } catch (e) {
+                console.error('Could not register to observe messageReceived event: ', e);
+            }
         }
 
         //Widget API
@@ -164,6 +169,45 @@
             liveChat('set_theme', theme, (error, result) => widgetApiCallback('setTheme', error, result));
         }
 
+        async function getThreads() {
+            try {
+                const response = await getLivechatSdk().getThreads();
+                if (response.success) {
+                    widgetApiCallback('getThreads', null, response.data);
+                } else {
+                    widgetApiCallback('getThreads', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('getThreads', `Could not get threads ${e.message}`, null);
+            }
+        }
+
+        async function showThread(threadId) {
+            try {
+                const response = await getLivechatSdk().getWidget().showThread(threadId);
+                if (response.success) {
+                    widgetApiCallback('showThread', null, response.data);
+                } else {
+                    widgetApiCallback('showThread', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('showThread', `Could not show thread ${e.message}`, null);
+            }
+        }
+
+        async function getActiveThread() {
+            try {
+                const response = await getLivechatSdk().getActiveThread();
+                if (response.success) {
+                    widgetApiCallback('getActiveThread', null, response.data);
+                } else {
+                    widgetApiCallback('getActiveThread', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('getActiveThread', `Could not show thread ${e.message}`, null);
+            }
+        }
+
         function getQueryParameter(name) {
             if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search)) {
                 return decodeURIComponent(name[1]);
@@ -195,6 +239,17 @@
                     InAppChatMobile.onWidgetApiSuccess(name, stringify(result));
                 }
             }
+        }
+
+        function getLivechatSdk() {
+            if (!livechatSdk) {
+                try {
+                    livechatSdk = new LiveChatSDK();
+                } catch (e) {
+                    throw e;
+                }
+            }
+            return livechatSdk;
         }
 
     </script>

@@ -17,5 +17,8 @@ internal enum class LivechatWidgetMethod {
     sendContextualData,
     setTheme,
     setLanguage,
+    getThreads,
+    getActiveThread,
+    showThread,
     showThreadList,
 }

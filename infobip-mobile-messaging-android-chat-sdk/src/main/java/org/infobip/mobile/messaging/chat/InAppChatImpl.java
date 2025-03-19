@@ -189,7 +189,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         sessionStorage().setConfigSyncResult(null);
-        livechatWidgetApi().reset();
+        getLivechatWidgetApi().reset();
     }
 
     @Override

@@ -36,6 +36,9 @@ import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
 import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
@@ -153,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpOpenChatFragmentButton();
         setUpOpenChatViewButton();
         setUpAuthButton();
+        setUpWidgetApiButton();
         setUpRuntimeCustomization();
         setUpPersonalizationButton();
         setUpDepersonalizationButton();
@@ -364,9 +368,50 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
     private void setInAppChatEventsListener() {
         inAppChat.setEventsListener(new InAppChatEventsListener() {
+
             @Override
-            public void onChatViewChanged(@NonNull LivechatWidgetView widgetView) {
-                MobileMessagingLogger.d(TAG, "On chat view changed: " + widgetView);
+            public void onChatLanguageChanged(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat language changed: " + result);
+            }
+
+            @Override
+            public void onChatThreadListShown(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat thread list shown: " + result);
+            }
+
+            @Override
+            public void onChatThreadShown(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
+                MobileMessagingLogger.d(TAG, "On chat thread shown: " + result);
+            }
+
+            @Override
+            public void onChatActiveThreadReceived(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
+                MobileMessagingLogger.d(TAG, "On chat active thread received: " + result);
+            }
+
+            @Override
+            public void onChatThreadsReceived(@NonNull LivechatWidgetResult<LivechatWidgetThreads> result) {
+                MobileMessagingLogger.d(TAG, "On chat threads received: " + result);
+            }
+
+            @Override
+            public void onChatContextualDataSent(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat contextual data sent: " + result);
+            }
+
+            @Override
+            public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat draft sent: " + result);
+            }
+
+            @Override
+            public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat message sent: " + result);
+            }
+
+            @Override
+            public void onChatLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat loading finished: " + result);
             }
 
             @Override
@@ -376,7 +421,12 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
             @Override
             public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
-                MobileMessagingLogger.d(TAG, "On chat widget theme changed: " + widgetThemeName);
+                //Deprecated, use onChatWidgetThemeChanged(LivechatWidgetResult<String>) instead
+            }
+
+            @Override
+            public void onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat widget theme changed: " + result);
             }
 
             @Override
@@ -386,6 +436,12 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
             @Override
             public void onChatViewChanged(@NonNull InAppChatWidgetView widgetView) {
+                //Deprecated, use onChatViewChanged(LivechatWidgetView) instead
+            }
+
+            @Override
+            public void onChatViewChanged(@NonNull LivechatWidgetView widgetView) {
+                MobileMessagingLogger.d(TAG, "On chat view changed: " + widgetView);
             }
 
             @Override
@@ -394,18 +450,28 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
 
             @Override
+            public void onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat connection resumed: " + result);
+            }
+
+            @Override
             public void onChatReconnected() {
-                MobileMessagingLogger.d(TAG, "On chat reconnected");
+                //Deprecated, use onChatConnectionResumed(LivechatWidgetResult<Unit>) instead
+            }
+
+            @Override
+            public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat connection paused: " + result);
             }
 
             @Override
             public void onChatDisconnected() {
-                MobileMessagingLogger.d(TAG, "On chat disconnected");
+                //Deprecated, use onChatConnectionPaused(LivechatWidgetResult<Unit>) instead
             }
 
             @Override
             public void onChatLoaded(boolean controlsEnabled) {
-                MobileMessagingLogger.d(TAG, "On chat loaded: " + controlsEnabled);
+                //Deprecated, use onChatLoadingFinished(LivechatWidgetResult<Unit>) instead
             }
         });
     }
@@ -681,6 +747,15 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     )
             );
             Toast.makeText(this, "Custom style applied", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setUpWidgetApiButton() {
+        Button openWidgetApiButton = findViewById(R.id.openWidgetApi);
+        openWidgetApiButton.setOnClickListener(v -> {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.fragmentContainer, new LivechatWidgetApiFragment(), LivechatWidgetApiFragment.class.getSimpleName());
+            fragmentTransaction.commit();
         });
     }
 

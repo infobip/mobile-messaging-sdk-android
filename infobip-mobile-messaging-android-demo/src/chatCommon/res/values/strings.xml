@@ -50,6 +50,7 @@
     <string name="mm_depersonalize">Depersonalize</string>
     <string name="enable_calls">Enable calls</string>
     <string name="disable_calls">Disable calls</string>
+    <string name="open_widget_api">Livechat Widget API</string>
     <string name="runtime_customization">Runtime customization</string>
     <string name="dark_mode_dark">Dark</string>
     <string name="dark_mode_light">Light</string>

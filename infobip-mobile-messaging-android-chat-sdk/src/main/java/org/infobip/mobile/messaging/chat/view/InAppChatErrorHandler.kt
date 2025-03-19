@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.view
 
 /**
  * Error handler allows you to define custom way to process InAppChat related errors.
+ * You can use [DefaultInAppChatErrorHandler] to override only necessary methods.
  */
 interface InAppChatErrorHandler {
     fun handlerError(error: String)

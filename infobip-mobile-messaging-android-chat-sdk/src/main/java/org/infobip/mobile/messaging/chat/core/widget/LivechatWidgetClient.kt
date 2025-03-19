@@ -42,7 +42,29 @@ internal interface LivechatWidgetClient {
     fun sendContextualData(data: String, multiThreadFlag: MultithreadStrategy, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
 
     /**
-     * Change destination from thread to list in multiThread widget. For non multiThread widget it does nothing.
+     * Get array of widget threads. Return empty array if there are no threads or widget is not multithread.
+     *
+     * @param executionListener action listener
+     */
+    fun getThreads(executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
+    /**
+     * Get active thread.
+     *
+     * @param executionListener action listener
+     */
+    fun getActiveThread(executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
+    /**
+     * Change widget destination to thread defined by [threadId].
+     *
+     * @param threadId threadId
+     * @param executionListener action listener
+     */
+    fun showThread(threadId: String, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
+    /**
+     * Change widget destination from thread to list in multiThread widget. For non multiThread widget it does nothing.
      *
      * @param executionListener action listener
      */
@@ -69,4 +91,5 @@ internal interface LivechatWidgetClient {
      * @param executionListener action listener
      */
     fun setTheme(themeName: String?, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
 }

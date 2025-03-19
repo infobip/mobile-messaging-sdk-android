@@ -13,6 +13,9 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.util.StringUtils;
@@ -23,6 +26,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import kotlin.Unit;
 
 public class InAppChatViewDemoFragment extends Fragment {
 
@@ -76,13 +80,78 @@ public class InAppChatViewDemoFragment extends Fragment {
         InAppChatView.EventsListener eventsListener = new InAppChatView.EventsListener() {
 
             @Override
+            public void onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) {
+                //Widget theme was applied
+            }
+
+            @Override
+            public void onChatLanguageChanged(@NonNull LivechatWidgetResult<String> result) {
+                //Widget language was changed
+            }
+
+            @Override
+            public void onChatThreadListShown(@NonNull LivechatWidgetResult<Unit> result) {
+                //Thread list was shown
+            }
+
+            @Override
+            public void onChatThreadShown(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
+                //Thread was shown
+            }
+
+            @Override
+            public void onChatActiveThreadReceived(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
+                //Active thread was received
+            }
+
+            @Override
+            public void onChatThreadsReceived(@NonNull LivechatWidgetResult<LivechatWidgetThreads> result) {
+                //Threads were received
+            }
+
+            @Override
+            public void onChatContextualDataSent(@NonNull LivechatWidgetResult<String> result) {
+                //Contextual data was sent
+            }
+
+            @Override
+            public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
+                //Draft was sent
+            }
+
+            @Override
+            public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
+                //Message was sent
+            }
+
+            @Override
+            public void onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) {
+                //Chat connection was resumed
+            }
+
+            @Override
+            public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
+                //Chat connection was paused
+            }
+
+            @Override
+            public void onChatLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) {
+                //Chat was loaded, if result.isSuccess() = true there was no error
+            }
+
+            @Override
+            public void onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
+                //Handle attachment preview
+            }
+
+            @Override
             public void onChatRawMessageReceived(@NonNull String rawMessage) {
                 //You can use raw message for further processing on your side
             }
 
             @Override
             public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
-                //Applied widget theme
+                //Deprecated, use onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) instead
             }
 
             @Override
@@ -127,7 +196,7 @@ public class InAppChatViewDemoFragment extends Fragment {
 
             @Override
             public void onAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
-                //Handle attachment preview
+                //Deprecated, use onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) instead
             }
 
             @Override
@@ -137,17 +206,17 @@ public class InAppChatViewDemoFragment extends Fragment {
 
             @Override
             public void onChatLoaded(boolean controlsEnabled) {
-                //Chat was loaded, if controlsEnabled = true there was no error
+                //Deprecated, use onChatLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) instead
             }
 
             @Override
             public void onChatDisconnected() {
-                //Chat connection was stopped
+                //Deprecated, use onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) instead
             }
 
             @Override
             public void onChatReconnected() {
-                //Chat connection was reestablished
+                //Deprecated, use onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) instead
             }
         };
         inAppChatView.setEventsListener(eventsListener);

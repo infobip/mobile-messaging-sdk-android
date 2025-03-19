@@ -2,6 +2,8 @@ package org.infobip.mobile.messaging.chat.core.widget
 
 /**
  * Interface for listening to events from livechat widget.
+ *
+ * You can use [DefaultLivechatWidgetEventsListener] to override only necessary methods.
  */
 interface LivechatWidgetEventsListener {
 
@@ -48,6 +50,22 @@ interface LivechatWidgetEventsListener {
     fun onContextualDataSent(result: LivechatWidgetResult<String?>)
 
     /**
+     * Called when livechat widget threads were requested.
+     */
+    fun onThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>)
+
+    /**
+     * Called when livechat widget active thread was requested.
+     * Success result can contains null if there is no existing thread for current user session or current widget destination is not [LivechatWidgetView.THREAD].
+     */
+    fun onActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>)
+
+    /**
+     * Called when livechat widget thread is shown.
+     */
+    fun onThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>)
+
+    /**
      * Called when livechat widget thread list is shown.
      */
     fun onThreadListShown(result: LivechatWidgetResult<Unit>)
@@ -83,6 +101,7 @@ interface LivechatWidgetEventsListener {
      * Called when raw message is received from livechat widget.
      */
     fun onRawMessageReceived(message: String?)
+
 }
 
 /**
@@ -97,6 +116,9 @@ open class DefaultLivechatWidgetEventsListener : LivechatWidgetEventsListener {
     override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {}
     override fun onWidgetViewChanged(view: LivechatWidgetView) {}
     override fun onRawMessageReceived(message: String?) {}
+    override fun onThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {}
+    override fun onActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>) {}
+    override fun onThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onConnectionPaused(result: LivechatWidgetResult<Unit>) {}
     override fun onConnectionResumed(result: LivechatWidgetResult<Unit>) {}
     override fun onDraftSent(result: LivechatWidgetResult<String?>) {}

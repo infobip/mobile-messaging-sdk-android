@@ -57,40 +57,61 @@ internal class InAppChatActivityResultDelegateImpl(
 
     override fun onCreate(owner: LifecycleOwner) {
         requestPermissionLauncher = activity.activityResultRegistry.register(
-            "requestPermissionLauncherKey",
+            "requestPermissionLauncherKey${this.hashCode()}", //hashCode has to be used to avoid key duplication if multiple instances coexist in the same time
             owner,
             ActivityResultContracts.RequestPermission()
         ) { onRequestPermissionResult?.invoke(it) }
 
         settingsActivityLauncher = activity.activityResultRegistry.register(
-            "settingsActivityLauncherKey",
+            "settingsActivityLauncherKey${this.hashCode()}",
             owner,
             ActivityResultContracts.StartActivityForResult()
         ) { onSettingsResult?.invoke(it)}
 
         photoActionLauncher = activity.activityResultRegistry.register(
-            "photoActionLauncherKey",
+            "photoActionLauncherKey${this.hashCode()}",
             owner,
             ActivityResultContracts.TakePicture()
         ) { onCameraResult?.invoke(it) }
 
         videoActionLauncher = activity.activityResultRegistry.register(
-            "videoActionLauncherKey",
+            "videoActionLauncherKey${this.hashCode()}",
             owner,
             ActivityResultContracts.CaptureVideo()
         ) { onCameraResult?.invoke(it) }
 
         mediaPickerLauncher = activity.activityResultRegistry.register(
-            "mediaPickerLauncherKey",
+            "mediaPickerLauncherKey${this.hashCode()}",
             owner,
             PickVisualMedia()
         ) { it?.let { listener.onAttachmentLauncherResult(it, AttachmentSource.VisualMediaPicker) } }
 
         filePickerLauncher = activity.activityResultRegistry.register(
-            "filePickerLauncherKey",
+            "filePickerLauncherKey${this.hashCode()}",
             owner,
             GetContentContract()
         ) { it?.let { listener.onAttachmentLauncherResult(it, AttachmentSource.FilePicker) } }
+    }
+
+    //All DefaultLifecycleObserver methods must be overridden to avoid compilation error with different versions of Lifecycle library
+    override fun onDestroy(owner: LifecycleOwner) {
+        super.onDestroy(owner)
+    }
+
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
     }
 
     override fun selectMedia() {

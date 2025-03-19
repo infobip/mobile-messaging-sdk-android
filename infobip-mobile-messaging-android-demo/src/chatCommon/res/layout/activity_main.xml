@@ -299,10 +299,21 @@
                     tools:visibility="visible"
                     android:checked="true"
                     android:text="@string/custom_button_enabled"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/openWidgetApi"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/customButtonChecked"/>
+
+                <Button
+                    android:id="@+id/openWidgetApi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/open_widget_api"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/enableCalls"
+                    />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

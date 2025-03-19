@@ -33,10 +33,10 @@ internal class LivechatWidgetApiImpl(
     companion object {
         private const val LOADING_TIMEOUT_MS = 10_000L
         private const val LOADING_CHECK_INTERVAL_MS = 100L
+        private const val LOADING_SUCCESS_EVENT_DELAY_MS = 300L
 
         private const val LOADING_FAIL_MSG = "Widget loading failed. Reason:"
         private const val LOADING_SUCCESS_MSG = "Widget successfully loaded."
-        private const val API_CALL_FAIL_MSG = "Livechat Widget API call failed. Reason:"
         private const val UNKNOWN_ERROR = "Unknown error."
     }
 
@@ -61,17 +61,9 @@ internal class LivechatWidgetApiImpl(
 
     override var eventsListener: LivechatWidgetEventsListener? = null
 
-    override var jwtProvider: JwtProvider?
-        get() = inAppChat.widgetJwtProvider
-        set(value) {
-            inAppChat.widgetJwtProvider = value
-        }
+    override var jwtProvider: JwtProvider? by inAppChat::widgetJwtProvider
 
-    override var domain: String?
-        get() = inAppChat.domain
-        set(value) {
-            inAppChat.domain = value
-        }
+    override var domain: String? by inAppChat::domain
 
     override fun loadWidget(
         widgetId: String?,
@@ -88,62 +80,80 @@ internal class LivechatWidgetApiImpl(
                     theme = theme,
                 )
             }.onFailure {
-                onWidgetLoadingFinished(LivechatWidgetResult.Error(it.getMappedMessage()))
+                onWidgetLoadingFinished(LivechatWidgetResult.Error(it.mapToLivechatException()))
             }
         }
     }
 
-    override fun pauseConnection(listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.pauseConnection) {
+    override fun pauseConnection() {
+        executeApiCall(LivechatWidgetMethod.pauseConnection) { listener ->
             pauseConnection(listener)
         }
     }
 
-    override fun resumeConnection(listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.resumeConnection) {
+    override fun resumeConnection() {
+        executeApiCall(LivechatWidgetMethod.resumeConnection) { listener ->
             resumeConnection(listener)
         }
     }
 
-    override fun sendMessage(message: String?, attachment: InAppChatMobileAttachment?, listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.sendMessage) {
+    override fun sendMessage(message: String?, attachment: InAppChatMobileAttachment?) {
+        executeApiCall(LivechatWidgetMethod.sendMessage) { listener ->
             sendMessage(message, attachment, listener)
         }
     }
 
-    override fun sendDraft(draft: String, listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.sendDraft) {
+    override fun sendDraft(draft: String) {
+        executeApiCall(LivechatWidgetMethod.sendDraft) { listener ->
             sendDraft(draft, listener)
         }
     }
 
-    override fun sendContextualData(data: String, multiThreadFlag: MultithreadStrategy, listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.sendContextualData) {
+    override fun sendContextualData(data: String, multiThreadFlag: MultithreadStrategy) {
+        executeApiCall(LivechatWidgetMethod.sendContextualData) { listener ->
             sendContextualData(data, multiThreadFlag, listener)
         }
     }
 
-    override fun showThreadList(listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.showThreadList) {
+    override fun getThreads() {
+        executeApiCall(LivechatWidgetMethod.getThreads) { listener ->
+            getThreads(listener)
+        }
+    }
+
+    override fun getActiveThread() {
+        executeApiCall(LivechatWidgetMethod.getActiveThread) { listener ->
+            getActiveThread(listener)
+        }
+    }
+
+    override fun showThread(threadId: String) {
+        executeApiCall(LivechatWidgetMethod.showThread) { listener ->
+            showThread(threadId, listener)
+        }
+    }
+
+    override fun showThreadList() {
+        executeApiCall(LivechatWidgetMethod.showThreadList) { listener ->
             showThreadList(listener)
         }
     }
 
-    override fun setLanguage(language: LivechatWidgetLanguage, listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.setLanguage) {
+    override fun setLanguage(language: LivechatWidgetLanguage) {
+        executeApiCall(LivechatWidgetMethod.setLanguage) { listener ->
             setLanguage(language, listener)
         }
     }
 
-    override fun setTheme(themeName: String, listener: ExecutionListener<String>?) {
-        executeApiCall(LivechatWidgetMethod.setTheme) {
+    override fun setTheme(themeName: String) {
+        executeApiCall(LivechatWidgetMethod.setTheme) { listener ->
             setTheme(themeName, listener)
         }
     }
 
     override fun reset() {
         coroutineScope.launch(Dispatchers.Main) {
-            val result = LivechatWidgetResult.Error("Widget loading cancelled due to cleanup.")
+            val result = LivechatWidgetResult.Error("Widget has been reset and is no longer loaded.")
             resumeWidgetLoadingContinuation(result)
             onWidgetLoadingFinished(result)
             webView.run {
@@ -202,8 +212,8 @@ internal class LivechatWidgetApiImpl(
             val fallbackTheme: String? = theme?.takeIf { it.isNotBlank() } ?: inAppChat.widgetTheme
 
             when {
-                fallbackPushRegistrationId.isNullOrBlank() -> throw IllegalStateException("Push registration id is null or blank.")
-                fallbackWidgetId.isNullOrBlank() -> throw IllegalStateException("Widget id is null or blank.")
+                fallbackPushRegistrationId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Push registration id is null or blank.")
+                fallbackWidgetId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget id is null or blank.")
                 isWidgetLoadingInProgress -> {
                     MobileMessagingLogger.d(LivechatWidgetApi.TAG, "Another widget loading is in progress.")
                     withTimeout(LOADING_TIMEOUT_MS) {
@@ -247,7 +257,7 @@ internal class LivechatWidgetApiImpl(
             }
 
             is LivechatWidgetResult.Error -> {
-                widgetLoadingContinuation?.takeIf { it.isActive }?.cancel(Exception(result.throwable.message))
+                widgetLoadingContinuation?.takeIf { it.isActive }?.cancel(result.throwable)
             }
         }
         setContinuation(null)
@@ -256,15 +266,13 @@ internal class LivechatWidgetApiImpl(
     /**
      * Propagates widget loading result to public [eventsListener] and updates [isWidgetLoaded] flag.
      */
-    private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Unit>, withReport: Boolean = true) {
+    private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Unit>) {
         updateWidgetLoaded(result is LivechatWidgetResult.Success<*>)
-        if (withReport) {
-            when (result) {
-                is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, "$LOADING_FAIL_MSG ${result.throwable.message}")
-                is LivechatWidgetResult.Success<*> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, LOADING_SUCCESS_MSG)
-            }
-            eventsListener?.onLoadingFinished(result.addErrorMessagePrefix(LOADING_FAIL_MSG))
+        when (result) {
+            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, result.throwable)
+            is LivechatWidgetResult.Success<*> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, LOADING_SUCCESS_MSG)
         }
+        eventsListener?.onLoadingFinished(result)
     }
 
     /**
@@ -272,23 +280,35 @@ internal class LivechatWidgetApiImpl(
      */
     private fun executeApiCall(
         method: LivechatWidgetMethod,
-        apiCall: LivechatWidgetClient.() -> Unit
+        apiCall: LivechatWidgetClient.(ExecutionListener<String>) -> Unit
     ) {
         coroutineScope.launch(Dispatchers.Main) {
             runCatching {
                 runCatching {
                     loadWidgetInternal()
                 }.onFailure {
-                    onWidgetLoadingFinished(LivechatWidgetResult.Error(it.getMappedMessage()), withReport = false)
+                    updateWidgetLoaded(false)
                 }.getOrThrow()
-                webView.livechatWidgetClient?.apiCall() ?: throw IllegalStateException("LivechatWidgetWebView is not initialized. Call LivechatWidgetWebView.setup() first.")
+                webView.livechatWidgetClient?.apiCall(
+                    ExecutionListener { executionResult: LivechatWidgetResult<String> ->
+                        if (executionResult is LivechatWidgetResult.Error) {
+                            handleWidgetApiError(method, executionResult)
+                        }
+                    }
+                ) ?: throw LivechatWidgetException.fromAndroid("LivechatWidgetWebView is not initialized. Call LivechatWidgetWebView.setup() first.")
             }.onFailure {
-                onWidgetApiError(method, it.getMappedMessage())
+                handleWidgetApiError(method, LivechatWidgetResult.Error(it.mapToLivechatException()))
             }
         }
     }
 
-    private fun Throwable.getMappedMessage(): String = if (this is TimeoutCancellationException) "Widget loading timeout." else this.message ?: UNKNOWN_ERROR
+    private fun Throwable.mapToLivechatException(): LivechatWidgetException {
+        return when (this) {
+            is LivechatWidgetException -> this
+            is TimeoutCancellationException -> LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget loading timeout.")
+            else -> LivechatWidgetException.fromAndroid("${this.javaClass.simpleName}: $message")
+        }
+    }
 
     //endregion
 
@@ -312,7 +332,7 @@ internal class LivechatWidgetApiImpl(
     override fun onWidgetViewChanged(widgetView: LivechatWidgetView) {
         if (!isWidgetLoaded && widgetView != LivechatWidgetView.LOADING) {
             coroutineScope.launch {
-                delay(300) //we must wait a bit to let JS widget fully load, already reported to LC team
+                delay(LOADING_SUCCESS_EVENT_DELAY_MS) //we must wait a bit to let JS widget fully load, already reported to LC team
                 resumeWidgetLoadingContinuation(LivechatWidgetResult.Success.unit)
             }
         }
@@ -324,9 +344,11 @@ internal class LivechatWidgetApiImpl(
     }
 
     override fun onWidgetApiError(method: LivechatWidgetMethod, errorPayload: String?) {
-        val payload = errorPayload?.takeIf { it.isNotBlank() } ?: UNKNOWN_ERROR
-        val message = "$method() ${"=>".takeIf { payload.isNotBlank() }} $payload"
-        val error = LivechatWidgetResult.Error("$API_CALL_FAIL_MSG $message")
+        val error = LivechatWidgetResult.Error(LivechatWidgetException.parse(errorPayload ?: UNKNOWN_ERROR))
+        handleWidgetApiError(method, error)
+    }
+
+    private fun handleWidgetApiError(method: LivechatWidgetMethod, error: LivechatWidgetResult.Error) {
         when (method) {
             /**
              * widgetLoadingContinuation.cancel(Exception) will resume suspendCancellableCoroutine() what will propagate public event
@@ -334,7 +356,7 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.config,
             LivechatWidgetMethod.identify,
             LivechatWidgetMethod.initWidget,
-            LivechatWidgetMethod.show -> resumeWidgetLoadingContinuation(LivechatWidgetResult.Error(message))
+            LivechatWidgetMethod.show -> resumeWidgetLoadingContinuation(error)
 
             LivechatWidgetMethod.setTheme -> eventsListener?.onThemeChanged(error)
             LivechatWidgetMethod.resumeConnection -> eventsListener?.onConnectionResumed(error)
@@ -345,6 +367,10 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.sendDraft -> eventsListener?.onDraftSent(error)
             LivechatWidgetMethod.sendMessageWithAttachment,
             LivechatWidgetMethod.sendMessage -> eventsListener?.onMessageSent(error)
+
+            LivechatWidgetMethod.getThreads -> eventsListener?.onThreadsReceived(error)
+            LivechatWidgetMethod.showThread -> eventsListener?.onThreadShown(error)
+            LivechatWidgetMethod.getActiveThread -> eventsListener?.onActiveThreadReceived(error)
         }
     }
 
@@ -367,8 +393,14 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.sendDraft -> eventsListener?.onDraftSent(LivechatWidgetResult.Success(payload))
             LivechatWidgetMethod.sendMessageWithAttachment,
             LivechatWidgetMethod.sendMessage -> eventsListener?.onMessageSent(LivechatWidgetResult.Success(payload))
+
+            LivechatWidgetMethod.getThreads -> eventsListener?.onThreadsReceived(LivechatWidgetResult.Success(LivechatWidgetThreads.parse(payload ?: "")))
+            LivechatWidgetMethod.showThread -> eventsListener?.onThreadShown(LivechatWidgetResult.Success(LivechatWidgetThread.parse(payload ?: "")))
+            LivechatWidgetMethod.getActiveThread -> eventsListener?.onActiveThreadReceived(LivechatWidgetResult.Success(LivechatWidgetThread.parseOrNull(payload)))
         }
     }
+
+
     //endregion
 
 }

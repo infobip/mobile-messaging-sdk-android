@@ -99,6 +99,22 @@ internal class LivechatWidgetClientImpl(
         executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.setTheme.name, themeName), executionListener)
     }
 
+    override fun getThreads(executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.getThreads.name), executionListener)
+    }
+
+    override fun getActiveThread(executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.getActiveThread.name), executionListener)
+    }
+
+    override fun showThread(threadId: String, executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        if (threadId.isNotBlank()) {
+            executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.showThread.name, threadId), executionListener)
+        } else {
+            executionListener?.onResult(LivechatWidgetResult.Error("Could not show thread. ThreadId is empty or blank."))
+        }
+    }
+
     /**
      * Executes JS script on UI thread with result listener.
      *
@@ -108,10 +124,13 @@ internal class LivechatWidgetClientImpl(
     private fun executeScript(script: String, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null) {
         coroutineScope.launch(Dispatchers.Main) {
             runCatching {
+                val scriptToLog = shortenScript(script)
+                MobileMessagingLogger.d(TAG, "Called Widget API: $scriptToLog")
                 webView.evaluateJavascript(script) { value: String? ->
-                    val valueToLog = if ((value != null && "null" != value)) " => $value" else ""
-                    val scriptToLog = shortenScript(script)
-                    MobileMessagingLogger.d(TAG, "Called Widget API: $scriptToLog$valueToLog")
+                    val valueToLog = if ((value != null && "null" != value && "{}" != value)) " => $value" else ""
+                    if (valueToLog.isNotEmpty()) {
+                        MobileMessagingLogger.d(TAG, "Called Widget API: $scriptToLog$valueToLog")
+                    }
                     executionListener?.onResult(LivechatWidgetResult.Success(valueToLog))
                 }
             }.onFailure {

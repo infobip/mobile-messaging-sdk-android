@@ -15,18 +15,13 @@ sealed class LivechatWidgetResult<out T> {
     data class Error(
         val throwable: Throwable,
     ) : LivechatWidgetResult<Nothing>() {
-        constructor(message: String) : this(Exception(message))
+        constructor(message: String) : this(LivechatWidgetException.fromAndroid(message))
     }
 
-    fun isSuccess() = this is Success
-    fun isError() = this is Error
+    val isSuccess
+        get() = this is Success
+    val isError
+        get() = this is Error
     fun getOrNull(): T? = if (this is Success) payload else null
     fun errorOrNull(): Throwable? = if (this is Error) throwable else null
-
-    internal fun addErrorMessagePrefix(prefix: String): LivechatWidgetResult<T> {
-        return when (this) {
-            is Error -> this.copy(throwable = Exception("$prefix ${throwable.message.orEmpty()}"))
-            is Success -> this
-        }
-    }
 }
