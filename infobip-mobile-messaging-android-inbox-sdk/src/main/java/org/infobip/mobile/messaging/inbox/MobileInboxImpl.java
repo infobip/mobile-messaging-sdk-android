@@ -18,6 +18,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule {
     @SuppressLint("StaticFieldLeak")
     private static MobileInboxImpl instance;
@@ -28,6 +33,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     private MobileApiResourceProvider mobileApiResourceProvider;
     private MobileInboxSynchronizer mobileInboxSynchronizer;
     private InboxSeenStatusReporter inboxSeenStatusReporter;
+    private final Set<String> seenMessageIds = Collections.synchronizedSet(new HashSet<>());
 
     public static MobileInboxImpl getInstance(Context context) {
         if (instance == null) {
@@ -80,7 +86,24 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
             MobileMessagingLogger.w("[Inbox] No messages to report");
             return;
         }
-        inboxSeenStatusReporter().reportSeen(listener, externalUserId, MobileMessagingCore.getInstance(context).enrichMessageIdsWithTimestamp(messageIDs));
+
+        Set<String> newMessageIds = new HashSet<>();
+        for (String messageId : messageIDs) {
+            if (!seenMessageIds.contains(messageId)) {
+                newMessageIds.add(messageId);
+            }
+        }
+
+        if (newMessageIds.isEmpty()) {
+            MobileMessagingLogger.w("[Inbox] All message IDs have already been reported as seen");
+            return;
+        }
+
+        seenMessageIds.addAll(newMessageIds);
+
+        String[] newMessageIdsArray = newMessageIds.toArray(new String[0]);
+
+        inboxSeenStatusReporter().reportSeen(listener, externalUserId, MobileMessagingCore.getInstance(context).enrichMessageIdsWithTimestamp(newMessageIdsArray));
     }
 
     @Override

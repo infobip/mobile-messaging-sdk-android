@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.inbox;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.times;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 public class MobileInboxTest extends MobileMessagingTestCase {
@@ -86,6 +88,37 @@ public class MobileInboxTest extends MobileMessagingTestCase {
         mobileInboxImpl.setSeen(givenExternalUserId, new String[]{}, seenResultListener);
 
         Mockito.verify(inboxSeenStatusReporter, times(0)).reportSeen(any(), any(), any());
+    }
+
+    @Test
+    public void reportSeen_should_report_duplicated_messageIDs_only_once() {
+        String[] messageIds = {"messageId1", "messageId1", "messageId2"};
+
+        mobileInboxImpl.setSeen(givenExternalUserId, messageIds, seenResultListener);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(inboxSeenStatusReporter, times(1)).reportSeen(Mockito.eq(seenResultListener), Mockito.eq(givenExternalUserId), captor.capture());
+
+        assertEquals(2, captor.getAllValues().size());
+
+        mobileInboxImpl.setSeen(givenExternalUserId, messageIds, seenResultListener);
+        ArgumentCaptor<String> captor1 = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(inboxSeenStatusReporter, times(1)).reportSeen(Mockito.eq(seenResultListener), Mockito.eq(givenExternalUserId), captor.capture());
+        assertEquals(0, captor1.getAllValues().size());
+    }
+
+    @Test
+    public void setSeen_should_not_be_called_in_case_of_error() {
+        String[] messageIds = {"someMessageId1"};
+        Mockito.doThrow(new RuntimeException("Error")).when(inboxSeenStatusReporter).reportSeen(any(), any(), any());
+
+        try {
+            mobileInboxImpl.setSeen(givenExternalUserId, messageIds, seenResultListener);
+        } catch (RuntimeException e) {
+            // Expected exception
+        }
+
+        Mockito.verify(seenResultListener, times(0)).onResult(any());
     }
 
     private MobileInboxFilterOptions filterOptions() {
