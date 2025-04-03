@@ -141,6 +141,36 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
         assertEquals(MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, getChannelId(builder));
     }
 
+    @Test
+    public void shouldUseHighPriorityChannelWithSoundAndVibrationForMessageWithBanner() throws Exception {
+
+        // Given
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
+        PreferenceHelper.saveClass(context, MobileMessagingProperty.CALLBACK_ACTIVITY, Activity.class);
+
+        // When
+        NotificationCompat.Builder builder = simpleNotificationHandler.createNotificationCompatBuilder(prepareMessageWithBanner());
+
+        // Then
+        assertEquals(MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, getChannelId(builder));
+    }
+
+    @Test
+    public void shouldUseDefaultChannelWithSoundAndVibration() throws Exception {
+
+        // Given
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);
+        PreferenceHelper.saveClass(context, MobileMessagingProperty.CALLBACK_ACTIVITY, Activity.class);
+
+        // When
+        Message message = prepareMessageWithBanner();
+        message.setSound(null);
+        NotificationCompat.Builder builder = simpleNotificationHandler.createNotificationCompatBuilder(message);
+
+        // Then
+        assertEquals(MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION, getChannelId(builder));
+    }
+
 //    private String prepareBitmapUrl() {
 //        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), android.R.drawable.ic_media_play);
 //        ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -155,7 +185,7 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
                 UUID.randomUUID().toString(),
                 "SomeTitle",
                 "SomeBody",
-                "SomeSound",
+                "default",
                 true,
                 "SomeIcon",
                 false,

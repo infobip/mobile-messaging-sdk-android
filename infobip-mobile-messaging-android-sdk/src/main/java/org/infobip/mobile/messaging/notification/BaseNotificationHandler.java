@@ -310,7 +310,10 @@ public class BaseNotificationHandler {
             notificationDefaults &= ~Notification.DEFAULT_SOUND;
         }
         notificationBuilder.setDefaults(notificationDefaults);
-
+        if (message.getSound() == null && !message.isVibrate()) {
+            notificationBuilder.setSilent(true);
+            return;
+        }
         String sound = message.getSound();
         if (message.isDefaultSound() || StringUtils.isBlank(sound)) {
             return;
@@ -321,7 +324,6 @@ public class BaseNotificationHandler {
             MobileMessagingLogger.e("Cannot create uri for sound:" + sound + " messageId:" + message.getMessageId());
             return;
         }
-
         notificationBuilder.setSound(soundUri);
     }
 
@@ -346,14 +348,21 @@ public class BaseNotificationHandler {
      */
     @NonNull
     private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings, Message message) {
-        if(message.getSound() != null && !message.getSound().equals("default")) {
-            return shouldDisplayHeadsUpNotification(notificationSettings, message)
-                    ? PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID)+"_high_priority"
-                    : PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
+        boolean hasCustomSound = message.getSound() != null && !message.getSound().equals("default");
+        boolean shouldDisplayHeadsUp = shouldDisplayHeadsUpNotification(notificationSettings, message);
+        boolean isVibrate = message.isVibrate();
+        boolean soundEnabled = message.getSound() != null;
+
+        if (hasCustomSound) {
+            String baseChannelId = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
+            if (shouldDisplayHeadsUp) {
+                return baseChannelId + (isVibrate ? "_high_priority, vibration" : "_high_priority");
+            } else {
+                return baseChannelId + (isVibrate ? "_vibration" : "");
+            }
         }
-        return shouldDisplayHeadsUpNotification(notificationSettings, message)
-                ? MobileMessagingCore.MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID
-                : MobileMessagingCore.MM_DEFAULT_CHANNEL_ID;
+
+        return MobileMessagingCore.getNotificationChannelId(soundEnabled, isVibrate, shouldDisplayHeadsUp);
     }
 
     /**
