@@ -7,14 +7,14 @@
     <string name="ib_chat_allowed_attachment_size_exceeded">超過允許的最大附件大小</string>
     <string name="ib_chat_permissions_not_granted_title">權限未授予</string>
     <string name="ib_chat_permissions_not_granted_message">您可以在應用程序設置中授予它們。</string>
-    <string name="ib_chat_message_hint">发送一条消息...</string>
+    <string name="ib_chat_message_hint">發送訊息…</string>
     <string name="ib_chat_cant_create_attachment">無法從所選文件創建附件</string>
     <string name="ib_chat_ok">好的</string>
     <string name="ib_chat_error">出了點問題：%1$s.</string>
     <string name="ib_chat_error_code">錯誤代碼：%1$s.</string>
-    <string name="ib_chat_save">節省</string>
+    <string name="ib_chat_save">儲存</string>
     <string name="ib_chat_attachments_take_a_photo">拍照</string>
-    <string name="ib_chat_attachments_record_video">记录视频</string>
-    <string name="ib_chat_attachments_select_file">选择文件</string>
-    <string name="ib_chat_attachments_select_from_gallery">从画廊中选择</string>
+    <string name="ib_chat_attachments_record_video">錄製影片</string>
+    <string name="ib_chat_attachments_select_file">選擇檔案</string>
+    <string name="ib_chat_attachments_select_from_gallery">從相簿中選擇</string>
 </resources>
