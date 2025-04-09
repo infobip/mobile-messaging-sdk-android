@@ -117,20 +117,25 @@ public class MobileMessagingCore
     private static final long LAZY_SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(5);
     private static final long FOREGROUND_SYNC_THROTTLE_INTERVAL_MILLIS = TimeUnit.SECONDS.toMillis(10);
     private static final JsonSerializer nullSerializer = new JsonSerializer(true);
-    public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_CHANNEL_ID = "mm_default_channel";
     public static final String MM_DEFAULT_CHANNEL_ID_VIBRATION = "mm_default_channel_vibration";
     public static final String MM_DEFAULT_CHANNEL_ID_SOUND = "mm_default_channel_sound";
+    public static final String MM_DEFAULT_CHANNEL_ID_QUIET = "mm_default_channel_quiet";
+    public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID = "mm_default_channel_high_priority";
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION = "mm_default_channel_high_priority_vibration";
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND = "mm_default_channel_high_priority_sound";
+    public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET = "mm_default_channel_high_priority_quiet";
     private static final Map<String, String> channelMap = Map.of(
                                             //soundEnabled, isVibrate, shouldDisplayHeadsUp
             createNotificationChannelKey(true, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID,
             createNotificationChannelKey(true, false, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND,
             createNotificationChannelKey(false, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION,
+            createNotificationChannelKey(false, false, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET,
             createNotificationChannelKey(true, true, false), MM_DEFAULT_CHANNEL_ID,
             createNotificationChannelKey(true, false, false), MM_DEFAULT_CHANNEL_ID_SOUND,
-            createNotificationChannelKey(false, true, false), MM_DEFAULT_CHANNEL_ID_VIBRATION
+            createNotificationChannelKey(false, true, false), MM_DEFAULT_CHANNEL_ID_VIBRATION,
+            createNotificationChannelKey(false, false, false), MM_DEFAULT_CHANNEL_ID_QUIET
+
     );
 
     protected static MobileApiResourceProvider mobileApiResourceProvider;
@@ -283,12 +288,14 @@ public class MobileMessagingCore
         createNotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, true, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
         createNotificationChannel(MM_DEFAULT_CHANNEL_ID_VIBRATION, channelName + " Vibration", true, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
         createNotificationChannel(MM_DEFAULT_CHANNEL_ID_SOUND, channelName + " Sound", false,true,  null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_QUIET, channelName + " Quiet", false,false,  null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
 
         NotificationSettings notificationSettings = getNotificationSettings();
         if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
             createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, channelName + " High Priority", true, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
             createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION, channelName + " High Priority, Vibration", true, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
             createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND, channelName + " High Priority, Sound", false, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET, channelName + " High Priority, Quiet", false, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
         }
     }
 
