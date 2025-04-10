@@ -103,7 +103,7 @@ public class LivechatWidgetApiFragment extends Fragment {
             }
 
             @Override
-            public void onLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) {
+            public void onLoadingFinished(@NonNull LivechatWidgetResult<Boolean> result) {
                 addLog("onLoadingFinished result: ", result.toString());
             }
 

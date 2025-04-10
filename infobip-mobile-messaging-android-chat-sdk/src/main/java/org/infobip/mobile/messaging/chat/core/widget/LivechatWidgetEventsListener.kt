@@ -19,9 +19,13 @@ interface LivechatWidgetEventsListener {
     fun onPageFinished(url: String?)
 
     /**
-     * Called when livechat widget loading finished.
+     * Called when the livechat widget has finished loading.
+     * A success result indicates that the loading process is complete.
+     * The boolean flag in the payload specifies whether the widget is fully loaded and ready for use.
+     * Typically, this flag will be true. However, there are scenarios where the loading completes successfully, but the widget is not loaded,
+     * such as when [LivechatWidgetApi.reset] is called.
      */
-    fun onLoadingFinished(result: LivechatWidgetResult<Unit>)
+    fun onLoadingFinished(result: LivechatWidgetResult<Boolean>)
 
     //Widget API callbacks
     /**
@@ -111,7 +115,7 @@ interface LivechatWidgetEventsListener {
 open class DefaultLivechatWidgetEventsListener : LivechatWidgetEventsListener {
     override fun onPageStarted(url: String?) {}
     override fun onPageFinished(url: String?) {}
-    override fun onLoadingFinished(result: LivechatWidgetResult<Unit>) {}
+    override fun onLoadingFinished(result: LivechatWidgetResult<Boolean>) {}
     override fun onControlsVisibilityChanged(visible: Boolean) {}
     override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {}
     override fun onWidgetViewChanged(view: LivechatWidgetView) {}

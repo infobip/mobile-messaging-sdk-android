@@ -487,10 +487,21 @@ class InAppChatView @JvmOverloads constructor(
             binding.ibLcWebView.visible()
         }
 
-        override fun onLoadingFinished(result: LivechatWidgetResult<Unit>) {
-            when (result) {
+        override fun onLoadingFinished(result: LivechatWidgetResult<Boolean>) {
+            val mappedResult: LivechatWidgetResult<Unit> = when (result) {
+                is LivechatWidgetResult.Error -> result
+                is LivechatWidgetResult.Success -> {
+                    if (result.payload) {
+                        LivechatWidgetResult.Success(Unit)
+                    } else {
+                        LivechatWidgetResult.Error("Chat has been reset and is no longer loaded.")
+                    }
+                }
+            }
+
+            when (mappedResult) {
                 is LivechatWidgetResult.Error -> {
-                    errorsHandler.handlerWidgetError(result.throwable.message ?: localizationUtils.getString(R.string.ib_chat_error, "Unknown error"))
+                    errorsHandler.handlerWidgetError(mappedResult.throwable.message ?: localizationUtils.getString(R.string.ib_chat_error, "Unknown error"))
                     binding.ibLcSpinner.invisible()
                     binding.ibLcWebView.visible()
                 }
@@ -504,11 +515,11 @@ class InAppChatView @JvmOverloads constructor(
                 }
             }
 
-            eventsListener?.onChatLoaded(result.isSuccess)
-            eventsListener?.onChatLoadingFinished(result)
+            eventsListener?.onChatLoaded(mappedResult.isSuccess)
+            eventsListener?.onChatLoadingFinished(mappedResult)
             lcRegIdChecker.sync()
-            if (eventsListener == null && result.isError) {
-                MobileMessagingLogger.e(TAG, "Chat could not load:", result.errorOrNull())
+            if (eventsListener == null && mappedResult.isError) {
+                MobileMessagingLogger.e(TAG, "Chat could not load:", mappedResult.errorOrNull())
             }
         }
 

@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -189,7 +191,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
         sessionStorage().setConfigSyncResult(null);
-        getLivechatWidgetApi().reset();
+        try {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                getLivechatWidgetApi().reset();
+            });
+        } catch (Throwable t) {
+            MobileMessagingLogger.e(TAG, "Error while cleaning up widget data: " + t.getMessage());
+        }
     }
 
     @Override

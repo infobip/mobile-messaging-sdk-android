@@ -27,7 +27,7 @@ internal class LivechatWidgetApiImpl(
     private val mmCore: MobileMessagingCore,
     private val inAppChat: InAppChat,
     private val propertyHelper: PropertyHelper,
-    private val coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope
 ) : LivechatWidgetApi, LivechatWidgetWebViewManager {
 
     companion object {
@@ -36,6 +36,7 @@ internal class LivechatWidgetApiImpl(
         private const val LOADING_SUCCESS_EVENT_DELAY_MS = 300L
 
         private const val LOADING_FAIL_MSG = "Widget loading failed. Reason:"
+        private const val LOADING_RESET_MSG = "Widget has been reset and is no longer loaded."
         private const val LOADING_SUCCESS_MSG = "Widget successfully loaded."
         private const val UNKNOWN_ERROR = "Unknown error."
     }
@@ -47,13 +48,18 @@ internal class LivechatWidgetApiImpl(
     /**
      *  Widget loading coroutine continuation. It is used to control - resume/cancel widget loading coroutine.
      */
-    private var widgetLoadingContinuation: CancellableContinuation<Unit>? = null
+    private var widgetLoadingContinuation: CancellableContinuation<Boolean>? = null
     private val isWidgetLoadingInProgress: Boolean
         get() = widgetLoadingContinuation?.isActive == true
 
     private val loadingMutex = Mutex()
     private val continuationMutex = Mutex()
     private val loadedFlagMutex = Mutex()
+
+    /**
+     * All [webView] interactions must be executed on the same thread.
+     */
+    private val webViewDispatcher = Dispatchers.Main
 
     //region LivechatWidgetApi
     override var isWidgetLoaded: Boolean = false
@@ -71,7 +77,7 @@ internal class LivechatWidgetApiImpl(
         domain: String?,
         theme: String?
     ) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(webViewDispatcher) {
             runCatching {
                 loadWidgetInternal(
                     widgetId = widgetId,
@@ -152,10 +158,12 @@ internal class LivechatWidgetApiImpl(
     }
 
     override fun reset() {
-        coroutineScope.launch(Dispatchers.Main) {
-            val result = LivechatWidgetResult.Error("Widget has been reset and is no longer loaded.")
-            resumeWidgetLoadingContinuation(result)
-            onWidgetLoadingFinished(result)
+        coroutineScope.launch(webViewDispatcher) {
+            val result = LivechatWidgetResult.Success(false)
+            val handled = resumeWidgetLoadingContinuation(result)
+            if (!handled) {
+                onWidgetLoadingFinished(result)
+            }
             webView.run {
                 clearHistory()
                 clearCache(true)
@@ -170,7 +178,7 @@ internal class LivechatWidgetApiImpl(
     /**
      * Sets widget loading continuation in safe manner - only one coroutine can access/set in a time.
      */
-    private fun setContinuation(continuation: CancellableContinuation<Unit>?) {
+    private fun setContinuation(continuation: CancellableContinuation<Boolean>?) {
         coroutineScope.launch {
             continuationMutex.withLock {
                 widgetLoadingContinuation = continuation
@@ -226,7 +234,7 @@ internal class LivechatWidgetApiImpl(
                 !isWidgetLoaded -> {
                     withTimeout(LOADING_TIMEOUT_MS) {
                         runCatching { //must stay in place to propagate possible suspendCancellableCoroutine() exception immediately and do not wait for timeout
-                            suspendCancellableCoroutine<Unit> { continuation ->
+                            val result: Boolean = suspendCancellableCoroutine { continuation ->
                                 setContinuation(continuation)
                                 webView.loadWidgetPage(
                                     pushRegistrationId = fallbackPushRegistrationId,
@@ -239,7 +247,7 @@ internal class LivechatWidgetApiImpl(
                                     setContinuation(null)
                                 }
                             }
-                            onWidgetLoadingFinished(LivechatWidgetResult.Success.unit)
+                            onWidgetLoadingFinished(LivechatWidgetResult.Success(result))
                         }.getOrThrow()
                     }
                 }
@@ -248,31 +256,31 @@ internal class LivechatWidgetApiImpl(
     }
 
     /**
-     * Resumes widget loading continuation with [result].
+     * Resumes widget loading continuation with [result] if loading is in progress.
+     * Returns true if widget loading was resumed, false otherwise.
      */
-    private fun resumeWidgetLoadingContinuation(result: LivechatWidgetResult<Unit>) {
-        when (result) {
-            is LivechatWidgetResult.Success<*> -> {
-                widgetLoadingContinuation?.takeIf { it.isActive }?.resume(Unit)
+    private fun resumeWidgetLoadingContinuation(result: LivechatWidgetResult<Boolean>): Boolean {
+        widgetLoadingContinuation?.takeIf { it.isActive }?.let { continuation ->
+            when (result) {
+                is LivechatWidgetResult.Success<Boolean> -> continuation.resume(result.payload)
+                is LivechatWidgetResult.Error -> continuation.cancel(result.throwable)
             }
-
-            is LivechatWidgetResult.Error -> {
-                widgetLoadingContinuation?.takeIf { it.isActive }?.cancel(result.throwable)
-            }
+            setContinuation(null)
+            return true
         }
-        setContinuation(null)
+        return false
     }
 
     /**
      * Propagates widget loading result to public [eventsListener] and updates [isWidgetLoaded] flag.
      */
-    private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Unit>) {
-        updateWidgetLoaded(result is LivechatWidgetResult.Success<*>)
+    private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Boolean>) {
+        updateWidgetLoaded(result.getOrNull() == true)
         when (result) {
             is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, result.throwable)
-            is LivechatWidgetResult.Success<*> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, LOADING_SUCCESS_MSG)
+            is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, if (result.payload) LOADING_SUCCESS_MSG else LOADING_RESET_MSG)
         }
-        eventsListener?.onLoadingFinished(result)
+        propagateEvent { onLoadingFinished(result) }
     }
 
     /**
@@ -282,7 +290,7 @@ internal class LivechatWidgetApiImpl(
         method: LivechatWidgetMethod,
         apiCall: LivechatWidgetClient.(ExecutionListener<String>) -> Unit
     ) {
-        coroutineScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(webViewDispatcher) {
             runCatching {
                 runCatching {
                     loadWidgetInternal()
@@ -314,33 +322,33 @@ internal class LivechatWidgetApiImpl(
 
     //region InAppChatWebViewManager
     override fun onPageStarted(url: String?) {
-        eventsListener?.onPageStarted(url)
+        propagateEvent { onPageStarted(url) }
     }
 
     override fun onPageFinished(url: String?) {
-        eventsListener?.onPageFinished(url)
+        propagateEvent { onPageFinished(url) }
     }
 
     override fun setControlsVisibility(isVisible: Boolean) {
-        eventsListener?.onControlsVisibilityChanged(isVisible)
+        propagateEvent { onControlsVisibilityChanged(isVisible) }
     }
 
     override fun openAttachmentPreview(url: String?, type: String?, caption: String?) {
-        eventsListener?.onAttachmentPreviewOpened(url, type, caption)
+        propagateEvent { onAttachmentPreviewOpened(url, type, caption) }
     }
 
     override fun onWidgetViewChanged(widgetView: LivechatWidgetView) {
         if (!isWidgetLoaded && widgetView != LivechatWidgetView.LOADING) {
             coroutineScope.launch {
                 delay(LOADING_SUCCESS_EVENT_DELAY_MS) //we must wait a bit to let JS widget fully load, already reported to LC team
-                resumeWidgetLoadingContinuation(LivechatWidgetResult.Success.unit)
+                resumeWidgetLoadingContinuation(LivechatWidgetResult.Success(true))
             }
         }
-        eventsListener?.onWidgetViewChanged(widgetView)
+        propagateEvent { onWidgetViewChanged(widgetView) }
     }
 
     override fun onWidgetRawMessageReceived(message: String?) {
-        eventsListener?.onRawMessageReceived(message)
+        propagateEvent { onRawMessageReceived(message) }
     }
 
     override fun onWidgetApiError(method: LivechatWidgetMethod, errorPayload: String?) {
@@ -358,19 +366,19 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.initWidget,
             LivechatWidgetMethod.show -> resumeWidgetLoadingContinuation(error)
 
-            LivechatWidgetMethod.setTheme -> eventsListener?.onThemeChanged(error)
-            LivechatWidgetMethod.resumeConnection -> eventsListener?.onConnectionResumed(error)
-            LivechatWidgetMethod.pauseConnection -> eventsListener?.onConnectionPaused(error)
-            LivechatWidgetMethod.sendContextualData -> eventsListener?.onContextualDataSent(error)
-            LivechatWidgetMethod.setLanguage -> eventsListener?.onLanguageChanged(error)
-            LivechatWidgetMethod.showThreadList -> eventsListener?.onThreadListShown(error)
-            LivechatWidgetMethod.sendDraft -> eventsListener?.onDraftSent(error)
+            LivechatWidgetMethod.setTheme -> propagateEvent { onThemeChanged(error) }
+            LivechatWidgetMethod.resumeConnection -> propagateEvent { onConnectionResumed(error) }
+            LivechatWidgetMethod.pauseConnection -> propagateEvent { onConnectionPaused(error) }
+            LivechatWidgetMethod.sendContextualData -> propagateEvent { onContextualDataSent(error) }
+            LivechatWidgetMethod.setLanguage -> propagateEvent { onLanguageChanged(error) }
+            LivechatWidgetMethod.showThreadList -> propagateEvent { onThreadListShown(error) }
+            LivechatWidgetMethod.sendDraft -> propagateEvent { onDraftSent(error) }
             LivechatWidgetMethod.sendMessageWithAttachment,
-            LivechatWidgetMethod.sendMessage -> eventsListener?.onMessageSent(error)
+            LivechatWidgetMethod.sendMessage -> propagateEvent { onMessageSent(error) }
 
-            LivechatWidgetMethod.getThreads -> eventsListener?.onThreadsReceived(error)
-            LivechatWidgetMethod.showThread -> eventsListener?.onThreadShown(error)
-            LivechatWidgetMethod.getActiveThread -> eventsListener?.onActiveThreadReceived(error)
+            LivechatWidgetMethod.getThreads -> propagateEvent { onThreadsReceived(error) }
+            LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(error) }
+            LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(error) }
         }
     }
 
@@ -384,22 +392,32 @@ internal class LivechatWidgetApiImpl(
                 //nothing, handled by onWidgetViewChanged()
             }
 
-            LivechatWidgetMethod.setTheme -> eventsListener?.onThemeChanged(LivechatWidgetResult.Success(payload))
-            LivechatWidgetMethod.resumeConnection -> eventsListener?.onConnectionResumed(LivechatWidgetResult.Success.unit)
-            LivechatWidgetMethod.pauseConnection -> eventsListener?.onConnectionPaused(LivechatWidgetResult.Success.unit)
-            LivechatWidgetMethod.sendContextualData -> eventsListener?.onContextualDataSent(LivechatWidgetResult.Success(payload))
-            LivechatWidgetMethod.setLanguage -> eventsListener?.onLanguageChanged(LivechatWidgetResult.Success(payload))
-            LivechatWidgetMethod.showThreadList -> eventsListener?.onThreadListShown(LivechatWidgetResult.Success.unit)
-            LivechatWidgetMethod.sendDraft -> eventsListener?.onDraftSent(LivechatWidgetResult.Success(payload))
+            LivechatWidgetMethod.setTheme -> propagateEvent { onThemeChanged(LivechatWidgetResult.Success(payload)) }
+            LivechatWidgetMethod.resumeConnection -> propagateEvent { onConnectionResumed(LivechatWidgetResult.Success.unit) }
+            LivechatWidgetMethod.pauseConnection -> propagateEvent { onConnectionPaused(LivechatWidgetResult.Success.unit) }
+            LivechatWidgetMethod.sendContextualData -> propagateEvent { onContextualDataSent(LivechatWidgetResult.Success(payload)) }
+            LivechatWidgetMethod.setLanguage -> propagateEvent { onLanguageChanged(LivechatWidgetResult.Success(payload)) }
+            LivechatWidgetMethod.showThreadList -> propagateEvent { onThreadListShown(LivechatWidgetResult.Success.unit) }
+            LivechatWidgetMethod.sendDraft -> propagateEvent { onDraftSent(LivechatWidgetResult.Success(payload)) }
             LivechatWidgetMethod.sendMessageWithAttachment,
-            LivechatWidgetMethod.sendMessage -> eventsListener?.onMessageSent(LivechatWidgetResult.Success(payload))
+            LivechatWidgetMethod.sendMessage -> propagateEvent { onMessageSent(LivechatWidgetResult.Success(payload)) }
 
-            LivechatWidgetMethod.getThreads -> eventsListener?.onThreadsReceived(LivechatWidgetResult.Success(LivechatWidgetThreads.parse(payload ?: "")))
-            LivechatWidgetMethod.showThread -> eventsListener?.onThreadShown(LivechatWidgetResult.Success(LivechatWidgetThread.parse(payload ?: "")))
-            LivechatWidgetMethod.getActiveThread -> eventsListener?.onActiveThreadReceived(LivechatWidgetResult.Success(LivechatWidgetThread.parseOrNull(payload)))
+            LivechatWidgetMethod.getThreads -> propagateEvent { onThreadsReceived(LivechatWidgetResult.Success(LivechatWidgetThreads.parse(payload ?: ""))) }
+            LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(LivechatWidgetResult.Success(LivechatWidgetThread.parse(payload ?: ""))) }
+            LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(LivechatWidgetResult.Success(LivechatWidgetThread.parseOrNull(payload))) }
         }
     }
 
+    /**
+     * Propagates event to [eventsListener] in a safe manner on UI thread.
+     */
+    private fun propagateEvent(action: LivechatWidgetEventsListener.() -> Unit) {
+        eventsListener?.let { listener ->
+            coroutineScope.launch(Dispatchers.Main) {
+                listener.action()
+            }
+        }
+    }
 
     //endregion
 
