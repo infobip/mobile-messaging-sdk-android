@@ -780,8 +780,8 @@ public abstract class MobileMessaging {
         /**
          * Use this to create a custom notification channel with custom sound.
          *
-         * @param channelId the channel id to be used
-         * @param channelName the channel name to be used
+         * @param channelId         the channel id to be used
+         * @param channelName       the channel name to be used
          * @param notificationAudio the sound file name to be used for the notification (added to the res/raw folder) - without extension
          * @return {@link Builder}
          */

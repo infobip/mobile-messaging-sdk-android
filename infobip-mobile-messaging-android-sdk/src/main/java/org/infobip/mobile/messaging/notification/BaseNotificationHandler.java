@@ -197,7 +197,7 @@ public class BaseNotificationHandler {
      * Same code as in {@link BitmapCompat#getAllocationByteCount(Bitmap)} to avoid compat dependencies
      */
     private static boolean isBitmapEmpty(@NonNull Bitmap bitmap) {
-        return (Build.VERSION.SDK_INT >= 19 ? bitmap.getAllocationByteCount() : bitmap.getByteCount()) == 0;
+        return bitmap.getAllocationByteCount() == 0;
     }
 
     @Nullable

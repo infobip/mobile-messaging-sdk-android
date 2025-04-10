@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.platform;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -25,6 +26,7 @@ import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getSchedu
  * @since 14/09/2017.
  */
 
+@SuppressLint("SpecifyJobSchedulerIdRange")
 @TargetApi(Build.VERSION_CODES.N)
 public class MobileMessagingJobService extends JobService {
 
@@ -73,6 +75,7 @@ public class MobileMessagingJobService extends JobService {
 
     //region Private methods
     @NonNull
+    @SuppressLint("SpecifyJobSchedulerIdRange")
     private MobileMessagingCore mobileMessagingCore() {
         if (mobileMessagingCore == null) {
             mobileMessagingCore = MobileMessagingCore.getInstance(getApplicationContext());
