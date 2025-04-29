@@ -5,26 +5,52 @@ import com.infobip.webrtc.sdk.api.options.AudioOptions
 import com.infobip.webrtc.sdk.api.options.VideoOptions
 import com.infobip.webrtc.sdk.api.options.WebrtcCallOptions
 
-internal data class RtcUiCallOptions(
-        val audio: Boolean = false,
-        val video: Boolean = false,
-        val audioOptions: AudioOptions? = null,
-        val videoOptions: VideoOptions? = null,
-        val customData: Map<String, String>? = null
-) {
-    fun toWebRtcCallOptions(): WebrtcCallOptions = WebrtcCallOptions.builder()
-            .audioOptions(audioOptions ?: AudioOptions.builder().audioQualityMode(AudioOptions.AudioQualityMode.AUTO).build())
-            .videoOptions(videoOptions ?: VideoOptions.builder().build())
-            .customData(customData ?: mapOf())
-            .audio(audio)
-            .video(video)
-            .build()
+internal sealed class RtcUiCallOptions {
 
-    fun toApplicationCallOptions(): ApplicationCallOptions = ApplicationCallOptions.builder()
-            .audioOptions(audioOptions ?: AudioOptions.builder().audioQualityMode(AudioOptions.AudioQualityMode.AUTO).build())
-            .videoOptions(videoOptions ?: VideoOptions.builder().build())
-            .customData(customData ?: mapOf())
-            .audio(audio)
-            .video(video)
-            .build()
+    abstract val audio: Boolean
+    abstract val video: Boolean
+    abstract val autoReconnect: Boolean
+    abstract val dataChannel: Boolean
+    abstract val audioOptions: AudioOptions
+    abstract val videoOptions: VideoOptions
+    abstract val customData: Map<String, String>
+
+    data class WebRtcCall(
+        val options: WebrtcCallOptions
+    ) : RtcUiCallOptions() {
+        override val audio: Boolean
+            get() = options.isAudio
+        override val video: Boolean
+            get() = options.isVideo
+        override val autoReconnect: Boolean
+            get() = options.isAutoReconnect
+        override val dataChannel: Boolean
+            get() = options.isDataChannel
+        override val audioOptions: AudioOptions
+            get() = options.audioOptions
+        override val videoOptions: VideoOptions
+            get() = options.videoOptions
+        override val customData: Map<String, String>
+            get() = options.customData
+    }
+
+    data class ApplicationCall(
+        val options: ApplicationCallOptions
+    ) : RtcUiCallOptions() {
+        override val audio: Boolean
+            get() = options.isAudio
+        override val video: Boolean
+            get() = options.isVideo
+        override val autoReconnect: Boolean
+            get() = options.isAutoReconnect
+        override val dataChannel: Boolean
+            get() = options.isDataChannel
+        override val audioOptions: AudioOptions
+            get() = options.audioOptions
+        override val videoOptions: VideoOptions
+            get() = options.videoOptions
+        override val customData: Map<String, String>
+            get() = options.customData
+    }
+
 }

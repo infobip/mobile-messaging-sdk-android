@@ -19,10 +19,12 @@ import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantDisconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
@@ -86,11 +88,13 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
 
     override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {}
 
+    override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {}
+
+    override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {}
+
     override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
 
     override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
-
-    override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
 
     override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {}
 
@@ -105,4 +109,6 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?) {}
 
     override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {}
+
+    override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
 }

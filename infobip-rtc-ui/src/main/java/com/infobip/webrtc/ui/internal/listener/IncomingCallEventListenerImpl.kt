@@ -1,7 +1,7 @@
 package com.infobip.webrtc.ui.internal.listener
 
 import android.content.Context
-import android.content.Intent
+import android.util.Log
 import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
 import com.infobip.webrtc.sdk.api.event.listener.IncomingApplicationCallEventListener
 import com.infobip.webrtc.sdk.api.event.listener.IncomingCallEventListener
@@ -9,13 +9,12 @@ import com.infobip.webrtc.sdk.api.event.rtc.IncomingApplicationCallEvent
 import com.infobip.webrtc.sdk.api.event.rtc.IncomingWebrtcCallEvent
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.sdk.api.model.ErrorCode
+import com.infobip.webrtc.ui.internal.core.TAG
+import com.infobip.webrtc.ui.internal.model.CallAction
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingAppCallImpl
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingCall
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingWebrtcCallImpl
-import com.infobip.webrtc.ui.internal.service.OngoingCallService
-import com.infobip.webrtc.ui.internal.service.OngoingCallService.Companion.CALL_STATUS_EXTRA
-import com.infobip.webrtc.ui.internal.service.OngoingCallService.Companion.INCOMING_CALL_ACTION
-import com.infobip.webrtc.ui.internal.service.OngoingCallService.Companion.NAME_EXTRA
+import com.infobip.webrtc.ui.internal.service.ActiveCallService
 
 internal class IncomingCallEventListenerImpl(
     private val context: Context,
@@ -27,16 +26,15 @@ internal class IncomingCallEventListenerImpl(
      * it replaces this listener with own one.
      */
     private val eventListener = object : DefaultRtcUiCallEventListener() {
-        private fun stopCall() {
-            OngoingCallService.sendCallServiceIntent(context, OngoingCallService.CALL_ENDED_ACTION)
-        }
 
         override fun onHangup(callHangupEvent: CallHangupEvent?) {
-            stopCall()
+            Log.d(TAG, "onHangup ${callHangupEvent?.errorCode?.name}")
+            ActiveCallService.start(context, CallAction.CALL_FINISHED)
         }
 
         override fun onError(errorCode: ErrorCode?) {
-            stopCall()
+            Log.d(TAG, "onError ${errorCode?.name}")
+            ActiveCallService.start(context, CallAction.CALL_FINISHED)
         }
     }
 
@@ -46,11 +44,13 @@ internal class IncomingCallEventListenerImpl(
 
         call.updateCustomData(pushPayload)
         call.setEventListener(eventListener)
-        context.startService(Intent(context, OngoingCallService::class.java).apply {
-            action = INCOMING_CALL_ACTION
-            putExtra(NAME_EXTRA, call.peer(context))
-            putExtra(CALL_STATUS_EXTRA, call.status()?.name)
-        })
+        ActiveCallService.start(
+            context = context,
+            action = CallAction.INCOMING_CALL_START,
+            peer = call.peer(context),
+            callStatus = call.status(),
+            foreground = true
+        )
     }
 
     override fun onIncomingApplicationCall(incomingApplicationCallEvent: IncomingApplicationCallEvent?) {

@@ -29,6 +29,7 @@ import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantDisconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
@@ -47,7 +48,8 @@ import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegateFactory
 import com.infobip.webrtc.ui.internal.listener.DefaultRtcUiCallEventListener
-import com.infobip.webrtc.ui.internal.service.OngoingCallService
+import com.infobip.webrtc.ui.internal.model.CallAction
+import com.infobip.webrtc.ui.internal.service.ActiveCallService
 import com.infobip.webrtc.ui.internal.ui.fragment.InCallFragment
 import com.infobip.webrtc.ui.internal.ui.fragment.IncomingCallFragment
 import com.infobip.webrtc.ui.internal.ui.view.CallAlert
@@ -76,9 +78,9 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         private const val CALLER_EXTRA_KEY = "CALLER_EXTRA_KEY"
         private const val ACCEPT_EXTRA_KEY = "ACCEPT_EXTRA_KEY"
 
-        fun newInstance(context: Context, caller: String, accept: Boolean = false): Intent {
+        fun startIntent(context: Context, caller: String, accept: Boolean = false): Intent {
             return Intent(context, CallActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 putExtra(CALLER_EXTRA_KEY, caller)
                 putExtra(ACCEPT_EXTRA_KEY, accept)
             }
@@ -232,16 +234,16 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         if (!viewModel.isEstablished()) {
             val action = if (accept) {
                 viewModel.accept()
-                OngoingCallService.CALL_ESTABLISHED_ACTION
+                CallAction.INCOMING_CALL_ACCEPTED
             } else {
-                OngoingCallService.SILENT_INCOMING_CALL_ACTION
+                CallAction.SILENT_INCOMING_CALL_START
             }
-            OngoingCallService.sendCallServiceIntent(applicationContext, action)
+            ActiveCallService.start(applicationContext, action, peer)
         }
     }
 
     private fun finishAndHideNotifications() {
-        OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ENDED_ACTION)
+        ActiveCallService.start(applicationContext, CallAction.CALL_FINISHED)
         finishAndRemoveTask()
     }
 
@@ -321,16 +323,20 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 viewModel.updateState { copy(isFinished = true) }
             }
 
+            override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {
+                viewModel.updateState { copy(isFinished = true) }
+            }
+
             override fun onRinging(callRingingEvent: CallRingingEvent?) {
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.INCOMING_CALL_ACTION)
+                    ActiveCallService.start(applicationContext, CallAction.CALL_RINGING)
                 }
             }
 
             override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {
                 viewModel.updateState { copy(isEstablished = true) }
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_ESTABLISHED_ACTION)
+                    ActiveCallService.start(applicationContext, CallAction.CALL_ESTABLISHED)
                 }
             }
 
@@ -342,14 +348,14 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {
                 viewModel.updateState { copy(callAlert = CallAlert.Mode.Reconnecting) }
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_RECONNECTING_ACTION)
+                    ActiveCallService.start(applicationContext, CallAction.CALL_RECONNECTING)
                 }
             }
 
             override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
                 viewModel.updateState { copy(callAlert = null) }
                 runOnUiThread {
-                    OngoingCallService.sendCallServiceIntent(applicationContext, OngoingCallService.CALL_RECONNECTED_ACTION)
+                    ActiveCallService.start(applicationContext, CallAction.CALL_RECONNECTED)
                 }
             }
         })

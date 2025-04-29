@@ -2,9 +2,14 @@ package com.infobip.webrtc.ui.internal.model
 
 import android.content.Context
 import android.util.Log
+import com.infobip.webrtc.sdk.api.call.DataChannel
 import com.infobip.webrtc.sdk.api.call.IncomingWebrtcCall
 import com.infobip.webrtc.sdk.api.call.WebrtcCall
+import com.infobip.webrtc.sdk.api.device.AudioDeviceManager
 import com.infobip.webrtc.sdk.api.event.listener.NetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.event.listener.ParticipantNetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.event.listener.RemoteNetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.event.network.ParticipantNetworkQualityChangedEvent
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.sdk.api.model.RemoteVideo
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
@@ -16,6 +21,7 @@ import com.infobip.webrtc.ui.internal.listener.toWebRtcCallEventListener
 import com.infobip.webrtc.ui.internal.utils.applyIf
 import java.util.Date
 
+//region Base
 internal interface RtcUiWebrtcCall : RtcUiCall
 
 internal abstract class BaseRtcUiWebrtcCall(
@@ -23,7 +29,7 @@ internal abstract class BaseRtcUiWebrtcCall(
 ) : RtcUiWebrtcCall {
 
     override fun id(): String? = activeCall.id()
-    override fun callOptions(): RtcUiCallOptions? = activeCall.options()?.run { RtcUiCallOptions(isAudio, isVideo, null, videoOptions, customData) }
+    override fun callOptions(): RtcUiCallOptions? = activeCall.options()?.let { RtcUiCallOptions.WebRtcCall(it) }
     override fun updateCustomData(customData: Map<String, String>) {
         activeCall.options()?.customData?.applyIf({ isEmpty() }, { putAll(customData) })
     }
@@ -41,7 +47,6 @@ internal abstract class BaseRtcUiWebrtcCall(
             activeCall.id() to RemoteVideo(activeCall.remoteCameraTrack(), activeCall.remoteScreenShareTrack())
         )
     }
-
     override fun firstRemoteVideoTrack(type: RtcUiCallVideoTrackType): RTCVideoTrack? = remoteVideos()
         .values.firstNotNullOfOrNull {
             when (type) {
@@ -51,6 +56,9 @@ internal abstract class BaseRtcUiWebrtcCall(
             }
         }
 
+    override fun pauseIncomingVideo() = activeCall.pauseIncomingVideo()
+    override fun resumeIncomingVideo() = activeCall.resumeIncomingVideo()
+
     override fun hasLocalVideo(): Boolean = activeCall.hasCameraVideo()
     override fun localVideo(enabled: Boolean) = activeCall.cameraVideo(enabled)
     override fun localVideoTrack(): RTCVideoTrack? = activeCall.localCameraTrack()
@@ -58,6 +66,9 @@ internal abstract class BaseRtcUiWebrtcCall(
     override fun hasScreenShare(): Boolean = activeCall.hasScreenShare()
     override fun startScreenShare(screenCapturer: ScreenCapturer) = activeCall.startScreenShare(screenCapturer)
     override fun stopScreenShare() = activeCall.stopScreenShare()
+    override fun resetScreenShare() = activeCall.resetScreenShare()
+    override fun localScreenShareTrack(): RTCVideoTrack? = activeCall.localScreenShareTrack()
+    override fun remoteScreenShareTrack(): RTCVideoTrack? = activeCall.remoteScreenShareTrack()
 
     override fun hangup() = activeCall.hangup()
 
@@ -85,12 +96,30 @@ internal abstract class BaseRtcUiWebrtcCall(
     override fun setNetworkQualityListener(networkQualityListener: NetworkQualityEventListener?) {
         activeCall.networkQualityEventListener = networkQualityListener
     }
-}
 
+    override fun setParticipantNetworkQualityEventListener(participantNetworkQualityEventListener: ParticipantNetworkQualityEventListener?) {
+        if (participantNetworkQualityEventListener != null) {
+            activeCall.remoteNetworkQualityEventListener = RemoteNetworkQualityEventListener { remoteNetworkQualityChangedEvent ->
+                participantNetworkQualityEventListener.onParticipantNetworkQualityChanged(
+                    ParticipantNetworkQualityChangedEvent(
+                        null, remoteNetworkQualityChangedEvent?.networkQuality
+                    )
+                )
+            }
+        } else {
+            activeCall.remoteNetworkQualityEventListener = null
+        }
+    }
+
+    override fun audioDeviceManager(): AudioDeviceManager = activeCall.audioDeviceManager()
+    override fun dataChannel(): DataChannel? = activeCall.dataChannel()
+}
+//endregion
+
+//region Incoming
 internal interface RtcUiIncomingWebRtcCall : RtcUiIncomingCall
 
-internal class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrtcCall) : BaseRtcUiWebrtcCall(activeCall),
-    RtcUiIncomingWebRtcCall {
+internal class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrtcCall) : BaseRtcUiWebrtcCall(activeCall), RtcUiIncomingWebRtcCall {
 
     override fun peer(context: Context): String {
         return activeCall.source()?.displayIdentifier()?.takeIf { it.isNotBlank() }
@@ -99,8 +128,8 @@ internal class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrt
     }
 
     override fun accept(callOptions: RtcUiCallOptions?) {
-        if (callOptions != null)
-            activeCall.accept(callOptions.toWebRtcCallOptions())
+        if (callOptions is RtcUiCallOptions.WebRtcCall)
+            activeCall.accept(callOptions.options)
         else
             activeCall.accept()
     }
@@ -110,3 +139,4 @@ internal class RtcUiIncomingWebrtcCallImpl(private val activeCall: IncomingWebrt
     }
 
 }
+//endregion

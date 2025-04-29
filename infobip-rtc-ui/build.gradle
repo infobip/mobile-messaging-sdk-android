@@ -30,7 +30,7 @@ android {
     }
     defaultConfig {
         minSdkVersion mm_minSdkVersion
-        targetSdkVersion 34
+        targetSdkVersion mm_targetSdkVersion
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -82,11 +82,11 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$mm_lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$mm_lifecycleVersion"
-    implementation "androidx.fragment:fragment-ktx:1.5.4"
-    implementation "androidx.work:work-runtime-ktx:2.8.1"
+    implementation "androidx.fragment:fragment-ktx:1.8.6"
+    implementation "androidx.work:work-runtime-ktx:2.10.1"
     implementation "com.google.android.material:material:$mm_materialVersion"
 
-    api ("com.infobip:infobip-rtc:2.4.3") {
+    api ("com.infobip:infobip-rtc:2.5.8") {
         transitive = true
     }
 

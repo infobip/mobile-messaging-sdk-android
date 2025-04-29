@@ -20,10 +20,12 @@ import com.infobip.webrtc.sdk.api.event.call.ErrorEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantDisconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
@@ -32,6 +34,8 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
+import com.infobip.webrtc.sdk.api.event.call.RemoteDisconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.RemoteReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.listener.ApplicationCallEventListener
@@ -69,6 +73,8 @@ internal interface RtcUiCallEventListener {
     fun onParticipantUndeafen(participantUndeafEvent: ParticipantUndeafEvent?)
     fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?)
     fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?)
+    fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?)
+    fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?)
 
     fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?)
     fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?)
@@ -146,8 +152,24 @@ internal fun RtcUiCallEventListener.toWebRtcCallEventListener(): WebrtcCallEvent
             this@toWebRtcCallEventListener.onParticipantUnmuted(ParticipantUnmutedEvent(null))
         }
 
+        override fun onRemoteDisconnected(remoteDisconnectedEvent: RemoteDisconnectedEvent?) {
+            this@toWebRtcCallEventListener.onParticipantDisconnected(ParticipantDisconnectedEvent(null))
+        }
+
+        override fun onRemoteReconnected(remoteReconnectedEvent: RemoteReconnectedEvent?) {
+            this@toWebRtcCallEventListener.onParticipantReconnected(ParticipantReconnectedEvent(null))
+        }
+
         override fun onCallRecordingStarted(callRecordingStartedEvent: CallRecordingStartedEvent?) {
             this@toWebRtcCallEventListener.onCallRecordingStarted(callRecordingStartedEvent)
+        }
+
+        override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {
+            this@toWebRtcCallEventListener.onReconnecting(reconnectingEvent)
+        }
+
+        override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
+            this@toWebRtcCallEventListener.onReconnected(reconnectedEvent)
         }
 
         override fun onRinging(callRingingEvent: CallRingingEvent?) {
@@ -258,16 +280,20 @@ internal fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEve
             this@toAppCallEventListener.onParticipantStoppedTalking(participantStoppedTalkingEvent)
         }
 
+        override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {
+            this@toAppCallEventListener.onParticipantDisconnected(participantDisconnectedEvent)
+        }
+
+        override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {
+            this@toAppCallEventListener.onParticipantReconnected(participantReconnectedEvent)
+        }
+
         override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {
             this@toAppCallEventListener.onDialogJoined(dialogJoinedEvent)
         }
 
         override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {
             this@toAppCallEventListener.onDialogLeft(dialogLeftEvent)
-        }
-
-        override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
-            this@toAppCallEventListener.onReconnected(reconnectedEvent)
         }
 
         override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {
@@ -296,6 +322,10 @@ internal fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEve
 
         override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {
             this@toAppCallEventListener.onReconnecting(reconnectingEvent)
+        }
+
+        override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
+            this@toAppCallEventListener.onReconnected(reconnectedEvent)
         }
     }
 }

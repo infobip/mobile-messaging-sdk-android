@@ -56,7 +56,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".internal.service.OngoingCallService"
+            android:name=".internal.service.ActiveCallService"
             android:exported="false"
             android:foregroundServiceType="phoneCall" />
         <service

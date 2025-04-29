@@ -3,8 +3,11 @@ package com.infobip.webrtc.ui.internal.model
 import android.content.Context
 import android.util.Log
 import com.infobip.webrtc.sdk.api.call.ApplicationCall
+import com.infobip.webrtc.sdk.api.call.DataChannel
 import com.infobip.webrtc.sdk.api.call.IncomingApplicationCall
+import com.infobip.webrtc.sdk.api.device.AudioDeviceManager
 import com.infobip.webrtc.sdk.api.event.listener.NetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.event.listener.ParticipantNetworkQualityEventListener
 import com.infobip.webrtc.sdk.api.exception.ActionFailedException
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.sdk.api.model.RemoteVideo
@@ -18,6 +21,7 @@ import com.infobip.webrtc.ui.internal.listener.toAppCallEventListener
 import com.infobip.webrtc.ui.internal.utils.applyIf
 import java.util.*
 
+//region Base
 /**
  * Represents WebRTC 2.0 model - Application Call
  */
@@ -31,8 +35,8 @@ internal abstract class BaseRtcUiAppCall(
 ) : RtcUiAppCall {
 
     override fun id(): String? = activeCall.id()
-    override fun applicationId(): String? = activeCall.options().platform?.applicationId
-    override fun callOptions(): RtcUiCallOptions? = activeCall.options().run { RtcUiCallOptions(isAudio, isVideo, audioOptions, videoOptions, customData) }
+    override fun applicationId(): String? = activeCall.callsConfigurationId()
+    override fun callOptions(): RtcUiCallOptions? = RtcUiCallOptions.ApplicationCall(activeCall.options())
     override fun updateCustomData(customData: Map<String, String>) {
         activeCall.options().customData.applyIf({ isEmpty() }, { putAll(customData) })
     }
@@ -59,6 +63,9 @@ internal abstract class BaseRtcUiAppCall(
             }
     }
 
+    override fun pauseIncomingVideo() = activeCall.pauseIncomingVideo()
+    override fun resumeIncomingVideo() = activeCall.resumeIncomingVideo()
+
     override fun hasLocalVideo(): Boolean = activeCall.hasCameraVideo()
     override fun localVideo(enabled: Boolean) = activeCall.cameraVideo(enabled)
     override fun localVideoTrack(): RTCVideoTrack? = activeCall.localCameraTrack()
@@ -66,6 +73,9 @@ internal abstract class BaseRtcUiAppCall(
     override fun hasScreenShare(): Boolean = activeCall.hasScreenShare()
     override fun startScreenShare(screenCapturer: ScreenCapturer) = activeCall.startScreenShare(screenCapturer)
     override fun stopScreenShare() = activeCall.stopScreenShare()
+    override fun resetScreenShare() = activeCall.resetScreenShare()
+    override fun localScreenShareTrack(): RTCVideoTrack? = activeCall.localScreenShareTrack()
+    override fun remoteScreenShareTrack(): RTCVideoTrack? = null
 
     override fun hangup() = activeCall.hangup()
 
@@ -95,23 +105,31 @@ internal abstract class BaseRtcUiAppCall(
         activeCall.networkQualityEventListener = networkQualityListener
     }
 
-    override fun participants(): List<Participant>? = activeCall.participants()
-}
+    override fun setParticipantNetworkQualityEventListener(participantNetworkQualityEventListener: ParticipantNetworkQualityEventListener?) {
+        activeCall.participantNetworkQualityEventListener = participantNetworkQualityEventListener
+    }
 
+    override fun participants(): List<Participant>? = activeCall.participants()
+
+    override fun audioDeviceManager(): AudioDeviceManager? = activeCall.audioDeviceManager()
+    override fun dataChannel(): DataChannel? = activeCall.dataChannel()
+}
+//endregion
+
+//region Incoming
 internal interface RtcUiIncomingAppCall : RtcUiIncomingCall
 
-internal class RtcUiIncomingAppCallImpl(private val activeCall: IncomingApplicationCall) : BaseRtcUiAppCall(activeCall),
-    RtcUiIncomingAppCall {
+internal class RtcUiIncomingAppCallImpl(private val activeCall: IncomingApplicationCall) : BaseRtcUiAppCall(activeCall), RtcUiIncomingAppCall {
 
     override fun peer(context: Context): String {
         return activeCall.fromDisplayName()?.takeIf { it.isNotBlank() }
-            ?: activeCall.from()?.takeIf { it.isNotBlank() }
+            ?: activeCall.from().takeIf { it.isNotBlank() }
             ?: context.getString(R.string.mm_unknown)
     }
 
     override fun accept(callOptions: RtcUiCallOptions?) {
-        if (callOptions != null)
-            activeCall.accept(callOptions.toApplicationCallOptions())
+        if (callOptions is RtcUiCallOptions.ApplicationCall)
+            activeCall.accept(callOptions.options)
         else
             activeCall.accept()
     }
@@ -120,3 +138,4 @@ internal class RtcUiIncomingAppCallImpl(private val activeCall: IncomingApplicat
         activeCall.decline()
     }
 }
+//endregion

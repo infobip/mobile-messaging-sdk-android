@@ -1,8 +1,10 @@
 package com.infobip.webrtc.ui.internal.service
 
+import android.Manifest
 import android.app.Notification
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioManager
@@ -14,6 +16,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.RtcUiCallErrorMapper
@@ -22,49 +25,74 @@ import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.RtcUiCallErrorMapperFactory
 import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
-import com.infobip.webrtc.ui.internal.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegateFactory
 import com.infobip.webrtc.ui.internal.delegate.Vibrator
 import com.infobip.webrtc.ui.internal.delegate.VibratorImpl
+import com.infobip.webrtc.ui.internal.model.CallAction
 import com.infobip.webrtc.ui.internal.notification.CALL_NOTIFICATION_ID
 import com.infobip.webrtc.ui.internal.notification.CallNotificationFactory
 import com.infobip.webrtc.ui.model.RtcUiError
 
-class OngoingCallService : BaseService() {
+class ActiveCallService : BaseService() {
 
     companion object {
 
-        fun sendCallServiceIntent(context: Context, action: String) {
-            context.startService(Intent(context, OngoingCallService::class.java).apply { setAction(action) })
+        const val PEER_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.PEER_EXTRA"
+        const val CALL_STATUS_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.CALL_STATUS_EXTRA"
+
+        private val Context.hasPushPermission: Boolean
+            get() {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+                else
+                    true
+            }
+
+        fun startIntent(
+            context: Context,
+            action: CallAction,
+            peer: String? = null,
+            callStatus: CallStatus? = null,
+        ): Intent {
+            return Intent(context, ActiveCallService::class.java).apply {
+                setAction(action.name)
+                putExtra(PEER_EXTRA, peer)
+                putExtra(CALL_STATUS_EXTRA, callStatus?.name)
+            }
         }
 
-        const val INCOMING_CALL_ACTION = "com.infobip.calls.ui.service.OngoingCallService.INCOMING_CALL_ACTION"
-        const val SILENT_INCOMING_CALL_ACTION = "com.infobip.calls.ui.service.OngoingCallService.SILENT_INCOMING_CALL_ACTION"
-        const val CALL_ENDED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.END_CALL_ACTION"
-        const val CALL_ESTABLISHED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_ESTABLISHED_ACTION"
-        const val CALL_DECLINED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_DECLINED_ACTION"
-        const val CALL_HANGUP_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_HANGUP_ACTION"
-        const val CALL_RECONNECTING_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_RECONNECTING_ACTION"
-        const val CALL_RECONNECTED_ACTION = "com.infobip.calls.ui.service.OngoingCallService.CALL_RECONNECTED_ACTION"
+        fun start(
+            context: Context,
+            action: CallAction,
+            peer: String? = null,
+            callStatus: CallStatus? = null,
+            foreground: Boolean = false
+        ) {
+            runCatching {
+                val intent = startIntent(context, action, peer, callStatus)
+                if (foreground && context.hasPushPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            }.onFailure {
+                Log.e(TAG, "Could not start service with argument = action: $action, peer: $peer, foreground: $foreground", it)
+            }
+        }
 
-        const val NAME_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.NAME_EXTRA"
-        const val CALL_STATUS_EXTRA = "com.infobip.calls.ui.service.OngoingCallService.CALL_STATUS_EXTRA"
     }
 
-    private val vibrateDelegate: Vibrator by lazy { VibratorImpl(this@OngoingCallService) }
+    private val vibrateDelegate: Vibrator by lazy { VibratorImpl(this@ActiveCallService) }
     private val incomingCallRingtone: Ringtone by lazy { RingtoneManager.getRingtone(applicationContext, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)) }
     private val audioManager: AudioManager by lazy { applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager }
     private val notificationHelper: CallNotificationFactory by lazy { Injector.notificationFactory }
     private val callsDelegate: CallsDelegate by lazy { Injector.callsDelegate }
-    private val notificationPermissionDelegate: NotificationPermissionDelegate by lazy { Injector.notificationPermissionDelegate }
-    private val hasNotificationPermission
-        get() = notificationPermissionDelegate.hasPermission()
-    private val phoneStateDelegate: PhoneStateDelegate by lazy { PhoneStateDelegateFactory.getPhoneStateDelegate(this@OngoingCallService) }
+    private val phoneStateDelegate: PhoneStateDelegate by lazy { PhoneStateDelegateFactory.getPhoneStateDelegate(this@ActiveCallService) }
     private val cache: Cache by lazy { Injector.cache }
-    private val errorMapper: RtcUiCallErrorMapper by lazy { RtcUiCallErrorMapperFactory.create(this@OngoingCallService) }
+    private val errorMapper: RtcUiCallErrorMapper by lazy { RtcUiCallErrorMapperFactory.create(this@ActiveCallService) }
 
-    private var peerName: String = ""
+    private var cachedPeer: String? = null
     private var reconnectingTonePlayer: MediaPlayer? = null
     private var isCallActive: Boolean = false
 
@@ -72,86 +100,95 @@ class OngoingCallService : BaseService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.d(TAG, "Handle action: ${intent?.action.orEmpty()}")
-        when (intent?.action) {
-            INCOMING_CALL_ACTION -> {
-                val activeCallStatus = runCatching { CallStatus.valueOf(intent.getStringExtra(
-                    CALL_STATUS_EXTRA
-                ).orEmpty()) }.getOrDefault(CallStatus.FINISHED)
+        val action: String? = intent?.action
+        val callAction = CallAction.fromValue(action) ?: return START_NOT_STICKY
+        val peer = intent?.getStringExtra(PEER_EXTRA)?.takeIf { it.isNotBlank() }?.also { cachedPeer = it }
+            ?: cachedPeer?.takeIf { it.isNotBlank() }
+            ?: applicationContext.getString(R.string.mm_unknown)
+
+        when (callAction) {
+            CallAction.INCOMING_CALL_START -> {
+                val activeCallStatus = intent?.getStringExtra(CALL_STATUS_EXTRA)?.let { runCatching { CallStatus.valueOf(it) }.getOrNull() } ?: CallStatus.FINISHED
                 val phoneState = phoneStateDelegate.getState()
 
                 if (phoneState == -1 && cache.autoDeclineOnMissingReadPhoneStatePermission) { //could not get phone state because of missing permission
                     showToast(RtcUiError.MISSING_READ_PHONE_STATE_PERMISSION)
                     callsDelegate.decline()
+                    onCallFinished()
                 } else if (phoneState > 0 && cache.autoDeclineWhenOngoingCellularCall) { //there is ongoing or ringing cellular phone call
                     showToast(RtcUiError.INCOMING_WEBRTC_CALL_WHILE_CELLULAR_CALL)
                     callsDelegate.decline()
-                } else if (!hasNotificationPermission && cache.autoDeclineOnMissingNotificationPermission) {
+                    onCallFinished()
+                } else if (!hasPushPermission && cache.autoDeclineOnMissingNotificationPermission) {
                     showToast(RtcUiError.MISSING_POST_NOTIFICATIONS_PERMISSION)
                     callsDelegate.decline()
-                } else if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING && hasNotificationPermission) {
-                    peerName = intent.getStringExtra(NAME_EXTRA) ?: applicationContext.getString(R.string.mm_unknown)
-                    startForeground(notificationHelper.createIncomingCallNotification(this, peerName, getString(R.string.mm_incoming_call)))
-                    startMedia()
+                    onCallFinished()
+                } else if (activeCallStatus != CallStatus.FINISHED && activeCallStatus != CallStatus.FINISHING && hasPushPermission) {
+                    startForeground(notificationHelper.createIncomingCallNotification(this, peer, getString(R.string.mm_incoming_call)))
+                    startRinging()
                 } else {
-                    Log.e(TAG, "Incoming call not handled! callStatus=$activeCallStatus, hasNotificationPermission=$hasNotificationPermission")
+                    Log.e(TAG, "Incoming call not handled! callStatus=$activeCallStatus, hasPushPermission=$hasPushPermission")
                 }
             }
 
-            SILENT_INCOMING_CALL_ACTION -> {
-                startForeground(notificationHelper.createIncomingCallNotificationSilent(this, peerName, getString(R.string.mm_incoming_call)))
+            CallAction.SILENT_INCOMING_CALL_START -> {
+                startForeground(notificationHelper.createIncomingCallNotificationSilent(this, peer, getString(R.string.mm_incoming_call)))
             }
 
-            CALL_ENDED_ACTION -> {
-                onCallEnded()
+            CallAction.INCOMING_CALL_ACCEPTED -> {
+                stopRinging()
             }
 
-            CALL_ESTABLISHED_ACTION -> {
-                stopMedia()
-                startForeground(notificationHelper.createOngoingCallNotification(this, peerName, getString(R.string.mm_in_call)))
+            CallAction.CALL_DECLINE -> {
+                callsDelegate.decline()
+                onCallFinished()
+            }
+
+            CallAction.CALL_RINGING,
+            CallAction.CALL_EARLY_MEDIA -> {
+            }
+
+            CallAction.CALL_ESTABLISHED -> {
+                stopRinging()
+                startForeground(notificationHelper.createOngoingCallNotification(this, peer, getString(R.string.mm_in_call)))
                 isCallActive = true
             }
 
-            CALL_DECLINED_ACTION -> {
-                callsDelegate.decline()
-                onCallEnded()
-            }
-
-            CALL_HANGUP_ACTION -> {
+            CallAction.CALL_HANGUP -> {
                 callsDelegate.hangup()
-                onCallEnded()
+                onCallFinished()
             }
 
-            CALL_RECONNECTING_ACTION -> {
+            CallAction.CALL_FINISHED -> {
+                onCallFinished()
+            }
+
+            CallAction.CALL_RECONNECTING -> {
                 startReconnectingTone()
             }
 
-            CALL_RECONNECTED_ACTION -> {
+            CallAction.CALL_RECONNECTED -> {
                 stopReconnectingToneAndPlayReconnection()
             }
-
-            else -> Log.d(TAG, "Unhandled intent action: ${intent?.action.orEmpty()}")
         }
         return START_NOT_STICKY
     }
 
     private fun startForeground(notification: Notification) {
-        if (hasNotificationPermission) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(CALL_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
-            } else {
-                startForeground(CALL_NOTIFICATION_ID, notification)
-            }
+        if (hasPushPermission) {
+            val serviceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL else 0
+            ServiceCompat.startForeground(this, CALL_NOTIFICATION_ID, notification, serviceType)
         }
     }
 
-    private fun onCallEnded() {
+    private fun onCallFinished() {
         ScreenShareService.sendScreenShareServiceIntent(
             applicationContext,
             ScreenShareService.ACTION_STOP_SCREEN_SHARE
         )
-        stopMedia()
+        stopRinging()
         stopReconnectingTone()
-        if (isCallActive){
+        if (isCallActive) {
             playCallFinishedTone()
             isCallActive = false
         }
@@ -159,7 +196,7 @@ class OngoingCallService : BaseService() {
         stopSelf()
     }
 
-    private fun startMedia() {
+    private fun startRinging() {
         when (audioManager.ringerMode) {
             AudioManager.RINGER_MODE_VIBRATE -> vibrateDelegate.vibrate()
             AudioManager.RINGER_MODE_NORMAL -> {
@@ -169,12 +206,12 @@ class OngoingCallService : BaseService() {
         }
     }
 
-    private fun stopMedia() {
+    private fun stopRinging() {
         incomingCallRingtone.stop()
         vibrateDelegate.stopVibrate()
     }
 
-    private fun startReconnectingTone()  {
+    private fun startReconnectingTone() {
         if (reconnectingTonePlayer != null)
             stopReconnectingTone()
 

@@ -9,7 +9,8 @@ import android.widget.Toast
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.RtcUiCallErrorMapperFactory
 import com.infobip.webrtc.ui.internal.core.TAG
-import com.infobip.webrtc.ui.internal.service.OngoingCallService
+import com.infobip.webrtc.ui.internal.model.CallAction
+import com.infobip.webrtc.ui.internal.service.ActiveCallService
 import com.infobip.webrtc.ui.model.RtcUiError
 
 class PhoneStateBroadcastReceiver : BroadcastReceiver() {
@@ -34,7 +35,7 @@ class PhoneStateBroadcastReceiver : BroadcastReceiver() {
                                     callDelegate.hangup()
                                 else
                                     callDelegate.decline()
-                                OngoingCallService.sendCallServiceIntent(context, OngoingCallService.CALL_ENDED_ACTION)
+                                ActiveCallService.start(context, CallAction.CALL_FINISHED)
                                 val message = RtcUiCallErrorMapperFactory.create(context).getMessageForError(RtcUiError.CELLULAR_CALL_ACCEPTED_WHILE_WEBRTC_CALL)
                                 if (message?.isNotBlank() == true) {
                                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()

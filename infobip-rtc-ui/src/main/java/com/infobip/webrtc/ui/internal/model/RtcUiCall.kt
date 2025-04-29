@@ -1,7 +1,10 @@
 package com.infobip.webrtc.ui.internal.model
 
 import android.content.Context
+import com.infobip.webrtc.sdk.api.call.DataChannel
+import com.infobip.webrtc.sdk.api.device.AudioDeviceManager
 import com.infobip.webrtc.sdk.api.event.listener.NetworkQualityEventListener
+import com.infobip.webrtc.sdk.api.event.listener.ParticipantNetworkQualityEventListener
 import com.infobip.webrtc.sdk.api.exception.ActionFailedException
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.sdk.api.model.RemoteVideo
@@ -26,19 +29,24 @@ internal interface RtcUiCall {
     fun remoteVideos(): Map<String, RemoteVideo>
     fun firstRemoteVideoTrack(type: RtcUiCallVideoTrackType): RTCVideoTrack?
 
-    fun hasLocalVideo(): Boolean
+    @Throws(ActionFailedException::class)
+    fun pauseIncomingVideo()
+    @Throws(ActionFailedException::class)
+    fun resumeIncomingVideo()
 
+    fun hasLocalVideo(): Boolean
     @Throws(ActionFailedException::class)
     fun localVideo(enabled: Boolean)
     fun localVideoTrack(): RTCVideoTrack?
 
     fun hasScreenShare(): Boolean
-
     @Throws(ActionFailedException::class)
     fun startScreenShare(screenCapturer: ScreenCapturer)
-
     @Throws(ActionFailedException::class)
     fun stopScreenShare()
+    fun resetScreenShare()
+    fun localScreenShareTrack(): RTCVideoTrack?
+    fun remoteScreenShareTrack(): RTCVideoTrack?
 
     fun hangup()
 
@@ -56,6 +64,10 @@ internal interface RtcUiCall {
 
     fun setEventListener(eventListener: RtcUiCallEventListener?)
     fun setNetworkQualityListener(networkQualityListener: NetworkQualityEventListener?)
+    fun setParticipantNetworkQualityEventListener(participantNetworkQualityEventListener: ParticipantNetworkQualityEventListener?)
+
+    fun audioDeviceManager(): AudioDeviceManager?
+    fun dataChannel(): DataChannel?
 }
 
 internal interface RtcUiIncomingCall : RtcUiCall {

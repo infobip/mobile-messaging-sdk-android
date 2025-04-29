@@ -15,7 +15,8 @@ import androidx.core.app.Person
 import androidx.core.content.getSystemService
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.service.OngoingCallService
+import com.infobip.webrtc.ui.internal.model.CallAction
+import com.infobip.webrtc.ui.internal.service.ActiveCallService
 import com.infobip.webrtc.ui.internal.ui.CallActivity
 import com.infobip.webrtc.ui.internal.utils.resolveStyledStringAttribute
 
@@ -137,15 +138,13 @@ internal class CallNotificationFactoryImpl(
 
         val acceptIntent = PendingIntent.getActivity(
             context, CALL_ACCEPT_REQUEST_CODE,
-            CallActivity.newInstance(context, callerName, acceptCall),
+            CallActivity.startIntent(context, callerName, acceptCall),
             updateCurrentImmutableFlags
         )
         val declineIntent = PendingIntent.getService(
             context,
             CALL_DECLINE_REQUEST_CODE,
-            Intent(context, OngoingCallService::class.java).apply {
-                action = OngoingCallService.CALL_DECLINED_ACTION
-            },
+            ActiveCallService.startIntent(context, CallAction.CALL_DECLINE),
             updateCurrentImmutableFlags
         )
 
@@ -197,9 +196,7 @@ internal class CallNotificationFactoryImpl(
         val hangupIntent = PendingIntent.getService(
             context,
             CALL_HANGUP_REQUEST_CODE,
-            Intent(context, OngoingCallService::class.java).apply {
-                action = OngoingCallService.CALL_HANGUP_ACTION
-            },
+            ActiveCallService.startIntent(context, CallAction.CALL_HANGUP),
             updateCurrentImmutableFlags
         )
 
@@ -246,7 +243,7 @@ internal class CallNotificationFactoryImpl(
     private fun contentIntent(title: String): PendingIntent {
         val activityClass = Injector.cache.activityClass
         val contentIntent = if (activityClass == CallActivity::class.java)
-            CallActivity.newInstance(context, caller = title)
+            CallActivity.startIntent(context, caller = title)
         else
             Intent(context, activityClass)
 

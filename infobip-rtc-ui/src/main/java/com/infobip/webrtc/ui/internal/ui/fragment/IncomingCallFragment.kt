@@ -12,6 +12,8 @@ import androidx.fragment.app.activityViewModels
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.FragmentIncomingCallBinding
 import com.infobip.webrtc.ui.internal.core.Injector
+import com.infobip.webrtc.ui.internal.model.CallAction
+import com.infobip.webrtc.ui.internal.service.ActiveCallService
 import com.infobip.webrtc.ui.internal.ui.CallViewModel
 import com.infobip.webrtc.ui.internal.utils.navigate
 import com.infobip.webrtc.ui.internal.utils.show
@@ -32,6 +34,7 @@ class IncomingCallFragment : Fragment() {
             name.text = (Injector.cache.incomingCallScreenStyle?.callerName ?: viewModel.peerName)
             accept.setOnClickListener {
                 viewModel.accept()
+                ActiveCallService.start(requireContext(), CallAction.INCOMING_CALL_ACCEPTED)
                 parentFragmentManager.navigate(InCallFragment(), R.id.navHost)
             }
             decline.setOnClickListener {
