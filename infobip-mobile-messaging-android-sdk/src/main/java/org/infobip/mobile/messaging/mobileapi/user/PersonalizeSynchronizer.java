@@ -1,12 +1,15 @@
 package org.infobip.mobile.messaging.mobileapi.user;
 
 
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.authorizationHeader;
+
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserAttributes;
 import org.infobip.mobile.messaging.UserIdentity;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiUserData;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
@@ -26,6 +29,7 @@ public class PersonalizeSynchronizer {
     private final MobileMessagingCore mobileMessagingCore;
     private final Broadcaster broadcaster;
     private final MobileApiAppInstance mobileApiAppInstance;
+    private final MobileApiUserData mobileApiUserData;
     private final Executor executor;
     private final BatchReporter batchReporter;
     private final MRetryPolicy policy;
@@ -35,6 +39,7 @@ public class PersonalizeSynchronizer {
             MobileMessagingCore mobileMessagingCore,
             Broadcaster broadcaster,
             MobileApiAppInstance mobileApiAppInstance,
+            MobileApiUserData mobileApiUserData,
             MRetryPolicy policy,
             Executor executor,
             BatchReporter batchReporter,
@@ -43,6 +48,7 @@ public class PersonalizeSynchronizer {
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
         this.mobileApiAppInstance = mobileApiAppInstance;
+        this.mobileApiUserData = mobileApiUserData;
         this.policy = policy;
         this.executor = executor;
         this.batchReporter = batchReporter;
@@ -69,7 +75,8 @@ public class PersonalizeSynchronizer {
             @Override
             public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("PERSONALIZE >>>", userPersonalizeBody);
-                mobileApiAppInstance.personalize(mobileMessagingCore.getPushRegistrationId(), forceDepersonalize, keepAsLead, userPersonalizeBody);
+                String header = authorizationHeader(mobileMessagingCore, broadcaster);
+                mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, userPersonalizeBody);
                 return null;
             }
 
@@ -226,7 +233,8 @@ public class PersonalizeSynchronizer {
             @Override
             public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("REPERSONALIZE >>>", userPersonalizeBody);
-                mobileApiAppInstance.repersonalize(mobileMessagingCore.getPushRegistrationId(), userPersonalizeBody);
+                String header = authorizationHeader(mobileMessagingCore, broadcaster);
+                mobileApiUserData.repersonalize(mobileMessagingCore.getPushRegistrationId(), header, userPersonalizeBody);
                 MobileMessagingLogger.v("REPERSONALIZE DONE <<<");
                 return null;
             }

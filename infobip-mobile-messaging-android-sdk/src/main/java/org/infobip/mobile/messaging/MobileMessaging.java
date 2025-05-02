@@ -52,6 +52,8 @@ import java.util.List;
  * @see Builder#withoutMessageStore()
  * @see Builder#withoutCarrierInfo()
  * @see Builder#withoutSystemInfo()
+ * @see Builder#withJwtSupplier(JwtSupplier)
+ *
  * @since 29.02.2016.
  */
 public abstract class MobileMessaging {
@@ -466,6 +468,25 @@ public abstract class MobileMessaging {
     public abstract void cleanup();
 
     /**
+     * Sets or replaces the {@link JwtSupplier} used for API authorization.
+     * <p>
+     * The provided {@link JwtSupplier} will be called to obtain JWT tokens
+     * for requests to APIs that support JWT-based authorization. The token
+     * is expected to be supplied by the {@link JwtSupplier#getJwt()} method
+     * when an authorized API call is made.
+     * </p>
+     *
+     * <p>
+     * Calling this method replaces any previously set {@link JwtSupplier}.
+     * The updated supplier will be used for all subsequent API requests requiring authorization.
+     * </p>
+     *
+     * @param jwtSupplier the supplier that provides JWT tokens for API authorization.
+     * @see JwtSupplier
+     */
+    public abstract void setJwtSupplier(JwtSupplier jwtSupplier);
+
+    /**
      * Default result listener interface for asynchronous operations.
      *
      * @param <T> type of successful result
@@ -523,6 +544,8 @@ public abstract class MobileMessaging {
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
      * @see Builder#withFirebaseOptions(FirebaseOptions)
+     * @see Builder#withJwtSupplier(JwtSupplier)
+     *
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -546,6 +569,7 @@ public abstract class MobileMessaging {
         private ApplicationCodeProvider applicationCodeProvider = null;
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
+        private JwtSupplier jwtSupplier = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -935,6 +959,29 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Sets the {@link JwtSupplier} to be used for API authorization.
+         * <p>
+         * The provided {@link JwtSupplier} will be called to obtain JWT tokens
+         * for requests to APIs that support JWT-based authorization. The token
+         * is expected to be supplied by the {@link JwtSupplier#getJwt()} method
+         * when an authorized API call is made.
+         * </p>
+         *
+         * <p>
+         * If set, the JWT returned by {@link JwtSupplier#getJwt()} will be included
+         * in the appropriate authorization header for supported API requests.
+         * </p>
+         *
+         * @param jwtSupplier the supplier that provides JWT tokens for API authorization.
+         * @return {@link Builder}
+         * @see JwtSupplier
+         */
+        public Builder withJwtSupplier(JwtSupplier jwtSupplier) {
+            this.jwtSupplier = jwtSupplier;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -968,7 +1015,8 @@ public abstract class MobileMessaging {
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
-                    .withFirebaseOptions(firebaseOptions);
+                    .withFirebaseOptions(firebaseOptions)
+                    .withJwtSupplier(jwtSupplier);
 
             if (oldCryptor != null) {
                 mobileMessagingCoreBuilder.withCryptorMigration(oldCryptor);

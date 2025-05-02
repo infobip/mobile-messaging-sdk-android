@@ -66,7 +66,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         mobileApiMessages = mock(MobileApiMessages.class);
 
         doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
-        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiAppInstance).patchUser(anyString(), any(Map.class));
+        doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiUserData).patchUser(anyString(), anyString(), any(Map.class));
         given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
 
         RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
@@ -74,7 +74,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         executor = Executors.newSingleThreadExecutor();
         messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiAppInstance);
-        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiAppInstance);
+        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiUserData);
     }
 
     @Test
@@ -149,7 +149,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
 
         // Then
         verify(broadcaster, after(3000).atLeast(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiAppInstance, times(1 + retryPolicy.getMaxRetries())).patchUser(anyString(), any(Map.class));
+        verify(mobileApiUserData, times(1 + retryPolicy.getMaxRetries())).patchUser(anyString(), anyString(), any(Map.class));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
 
         // Then
         verify(broadcaster, after(4000).times(1)).error(any(MobileMessagingError.class));
-        verify(mobileApiAppInstance, times(1)).patchUser(anyString(), any(Map.class));
+        verify(mobileApiUserData, times(1)).patchUser(anyString(), anyString(), any(Map.class));
     }
 
     private void withoutStoringUserData() {

@@ -132,6 +132,7 @@ dependencies {
     implementation "com.google.android.material:material:$mm_materialVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$mm_desugarJdkVersion"
 

@@ -148,6 +148,11 @@ public class AndroidBroadcaster implements Broadcaster {
         send(inAppClickReported);
     }
 
+    @Override
+    public void userDataJwtExpired() {
+        send(prepare(Event.USER_DATA_JWT_EXPIRED));
+    }
+
     private void send(Intent intent) {
         try {
             context.sendBroadcast(intent);

@@ -43,14 +43,14 @@ public class UserSyncTest extends MobileMessagingTestCase {
         resultListener = mock(MobileMessaging.ResultListener.class);
         dataCaptor = forClass(User.class);
         resultCaptor = forClass(Result.class);
-        given(mobileApiAppInstance.getUser(anyString())).willReturn(new UserBody());
+        given(mobileApiUserData.getUser(anyString(), anyString())).willReturn(new UserBody());
     }
 
     @Test
     public void test_user_data_fetch() throws Exception {
         mobileMessaging.fetchUser(resultListener);
 
-        verify(mobileApiAppInstance, after(500).times(1)).getUser(anyString());
+        verify(mobileApiUserData, after(500).times(1)).getUser(anyString(), anyString());
         verify(resultListener, after(300).times(1)).onResult(resultCaptor.capture());
         Result result = resultCaptor.getValue();
         assertNotNull(result.getData());
@@ -68,7 +68,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.tags, CollectionUtils.setOf("first", "second", "third"));
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
+        verify(mobileApiUserData, after(500).times(1)).patchUser(anyString(), anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 
@@ -102,7 +102,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
 
         mobileMessaging.saveUser(givenUser);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
+        verify(mobileApiUserData, after(500).times(1)).patchUser(anyString(), anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
     }
@@ -135,7 +135,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
+        verify(mobileApiUserData, after(500).times(1)).patchUser(anyString(), anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 
@@ -166,7 +166,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> report = new HashMap<>();
         report.put(UserAtts.customAttributes, customAtts);
 
-        verify(mobileApiAppInstance, after(500).times(1)).patchUser(anyString(), eq(report));
+        verify(mobileApiUserData, after(500).times(1)).patchUser(anyString(), anyString(), eq(report));
         verify(broadcaster, after(500).atLeastOnce()).userUpdated(dataCaptor.capture());
         assertNull(mobileMessagingCore.getUnreportedUserData());
 

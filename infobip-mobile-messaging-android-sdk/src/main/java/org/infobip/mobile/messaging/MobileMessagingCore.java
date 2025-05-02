@@ -177,6 +177,7 @@ public class MobileMessagingCore
     private final FirebaseAppProvider firebaseAppProvider;
     private final PostNotificationsPermissionRequester postNotificationsPermissionRequester;
     private InAppClickReporter inAppClickReporter;
+    private volatile JwtSupplier jwtSupplier;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
@@ -1096,6 +1097,15 @@ public class MobileMessagingCore
     private void setNotificationSettings(NotificationSettings notificationSettings) {
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, null != notificationSettings);
         this.notificationSettings = notificationSettings;
+    }
+
+    public void setJwtSupplier(JwtSupplier jwtSupplier) {
+        this.jwtSupplier = jwtSupplier;
+    }
+
+    public String getJwtFromSupplier() {
+        if (jwtSupplier == null) return null;
+        return jwtSupplier.getJwt();
     }
 
     private boolean isDisplayNotificationEnabled() {
@@ -2038,7 +2048,7 @@ public class MobileMessagingCore
     private UserDataReporter userDataReporter() {
         if (userDataReporter == null) {
             userDataReporter = new UserDataReporter(this, registrationAlignedExecutor,
-                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiAppInstance(context));
+                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiUserData(context));
         }
         return userDataReporter;
     }
@@ -2050,6 +2060,7 @@ public class MobileMessagingCore
                     this,
                     broadcaster,
                     mobileApiResourceProvider().getMobileApiAppInstance(context),
+                    mobileApiResourceProvider().getMobileApiUserData(context),
                     retryPolicyProvider.DEFAULT(),
                     registrationAlignedExecutor,
                     new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
@@ -2154,6 +2165,7 @@ public class MobileMessagingCore
         private ApplicationCodeProvider applicationCodeProvider;
         private FirebaseOptions firebaseOptions;
         private Cryptor oldCryptor = null;
+        private JwtSupplier jwtSupplier = null;
 
         public Builder(Application application) {
             if (null == application) {
@@ -2247,6 +2259,29 @@ public class MobileMessagingCore
         }
 
         /**
+         * Sets the {@link JwtSupplier} to be used for API authorization.
+         * <p>
+         * The provided {@link JwtSupplier} will be called to obtain JWT tokens
+         * for requests to APIs that support JWT-based authorization. The token
+         * is expected to be supplied by the {@link JwtSupplier#getJwt()} method
+         * when an authorized API call is made.
+         * </p>
+         *
+         * <p>
+         * If set, the JWT returned by {@link JwtSupplier#getJwt()} will be included
+         * in the appropriate authorization header for supported API requests.
+         * </p>
+         *
+         * @param jwtSupplier the supplier that provides JWT tokens for API authorization.
+         * @return {@link MobileMessaging.Builder}
+         * @see JwtSupplier
+         */
+        public Builder withJwtSupplier(JwtSupplier jwtSupplier) {
+            this.jwtSupplier = jwtSupplier;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessagingCore</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -2265,6 +2300,7 @@ public class MobileMessagingCore
             mobileMessagingCore.setApplicationCodeProviderClassName(applicationCodeProvider);
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
+            mobileMessagingCore.setJwtSupplier(jwtSupplier);
 
             // do the force invalidation of old push cloud tokens
             boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;

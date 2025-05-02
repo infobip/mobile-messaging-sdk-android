@@ -120,4 +120,9 @@ public interface Broadcaster {
      * @param clickUrls URLs of in-app actions clicked
      */
     void inAppClickReported(String... clickUrls);
+
+    /**
+     * Sends broadcast that the provided JWT for user data authorization is expired
+     */
+    void userDataJwtExpired();
 }

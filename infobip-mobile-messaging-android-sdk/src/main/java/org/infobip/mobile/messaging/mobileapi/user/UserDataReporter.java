@@ -5,7 +5,7 @@ import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserMapper;
-import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
+import org.infobip.mobile.messaging.api.appinstance.MobileApiUserData;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.authorizationHeader;
 
 
 @SuppressWarnings("unchecked")
@@ -35,16 +36,16 @@ public class UserDataReporter {
     private final Broadcaster broadcaster;
     private final MobileMessagingCore mobileMessagingCore;
     private final MobileMessagingStats stats;
-    private final MobileApiAppInstance mobileApiAppInstance;
+    private final MobileApiUserData mobileApiUserData;
     private final RetryPolicyProvider retryPolicyProvider;
 
-    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiAppInstance mobileApiAppInstance) {
+    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiUserData mobileApiUserData) {
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
-        this.mobileApiAppInstance = mobileApiAppInstance;
         this.retryPolicyProvider = retryPolicyProvider;
+        this.mobileApiUserData = mobileApiUserData;
     }
 
     public void patch(final MobileMessaging.ResultListener listener, final User user) {
@@ -73,9 +74,10 @@ public class UserDataReporter {
 
             @Override
             public Void run(User[] userData) {
+                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 final Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
-                mobileApiAppInstance.patchUser(pushRegistrationId, request);
+                mobileApiUserData.patchUser(pushRegistrationId, header, request);
                 MobileMessagingLogger.v("USER DATA DONE <<<");
                 return null;
             }
@@ -135,8 +137,9 @@ public class UserDataReporter {
         new MRetryableTask<Void, UserBody>() {
             @Override
             public UserBody run(Void[] aVoid) {
+                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 MobileMessagingLogger.v("FETCHING USER DATA >>>");
-                UserBody userResponse = mobileApiAppInstance.getUser(mobileMessagingCore.getPushRegistrationId());
+                UserBody userResponse = mobileApiUserData.getUser(mobileMessagingCore.getPushRegistrationId(), header);
                 MobileMessagingLogger.v("FETCHING USER DATA <<<", userResponse != null ? userResponse.toString() : null);
                 return userResponse;
             }
