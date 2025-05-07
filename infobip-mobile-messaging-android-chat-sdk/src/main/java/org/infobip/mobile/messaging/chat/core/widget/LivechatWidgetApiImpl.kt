@@ -17,6 +17,7 @@ import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.JwtProvider
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi.ExecutionListener
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -103,15 +104,41 @@ internal class LivechatWidgetApiImpl(
         }
     }
 
+    @Deprecated(
+        message = "Use send(message: MessagePayload) with MessagePayload.Basic() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
+    )
     override fun sendMessage(message: String?, attachment: InAppChatMobileAttachment?) {
-        executeApiCall(LivechatWidgetMethod.sendMessage) { listener ->
-            sendMessage(message, attachment, listener)
+        if (message?.isNotBlank() == true) {
+            send(MessagePayload.Basic(message, attachment))
+        } else if (attachment != null) {
+            send(MessagePayload.Basic(null, attachment))
+        } else {
+            propagateEvent { onMessageSent(LivechatWidgetResult.Error("Could not send message. Both message and attachment are null or empty.")) }
         }
     }
 
+    @Deprecated(
+        message = "Use send(message: MessagePayload) with MessagePayload.Draft() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
+    )
     override fun sendDraft(draft: String) {
-        executeApiCall(LivechatWidgetMethod.sendDraft) { listener ->
-            sendDraft(draft, listener)
+        if (draft.isNotBlank()) {
+            send(MessagePayload.Draft(draft))
+        } else {
+            propagateEvent { onDraftSent(LivechatWidgetResult.Error("Could not send draft. Draft is null or empty.")) }
+        }
+    }
+
+    override fun send(payload: MessagePayload, threadId: String?) {
+        executeApiCall(LivechatWidgetMethod.sendMessage) { listener ->
+            send(payload, threadId, listener)
+        }
+    }
+
+    override fun createThread(payload: MessagePayload) {
+        executeApiCall(LivechatWidgetMethod.createThread) { listener ->
+            createThread(payload, listener)
         }
     }
 
@@ -372,13 +399,12 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.sendContextualData -> propagateEvent { onContextualDataSent(error) }
             LivechatWidgetMethod.setLanguage -> propagateEvent { onLanguageChanged(error) }
             LivechatWidgetMethod.showThreadList -> propagateEvent { onThreadListShown(error) }
-            LivechatWidgetMethod.sendDraft -> propagateEvent { onDraftSent(error) }
-            LivechatWidgetMethod.sendMessageWithAttachment,
-            LivechatWidgetMethod.sendMessage -> propagateEvent { onMessageSent(error) }
+            LivechatWidgetMethod.sendMessage -> propagateEvent { onSent(error) }
 
             LivechatWidgetMethod.getThreads -> propagateEvent { onThreadsReceived(error) }
             LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(error) }
             LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(error) }
+            LivechatWidgetMethod.createThread -> propagateEvent { onThreadCreated(error) }
         }
     }
 
@@ -398,13 +424,12 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.sendContextualData -> propagateEvent { onContextualDataSent(LivechatWidgetResult.Success(payload)) }
             LivechatWidgetMethod.setLanguage -> propagateEvent { onLanguageChanged(LivechatWidgetResult.Success(payload)) }
             LivechatWidgetMethod.showThreadList -> propagateEvent { onThreadListShown(LivechatWidgetResult.Success.unit) }
-            LivechatWidgetMethod.sendDraft -> propagateEvent { onDraftSent(LivechatWidgetResult.Success(payload)) }
-            LivechatWidgetMethod.sendMessageWithAttachment,
-            LivechatWidgetMethod.sendMessage -> propagateEvent { onMessageSent(LivechatWidgetResult.Success(payload)) }
 
-            LivechatWidgetMethod.getThreads -> propagateEvent { onThreadsReceived(LivechatWidgetResult.Success(LivechatWidgetThreads.parse(payload ?: ""))) }
-            LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(LivechatWidgetResult.Success(LivechatWidgetThread.parse(payload ?: ""))) }
+            LivechatWidgetMethod.getThreads -> propagateEvent { onThreadsReceived(LivechatWidgetResult.Success(LivechatWidgetThreads.parse(payload))) }
+            LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(LivechatWidgetResult.Success(LivechatWidgetThread.parse(payload))) }
             LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(LivechatWidgetResult.Success(LivechatWidgetThread.parseOrNull(payload))) }
+            LivechatWidgetMethod.sendMessage -> propagateEvent { onSent(LivechatWidgetResult.Success(LivechatWidgetMessage.parseOrNull(payload))) }
+            LivechatWidgetMethod.createThread -> propagateEvent { onThreadCreated(LivechatWidgetResult.Success(LivechatWidgetMessage.parseOrNull(payload))) }
         }
     }
 

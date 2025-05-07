@@ -14,10 +14,12 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
+import org.infobip.mobile.messaging.chat.models.MessagePayload;
 import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.util.StringUtils;
 
@@ -105,6 +107,11 @@ public class InAppChatFragmentDemoFragment extends Fragment {
             }
 
             @Override
+            public void onChatThreadCreated(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
+                //Chat thread was created
+            }
+
+            @Override
             public void onChatThreadListShown(@NonNull LivechatWidgetResult<Unit> result) {
                 //Chat thread list was shown
             }
@@ -131,11 +138,16 @@ public class InAppChatFragmentDemoFragment extends Fragment {
 
             @Override
             public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
-                //Draft was sent
+                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
             }
 
             @Override
             public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
+                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
+            }
+
+            @Override
+            public void onChatSent(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
                 //Message was sent
             }
 
@@ -337,7 +349,7 @@ public class InAppChatFragmentDemoFragment extends Fragment {
                 String message = text.toString();
                 if (StringUtils.isNotBlank(message)) {
                     try {
-                        getInAppChatFragment().sendChatMessage(message);
+                        getInAppChatFragment().send(new MessagePayload.Basic(message));
                     } catch (IllegalArgumentException e) {
                         String error = e.getMessage();
                         if (StringUtils.isNotBlank(error)) {

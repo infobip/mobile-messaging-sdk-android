@@ -34,7 +34,9 @@ import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.SessionStorage
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads
@@ -42,6 +44,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
 import org.infobip.mobile.messaging.chat.models.AttachmentSource
 import org.infobip.mobile.messaging.chat.models.ContextualData
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.copyFileToPublicDir
 import org.infobip.mobile.messaging.chat.utils.deleteFile
@@ -155,7 +158,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
     private val inputFinishChecker: InAppChatInputFinishChecker =
         InAppChatInputFinishChecker { draft ->
-            withBinding { it.ibLcChat.sendChatMessageDraft(draft) }
+            withBinding { it.ibLcChat.send(MessagePayload.Draft(draft)) }
         }
     private val inputCheckerHandler = Handler(Looper.getMainLooper())
     private var lifecycleRegistry: InAppChatFragmentLifecycleRegistry? = null
@@ -223,8 +226,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      * When you use own message input it is up to you to handle message and attachment sending logic
      * including request Android permissions for attachment picker.
      * You can reuse provided [InAppChatInputView] or create custom UI.
-     * Use [InAppChatFragment.sendChatMessage] to send message.
-     * Use [InAppChatFragment.sendChatMessageDraft] to send draft message.
+     * Use [InAppChatFragment.send] to send message.
      */
     var withInput = true
         set(value) {
@@ -362,8 +364,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      */
     @JvmOverloads
     @Throws(IllegalArgumentException::class)
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
+    )
     fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
-        withBinding { it.ibLcChat.sendChatMessage(message, attachment) }
+        send(MessagePayload.Basic(message, attachment))
     }
 
     /**
@@ -373,8 +379,25 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      *
      * @param draft message
      */
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
+    )
     fun sendChatMessageDraft(draft: String) {
-        withBinding { it.ibLcChat.sendChatMessageDraft(draft) }
+        send(MessagePayload.Draft(draft))
+    }
+
+    /**
+     * Sends a message defined by [payload] data with optional [threadId].
+     *
+     * You can observe result by [InAppChatFragment.EventsListener.onChatSent] event.
+     *
+     * @param payload data defining message to be sent
+     * @param threadId id of existing thread to send message into, if not provided, it will be sent to the active thread
+     */
+    @JvmOverloads
+    fun send(payload: MessagePayload, threadId: String? = null) {
+        withBinding { it.ibLcChat.send(payload, threadId) }
     }
 
     /**
@@ -416,6 +439,17 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.")
             }
         )
+    }
+
+    /**
+     * Creates a new thread with an initial message defined by the given [payload].
+     *
+     * You can observe the result via the [InAppChatFragment.EventsListener.onChatThreadCreated] event.
+     *
+     * @param payload The message payload used to start the new thread.
+     */
+    fun createThread(payload: MessagePayload) {
+        withBinding { it.ibLcChat.createThread(payload) }
     }
 
     /**
@@ -650,8 +684,16 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 eventsListener?.onChatDraftSent(result)
             }
 
+            override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+                eventsListener?.onChatSent(result)
+            }
+
             override fun onChatContextualDataSent(result: LivechatWidgetResult<String?>) {
                 eventsListener?.onChatContextualDataSent(result)
+            }
+
+            override fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+                eventsListener?.onChatThreadCreated(result)
             }
 
             override fun onChatThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {
@@ -793,10 +835,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun initSendButton() = with(binding.ibLcChatInput) {
         setSendButtonClickListener {
             getInputText()?.let { msg ->
-                msg.chunkedSequence(InAppChatView.MESSAGE_MAX_LENGTH)
+                msg.chunkedSequence(LivechatWidgetApi.MESSAGE_MAX_LENGTH)
                     .forEach { message ->
                         if (message.isNotBlank()) {
-                            binding.ibLcChat.sendChatMessage(message)
+                            binding.ibLcChat.send(MessagePayload.Basic(message))
                         }
                     }
                 clearInputText()
@@ -921,7 +963,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                     Toast.LENGTH_SHORT
                 ).show()
             }.onSuccess {
-                binding.ibLcChat.sendChatMessage(null, it)
+                binding.ibLcChat.send(MessagePayload.Basic(null, it))
                 if (source == AttachmentSource.Camera || source == AttachmentSource.VideoRecorder) {
                     uri.copyFileToPublicDir(context)
                     uri.deleteFile(context)
@@ -1015,8 +1057,16 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 this@toFragmentEventsListener.onChatDraftSent(result)
             }
 
+            override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+                this@toFragmentEventsListener.onChatSent(result)
+            }
+
             override fun onChatContextualDataSent(result: LivechatWidgetResult<String?>) {
                 this@toFragmentEventsListener.onChatContextualDataSent(result)
+            }
+
+            override fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+                this@toFragmentEventsListener.onChatThreadCreated(result)
             }
 
             override fun onChatThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {

@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.chat.core.widget
 
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 
 /**
  * Low level interface for communication with JS Livechat Widget from native code.
@@ -9,20 +9,10 @@ import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 internal interface LivechatWidgetClient {
 
     /**
-     * Send typed message and attachment
-     * @param message user message
-     * @param attachment IMAGE, VIDEO, DOCUMENT
-     * @param executionListener action listener
+     * Send message defined by [payload] data.
+     * The message is sent to the thread defined by [threadId] parameter, otherwise it is sent to the currently active thread.
      */
-    fun sendMessage(message: String?, attachment: InAppChatMobileAttachment? = null, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
-
-    /**
-     * Send intermediate state of message input component
-     *
-     * @param draft user message draft
-     * @param executionListener action listener
-     */
-    fun sendDraft(draft: String?, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+    fun send(payload: MessagePayload, threadId: String? = null, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
 
     /**
      * Set language of widget
@@ -54,6 +44,11 @@ internal interface LivechatWidgetClient {
      * @param executionListener action listener
      */
     fun getActiveThread(executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
+    /**
+     * Create new thread with initial message defined by [payload] data.
+     */
+    fun createThread(payload: MessagePayload, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
 
     /**
      * Change widget destination to thread defined by [threadId].

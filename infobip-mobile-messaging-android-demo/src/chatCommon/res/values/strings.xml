@@ -60,4 +60,12 @@
     <string name="custom_button_checked">Custom button checked</string>
     <string name="custom_button_enabled">Custom button enabled</string>
     <string name="chat_availability">Chat available: %1$b</string>
+    <string name="message_type">Message type</string>
+    <string-array name="message_types">
+        <item>Basic text</item>
+        <item>Draft</item>
+        <item>Attachment</item>
+        <item>Custom data</item>
+    </string-array>
+    <string name="thread_id">Thread ID</string>
 </resources>

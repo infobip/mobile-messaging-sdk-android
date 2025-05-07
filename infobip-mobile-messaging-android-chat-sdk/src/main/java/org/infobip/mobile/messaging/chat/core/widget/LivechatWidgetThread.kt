@@ -35,7 +35,7 @@ data class LivechatWidgetThread(
             }
         }
 
-        internal fun parse(json: String): LivechatWidgetThread {
+        internal fun parse(json: String?): LivechatWidgetThread {
             return parseOrNull(json) ?: LivechatWidgetThread(raw = json)
         }
     }
@@ -52,13 +52,19 @@ data class LivechatWidgetThreads(
     internal companion object {
         private val serializer = JsonSerializer(false)
 
-        internal fun parse(json: String): LivechatWidgetThreads {
-            return runCatching {
-                val threads = serializer.deserialize(json, Array<LivechatWidgetThread>::class.java)
-                LivechatWidgetThreads(threads = threads.toList(), raw = json)
-            }.onFailure {
-                MobileMessagingLogger.e("Could not parse threads from: $json", it)
-            }.getOrDefault(LivechatWidgetThreads(raw = json))
+        internal fun parseOrNull(json: String?): LivechatWidgetThreads? {
+            return json?.takeIf { it.isNotBlank() && it != "null" }?.let {
+                runCatching {
+                    val threads = serializer.deserialize(json, Array<LivechatWidgetThread>::class.java)
+                    LivechatWidgetThreads(threads = threads.toList(), raw = json)
+                }.onFailure {
+                    MobileMessagingLogger.e("Could not parse threads from: $json", it)
+                }.getOrNull()
+            }
+        }
+
+        internal fun parse(json: String?): LivechatWidgetThreads {
+            return parseOrNull(json) ?: LivechatWidgetThreads(raw = json)
         }
     }
 

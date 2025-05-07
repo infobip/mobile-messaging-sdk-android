@@ -31,6 +31,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetEventsListener
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetException
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads
@@ -39,6 +40,7 @@ import org.infobip.mobile.messaging.chat.core.widget.toInAppChatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatBinding
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker
 import org.infobip.mobile.messaging.chat.models.ContextualData
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.*
@@ -85,7 +87,6 @@ class InAppChatView @JvmOverloads constructor(
         private const val CHAT_SERVICE_ERROR = "12"
         private const val CHAT_WIDGET_NOT_FOUND = "24"
         private const val TAG = "InAppChatView"
-        const val MESSAGE_MAX_LENGTH = 4096
     }
 
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
@@ -284,21 +285,38 @@ class InAppChatView @JvmOverloads constructor(
      */
     @JvmOverloads
     @Throws(IllegalArgumentException::class)
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
+    )
     fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
-        val messageEscaped = message?.let(CommonUtils::escapeJsonString)
-        if (message != null && message.length > MESSAGE_MAX_LENGTH) {
-            throw IllegalArgumentException("Message length exceed maximal allowed length $MESSAGE_MAX_LENGTH")
-        } else {
-            livechatWidgetApi.sendMessage(messageEscaped, attachment)
-        }
+        send(MessagePayload.Basic(message, attachment))
     }
 
     /**
      * Sends a draft message.
      * @param draft message
      */
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
+    )
     fun sendChatMessageDraft(draft: String) {
-        livechatWidgetApi.sendDraft(draft)
+        send(MessagePayload.Draft(draft))
+    }
+
+    /**
+     * Sends a message defined by the given [payload] to the specified [threadId], if provided.
+     * Otherwise, the message will be sent to the currently active thread.
+     *
+     * You can observe the result via the [InAppChatView.EventsListener.onChatSent] event.
+     *
+     * @param payload The message payload to sent.
+     * @param threadId The ID of the existing thread to send the message to. If `null`, the active thread will be used.
+     */
+    @JvmOverloads
+    fun send(payload: MessagePayload, threadId: String? = null) {
+        livechatWidgetApi.send(payload, threadId)
     }
 
     /**
@@ -338,6 +356,17 @@ class InAppChatView @JvmOverloads constructor(
             SessionStorage.contextualData = ContextualData(data, flag)
             MobileMessagingLogger.d(TAG, "Contextual data is stored, will be sent once chat is loaded.")
         }
+    }
+
+    /**
+     * Creates a new thread with an initial message defined by the given [payload].
+     *
+     * You can observe the result via the [InAppChatView.EventsListener.onChatThreadCreated] event.
+     *
+     * @param payload The message payload used to start the new thread.
+     */
+    fun createThread(payload: MessagePayload) {
+        livechatWidgetApi.createThread(payload)
     }
 
     /**
@@ -553,6 +582,13 @@ class InAppChatView @JvmOverloads constructor(
             }
         }
 
+        override fun onSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+            eventsListener?.onChatSent(result)
+            if (eventsListener == null && result.isError) {
+                MobileMessagingLogger.e(TAG, "Chat could not send:", result.errorOrNull())
+            }
+        }
+
         override fun onContextualDataSent(result: LivechatWidgetResult<String?>) {
             eventsListener?.onChatContextualDataSent(result)
             if (result.isSuccess) {
@@ -620,6 +656,10 @@ class InAppChatView @JvmOverloads constructor(
             if (eventsListener == null && result.isError) {
                 MobileMessagingLogger.e(TAG, "Chat could not obtain active thread:", result.errorOrNull())
             }
+        }
+
+        override fun onThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
+            eventsListener?.onChatThreadCreated(result)
         }
 
         override fun onThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {

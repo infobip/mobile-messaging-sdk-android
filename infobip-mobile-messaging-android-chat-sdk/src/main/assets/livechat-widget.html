@@ -118,24 +118,54 @@
         }
 
         //Widget API
-        function sendMessage(message) {
-            liveChat('send', message, (error, result) => widgetApiCallback('sendMessage', error, message));
+        function getValidMessagePayload(messagePayload, threadId) {
+            if ('customData' in messagePayload) {
+                const customDataObject = JSON.parse(messagePayload.customData);
+                messagePayload = {
+                    ...messagePayload,
+                    customData: customDataObject
+                };
+            }
+            if (threadId != null) {
+                messagePayload.threadId = threadId;
+            }
+            return messagePayload;
         }
 
-        function sendMessageWithAttachment(message, attachment, fileName) {
-            liveChat('send', {
-                'message': message,
-                'attachment': attachment,
-                'fileName': fileName,
-                'type': 'BASIC'
-            }, (error, result) => widgetApiCallback('sendMessageWithAttachment', error, message));
+        async function sendMessage(payload, threadId) {
+            try {
+                const validPayload = getValidMessagePayload(payload, threadId);
+                const response = await getLivechatSdk().sendMessage(validPayload);
+                if (response.success) {
+                    let responseData = response.data;
+                    if (responseData == null) {
+                        responseData = validPayload;
+                    }
+                    widgetApiCallback('sendMessage', null, responseData);
+                } else {
+                    widgetApiCallback('sendMessage', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('sendMessage', `Could not send message ${e.message}`, null);
+            }
         }
 
-        function sendDraft(draft) {
-            liveChat('send', {
-                'message': draft,
-                'type': 'DRAFT'
-            }, (error, result) => widgetApiCallback('sendDraft', error, draft));
+        async function createThread(initialMessagePayload) {
+            try {
+                const validPayload = getValidMessagePayload(initialMessagePayload);
+                const response = await getLivechatSdk().createThread(validPayload);
+                if (response.success) {
+                    let responseData = response.data;
+                    if (responseData == null) {
+                        responseData = validPayload;
+                    }
+                    widgetApiCallback('createThread', null, responseData);
+                } else {
+                    widgetApiCallback('createThread', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('createThread', `Could not create thread ${e.message}`, null);
+            }
         }
 
         function showThreadList() {

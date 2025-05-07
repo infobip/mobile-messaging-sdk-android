@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.view
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads
@@ -54,17 +55,29 @@ interface InAppChatEventsListener {
     /**
      * Called when chat message is sent.
      */
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     fun onChatMessageSent(result: LivechatWidgetResult<String?>)
 
     /**
      * Called when chat draft message is sent.
      */
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     fun onChatDraftSent(result: LivechatWidgetResult<String?>)
+
+    /**
+     * Called when any chat message payload is sent.
+     */
+    fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>)
 
     /**
      * Called when chat contextual data are sent.
      */
     fun onChatContextualDataSent(result: LivechatWidgetResult<String?>)
+
+    /**
+     * Called when livechat widget thread is created.
+     */
+    fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>)
 
     /**
      * Called when chat threads were requested.
@@ -151,25 +164,25 @@ open class DefaultInAppChatEventsListener : InAppChatEventsListener {
     @Deprecated("Use onChatLoadingFinished(result: LivechatWidgetResult<Unit>) instead")
     override fun onChatLoaded(controlsEnabled: Boolean) {}
     override fun onChatLoadingFinished(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionPaused(result: LivechatWidgetResult<Unit>) instead")
     override fun onChatDisconnected() {}
     override fun onChatConnectionPaused(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionResumed(result: LivechatWidgetResult<Unit>) instead")
     override fun onChatReconnected() {}
     override fun onChatConnectionResumed(result: LivechatWidgetResult<Unit>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatMessageSent(result: LivechatWidgetResult<String?>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatDraftSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatContextualDataSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatControlsVisibilityChanged(isVisible: Boolean) {}
     override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
-
     @Deprecated("Use onChatViewChanged(widgetView: LivechatWidgetView) instead")
     override fun onChatViewChanged(widgetView: InAppChatWidgetView) {}
     override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
     override fun onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) {}
-
     @Deprecated("Use onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) instead")
     override fun onChatWidgetThemeChanged(widgetThemeName: String) {}
     override fun onChatRawMessageReceived(rawMessage: String) {}
@@ -189,44 +202,33 @@ open class DefaultInAppChatFragmentEventsListener : InAppChatFragment.EventsList
     override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean = false
     override fun onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean = false
     override fun onExitChatPressed() {}
-
     @Deprecated("Use onChatLoadingFinished(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatLoaded(controlsEnabled: Boolean) {
-    }
-
+    override fun onChatLoaded(controlsEnabled: Boolean) {}
     override fun onChatLoadingFinished(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionPaused(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatDisconnected() {
-    }
-
+    override fun onChatDisconnected() {}
     override fun onChatConnectionPaused(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionResumed(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatReconnected() {
-    }
-
+    override fun onChatReconnected() {}
     override fun onChatConnectionResumed(result: LivechatWidgetResult<Unit>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatMessageSent(result: LivechatWidgetResult<String?>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatDraftSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatContextualDataSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {}
     override fun onChatActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>) {}
     override fun onChatThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onChatThreadListShown(result: LivechatWidgetResult<Unit>) {}
     override fun onChatLanguageChanged(result: LivechatWidgetResult<String?>) {}
     override fun onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) {}
-
     @Deprecated("Use onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) instead")
-    override fun onChatWidgetThemeChanged(widgetThemeName: String) {
-    }
-
+    override fun onChatWidgetThemeChanged(widgetThemeName: String) {}
     override fun onChatControlsVisibilityChanged(isVisible: Boolean) {}
-
     @Deprecated("Use onChatViewChanged(widgetView: LivechatWidgetView) instead")
-    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
-    }
-
+    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {}
     override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
     override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
     override fun onChatRawMessageReceived(rawMessage: String) {}
@@ -238,48 +240,35 @@ open class DefaultInAppChatFragmentEventsListener : InAppChatFragment.EventsList
  */
 open class DefaultInAppChatViewEventsListener : InAppChatView.EventsListener {
     @Deprecated("Use onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?) instead")
-    override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-    }
-
+    override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {}
     override fun onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {}
-
     @Deprecated("Use onChatLoadingFinished(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatLoaded(controlsEnabled: Boolean) {
-    }
-
+    override fun onChatLoaded(controlsEnabled: Boolean) {}
     override fun onChatLoadingFinished(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionPaused(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatDisconnected() {
-    }
-
+    override fun onChatDisconnected() {}
     override fun onChatConnectionPaused(result: LivechatWidgetResult<Unit>) {}
-
     @Deprecated("Use onChatConnectionResumed(result: LivechatWidgetResult<Unit>) instead")
-    override fun onChatReconnected() {
-    }
-
+    override fun onChatReconnected() {}
     override fun onChatConnectionResumed(result: LivechatWidgetResult<Unit>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatMessageSent(result: LivechatWidgetResult<String?>) {}
+    @Deprecated("Use onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) instead")
     override fun onChatDraftSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatContextualDataSent(result: LivechatWidgetResult<String?>) {}
+    override fun onChatThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onChatThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {}
     override fun onChatActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>) {}
     override fun onChatThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onChatThreadListShown(result: LivechatWidgetResult<Unit>) {}
     override fun onChatLanguageChanged(result: LivechatWidgetResult<String?>) {}
     override fun onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) {}
-
     @Deprecated("Use onChatWidgetThemeChanged(result: LivechatWidgetResult<String?>) instead")
-    override fun onChatWidgetThemeChanged(widgetThemeName: String) {
-    }
-
+    override fun onChatWidgetThemeChanged(widgetThemeName: String) {}
     override fun onChatControlsVisibilityChanged(isVisible: Boolean) {}
-
     @Deprecated("Use onChatViewChanged(widgetView: LivechatWidgetView) instead")
-    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
-    }
-
+    override fun onChatViewChanged(widgetView: InAppChatWidgetView) {}
     override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
     override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
     override fun onChatRawMessageReceived(rawMessage: String) {}

@@ -28,6 +28,8 @@ internal object AttachmentHelper {
 
     private const val tag = "AttachmentHelper"
 
+    val ATTACHMENT_URL_REGEX = Regex("""(?<prefix>data:)(?<mimeType>[^;]+)(?<base64Prefix>;base64,)(?<base64Value>[A-Za-z0-9+\\/=\n]+)""")
+
     @Throws(IllegalStateException::class)
     @JvmStatic
     fun createInAppChatAttachment(

@@ -15,8 +15,6 @@ import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
-import androidx.exifinterface.media.ExifInterface;
-
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -31,6 +29,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+
+import androidx.exifinterface.media.ExifInterface;
 
 public class InAppChatMobileAttachment {
     public static final long DEFAULT_MAX_UPLOAD_CONTENT_SIZE = 10_485_760; //10 MiB
@@ -112,6 +112,10 @@ public class InAppChatMobileAttachment {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public boolean isValid() {
+        return StringUtils.isNotBlank(getFileName()) && StringUtils.isNotBlank(getBase64()) && StringUtils.isNotBlank(getMimeType());
     }
 
     @Deprecated
@@ -328,5 +332,14 @@ public class InAppChatMobileAttachment {
             fileName += "." + extension;
         }
         return fileName;
+    }
+
+    @Override
+    public String toString() {
+        return "InAppChatMobileAttachment{" +
+                "base64='" + base64 + '\'' +
+                ", mimeType='" + mimeType + '\'' +
+                ", fileName='" + fileName + '\'' +
+                '}';
     }
 }

@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.chat.core.widget
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.JwtProvider
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 
 /**
  * The `LivechatWidgetApi` interface provides methods to interact with the Livechat widget.
@@ -27,6 +28,7 @@ interface LivechatWidgetApi {
 
     companion object {
         const val TAG = "LivechatWidgetApi"
+        const val MESSAGE_MAX_LENGTH = 4096
     }
 
     /**
@@ -120,6 +122,10 @@ interface LivechatWidgetApi {
      * @param message message to be send, max length allowed is 4096 characters
      * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
      */
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
+    )
     fun sendMessage(message: String?, attachment: InAppChatMobileAttachment? = null)
 
     /**
@@ -129,6 +135,10 @@ interface LivechatWidgetApi {
      *
      * @param message message to be send, max length allowed is 4096 characters
      */
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Basic(message))"),
+    )
     fun sendMessage(message: String) = sendMessage(message = message, attachment = null)
 
     /**
@@ -138,7 +148,40 @@ interface LivechatWidgetApi {
      *
      * @param draft draft message to be send
      */
+    @Deprecated(
+        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
+        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
+    )
     fun sendDraft(draft: String)
+
+    /**
+     * Sends a message defined by the given [payload] to the specified [threadId], if provided.
+     * Otherwise, the message will be sent to the currently active thread.
+     *
+     * You can observe the result via the [LivechatWidgetEventsListener.onSent] event.
+     *
+     * @param payload The message payload to send.
+     * @param threadId The ID of the existing thread to send the message to. If `null`, the active thread will be used.
+     */
+    fun send(payload: MessagePayload, threadId: String? = null)
+
+    /**
+     * Sends a message defined by the given [payload] to the currently active thread.
+     *
+     * You can observe the result via the [LivechatWidgetEventsListener.onSent] event.
+     *
+     * @param payload The message payload to send.
+     */
+    fun send(payload: MessagePayload) = send(payload = payload, threadId = null)
+
+    /**
+     * Creates a new thread with an initial message defined by the given [payload].
+     *
+     * You can observe the result via the [LivechatWidgetEventsListener.onThreadCreated] event.
+     *
+     * @param payload The message payload used to start the new thread.
+     */
+    fun createThread(payload: MessagePayload)
 
     /**
      * Sends contextual data.

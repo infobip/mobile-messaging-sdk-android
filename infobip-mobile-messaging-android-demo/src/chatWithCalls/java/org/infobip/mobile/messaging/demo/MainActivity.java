@@ -36,6 +36,7 @@ import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
 import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
 import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
@@ -375,6 +376,11 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
 
             @Override
+            public void onChatThreadCreated(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
+                MobileMessagingLogger.d(TAG, "On chat thread created: " + result);
+            }
+
+            @Override
             public void onChatThreadListShown(@NonNull LivechatWidgetResult<Unit> result) {
                 MobileMessagingLogger.d(TAG, "On chat thread list shown: " + result);
             }
@@ -401,12 +407,17 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
             @Override
             public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
-                MobileMessagingLogger.d(TAG, "On chat draft sent: " + result);
+                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
             }
 
             @Override
             public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
-                MobileMessagingLogger.d(TAG, "On chat message sent: " + result);
+                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
+            }
+
+            @Override
+            public void onChatSent(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
+                MobileMessagingLogger.d(TAG, "On chat sent: " + result);
             }
 
             @Override

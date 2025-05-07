@@ -41,12 +41,23 @@ interface LivechatWidgetEventsListener {
     /**
      * Called when message is sent.
      */
+    @Deprecated(
+        message = "Use onSent(LivechatWidgetResult<LivechatWidgetMessage?>) instead",
+    )
     fun onMessageSent(result: LivechatWidgetResult<String?>)
 
     /**
      * Called when draft message is sent.
      */
+    @Deprecated(
+        message = "Use onSent(LivechatWidgetResult<LivechatWidgetMessage?>) instead",
+    )
     fun onDraftSent(result: LivechatWidgetResult<String?>)
+
+    /**
+     * Called when any message payload is sent.
+     */
+    fun onSent(result: LivechatWidgetResult<LivechatWidgetMessage?>)
 
     /**
      * Called when contextual data is sent.
@@ -63,6 +74,11 @@ interface LivechatWidgetEventsListener {
      * Success result can contains null if there is no existing thread for current user session or current widget destination is not [LivechatWidgetView.THREAD].
      */
     fun onActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>)
+
+    /**
+     * Called when livechat widget thread was created.
+     */
+    fun onThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>)
 
     /**
      * Called when livechat widget thread is shown.
@@ -122,11 +138,13 @@ open class DefaultLivechatWidgetEventsListener : LivechatWidgetEventsListener {
     override fun onRawMessageReceived(message: String?) {}
     override fun onThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {}
     override fun onActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>) {}
+    override fun onThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onConnectionPaused(result: LivechatWidgetResult<Unit>) {}
     override fun onConnectionResumed(result: LivechatWidgetResult<Unit>) {}
-    override fun onDraftSent(result: LivechatWidgetResult<String?>) {}
     override fun onMessageSent(result: LivechatWidgetResult<String?>) {}
+    override fun onDraftSent(result: LivechatWidgetResult<String?>) {}
+    override fun onSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onContextualDataSent(result: LivechatWidgetResult<String?>) {}
     override fun onThemeChanged(result: LivechatWidgetResult<String?>) {}
     override fun onLanguageChanged(result: LivechatWidgetResult<String?>) {}

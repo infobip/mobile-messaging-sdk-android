@@ -3,8 +3,10 @@ package org.infobip.mobile.messaging.chat.core.widget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
+import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
+import org.infobip.mobile.messaging.chat.models.HasAttachment
+import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 /**
@@ -21,37 +23,59 @@ internal class LivechatWidgetClientImpl(
         private const val MAX_ALLOWED_SCRIPT_LENGTH: Int = 200
         private const val MAX_ALLOWED_ARGUMENT_LENGTH: Int = 50
         private const val ARGUMENT_VISIBLE_PART_LENGTH: Int = 15
-    }
 
-    override fun sendMessage(
-        message: String?,
-        attachment: InAppChatMobileAttachment?,
-        executionListener: LivechatWidgetApi.ExecutionListener<String>?
-    ) {
-        val attachmentBase64 = attachment?.base64UrlString()
-        val fileName = attachment?.fileName
-
-        val script = when {
-            attachmentBase64?.isNotBlank() == true -> buildWidgetMethodInvocation(LivechatWidgetMethod.sendMessageWithAttachment.name, message, attachmentBase64, fileName)
-            message?.isNotBlank() == true -> buildWidgetMethodInvocation(LivechatWidgetMethod.sendMessage.name, message)
-            else -> null
-        }
-
-        if (script != null) {
-            executeScript(script, executionListener)
-        } else {
-            executionListener?.onResult(LivechatWidgetResult.Error("Could not send message. Both message and attachment are null or empty."))
+        fun shortenLog(log: String): String {
+            return AttachmentHelper.ATTACHMENT_URL_REGEX.replace(log) { matchResult ->
+                val prefix = matchResult.groups["prefix"]?.value
+                val mimeType = matchResult.groups["mimeType"]?.value
+                val base64Prefix = matchResult.groups["base64Prefix"]?.value
+                val base64Value = matchResult.groups["base64Value"]?.value
+                if ((base64Value?.length ?: 0) > MAX_ALLOWED_ARGUMENT_LENGTH) {
+                    val startPart = base64Value?.take(ARGUMENT_VISIBLE_PART_LENGTH)
+                    val endPart = base64Value?.takeLast(ARGUMENT_VISIBLE_PART_LENGTH)
+                    "$prefix$mimeType$base64Prefix$startPart...$endPart"
+                } else {
+                    matchResult.toString()
+                }
+            }
         }
     }
 
-    override fun sendDraft(
-        draft: String?,
-        executionListener: LivechatWidgetApi.ExecutionListener<String>?
-    ) {
-        if (draft?.isNotBlank() == true) {
-            executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.sendDraft.name, draft), executionListener)
-        } else {
-            executionListener?.onResult(LivechatWidgetResult.Error("Could not send draft. Draft is null or empty."))
+    override fun send(payload: MessagePayload, threadId: String?, executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        if (payload is HasAttachment && payload.attachment?.isValid == false) {
+            executionListener?.onResult(LivechatWidgetResult.Error("Message attachment is not valid."))
+            return
+        }
+
+        runCatching {
+            MessagePayload.serialize(payload)
+        }.onFailure {
+            executionListener?.onResult(LivechatWidgetResult.Error(it.message ?: "Failed to serialize message payload."))
+        }.onSuccess { serializedPayload ->
+            if (threadId.isNullOrBlank())
+                executeScript(LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload + ")", executionListener)
+            else
+                executeScript(LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload +", '" + threadId + "')", executionListener)
+        }
+    }
+
+    override fun createThread(payload: MessagePayload, executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        if (payload is MessagePayload.Draft) {
+            executionListener?.onResult(LivechatWidgetResult.Error("Initial message must not be of type MessagePayload.Draft"))
+            return
+        }
+
+        if (payload is HasAttachment && payload.attachment?.isValid == false) {
+            executionListener?.onResult(LivechatWidgetResult.Error("Message attachment is not valid."))
+            return
+        }
+
+        runCatching {
+            MessagePayload.serialize(payload)
+        }.onFailure {
+            executionListener?.onResult(LivechatWidgetResult.Error(it.message ?: "Failed to serialize message payload."))
+        }.onSuccess { serializedPayload ->
+            executeScript(LivechatWidgetMethod.createThread.name + "(" + serializedPayload + ")", executionListener)
         }
     }
 
@@ -161,20 +185,10 @@ internal class LivechatWidgetClientImpl(
                 val methodName = script.substring(0, methodNameEndIndex)
                 builder.append(methodName)
                 val paramsSubstring = script.substring(methodNameEndIndex + 1, script.length - 1)
-                val params: List<String> = paramsSubstring.split(",".toRegex())
-                if (params.isNotEmpty()) {
-                    val shortenedParams = mutableListOf<String>()
-                    for (param in params) {
-                        var value = param.replace("'", "")
-                        if (value.length > MAX_ALLOWED_ARGUMENT_LENGTH) {
-                            value = value.substring(0, ARGUMENT_VISIBLE_PART_LENGTH) + "..." + value.substring(value.length - ARGUMENT_VISIBLE_PART_LENGTH)
-                        }
-                        shortenedParams.add(value)
-                    }
-                    builder.append(shortenedParams.joinToString("','", "('", "')"))
-                } else {
-                    builder.append("()")
-                }
+                val shortenScript = shortenLog(paramsSubstring)
+                builder.append("(")
+                builder.append(shortenScript)
+                builder.append(")")
             }
             return builder.toString()
         }
