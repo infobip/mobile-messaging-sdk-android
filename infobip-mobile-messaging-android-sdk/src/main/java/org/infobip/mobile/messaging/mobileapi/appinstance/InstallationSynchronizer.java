@@ -225,7 +225,7 @@ public class InstallationSynchronizer {
 
     public void patch(@NonNull final Installation installation, final MobileMessaging.ResultListener<Installation> actionListener, final boolean myInstallation) {
         SystemData systemDataForReport = mobileMessagingCore.systemDataForReport(false);
-        if (systemDataForReport != null) {
+        if (systemDataForReport != null && myInstallation) {
             mobileMessagingCore.populateInstallationWithSystemData(systemDataForReport, installation);
         }
 
