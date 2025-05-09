@@ -158,6 +158,22 @@
                     let responseData = response.data;
                     if (responseData == null) {
                         responseData = validPayload;
+                        for (let attempt = 1; attempt <= 3; attempt++) {
+                            try {
+                                const activeThreadResponse = await getLivechatSdk().getActiveThread();
+                                if (activeThreadResponse && activeThreadResponse.success && activeThreadResponse.data) {
+                                    responseData = {
+                                        ...responseData,
+                                        thread: activeThreadResponse.data
+                                    };
+                                    break;
+                                } else {
+                                    await new Promise(resolve => setTimeout(resolve, 300));
+                                }
+                            } catch (e) {
+                                console.log(`Attempt ${attempt}: Could not get active thread - ${e.message}`);
+                            }
+                        }
                     }
                     widgetApiCallback('createThread', null, responseData);
                 } else {
@@ -234,7 +250,7 @@
                     widgetApiCallback('getActiveThread', response.error, null);
                 }
             } catch (e) {
-                widgetApiCallback('getActiveThread', `Could not show thread ${e.message}`, null);
+                widgetApiCallback('getActiveThread', `Could not get active thread ${e.message}`, null);
             }
         }
 

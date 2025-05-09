@@ -31,21 +31,27 @@ sealed class LivechatWidgetMessage {
 
     data class Draft(
         val message: String? = null,
-        val threadId: String? = null,
-    ) : LivechatWidgetMessage()
+        val thread: LivechatWidgetThread? = null,
+    ) : LivechatWidgetMessage(){
+        val threadId get() = thread?.id
+    }
 
     data class Basic(
         val message: String? = null,
         val attachment: InAppChatMobileAttachment? = null,
-        val threadId: String? = null,
-    ) : LivechatWidgetMessage()
+        val thread: LivechatWidgetThread? = null,
+    ) : LivechatWidgetMessage() {
+        val threadId get() = thread?.id
+    }
 
     data class CustomData(
         val customData: String? = null,
         val agentMessage: String? = null,
         val userMessage: String? = null,
-        val threadId: String? = null,
-    ) : LivechatWidgetMessage()
+        val thread: LivechatWidgetThread? = null,
+    ) : LivechatWidgetMessage() {
+        val threadId get() = thread?.id
+    }
 
     data class Unknown(
         val raw: String? = null,
@@ -71,7 +77,9 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
                     when (LivechatWidgetMessageType.valueOf(jsonObject.getString(MESSAGE_TYPE))) {
                         LivechatWidgetMessageType.DRAFT -> LivechatWidgetMessage.Draft(
                             message = jsonObject.optString(LivechatWidgetMessage.Draft::message.name).takeIf { it.isNotBlank() },
-                            threadId = jsonObject.optString(LivechatWidgetMessage.Draft::threadId.name).takeIf { it.isNotBlank() },
+                            thread = jsonObject.getJSONObject(LivechatWidgetMessage.Draft::thread.name).toString().takeIf { it.isNotBlank() }?.let {
+                                LivechatWidgetThread.parseOrNull(it)
+                            }
                         )
 
                         LivechatWidgetMessageType.BASIC -> {
@@ -81,7 +89,9 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
                                     jsonObject.optString(LivechatWidgetMessage.Basic::attachment.name),
                                     jsonObject.optString(ATTACHMENT_FILE_NAME),
                                 ),
-                                threadId = jsonObject.optString(LivechatWidgetMessage.Basic::threadId.name).takeIf { it.isNotBlank() },
+                                thread = jsonObject.getJSONObject(LivechatWidgetMessage.Basic::thread.name).toString().takeIf { it.isNotBlank() }?.let {
+                                    LivechatWidgetThread.parseOrNull(it)
+                                }
                             )
                         }
 
@@ -89,7 +99,9 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
                             customData = jsonObject.getJSONObject(LivechatWidgetMessage.CustomData::customData.name).toString().takeIf { it.isNotBlank() },
                             agentMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::agentMessage.name).takeIf { it.isNotBlank() },
                             userMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::userMessage.name).takeIf { it.isNotBlank() },
-                            threadId = jsonObject.optString(LivechatWidgetMessage.CustomData::threadId.name).takeIf { it.isNotBlank() },
+                            thread = jsonObject.getJSONObject(LivechatWidgetMessage.CustomData::thread.name).toString().takeIf { it.isNotBlank() }?.let {
+                                LivechatWidgetThread.parseOrNull(it)
+                            }
                         )
                     }
                 } else {
