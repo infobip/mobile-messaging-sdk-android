@@ -27,6 +27,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.models.MessagePayload;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.HashSet;
@@ -103,6 +104,7 @@ public class LivechatWidgetApiFragment extends Fragment {
     }
 
     private void addLog(String label, String message) {
+        MobileMessagingLogger.d(TAG, label + message);
         SpannableString spannable = new SpannableString(label);
         spannable.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         logTextView.append(spannable);

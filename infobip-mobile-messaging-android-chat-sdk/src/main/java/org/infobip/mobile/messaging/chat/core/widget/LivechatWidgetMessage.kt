@@ -32,7 +32,7 @@ sealed class LivechatWidgetMessage {
     data class Draft(
         val message: String? = null,
         val thread: LivechatWidgetThread? = null,
-    ) : LivechatWidgetMessage(){
+    ) : LivechatWidgetMessage() {
         val threadId get() = thread?.id
     }
 
@@ -64,7 +64,10 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
     companion object {
         private const val TAG = "LivechatWidgetMessageAdapter"
         private const val MESSAGE_TYPE = "type"
+        private const val ATTACHMENT = "attachment"
         private const val ATTACHMENT_FILE_NAME = "fileName"
+        private const val THREAD = "thread"
+        private const val THREAD_ID = "threadId"
     }
 
     override fun getCls(): Class<LivechatWidgetMessage> = LivechatWidgetMessage::class.java
@@ -77,31 +80,22 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
                     when (LivechatWidgetMessageType.valueOf(jsonObject.getString(MESSAGE_TYPE))) {
                         LivechatWidgetMessageType.DRAFT -> LivechatWidgetMessage.Draft(
                             message = jsonObject.optString(LivechatWidgetMessage.Draft::message.name).takeIf { it.isNotBlank() },
-                            thread = jsonObject.getJSONObject(LivechatWidgetMessage.Draft::thread.name).toString().takeIf { it.isNotBlank() }?.let {
-                                LivechatWidgetThread.parseOrNull(it)
-                            }
+                            thread = deserializeThread(jsonObject)
                         )
 
                         LivechatWidgetMessageType.BASIC -> {
                             LivechatWidgetMessage.Basic(
                                 message = jsonObject.optString(LivechatWidgetMessage.Basic::message.name).takeIf { it.isNotBlank() },
-                                attachment = deserializeAttachment(
-                                    jsonObject.optString(LivechatWidgetMessage.Basic::attachment.name),
-                                    jsonObject.optString(ATTACHMENT_FILE_NAME),
-                                ),
-                                thread = jsonObject.getJSONObject(LivechatWidgetMessage.Basic::thread.name).toString().takeIf { it.isNotBlank() }?.let {
-                                    LivechatWidgetThread.parseOrNull(it)
-                                }
+                                attachment = deserializeAttachment(jsonObject),
+                                thread = deserializeThread(jsonObject)
                             )
                         }
 
                         LivechatWidgetMessageType.CUSTOM_DATA -> LivechatWidgetMessage.CustomData(
-                            customData = jsonObject.getJSONObject(LivechatWidgetMessage.CustomData::customData.name).toString().takeIf { it.isNotBlank() },
+                            customData = jsonObject.optJSONObject(LivechatWidgetMessage.CustomData::customData.name)?.toString()?.takeIf { it.isNotBlank() },
                             agentMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::agentMessage.name).takeIf { it.isNotBlank() },
                             userMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::userMessage.name).takeIf { it.isNotBlank() },
-                            thread = jsonObject.getJSONObject(LivechatWidgetMessage.CustomData::thread.name).toString().takeIf { it.isNotBlank() }?.let {
-                                LivechatWidgetThread.parseOrNull(it)
-                            }
+                            thread = deserializeThread(jsonObject)
                         )
                     }
                 } else {
@@ -114,20 +108,36 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
         }
     }
 
-    private fun deserializeAttachment(
-        attachment: String,
-        fileName: String,
-    ): InAppChatMobileAttachment? {
+    private fun deserializeThread(jsonObject: JSONObject): LivechatWidgetThread? {
         return runCatching {
-            if (attachment.isNotBlank()) {
-                AttachmentHelper.ATTACHMENT_URL_REGEX.find(attachment)?.let { matchResult ->
-                    val mimeType = matchResult.groups["mimeType"]?.value
-                    val base64Value = matchResult.groups["base64Value"]?.value
-                    InAppChatMobileAttachment(mimeType, base64Value, fileName).takeIf { it.isValid }
+            var thread: LivechatWidgetThread? = null
+            if (jsonObject.has(THREAD)) {
+                thread = jsonObject.optJSONObject(THREAD)?.toString()?.takeIf { it.isNotBlank() }?.let {
+                    LivechatWidgetThread.parseOrNull(it)
                 }
-            } else {
-                null
             }
+            if (jsonObject.has(THREAD_ID) && thread?.id == null) {
+                thread = LivechatWidgetThread(id = jsonObject.optString(THREAD_ID))
+            }
+            return thread
+        }.getOrNull()
+    }
+
+    private fun deserializeAttachment(jsonObject: JSONObject): InAppChatMobileAttachment? {
+        return runCatching {
+            var attachment: InAppChatMobileAttachment? = null
+            if (jsonObject.has(ATTACHMENT)) {
+                val attachmentUrl = jsonObject.optString(LivechatWidgetMessage.Basic::attachment.name).takeIf { it.isNotBlank() }
+                val fileName = jsonObject.optString(ATTACHMENT_FILE_NAME).takeIf { it.isNotBlank() }
+                if (attachmentUrl?.isNotBlank() == true) {
+                    attachment = AttachmentHelper.ATTACHMENT_URL_REGEX.find(attachmentUrl)?.let { matchResult ->
+                        val mimeType = matchResult.groups["mimeType"]?.value
+                        val base64Value = matchResult.groups["base64Value"]?.value
+                        InAppChatMobileAttachment(mimeType, base64Value, fileName).takeIf { it.isValid }
+                    }
+                }
+            }
+            return attachment
         }.getOrNull()
     }
 
