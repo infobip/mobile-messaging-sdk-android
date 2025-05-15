@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.util.AuthorizationUtils.authorizationHeader;
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
 
 
 @SuppressWarnings("unchecked")
@@ -70,11 +70,15 @@ public class UserDataReporter {
             return;
         }
 
+        String header = getAuthorizationHeader(mobileMessagingCore, listener);
+        if (header == null) {
+            return;
+        }
+
         new MRetryableTask<User, Void>() {
 
             @Override
             public Void run(User[] userData) {
-                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 final Map<String, Object> request = new HashMap<>(userData[0].getMap());
                 MobileMessagingLogger.v("USER DATA >>>", request);
                 mobileApiUserData.patchUser(pushRegistrationId, header, request);
@@ -134,10 +138,14 @@ public class UserDataReporter {
             return;
         }
 
+        String header = getAuthorizationHeader(mobileMessagingCore, listener);
+        if (header == null) {
+            return;
+        }
+
         new MRetryableTask<Void, UserBody>() {
             @Override
             public UserBody run(Void[] aVoid) {
-                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 MobileMessagingLogger.v("FETCHING USER DATA >>>");
                 UserBody userResponse = mobileApiUserData.getUser(mobileMessagingCore.getPushRegistrationId(), header);
                 MobileMessagingLogger.v("FETCHING USER DATA <<<", userResponse != null ? userResponse.toString() : null);

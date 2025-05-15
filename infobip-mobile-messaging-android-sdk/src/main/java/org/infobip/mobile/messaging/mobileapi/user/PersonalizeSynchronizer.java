@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.mobileapi.user;
 
 
-import static org.infobip.mobile.messaging.util.AuthorizationUtils.authorizationHeader;
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -70,12 +70,16 @@ public class PersonalizeSynchronizer {
             userPersonalizeBody.setUserAttributes(userAttributes.getMap());
         }
 
+        String header = getAuthorizationHeader(mobileMessagingCore, listener);
+        if (header == null) {
+            return;
+        }
+
         new MRetryableTask<UserPersonalizeBody, Void>() {
 
             @Override
             public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("PERSONALIZE >>>", userPersonalizeBody);
-                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, userPersonalizeBody);
                 return null;
             }
@@ -228,12 +232,16 @@ public class PersonalizeSynchronizer {
             return;
         }
 
+        String header = getAuthorizationHeader(mobileMessagingCore, null);
+        if (header == null) {
+            return;
+        }
+
         new MRetryableTask<UserPersonalizeBody, Void>() {
 
             @Override
             public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("REPERSONALIZE >>>", userPersonalizeBody);
-                String header = authorizationHeader(mobileMessagingCore, broadcaster);
                 mobileApiUserData.repersonalize(mobileMessagingCore.getPushRegistrationId(), header, userPersonalizeBody);
                 MobileMessagingLogger.v("REPERSONALIZE DONE <<<");
                 return null;

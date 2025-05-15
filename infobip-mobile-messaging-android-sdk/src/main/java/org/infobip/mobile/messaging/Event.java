@@ -249,11 +249,6 @@ public enum Event {
     IN_APP_CLICKS_REPORTED("org.infobip.mobile.messaging.IN_APP_CLICKS_REPORTED"),
 
     /**
-     * It is triggered when the SDK tried to make a call to the server but the provided JWT was expired.
-     */
-    USER_DATA_JWT_EXPIRED("org.infobip.mobile.messaging.USER_DATA_JWT_EXPIRED"),
-
-    /**
      * It is triggered when Google Play Services are not available.
      * <pre>
      * {@code

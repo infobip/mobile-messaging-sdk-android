@@ -5,7 +5,6 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendCommunicationException;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendCommunicationExceptionWithContent;
-import org.infobip.mobile.messaging.util.JwtExpirationException;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 /**
@@ -23,7 +22,7 @@ public class RetryPolicyProvider {
         this.defaultPolicy = new MRetryPolicy.Builder()
                 .withBackoffMultiplier(PreferenceHelper.findInt(context, MobileMessagingProperty.DEFAULT_EXP_BACKOFF_MULTIPLIER))
                 .withMaxRetries(PreferenceHelper.findInt(context, MobileMessagingProperty.DEFAULT_MAX_RETRY_COUNT))
-                .withRetryOn(BackendCommunicationException.class, BackendCommunicationExceptionWithContent.class, JwtExpirationException.class)
+                .withRetryOn(BackendCommunicationException.class, BackendCommunicationExceptionWithContent.class)
                 .build();
         this.oneRetryPolicy = new MRetryPolicy.Builder()
                 .withMaxRetries(1)

@@ -2,8 +2,11 @@ package org.infobip.mobile.messaging.util;
 
 import android.util.Base64;
 
+import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
-import org.infobip.mobile.messaging.platform.Broadcaster;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.Result;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +29,7 @@ public class AuthorizationUtils {
         return "Token payload is missing mandatory claim " + missingClaim;
     }
 
-    static void isValidJwtStructure(String token) throws JwtStructureValidationException {
+    static void isValidJwt(String token) throws JwtStructureValidationException, JwtExpirationException {
         if (token == null)
             throw new JwtStructureValidationException(TOKEN_IS_NULL);
         if (token.isBlank())
@@ -51,23 +54,15 @@ public class AuthorizationUtils {
             if (!payloadJson.has(claim))
                 throw new JwtStructureValidationException(PAYLOAD_MISSING_CLAIM(claim));
         }
-    }
 
-    static boolean isTokenExpired(String token) {
-        isValidJwtStructure(token);
-        String[] jwtParts = token.split("\\.");
-        JSONObject payloadJson = decodeAndParse(jwtParts[1]);
-        if (payloadJson == null)
-            return true;
         try {
             long exp = payloadJson.getLong("exp");
             long currentTimeSeconds = System.currentTimeMillis() / 1000L;
             if (currentTimeSeconds >= exp)
-                return true;
+                throw new JwtExpirationException();
         } catch (JSONException e) {
-            return true;
+            throw new JwtStructureValidationException(PAYLOAD_MISSING_CLAIM("exp"));
         }
-        return false;
     }
 
     private static JSONObject decodeAndParse(String encoded) {
@@ -81,12 +76,32 @@ public class AuthorizationUtils {
         }
     }
 
-    public static String authorizationHeader(MobileMessagingCore mobileMessagingCore, Broadcaster broadcaster) {
+    private static String authorizationHeader(String token, String applicationCode) {
+        return token != null ? "Bearer " + token : "App " + applicationCode;
+    }
+
+    /**
+     * Create the authorization header for API request. Will first
+     * get JWT token from {@code JwtSupplier} and validate it. If the token
+     * is not valid because of wrong structure or if it expired,
+     * will send error result to the {@code listener} and return {@code null}.
+     * If there is no {@code JwtSupplier} or the token from it is {@code null}
+     * the authorization header will be with application code.
+     * @return authorization header with either token or application code, or {@code null} if there was an error
+     */
+    public static String getAuthorizationHeader(MobileMessagingCore mobileMessagingCore, MobileMessaging.ResultListener listener) {
         String token = mobileMessagingCore.getJwtFromSupplier();
-        if (token != null && isTokenExpired(token)) {
-            broadcaster.userDataJwtExpired();
-            throw new JwtExpirationException();
+        if (token != null) {
+            try {
+                isValidJwt(token);
+            } catch (JwtStructureValidationException | JwtExpirationException e) {
+                MobileMessagingLogger.e("JWT token structure is invalid or the token is expired.");
+                if (listener != null) {
+                    listener.onResult(new Result<>(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(e)));
+                }
+                return null;
+            }
         }
-        return token != null ? "Bearer " + token : "App " + mobileMessagingCore.getApplicationCode();
+        return authorizationHeader(token, mobileMessagingCore.getApplicationCode());
     }
 }

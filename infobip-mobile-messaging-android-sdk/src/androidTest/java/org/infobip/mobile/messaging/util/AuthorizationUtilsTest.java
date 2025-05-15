@@ -5,8 +5,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 
 import java.time.Instant;
@@ -49,7 +47,7 @@ public class AuthorizationUtilsTest {
     @Test
     public void shouldFailStructureBecauseTokenIsNull() {
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(null);
+            AuthorizationUtils.isValidJwt(null);
         });
         assertEquals(exception.getMessage(), "Token is null.");
     }
@@ -57,7 +55,7 @@ public class AuthorizationUtilsTest {
     @Test
     public void shouldFailStructureBecauseTokenIsBlank() {
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure("   ");
+            AuthorizationUtils.isValidJwt("   ");
         });
         assertEquals(exception.getMessage(), "Token is empty or blank.");
     }
@@ -65,7 +63,7 @@ public class AuthorizationUtilsTest {
     @Test
     public void shouldFailStructureBecauseTokenDoesntHaveThreeParts() {
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure("header.payload");
+            AuthorizationUtils.isValidJwt("header.payload");
         });
         assertEquals(exception.getMessage(), "Token must have three parts separated by dots.");
     }
@@ -73,7 +71,7 @@ public class AuthorizationUtilsTest {
     @Test
     public void shouldFailStructureBecauseHeaderIsNotBase64Encoded() {
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(validHeader + ".payload.signature");
+            AuthorizationUtils.isValidJwt(validHeader + ".payload.signature");
         });
         assertEquals(exception.getMessage(), "Token header is not a valid Base64 encoded JSON object.");
     }
@@ -82,7 +80,7 @@ public class AuthorizationUtilsTest {
     public void shouldFailStructureBecauseHeaderIsNotValidJson() {
         String encodedHeader = encoder.encodeToString("header".getBytes());
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(encodedHeader + ".payload.signature");
+            AuthorizationUtils.isValidJwt(encodedHeader + ".payload.signature");
         });
         assertEquals(exception.getMessage(), "Token header is not a valid Base64 encoded JSON object.");
     }
@@ -90,7 +88,7 @@ public class AuthorizationUtilsTest {
     @Test
     public void shouldFailStructureBecausePayloadIsNotBase64Encoded() {
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(validHeaderEncoded + "." + validPayload + ".signature");
+            AuthorizationUtils.isValidJwt(validHeaderEncoded + "." + validPayload + ".signature");
         });
         assertEquals(exception.getMessage(), "Token payload is not a valid Base64 encoded JSON object.");
     }
@@ -100,7 +98,7 @@ public class AuthorizationUtilsTest {
         String encodedPayload = encoder.encodeToString("payload".getBytes());
 
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(validHeaderEncoded + "." + encodedPayload + ".signature");
+            AuthorizationUtils.isValidJwt(validHeaderEncoded + "." + encodedPayload + ".signature");
         });
         assertEquals(exception.getMessage(), "Token payload is not a valid Base64 encoded JSON object.");
     }
@@ -112,7 +110,7 @@ public class AuthorizationUtilsTest {
         String encodedHeader = encoder.encodeToString(notValidHeader.toString().getBytes());
 
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(encodedHeader + ".payload.signature");
+            AuthorizationUtils.isValidJwt(encodedHeader + ".payload.signature");
         });
         assertEquals(exception.getMessage(), "Token header is missing mandatory header kid");
     }
@@ -124,28 +122,25 @@ public class AuthorizationUtilsTest {
         String encodedPayload = encoder.encodeToString(notValidPayload.toString().getBytes());
 
         JwtStructureValidationException exception = assertThrows(JwtStructureValidationException.class, () -> {
-            AuthorizationUtils.isValidJwtStructure(validHeaderEncoded + "." + encodedPayload + ".signature");
+            AuthorizationUtils.isValidJwt(validHeaderEncoded + "." + encodedPayload + ".signature");
         });
         assertEquals(exception.getMessage(), "Token payload is missing mandatory claim infobip-api-key");
     }
 
     @Test
-    public void shouldPassStructureCheck() throws JwtStructureValidationException {
-        AuthorizationUtils.isValidJwtStructure(validHeaderEncoded + "." + validPayloadEncoded + ".signature");
-    }
-
-    @Test
-    public void shouldReturnTokenExpired() throws JSONException {
+    public void shouldFailValidationBecauseTokenExpired() throws JSONException {
         JSONObject expiredPayload = new JSONObject(validPayload);
         expiredPayload.put("exp", Instant.now().minusSeconds(10).getEpochSecond());
         String encodedPayload = encoder.encodeToString(expiredPayload.toString().getBytes());
 
-        assertTrue(AuthorizationUtils.isTokenExpired(validHeaderEncoded + "." + encodedPayload + ".signature"));
+        JwtExpirationException exception = assertThrows(JwtExpirationException.class, () -> {
+            AuthorizationUtils.isValidJwt(validHeaderEncoded + "." + encodedPayload + ".signature");
+        });
+        assertEquals(exception.getMessage(), "The provided JWT is expired.");
     }
 
     @Test
-    public void shouldNotReturnTokenExpired() {
-        assertFalse(AuthorizationUtils.isTokenExpired(validHeaderEncoded + "." + validPayloadEncoded + ".signature"));
+    public void shouldPassTokenValidation() throws JwtStructureValidationException {
+        AuthorizationUtils.isValidJwt(validHeaderEncoded + "." + validPayloadEncoded + ".signature");
     }
-
 }

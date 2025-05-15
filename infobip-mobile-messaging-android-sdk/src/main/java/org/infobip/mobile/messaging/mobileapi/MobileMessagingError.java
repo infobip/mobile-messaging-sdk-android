@@ -6,6 +6,8 @@ import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendBaseException;
+import org.infobip.mobile.messaging.util.JwtExpirationException;
+import org.infobip.mobile.messaging.util.JwtStructureValidationException;
 
 import java.io.Serializable;
 import java.util.Locale;
@@ -22,6 +24,10 @@ public class MobileMessagingError implements Serializable {
             return ((BackendBaseException) e).getError();
         } else if (e instanceof ApiIOException) {
             return new MobileMessagingError((ApiIOException) e);
+        } else if (e instanceof JwtStructureValidationException) {
+            return InternalSdkError.JWT_TOKEN_STRUCTURE_INVALID.getError(e.getMessage());
+        } else if (e instanceof JwtExpirationException) {
+            return InternalSdkError.JWT_TOKEN_EXPIRED.getError(e.getMessage());
         }
         return new MobileMessagingError(e);
     }

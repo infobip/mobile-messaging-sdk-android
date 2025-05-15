@@ -13,7 +13,9 @@ public enum InternalSdkError {
     NETWORK_UNAVAILABLE("20009", "Network unavailable"),
     ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED("20010", "Maximum allowed attachment size exceeded"),
     INSTALLATION_SYNC_IN_PROGRESS("20011", "Installation sync is already in progress"),
-    ERROR_ATTACHMENT_NOT_VALID("20012", "Attachment is not valid");
+    ERROR_ATTACHMENT_NOT_VALID("20012", "Attachment is not valid"),
+    JWT_TOKEN_STRUCTURE_INVALID("20013", "JWT token structure invalid"),
+    JWT_TOKEN_EXPIRED("20014", "JWT token is expired");
 
     private final String code;
     private final String message;
@@ -37,6 +39,10 @@ public enum InternalSdkError {
     }
 
     public MobileMessagingError getError() {
+        return new MobileMessagingError(code, message);
+    }
+
+    public MobileMessagingError getError(String message) {
         return new MobileMessagingError(code, message);
     }
 
