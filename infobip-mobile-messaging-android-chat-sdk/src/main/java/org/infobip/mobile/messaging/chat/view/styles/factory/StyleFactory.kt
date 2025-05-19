@@ -11,12 +11,10 @@ import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 /**
  * Custom styles are stored here, there is hierarchy of style sources
  *
- * 1. Runtime theme attributes
- * 2. 8.0+ android theme attributes
- * 3. Pre 8.0 android theme attributes
- * 4. LiveChat widget theme
- * 5. In-app chat default theme
- *
+ * 1. Runtime theme attributes - [InAppChatTheme] by [RuntimeThemeFactory]
+ * 2. Android theme attributes - [InAppChatTheme] by [XMLThemeFactory]
+ * 3. LiveChat widget theme - [WidgetInfo]
+ * 4. In-app chat default theme - [IB_ChatDefaultTheme.Styled]
  */
 interface StyleFactory {
 

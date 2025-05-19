@@ -16,5 +16,5 @@ class XMLThemeFactory(private val context: Context, private val attributeSet: At
 
     override fun chatStyle(): InAppChatStyle = InAppChatStyle.invoke(context, attributeSet, widgetInfo)
 
-    override fun chatInputViewStyle(): InAppChatInputViewStyle = InAppChatInputViewStyle(context, attributeSet, widgetInfo)
+    override fun chatInputViewStyle(): InAppChatInputViewStyle = InAppChatInputViewStyle.invoke(context, attributeSet, widgetInfo)
 }

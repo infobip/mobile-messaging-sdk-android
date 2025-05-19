@@ -88,7 +88,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(InAppChatThemeResolver.getChatAttachPreviewTheme(this))
+        setTheme(InAppChatThemeResolver.getChatViewTheme(this))
         super.onCreate(savedInstanceState)
         binding = IbActivityChatAttachPreviewBinding.inflate(layoutInflater)
         webViewClient = InAppChatAttachmentPreviewClientImpl(binding.ibLcChatAttachWv)
@@ -290,11 +290,16 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key,
             null
         )
+        val widgetPrimaryTextColor = prefs.getString(
+            MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR.key,
+            null
+        )
         return WidgetInfo(
             null,
             null,
             widgetPrimaryColor,
             widgetBackgroundColor,
+            widgetPrimaryTextColor,
             0L,
             false,
             false,

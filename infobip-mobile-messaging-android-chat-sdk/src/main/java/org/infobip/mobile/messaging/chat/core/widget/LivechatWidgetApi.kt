@@ -54,10 +54,25 @@ interface LivechatWidgetApi {
     var domain: String?
 
     /**
+     * Timeout duration for loading the LiveChat widget, in milliseconds.
+     *
+     * This value must be set **before** calling [loadWidget].
+     *
+     * - **Minimum allowed:** 5,000 ms (5 seconds)
+     * - **Maximum allowed:** 300,000 ms (5 minutes)
+     * - **Default value:** 10,000 ms (10 seconds)
+     *
+     * @throws IllegalStateException if the value is set outside the allowed range.
+     */
+    @set:Throws(IllegalStateException::class)
+    var loadingTimeoutMillis: Long
+
+    /**
      * Triggers livechat widget loading. Does nothing, if widget is already loaded.
      * You can observe loading's result by [LivechatWidgetEventsListener.onLoadingFinished] event.
      * If you want to force load widget again, you need to call [reset] first.
      * If you want to load widget with current `InAppChat` configuration, you can call [loadWidget] without parameters.
+     * You can control widget loading timeout by setting [loadingTimeoutMillis] property.
      *
      * @param widgetId livechat widget id to be loaded, if not provided, it will be taken from current configuration
      * @param jwt jwt token for authentication, if not provided, it will be taken from current `InAppChat` configuration
@@ -69,12 +84,14 @@ interface LivechatWidgetApi {
         jwt: String? = null,
         domain: String? = null,
         theme: String? = null,
+        language: LivechatWidgetLanguage? = null,
     )
 
     /**
      * Triggers livechat widget loading with current `InAppChat` configuration. Does nothing, if widget is already loaded.
      * You can observe loading's result by [LivechatWidgetEventsListener.onLoadingFinished] event.
      * If you want to force load widget again, you need to call [reset] first.
+     * You can control widget loading timeout by setting [loadingTimeoutMillis] property.
      *
      * @param widgetId livechat widget id to be loaded, if not provided, it will be taken from current configuration
      */
@@ -86,6 +103,7 @@ interface LivechatWidgetApi {
      * Triggers livechat widget loading with current `InAppChat` configuration. Does nothing, if widget is already loaded.
      * You can observe loading's result by [LivechatWidgetEventsListener.onLoadingFinished] event.
      * If you want to force load widget again, you need to call [reset] first.
+     * You can control widget loading timeout by setting [loadingTimeoutMillis] property.
      */
     fun loadWidget() = loadWidget(widgetId = null, jwt = null, domain = null, theme = null)
 

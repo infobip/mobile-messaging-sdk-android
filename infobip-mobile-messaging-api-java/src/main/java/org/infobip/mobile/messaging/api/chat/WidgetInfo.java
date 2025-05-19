@@ -14,6 +14,7 @@ public class WidgetInfo {
     private String title;
     private String primaryColor;
     private String backgroundColor;
+    private String primaryTextColor;
     private long maxUploadContentSize;
     private boolean multiThread;
     private boolean multiChannelConversationEnabled;

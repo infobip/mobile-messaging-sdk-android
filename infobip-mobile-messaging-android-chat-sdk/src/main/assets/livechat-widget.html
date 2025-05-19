@@ -23,6 +23,7 @@
         const pushRegId = getQueryParameter('pushRegId');
         const widgetId = getQueryParameter('widgetId');
         const widgetTheme = getQueryParameter('widgetTheme');
+        const language = getQueryParameter('language');
 
         let uri = 'https://livechat.infobip.com/widget.js';
         let livechatSdk = null;
@@ -84,6 +85,9 @@
                     show();
                 }
             };
+            if (!isNullOrBlank(language)) {
+                setLanguage(language);
+            }
             if (domain != null) {
                 liveChat('init', { widgetId: widgetId, domain: domain }, callback);
             } else {

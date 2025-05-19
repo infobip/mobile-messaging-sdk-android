@@ -22,6 +22,7 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import kotlin.coroutines.resume
+import kotlin.properties.Delegates
 
 internal class LivechatWidgetApiImpl(
     private val webView: LivechatWidgetWebView,
@@ -32,7 +33,9 @@ internal class LivechatWidgetApiImpl(
 ) : LivechatWidgetApi, LivechatWidgetWebViewManager {
 
     companion object {
-        private const val LOADING_TIMEOUT_MS = 10_000L
+        private const val DEFAULT_LOADING_TIMEOUT_MS = 10_000L
+        private const val MIN_LOADING_TIMEOUT_MS = 5 * 1000
+        private const val MAX_LOADING_TIMEOUT_MS = 5 * 60 * 1000
         private const val LOADING_CHECK_INTERVAL_MS = 100L
         private const val LOADING_SUCCESS_EVENT_DELAY_MS = 300L
 
@@ -72,11 +75,21 @@ internal class LivechatWidgetApiImpl(
 
     override var domain: String? by inAppChat::domain
 
+    @set:Throws(IllegalArgumentException::class)
+    override var loadingTimeoutMillis: Long by Delegates.vetoable(DEFAULT_LOADING_TIMEOUT_MS) { _, _, newValue ->
+        if (newValue in MIN_LOADING_TIMEOUT_MS..MAX_LOADING_TIMEOUT_MS) {
+            true
+        } else {
+            throw IllegalArgumentException("Loading timeout must be between $MIN_LOADING_TIMEOUT_MS and $MAX_LOADING_TIMEOUT_MS milliseconds.")
+        }
+    }
+
     override fun loadWidget(
         widgetId: String?,
         jwt: String?,
         domain: String?,
-        theme: String?
+        theme: String?,
+        language: LivechatWidgetLanguage?
     ) {
         coroutineScope.launch(webViewDispatcher) {
             runCatching {
@@ -85,6 +98,7 @@ internal class LivechatWidgetApiImpl(
                     jwt = jwt,
                     domain = domain,
                     theme = theme,
+                    language = language,
                 )
             }.onFailure {
                 onWidgetLoadingFinished(LivechatWidgetResult.Error(it.mapToLivechatException()))
@@ -225,7 +239,7 @@ internal class LivechatWidgetApiImpl(
     }
 
     /**
-     * Loads widget if not loaded yet. Widget loading timeout is 10 seconds.
+     * Loads widget if not loaded yet. Widget loading timeout is [loadingTimeoutMillis] seconds.
      * If widget is already loaded, it does nothing.
      * It waits for widget loading to finish if it's in progress.
      * It validates input parameters and fallbacks to [InAppChat] default configuration values.
@@ -238,6 +252,7 @@ internal class LivechatWidgetApiImpl(
         jwt: String? = null,
         domain: String? = null,
         theme: String? = null,
+        language: LivechatWidgetLanguage? = null
     ) {
         loadingMutex.withLock {
             val fallbackPushRegistrationId: String? = pushRegistrationId?.takeIf { it.isNotBlank() } ?: mmCore.pushRegistrationId?.takeIf { it.isNotBlank() }
@@ -245,13 +260,14 @@ internal class LivechatWidgetApiImpl(
             val fallbackJwt: String? = jwt?.takeIf { it.isNotBlank() } ?: inAppChat.widgetJwtProvider?.provideJwt()
             val fallbackDomain: String? = domain?.takeIf { it.isNotBlank() } ?: inAppChat.domain
             val fallbackTheme: String? = theme?.takeIf { it.isNotBlank() } ?: inAppChat.widgetTheme
+            val fallbackLanguage: String = (language ?: inAppChat.language).widgetCode
 
             when {
                 fallbackPushRegistrationId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Push registration id is null or blank.")
                 fallbackWidgetId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget id is null or blank.")
                 isWidgetLoadingInProgress -> {
                     MobileMessagingLogger.d(LivechatWidgetApi.TAG, "Another widget loading is in progress.")
-                    withTimeout(LOADING_TIMEOUT_MS) {
+                    withTimeout(loadingTimeoutMillis) {
                         while (isActive && isWidgetLoadingInProgress) {
                             delay(LOADING_CHECK_INTERVAL_MS)
                         }
@@ -259,7 +275,7 @@ internal class LivechatWidgetApiImpl(
                 }
 
                 !isWidgetLoaded -> {
-                    withTimeout(LOADING_TIMEOUT_MS) {
+                    withTimeout(loadingTimeoutMillis) {
                         runCatching { //must stay in place to propagate possible suspendCancellableCoroutine() exception immediately and do not wait for timeout
                             val result: Boolean = suspendCancellableCoroutine { continuation ->
                                 setContinuation(continuation)
@@ -268,7 +284,8 @@ internal class LivechatWidgetApiImpl(
                                     widgetId = fallbackWidgetId,
                                     jwt = fallbackJwt,
                                     domain = fallbackDomain,
-                                    widgetTheme = fallbackTheme
+                                    widgetTheme = fallbackTheme,
+                                    language = fallbackLanguage
                                 )
                                 continuation.invokeOnCancellation {
                                     setContinuation(null)

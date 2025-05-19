@@ -7,6 +7,7 @@ public enum MobileMessagingChatProperty {
     IN_APP_CHAT_WIDGET_TITLE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_TITLE", null),
     IN_APP_CHAT_WIDGET_PRIMARY_COLOR("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_PRIMARY_COLOR", null),
     IN_APP_CHAT_WIDGET_BACKGROUND_COLOR("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR", null),
+    IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR", null),
     IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE", null),
     IN_APP_CHAT_WIDGET_MULTITHREAD("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTITHREAD", false),
     IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION", false),

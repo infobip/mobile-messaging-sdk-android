@@ -53,6 +53,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
         jwt: String? = null,
         domain: String? = null,
         widgetTheme: String? = null,
+        language: String? = null
     ) {
         val builder = Uri.Builder()
             .encodedPath(widgetPageUri)
@@ -61,20 +62,24 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
 
         val encodedWidgetUri = widgetUri.takeIf { it != DEFAULT_WIDGET_URI }?.encode()
 
-        if (encodedWidgetUri?.isNotBlank() == true) {
-            builder.appendQueryParameter("widgetUri", encodedWidgetUri)
+        if (widgetTheme?.isNotBlank() == true) {
+            builder.appendQueryParameter("widgetTheme", widgetTheme)
         }
 
-        if (jwt?.isNotBlank() == true) {
-            builder.appendQueryParameter("jwt", jwt)
+        if (language?.isNotBlank() == true) {
+            builder.appendQueryParameter("language", language)
+        }
+
+        if (encodedWidgetUri?.isNotBlank() == true) {
+            builder.appendQueryParameter("widgetUri", encodedWidgetUri)
         }
 
         if (domain?.isNotBlank() == true) {
             builder.appendQueryParameter("domain", domain)
         }
 
-        if (widgetTheme?.isNotBlank() == true) {
-            builder.appendQueryParameter("widgetTheme", widgetTheme)
+        if (jwt?.isNotBlank() == true) {
+            builder.appendQueryParameter("jwt", jwt)
         }
 
         val resultUrl = builder.build().toString()

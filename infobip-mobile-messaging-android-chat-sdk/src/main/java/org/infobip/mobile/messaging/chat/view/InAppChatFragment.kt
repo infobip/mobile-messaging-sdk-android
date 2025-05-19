@@ -609,8 +609,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
-        val style =
-            StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
+        val style = StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
         withBinding { style.apply(it.ibLcChatToolbar) }
         applyStatusBarStyle(style)
     }
@@ -979,7 +978,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
     //endregion
     //endregion
-
 
     private fun initBackPressHandler() {
         requireActivity().onBackPressedDispatcher.addCallback(
