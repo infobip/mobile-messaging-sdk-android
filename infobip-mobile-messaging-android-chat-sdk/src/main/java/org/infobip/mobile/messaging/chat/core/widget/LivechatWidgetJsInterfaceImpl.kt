@@ -72,8 +72,8 @@ internal class LivechatWidgetJsInterfaceImpl(
             if (payload?.isNotBlank() == true && payload.startsWith("\"") && payload.endsWith("\"") && payload.length > 2) {
                 payload = payload.substring(1, payload.length - 1)
             }
-            payload = payload?.let { LivechatWidgetClientImpl.shortenLog(it) }
-            val result = if (payload?.isNotBlank() == true) " => $payload" else ""
+            val log = payload?.let { LivechatWidgetClientImpl.shortenLog(it) }
+            val result = if (log?.isNotBlank() == true) " => $log" else ""
             MobileMessagingLogger.d(TAG, "Widget API call result: $method()$result")
             runCatching {
                 widgetWebViewManager.onWidgetApiSuccess(LivechatWidgetMethod.valueOf(method.orEmpty()), payload)

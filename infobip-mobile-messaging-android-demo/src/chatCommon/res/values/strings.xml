@@ -66,6 +66,7 @@
         <item>Draft</item>
         <item>Attachment</item>
         <item>Custom data</item>
+        <item>Basic text with Attachment</item>
     </string-array>
     <string name="thread_id">Thread ID</string>
 </resources>

@@ -5,6 +5,7 @@ import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
 import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.json.JSONObject
+import java.util.Date
 
 /**
  * Represents Livechat widget message response.
@@ -40,6 +41,8 @@ sealed class LivechatWidgetMessage {
         val message: String? = null,
         val attachment: InAppChatMobileAttachment? = null,
         val thread: LivechatWidgetThread? = null,
+        val moment: Date? = null,
+        val id: String? = null,
     ) : LivechatWidgetMessage() {
         val threadId get() = thread?.id
     }
@@ -49,6 +52,8 @@ sealed class LivechatWidgetMessage {
         val agentMessage: String? = null,
         val userMessage: String? = null,
         val thread: LivechatWidgetThread? = null,
+        val moment: Date? = null,
+        val id: String? = null,
     ) : LivechatWidgetMessage() {
         val threadId get() = thread?.id
     }
@@ -64,10 +69,12 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
     companion object {
         private const val TAG = "LivechatWidgetMessageAdapter"
         private const val MESSAGE_TYPE = "type"
-        private const val ATTACHMENT = "attachment"
         private const val ATTACHMENT_FILE_NAME = "fileName"
         private const val THREAD = "thread"
         private const val THREAD_ID = "threadId"
+        private const val MESSAGE = "message"
+        private const val CONTENT = "content"
+        private const val TEXT = "text"
     }
 
     override fun getCls(): Class<LivechatWidgetMessage> = LivechatWidgetMessage::class.java
@@ -76,26 +83,43 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
         return value?.let {
             runCatching {
                 val jsonObject = JSONObject(it)
-                if (jsonObject.has(MESSAGE_TYPE)) {
-                    when (LivechatWidgetMessageType.valueOf(jsonObject.getString(MESSAGE_TYPE))) {
+                if (jsonObject.has(MESSAGE_TYPE))
+                    deserializeOldResponse(it)
+                else
+                    deserializeNewResponse(it)
+            }.getOrElse {
+                MobileMessagingLogger.e(TAG, "Could not parse message from: $value", it)
+                LivechatWidgetMessage.Unknown(value)
+            }
+        }
+    }
+
+
+    @Deprecated("To be removed in future versions. Used for backward compatibility with old message response model.")
+    private fun deserializeOldResponse(value: String?): LivechatWidgetMessage? {
+        return value?.let {
+            runCatching {
+                val root = JSONObject(it)
+                if (root.has(MESSAGE_TYPE)) {
+                    when (LivechatWidgetMessageType.valueOf(root.getString(MESSAGE_TYPE))) {
                         LivechatWidgetMessageType.DRAFT -> LivechatWidgetMessage.Draft(
-                            message = jsonObject.optString(LivechatWidgetMessage.Draft::message.name).takeIf { it.isNotBlank() },
-                            thread = deserializeThread(jsonObject)
+                            message = root.optString(LivechatWidgetMessage.Draft::message.name).takeIf { it.isNotBlank() },
+                            thread = deserializeThread(root)
                         )
 
                         LivechatWidgetMessageType.BASIC -> {
                             LivechatWidgetMessage.Basic(
-                                message = jsonObject.optString(LivechatWidgetMessage.Basic::message.name).takeIf { it.isNotBlank() },
-                                attachment = deserializeAttachment(jsonObject),
-                                thread = deserializeThread(jsonObject)
+                                message = root.optString(LivechatWidgetMessage.Basic::message.name).takeIf { it.isNotBlank() },
+                                attachment = deserializeAttachment(root),
+                                thread = deserializeThread(root)
                             )
                         }
 
                         LivechatWidgetMessageType.CUSTOM_DATA -> LivechatWidgetMessage.CustomData(
-                            customData = jsonObject.optJSONObject(LivechatWidgetMessage.CustomData::customData.name)?.toString()?.takeIf { it.isNotBlank() },
-                            agentMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::agentMessage.name).takeIf { it.isNotBlank() },
-                            userMessage = jsonObject.optString(LivechatWidgetMessage.CustomData::userMessage.name).takeIf { it.isNotBlank() },
-                            thread = deserializeThread(jsonObject)
+                            customData = root.optJSONObject(LivechatWidgetMessage.CustomData::customData.name)?.toString()?.takeIf { it.isNotBlank() },
+                            agentMessage = root.optString(LivechatWidgetMessage.CustomData::agentMessage.name).takeIf { it.isNotBlank() },
+                            userMessage = root.optString(LivechatWidgetMessage.CustomData::userMessage.name).takeIf { it.isNotBlank() },
+                            thread = deserializeThread(root)
                         )
                     }
                 } else {
@@ -105,6 +129,53 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
                 MobileMessagingLogger.e(TAG, "Could not parse message from: $value", it)
                 LivechatWidgetMessage.Unknown(value)
             }
+        }
+    }
+
+
+    private fun deserializeNewResponse(value: String?): LivechatWidgetMessage? {
+        return value?.let {
+            runCatching {
+                val root = JSONObject(it)
+                val messageJsonObject = root.getJSONObject(MESSAGE)
+                val contentJsonObject = messageJsonObject.optJSONObject(CONTENT)
+                if (messageJsonObject.has(MESSAGE_TYPE)) {
+                    when (LivechatWidgetMessageType.valueOf(messageJsonObject.getString(MESSAGE_TYPE))) {
+                        LivechatWidgetMessageType.DRAFT -> LivechatWidgetMessage.Draft(
+                            message = contentJsonObject?.optString(TEXT).takeIf { it?.isNotBlank() == true },
+                            thread = deserializeThread(root)
+                        )
+
+                        LivechatWidgetMessageType.BASIC -> LivechatWidgetMessage.Basic(
+                            message = contentJsonObject?.optString(TEXT).takeIf { it?.isNotBlank() == true },
+                            attachment = contentJsonObject?.let { deserializeAttachment(it) },
+                            thread = deserializeThread(root),
+                            moment = deserializeMoment(messageJsonObject, LivechatWidgetMessage.Basic::moment.name),
+                            id = messageJsonObject.optString(LivechatWidgetMessage.Basic::id.name).takeIf { it.isNotBlank() }
+                        )
+
+                        LivechatWidgetMessageType.CUSTOM_DATA -> LivechatWidgetMessage.CustomData(
+                            customData = contentJsonObject?.optJSONObject(LivechatWidgetMessage.CustomData::customData.name)?.toString()?.takeIf { it.isNotBlank() },
+                            agentMessage = contentJsonObject?.optString(LivechatWidgetMessage.CustomData::agentMessage.name)?.takeIf { it.isNotBlank() },
+                            userMessage = contentJsonObject?.optString(LivechatWidgetMessage.CustomData::userMessage.name)?.takeIf { it.isNotBlank() },
+                            thread = deserializeThread(root),
+                            moment = deserializeMoment(messageJsonObject, LivechatWidgetMessage.CustomData::moment.name),
+                            id = messageJsonObject.optString(LivechatWidgetMessage.CustomData::id.name).takeIf { it.isNotBlank() }
+                        )
+                    }
+                } else {
+                    LivechatWidgetMessage.Unknown(it)
+                }
+            }.getOrElse {
+                MobileMessagingLogger.e(TAG, "Could not parse message from: $value", it)
+                LivechatWidgetMessage.Unknown(value)
+            }
+        }
+    }
+
+    private fun deserializeMoment(jsonObject: JSONObject, key: String): Date? {
+        return jsonObject.optLong(key).takeIf { it != 0L }?.let {
+            runCatching { Date(it) }.getOrNull()
         }
     }
 
@@ -126,7 +197,7 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
     private fun deserializeAttachment(jsonObject: JSONObject): InAppChatMobileAttachment? {
         return runCatching {
             var attachment: InAppChatMobileAttachment? = null
-            if (jsonObject.has(ATTACHMENT)) {
+            if (jsonObject.has(LivechatWidgetMessage.Basic::attachment.name)) {
                 val attachmentUrl = jsonObject.optString(LivechatWidgetMessage.Basic::attachment.name).takeIf { it.isNotBlank() }
                 val fileName = jsonObject.optString(ATTACHMENT_FILE_NAME).takeIf { it.isNotBlank() }
                 if (attachmentUrl?.isNotBlank() == true) {
