@@ -36,9 +36,11 @@ ext {
     mm_coreKtxVersion = "1.10.1"
     mm_lifecycleVersion = "2.5.1"
     mm_junitVersion = "4.13.2"
+    mm_androidJunitVersion = "1.2.1"
     mm_mockitoCoreVersion = "1.10.19"
     mm_multidexVersion = "2.0.1"
     mm_coroutinesVersion = "1.9.0"
+    mm_androidTestRunnerVersion = "1.6.2"
     mm_version = "$version"
 }
 

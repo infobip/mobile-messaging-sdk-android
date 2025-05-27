@@ -14,6 +14,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import org.infobip.mobile.messaging.chat.databinding.IbWidgetBottomSheetChooserBinding
 import org.infobip.mobile.messaging.chat.databinding.IbWidgetBottomSheetChooserRowBinding
+import org.infobip.mobile.messaging.chat.utils.show
 
 class BottomSheetChooser<T> @JvmOverloads constructor(
     context: Context,
@@ -35,10 +36,12 @@ class BottomSheetChooser<T> @JvmOverloads constructor(
 
     fun setTitle(@StringRes title: Int) {
         binding.ibLcChooserTitle.setText(title)
+        binding.ibLcChooserTitle.show(binding.ibLcChooserTitle.text.isNotBlank())
     }
 
     fun setTitle(title: String) {
         binding.ibLcChooserTitle.text = title
+        binding.ibLcChooserTitle.show(binding.ibLcChooserTitle.text.isNotBlank())
     }
 
     fun setOnItemSelectedListener(onItemSelected: ((T, BottomSheetDialog?) -> (Unit))?) {

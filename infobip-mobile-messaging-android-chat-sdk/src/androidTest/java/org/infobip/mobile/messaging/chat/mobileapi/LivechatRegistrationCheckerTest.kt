@@ -2,6 +2,11 @@ package org.infobip.mobile.messaging.chat.mobileapi
 
 import android.os.Handler
 import android.os.Looper
+import io.mockk.Runs
+import io.mockk.clearMocks
+import io.mockk.every
+import io.mockk.just
+import io.mockk.verify
 import org.infobip.mobile.messaging.MobileMessagingProperty
 import org.infobip.mobile.messaging.api.appinstance.LivechatContactInformation
 import org.infobip.mobile.messaging.api.appinstance.LivechatDestination
@@ -10,14 +15,6 @@ import org.infobip.mobile.messaging.chat.MobileMessagingChatTestCase
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.util.PreferenceHelper
 import org.junit.Test
-import org.mockito.Mockito.after
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.doNothing
-import org.mockito.Mockito.doThrow
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import java.util.concurrent.Executor
 
 class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
@@ -39,14 +36,14 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
 
     override fun tearDown() {
         super.tearDown()
-        reset(mobileApiAppInstance)
+        clearMocks(mobileApiAppInstance)
     }
 
     @Test
     fun shouldSkipCheckWhenCallAreDisabled() {
         lcRegIdChecker.sync("widgetId", "pushRegistrationId", false)
-        verify(mobileApiAppInstance, after(300).times(0)).getLivechatContactInformation(any())
-        verify(inAppChatBroadcaster, after(300).times(0)).livechatRegistrationIdUpdated(any())
+        verify(exactly = 0) { mobileApiAppInstance.getLivechatContactInformation(any()) }
+        verify(exactly = 0) { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) }
     }
 
     @Test
@@ -59,16 +56,16 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
                     )
                 )
         )
-        `when`(mobileApiAppInstance.getLivechatContactInformation(any())).thenReturn(lcContactInfoResponse)
-        doNothing().`when`(inAppChatBroadcaster).livechatRegistrationIdUpdated(anyString())
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } returns lcContactInfoResponse
+        every { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) } just Runs
 
         Handler(Looper.getMainLooper()).postDelayed({
             lcRegIdChecker.sync("widgetId", "pushRegistrationId", true)
             lcRegIdChecker.sync("widgetId", "pushRegistrationId", true)
             lcRegIdChecker.sync("widgetId", "pushRegistrationId", true)
 
-            verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(any())
-            verify(inAppChatBroadcaster, after(300).times(1)).livechatRegistrationIdUpdated(any())
+            verify { mobileApiAppInstance.getLivechatContactInformation(any()) }
+            verify { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) }
         }, 500)
 
     }
@@ -79,13 +76,13 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
         val pushRegistrationId = "pushRegistrationId"
 
         val lcContactInfoResponse = LivechatContactInformation(null)
-        `when`(mobileApiAppInstance.getLivechatContactInformation(any())).thenReturn(lcContactInfoResponse)
-        doNothing().`when`(inAppChatBroadcaster).livechatRegistrationIdUpdated(anyString())
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } returns lcContactInfoResponse
+        every { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) } just Runs
 
         lcRegIdChecker.sync(widgetId, pushRegistrationId, true)
 
-        verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(pushRegistrationId)
-        verify(inAppChatBroadcaster, after(300).times(0)).livechatRegistrationIdUpdated(anyString())
+        verify { mobileApiAppInstance.getLivechatContactInformation(pushRegistrationId) }
+        verify(exactly = 0) { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) }
     }
 
     @Test
@@ -102,13 +99,13 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
                 )
             )
         )
-        `when`(mobileApiAppInstance.getLivechatContactInformation(any())).thenReturn(lcContactInfoResponse)
-        doNothing().`when`(inAppChatBroadcaster).livechatRegistrationIdUpdated(anyString())
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } returns lcContactInfoResponse
+        every { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) } just Runs
 
         lcRegIdChecker.sync(widgetId, pushRegistrationId, true)
 
-        verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(pushRegistrationId)
-        verify(inAppChatBroadcaster, after(300).times(1)).livechatRegistrationIdUpdated(lcRegistrationId)
+        verify { mobileApiAppInstance.getLivechatContactInformation(pushRegistrationId) }
+        verify { inAppChatBroadcaster.livechatRegistrationIdUpdated(lcRegistrationId) }
     }
 
     @Test
@@ -133,24 +130,23 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
                 )
             )
         )
-        `when`(mobileApiAppInstance.getLivechatContactInformation(any())).thenReturn(lcContactInfoResponse)
-        doNothing().`when`(inAppChatBroadcaster).livechatRegistrationIdUpdated(anyString())
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } returns lcContactInfoResponse
+        every { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) } just Runs
 
         lcRegIdChecker.sync(widgetId, pushRegistrationId, true)
 
-        verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(pushRegistrationId)
-        verify(inAppChatBroadcaster, after(300).times(1)).livechatRegistrationIdUpdated(lcRegistrationId)
+        verify { mobileApiAppInstance.getLivechatContactInformation(pushRegistrationId) }
+        verify { inAppChatBroadcaster.livechatRegistrationIdUpdated(lcRegistrationId) }
     }
 
     @Test
     fun shouldNotBroadcastLivechatRegistrationIdWhenRequestFails() {
-        doThrow(ApiIOException("error code", "error msg")).`when`(mobileApiAppInstance)
-            .getLivechatContactInformation(anyString())
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } throws ApiIOException("error code", "error msg")
 
         lcRegIdChecker.sync("widgetId", "pushRegistrationId", true)
 
-        verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(any())
-        verify(inAppChatBroadcaster, after(300).times(0)).livechatRegistrationIdUpdated(anyString())
+        verify { mobileApiAppInstance.getLivechatContactInformation(any()) }
+        verify(exactly = 0) { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) }
     }
 
     @Test
@@ -179,8 +175,9 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
                 )
             )
         )
-        `when`(mobileApiAppInstance.getLivechatContactInformation(any())).thenReturn(lcContactInfoResponse)
-        doNothing().`when`(inAppChatBroadcaster).livechatRegistrationIdUpdated(anyString())
+
+        every { mobileApiAppInstance.getLivechatContactInformation(any()) } returns lcContactInfoResponse
+        every { inAppChatBroadcaster.livechatRegistrationIdUpdated(any()) } just Runs
 
         PreferenceHelper.saveBoolean(
             context,
@@ -200,8 +197,8 @@ class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
 
         lcRegIdChecker.sync()
 
-        verify(mobileApiAppInstance, after(300).times(1)).getLivechatContactInformation(pushRegistrationId)
-        verify(inAppChatBroadcaster, after(300).times(1)).livechatRegistrationIdUpdated(lcRegistrationId)
+        verify { mobileApiAppInstance.getLivechatContactInformation(any()) }
+        verify { inAppChatBroadcaster.livechatRegistrationIdUpdated(lcRegistrationId) }
     }
 
 

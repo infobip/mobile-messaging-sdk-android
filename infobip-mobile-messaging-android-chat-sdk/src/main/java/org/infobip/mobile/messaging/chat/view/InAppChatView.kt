@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import org.infobip.mobile.messaging.*
+import org.infobip.mobile.messaging.api.chat.WidgetAttachmentConfig
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient
 import org.infobip.mobile.messaging.chat.InAppChat
@@ -49,7 +50,6 @@ import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
-import org.infobip.mobile.messaging.util.StringUtils
 import org.infobip.mobile.messaging.util.SystemInformation
 import java.util.*
 
@@ -863,26 +863,29 @@ class InAppChatView @JvmOverloads constructor(
             val widgetPrimaryColor = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR)
             val widgetBackgroundColor = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR)
             val widgetPrimaryTextColor = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR)
-            val maxUploadContentSizeStr = propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE)
             val widgetMultiThread = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD)
             val widgetMultichannelConversation = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION)
             val callsEnabled = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED)
-            var maxUploadContentSize = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE
-            if (StringUtils.isNotBlank(maxUploadContentSizeStr)) {
-                maxUploadContentSize = maxUploadContentSizeStr!!.toLong()
-            }
             val themeNames: Set<String>? = propertyHelper.findStringSet(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES)
+            val attachmentMaxSize = propertyHelper.findLong(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE)
+            val attachmentIsEnabled = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED)
+            val attachmentAllowedExtensions = propertyHelper.findStringSet(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS)
             WidgetInfo(
                 it,
                 widgetTitle,
                 widgetPrimaryColor,
                 widgetBackgroundColor,
                 widgetPrimaryTextColor,
-                maxUploadContentSize,
+                attachmentMaxSize,
                 widgetMultiThread,
                 widgetMultichannelConversation,
                 callsEnabled,
-                themeNames?.toList()
+                themeNames?.toList(),
+                WidgetAttachmentConfig(
+                    attachmentMaxSize,
+                    attachmentIsEnabled,
+                    attachmentAllowedExtensions
+                )
             )
         }
     }

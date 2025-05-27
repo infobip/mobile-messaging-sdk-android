@@ -2,15 +2,12 @@ package org.infobip.mobile.messaging.chat.view
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +40,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbFragmentChatBinding
 import org.infobip.mobile.messaging.chat.models.AttachmentSource
+import org.infobip.mobile.messaging.chat.models.AttachmentSourceSpecification
 import org.infobip.mobile.messaging.chat.models.ContextualData
 import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
@@ -798,7 +796,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             if (withInput) {
                 initTextBar()
                 initSendButton()
-                initAttachmentButton()
+                updateAttachmentButton(widgetInfo)
                 setChatInputVisibility(true)
             } else {
                 it.ibLcChatInput.visibility = View.GONE
@@ -845,14 +843,24 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         }
     }
 
-    private fun initAttachmentButton() {
-        binding.ibLcChatInput.setAttachmentButtonClickListener {
-            chooseAttachmentSource()
+    private fun updateAttachmentButton(widgetInfo: WidgetInfo?) {
+        withBinding {
+            val attachmentsEnabled = widgetInfo?.attachmentConfig?.isEnabled == true && widgetInfo.attachmentConfig.allowedExtensions.isNotEmpty()
+            it.ibLcChatInput.setAttachmentButtonVisibility(if (attachmentsEnabled) View.VISIBLE else View.GONE)
+            it.ibLcChatInput.setAttachmentButtonEnabled(attachmentsEnabled)
+            if (attachmentsEnabled) {
+                it.ibLcChatInput.setAttachmentButtonClickListener {
+                    showAttachmentActionDialog(widgetInfo?.attachmentConfig?.allowedExtensions.orEmpty())
+                }
+            }
         }
     }
 
     private fun applyChatInputStyle(widgetInfo: WidgetInfo) {
-        withBinding { it.ibLcChatInput.applyWidgetInfoStyle(widgetInfo) }
+        updateAttachmentButton(widgetInfo)
+        withBinding {
+            it.ibLcChatInput.applyWidgetInfoStyle(widgetInfo)
+        }
     }
 
     private fun updateInputVisibilityByMultiThreadView(widgetView: LivechatWidgetView) {
@@ -898,51 +906,54 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     //region Attachment picker
+    private fun showAttachmentActionDialog(allowedExtensions: Set<String>) {
+        if (allowedExtensions.isEmpty()) {
+            MobileMessagingLogger.e(TAG, "Attachment picker skipped: no allowed attachment extensions are configured in the LiveChat Widget.")
+            return
+        }
+        val specifications: Set<AttachmentSourceSpecification> = AttachmentHelper.getAvailableSourcesSpecifications(requireContext(), allowedExtensions)
+        if (specifications.isEmpty()) {
+            MobileMessagingLogger.e(TAG, "Attachment picker skipped: no available attachment sources match the allowed extensions configured in the LiveChat Widget.")
+            return
+        }
 
-    private fun chooseAttachmentSource() {
-        val chooser = attachmentBottomSheetChooser()
-        val dialog = chooser.createDialog()
+        val bottomSheetRows = specifications.map { spec ->
+            BottomSheetRow(
+                text = localizationUtils.getString(spec.nameRes),
+                identifier = spec.attachmentSource
+            )
+        }
+
+        val chooser = BottomSheetChooser<AttachmentSource>(context).apply {
+            setRows(bottomSheetRows)
+        }
+
         chooser.setOnItemSelectedListener { attachmentSource, bottomSheetDialog ->
-            (bottomSheetDialog ?: dialog).dismiss()
+            bottomSheetDialog?.dismiss()
             getLifecycleRegistry().isEnabled = false
             when (attachmentSource) {
-                AttachmentSource.Camera -> activityResultDelegate.capturePhoto()
-                AttachmentSource.VideoRecorder -> activityResultDelegate.recordVideo()
-                AttachmentSource.VisualMediaPicker -> {
-                    activityResultDelegate.selectMedia()
+                AttachmentSource.Camera -> specifications.firstInstanceOrNull<AttachmentSourceSpecification.Camera>()?.let {
+                    activityResultDelegate.capturePhoto(it.photoFileExtension)
                 }
 
-                AttachmentSource.FilePicker -> {
-                    activityResultDelegate.selectFile()
+                AttachmentSource.VideoRecorder -> specifications.firstInstanceOrNull<AttachmentSourceSpecification.VideoRecorder>()?.let {
+                    activityResultDelegate.recordVideo(it.videoFileExtension)
+                }
+
+                AttachmentSource.VisualMediaPicker -> specifications.firstInstanceOrNull<AttachmentSourceSpecification.VisualMediaPicker>()?.let {
+                    activityResultDelegate.selectMedia(it.type)
+                }
+
+                AttachmentSource.FilePicker -> specifications.firstInstanceOrNull<AttachmentSourceSpecification.FilePicker>()?.let {
+                    activityResultDelegate.selectFile(it.mimeTypes.toTypedArray())
                 }
             }
         }
-        dialog.show()
+        chooser.createDialog().show()
     }
 
-    private fun attachmentBottomSheetChooser(): BottomSheetChooser<AttachmentSource> {
-        return BottomSheetChooser<AttachmentSource>(context).apply {
-            setRows(
-                listOfNotNull(
-                    BottomSheetRow(
-                        text = localizationUtils.getString(R.string.ib_chat_attachments_take_a_photo),
-                        identifier = AttachmentSource.Camera
-                    ).takeIf { hasCameraFeature() },
-                    BottomSheetRow(
-                        text = localizationUtils.getString(R.string.ib_chat_attachments_record_video),
-                        identifier = AttachmentSource.VideoRecorder
-                    ).takeIf { hasCameraFeature() },
-                    BottomSheetRow(
-                        text = localizationUtils.getString(R.string.ib_chat_attachments_select_from_gallery),
-                        identifier = AttachmentSource.VisualMediaPicker
-                    ),
-                    BottomSheetRow(
-                        text = localizationUtils.getString(R.string.ib_chat_attachments_select_file),
-                        identifier = AttachmentSource.FilePicker
-                    ),
-                )
-            )
-        }
+    private inline fun <reified T : AttachmentSourceSpecification> Set<AttachmentSourceSpecification>.firstInstanceOrNull(): T? {
+        return firstOrNull { it is T } as? T
     }
 
     override fun onAttachmentLauncherResult(uri: Uri, source: AttachmentSource) {
@@ -950,10 +961,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             runCatching {
                 withContext(Dispatchers.Default) {
-                    AttachmentHelper.createInAppChatAttachment(context, uri)
+                    AttachmentHelper.createInAppChatAttachment(context, uri, widgetInfo?.attachmentConfig?.maxSize?.toInt() ?: 0)
                 }
             }.onFailure {
-                Log.e("InAppChatScreen", "Failed to create In-app chat attachment", it)
+                MobileMessagingLogger.e(TAG, "Failed to create In-app chat attachment", it)
                 val messageRes =
                     if (it.message == "Attachment data is too large") R.string.ib_chat_allowed_attachment_size_exceeded else R.string.ib_chat_cant_create_attachment
                 Toast.makeText(
@@ -969,12 +980,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 }
             }
         }
-    }
-
-    private fun hasCameraFeature(): Boolean {
-        val hasCameraFeature = requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
-        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        return hasCameraFeature && cameraManager.cameraIdList.isNotEmpty()
     }
     //endregion
     //endregion

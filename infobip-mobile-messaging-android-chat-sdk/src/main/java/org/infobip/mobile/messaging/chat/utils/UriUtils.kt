@@ -12,10 +12,14 @@ import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import android.provider.MediaStore.MediaColumns
 import android.provider.OpenableColumns
-import android.util.Log
 import android.webkit.MimeTypeMap
+import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.io.File
+
+private const val TAG = "FileUtils"
 
 /**
  * Copies file to public destination.
@@ -28,15 +32,24 @@ fun Uri.copyFileToPublicDir(context: Context, directory: String = "DCIM/Infobip"
         val fileName = sourceUri.fileName(context) ?: return
         val mimeType = sourceUri.mimeType(context) ?: return
 
+        val collectionUri = when {
+            mimeType.startsWith(AttachmentHelper.IMAGE_MIME_TYPE_PREFIX) -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            mimeType.startsWith(AttachmentHelper.VIDEO_MIME_TYPE_PREFIX) -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            else -> {
+                MobileMessagingLogger.e(TAG, "Failed to copy file to public folder. Unsupported MIME type: $mimeType")
+                return
+            }
+        }
+
         val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
-            put(MediaStore.Images.Media.MIME_TYPE, mimeType)
-            put(MediaStore.Images.Media.RELATIVE_PATH, directory)
-            put(MediaStore.Images.Media.IS_PENDING, 1) // Mark file as pending (Android 10+)
+            put(MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaColumns.MIME_TYPE, mimeType)
+            put(MediaColumns.RELATIVE_PATH, directory)
+            put(MediaColumns.IS_PENDING, 1) // For Android 10+ (scoped storage)
         }
 
         val resolver = context.contentResolver
-        val uri: Uri? = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        val uri: Uri? = resolver.insert(collectionUri, contentValues)
 
         uri?.let {
             resolver.openOutputStream(it)?.use { outputStream ->
@@ -45,11 +58,11 @@ fun Uri.copyFileToPublicDir(context: Context, directory: String = "DCIM/Infobip"
                 }
             }
             contentValues.clear()
-            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0) // File ready
+            contentValues.put(MediaColumns.IS_PENDING, 0) // File ready
             resolver.update(it, contentValues, null, null)
         }
     }.onFailure {
-        Log.e("FileUtils", "Failed to copy file to public folder.", it)
+        MobileMessagingLogger.e(TAG, "Failed to copy file to public folder.", it)
     }.onSuccess {
 
     }
@@ -69,7 +82,7 @@ fun Uri.mimeType(context: Context): String? {
         }
         mimeType
     }.onFailure {
-        Log.e("FileUtils", "Failed to get file mimeType from URI.", it)
+        MobileMessagingLogger.e(TAG, "Failed to get file mimeType from URI.", it)
     }.getOrNull()
 }
 
@@ -95,7 +108,7 @@ fun Uri.fileName(context: Context): String? {
         }
         fileName
     }.onFailure {
-        Log.e("FileUtils", "Failed to get file name from URI.", it)
+        MobileMessagingLogger.e(TAG, "Failed to get file name from URI.", it)
     }.getOrNull()
 }
 
@@ -113,6 +126,6 @@ fun Uri.deleteFile(context: Context): Boolean {
         val file = File(this.path ?: return false)
         return if (file.exists()) file.delete() else false
     }.onFailure {
-        Log.e("FileUtils", "Failed to delete file.", it)
+        MobileMessagingLogger.e(TAG, "Failed to delete file.", it)
     }.getOrDefault(false)
 }

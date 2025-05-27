@@ -10,23 +10,29 @@ package org.infobip.mobile.messaging.chat.attachments
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.util.Base64
-import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.exifinterface.media.ExifInterface
+import org.infobip.mobile.messaging.chat.models.AttachmentSourceSpecification
 import org.infobip.mobile.messaging.chat.utils.fileName
 import org.infobip.mobile.messaging.chat.utils.mimeType
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 
 internal object AttachmentHelper {
 
-    private const val tag = "AttachmentHelper"
+    private const val TAG = "AttachmentHelper"
+    const val IMAGE_MIME_TYPE_PREFIX = "image/"
+    const val VIDEO_MIME_TYPE_PREFIX = "video/"
 
     val ATTACHMENT_URL_REGEX = Regex("""(?<prefix>data:)(?<mimeType>[^;]+)(?<base64Prefix>;base64,)(?<base64Value>[A-Za-z0-9+\\/=\n]+)""")
 
@@ -35,7 +41,7 @@ internal object AttachmentHelper {
     fun createInAppChatAttachment(
         context: Context,
         uri: Uri,
-        maxBytesSize: Int = InAppChatMobileAttachment.DEFAULT_MAX_UPLOAD_CONTENT_SIZE.toInt()
+        maxBytesSize: Int
     ): InAppChatMobileAttachment {
         val mimeType: String? = uri.mimeType(context)
         if (mimeType.isNullOrBlank())
@@ -44,7 +50,7 @@ internal object AttachmentHelper {
         if (contentResolver != null) {
             val inputStream = contentResolver.openInputStream(uri)
             val data: ByteArray?
-            if (mimeType == InAppChatAttachmentHelper.MIME_TYPE_IMAGE_JPEG) {
+            if (AttachmentSourceSpecification.Camera.allowedFileExtension.any { mimeType.equals(it, ignoreCase = true) }) {
                 val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream) ?: throw IllegalStateException("Failed to decode bitmap")
                 val scaledBitmap = scaleCompressAndRotateBitmap(context, uri, bitmap, maxBytesSize)
                 data = (scaledBitmap ?: bitmap).toByteArray()
@@ -53,6 +59,7 @@ internal object AttachmentHelper {
             } else {
                 data = inputStream?.use { it.readBytes() }
             }
+
 
             if (data == null)
                 throw IllegalStateException("Attachment data is null")
@@ -119,7 +126,7 @@ internal object AttachmentHelper {
         return runCatching {
             val cr = context.applicationContext.contentResolver
             if (cr == null) {
-                Log.e(tag, "Failed to get content resolver")
+                MobileMessagingLogger.e(TAG, "Failed to get content resolver")
                 return null
             }
             var scaledBitmap = originalBitmap
@@ -152,7 +159,7 @@ internal object AttachmentHelper {
                 else -> resultBitmap
             }
         }.onFailure {
-            Log.e(tag, "Failed to scale and compress bitmap", it)
+            MobileMessagingLogger.e(TAG, "Failed to scale and compress bitmap", it)
         }.getOrNull()
     }
 
@@ -162,7 +169,7 @@ internal object AttachmentHelper {
     ): Int? {
         val cr = context.applicationContext.contentResolver
         if (cr == null) {
-            Log.e(tag, "Failed to get content resolver")
+            MobileMessagingLogger.e(TAG, "Failed to get content resolver")
             return null
         }
         val ei = runCatching {
@@ -178,5 +185,58 @@ internal object AttachmentHelper {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
     //endregion
+
+    /**
+     * Returns available attachment source specifications based on allowed livechat widget file extensions.
+     */
+    internal fun getAvailableSourcesSpecifications(context: Context, allowedExtensions: Set<String>): Set<AttachmentSourceSpecification> {
+        if (allowedExtensions.isEmpty()) {
+            return emptySet()
+        }
+
+        val specifications = mutableSetOf<AttachmentSourceSpecification>()
+
+        val hasCameraFeature = context.hasCameraFeature()
+        //Camera
+        val availablePhotoFileExtensions: Set<String> = AttachmentSourceSpecification.Camera.allowedFileExtension.intersect(allowedExtensions)
+        if (hasCameraFeature && availablePhotoFileExtensions.isNotEmpty()) {
+            specifications.add(AttachmentSourceSpecification.Camera(availablePhotoFileExtensions.first()))
+        }
+        //VideoRecorder
+        val availableVideoFileExtensions: Set<String> = AttachmentSourceSpecification.VideoRecorder.allowedFileExtension.intersect(allowedExtensions)
+        if (hasCameraFeature && availableVideoFileExtensions.isNotEmpty()) {
+            specifications.add(AttachmentSourceSpecification.VideoRecorder(availableVideoFileExtensions.first()))
+        }
+        //FilePicker
+        val mimeTypeMap = MimeTypeMap.getSingleton()
+        val allowedMimeTypes = allowedExtensions.mapNotNull { mimeTypeMap.getMimeTypeFromExtension(it) }.toSet()
+        if (allowedMimeTypes.isNotEmpty()) {
+            specifications.add(AttachmentSourceSpecification.FilePicker(allowedMimeTypes))
+        }
+        //VisualMediaPicker
+        val imagesAllowed = allowedMimeTypes.any { it.startsWith(IMAGE_MIME_TYPE_PREFIX) }
+        val videosAllowed = allowedMimeTypes.any { it.startsWith(VIDEO_MIME_TYPE_PREFIX) }
+        val visualMediaPickerType = when {
+            imagesAllowed && videosAllowed -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
+            imagesAllowed -> ActivityResultContracts.PickVisualMedia.ImageOnly
+            videosAllowed -> ActivityResultContracts.PickVisualMedia.VideoOnly
+            else -> null
+        }
+        if (visualMediaPickerType != null) {
+            specifications.add(AttachmentSourceSpecification.VisualMediaPicker(visualMediaPickerType))
+        }
+        return specifications
+    }
+
+    private fun Context.hasCameraFeature(): Boolean {
+        return runCatching {
+            val hasCameraFeature = packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+            val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            hasCameraFeature && cameraManager.cameraIdList.isNotEmpty()
+        }
+            .onFailure { MobileMessagingLogger.e(TAG, "Failed to check camera feature", it) }
+            .getOrElse { false }
+    }
+
 
 }

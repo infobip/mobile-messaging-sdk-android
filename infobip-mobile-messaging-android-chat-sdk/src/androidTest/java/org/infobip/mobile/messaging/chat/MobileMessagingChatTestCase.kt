@@ -2,11 +2,13 @@ package org.infobip.mobile.messaging.chat
 
 import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.firebase.FirebaseOptions
+import io.mockk.every
+import io.mockk.mockk
 import org.infobip.mobile.messaging.MobileMessaging
 import org.infobip.mobile.messaging.MobileMessagingCore
 import org.infobip.mobile.messaging.MobileMessagingProperty
-import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcaster
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
@@ -18,14 +20,13 @@ import org.infobip.mobile.messaging.platform.Broadcaster
 import org.infobip.mobile.messaging.platform.Time
 import org.infobip.mobile.messaging.platform.TimeProvider
 import org.infobip.mobile.messaging.util.PreferenceHelper
+import org.junit.After
+import org.junit.Before
 import org.junit.runner.RunWith
-import org.mockito.BDDMockito
-import org.mockito.Matchers
-import org.mockito.Mockito
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
-abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
+abstract class MobileMessagingChatTestCase() {
 
     protected class TestTimeProvider : TimeProvider {
         var delta: Long = 0
@@ -57,19 +58,21 @@ abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
         }
     }
 
-    protected lateinit var messageBroadcaster: Broadcaster
-    protected lateinit var inAppChatBroadcaster: InAppChatBroadcaster
-    protected lateinit var time: TestTimeProvider
-    protected lateinit var mobileMessagingCore: MobileMessagingCore
-    protected lateinit var mobileMessaging: MobileMessaging
-    protected lateinit var firebaseAppProvider: FirebaseAppProvider
-    protected lateinit var mobileApiResourceProvider: MobileApiResourceProvider
-    protected lateinit var mobileApiAppInstance: MobileApiAppInstance
+    protected val messageBroadcaster: Broadcaster = mockk()
+    protected val inAppChatBroadcaster: InAppChatBroadcaster = mockk()
+    protected val mobileApiResourceProvider: MobileApiResourceProvider = mockk()
+    protected val mobileApiAppInstance: MobileApiAppInstance = mockk()
     protected lateinit var propertyHelper: PropertyHelper
+    protected lateinit var time: TestTimeProvider
+    protected lateinit var firebaseAppProvider: FirebaseAppProvider
+    protected lateinit var mobileMessaging: MobileMessaging
+    protected lateinit var mobileMessagingCore: MobileMessagingCore
 
-    override fun setUp() {
-        super.setUp()
+    protected val context: Context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
 
+    @Before
+    open fun setUp() {
         PreferenceHelper.getDefaultMMSharedPreferences(context).edit().clear().commit()
 
 //        PreferenceHelper.saveString(context, MobileMessagingProperty.API_URI, "http://127.0.0.1:" + debugServer.listeningPort + "/")
@@ -83,12 +86,17 @@ abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
         PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key , "IN_APP_CHAT_WIDGET_TITLE")
         PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key , "IN_APP_CHAT_WIDGET_PRIMARY_COLOR")
         PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key , "IN_APP_CHAT_WIDGET_BACKGROUND_COLOR")
-        PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.key , "IN_APP_CHAT_LANGUAGE")
-        PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.key , 10L)
+        PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR.key , "IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR")
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key , true)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.key , true)
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key , true)
+        PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.key , setOf("default", "dark"))
+        PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED.key , true)
+        PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE.key , 10L)
+        PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS.key , setOf("jpg", "png"))
         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED.key , true)
+        PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE.key , "IN_APP_CHAT_LANGUAGE")
+        PreferenceHelper.saveInt(context, MobileMessagingChatProperty.UNREAD_CHAT_MESSAGES_COUNT.key , 0)
         propertyHelper = PropertyHelper(context)
 
         MobileMessagingLogger.enforce()
@@ -96,13 +104,7 @@ abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
         time = TestTimeProvider()
         Time.reset(time)
 
-        mobileApiResourceProvider = Mockito.mock(MobileApiResourceProvider::class.java)
-        mobileApiAppInstance = Mockito.mock(MobileApiAppInstance::class.java)
-
-        BDDMockito.given(mobileApiResourceProvider.getMobileApiAppInstance(Matchers.any(Context::class.java))).willReturn(mobileApiAppInstance)
-
-        messageBroadcaster = Mockito.mock(Broadcaster::class.java)
-        inAppChatBroadcaster = Mockito.mock(InAppChatBroadcaster::class.java)
+        every { mobileApiResourceProvider.getMobileApiAppInstance(any()) } returns mobileApiAppInstance
 
         firebaseAppProvider = FirebaseAppProvider(context)
         val firebaseOptions = FirebaseOptions.Builder()
@@ -116,8 +118,8 @@ abstract class MobileMessagingChatTestCase: MobileMessagingBaseTestCase() {
         mobileMessaging = mobileMessagingCore
     }
 
-    override fun tearDown() {
-        super.tearDown()
+    @After
+    open fun tearDown() {
         time.reset()
     }
 

@@ -280,10 +280,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR);
-        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
         PreferenceHelper.remove(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE);

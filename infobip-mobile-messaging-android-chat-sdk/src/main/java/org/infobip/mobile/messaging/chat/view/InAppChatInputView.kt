@@ -148,6 +148,10 @@ class InAppChatInputView @JvmOverloads constructor(
         binding.sendButton.setThrottleFirstOnClickListener(listener)
     }
 
+    fun setAttachmentButtonVisibility(visibility: Int) {
+        binding.attachmentButton.visibility = visibility
+    }
+
     fun setAttachmentButtonEnabled(isEnabled: Boolean) {
         binding.attachmentButton.isEnabled = isEnabled
     }

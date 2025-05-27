@@ -15,6 +15,8 @@ import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 
+import org.infobip.mobile.messaging.api.chat.WidgetAttachmentConfig;
+import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.utils.CommonUtils;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -33,6 +35,12 @@ import java.util.UUID;
 import androidx.exifinterface.media.ExifInterface;
 
 public class InAppChatMobileAttachment {
+
+    /**
+     * Default max size for attachment upload.
+     * Deprecated, attachment max size it now configurable per Livechat Widget, use {@link WidgetInfo}'s {@link WidgetAttachmentConfig} property {@code maxSize} instead.
+     */
+    @Deprecated
     public static final long DEFAULT_MAX_UPLOAD_CONTENT_SIZE = 10_485_760; //10 MiB
 
     String base64;
@@ -277,7 +285,7 @@ public class InAppChatMobileAttachment {
     }
 
     private static Long getAttachmentMaxSize(Context context) {
-        return PreferenceHelper.findLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), DEFAULT_MAX_UPLOAD_CONTENT_SIZE);
+        return PreferenceHelper.findLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE.getKey(), DEFAULT_MAX_UPLOAD_CONTENT_SIZE);
     }
 
     /**

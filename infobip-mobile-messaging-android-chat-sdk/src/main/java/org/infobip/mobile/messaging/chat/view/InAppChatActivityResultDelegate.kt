@@ -13,6 +13,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.VisualMediaType
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
@@ -33,9 +34,9 @@ internal interface InAppChatFragmentActivityResultDelegate : DefaultLifecycleObs
         fun onAttachmentLauncherResult(uri: Uri, source: AttachmentSource)
     }
 
-    fun capturePhoto()
-    fun recordVideo()
-    fun selectMedia()
+    fun capturePhoto(photoFileExtension: String)
+    fun recordVideo(videoFileExtension: String)
+    fun selectMedia(type: VisualMediaType)
     fun selectFile(mimeTypes: Array<String>? = null)
 }
 
@@ -104,20 +105,20 @@ internal class InAppChatActivityResultDelegateImpl(
 
     override fun onStop(owner: LifecycleOwner) {}
 
-    override fun selectMedia() {
-        mediaPickerLauncher.launch(PickVisualMediaRequest())
+    override fun selectMedia(type: VisualMediaType) {
+        mediaPickerLauncher.launch(PickVisualMediaRequest(type))
     }
 
     override fun selectFile(mimeTypes: Array<String>?) {
         filePickerLauncher.launch(mimeTypes)
     }
 
-    override fun capturePhoto() {
-        useCamera(photoActionLauncher, "Photo-${System.currentTimeMillis()}.jpeg", AttachmentSource.Camera)
+    override fun capturePhoto(photoFileExtension: String) {
+        useCamera(photoActionLauncher, "Photo-${System.currentTimeMillis()}.$photoFileExtension", AttachmentSource.Camera)
     }
 
-    override fun recordVideo() {
-        useCamera(videoActionLauncher, "Video-${System.currentTimeMillis()}.mp4", AttachmentSource.VideoRecorder)
+    override fun recordVideo(videoFileExtension: String) {
+        useCamera(videoActionLauncher, "Video-${System.currentTimeMillis()}.$videoFileExtension", AttachmentSource.VideoRecorder)
     }
 
     private fun useCamera(launcher: ActivityResultLauncher<Uri>, fileName: String, source: AttachmentSource) {

@@ -2,13 +2,13 @@ package org.infobip.mobile.messaging.chat.properties;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import androidx.annotation.Nullable;
 
 /**
  * @author sslavin
@@ -38,6 +38,14 @@ public class PropertyHelper extends PreferenceHelper {
 
     public void saveInt(MobileMessagingChatProperty property, int value) {
         saveInt(context, property.getKey(), value);
+    }
+
+    public long findLong(MobileMessagingChatProperty property) {
+        return findLong(context, property.getKey(), (long) property.getDefaultValue());
+    }
+
+    public void saveLong(MobileMessagingChatProperty property, long value) {
+        saveLong(context, property.getKey(), value);
     }
 
     public void saveString(MobileMessagingChatProperty property, String value) {

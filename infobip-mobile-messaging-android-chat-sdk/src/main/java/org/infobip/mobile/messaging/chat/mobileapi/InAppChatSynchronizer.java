@@ -5,6 +5,7 @@ import android.content.Context;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.chat.MobileApiChat;
+import org.infobip.mobile.messaging.api.chat.WidgetAttachmentConfig;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcaster;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
@@ -78,13 +79,20 @@ public class InAppChatSynchronizer {
                 PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.getKey(), widgetInfo.getPrimaryColor());
                 PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.getKey(), widgetInfo.getBackgroundColor());
                 PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR.getKey(), widgetInfo.getPrimaryTextColor());
-                PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MAX_UPLOAD_CONTENT_SIZE.getKey(), widgetInfo.getMaxUploadContentSize());
                 PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.getKey(), widgetInfo.isMultiThread());
                 PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.getKey(), widgetInfo.isMultiChannelConversationEnabled());
                 PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.getKey(), widgetInfo.isCallsEnabled());
                 List<String> themes = widgetInfo.getThemeNames();
                 if (themes != null) {
                     PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.getKey(), new HashSet<String>(themes));
+                }
+                WidgetAttachmentConfig attachmentConfig = widgetInfo.getAttachmentConfig();
+                if (attachmentConfig != null) {
+                    PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE.getKey(), attachmentConfig.getMaxSize());
+                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED.getKey(), attachmentConfig.isEnabled());
+                    if (attachmentConfig.getAllowedExtensions() != null) {
+                        PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS.getKey(), attachmentConfig.getAllowedExtensions());
+                    }
                 }
                 if (listener != null) {
                     listener.onResult(new Result<>(widgetInfo));

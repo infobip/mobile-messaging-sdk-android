@@ -74,6 +74,10 @@ android {
         abortOnError false
     }
 
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+
 
 }
 
@@ -102,12 +106,13 @@ dependencies {
 
     testImplementation project(":infobip-mobile-messaging-android-test")
     testImplementation "junit:junit:$mm_junitVersion"
-    testImplementation "org.mockito:mockito-core:$mm_mockitoCoreVersion"
+    testImplementation "io.mockk:mockk:1.13.9"
+    testImplementation "org.assertj:assertj-core:3.26.0"
 
-    androidTestImplementation project(":infobip-mobile-messaging-android-test")
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation "androidx.test:runner:$mm_androidTestRunnerVersion"
+    androidTestImplementation "androidx.test.ext:junit:$mm_androidJunitVersion"
     androidTestImplementation "junit:junit:$mm_junitVersion"
-    androidTestImplementation "org.mockito:mockito-core:$mm_mockitoCoreVersion"
+    androidTestImplementation "io.mockk:mockk-android:1.13.11"
     androidTestImplementation "com.android.support:multidex:$mm_multidexVersion"
 }
 

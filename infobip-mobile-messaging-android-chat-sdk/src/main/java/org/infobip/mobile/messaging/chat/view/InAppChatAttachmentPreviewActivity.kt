@@ -304,7 +304,8 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             false,
             false,
             false,
-            null
+            null,
+            null,
         )
     }
 
