@@ -16,9 +16,14 @@ import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
+import org.infobip.mobile.messaging.NotificationSettings;
+import org.infobip.mobile.messaging.OpenLivechatAction;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
+import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl;
+import org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler;
 import org.infobip.mobile.messaging.chat.core.InAppChatScreenImpl;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.core.SessionStorage;
@@ -61,18 +66,20 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private final static String TAG = "InAppChat";
     @SuppressLint("StaticFieldLeak")
     private static InAppChatImpl instance;
-    private static MobileMessagingCore mmCore;
+    private MobileMessagingCore mmCore;
     private Context context;
     private AndroidBroadcaster coreBroadcaster;
     private InAppChatBroadcasterImpl inAppChatBroadcaster;
     private InAppChatScreenImpl inAppChatScreen;
     private PropertyHelper propertyHelper;
-    private LivechatWidgetWebView webView;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
     private LivechatRegistrationChecker lcRegIgChecker;
     private LivechatWidgetApi lcWidgetApi;
     private InAppChatFragment inAppChatWVFragment;
+    private InAppChatNotificationInteractionHandler defaultNotificationTapHandler;
+    private ContentIntentWrapper contentIntentWrapper;
+    private ActivityStarterWrapper activityStarterWrapper;
 
     //region MessageHandlerModule
     public InAppChatImpl() {
@@ -93,9 +100,10 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         inAppChatBroadcaster().unreadMessagesCounterUpdated(unreadChatMessageCount);
         coreBroadcaster().messageReceived(message);
         if (!isChatWidgetOnForeground() && !message.isSilent()) {
-            MobileMessagingCore.getInstance(context).getNotificationHandler().displayNotification(message);
+            int notificationId = mobileMessagingCore().getNotificationHandler().displayNotification(message);
+            coreBroadcaster().notificationDisplayed(message, notificationId);
         }
-        MobileMessagingLogger.d(TAG, "Message with id: " + message.getMessageId() + " will be handled by inAppChat MessageHandler");
+        MobileMessagingLogger.d(TAG, "Message with id: " + message.getMessageId() + " was handled by inAppChat MessageHandler");
         return true;
     }
 
@@ -150,16 +158,45 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public boolean messageTapped(Message message) {
-        if (!message.isChatMessage()) {
+        OpenLivechatAction action = OpenLivechatAction.parseFrom(message);
+        if (message == null || (!message.isChatMessage() && action == null)) {
             return false;
         }
+
+        InAppChatNotificationInteractionHandler handler = getNotificationInteractionHandler();
+        if (handler == null) {
+            handler = getDefaultNotificationInteractionHandler();
+        }
+        handler.onNotificationInteracted(message);
+
         coreBroadcaster().notificationTapped(message);
-        doCoreTappedActions(message);
+        NotificationSettings notificationSettings = mobileMessagingCore().getNotificationSettings();
+        if (notificationSettings != null && notificationSettings.markSeenOnTap()) {
+            mobileMessagingCore().setMessagesSeen(message.getMessageId());
+        }
         return true;
     }
 
-    private void doCoreTappedActions(Message chatMessage) {
-        TaskStackBuilder stackBuilder = stackBuilderForNotificationTap(chatMessage);
+    private void onOpenChatActionTriggered(@NonNull Message message, @NonNull OpenLivechatAction action) {
+        MobileMessagingLogger.d(TAG, "onOpenChatActionTriggered() for message: " + message.getBody() + " with action: " + action);
+        Intent chatIntent = InAppChatActivity.startIntent(
+                context,
+                Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                message
+        );
+        context.startActivity(chatIntent);
+    }
+
+    private void onChatNotificationTapped(@NonNull Message message) {
+        MobileMessagingLogger.d(TAG, "onChatNotificationTapped() for message: " + message.getBody());
+        NotificationSettings notificationSettings = mobileMessagingCore().getNotificationSettings();
+        if (notificationSettings != null) {
+            Intent callbackIntent = contentIntentWrapper().createContentIntent(message, notificationSettings);
+            if (callbackIntent != null) {
+                activityStarterWrapper().startCallbackActivity(callbackIntent);
+            }
+        }
+        TaskStackBuilder stackBuilder = stackBuilderForNotificationTap(message);
         if (stackBuilder != null && stackBuilder.getIntentCount() > 0) {
             stackBuilder.startActivities();
         }
@@ -238,8 +275,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @NonNull
     public static InAppChat getInstance(Context context) {
         if (instance == null) {
-            mmCore = MobileMessagingCore.getInstance(context);
-            instance = mmCore.getMessageHandlerModule(InAppChatImpl.class);
+            instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(InAppChatImpl.class);
         }
         return instance;
     }
@@ -261,6 +297,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         return inAppChatScreen;
     }
 
+    @Deprecated
     @Override
     public void setActivitiesToStartOnMessageTap(Class<?>... activityClasses) {
         propertyHelper().saveClasses(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES, activityClasses);
@@ -272,6 +309,13 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         inAppChatSynchronizer = null;
         lcRegIgChecker = null;
         lcWidgetApi = null;
+        contentIntentWrapper = null;
+        activityStarterWrapper = null;
+        mmCore = null;
+        coreBroadcaster = null;
+        inAppChatBroadcaster = null;
+        inAppChatScreen = null;
+        propertyHelper = null;
         sessionStorage().clean();
         cleanupWidgetData();
         propertyHelper().remove(MobileMessagingChatProperty.ON_MESSAGE_TAP_ACTIVITY_CLASSES);
@@ -412,8 +456,8 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (StringUtils.isNotBlank(storedLanguage)) {
             language = storedLanguage;
         }
-        else if (mmCore != null && mmCore.getInstallation() != null) {
-            language = mmCore.getInstallation().getLanguage();
+        else if (mobileMessagingCore() != null && mobileMessagingCore().getInstallation() != null) {
+            language = mobileMessagingCore().getInstallation().getLanguage();
         }
         return LivechatWidgetLanguage.findLanguageOrDefault(language);
     }
@@ -620,6 +664,37 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     public LivechatWidgetApi getLivechatWidgetApi() {
         return livechatWidgetApi();
     }
+
+    @Override
+    public void setNotificationInteractionHandler(@Nullable InAppChatNotificationInteractionHandler notificationTapHandler) {
+        sessionStorage().setInAppChatNotificationInteractionHandler(notificationTapHandler);
+    }
+
+    @Nullable
+    @Override
+    public InAppChatNotificationInteractionHandler getNotificationInteractionHandler() {
+        return sessionStorage().getInAppChatNotificationInteractionHandler();
+    }
+
+    @NonNull
+    @Override
+    public InAppChatNotificationInteractionHandler getDefaultNotificationInteractionHandler() {
+        if (defaultNotificationTapHandler == null) {
+            defaultNotificationTapHandler = new InAppChatNotificationInteractionHandler() {
+                @Override
+                public void onNotificationInteracted(@NonNull Message message) {
+                    MobileMessagingLogger.d(TAG, "onNotificationInteracted() for message: " + message.getBody());
+                    OpenLivechatAction action = OpenLivechatAction.parseFrom(message);
+                    if (action != null) {
+                        onOpenChatActionTriggered(message, action);
+                    } else if (message.isChatMessage()) {
+                        onChatNotificationTapped(message);
+                    }
+                }
+            };
+        }
+        return defaultNotificationTapHandler;
+    }
     //endregion
 
     // region private functions
@@ -699,6 +774,20 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     synchronized private SessionStorage sessionStorage() {
         return SessionStorage.INSTANCE;
+    }
+
+    synchronized private ContentIntentWrapper contentIntentWrapper() {
+        if (contentIntentWrapper == null) {
+            contentIntentWrapper = new ContentIntentWrapper(context);
+        }
+        return contentIntentWrapper;
+    }
+
+    synchronized private ActivityStarterWrapper activityStarterWrapper() {
+        if (activityStarterWrapper == null) {
+            activityStarterWrapper = new ActivityStarterWrapper(context, mobileMessagingCore());
+        }
+        return activityStarterWrapper;
     }
 
     private boolean isActivated() {

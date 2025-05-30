@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
+import org.infobip.mobile.messaging.OpenLivechatAction;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
@@ -33,6 +32,9 @@ import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 /**
  * @author sslavin
  * @since 11/04/2018.
@@ -46,10 +48,12 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     private final DialogStack dialogStack;
     private final InteractiveBroadcaster interactiveBroadcaster;
     private final ActivityStarterWrapper activityStarterWrapper;
+    private final MessageHandlerModule inAppChatModule;
     private ContentIntentWrapper contentIntentWrapper;
 
     @VisibleForTesting
-    InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack, InteractiveBroadcaster interactiveBroadcaster, ActivityStarterWrapper activityStarterWrapper) {
+    InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack,
+                                 InteractiveBroadcaster interactiveBroadcaster, ActivityStarterWrapper activityStarterWrapper, MessageHandlerModule inAppChatModule) {
         this.mobileInteractive = mobileInteractive;
         this.inAppViewFactory = inAppViewFactory;
         this.inAppRules = inAppRules;
@@ -57,6 +61,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         this.dialogStack = dialogStack;
         this.interactiveBroadcaster = interactiveBroadcaster;
         this.activityStarterWrapper = activityStarterWrapper;
+        this.inAppChatModule = inAppChatModule;
     }
 
     public InAppNotificationHandlerImpl(Context context) {
@@ -71,8 +76,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 new OneMessagePreferenceCache(context),
                 new QueuedDialogStack(),
                 new AndroidInteractiveBroadcaster(context),
-                new ActivityStarterWrapper(context,
-                        MobileMessagingCore.getInstance(context))
+                new ActivityStarterWrapper(context, MobileMessagingCore.getInstance(context)),
+                MobileMessagingCore.getInstance(context).findMessageHandlerModule(MobileMessagingCore.IN_APP_CHAT_MESSAGE_HANDLER_MODULE_NAME)
         );
     }
 
@@ -206,6 +211,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
                 activityStarterWrapper.startWebViewActivity(callbackIntent, message.getWebViewUrl());
             } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
                 activityStarterWrapper.startBrowser(message.getBrowserUrl());
+            } else if (OpenLivechatAction.parseFrom(message) != null && inAppChatModule != null) {
+                inAppChatModule.messageTapped(message);
             } else {
                 activityStarterWrapper.startCallbackActivity(callbackIntent);
             }

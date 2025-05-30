@@ -321,7 +321,7 @@ internal class LivechatWidgetApiImpl(
     private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Boolean>) {
         updateWidgetLoaded(result.getOrNull() == true)
         when (result) {
-            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, result.throwable)
+            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, "${result.throwable.message}", result.throwable)
             is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, if (result.payload) LOADING_SUCCESS_MSG else LOADING_RESET_MSG)
         }
         propagateEvent { onLoadingFinished(result) }

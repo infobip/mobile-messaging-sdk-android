@@ -151,10 +151,10 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun handlerWidgetError(error: String) {
-            val message = if (CommonUtils.isJSON(error)) parseWidgetError(error) else error
-            Snackbar.make(binding.root, message, Snackbar.LENGTH_INDEFINITE)
-                .also {
-                    runCatching {
+            runCatching {
+                val message = if (CommonUtils.isJSON(error)) parseWidgetError(error) else error
+                Snackbar.make(binding.root, message, Snackbar.LENGTH_INDEFINITE)
+                    .also {
                         var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
                         if (textView == null) {
                             textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
@@ -163,9 +163,9 @@ class InAppChatView @JvmOverloads constructor(
                             textView.maxLines = 4
                         }
                     }
-                }
-                .setAction(R.string.ib_chat_ok) {}
-                .show()
+                    .setAction(R.string.ib_chat_ok) {}
+                    .show()
+            }
         }
 
         override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
@@ -485,7 +485,7 @@ class InAppChatView @JvmOverloads constructor(
         override fun onStart(owner: LifecycleOwner) {
             //do not call widget API when chat is not loaded yet - initial loading
             if (isWidgetLoaded)
-                restartConnection()
+                resumeChatConnection()
         }
 
         override fun onResume(owner: LifecycleOwner) {
@@ -501,11 +501,23 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onStop(owner: LifecycleOwner) {
-            stopConnection()
+            pauseChatConnection()
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        livechatWidgetApi.eventsListener = livechatWidgetEventsListener
+        lifecycle?.addObserver(lifecycleObserver)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        livechatWidgetApi.eventsListener = null
+        lifecycle?.removeObserver(lifecycleObserver)
     }
     //endregion
 

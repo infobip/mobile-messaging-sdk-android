@@ -1,9 +1,5 @@
 package org.infobip.mobile.messaging;
 
-import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.UserMapper.toJson;
-import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
-
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -14,9 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -104,6 +97,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
+import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+
 /**
  * @author sslavin
  * @since 28.04.2016.
@@ -125,6 +125,7 @@ public class MobileMessagingCore
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION = "mm_default_channel_high_priority_vibration";
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND = "mm_default_channel_high_priority_sound";
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET = "mm_default_channel_high_priority_quiet";
+    public static final String IN_APP_CHAT_MESSAGE_HANDLER_MODULE_NAME = "org.infobip.mobile.messaging.chat.InAppChatImpl";
     private static final Map<String, String> channelMap = Map.of(
                                             //soundEnabled, isVibrate, shouldDisplayHeadsUp
             createNotificationChannelKey(true, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID,
@@ -381,6 +382,13 @@ public class MobileMessagingCore
 
     public Collection<MessageHandlerModule> getMessageHandlerModules() {
         return messageHandlerModules.values();
+    }
+
+    public MessageHandlerModule findMessageHandlerModule(String moduleName) {
+        if (messageHandlerModules.containsKey(moduleName)) {
+            return messageHandlerModules.get(moduleName);
+        }
+        return null;
     }
 
     public <T extends MessageHandlerModule> T getMessageHandlerModule(Class<? extends MessageHandlerModule> cls) {

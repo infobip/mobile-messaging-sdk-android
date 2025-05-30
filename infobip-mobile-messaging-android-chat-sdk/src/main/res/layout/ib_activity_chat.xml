@@ -4,10 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="org.infobip.mobile.messaging.chat.view.InAppChatActivity">
+    tools:context="org.infobip.mobile.messaging.chat.view.InAppChatActivity"
+    >
+
     <androidx.fragment.app.FragmentContainerView
-        android:name="org.infobip.mobile.messaging.chat.view.InAppChatFragment"
+        android:id="@+id/ib_in_app_chat_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/ib_in_app_chat_fragment" />
+        />
 </RelativeLayout>

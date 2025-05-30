@@ -47,6 +47,10 @@ internal object SessionStorage {
     @set:Synchronized
     var inAppChatEventsListener: InAppChatEventsListener? = null
 
+    @get:Synchronized
+    @set:Synchronized
+    var inAppChatNotificationInteractionHandler: InAppChatNotificationInteractionHandler? = null
+
     /**
      * InAppChat SDK coroutine scope
      */
@@ -60,6 +64,7 @@ internal object SessionStorage {
         contextualData = null
         configSyncResult = null
         inAppChatEventsListener = null
+        inAppChatNotificationInteractionHandler = null
         scope.coroutineContext.cancelChildren()
     }
 

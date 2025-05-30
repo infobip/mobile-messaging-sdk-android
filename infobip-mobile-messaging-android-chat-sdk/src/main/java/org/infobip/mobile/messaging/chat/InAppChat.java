@@ -3,6 +3,7 @@ package org.infobip.mobile.messaging.chat;
 import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
+import org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
@@ -73,7 +74,9 @@ public abstract class InAppChat {
      * </pre>
      *
      * @param activityClasses array of activities to put into task stack when message is tapped
+     * @deprecated Use {@link InAppChat#setNotificationInteractionHandler(InAppChatNotificationInteractionHandler)} instead
      */
+    @Deprecated
     public abstract void setActivitiesToStartOnMessageTap(Class<?>... activityClasses);
 
     /**
@@ -398,4 +401,53 @@ public abstract class InAppChat {
      * @see org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
      */
     public abstract LivechatWidgetApi getLivechatWidgetApi();
+
+    /**
+     * Sets a custom {@link InAppChatNotificationInteractionHandler} to handle user interactions
+     * with in-app chat-related notifications.
+     * <p><strong>If not set, the default tap handler will be used.</strong></p>
+     *
+     * <p>The handler is triggered when the user interacts with any of the following:</p>
+     * <ul>
+     *     <li>An in-app chat message push notification</li>
+     *     <li>A <a href="https://www.infobip.com/docs/mobile-app-messaging/push-notification">push notification</a> with the "Open chatbot in LiveChat" tap action</li>
+     *     <li>A <a href="https://www.infobip.com/docs/mobile-app-messaging/push-notification#mirror-push-notifications">mirror push notification</a> with the primary button action "Open chatbot in LiveChat"</li>
+     *     <li>An <a href="https://www.infobip.com/docs/mobile-app-messaging/send-in-app-message#create-in-app-message"> in-app message</a> with the "Open chatbot in LiveChat" tap action</li>
+     * </ul>
+     *
+     * @param notificationTapHandler the handler to process in-app chat notification taps
+     */
+    public abstract void setNotificationInteractionHandler(@Nullable InAppChatNotificationInteractionHandler notificationTapHandler);
+
+    /**
+     * Returns the currently set {@link InAppChatNotificationInteractionHandler}, which handles user interactions with in-app chat notifications.
+     *
+     * @return the {@link InAppChatNotificationInteractionHandler} currently handling in-app chat notification taps, or {@code null} if none is set
+     * @see org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler
+     */
+    @Nullable
+    public abstract InAppChatNotificationInteractionHandler getNotificationInteractionHandler();
+
+    /**
+     * Returns the default {@link InAppChatNotificationInteractionHandler}.
+     *
+     * <p>
+     * When the user taps an in-app chat message push notification, the default handler opens the callback activity
+     * defined in {@link org.infobip.mobile.messaging.NotificationSettings#getCallbackActivity()}.
+     * It may also start activities defined in {@link InAppChat#setActivitiesToStartOnMessageTap(Class[])},
+     * although this method is deprecated and will be removed in a future release, along with this behavior.
+     * </p>
+     *
+     * <p>
+     * For any push notification or in-app message with the "Open chatbot in LiveChat" tap action,
+     * the default handler opens {@link org.infobip.mobile.messaging.chat.view.InAppChatActivity}.
+     * </p>
+     *
+     * @return the default {@link InAppChatNotificationInteractionHandler} used to handle in-app chat notification taps
+     * @see org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler
+     * @see org.infobip.mobile.messaging.NotificationSettings#getCallbackActivity()
+     */
+    @NonNull
+    public abstract InAppChatNotificationInteractionHandler getDefaultNotificationInteractionHandler();
+
 }

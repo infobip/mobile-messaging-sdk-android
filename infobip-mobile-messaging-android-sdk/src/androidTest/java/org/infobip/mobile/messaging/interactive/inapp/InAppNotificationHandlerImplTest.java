@@ -1,23 +1,10 @@
 package org.infobip.mobile.messaging.interactive.inapp;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
 import android.app.Activity;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
@@ -37,6 +24,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 /**
  * @author sslavin
  * @since 18/04/2018.
@@ -55,13 +56,14 @@ public class InAppNotificationHandlerImplTest {
     private DialogStack dialogStack = mock(DialogStack.class);
     private InteractiveBroadcaster interactiveBroadcaster = mock(InteractiveBroadcaster.class);
     private ActivityStarterWrapper activityStarterWrapper = mock(ActivityStarterWrapper.class);
+    private MessageHandlerModule inAppChatMessageHandler = mock(MessageHandlerModule.class);
 
     private Activity activity = mock(Activity.class);
 
     @Before
     public void before() {
         reset(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, inAppView);
-        inAppNotificationHandler = Mockito.spy(new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster, activityStarterWrapper));
+        inAppNotificationHandler = Mockito.spy(new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster, activityStarterWrapper, inAppChatMessageHandler));
     }
 
     @Test

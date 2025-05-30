@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.notification;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -15,19 +13,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.BitmapCompat;
-
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.NotificationTapReceiverActivity;
+import org.infobip.mobile.messaging.OpenLivechatAction;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -40,6 +32,15 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BitmapCompat;
+
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 
 /**
  * @author sslavin
@@ -225,6 +226,9 @@ public class BaseNotificationHandler {
             callbackIntent = activityStarterWrapper(context).createWebViewContentIntent(message);
         } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {
             callbackIntent = activityStarterWrapper(context).createBrowserIntent(message.getBrowserUrl());
+        } else if (MobileMessagingCore.getInstance(context).findMessageHandlerModule(MobileMessagingCore.IN_APP_CHAT_MESSAGE_HANDLER_MODULE_NAME) != null
+                && (OpenLivechatAction.parseFrom(message) != null || message.isChatMessage())) {
+            callbackIntent = null; // InAppChat module handles the chat notification tap
         } else {
             callbackIntent = activityStarterWrapper(context).createContentIntent(message, notificationSettings);
         }
