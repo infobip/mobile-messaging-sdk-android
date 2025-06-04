@@ -701,6 +701,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     synchronized private LivechatWidgetApi livechatWidgetApi() {
         if (lcWidgetApi == null) {
             lcWidgetApi = new LivechatWidgetApiImpl(
+                    LivechatWidgetApi.INSTANCE_ID_LC_WIDGET_API,
                     new LivechatWidgetWebView(context),
                     mobileMessagingCore(),
                     this,

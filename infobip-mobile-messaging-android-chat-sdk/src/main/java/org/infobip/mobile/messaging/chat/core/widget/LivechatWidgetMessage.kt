@@ -67,7 +67,7 @@ sealed class LivechatWidgetMessage {
 internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<LivechatWidgetMessage> {
 
     companion object {
-        private const val TAG = "LivechatWidgetMessageAdapter"
+        private const val TAG = "LcWidgetMessageAdapter"
         private const val MESSAGE_TYPE = "type"
         private const val ATTACHMENT_FILE_NAME = "fileName"
         private const val THREAD = "thread"

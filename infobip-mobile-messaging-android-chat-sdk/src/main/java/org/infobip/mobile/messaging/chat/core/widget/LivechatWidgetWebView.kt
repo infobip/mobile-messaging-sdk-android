@@ -10,6 +10,16 @@ import kotlinx.coroutines.CoroutineScope
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
+internal typealias InstanceId = String
+
+internal fun InstanceId?.tag(tag: String): String {
+    return if (this.isNullOrBlank()) {
+        tag
+    } else {
+        "$tag-$this"
+    }
+}
+
 @SuppressLint("SetJavaScriptEnabled")
 internal class LivechatWidgetWebView @JvmOverloads constructor(
     context: Context,
@@ -19,7 +29,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
 ) : WebView(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
-        const val TAG = "LivechatWidgetWebView"
+        const val TAG = "LcWidgetWebView"
         private const val DEFAULT_WIDGET_URI = "https://livechat.infobip.com/widget.js"
     }
 
@@ -27,6 +37,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
     private val widgetUri = context.getString(R.string.ib_livechat_widget_uri)
 
     var livechatWidgetClient: LivechatWidgetClient? = null
+    var instanceId: String? = null
 
     init {
         settings.apply {
@@ -35,16 +46,16 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
             cacheMode = LOAD_NO_CACHE
         }
         isClickable = true
-        webChromeClient = LivechatWidgetWebChromeClient()
+        webChromeClient = LivechatWidgetWebChromeClient(instanceId)
     }
 
     fun setup(
         webViewManager: LivechatWidgetWebViewManager,
         coroutineScope: CoroutineScope
     ) {
-        webViewClient = LivechatWidgetWebViewClient(webViewManager)
-        addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, coroutineScope), LivechatWidgetJsInterface.name)
-        livechatWidgetClient = LivechatWidgetClientImpl(this, coroutineScope)
+        webViewClient = LivechatWidgetWebViewClient(webViewManager, instanceId)
+        addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, instanceId, coroutineScope), LivechatWidgetJsInterface.name)
+        livechatWidgetClient = LivechatWidgetClientImpl(this, instanceId, coroutineScope)
     }
 
     fun loadWidgetPage(
@@ -83,7 +94,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
         }
 
         val resultUrl = builder.build().toString()
-        MobileMessagingLogger.d(TAG, "Loading page: $resultUrl")
+        MobileMessagingLogger.d(instanceId?.tag(TAG), "Loading page: $resultUrl")
         loadUrl(resultUrl)
     }
 

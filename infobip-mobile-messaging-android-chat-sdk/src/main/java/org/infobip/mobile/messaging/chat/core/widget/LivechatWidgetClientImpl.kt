@@ -15,11 +15,12 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
  */
 internal class LivechatWidgetClientImpl(
     private val webView: LivechatWidgetWebView,
+    private val instanceId: InstanceId?,
     private val coroutineScope: CoroutineScope,
 ) : LivechatWidgetClient {
 
     companion object {
-        private const val TAG = "LivechatWidgetClient"
+        private const val TAG = "LcWidgetClient"
         private const val MAX_ALLOWED_SCRIPT_LENGTH: Int = 200
         private const val MAX_ALLOWED_ARGUMENT_LENGTH: Int = 50
         private const val ARGUMENT_VISIBLE_PART_LENGTH: Int = 15
@@ -149,17 +150,17 @@ internal class LivechatWidgetClientImpl(
         coroutineScope.launch(Dispatchers.Main) {
             runCatching {
                 val scriptToLog = shortenScript(script)
-                MobileMessagingLogger.d(TAG, "Called Widget API: $scriptToLog")
+                MobileMessagingLogger.d(instanceId.tag(TAG), "Called Widget API: $scriptToLog")
                 webView.evaluateJavascript(script) { value: String? ->
                     val valueToLog = if ((value != null && "null" != value && "{}" != value)) " => $value" else ""
                     if (valueToLog.isNotEmpty()) {
-                        MobileMessagingLogger.d(TAG, "Called Widget API: $scriptToLog$valueToLog")
+                        MobileMessagingLogger.d(instanceId.tag(TAG), "Called Widget API: $scriptToLog$valueToLog")
                     }
                     executionListener?.onResult(LivechatWidgetResult.Success(valueToLog))
                 }
             }.onFailure {
                 executionListener?.onResult(LivechatWidgetResult.Error(it))
-                MobileMessagingLogger.e(TAG, "Failed to execute webView JS script ${shortenScript(script)} + ${it.message}")
+                MobileMessagingLogger.e(instanceId.tag(TAG), "Failed to execute webView JS script ${shortenScript(script)} + ${it.message}")
             }
         }
     }

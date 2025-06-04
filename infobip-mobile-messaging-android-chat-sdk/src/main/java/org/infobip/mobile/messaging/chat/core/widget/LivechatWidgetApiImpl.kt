@@ -25,6 +25,7 @@ import kotlin.coroutines.resume
 import kotlin.properties.Delegates
 
 internal class LivechatWidgetApiImpl(
+    instanceId: InstanceId,
     private val webView: LivechatWidgetWebView,
     private val mmCore: MobileMessagingCore,
     private val inAppChat: InAppChat,
@@ -46,6 +47,7 @@ internal class LivechatWidgetApiImpl(
     }
 
     init {
+        webView.instanceId = instanceId
         webView.setup(this, coroutineScope)
     }
 
@@ -208,7 +210,7 @@ internal class LivechatWidgetApiImpl(
             webView.run {
                 clearHistory()
                 clearCache(true)
-                MobileMessagingLogger.d(LivechatWidgetApi.TAG, "Livechat widget history deleted.")
+                MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), "Livechat widget history deleted.")
                 loadUrl("about:blank")
             }
         }
@@ -266,7 +268,7 @@ internal class LivechatWidgetApiImpl(
                 fallbackPushRegistrationId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Push registration id is null or blank.")
                 fallbackWidgetId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget id is null or blank.")
                 isWidgetLoadingInProgress -> {
-                    MobileMessagingLogger.d(LivechatWidgetApi.TAG, "Another widget loading is in progress.")
+                    MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), "Another widget loading is in progress.")
                     withTimeout(loadingTimeoutMillis) {
                         while (isActive && isWidgetLoadingInProgress) {
                             delay(LOADING_CHECK_INTERVAL_MS)
@@ -321,8 +323,8 @@ internal class LivechatWidgetApiImpl(
     private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Boolean>) {
         updateWidgetLoaded(result.getOrNull() == true)
         when (result) {
-            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(LivechatWidgetApi.TAG, "${result.throwable.message}", result.throwable)
-            is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(LivechatWidgetApi.TAG, if (result.payload) LOADING_SUCCESS_MSG else LOADING_RESET_MSG)
+            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(webView.instanceId.tag(LivechatWidgetApi.TAG), "${result.throwable.message}", result.throwable)
+            is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), if (result.payload) LOADING_SUCCESS_MSG else LOADING_RESET_MSG)
         }
         propagateEvent { onLoadingFinished(result) }
     }

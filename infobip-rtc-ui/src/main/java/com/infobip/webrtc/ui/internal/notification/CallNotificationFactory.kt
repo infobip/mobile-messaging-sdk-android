@@ -38,7 +38,7 @@ internal interface CallNotificationFactory {
 
     fun createOngoingCallNotification(
         context: Context,
-        title: String,
+        callerName: String,
         description: String
     ): Notification
 
@@ -134,7 +134,9 @@ internal class CallNotificationFactoryImpl(
             R.styleable.InfobipRtcUi
         )
         val acceptCall = incomingCallScreenMessage.isNullOrEmpty() && incomingCallScreenHeadline.isNullOrEmpty()
-        val displayName = incomingCallScreenCallerName ?: callerName
+        val displayName = incomingCallScreenCallerName.takeIf { it?.isNotBlank() == true }
+            ?: callerName.takeIf { it.isNotBlank() }
+            ?: context.getString(R.string.mm_unknown)
 
         val acceptIntent = PendingIntent.getActivity(
             context, CALL_ACCEPT_REQUEST_CODE,
@@ -148,7 +150,11 @@ internal class CallNotificationFactoryImpl(
             updateCurrentImmutableFlags
         )
 
-        return commonCallNotification(displayName, description, INCOMING_CALL_NOTIFICATION_CHANNEL_ID) {
+        return commonCallNotification(
+            title = displayName,
+            description = description,
+            channelId = INCOMING_CALL_NOTIFICATION_CHANNEL_ID
+        ) {
             foregroundServiceBehavior = FOREGROUND_SERVICE_IMMEDIATE
             setStyle(
                 NotificationCompat.CallStyle.forIncomingCall(
@@ -190,7 +196,7 @@ internal class CallNotificationFactoryImpl(
 
     override fun createOngoingCallNotification(
         context: Context,
-        title: String,
+        callerName: String,
         description: String
     ): Notification {
         val hangupIntent = PendingIntent.getService(
@@ -200,12 +206,26 @@ internal class CallNotificationFactoryImpl(
             updateCurrentImmutableFlags
         )
 
-        return commonCallNotification(title, description, IN_CALL_NOTIFICATION_CHANNEL_ID) {
+        val themedContext by lazy { ContextThemeWrapper(context, R.style.InfobipRtcUi_Call) }
+        val inCallScreenCallerName: String? = Injector.cache.inCallScreenStyle?.callerName ?: themedContext.resolveStyledStringAttribute(
+            R.styleable.InfobipRtcUi_rtc_ui_in_call_caller_name,
+            R.attr.infobipRtcUiStyle,
+            R.styleable.InfobipRtcUi
+        )
+        val displayName = inCallScreenCallerName.takeIf { it?.isNotBlank() == true }
+            ?: callerName.takeIf { it.isNotBlank() }
+            ?: context.getString(R.string.mm_unknown)
+
+        return commonCallNotification(
+            title = displayName,
+            description = description,
+            channelId = IN_CALL_NOTIFICATION_CHANNEL_ID
+        ) {
             priority = NotificationCompat.PRIORITY_DEFAULT
-            setContentIntent(contentIntent(title))
+            setContentIntent(contentIntent(displayName))
             setStyle(
                 NotificationCompat.CallStyle.forOngoingCall(
-                    Person.Builder().setName(title).setImportant(true).build(),
+                    Person.Builder().setName(displayName).setImportant(true).build(),
                     hangupIntent
                 )
             )
@@ -240,10 +260,10 @@ internal class CallNotificationFactoryImpl(
             .build()
     }
 
-    private fun contentIntent(title: String): PendingIntent {
+    private fun contentIntent(callerName: String): PendingIntent {
         val activityClass = Injector.cache.activityClass
         val contentIntent = if (activityClass == CallActivity::class.java)
-            CallActivity.startIntent(context, caller = title)
+            CallActivity.startIntent(context, caller = callerName)
         else
             Intent(context, activityClass)
 

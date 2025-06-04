@@ -27,8 +27,10 @@ interface LivechatWidgetApi {
     }
 
     companion object {
-        const val TAG = "LivechatWidgetApi"
+        const val TAG = "LcWidgetApi"
         const val MESSAGE_MAX_LENGTH = 4096
+        internal const val INSTANCE_ID_IN_APP_CHAT_VIEW: InstanceId = "View"
+        internal const val INSTANCE_ID_LC_WIDGET_API: InstanceId = "Api"
     }
 
     /**

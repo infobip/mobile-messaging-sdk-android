@@ -106,6 +106,7 @@ class InAppChatView @JvmOverloads constructor(
         get() = findViewTreeLifecycleOwner()?.lifecycleScope ?: SessionStorage.scope //when View is attached to the window, it has a lifecycle owner otherwise use session scope
     private val livechatWidgetApi: LivechatWidgetApi by lazy {
         LivechatWidgetApiImpl(
+            LivechatWidgetApi.INSTANCE_ID_IN_APP_CHAT_VIEW,
             binding.ibLcWebView,
             mmCore,
             inAppChat,

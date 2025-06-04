@@ -12,11 +12,12 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
  */
 internal class LivechatWidgetJsInterfaceImpl(
     private val widgetWebViewManager: LivechatWidgetWebViewManager,
+    private val instanceId: InstanceId?,
     private val coroutineScope: CoroutineScope,
 ) : LivechatWidgetJsInterface {
 
     companion object {
-        private const val TAG = "LivechatWidgetJsInterface"
+        private const val TAG = "LcWidgetJsInterface"
     }
 
     @JavascriptInterface
@@ -36,11 +37,11 @@ internal class LivechatWidgetJsInterfaceImpl(
     @JavascriptInterface
     override fun onViewChanged(view: String?) {
         coroutineScope.launch(Dispatchers.Main) {
-            MobileMessagingLogger.d(TAG, "Widget onWidgetViewChanged: $view")
+            MobileMessagingLogger.d(instanceId.tag(TAG), "Widget onWidgetViewChanged: $view")
             runCatching {
                 widgetWebViewManager.onWidgetViewChanged(LivechatWidgetView.valueOf(view.orEmpty()))
             }.onFailure {
-                MobileMessagingLogger.e("Could not parse LivechatWidgetView from $view", it)
+                MobileMessagingLogger.e(instanceId.tag(TAG),"Could not parse LivechatWidgetView from $view", it)
             }
         }
     }
@@ -56,11 +57,11 @@ internal class LivechatWidgetJsInterfaceImpl(
     override fun onWidgetApiError(method: String?, errorPayload: String?) {
         coroutineScope.launch(Dispatchers.Main) {
             val result = if (errorPayload?.isNotBlank() == true) " => $errorPayload" else ""
-            MobileMessagingLogger.e(TAG, "Widget API call error: $method()$result")
+            MobileMessagingLogger.e(instanceId.tag(TAG), "Widget API call error: $method()$result")
             runCatching {
                 widgetWebViewManager.onWidgetApiError(LivechatWidgetMethod.valueOf(method.orEmpty()), errorPayload)
             }.onFailure {
-                MobileMessagingLogger.e(TAG, "Could not parse WidgetMethod from $method", it)
+                MobileMessagingLogger.e(instanceId.tag(TAG), "Could not parse WidgetMethod from $method", it)
             }
         }
     }
@@ -74,11 +75,11 @@ internal class LivechatWidgetJsInterfaceImpl(
             }
             val log = payload?.let { LivechatWidgetClientImpl.shortenLog(it) }
             val result = if (log?.isNotBlank() == true) " => $log" else ""
-            MobileMessagingLogger.d(TAG, "Widget API call result: $method()$result")
+            MobileMessagingLogger.d(instanceId.tag(TAG), "Widget API call result: $method()$result")
             runCatching {
                 widgetWebViewManager.onWidgetApiSuccess(LivechatWidgetMethod.valueOf(method.orEmpty()), payload)
             }.onFailure {
-                MobileMessagingLogger.e(TAG, "Could not parse WidgetMethod from $method", it)
+                MobileMessagingLogger.e(instanceId.tag(TAG), "Could not parse WidgetMethod from $method", it)
             }
         }
     }
