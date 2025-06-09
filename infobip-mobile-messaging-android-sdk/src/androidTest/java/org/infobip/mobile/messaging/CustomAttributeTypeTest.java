@@ -284,7 +284,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
     @Test
     public void test_save_user_custom_attributes_locale() throws Exception {
         User user = new User();
-        Locale.setDefault(new Locale("ar"));
+        Locale.setDefault(Locale.forLanguageTag("ar-u-nu-arab"));
         String someDateString = "١٩٨٩-١١-٢١";
         Date myDate = dateFromYMDString(someDateString);
 
