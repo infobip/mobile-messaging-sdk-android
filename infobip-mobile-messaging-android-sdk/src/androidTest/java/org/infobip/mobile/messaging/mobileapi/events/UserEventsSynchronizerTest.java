@@ -33,10 +33,10 @@ import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -109,7 +109,6 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
         verify(broadcaster, after(300).times(1)).customEventsReported();
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldPropagateValidationErrorOnReportingOneCustomEventOnServerSync() throws Exception {
         CustomEvent customEvent = setupCustomEventWithProperties();

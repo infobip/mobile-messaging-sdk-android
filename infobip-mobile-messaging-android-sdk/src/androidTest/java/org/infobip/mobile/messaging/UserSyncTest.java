@@ -9,6 +9,7 @@ import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,8 +24,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -111,9 +112,10 @@ public class UserSyncTest extends MobileMessagingTestCase {
     public void test_add_custom_element() throws Exception {
 
         User givenUser = new User();
+        Date now = new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-27");
         givenUser.setCustomAttribute("myKey1", new CustomAttributeValue("Some string"));
         givenUser.setCustomAttribute("myKey2", new CustomAttributeValue(12345));
-        givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(new Date()));
+        givenUser.setCustomAttribute("myKey3", new CustomAttributeValue(now));
         givenUser.setCustomAttribute("myKey4", new CustomAttributeValue(false));
         givenUser = setListCustomAttributes(givenUser);
 
@@ -128,7 +130,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
         HashMap<String, Object> customAtts = new HashMap<>();
         customAtts.put("myKey1", "Some string");
         customAtts.put("myKey2", 12345);
-        customAtts.put("myKey3", DateTimeUtil.dateToYMDString(new Date()));
+        customAtts.put("myKey3", DateTimeUtil.dateToYMDString(now));
         customAtts.put("myKey4", false);
         customAtts.put(KEY_FOR_LIST, listMap);
 

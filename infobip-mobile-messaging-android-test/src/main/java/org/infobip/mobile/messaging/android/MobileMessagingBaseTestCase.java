@@ -54,7 +54,6 @@ public abstract class MobileMessagingBaseTestCase {
 
     private static Context mockContext(final Context realContext) {
         Context contextSpy = Mockito.spy(Context.class);
-
         Mockito.when(contextSpy.getSharedPreferences(Mockito.anyString(), Mockito.anyInt())).thenAnswer(new Answer<SharedPreferences>() {
             @Override
             public SharedPreferences answer(InvocationOnMock invocation) throws Throwable {
@@ -125,3 +124,4 @@ public abstract class MobileMessagingBaseTestCase {
         JSONAssert.assertNotEquals(gson.toJson(expected), gson.toJson(actual), true);
     }
 }
+

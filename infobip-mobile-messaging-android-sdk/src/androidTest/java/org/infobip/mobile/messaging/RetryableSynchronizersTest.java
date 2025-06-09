@@ -1,5 +1,15 @@
 package org.infobip.mobile.messaging;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.annotation.SuppressLint;
 
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
@@ -20,19 +30,11 @@ import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.SoftwareInformation;
 import org.infobip.mobile.messaging.util.SystemInformation;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author pandric on 08/03/2017.
@@ -40,14 +42,10 @@ import static org.mockito.Mockito.verify;
 
 public class RetryableSynchronizersTest extends MobileMessagingTestCase {
 
-    private Executor executor;
-
     private MessagesSynchronizer messagesSynchronizer;
     private InstallationSynchronizer installationSynchronizer;
     private UserDataReporter userDataReporter;
     private MRetryPolicy retryPolicy;
-
-    private MobileMessageHandler mobileMessageHandler;
 
     private MobileApiMessages mobileApiMessages;
 
@@ -62,17 +60,21 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         PreferenceHelper.saveInt(context, MobileMessagingProperty.DEFAULT_EXP_BACKOFF_MULTIPLIER, 0);
         PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
 
-        mobileMessageHandler = mock(MobileMessageHandler.class);
+        MobileMessageHandler mobileMessageHandler = mock(MobileMessageHandler.class);
         mobileApiMessages = mock(MobileApiMessages.class);
 
         doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiAppInstance).patchInstance(anyString(), any(Map.class));
         doThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error"))).when(mobileApiUserData).patchUser(anyString(), anyString(), any(Map.class));
         given(mobileApiMessages.sync(any(SyncMessagesBody.class))).willThrow(new BackendCommunicationException("Backend error", new ApiIOException("0", "Backend error")));
 
+        MobileMessagingTestable spy = Mockito.spy(mobileMessagingCore);
+        when(spy.getSyncMessagesIds()).thenReturn(new String[]{"id1"});
+        when(spy.getAndRemoveUnreportedMessageIds()).thenReturn(new String[]{"id2"});
+
         RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
         retryPolicy = retryPolicyProvider.DEFAULT();
-        executor = Executors.newSingleThreadExecutor();
-        messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
+        Executor executor = Executors.newSingleThreadExecutor();
+        messagesSynchronizer = new MessagesSynchronizer(spy, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiAppInstance);
         userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiUserData);
     }
@@ -113,7 +115,6 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
 
     @Test
     public void test_sync_messages_retry() {
-
         // When
         messagesSynchronizer.sync();
 

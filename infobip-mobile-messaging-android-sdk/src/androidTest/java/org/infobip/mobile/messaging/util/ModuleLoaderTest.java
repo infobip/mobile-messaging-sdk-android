@@ -14,9 +14,9 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -70,10 +70,11 @@ public class ModuleLoaderTest {
     private void givenMetadataWillBe(Bundle metadata) throws PackageManager.NameNotFoundException {
         ApplicationInfo ai = new ApplicationInfo();
         ai.metaData = metadata;
-
         PackageManager mockedPM = mock(PackageManager.class);
         given(mockedContext.getPackageManager()).willReturn(mockedPM);
-        given(mockedPM.getApplicationInfo(anyString(), anyInt())).willReturn(ai);
+
+        given(mockedContext.getPackageName()).willReturn("my.test.package");
+        given(mockedPM.getApplicationInfo(eq("my.test.package"), anyInt())).willReturn(ai);
     }
 
 }

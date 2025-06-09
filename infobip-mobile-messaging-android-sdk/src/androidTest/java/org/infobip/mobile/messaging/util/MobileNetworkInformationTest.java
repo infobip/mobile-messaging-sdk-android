@@ -9,7 +9,7 @@ import org.mockito.BDDMockito;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 

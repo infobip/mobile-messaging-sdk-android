@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -101,8 +101,13 @@ public class MobileMessageHandlerTest extends MobileMessagingTestCase {
     private Message messageWith(final String messageId) {
         return argThat(new ArgumentMatcher<Message>() {
             @Override
-            public boolean matches(Object o) {
-                return messageId.equals(((Message) o).getMessageId());
+            public Class<?> type() {
+                return ArgumentMatcher.super.type();
+            }
+
+            @Override
+            public boolean matches(Message o) {
+                return messageId.equals((o).getMessageId());
             }
         });
     }

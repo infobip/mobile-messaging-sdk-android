@@ -1,17 +1,16 @@
 package org.infobip.mobile.messaging.mobileapi.common;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 
 /**
  * @author sslavin
@@ -21,12 +20,7 @@ import static org.mockito.Matchers.eq;
 public class MRetryableTaskTest extends MobileMessagingTestCase {
 
     private MRetryableTask<String, String> retryableTask;
-    private final Executor executor = new Executor() {
-        @Override
-        public void execute(@NonNull Runnable runnable) {
-            runnable.run();
-        }
-    };
+    private final Executor executor = Runnable::run;
     private IMAsyncTask<String, String> tester;
 
     @Override
@@ -79,7 +73,6 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
         };
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteRunMultipleTimesOrError() {
 
@@ -103,7 +96,6 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
                 .run(any(String[].class));
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteRunUntilThereAreExceptions() {
 
@@ -187,7 +179,7 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
 
         // Then
         Mockito.verify(tester, Mockito.after(100).times(1))
-                .after(Mockito.anyString());
+                .after(Mockito.any());
     }
 
     @Test
@@ -206,7 +198,7 @@ public class MRetryableTaskTest extends MobileMessagingTestCase {
 
         // Then
         Mockito.verify(tester, Mockito.after(100).times(1))
-                .afterBackground(Mockito.anyString());
+                .afterBackground(Mockito.any());
     }
 
     @Test

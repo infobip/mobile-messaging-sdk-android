@@ -1,6 +1,20 @@
 package org.infobip.mobile.messaging.mobileapi.messages;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static java.util.Arrays.asList;
+
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingTestable;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesResponse;
@@ -15,19 +29,8 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author pandric
@@ -53,8 +56,12 @@ public class MessagesSynchronizerTest extends MobileMessagingTestCase {
 
         retryPolicy = new RetryPolicyProvider(context).DEFAULT();
 
-        messagesSynchronizer = new MessagesSynchronizer(mobileMessagingCore, mobileMessagingCore.getStats(),
-                Executors.newSingleThreadExecutor(), broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
+        MobileMessagingTestable spy = Mockito.spy(mobileMessagingCore);
+        when(spy.getSyncMessagesIds()).thenReturn(new String[]{"id1"});
+        when(spy.getAndRemoveUnreportedMessageIds()).thenReturn(new String[]{"id2"});
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        messagesSynchronizer = new MessagesSynchronizer(spy, mobileMessagingCore.getStats(), executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
     }
 
     @Override

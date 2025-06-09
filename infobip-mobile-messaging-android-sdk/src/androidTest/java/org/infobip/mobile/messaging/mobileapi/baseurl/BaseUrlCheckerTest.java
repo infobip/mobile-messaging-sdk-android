@@ -3,22 +3,16 @@ package org.infobip.mobile.messaging.mobileapi.baseurl;
 import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS;
 import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_LAST_TIME;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.baseurl.BaseUrlResponse;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.concurrent.Executor;
 
@@ -26,12 +20,7 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
 
     private BaseUrlChecker baseUrlChecker;
     private String baseUrl = "https://newbaseurl.infobip.com";
-    private Executor executor = new Executor() {
-        @Override
-        public void execute(@NonNull Runnable command) {
-            command.run();
-        }
-    };
+    private Executor executor = Runnable::run;
 
     @Override
     public void setUp() throws Exception {
@@ -99,33 +88,24 @@ public class BaseUrlCheckerTest extends MobileMessagingTestCase {
     }
 
     @Test
-    @Ignore("mocking issues")
-    public void shouldCallBaseUrlSyncIfNoHoursIntervalIsSetUpAndSyncIsNotInProgress() {
+    public void shouldCallBaseUrlSyncIfNoHoursIntervalIsSetUpAndSyncIsNotInProgress() throws InterruptedException {
         PreferenceHelper.saveInt(context, BASEURL_CHECK_INTERVAL_HOURS, 0);
 
-        when(mobileApiBaseUrl.getBaseUrl()).thenAnswer(new Answer<BaseUrlResponse>() {
-            @Override
-            public BaseUrlResponse answer(InvocationOnMock invocation) {
-                try {
-                    Thread.sleep(400);
-                } catch (InterruptedException e) {
-                    fail();
-                }
-                return new BaseUrlResponse(baseUrl);
-            }
-        });
-
+        when(mobileApiBaseUrl.getBaseUrl()).thenReturn(new BaseUrlResponse(baseUrl));
 
         baseUrlChecker.sync();
+        Thread.sleep(500);
         baseUrlChecker.sync();
+        Thread.sleep(500);
 
-        verify(mobileApiBaseUrl, after(300).times(1)).getBaseUrl();
+        verify(mobileApiBaseUrl, Mockito.times(2)).getBaseUrl();
         assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
-
         baseUrlChecker.sync();
+        Thread.sleep(500);
         baseUrlChecker.sync();
+        Thread.sleep(500);
 
-        verify(mobileApiBaseUrl, after(300).times(2)).getBaseUrl();
+        verify(mobileApiBaseUrl, Mockito.times(4)).getBaseUrl();
         assertEquals(baseUrl, MobileMessagingCore.getApiUri(context));
     }
 

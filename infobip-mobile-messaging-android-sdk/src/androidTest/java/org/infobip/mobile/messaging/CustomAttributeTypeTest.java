@@ -1,5 +1,10 @@
 package org.infobip.mobile.messaging;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
+import static org.junit.Assert.assertFalse;
+
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
@@ -17,11 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
-import static org.junit.Assert.assertFalse;
 
 public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
@@ -68,7 +68,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         assertEquals(SOME_STRING_VALUE, userResponse.getCustomAttributeValue(KEY_FOR_STRING).stringValue());
         assertEquals(SOME_NUMBER_VALUE, userResponse.getCustomAttributeValue(KEY_FOR_NUMBER).numberValue().intValue());
         List<ListCustomAttributeItem> items = userResponse.getListCustomAttributeItems(KEY_FOR_LIST);
-        for (ListCustomAttributeItem item: items) {
+        for (ListCustomAttributeItem item : items) {
             assertEquals(SOME_NUMBER_VALUE, item.getNumberValue(KEY_FOR_LIST_PARAM_1).intValue());
             assertEquals(SOME_BOOLEAN_VALUE, item.getBooleanValue(KEY_FOR_LIST_PARAM_2));
             assertEquals(SOME_STRING_VALUE, item.getStringValue(KEY_FOR_LIST_PARAM_3));
@@ -173,7 +173,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         CustomAttributeValue.DateTime keyForDateTime = user.getCustomAttributeValue(KEY_FOR_DATETIME).dateTimeValue();
         List<ListCustomAttributeItem> items = user.getListCustomAttributeItems(KEY_FOR_LIST);
 
-        for (ListCustomAttributeItem item: items) {
+        for (ListCustomAttributeItem item : items) {
             assertEquals(SOME_NUMBER_VALUE, item.getNumberValue(KEY_FOR_LIST_PARAM_1).intValue());
             assertEquals(SOME_BOOLEAN_VALUE, item.getBooleanValue(KEY_FOR_LIST_PARAM_2));
             assertEquals(SOME_STRING_VALUE, item.getStringValue(KEY_FOR_LIST_PARAM_3));
@@ -222,7 +222,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
     @Test
     public void test_set_multi_custom_attributes_user() throws ParseException {
-        Date date = new Date();
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-27");
         HashMap<String, CustomAttributeValue> customAttsValueHashMap = new HashMap<>();
         customAttsValueHashMap.put(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
         customAttsValueHashMap.put(KEY_FOR_EMPTY_STRING, new CustomAttributeValue(EMPTY_STRING_VALUE));
@@ -251,7 +251,7 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 
     @Test
     public void test_set_multi_custom_attributes_installation() throws ParseException {
-        Date date = new Date();
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2025-05-27");
         HashMap<String, CustomAttributeValue> customAttsValueHashMap = new HashMap<>();
         customAttsValueHashMap.put(KEY_FOR_STRING, new CustomAttributeValue(SOME_STRING_VALUE));
         customAttsValueHashMap.put(KEY_FOR_EMPTY_STRING, new CustomAttributeValue(EMPTY_STRING_VALUE));
@@ -278,6 +278,9 @@ public class CustomAttributeTypeTest extends MobileMessagingTestCase {
         assertEquals(5, customInstallationAtts.size());
     }
 
+    /*
+    * The test is written in such way on purpose because it is expected from our SDK to return localised date when given localized date.
+    * */
     @Test
     public void test_save_user_custom_attributes_locale() throws Exception {
         User user = new User();

@@ -14,7 +14,7 @@ import org.mockito.Mockito;
 
 import static org.infobip.mobile.messaging.platform.MobileMessagingJob.MM_JOB_SCHEDULER_START_ID;
 import static org.infobip.mobile.messaging.platform.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;

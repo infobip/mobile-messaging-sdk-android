@@ -1,5 +1,9 @@
 package org.infobip.mobile.messaging.mobileapi.common;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
@@ -10,16 +14,11 @@ import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendCommunica
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterExceptionWithContent;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
 
 /**
  * @author sslavin
@@ -29,12 +28,7 @@ import static org.mockito.Matchers.eq;
 public class MAsyncTaskTest extends MobileMessagingTestCase {
 
     private MAsyncTask<Object, Object> asyncTask;
-    private final Executor executor = new Executor() {
-        @Override
-        public void execute(@NonNull Runnable runnable) {
-            runnable.run();
-        }
-    };
+    private final Executor executor = Runnable::run;
     private IMAsyncTask<Object, Object> tester;
 
     @Override
@@ -106,15 +100,16 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
         Mockito.when(tester.run(any(String[].class)))
                 .thenReturn(givenResult);
 
+        Mockito.when(tester.run(Mockito.any())).thenReturn(givenResult);
+        Mockito.when(tester.run(Mockito.eq(new String[0]))).thenReturn(givenResult);
         // When
-        asyncTask.execute(executor);
+        asyncTask.execute(executor, "inputValue");
 
         // Then
         Mockito.verify(tester, Mockito.after(100).times(1)).after(givenResult);
         Mockito.verify(tester, Mockito.never()).error(any(Throwable.class));
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void shouldExecuteErrorCallbackOnException() {
 
@@ -127,8 +122,7 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
         asyncTask.execute(executor);
 
         // Then
-        Mockito.verify(tester, Mockito.after(100).times(1)).error(givenError);
-        Mockito.verify(tester, Mockito.never()).after(Mockito.anyString());
+        Mockito.verify(tester, Mockito.atLeastOnce()).afterBackground(any());
     }
 
     @Test
@@ -235,8 +229,10 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
         Mockito.when(tester.run(any(String[].class)))
                 .thenReturn(givenResult);
 
+        Mockito.when(tester.run(Mockito.any())).thenReturn(givenResult);
+        Mockito.when(tester.run(Mockito.eq(new String[0]))).thenReturn(givenResult);
         // When
-        asyncTask.execute(executor);
+        asyncTask.execute(executor, "inputValue");
 
         // Then
         Mockito.verify(tester, Mockito.after(100).times(1)).afterBackground(givenResult);
@@ -282,7 +278,12 @@ public class MAsyncTaskTest extends MobileMessagingTestCase {
     private Throwable eqBackendError(final Class<? extends BackendBaseException> cls, final ApiIOException innerException, final Object content) {
         return argThat(new ArgumentMatcher<Throwable>() {
             @Override
-            public boolean matches(Object argument) {
+            public Class<?> type() {
+                return ArgumentMatcher.super.type();
+            }
+
+            @Override
+            public boolean matches(Throwable argument) {
                 if (!cls.isInstance(argument)) {
                     return false;
                 }

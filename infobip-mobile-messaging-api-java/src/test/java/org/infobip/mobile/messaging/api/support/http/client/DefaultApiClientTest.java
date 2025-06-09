@@ -2,15 +2,14 @@ package org.infobip.mobile.messaging.api.support.http.client;
 
 import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
 import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_READ_TIMEOUT;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -28,7 +27,7 @@ import lombok.NoArgsConstructor;
  * @since 08.03.2016.
  */
 public class DefaultApiClientTest {
-//    private DebugServer debugServer;
+    //    private DebugServer debugServer;
     private DefaultApiClient apiClient;
 
     private RequestInterceptor requestInterceptorMock;
@@ -270,38 +269,32 @@ public class DefaultApiClientTest {
     }
 
     private static Request matches(final Request givenRequest) {
-        return argThat(new ArgumentMatcher<Request>() {
-            @Override
-            public boolean matches(Object argument) {
-                Request another = (Request) argument;
-                return givenRequest.uri.equalsIgnoreCase(another.uri) &&
-                        givenRequest.body.equals(another.body) &&
-                        givenRequest.credentials.equals(another.credentials) &&
-                        givenRequest.apiKey.equalsIgnoreCase(another.apiKey) &&
-                        givenRequest.headers.keySet().equals(another.headers.keySet()) &&
-                        givenRequest.queryParams.keySet().equals(another.queryParams.keySet()) &&
-                        givenRequest.httpMethod.equals(another.httpMethod);
-            }
+        return argThat(argument -> {
+            Request another = argument;
+            return givenRequest.uri.equalsIgnoreCase(another.uri) &&
+                    givenRequest.body.equals(another.body) &&
+                    givenRequest.credentials.equals(another.credentials) &&
+                    givenRequest.apiKey.equalsIgnoreCase(another.apiKey) &&
+                    givenRequest.headers.keySet().equals(another.headers.keySet()) &&
+                    givenRequest.queryParams.keySet().equals(another.queryParams.keySet()) &&
+                    givenRequest.httpMethod.equals(another.httpMethod);
         });
     }
 
     private static Map<String, List<String>> contansAll(final Map<String, Collection<Object>> headers) {
-        return argThat(new ArgumentMatcher<Map<String, List<String>>>() {
-            @Override
-            public boolean matches(Object argument) {
-                @SuppressWarnings("unchecked")
-                Map<String, List<String>> arg = (Map<String, List<String>>) argument;
-                for (String key : arg.keySet()) {
-                    if (key == null || !headers.containsKey(key)) {
-                        continue;
-                    }
-
-                    if (!headers.get(key).containsAll(arg.get(key))) {
-                        return false;
-                    }
+        return argThat(argument -> {
+            @SuppressWarnings("unchecked")
+            Map<String, List<String>> arg = (Map<String, List<String>>) argument;
+            for (String key : arg.keySet()) {
+                if (key == null || !headers.containsKey(key)) {
+                    continue;
                 }
-                return true;
+
+                if (!headers.get(key).containsAll(arg.get(key))) {
+                    return false;
+                }
             }
+            return true;
         });
     }
 }

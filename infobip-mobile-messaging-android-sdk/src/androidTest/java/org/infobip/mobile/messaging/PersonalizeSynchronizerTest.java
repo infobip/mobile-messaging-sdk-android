@@ -7,12 +7,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import androidx.annotation.NonNull;
@@ -57,7 +58,6 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         givenCustomAtts.put("someKey", new CustomAttributeValue("someValue"));
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_without_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
@@ -84,7 +84,6 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertJEquals(returnedUser, mobileMessagingCore.getUser());
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_with_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
@@ -141,7 +140,6 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertJEquals(returnedUser, mobileMessagingCore.getUser());
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_depersonalize_without_params_completed() {
         //given
@@ -176,7 +174,6 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertNull(mobileMessagingCore.getUser());
     }
 
-    @Ignore("Ignoring as part of MM-7095")
     @Test
     public void test_personalize_with_force_depersonalize_ambiguous_personalize_candidates_api_error() {
 
@@ -208,7 +205,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verify(broadcaster, after(300).never()).depersonalized();
-        verify(broadcaster, after(300).times(1)).error(any(MobileMessagingError.class));
+        verify(broadcaster, timeout(2000).times(1)).error(any(MobileMessagingError.class));
         assertTrue(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
         verifyNeededPrefsCleanUp();
         assertNull(mobileMessagingCore.getUser());

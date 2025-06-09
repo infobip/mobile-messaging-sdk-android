@@ -1,12 +1,28 @@
 package org.infobip.mobile.messaging.interactive.inapp;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import android.app.Activity;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
+import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.inapp.cache.OneMessageCache;
@@ -20,48 +36,46 @@ import org.infobip.mobile.messaging.interactive.inapp.view.InAppWebView;
 import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppNativeCtx;
 import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppWebCtx;
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
-import org.junit.Before;
+import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 /**
  * @author sslavin
  * @since 18/04/2018.
  */
-public class InAppNotificationHandlerImplTest {
+public class InAppNotificationHandlerImplTest extends MobileMessagingTestCase {
 
     private InAppNotificationHandlerImpl inAppNotificationHandler;
+    private InteractiveBroadcaster interactiveBroadcaster;
+    private MobileInteractive mobileInteractive;
+    private InAppViewFactory inAppViewFactory;
+    private InAppRules inAppRules;
+    private OneMessageCache oneMessageCache;
+    private InAppView inAppView;
+    private InAppNativeView inAppNativeView;
+    private InAppWebView inAppWebView;
+    private DialogStack dialogStack;
+    private ActivityStarterWrapper activityStarterWrapper;
 
-    private MobileInteractive mobileInteractive = mock(MobileInteractive.class);
-    private InAppViewFactory inAppViewFactory = mock(InAppViewFactory.class);
-    private InAppRules inAppRules = mock(InAppRules.class);
-    private OneMessageCache oneMessageCache = mock(OneMessageCache.class);
-    private InAppView inAppView = mock(InAppView.class);
-    private InAppNativeView inAppNativeView = mock(InAppNativeView.class);
-    private InAppWebView inAppWebView = mock(InAppWebView.class);
-    private DialogStack dialogStack = mock(DialogStack.class);
-    private InteractiveBroadcaster interactiveBroadcaster = mock(InteractiveBroadcaster.class);
-    private ActivityStarterWrapper activityStarterWrapper = mock(ActivityStarterWrapper.class);
-    private MessageHandlerModule inAppChatMessageHandler = mock(MessageHandlerModule.class);
+    private Activity activity;
 
-    private Activity activity = mock(Activity.class);
-
-    @Before
-    public void before() {
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        MessageHandlerModule inAppChatMessageHandler = Mockito.mock(MessageHandlerModule.class);
+        interactiveBroadcaster = Mockito.mock(InteractiveBroadcaster.class);
+        inAppViewFactory = Mockito.mock(InAppViewFactory.class);
+        inAppRules       = Mockito.mock(InAppRules.class);
+        oneMessageCache  = Mockito.mock(OneMessageCache.class);
+        inAppView        = Mockito.mock(InAppView.class);
+        inAppNativeView  = Mockito.mock(InAppNativeView.class);
+        inAppWebView     = Mockito.mock(InAppWebView.class);
+        dialogStack      = Mockito.mock(DialogStack.class);
+        mobileMessagingCore = Mockito.mock(MobileMessagingCore.class);
+        mobileInteractive = Mockito.mock(MobileInteractiveImpl.class);
+        activityStarterWrapper = Mockito.mock(ActivityStarterWrapper.class);
+        activity = Mockito.mock(Activity.class);
         reset(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, inAppView);
         inAppNotificationHandler = Mockito.spy(new InAppNotificationHandlerImpl(mobileInteractive, inAppViewFactory, inAppRules, oneMessageCache, dialogStack, interactiveBroadcaster, activityStarterWrapper, inAppChatMessageHandler));
     }
@@ -237,6 +251,9 @@ public class InAppNotificationHandlerImplTest {
                 .build()};
         NotificationCategory category = category(message.getCategory(), actions);
 
+        Intent mockIntent = new Intent();
+        when(interactiveBroadcaster.notificationActionTapped(any(), any(), any())).thenReturn(mockIntent);
+
         inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, actions[0]);
 
         assertTrue(actions[0].bringsAppToForeground());
@@ -260,6 +277,9 @@ public class InAppNotificationHandlerImplTest {
         Message message = message();
         NotificationAction action = new NotificationAction.Builder(true).withId("mm_open").withTitleText("Open").build();
         NotificationCategory category = category(message.getCategory(), action);
+
+        Intent mockIntent = new Intent();
+        when(interactiveBroadcaster.notificationActionTapped(any(), any(), any())).thenReturn(mockIntent);
 
         inAppNotificationHandler.buttonPressedFor(inAppNativeView, message, category, action);
 

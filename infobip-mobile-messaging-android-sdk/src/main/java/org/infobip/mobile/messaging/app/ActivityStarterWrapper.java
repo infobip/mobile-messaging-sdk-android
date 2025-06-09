@@ -31,7 +31,7 @@ public class ActivityStarterWrapper {
         if (notificationSettings == null) {
             return;
         }
-        Class callbackActivity = notificationSettings.getCallbackActivity();
+        Class<?> callbackActivity = notificationSettings.getCallbackActivity();
         if (callbackActivity == null) {
             MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
             return;

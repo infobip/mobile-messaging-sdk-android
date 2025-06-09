@@ -14,13 +14,15 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BaseUrlChecker {
 
     private final Context context;
     private final Executor executor;
     private final MobileApiBaseUrl mobileApiBaseUrl;
-    private boolean isSyncInProgress;
+
+    private final AtomicBoolean isSyncInProgress = new AtomicBoolean(false);
 
     public BaseUrlChecker(Context context, Executor executor, MobileApiBaseUrl mobileApiBaseUrl) {
         this.context = context;
@@ -29,14 +31,13 @@ public class BaseUrlChecker {
     }
 
     public void sync() {
-        if (isSyncInProgress) return;
-        isSyncInProgress = true;
+        if (!isSyncInProgress.compareAndSet(false, true)) return;
 
         long lastCheckTimeMillis = PreferenceHelper.findLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME);
         int minimumIntervalHours = PreferenceHelper.findInt(context, MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS);
         long lastBaseUrlCheckHours = TimeUnit.MILLISECONDS.toHours(Time.now() - lastCheckTimeMillis);
         if (lastBaseUrlCheckHours < minimumIntervalHours) {
-            isSyncInProgress = false;
+            isSyncInProgress.set(false);
             return;
         }
 
@@ -58,13 +59,13 @@ public class BaseUrlChecker {
                     }
                 }
                 PreferenceHelper.saveLong(context, MobileMessagingProperty.BASEURL_CHECK_LAST_TIME, Time.now());
-                isSyncInProgress = false;
+                isSyncInProgress.set(false);
             }
 
             @Override
             public void error(Throwable error) {
                 MobileMessagingLogger.e("Error while checking base URL!");
-                isSyncInProgress = false;
+                isSyncInProgress.set(false);
             }
         }
                 .execute(executor);

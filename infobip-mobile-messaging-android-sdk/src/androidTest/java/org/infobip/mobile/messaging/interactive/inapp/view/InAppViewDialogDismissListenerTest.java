@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
