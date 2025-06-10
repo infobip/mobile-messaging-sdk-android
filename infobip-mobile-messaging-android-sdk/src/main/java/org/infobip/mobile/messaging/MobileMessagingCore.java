@@ -1,5 +1,9 @@
 package org.infobip.mobile.messaging;
 
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
+import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +14,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -97,13 +104,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.UserMapper.toJson;
-import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
-
 /**
  * @author sslavin
  * @since 28.04.2016.
@@ -127,7 +127,7 @@ public class MobileMessagingCore
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET = "mm_default_channel_high_priority_quiet";
     public static final String IN_APP_CHAT_MESSAGE_HANDLER_MODULE_NAME = "org.infobip.mobile.messaging.chat.InAppChatImpl";
     private static final Map<String, String> channelMap = Map.of(
-                                            //soundEnabled, isVibrate, shouldDisplayHeadsUp
+            //soundEnabled, isVibrate, shouldDisplayHeadsUp
             createNotificationChannelKey(true, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID,
             createNotificationChannelKey(true, false, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND,
             createNotificationChannelKey(false, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION,
@@ -289,8 +289,8 @@ public class MobileMessagingCore
 
         createNotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, true, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
         createNotificationChannel(MM_DEFAULT_CHANNEL_ID_VIBRATION, channelName + " Vibration", true, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_SOUND, channelName + " Sound", false,true,  null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_QUIET, channelName + " Quiet", false,false,  null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_SOUND, channelName + " Sound", false, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_QUIET, channelName + " Quiet", false, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
 
         NotificationSettings notificationSettings = getNotificationSettings();
         if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
@@ -697,7 +697,8 @@ public class MobileMessagingCore
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
+        if (shouldSaveInstallationDataOnDisk())
+            PreferenceHelper.saveString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
     }
 
     public String getCustomAttributes() {
@@ -708,7 +709,8 @@ public class MobileMessagingCore
         if (customAttributes == null) {
             customAttributes = new HashMap<>();
         }
-        PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
+        if (shouldSaveInstallationDataOnDisk())
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, nullSerializer.serialize(customAttributes));
     }
 
     private String getUnreportedCustomAttributes() {
@@ -1429,8 +1431,19 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK, shouldSaveUserData);
     }
 
+    public static void setShouldSaveInstallationData(Context context, boolean shouldSaveInstallationData) {
+        if (!shouldSaveInstallationData)
+            PreferenceHelper.remove(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_INSTALLATION_ON_DISK, shouldSaveInstallationData);
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.SAVE_CUSTOM_ATTRIBUTES_ON_DISK, shouldSaveInstallationData);
+    }
+
     public boolean shouldSaveUserData() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_USER_DATA_ON_DISK.getKey(), true);
+    }
+
+    public boolean shouldSaveInstallationDataOnDisk() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_INSTALLATION_ON_DISK.getKey(), true);
     }
 
     public static void setShouldSaveAppCode(Context context, boolean shouldSaveAppCode) {

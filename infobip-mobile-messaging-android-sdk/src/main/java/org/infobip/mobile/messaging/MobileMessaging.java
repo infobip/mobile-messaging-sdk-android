@@ -540,6 +540,7 @@ public abstract class MobileMessaging {
      * @see Builder#withoutRegisteringForRemoteNotifications()
      * @see Builder#withoutDisplayNotification()
      * @see Builder#withoutStoringUserData()
+     * @see Builder#withoutStoringInstallationData()
      * @see Builder#withoutCarrierInfo()
      * @see Builder#withoutSystemInfo()
      * @see Builder#withoutMarkingSeenOnNotificationTap()
@@ -559,6 +560,7 @@ public abstract class MobileMessaging {
         private boolean doMarkSeenOnNotificationTap = true;
         private boolean shouldSaveUserData = true;
         private boolean storeAppCodeOnDisk = true;
+        private boolean shouldSaveInstallationData = true;
         private boolean allowUntrustedSSLOnError = false;
         private boolean usePrivateSharedPrefs = true;
         private boolean postNotificationPermissionRequest = true;
@@ -910,6 +912,14 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * It will not store any {@link Installation} data on device.
+         * */
+        public Builder withoutStoringInstallationData() {
+            this.shouldSaveInstallationData = false;
+            return this;
+        }
+
+        /**
          * Set `allowUntrustedSSLOnError` to true to allow connections to untrusted hosts when SSL error happens.
          * <br>Regardless of the setting, SDK will first try to connect in ordinary mode.
          *
@@ -1008,6 +1018,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setRemoteNotificationsEnabled(application, postNotificationPermissionRequest);
             MobileMessagingCore.setFullFeatureInAppsEnabled(application, fullFeaturedInApps);
             MobileMessagingCore.setShouldSaveUserData(application, shouldSaveUserData);
+            MobileMessagingCore.setShouldSaveInstallationData(application, shouldSaveInstallationData);
             MobileMessagingCore.setShouldSaveAppCode(application, storeAppCodeOnDisk);
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
