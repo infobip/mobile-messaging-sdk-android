@@ -19,7 +19,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import org.infobip.mobile.messaging.ConfigurationException
@@ -33,7 +32,6 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.applyInAppChatLanguage
 import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
-import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
 import org.infobip.mobile.messaging.chat.utils.hide
 import org.infobip.mobile.messaging.chat.utils.setProgressTint
 import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
@@ -80,9 +78,6 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     private lateinit var webViewClient: InAppChatAttachmentPreviewClient
     private var isWebViewLoaded = false
 
-    @ColorInt
-    private var originalStatusBarColor: Int? = null
-
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(newBase?.applyInAppChatLanguage())
     }
@@ -119,7 +114,6 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        originalStatusBarColor?.let { setStatusBarColor(it) }
         unregisterReceiver(onFileDownloadingComplete)
     }
 
@@ -129,7 +123,6 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     }
 
     private fun initToolbar() {
-        originalStatusBarColor = getStatusBarColor()
         setSupportActionBar(binding.ibLcChatAttachTb)
         supportActionBar?.let {
             it.setDisplayHomeAsUpEnabled(false)

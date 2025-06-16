@@ -59,6 +59,14 @@ internal interface LivechatWidgetClient {
     fun showThread(threadId: String, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
 
     /**
+     * Prepares the widget to start a new conversation by setting its destination to [LivechatWidgetView.THREAD].
+     *
+     * Note: This does not create the actual thread until the initial message is sent by the user.
+     * @param executionListener action listener
+     */
+    fun openNewThread(executionListener: LivechatWidgetApi.ExecutionListener<String>? = null)
+
+    /**
      * Change widget destination from thread to list in multiThread widget. For non multiThread widget it does nothing.
      *
      * @param executionListener action listener

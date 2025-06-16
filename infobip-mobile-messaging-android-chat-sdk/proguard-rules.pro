@@ -41,8 +41,22 @@
     public protected *;
 }
 
+# Keep sealed classes and their nested types
+-keep public class org.infobip.mobile.messaging.chat.**$* {
+    public protected *;
+}
+
 -keep public interface org.infobip.mobile.messaging.chat.** {
     public protected *;
+}
+
+# Keep interfaces and their nested types
+-keep public interface org.infobip.mobile.messaging.chat.**$* {
+    public protected *;
+}
+
+-keepclassmembers class org.infobip.mobile.messaging.chat.** {
+    @kotlin.Metadata *;
 }
 
 # Preserve the special static methods that are required in all enumeration

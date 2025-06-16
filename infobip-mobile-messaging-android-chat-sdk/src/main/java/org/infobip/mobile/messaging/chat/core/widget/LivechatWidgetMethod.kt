@@ -20,4 +20,5 @@ internal enum class LivechatWidgetMethod {
     createThread,
     showThread,
     showThreadList,
+    openNewThread,
 }

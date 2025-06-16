@@ -221,6 +221,19 @@
             }
         }
 
+        async function openNewThread() {
+            try {
+                const response = await getLivechatSdk().getWidget().openNewThread();
+                if (response.success) {
+                    widgetApiCallback('openNewThread', null, response.data);
+                } else {
+                    widgetApiCallback('openNewThread', response.error, null);
+                }
+            } catch (e) {
+                widgetApiCallback('openNewThread', `Could not open new thread ${e.message}`, null);
+            }
+        }
+
         async function getActiveThread() {
             try {
                 const response = await getLivechatSdk().getActiveThread();

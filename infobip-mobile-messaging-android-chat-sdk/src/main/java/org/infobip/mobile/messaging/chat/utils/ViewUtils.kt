@@ -24,6 +24,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.WindowInsetsControllerCompat
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
@@ -178,45 +179,35 @@ internal fun Theme.resolveThemeColor(resId: Int): Int? {
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimary: Int?
-    get() = runCatching { Color.parseColor(this.getPrimaryColor()) }.getOrNull()
+    get() = runCatching { this.getPrimaryColor().toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorBackground: Int?
-    get() = runCatching { Color.parseColor(this.getBackgroundColor()) }.getOrNull()
+    get() = runCatching { this.getBackgroundColor().toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimaryText: Int?
-    get() = runCatching { Color.parseColor(this.getPrimaryTextColor()) }.getOrNull()
+    get() = runCatching { this.getPrimaryTextColor().toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimaryDark: Int?
     get() = colorPrimary?.let { ColorUtils.blendARGB(it, Color.BLACK, 0.2f) }
 
-@ColorInt
-internal fun Activity?.getStatusBarColor(): Int? {
-    return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-        this?.window?.statusBarColor
-    } else {
-        null
-    }
-}
-
 internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
-    if (color != null && Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-        this?.window?.let {
-            it.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            it.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            it.statusBarColor = color
+    if (color != null) {
+        this?.window?.let { w ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) { // Android 15+
+                w.decorView.setOnApplyWindowInsetsListener { view, insets ->
+                    view.setBackgroundColor(color)
+                    insets
+                }
+            } else {
+                // For Android 14 and below
+                w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+                w.statusBarColor = color
+            }
         }
-    }
-}
-
-internal fun Activity?.isLightStatusBarMode(): Boolean? {
-    return this?.window?.let {
-        WindowInsetsControllerCompat(
-            it,
-            it.decorView
-        ).isAppearanceLightStatusBars
     }
 }
 

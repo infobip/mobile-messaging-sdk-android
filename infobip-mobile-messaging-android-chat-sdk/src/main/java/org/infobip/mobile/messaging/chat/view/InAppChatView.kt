@@ -477,6 +477,19 @@ class InAppChatView @JvmOverloads constructor(
     }
     //endregion
 
+    //region Internal
+    /**
+     * Prepares the widget to start a new conversation by setting its destination to [LivechatWidgetView.THREAD].
+     *
+     * Note: This does not create the actual thread until the initial message is sent by the user.
+     * Internal method to be used by [InAppChat] only.
+     * @param resultListener Optional listener to receive the result of the operation.
+     */
+    internal fun openNewThread(resultListener: ((LivechatWidgetResult<Unit>) -> Unit)? = null) {
+        (livechatWidgetApi as? LivechatWidgetApiImpl)?.openNewThread(resultListener)
+    }
+    //endregion
+
     //region Lifecycle
     private val lifecycleObserver = object : DefaultLifecycleObserver {
 

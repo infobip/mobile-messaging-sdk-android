@@ -140,6 +140,10 @@ internal class LivechatWidgetClientImpl(
         }
     }
 
+    override fun openNewThread(executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
+        executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.openNewThread.name), executionListener)
+    }
+
     /**
      * Executes JS script on UI thread with result listener.
      *

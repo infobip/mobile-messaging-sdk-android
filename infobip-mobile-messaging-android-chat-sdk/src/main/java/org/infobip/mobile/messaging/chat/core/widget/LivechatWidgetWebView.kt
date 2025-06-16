@@ -37,6 +37,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
     private val widgetUri = context.getString(R.string.ib_livechat_widget_uri)
 
     var livechatWidgetClient: LivechatWidgetClient? = null
+        private set
     var instanceId: String? = null
 
     init {

@@ -25,7 +25,10 @@ public class OpenLivechatAction {
             if (internalData.has(ACTION_KEY)) {
                 action = new OpenLivechatAction();
                 JSONObject openLiveChat = internalData.optJSONObject(ACTION_KEY);
-                action.keyword = openLiveChat != null ? openLiveChat.optString(KEYWORD) : null;
+                if (openLiveChat != null && !openLiveChat.isNull(KEYWORD))
+                    action.keyword = openLiveChat.optString(KEYWORD);
+                else
+                    action.keyword = null;
             }
         } catch (JSONException e) {
             MobileMessagingLogger.e("OpenLivechatAction", "Failed to parse internal data.", e);

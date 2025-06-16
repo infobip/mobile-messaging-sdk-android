@@ -38,7 +38,6 @@ internal class LivechatWidgetApiImpl(
         private const val MIN_LOADING_TIMEOUT_MS = 5 * 1000
         private const val MAX_LOADING_TIMEOUT_MS = 5 * 60 * 1000
         private const val LOADING_CHECK_INTERVAL_MS = 100L
-        private const val LOADING_SUCCESS_EVENT_DELAY_MS = 300L
 
         private const val LOADING_FAIL_MSG = "Widget loading failed. Reason:"
         private const val LOADING_RESET_MSG = "Widget has been reset and is no longer loaded."
@@ -57,6 +56,11 @@ internal class LivechatWidgetApiImpl(
     private var widgetLoadingContinuation: CancellableContinuation<Boolean>? = null
     private val isWidgetLoadingInProgress: Boolean
         get() = widgetLoadingContinuation?.isActive == true
+
+    /**
+     * Listener for the result of [openNewThread] method. [LivechatWidgetEventsListener] is not used as [openNewThread] is a special internal only function.
+     */
+    private var openNewThreadResultListener: ((LivechatWidgetResult<Unit>) -> Unit)? = null
 
     private val loadingMutex = Mutex()
     private val continuationMutex = Mutex()
@@ -213,6 +217,20 @@ internal class LivechatWidgetApiImpl(
                 MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), "Livechat widget history deleted.")
                 loadUrl("about:blank")
             }
+        }
+    }
+
+    /**
+     * Prepares the widget to start a new conversation by setting its destination to [LivechatWidgetView.THREAD].
+     *
+     * Note: This does not create the actual thread until the initial message is sent by the user.
+     * Internal method to be used by [InAppChat] only.
+     * @param resultListener Optional listener to receive the result of the operation.
+     */
+    internal fun openNewThread(resultListener: ((LivechatWidgetResult<Unit>) -> Unit)? = null) {
+        openNewThreadResultListener = resultListener
+        executeApiCall(LivechatWidgetMethod.openNewThread) { listener ->
+            openNewThread(listener)
         }
     }
     //endregion
@@ -386,7 +404,6 @@ internal class LivechatWidgetApiImpl(
     override fun onWidgetViewChanged(widgetView: LivechatWidgetView) {
         if (!isWidgetLoaded && widgetView != LivechatWidgetView.LOADING) {
             coroutineScope.launch {
-                delay(LOADING_SUCCESS_EVENT_DELAY_MS) //we must wait a bit to let JS widget fully load, already reported to LC team
                 resumeWidgetLoadingContinuation(LivechatWidgetResult.Success(true))
             }
         }
@@ -424,6 +441,10 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.showThread -> propagateEvent { onThreadShown(error) }
             LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(error) }
             LivechatWidgetMethod.createThread -> propagateEvent { onThreadCreated(error) }
+            LivechatWidgetMethod.openNewThread -> {
+                openNewThreadResultListener?.invoke(error)
+                openNewThreadResultListener = null
+            }
         }
     }
 
@@ -449,6 +470,10 @@ internal class LivechatWidgetApiImpl(
             LivechatWidgetMethod.getActiveThread -> propagateEvent { onActiveThreadReceived(LivechatWidgetResult.Success(LivechatWidgetThread.parseOrNull(payload))) }
             LivechatWidgetMethod.sendMessage -> propagateEvent { onSent(LivechatWidgetResult.Success(LivechatWidgetMessage.parseOrNull(payload))) }
             LivechatWidgetMethod.createThread -> propagateEvent { onThreadCreated(LivechatWidgetResult.Success(LivechatWidgetMessage.parseOrNull(payload))) }
+            LivechatWidgetMethod.openNewThread -> {
+                openNewThreadResultListener?.invoke(LivechatWidgetResult.Success.unit)
+                openNewThreadResultListener = null
+            }
         }
     }
 

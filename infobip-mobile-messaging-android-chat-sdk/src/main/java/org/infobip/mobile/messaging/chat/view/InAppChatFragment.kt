@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.ColorInt
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.view.isVisible
@@ -46,8 +45,6 @@ import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.copyFileToPublicDir
 import org.infobip.mobile.messaging.chat.utils.deleteFile
-import org.infobip.mobile.messaging.chat.utils.getStatusBarColor
-import org.infobip.mobile.messaging.chat.utils.isLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setLightStatusBarMode
 import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
 import org.infobip.mobile.messaging.chat.utils.show
@@ -142,9 +139,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private val binding
         get() = _binding!!
 
-    @ColorInt
-    private var originalStatusBarColor = 0
-    private var originalLightStatusBar: Boolean? = null
     private lateinit var localizationUtils: LocalizationUtils
     private var widgetInfo: WidgetInfo? = null
     private var widgetView: LivechatWidgetView? = null
@@ -325,7 +319,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     override fun onDestroyView() {
         super.onDestroyView()
-        revertStatusBarStyle() //called because of react native plugin UI component
         removeBackPressHandler()
         binding.ibLcChat.eventsListener = null
         _binding = null
@@ -569,6 +562,19 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
     //endregion
 
+    //region Internal
+    /**
+     * Prepares the widget to start a new conversation by setting its destination to [LivechatWidgetView.THREAD].
+     *
+     * Note: This does not create the actual thread until the initial message is sent by the user.
+     * Internal method to be used by [InAppChat] only.
+     * @param resultListener Optional listener to receive the result of the operation.
+     */
+    internal fun openNewThread(resultListener: ((LivechatWidgetResult<Unit>) -> Unit)? = null) {
+        withBinding { it.ibLcChat.openNewThread(resultListener) }
+    }
+    //endregion
+
     //region Toolbar
     private fun initToolbar(withToolbar: Boolean) {
         withBinding { binding ->
@@ -598,7 +604,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun closeChatPage() {
-        revertStatusBarStyle()
         if (withToolbar)
             inAppChatActionBarProvider?.originalSupportActionBar?.show()
         backPressedCallback.isEnabled = false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
@@ -609,32 +614,14 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
         val style = StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
         withBinding { style.apply(it.ibLcChatToolbar) }
-        applyStatusBarStyle(style)
+        (activity as? InAppChatActivity)?.applyStatusBarStyle(style)
     }
 
-    private fun applyStatusBarStyle(style: InAppChatToolbarStyle) {
+    private fun InAppChatActivity.applyStatusBarStyle(style: InAppChatToolbarStyle) {
         if (!withToolbar)
             return
-        requireActivity().apply {
-            val currentColor = getStatusBarColor() ?: 0
-            if (currentColor != style.statusBarBackgroundColor)
-                this@InAppChatFragment.originalStatusBarColor = currentColor
-            setStatusBarColor(style.statusBarBackgroundColor)
-            val currentMode = isLightStatusBarMode()
-            if (currentMode != (!style.lightStatusBarIcons))
-                this@InAppChatFragment.originalLightStatusBar = currentMode
-            setLightStatusBarMode(!style.lightStatusBarIcons)
-        }
-    }
-
-    private fun revertStatusBarStyle() {
-        if (!withToolbar)
-            return
-        if (originalStatusBarColor != 0)
-            requireActivity().setStatusBarColor(originalStatusBarColor)
-        originalLightStatusBar?.let {
-            requireActivity().setLightStatusBarMode(it)
-        }
+        setStatusBarColor(style.statusBarBackgroundColor)
+        setLightStatusBarMode(!style.lightStatusBarIcons)
     }
     //endregion
 
