@@ -41,7 +41,7 @@ internal object SessionStorage {
 
     @get:Synchronized
     @set:Synchronized
-    var configSyncResult: Result<WidgetInfo, MobileMessagingError>? = null
+    var lcWidgetConfigSyncResult: Result<WidgetInfo, MobileMessagingError>? = null
 
     @get:Synchronized
     @set:Synchronized
@@ -62,7 +62,7 @@ internal object SessionStorage {
         theme = null
         jwtProvider = null
         contextualData = null
-        configSyncResult = null
+        lcWidgetConfigSyncResult = null
         inAppChatEventsListener = null
         inAppChatNotificationInteractionHandler = null
         scope.coroutineContext.cancelChildren()

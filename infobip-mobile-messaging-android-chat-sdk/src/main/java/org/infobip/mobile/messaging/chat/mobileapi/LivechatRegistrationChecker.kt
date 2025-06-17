@@ -14,8 +14,7 @@ import org.infobip.mobile.messaging.mobileapi.common.MAsyncTask
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-class LivechatRegistrationChecker(
-    private val context: Context,
+internal class LivechatRegistrationChecker(
     private val mmCore: MobileMessagingCore,
     private val propertyHelper: PropertyHelper,
     private val inAppChatBroadcaster: InAppChatBroadcaster,
@@ -27,10 +26,10 @@ class LivechatRegistrationChecker(
         //used as session cache to avoid sending broadcast with same registration id in a row
         private var reportedRegistrationId: String? = null
         private var isSyncInProgress: Boolean = false
+        const val TAG = "LcRegistrationChecker"
     }
 
     constructor(context: Context) : this(
-        context,
         MobileMessagingCore.getInstance(context),
         PropertyHelper(context),
         InAppChatBroadcasterImpl(context),
@@ -45,12 +44,12 @@ class LivechatRegistrationChecker(
         callsEnabled: Boolean? = null,
     ) {
         if (isSyncInProgress) {
-            MobileMessagingLogger.d("LivechatRegistration check skipped. Another check of livechat registration id is progress.")
+            MobileMessagingLogger.d(TAG,"LivechatRegistration check skipped. Another check is in progress.")
             return
         }
         val enableCalls = callsEnabled ?: propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED)
-        if (!enableCalls){
-            MobileMessagingLogger.d("LivechatRegistration check skipped. Call feature is disabled.")
+        if (!enableCalls) {
+            MobileMessagingLogger.d(TAG,"LivechatRegistration check skipped. Call feature is disabled.")
             return
         }
         isSyncInProgress = true
@@ -73,7 +72,7 @@ class LivechatRegistrationChecker(
                         require(wId?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing widgetId argument." }
                         val widget = destinations.firstOrNull { it.getWidgetId() == wId }
                         if (widget == null) {
-                            MobileMessagingLogger.d("Livechat contact information for widget id = $wId does not exits.")
+                            MobileMessagingLogger.d(TAG,"Livechat contact information for widget id = $wId does not exits.")
                             null
                         } else {
                             widget.getRegistrationId()
@@ -87,9 +86,9 @@ class LivechatRegistrationChecker(
                 if (livechatRegistrationId?.isNotBlank() == true && livechatRegistrationId != reportedRegistrationId) {
                     inAppChatBroadcaster.livechatRegistrationIdUpdated(livechatRegistrationId)
                     reportedRegistrationId = livechatRegistrationId
-                    MobileMessagingLogger.v("Livechat registration id = $livechatRegistrationId broadcast sent.")
+                    MobileMessagingLogger.d(TAG,"Livechat registration id = $livechatRegistrationId broadcast sent.")
                 } else {
-                    MobileMessagingLogger.v("Livechat registration id = $livechatRegistrationId broadcast skipped.")
+                    MobileMessagingLogger.d(TAG,"Livechat registration id = $livechatRegistrationId broadcast skipped.")
                 }
                 isSyncInProgress = false
             }

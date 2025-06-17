@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null) {
-                onChatAvailabilityUpdated(intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, false), true);
+                onChatAvailabilityUpdated(intent.getBooleanExtra(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, inAppChat.isChatAvailable()), true);
             }
         }
     };
@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpWidgetApiButton();
         setUpRuntimeCustomization();
         setUpInAppChatAvailabilityReceiver();
+        onChatAvailabilityUpdated(inAppChat.isChatAvailable(), false);
     }
 
     @Override
@@ -186,9 +187,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         if (this.lastUsedAuthData != null) {
             outState.putParcelable(EXTRA_AUTH_DATA, this.lastUsedAuthData);
         }
-        if (this.openChatActivityButton != null) {
-            outState.putBoolean(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE, this.openChatActivityButton.isEnabled());
-        }
         super.onSaveInstanceState(outState);
     }
 
@@ -199,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         if (parcelable instanceof AuthData) {
             this.lastUsedAuthData = (AuthData) parcelable;
         }
-        onChatAvailabilityUpdated(savedInstanceState.getBoolean(BroadcastParameter.EXTRA_IS_CHAT_AVAILABLE), false);
     }
 
     @Override

@@ -19,13 +19,12 @@ import java.util.concurrent.Executor
 
 class LivechatRegistrationCheckerTest : MobileMessagingChatTestCase() {
 
-    lateinit var lcRegIdChecker: LivechatRegistrationChecker
+    private lateinit var lcRegIdChecker: LivechatRegistrationChecker
     private val executor = Executor { command -> command.run() }
 
     override fun setUp() {
         super.setUp()
         lcRegIdChecker = LivechatRegistrationChecker(
-            context,
             mobileMessagingCore,
             propertyHelper,
             inAppChatBroadcaster,

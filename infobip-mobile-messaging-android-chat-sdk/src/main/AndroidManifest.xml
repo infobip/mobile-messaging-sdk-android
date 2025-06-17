@@ -36,6 +36,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".core.PushRegistrationBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="org.infobip.mobile.messaging.REGISTRATION_CREATED" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="org.infobip.mobile.messaging.chat.InAppChatImpl"
             android:value="org.infobip.mobile.messaging.MessageHandlerModule" />

@@ -18,7 +18,6 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.OpenLivechatAction;
-import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.app.ContentIntentWrapper;
@@ -32,7 +31,9 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetWebView;
 import org.infobip.mobile.messaging.chat.mobileapi.InAppChatSynchronizer;
+import org.infobip.mobile.messaging.chat.mobileapi.IsChatAvailable;
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker;
+import org.infobip.mobile.messaging.chat.mobileapi.LivechatWidgetConfigSynchronizer;
 import org.infobip.mobile.messaging.chat.models.ContextualData;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
@@ -74,6 +75,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     private PropertyHelper propertyHelper;
     private MobileApiResourceProvider mobileApiResourceProvider;
     private InAppChatSynchronizer inAppChatSynchronizer;
+    private LivechatWidgetConfigSynchronizer lcWidgetConfigSynchronizer;
     private LivechatRegistrationChecker lcRegIgChecker;
     private LivechatWidgetApi lcWidgetApi;
     private InAppChatFragment inAppChatWVFragment;
@@ -109,7 +111,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     private boolean isChatWidgetOnForeground() {
         Activity activity = null;
-        ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(context).getActivityLifecycleMonitor();
+        ActivityLifecycleMonitor activityLifecycleMonitor = mobileMessagingCore().getActivityLifecycleMonitor();
         if (activityLifecycleMonitor != null) {
             activity = activityLifecycleMonitor.getForegroundActivity();
         }
@@ -227,7 +229,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     // must be done on separate thread if it's not invoked by UI thread
     private void cleanupWidgetData() {
-        sessionStorage().setConfigSyncResult(null);
+        sessionStorage().setLcWidgetConfigSyncResult(null);
         try {
             new Handler(Looper.getMainLooper()).post(() -> {
                 getLivechatWidgetApi().reset();
@@ -245,30 +247,9 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void performSyncActions() {
-        Result<WidgetInfo, MobileMessagingError> syncResult = sessionStorage().getConfigSyncResult();
-        if (isActivated() && (syncResult == null || !syncResult.isSuccess())) {
-            inAppChatSynchronizer().getWidgetConfiguration(new MobileMessaging.ResultListener<WidgetInfo>() {
-                @Override
-                public void onResult(Result<WidgetInfo, MobileMessagingError> result) {
-                    sessionStorage().setConfigSyncResult(result);
-                    if (result.isSuccess()) {
-                        syncLivechatRegistrationId(result.getData());
-                    }
-                }
-            });
-        }
-        else {
-            MobileMessagingLogger.i(TAG, "Widget sync skipped. In-app chat is not activated or widget configuration is already synced");
-        }
+        inAppChatSynchronizer().sync(mobileMessagingCore().getPushRegistrationId());
     }
 
-    private void syncLivechatRegistrationId(WidgetInfo widgetInfo) {
-        livechatRegistrationIdChecker().sync(
-                widgetInfo.getId(),
-                mobileMessagingCore().getPushRegistrationId(),
-                widgetInfo.isCallsEnabled()
-        );
-    }
     //endregion
 
     //region InAppChat public functions
@@ -283,6 +264,11 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void activate() {
         propertyHelper().saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
+    }
+
+    @Override
+    public boolean isChatAvailable() {
+        return IsChatAvailable.check(propertyHelper(), mobileMessagingCore());
     }
 
     @Override
@@ -309,6 +295,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         inAppChatSynchronizer = null;
         lcRegIgChecker = null;
         lcWidgetApi = null;
+        lcWidgetConfigSynchronizer = null;
         contentIntentWrapper = null;
         activityStarterWrapper = null;
         mmCore = null;
@@ -733,14 +720,27 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         return mobileApiResourceProvider;
     }
 
-    synchronized private InAppChatSynchronizer inAppChatSynchronizer() {
-        if (inAppChatSynchronizer == null) {
-            inAppChatSynchronizer = new InAppChatSynchronizer(
+    synchronized private LivechatWidgetConfigSynchronizer livechatWidgetConfigSynchronizer() {
+        if (lcWidgetConfigSynchronizer == null) {
+            lcWidgetConfigSynchronizer = new LivechatWidgetConfigSynchronizer(
                     context,
-                    MobileMessagingCore.getInstance(context),
+                    mobileMessagingCore(),
                     coreBroadcaster(),
                     inAppChatBroadcaster(),
                     mobileApiResourceProvider().getMobileApiChat(context));
+        }
+        return lcWidgetConfigSynchronizer;
+    }
+
+    synchronized private InAppChatSynchronizer inAppChatSynchronizer() {
+        if (inAppChatSynchronizer == null) {
+            inAppChatSynchronizer = new InAppChatSynchronizer(
+                    TAG,
+                    sessionStorage(),
+                    propertyHelper(),
+                    livechatWidgetConfigSynchronizer(),
+                    livechatRegistrationIdChecker()
+            );
         }
         return inAppChatSynchronizer;
     }
@@ -762,7 +762,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     synchronized private LivechatRegistrationChecker livechatRegistrationIdChecker() {
         if (lcRegIgChecker == null) {
             lcRegIgChecker = new LivechatRegistrationChecker(
-                    context,
                     mobileMessagingCore(),
                     propertyHelper(),
                     inAppChatBroadcaster(),

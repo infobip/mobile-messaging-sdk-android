@@ -56,6 +56,18 @@ public abstract class InAppChat {
     public abstract void activate();
 
     /**
+     * Checks whether the in-app chat is ready to be shown to the user.
+     * <p>
+     * In-app chat is considered ready when the widget configuration has been synced and
+     * Infobip's unique push registration ID has been issued.
+     * </p>
+     * @return {@code true} if the in-app chat is ready to be presented to the user,
+     *         {@code false} otherwise.
+     * @see org.infobip.mobile.messaging.chat.core.InAppChatEvent#IN_APP_CHAT_AVAILABILITY_UPDATED
+     */
+    public abstract boolean isChatAvailable();
+
+    /**
      * Creates in-app chat screen
      *
      * @return chat view object
