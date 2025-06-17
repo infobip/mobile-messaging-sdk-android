@@ -54,6 +54,10 @@
             showFooter: false,
             showFab: false
         };
+
+        if (widgetTheme != null) {
+            setTheme(widgetTheme);
+        }
         liveChat('config', widgetConfig, function (error, result) {
             widgetApiCallback('config', error, result);
             if (!error) {
@@ -98,9 +102,6 @@
         function show() {
             liveChat('show', null, function (error, result) {
                 widgetApiCallback('show', error, result);
-                if (!error && widgetTheme != null) {
-                    setTheme(widgetTheme);
-                }
             });
             addLiveChatEventsListener();
         }
