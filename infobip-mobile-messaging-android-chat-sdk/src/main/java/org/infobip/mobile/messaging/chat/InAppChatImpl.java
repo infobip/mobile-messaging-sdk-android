@@ -258,6 +258,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (instance == null) {
             instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(InAppChatImpl.class);
         }
+        new PropertyHelper(context).saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
         return instance;
     }
 

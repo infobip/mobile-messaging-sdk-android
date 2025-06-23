@@ -51,7 +51,7 @@ public abstract class InAppChat {
     }
 
     /**
-     * Activates in-app chat service.
+     * Activates In-app chat service, what ensures all chat necessary configurations are synced with the server.
      */
     public abstract void activate();
 
@@ -60,6 +60,7 @@ public abstract class InAppChat {
      * <p>
      * In-app chat is considered ready when the widget configuration has been synced and
      * Infobip's unique push registration ID has been issued.
+     * Widget configuration sync requires In-app chat service to be activated by calling {@code activate()} method.
      * </p>
      * @return {@code true} if the in-app chat is ready to be presented to the user,
      *         {@code false} otherwise.
@@ -408,6 +409,10 @@ public abstract class InAppChat {
     /**
      * Get instance of {@link LivechatWidgetApi} to interact with livechat widget
      * without need to show either {@code InAppChatView} or {@code InAppChatFragment} in UI.
+     *
+     * Before using this API, you must ensure that the In-app chat service is activated by calling {@link InAppChat#activate()}.
+     * You can also check if the {@code LivechatWidgetApi} is ready to use by {@link InAppChat#isChatAvailable()}
+     * or {@code InAppChatEvent.IN_APP_CHAT_AVAILABILITY_UPDATED} broadcast event.
      *
      * @return {@link LivechatWidgetApi} instance
      * @see org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
