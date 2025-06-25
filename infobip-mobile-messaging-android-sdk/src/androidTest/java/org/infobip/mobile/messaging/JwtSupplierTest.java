@@ -86,7 +86,7 @@ public class JwtSupplierTest extends MobileMessagingTestCase {
         Result result = resultCaptor.getValue();
         MobileMessagingError error = result.getError();
         assertNotNull(error);
-        assertEquals(error.getCode(), "20013");
+        assertEquals(error.getCode(), "JWT_TOKEN_STRUCTURE_INVALID");
         assertEquals(error.getMessage(), "Token must have three parts separated by dots.");
     }
 
@@ -100,7 +100,7 @@ public class JwtSupplierTest extends MobileMessagingTestCase {
         Result result = resultCaptor.getValue();
         MobileMessagingError error = result.getError();
         assertNotNull(error);
-        assertEquals(error.getCode(), "20014");
+        assertEquals(error.getCode(), "JWT_TOKEN_EXPIRED");
         assertEquals(error.getMessage(), "The provided JWT is expired.");
     }
 

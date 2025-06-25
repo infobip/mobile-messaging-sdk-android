@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.notification;
 
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
+
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,6 +14,13 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BitmapCompat;
 
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
@@ -32,15 +41,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.BitmapCompat;
-
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 
 /**
  * @author sslavin
@@ -325,9 +325,10 @@ public class BaseNotificationHandler {
 
         Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
         if (soundUri == null) {
-            MobileMessagingLogger.e("Cannot create uri for sound:" + sound + " messageId:" + message.getMessageId());
+            MobileMessagingLogger.e("Cannot create uri for sound: " + sound + " messageId: " + message.getMessageId());
             return;
         }
+        MobileMessagingLogger.w("Trying to play custom sound: " + sound + " messageId: " + message.getMessageId());
         notificationBuilder.setSound(soundUri);
     }
 
@@ -359,10 +360,12 @@ public class BaseNotificationHandler {
 
         if (hasCustomSound) {
             String baseChannelId = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
-            if (shouldDisplayHeadsUp) {
-                return baseChannelId + (isVibrate ? "_high_priority, vibration" : "_high_priority");
-            } else {
-                return baseChannelId + (isVibrate ? "_vibration" : "");
+            if (baseChannelId != null) {
+                if (shouldDisplayHeadsUp) {
+                    return baseChannelId + (isVibrate ? "_high_priority, vibration" : "_high_priority");
+                } else {
+                    return baseChannelId + (isVibrate ? "_vibration" : "");
+                }
             }
         }
 

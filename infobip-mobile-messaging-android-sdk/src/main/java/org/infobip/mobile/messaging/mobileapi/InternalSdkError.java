@@ -14,8 +14,8 @@ public enum InternalSdkError {
     ERROR_ATTACHMENT_MAX_SIZE_EXCEEDED("20010", "Maximum allowed attachment size exceeded"),
     INSTALLATION_SYNC_IN_PROGRESS("20011", "Installation sync is already in progress"),
     ERROR_ATTACHMENT_NOT_VALID("20012", "Attachment is not valid"),
-    JWT_TOKEN_STRUCTURE_INVALID("20013", "JWT token structure invalid"),
-    JWT_TOKEN_EXPIRED("20014", "JWT token is expired");
+    JWT_TOKEN_STRUCTURE_INVALID("JWT_TOKEN_STRUCTURE_INVALID", "JWT token structure invalid"),
+    JWT_TOKEN_EXPIRED("JWT_TOKEN_EXPIRED", "JWT token is expired");
 
     private final String code;
     private final String message;
