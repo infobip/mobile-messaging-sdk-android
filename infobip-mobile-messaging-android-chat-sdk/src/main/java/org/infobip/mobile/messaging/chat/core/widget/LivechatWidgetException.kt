@@ -16,10 +16,22 @@ class LivechatWidgetException(
         const val ORIGIN_LIVECHAT = "Livechat"
         const val ORIGIN_ANDROID_SDK = "Android SDK"
 
-        fun parse(json: String): LivechatWidgetException {
-            return runCatching {
+        internal fun parse(json: String, method: LivechatWidgetMethod? = null): LivechatWidgetException {
+            var exception = runCatching {
                 serializer.deserialize(json, LivechatWidgetException::class.java)
-            }.getOrDefault(LivechatWidgetException(message = json, origin = ORIGIN_LIVECHAT))
+            }.getOrNull()
+
+            //JSON like "{}" is parsed without error but exception is empty, this make sure we have a valid message and origin
+            if (exception == null || exception.message.isNullOrBlank() || exception.origin.isNullOrBlank()) {
+                val message = if (method != null) {
+                    "${method.name}() failed with response: $json"
+                } else {
+                    json
+                }
+                exception = LivechatWidgetException(message = message, origin = ORIGIN_LIVECHAT)
+            }
+
+            return exception
         }
 
         fun fromAndroid(message: String): LivechatWidgetException {

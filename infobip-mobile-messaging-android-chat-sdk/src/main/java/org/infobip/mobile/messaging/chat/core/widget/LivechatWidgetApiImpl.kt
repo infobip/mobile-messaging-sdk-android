@@ -415,7 +415,7 @@ internal class LivechatWidgetApiImpl(
     }
 
     override fun onWidgetApiError(method: LivechatWidgetMethod, errorPayload: String?) {
-        val error = LivechatWidgetResult.Error(LivechatWidgetException.parse(errorPayload ?: UNKNOWN_ERROR))
+        val error = LivechatWidgetResult.Error(LivechatWidgetException.parse(errorPayload ?: UNKNOWN_ERROR, method))
         handleWidgetApiError(method, error)
     }
 

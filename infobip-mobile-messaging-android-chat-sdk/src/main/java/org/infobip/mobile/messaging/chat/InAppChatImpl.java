@@ -258,7 +258,11 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         if (instance == null) {
             instance = MobileMessagingCore.getInstance(context).getMessageHandlerModule(InAppChatImpl.class);
         }
-        new PropertyHelper(context).saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
+        try {
+            new PropertyHelper(context).saveBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED, true);
+        } catch (Exception e) {
+            MobileMessagingLogger.e(TAG, "In-app chat wasn't activated, call activate()");
+        }
         return instance;
     }
 
@@ -545,18 +549,17 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Nullable
     @Deprecated
     public InAppChat.JwtProvider getJwtProvider() {
-        return new JwtProvider() {
-            @Nullable
-            @Override
-            public String provideJwt() {
-                if (sessionStorage().getJwtProvider() != null) {
+        if (sessionStorage().getJwtProvider() != null) {
+            return new JwtProvider() {
+                @Nullable
+                @Override
+                public String provideJwt() {
                     return sessionStorage().getJwtProvider().provideJwt();
                 }
-                else {
-                    return null;
-                }
-            }
-        };
+            };
+        } else {
+            return null;
+        }
     }
 
     @Override
