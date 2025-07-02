@@ -54,8 +54,8 @@ afterEvaluate {
         }
 //    repositories {
 //        maven {
-//            name = "SonatypeReleases"
-//            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+//            name = "ossrh-staging-api"
+//            url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
 //
 //            credentials {
 //                username ossrhUsername
