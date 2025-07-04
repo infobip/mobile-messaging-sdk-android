@@ -1,7 +1,7 @@
 buildscript {
     //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
     ext.mm_kotlinVersion = "2.0.21"
-    ext.mm_gradlePluginVersion = "8.5.2"
+    ext.mm_gradlePluginVersion = '8.9.0'
     ext.mm_desugarJdkVersion = "2.1.4"
 
     repositories {
@@ -25,9 +25,9 @@ plugins {
 
 ext {
     mm_minSdkVersion = 21
-    mm_compileSdkVersion = 35
-    mm_targetSdkVersion = 35
-    mm_buildToolsVersion = "35.0.0"
+    mm_compileSdkVersion = 36
+    mm_targetSdkVersion = 36
+    mm_buildToolsVersion = "36.0.0"
     mm_firebaseMessagingVersion = "22.0.0"
     mm_gmsLocationVersion = "21.0.1"
     mm_constraintLayoutVersion = "2.1.4"
