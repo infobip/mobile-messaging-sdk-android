@@ -526,23 +526,21 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         authButton.setOnClickListener((v) -> {
             showProgressBar();
 
-            JwtProvider livechatWidgetJwtProvider = new JwtProvider() {
-
-                @Nullable
-                @Override
-                public String provideJwt() {
-                    AuthData authData = MainActivity.this.lastUsedAuthData;
-                    String jwt = null;
-                    if (authData != null) {
-                        jwt = JWTUtils.createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
-                        if (jwt == null) {
-                            Toast.makeText(MainActivity.this, "Create JWT process failed!", Toast.LENGTH_SHORT).show();
-                        }
+            JwtProvider livechatWidgetJwtProvider = callback -> {
+                AuthData authData = MainActivity.this.lastUsedAuthData;
+                String jwt = null;
+                if (authData != null) {
+                    jwt = JWTUtils.createJwt(authData.getJwtSubjectType(), authData.getSubject(), WIDGET_ID, WIDGET_SECRET_KEY_JSON);
+                    if (jwt == null) {
+                        Toast.makeText(MainActivity.this, "Create JWT process failed!", Toast.LENGTH_SHORT).show();
                     }
-                    MobileMessagingLogger.d("Providing JWT for " + authData + " = " + jwt);
-                    return jwt;
                 }
-
+                MobileMessagingLogger.d(TAG, "Providing JWT for " + authData + " = " + jwt);
+                if (StringUtils.isNotBlank(jwt)){
+                    callback.onJwtReady(jwt);
+                } else {
+                    callback.onJwtError(new IllegalStateException("JWT is null, check widgetId and widget secret key."));
+                }
             };
             inAppChat.setWidgetJwtProvider(livechatWidgetJwtProvider);
 

@@ -534,35 +534,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     }
 
     @Override
-    @Deprecated
-    public void setJwtProvider(InAppChat.JwtProvider jwtProvider) {
-        sessionStorage().setJwtProvider(new org.infobip.mobile.messaging.chat.core.JwtProvider() {
-            @Nullable
-            @Override
-            public String provideJwt() {
-                return jwtProvider.provideJwt();
-            }
-        });
-    }
-
-    @Override
-    @Nullable
-    @Deprecated
-    public InAppChat.JwtProvider getJwtProvider() {
-        if (sessionStorage().getJwtProvider() != null) {
-            return new JwtProvider() {
-                @Nullable
-                @Override
-                public String provideJwt() {
-                    return sessionStorage().getJwtProvider().provideJwt();
-                }
-            };
-        } else {
-            return null;
-        }
-    }
-
-    @Override
     public void setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider jwtProvider) {
         sessionStorage().setJwtProvider(jwtProvider);
     }

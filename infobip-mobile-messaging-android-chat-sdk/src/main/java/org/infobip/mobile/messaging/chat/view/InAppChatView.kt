@@ -812,28 +812,10 @@ class InAppChatView @JvmOverloads constructor(
 
     //region Helpers
     private fun loadWidget() {
-        val pushRegId = pushRegistrationId
-        val widgetId = widgetInfo?.id
-        val jwt = inAppChat.widgetJwtProvider?.provideJwt()
-        val domain = inAppChat.domain
-        val widgetTheme = inAppChat.widgetTheme
-        val language = inAppChat.language
-
-        if (pushRegId.isNullOrBlank() || widgetId.isNullOrBlank()) {
-            MobileMessagingLogger.e(TAG, "Chat loading skipped, pushRegId($pushRegId) or widgetId($widgetId) is missing.")
-            return
-        }
-
         with(binding) {
             ibLcSpinner.visible()
             ibLcWebView.invisible()
-            livechatWidgetApi.loadWidget(
-                widgetId = widgetId,
-                jwt = jwt,
-                domain = domain,
-                theme = widgetTheme,
-                language = language
-            )
+            livechatWidgetApi.loadWidget(widgetId = widgetInfo?.id)
         }
     }
 

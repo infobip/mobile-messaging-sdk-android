@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.infobip.mobile.messaging.MobileMessagingCore
 import org.infobip.mobile.messaging.chat.InAppChat
@@ -95,16 +96,16 @@ internal class LivechatWidgetApiImpl(
         jwt: String?,
         domain: String?,
         theme: String?,
-        language: LivechatWidgetLanguage?
+        language: LivechatWidgetLanguage?,
     ) {
         coroutineScope.launch(webViewDispatcher) {
             runCatching {
                 loadWidgetInternal(
-                    widgetId = widgetId,
-                    jwt = jwt,
-                    domain = domain,
-                    theme = theme,
-                    language = language,
+                    providedWidgetId = widgetId,
+                    providedJwt = jwt,
+                    providedDomain = domain,
+                    providedTheme = theme,
+                    providedLanguage = language,
                 )
             }.onFailure {
                 onWidgetLoadingFinished(LivechatWidgetResult.Error(it.mapToLivechatException()))
@@ -267,24 +268,19 @@ internal class LivechatWidgetApiImpl(
      */
     @Throws(Exception::class)
     private suspend fun loadWidgetInternal(
-        pushRegistrationId: String? = null,
-        widgetId: String? = null,
-        jwt: String? = null,
-        domain: String? = null,
-        theme: String? = null,
-        language: LivechatWidgetLanguage? = null
+        providedWidgetId: String? = null,
+        providedJwt: String? = null,
+        providedDomain: String? = null,
+        providedTheme: String? = null,
+        providedLanguage: LivechatWidgetLanguage? = null,
     ) {
         loadingMutex.withLock {
-            val fallbackPushRegistrationId: String? = pushRegistrationId?.takeIf { it.isNotBlank() } ?: mmCore.pushRegistrationId?.takeIf { it.isNotBlank() }
-            val fallbackWidgetId: String? = widgetId?.takeIf { it.isNotBlank() } ?: propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID)
-            val fallbackJwt: String? = jwt?.takeIf { it.isNotBlank() } ?: inAppChat.widgetJwtProvider?.provideJwt()
-            val fallbackDomain: String? = domain?.takeIf { it.isNotBlank() } ?: inAppChat.domain
-            val fallbackTheme: String? = theme?.takeIf { it.isNotBlank() } ?: inAppChat.widgetTheme
-            val fallbackLanguage: String = (language ?: inAppChat.language).widgetCode
+            val pushRegId: String? = mmCore.pushRegistrationId?.takeIf { it.isNotBlank() }
+            val widgetId: String? = providedWidgetId?.takeIf { it.isNotBlank() } ?: propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID)
 
             when {
-                fallbackPushRegistrationId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Push registration id is null or blank.")
-                fallbackWidgetId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget id is null or blank.")
+                pushRegId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Push registration id is null or blank.")
+                widgetId.isNullOrBlank() -> throw LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG Widget id is null or blank.")
                 isWidgetLoadingInProgress -> {
                     MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), "Another widget loading is in progress.")
                     withTimeout(loadingTimeoutMillis) {
@@ -296,16 +292,20 @@ internal class LivechatWidgetApiImpl(
 
                 !isWidgetLoaded -> {
                     withTimeout(loadingTimeoutMillis) {
+                        val jwt: String? = providedJwt?.takeIf { it.isNotBlank() } ?: requestNewJwt()
+                        val domain: String? = providedDomain?.takeIf { it.isNotBlank() } ?: inAppChat.domain
+                        val theme: String? = providedTheme?.takeIf { it.isNotBlank() } ?: inAppChat.widgetTheme
+                        val language: String = (providedLanguage ?: inAppChat.language).widgetCode
                         runCatching { //must stay in place to propagate possible suspendCancellableCoroutine() exception immediately and do not wait for timeout
                             val result: Boolean = suspendCancellableCoroutine { continuation ->
                                 setContinuation(continuation)
                                 webView.loadWidgetPage(
-                                    pushRegistrationId = fallbackPushRegistrationId,
-                                    widgetId = fallbackWidgetId,
-                                    jwt = fallbackJwt,
-                                    domain = fallbackDomain,
-                                    widgetTheme = fallbackTheme,
-                                    language = fallbackLanguage
+                                    pushRegistrationId = pushRegId,
+                                    widgetId = widgetId,
+                                    jwt = jwt,
+                                    domain = domain,
+                                    widgetTheme = theme,
+                                    language = language
                                 )
                                 continuation.invokeOnCancellation {
                                     setContinuation(null)
@@ -316,6 +316,30 @@ internal class LivechatWidgetApiImpl(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Requests new JWT from [inAppChat.widgetJwtProvider].
+     * If provider is set, it will call [JwtProvider.provideJwt] and wait for the result.
+     * Returns null if provider is not set.
+     */
+    private suspend fun requestNewJwt(): String? = withContext(Dispatchers.Main) {
+        suspendCancellableCoroutine { continuation ->
+            inAppChat.widgetJwtProvider
+                ?.provideJwt(
+                    object : JwtProvider.JwtCallback {
+                        override fun onJwtReady(jwt: String) {
+                            continuation.resume(jwt)
+                        }
+
+                        override fun onJwtError(error: Throwable) {
+                            MobileMessagingLogger.e(webView.instanceId.tag(LivechatWidgetApi.TAG), "JwtProvider error: ${error.message}", error)
+                            continuation.cancel(LivechatWidgetException.fromAndroid("$LOADING_FAIL_MSG JwtProvider returned error. ${error.message}"))
+                        }
+                    }
+                )
+                ?: continuation.resume(null)
         }
     }
 

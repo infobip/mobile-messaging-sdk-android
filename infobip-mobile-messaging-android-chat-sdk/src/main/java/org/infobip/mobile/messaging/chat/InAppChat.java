@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler;
+import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
@@ -19,25 +20,6 @@ import androidx.fragment.app.FragmentManager;
  */
 @SuppressWarnings("unused")
 public abstract class InAppChat {
-
-    /**
-     * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
-     *
-     * @deprecated Use {@link org.infobip.mobile.messaging.chat.core.JwtProvider} instead
-     */
-    @Deprecated
-    public interface JwtProvider {
-        /**
-         * Provides JSON Web Token (JWT), to give in-app chat ability to authenticate.
-         * Function can be triggered multiple times during in-app chat lifetime, due to various events like screen orientation change, internet re-connection.
-         * If you can ensure JWT expiration time is more than in-app chat lifetime, you can return cached token, otherwise
-         * <b>it is important to provide fresh new token for each invocation.</b>
-         *
-         * @return JWT
-         */
-        @Nullable
-        String provideJwt();
-    }
 
     /**
      * Returns instance of chat api
@@ -260,33 +242,10 @@ public abstract class InAppChat {
     /**
      * Set {@link JwtProvider} to give in-app chat ability to authenticate.
      *
-     * @deprecated Use {@link InAppChat#setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider)} instead
-     *
      * @param jwtProvider provider instance
      * @see JwtProvider
      */
-    @Deprecated
-    public abstract void setJwtProvider(InAppChat.JwtProvider jwtProvider);
-
-    /**
-     * Returns instance of {@link JwtProvider}
-     *
-     * @deprecated Use {@link JwtProvider InAppChat#getJwtProvider()} instead
-     *
-     * @return instance of {@link JwtProvider}
-     * @see JwtProvider
-     */
-    @Nullable
-    @Deprecated
-    public abstract InAppChat.JwtProvider getJwtProvider();
-
-    /**
-     * Set {@link JwtProvider} to give in-app chat ability to authenticate.
-     *
-     * @param jwtProvider provider instance
-     * @see JwtProvider
-     */
-    public abstract void setWidgetJwtProvider(org.infobip.mobile.messaging.chat.core.JwtProvider jwtProvider);
+    public abstract void setWidgetJwtProvider(JwtProvider jwtProvider);
 
     /**
      * Returns instance of {@link JwtProvider}
@@ -295,7 +254,7 @@ public abstract class InAppChat {
      * @see JwtProvider
      */
     @Nullable
-    public abstract org.infobip.mobile.messaging.chat.core.JwtProvider getWidgetJwtProvider();
+    public abstract JwtProvider getWidgetJwtProvider();
 
     /**
      * Navigates to THREAD_LIST view in multithread widget if in-app chat is shown as Fragment.
