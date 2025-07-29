@@ -53,7 +53,6 @@ import java.util.List;
  * @see Builder#withoutCarrierInfo()
  * @see Builder#withoutSystemInfo()
  * @see Builder#withJwtSupplier(JwtSupplier)
- *
  * @since 29.02.2016.
  */
 public abstract class MobileMessaging {
@@ -546,7 +545,6 @@ public abstract class MobileMessaging {
      * @see Builder#withoutMarkingSeenOnNotificationTap()
      * @see Builder#withFirebaseOptions(FirebaseOptions)
      * @see Builder#withJwtSupplier(JwtSupplier)
-     *
      * @since 29.02.2016.
      */
     @SuppressWarnings({"unused", "WeakerAccess"})
@@ -572,6 +570,7 @@ public abstract class MobileMessaging {
         private FirebaseOptions firebaseOptions = null;
         private Cryptor oldCryptor = null;
         private JwtSupplier jwtSupplier = null;
+        private boolean bannerForegroundNotifications = false;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -913,7 +912,7 @@ public abstract class MobileMessaging {
 
         /**
          * It will not store any {@link Installation} data on device.
-         * */
+         */
         public Builder withoutStoringInstallationData() {
             this.shouldSaveInstallationData = false;
             return this;
@@ -992,6 +991,14 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Sets default foreground notification behaviour to always show as BANNER.
+         */
+        public Builder withBannerForegroundNotifications() {
+            this.bannerForegroundNotifications = true;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -1023,6 +1030,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setAllowUntrustedSSLOnError(application, allowUntrustedSSLOnError);
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
             MobileMessagingCore.setCustomNotificationChannel(application, channelId, channelName, notificationAudio);
+            MobileMessagingCore.setBannerForegroundNotifications(application, bannerForegroundNotifications);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)

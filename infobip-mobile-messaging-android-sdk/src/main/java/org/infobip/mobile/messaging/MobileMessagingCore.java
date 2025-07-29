@@ -1460,6 +1460,10 @@ public class MobileMessagingCore
         PreferenceHelper.saveUsePrivateSharedPrefs(context, usePrivateSharedPrefs);
     }
 
+    public static void setBannerForegroundNotifications(Context context, boolean bannerForegroundNotifications) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.BANNER_FOREGROUND_NOTIFICATIONS, bannerForegroundNotifications);
+    }
+
     static boolean shouldSaveApplicationCode(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK.getKey(), true);
     }

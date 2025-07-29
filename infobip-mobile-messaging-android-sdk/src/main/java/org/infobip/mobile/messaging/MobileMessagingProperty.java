@@ -72,6 +72,7 @@ public enum MobileMessagingProperty {
     NOTIFICATION_CHANNEL_ID("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_ID", null),
     NOTIFICATION_CHANNEL_NAME("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_NAME", null),
     NOTIFICATION_CHANNEL_AUDIO("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_AUDIO", null),
+    BANNER_FOREGROUND_NOTIFICATIONS("org.infobip.mobile.messaging.infobip.BANNER_FOREGROUND_NOTIFICATIONS", false),
     // END
 
     // START: privacy settings prefs

@@ -395,7 +395,8 @@ public class BaseNotificationHandler {
 
         // 1) always display in background
         // 2) display in foreground when configured in message
-        return ActivityLifecycleMonitor.isBackground() || message.getInAppStyle() == Message.InAppStyle.BANNER;
+        // 3) with banner in foreground
+        return ActivityLifecycleMonitor.isBackground() || message.getInAppStyle() == Message.InAppStyle.BANNER || notificationSettings.areBannerForegroundNotificationsEnabled();
     }
 
     private ContentIntentWrapper activityStarterWrapper(Context context) {

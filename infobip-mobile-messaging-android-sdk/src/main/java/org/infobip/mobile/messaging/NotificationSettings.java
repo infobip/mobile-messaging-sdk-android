@@ -159,6 +159,10 @@ public class NotificationSettings {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.MODAL_IN_APP_NOTIFICATIONS_ENABLED);
     }
 
+    public boolean areBannerForegroundNotificationsEnabled() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.BANNER_FOREGROUND_NOTIFICATIONS);
+    }
+
     /**
      * The {@link NotificationSettings} builder class.
      *
