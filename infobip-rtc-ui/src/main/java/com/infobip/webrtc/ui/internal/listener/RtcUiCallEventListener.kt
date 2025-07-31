@@ -7,6 +7,7 @@ import com.infobip.webrtc.sdk.api.event.call.CallRecordingStartedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceLeftEvent
@@ -26,6 +27,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantRoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
@@ -36,6 +38,7 @@ import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
 import com.infobip.webrtc.sdk.api.event.call.RemoteDisconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.RemoteReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.listener.ApplicationCallEventListener
@@ -51,7 +54,7 @@ internal interface RtcUiCallEventListener {
 
     fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?)
     fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?)
-    fun onCameraVideoRemoved()
+    fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?)
     fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?)
     fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?)
 
@@ -88,6 +91,9 @@ internal interface RtcUiCallEventListener {
     fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?)
     fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?)
     fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?)
+
+    fun onRoleChanged(roleChangedEvent: RoleChangedEvent?)
+    fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?)
 }
 
 internal fun RtcUiCallEventListener.toWebRtcCallEventListener(): WebrtcCallEventListener {
@@ -116,8 +122,8 @@ internal fun RtcUiCallEventListener.toWebRtcCallEventListener(): WebrtcCallEvent
             this@toWebRtcCallEventListener.onCameraVideoUpdated(cameraVideoUpdatedEvent)
         }
 
-        override fun onCameraVideoRemoved() {
-            this@toWebRtcCallEventListener.onCameraVideoRemoved()
+        override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {
+            this@toWebRtcCallEventListener.onCameraVideoRemoved(cameraVideoRemovedEvent)
         }
 
         override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
@@ -208,8 +214,8 @@ internal fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEve
             this@toAppCallEventListener.onCameraVideoUpdated(cameraVideoUpdatedEvent)
         }
 
-        override fun onCameraVideoRemoved() {
-            this@toAppCallEventListener.onCameraVideoRemoved()
+        override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {
+            this@toAppCallEventListener.onCameraVideoRemoved(cameraVideoRemovedEvent)
         }
 
         override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
@@ -326,6 +332,14 @@ internal fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEve
 
         override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
             this@toAppCallEventListener.onReconnected(reconnectedEvent)
+        }
+
+        override fun onRoleChanged(roleChangedEvent: RoleChangedEvent?) {
+            this@toAppCallEventListener.onRoleChanged(roleChangedEvent)
+        }
+
+        override fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?) {
+            this@toAppCallEventListener.onParticipantRoleChanged(participantRoleChangedEvent)
         }
     }
 }

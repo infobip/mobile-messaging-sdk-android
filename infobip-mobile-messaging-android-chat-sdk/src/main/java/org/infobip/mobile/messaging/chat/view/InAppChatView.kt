@@ -721,8 +721,6 @@ class InAppChatView @JvmOverloads constructor(
                 if (errorCode == CHAT_SERVICE_ERROR || errorCode == CHAT_WIDGET_NOT_FOUND) {
                     inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, mobileMessagingError.message))
                 }
-            } else if (action == Event.REGISTRATION_CREATED.key) {
-                syncInAppChatConfigIfNeeded()
             }
         }
     }

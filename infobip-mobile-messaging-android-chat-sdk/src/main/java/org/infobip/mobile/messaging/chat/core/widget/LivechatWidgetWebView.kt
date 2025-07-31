@@ -49,7 +49,6 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
             cacheMode = LOAD_NO_CACHE
         }
         isClickable = true
-        webChromeClient = LivechatWidgetWebChromeClient(instanceId)
         isFocusable = true
         isFocusableInTouchMode = true
     }
@@ -58,6 +57,7 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
         webViewManager: LivechatWidgetWebViewManager,
         coroutineScope: CoroutineScope
     ) {
+        webChromeClient = LivechatWidgetWebChromeClient(instanceId)
         webViewClient = LivechatWidgetWebViewClient(webViewManager, instanceId)
         addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, instanceId, coroutineScope), LivechatWidgetJsInterface.name)
         livechatWidgetClient = LivechatWidgetClientImpl(this, instanceId, coroutineScope)

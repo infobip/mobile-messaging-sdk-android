@@ -38,7 +38,6 @@ android {
             storeFile file("${property(project, 'signingKeystore', 'KEYSTORE')}")
             storePassword "${property(project, 'signingKeystorePassword', 'KEYSTORE_PASSWORD')}"
             keyAlias "alias_name"
-            keyPassword "${property(project, 'signingKeystorePassword', 'KEYSTORE_PASSWORD')}"
             keyPassword "${project.hasProperty('signingKeystorePassword') ? project['signingKeystorePassword'] : System.getenv('KEYSTORE_PASSWORD')}"
         }
     }

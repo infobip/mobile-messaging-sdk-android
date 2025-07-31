@@ -26,6 +26,7 @@ import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
@@ -278,7 +279,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
                 viewModel.updateState { copy(localVideoTrack = cameraVideoUpdatedEvent?.track) }
             }
 
-            override fun onCameraVideoRemoved() {
+            override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {
                 viewModel.emitLocalTrackToRemove()
                 viewModel.updateState { copy(localVideoTrack = null) }
             }

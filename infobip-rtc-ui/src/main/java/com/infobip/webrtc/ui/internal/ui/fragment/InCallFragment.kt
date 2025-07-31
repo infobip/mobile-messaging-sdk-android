@@ -78,7 +78,7 @@ class InCallFragment : Fragment() {
 
         fun pipActionIntent(
             context: Context,
-            pipAction: Int
+            pipAction: Int,
         ): Intent {
             return Intent(ACTION_PIP).apply {
                 setPackage(context.packageName)
@@ -89,7 +89,7 @@ class InCallFragment : Fragment() {
 
     private fun <T> Flow<T>.launchWithLifecycle(
         lifecycle: Lifecycle = viewLifecycleOwner.lifecycle,
-        minActiveState: Lifecycle.State = Lifecycle.State.STARTED
+        minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     ) = flowWithLifecycle(lifecycle, minActiveState).launchIn(lifecycle.coroutineScope)
 
     private var _binding: FragmentInCallBinding? = null
@@ -126,7 +126,7 @@ class InCallFragment : Fragment() {
                         delay(20)
                         counter++
                     }
-                    if (ScreenShareService.isRunning){
+                    if (ScreenShareService.isRunning) {
                         Log.d(TAG, "Starting screen sharing")
                         viewModel.shareScreen(ScreenCapturer(result.resultCode, result.data))
                             .onSuccess {
@@ -171,7 +171,7 @@ class InCallFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return FragmentInCallBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
@@ -673,20 +673,11 @@ class InCallFragment : Fragment() {
         val context = requireContext()
         val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as? AppOpsManager?
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                appOps?.unsafeCheckOpNoThrow(
-                    AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
-                    android.os.Process.myUid(),
-                    context.packageName
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                appOps?.checkOpNoThrow(
-                    AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
-                    android.os.Process.myUid(),
-                    context.packageName
-                )
-            }
+            val mode = appOps?.checkOpNoThrow(
+                AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
+                android.os.Process.myUid(),
+                context.packageName
+            )
             mode == AppOpsManager.MODE_ALLOWED
         } else {
             false

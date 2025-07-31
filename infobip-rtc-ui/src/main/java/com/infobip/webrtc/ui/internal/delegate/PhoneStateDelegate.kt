@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.infobip.webrtc.ui.internal.delegate
 
 import android.Manifest

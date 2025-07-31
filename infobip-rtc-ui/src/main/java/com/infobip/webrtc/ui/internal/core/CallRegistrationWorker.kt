@@ -1,12 +1,12 @@
 package com.infobip.webrtc.ui.internal.core
 
-import android.annotation.TargetApi
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.BackoffPolicy
 import androidx.work.CoroutineWorker
@@ -38,7 +38,6 @@ internal class CallRegistrationWorker(
         private const val ARG_IDENTITY: String = "com.infobip.webrtc.CallRegistrationWorker.IDENTITY"
         private const val ARG_DISABLE_PREVIOUS_IDENTITY: String = "com.infobip.webrtc.CallRegistrationWorker.ARG_DISABLE_PREVIOUS_IDENTITY"
         private const val MAX_ATTEMPT_COUNT: Int = 3
-        private const val TAG = "CallRegistrationWorker"
         private const val CALL_REGISTRATION_SERVICE_CHANNEL_ID = "com.infobip.webrtc.CallRegistrationWorker.CALL_REGISTRATION_SERVICE_CHANNEL_ID"
         private const val NOTIFICATION_ID = 2001
 
@@ -152,7 +151,7 @@ internal class CallRegistrationWorker(
         return builder.build()
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(
         channelId: String,
         name: String

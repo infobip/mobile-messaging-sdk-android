@@ -53,7 +53,7 @@ internal class InAppChatSynchronizer(
         }
         val syncResult: Result<WidgetInfo, MobileMessagingError>? = sessionStorage.lcWidgetConfigSyncResult
         val isChatActivated = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED)
-        if (isChatActivated && (syncResult == null || !syncResult.isSuccess())) {
+        if (isChatActivated && (syncResult == null || syncResult.data == null)) {
             isSyncInProgress.set(true)
             MobileMessagingLogger.d(TAG, "In-app chat sync started from $instanceId")
             val syncAction = {

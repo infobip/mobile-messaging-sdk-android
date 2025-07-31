@@ -36,7 +36,7 @@ android {
         // https://issuetracker.google.com/issues/154275579
         buildConfigField "String", "VERSION_NAME", "\"$versionName\""
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "proguard-rules.pro"
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
     buildFeatures {
@@ -86,7 +86,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.10.1"
     implementation "com.google.android.material:material:$mm_materialVersion"
 
-    api ("com.infobip:infobip-rtc:2.5.8") {
+    api ("com.infobip:infobip-rtc:2.5.19") {
         transitive = true
     }
 

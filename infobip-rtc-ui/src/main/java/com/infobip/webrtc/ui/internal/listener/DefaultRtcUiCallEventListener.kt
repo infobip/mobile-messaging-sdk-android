@@ -7,6 +7,7 @@ import com.infobip.webrtc.sdk.api.event.call.CallRecordingStartedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
+import com.infobip.webrtc.sdk.api.event.call.CameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.ConferenceLeftEvent
@@ -25,6 +26,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantRoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
@@ -33,6 +35,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
+import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
@@ -52,7 +55,7 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
 
     override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {}
 
-    override fun onCameraVideoRemoved() {}
+    override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {}
 
     override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {}
 
@@ -111,4 +114,8 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {}
 
     override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
+
+    override fun onRoleChanged(roleChangedEvent: RoleChangedEvent?) {}
+
+    override fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?) {}
 }

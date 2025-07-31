@@ -14,7 +14,7 @@ sealed class InCallButton(
 ) {
     abstract val id: Int
 
-    internal object HangUp : InCallButton(
+    internal data object HangUp : InCallButton(
         R.string.mm_hangup,
         Injector.cache.icons?.endCall ?: R.drawable.ic_endcall,
         null

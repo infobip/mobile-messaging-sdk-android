@@ -60,22 +60,22 @@ internal class LivechatRegistrationChecker(
                 MobileMessagingLogger.v("CHECK LIVECHAT REGISTRATION >>>")
                 val pushRegIg = pushRegistrationId ?: mmCore.pushRegistrationId
                 require(pushRegIg?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing pushRegistrationId argument." }
-                val destinations: Array<out LivechatDestination>? = mobileApiAppInstance.getLivechatContactInformation(pushRegIg)?.getLiveChatDestinations()
+                val destinations: Array<out LivechatDestination>? = mobileApiAppInstance.getLivechatContactInformation(pushRegIg)?.liveChatDestinations
                 return when (destinations?.size) {
                     null, 0 -> {
                         MobileMessagingLogger.d("Livechat contact information array is null or empty.")
                         null
                     }
-                    1 -> destinations.first().getRegistrationId()
+                    1 -> destinations.first().registrationId
                     else -> {
                         val wId = widgetId ?: propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID)
                         require(wId?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing widgetId argument." }
-                        val widget = destinations.firstOrNull { it.getWidgetId() == wId }
+                        val widget = destinations.firstOrNull { it.widgetId == wId }
                         if (widget == null) {
                             MobileMessagingLogger.d(TAG,"Livechat contact information for widget id = $wId does not exits.")
                             null
                         } else {
-                            widget.getRegistrationId()
+                            widget.registrationId
                         }
                     }
                 }
