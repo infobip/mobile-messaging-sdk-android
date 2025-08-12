@@ -8,13 +8,14 @@ import android.content.res.Resources.Theme
 import android.content.res.TypedArray
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.util.TypedValue
 import android.view.View
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -25,7 +26,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.toColorInt
-import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.ViewGroupCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 
@@ -136,7 +140,7 @@ internal fun Theme?.isThemeAttributePresent(attr: Int): Boolean {
 internal fun Theme?.isAttributePresent(
     attr: Int,
     @AttrRes styleAttr: Int? = null,
-    @StyleableRes styleable: IntArray? = null
+    @StyleableRes styleable: IntArray? = null,
 ): Boolean {
     return this?.let {
         if (styleAttr != null && styleable != null) { //style attr
@@ -179,49 +183,60 @@ internal fun Theme.resolveThemeColor(resId: Int): Int? {
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimary: Int?
-    get() = runCatching { this.getPrimaryColor().toColorInt() }.getOrNull()
+    get() = runCatching { this.primaryColor.toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorBackground: Int?
-    get() = runCatching { this.getBackgroundColor().toColorInt() }.getOrNull()
+    get() = runCatching { this.backgroundColor.toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimaryText: Int?
-    get() = runCatching { this.getPrimaryTextColor().toColorInt() }.getOrNull()
+    get() = runCatching { this.primaryTextColor.toColorInt() }.getOrNull()
 
 @get:ColorInt
 internal val WidgetInfo.colorPrimaryDark: Int?
     get() = colorPrimary?.let { ColorUtils.blendARGB(it, Color.BLACK, 0.2f) }
 
-internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
-    if (color != null) {
-        this?.window?.let { w ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) { // Android 15+
-                w.decorView.setOnApplyWindowInsetsListener { view, insets ->
-                    view.setBackgroundColor(color)
-                    insets
-                }
-            } else {
-                // For Android 14 and below
-                w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-                w.statusBarColor = color
-            }
+internal fun Activity.applyWindowInsets() {
+    window?.let { window ->
+        val decor = window.decorView
+        ViewGroupCompat.installCompatInsetsDispatch(decor)
+        ViewCompat.setOnApplyWindowInsetsListener(decor) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            view.updatePadding(
+                left = insets.left,
+                top = insets.top,
+                right = insets.right,
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
         }
+        decor.post { ViewCompat.requestApplyInsets(decor) }
     }
 }
 
-internal fun Activity?.setLightStatusBarMode(isLightStatusBar: Boolean) {
-    this?.window?.let {
-        WindowInsetsControllerCompat(it, it.decorView).isAppearanceLightStatusBars =
-            isLightStatusBar
+internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
+    if (color != null) {
+        this?.window?.decorView?.rootView?.setBackgroundColor(color)
     }
+}
+
+internal fun ComponentActivity?.setSystemBarIconsColor(lightIcons: Boolean) {
+    val systemBarStyle = if (lightIcons) {
+        SystemBarStyle.dark(Color.TRANSPARENT)
+    } else {
+        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+    }
+    this?.enableEdgeToEdge(
+        statusBarStyle = systemBarStyle,
+        navigationBarStyle = systemBarStyle
+    )
 }
 
 internal fun TypedArray.resolveStringWithResId(
     context: Context,
     @StyleableRes stringAttr: Int,
-    defValue: Int? = null
+    defValue: Int? = null,
 ): Pair<Int?, String?> {
     var value: String? = getString(stringAttr)
     var resource: Int? = getResourceId(stringAttr, 0).takeIfDefined()

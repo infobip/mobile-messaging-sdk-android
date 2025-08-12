@@ -1,7 +1,7 @@
 buildscript {
     //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
     ext.mm_kotlinVersion = "2.0.21"
-    ext.mm_gradlePluginVersion = '8.9.0'
+    ext.mm_gradlePluginVersion = '8.9.1'
     ext.mm_desugarJdkVersion = "2.1.3"
 
     repositories {
@@ -33,7 +33,7 @@ ext {
     mm_constraintLayoutVersion = "2.1.4"
     mm_appCompatVersion = "1.7.0"
     mm_materialVersion = "1.12.0"
-    mm_coreKtxVersion = "1.10.1"
+    mm_coreKtxVersion = "1.16.0"
     mm_lifecycleVersion = "2.5.1"
     mm_junitVersion = "4.13.2"
     mm_androidJunitVersion = "1.2.1"

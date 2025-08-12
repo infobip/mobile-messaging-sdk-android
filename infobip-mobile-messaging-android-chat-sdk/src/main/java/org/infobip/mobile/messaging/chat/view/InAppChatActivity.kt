@@ -8,11 +8,16 @@ import androidx.appcompat.app.AppCompatActivity
 import org.infobip.mobile.messaging.BroadcastParameter
 import org.infobip.mobile.messaging.Message
 import org.infobip.mobile.messaging.OpenLivechatAction
+import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
 import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.utils.applyInAppChatLanguage
+import org.infobip.mobile.messaging.chat.utils.applyWindowInsets
+import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.setSystemBarIconsColor
 import org.infobip.mobile.messaging.chat.view.InAppChatThemeResolver.getChatViewTheme
+import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
@@ -48,6 +53,7 @@ class InAppChatActivity : AppCompatActivity() {
         setTheme(getChatViewTheme(this))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ib_activity_chat)
+        applyWindowInsets()
         val fragment = getInAppChatFragment()
         fragment.eventsListener = getEventsListener()
         runCatching {
@@ -75,6 +81,13 @@ class InAppChatActivity : AppCompatActivity() {
 
             override fun onExitChatPressed() {
                 this@InAppChatActivity.finish()
+            }
+
+            override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
+                super.onChatWidgetInfoUpdated(widgetInfo)
+                val style = StyleFactory.create(this@InAppChatActivity, widgetInfo = widgetInfo).chatToolbarStyle()
+                setStatusBarColor(style.statusBarBackgroundColor)
+                setSystemBarIconsColor(style.lightStatusBarIcons)
             }
 
         }

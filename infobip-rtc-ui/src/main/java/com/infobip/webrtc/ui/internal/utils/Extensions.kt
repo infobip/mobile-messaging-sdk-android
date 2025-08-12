@@ -2,6 +2,7 @@ package com.infobip.webrtc.ui.internal.utils
 
 //noinspection SuspiciousImport
 import android.R
+import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -16,6 +17,11 @@ import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.StyleableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.ViewGroupCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
@@ -181,5 +187,30 @@ internal fun <T> Flow<T>.throttleFirst(windowDuration: Long): Flow<T> = flow {
             emit(value)
             emitted = true
         }
+    }
+}
+
+internal fun Activity.applyWindowInsets() {
+    window?.let { window ->
+        val decor = window.decorView
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        ViewGroupCompat.installCompatInsetsDispatch(decor)
+        ViewCompat.setOnApplyWindowInsetsListener(decor) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
+            view.updatePadding(
+                left = insets.left,
+                top = insets.top,
+                right = insets.right,
+                bottom = insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+        decor.post { ViewCompat.requestApplyInsets(decor) }
+    }
+}
+
+internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
+    if (color != null) {
+        this?.window?.decorView?.rootView?.setBackgroundColor(color)
     }
 }

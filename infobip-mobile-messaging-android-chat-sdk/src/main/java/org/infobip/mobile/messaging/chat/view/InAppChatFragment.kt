@@ -45,12 +45,9 @@ import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.copyFileToPublicDir
 import org.infobip.mobile.messaging.chat.utils.deleteFile
-import org.infobip.mobile.messaging.chat.utils.setLightStatusBarMode
-import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
 import org.infobip.mobile.messaging.chat.utils.show
 import org.infobip.mobile.messaging.chat.view.chooser.BottomSheetChooser
 import org.infobip.mobile.messaging.chat.view.chooser.BottomSheetRow
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -614,14 +611,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun applyToolbarStyle(widgetInfo: WidgetInfo) {
         val style = StyleFactory.create(requireContext(), widgetInfo = widgetInfo).chatToolbarStyle()
         withBinding { style.apply(it.ibLcChatToolbar) }
-        (activity as? InAppChatActivity)?.applyStatusBarStyle(style)
-    }
-
-    private fun InAppChatActivity.applyStatusBarStyle(style: InAppChatToolbarStyle) {
-        if (!withToolbar)
-            return
-        setStatusBarColor(style.statusBarBackgroundColor)
-        setLightStatusBarMode(!style.lightStatusBarIcons)
     }
     //endregion
 

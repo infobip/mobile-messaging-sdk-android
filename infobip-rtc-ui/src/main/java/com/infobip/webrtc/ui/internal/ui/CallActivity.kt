@@ -55,7 +55,9 @@ import com.infobip.webrtc.ui.internal.ui.fragment.InCallFragment
 import com.infobip.webrtc.ui.internal.ui.fragment.IncomingCallFragment
 import com.infobip.webrtc.ui.internal.ui.view.CallAlert
 import com.infobip.webrtc.ui.internal.utils.applyLocale
+import com.infobip.webrtc.ui.internal.utils.applyWindowInsets
 import com.infobip.webrtc.ui.internal.utils.navigate
+import com.infobip.webrtc.ui.internal.utils.setStatusBarColor
 import com.infobip.webrtc.ui.internal.utils.throttleFirst
 import com.infobip.webrtc.ui.model.RtcUiError
 import com.infobip.webrtc.ui.view.styles.Colors
@@ -125,11 +127,13 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             colors = Injector.cache.colors ?: Colors(this, attrs),
             icons = Injector.cache.icons ?: Icons(this, attrs),
         )
+        setStatusBarColor(Injector.cache.colors?.background)
         return super.onCreateView(parent, name, context, attrs)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyWindowInsets()
         viewModel.orientation = resources.configuration.orientation
         showWhenLocked()
         viewModel.init()

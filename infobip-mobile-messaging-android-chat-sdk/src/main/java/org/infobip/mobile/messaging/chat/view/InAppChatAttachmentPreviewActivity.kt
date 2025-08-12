@@ -31,10 +31,12 @@ import org.infobip.mobile.messaging.chat.databinding.IbActivityChatAttachPreview
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.applyInAppChatLanguage
+import org.infobip.mobile.messaging.chat.utils.applyWindowInsets
 import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
 import org.infobip.mobile.messaging.chat.utils.hide
 import org.infobip.mobile.messaging.chat.utils.setProgressTint
 import org.infobip.mobile.messaging.chat.utils.setStatusBarColor
+import org.infobip.mobile.messaging.chat.utils.setSystemBarIconsColor
 import org.infobip.mobile.messaging.chat.utils.setTint
 import org.infobip.mobile.messaging.chat.utils.show
 import org.infobip.mobile.messaging.chat.utils.toColorStateList
@@ -94,6 +96,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             ContextCompat.RECEIVER_EXPORTED
         )
         setContentView(binding.root)
+        applyWindowInsets()
         initViews()
         loadPreviewPage()
     }
@@ -141,6 +144,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             style.toolbarBackgroundColor.toColorStateList() ?: Color.WHITE.toColorStateList()
         )
         setStatusBarColor(style.statusBarBackgroundColor)
+        setSystemBarIconsColor(style.lightStatusBarIcons)
     }
 
     private fun applyToolbarMenuStyle(menu: Menu?) {
