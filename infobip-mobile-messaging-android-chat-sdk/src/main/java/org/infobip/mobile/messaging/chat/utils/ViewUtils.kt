@@ -27,7 +27,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
-import androidx.core.view.ViewGroupCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
@@ -200,7 +199,8 @@ internal val WidgetInfo.colorPrimaryDark: Int?
 internal fun Activity.applyWindowInsets() {
     window?.let { window ->
         val decor = window.decorView
-        ViewGroupCompat.installCompatInsetsDispatch(decor)
+        //TODO: Uncomment it once RN plugin supports Android 15, it requires mm_coreKtxVersion = "1.16.0" and targetSdkVersion 35
+        //ViewGroupCompat.installCompatInsetsDispatch(decor)
         ViewCompat.setOnApplyWindowInsetsListener(decor) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
             view.updatePadding(

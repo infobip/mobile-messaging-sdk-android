@@ -18,7 +18,6 @@ import androidx.annotation.IdRes
 import androidx.annotation.StyleableRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.ViewGroupCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -194,7 +193,8 @@ internal fun Activity.applyWindowInsets() {
     window?.let { window ->
         val decor = window.decorView
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        ViewGroupCompat.installCompatInsetsDispatch(decor)
+        //TODO: Uncomment it once RN plugin supports Android 15, it requires mm_coreKtxVersion = "1.16.0" and targetSdkVersion 35
+        //ViewGroupCompat.installCompatInsetsDispatch(decor)
         ViewCompat.setOnApplyWindowInsetsListener(decor) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
             view.updatePadding(
