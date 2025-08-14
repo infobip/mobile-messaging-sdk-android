@@ -113,7 +113,7 @@ public enum MobileMessagingProperty {
     SHOULD_REPERSONALIZE("org.infobip.mobile.messaging.infobip.SHOULD_REPERSONALIZE", false),
 
     UNREPORTED_USER_DATA("org.infobip.mobile.messaging.infobip.UNREPORTED_USER_DATA"),
-    USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA"),
+    USER_DATA("org.infobip.mobile.messaging.infobip.USER_DATA", "", true),
     USER_INSTALLATIONS_EXPIRE_AT("org.infobip.mobile.messaging.infobip.USER_INSTALLATIONS_EXPIRE_AT"),
 
     USER_CUSTOM_EVENTS("org.infobip.mobile.messaging.infobip.USER_CUSTOM_EVENTS"),

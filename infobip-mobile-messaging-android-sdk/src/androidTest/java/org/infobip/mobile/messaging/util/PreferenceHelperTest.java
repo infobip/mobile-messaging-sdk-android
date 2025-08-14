@@ -22,28 +22,24 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
         PreferenceHelper.saveUsePrivateSharedPrefs(context, false);
 
         MobileMessagingProperty key1 = MobileMessagingProperty.APP_USER_ID;
-        MobileMessagingProperty key2 = MobileMessagingProperty.USER_DATA;
         MobileMessagingProperty key3 = MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES;
         String value = "some value";
 
         // saving to public storage
         PreferenceHelper.saveString(context, key1, value);
-        PreferenceHelper.saveString(context, key2, value);
         // saving to private storage
         PreferenceHelper.saveUsePrivateSharedPrefs(context, true);
         PreferenceHelper.saveString(context, key3, value);
 
         assertTrue(PreferenceHelper.publicPrefsContains(context, key1));
         assertEquals(value, PreferenceHelper.getPublicSharedPreferences(context).getString(key1.getKey(), null));
-        assertTrue(PreferenceHelper.publicPrefsContains(context, key2));
-        assertEquals(value, PreferenceHelper.getPublicSharedPreferences(context).getString(key2.getKey(), null));
+
         assertTrue(PreferenceHelper.contains(context, key3));
         assertEquals(value, PreferenceHelper.findString(context, key3));
 
         PreferenceHelper.getPublicSharedPreferences(context).edit().clear().apply();
 
         assertFalse(PreferenceHelper.getPublicSharedPreferences(context).contains(key1.getKey()));
-        assertFalse(PreferenceHelper.getPublicSharedPreferences(context).contains(key2.getKey()));
         assertFalse(PreferenceHelper.getPublicSharedPreferences(context).contains(key3.getKey()));
         assertTrue(PreferenceHelper.getPrivateMMSharedPreferences(context).contains(key3.getKey()));
         assertEquals(value, PreferenceHelper.getPrivateMMSharedPreferences(context).getString(key3.getKey(), null));

@@ -216,6 +216,7 @@ public class MobileMessagingCore
         }
 
         migratePrefsIfNecessary(context);
+        encryptUserDataIfNecessary();
 
         this.installationId = getUniversalInstallationId();
         this.firebaseAppProvider = firebaseAppProvider;
@@ -264,6 +265,21 @@ public class MobileMessagingCore
             } else if (userDataProperty == MobileMessagingProperty.USER_DATA) {
                 saveCustomAttributes(customAtts);
             }
+        }
+    }
+
+    /**
+     * Clearing unencrypted user data and storing it as encrypted.
+     */
+    private void encryptUserDataIfNecessary() {
+        if (!PreferenceHelper.contains(context, MobileMessagingProperty.USER_DATA.getKey())) {
+            return;
+        }
+
+        String newValue = PreferenceHelper.findString(context, MobileMessagingProperty.USER_DATA.getKey(), "");
+        if (StringUtils.isNotBlank(newValue)) {
+            PreferenceHelper.remove(context, MobileMessagingProperty.USER_DATA.getKey());
+            PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, newValue);
         }
     }
 
