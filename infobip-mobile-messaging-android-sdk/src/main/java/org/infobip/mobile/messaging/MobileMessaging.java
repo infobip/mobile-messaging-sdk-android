@@ -23,6 +23,7 @@ import org.infobip.mobile.messaging.util.CryptorImpl;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -571,6 +572,7 @@ public abstract class MobileMessaging {
         private Cryptor oldCryptor = null;
         private JwtSupplier jwtSupplier = null;
         private boolean bannerForegroundNotifications = false;
+        private HashSet<String> trustedDomains = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -999,6 +1001,20 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Sets the HashSet of allowed domains for URLs that can be opened in webviews or external browsers.
+         * Only URLs matching the specified trusted domains will be allowed to open. URLs from untrusted domains will be blocked.
+         * If no trusted domains are configured, all URLs will be allowed (default behavior).
+         * Each domain should be in format "example.com" or "subdomain.example.com".
+         *
+         * @param trustedDomains the list of allowed domains
+         * @return {@link Builder}
+         */
+        public Builder withTrustedDomains(HashSet<String> trustedDomains) {
+            this.trustedDomains = trustedDomains;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -1035,7 +1051,8 @@ public abstract class MobileMessaging {
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
                     .withFirebaseOptions(firebaseOptions)
-                    .withJwtSupplier(jwtSupplier);
+                    .withJwtSupplier(jwtSupplier)
+                    .withTrustedDomains(trustedDomains);
 
             if (oldCryptor != null) {
                 mobileMessagingCoreBuilder.withCryptorMigration(oldCryptor);

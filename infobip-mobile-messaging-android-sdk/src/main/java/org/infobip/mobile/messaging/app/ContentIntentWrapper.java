@@ -81,4 +81,9 @@ public class ContentIntentWrapper {
         if (intent.resolveActivity(context.getPackageManager()) == null) return null;
         return intent;
     }
+
+    @Nullable
+    public Intent createBrowserIntent(@NonNull Message message) {
+        return createBrowserIntent(message.getBrowserUrl());
+    }
 }

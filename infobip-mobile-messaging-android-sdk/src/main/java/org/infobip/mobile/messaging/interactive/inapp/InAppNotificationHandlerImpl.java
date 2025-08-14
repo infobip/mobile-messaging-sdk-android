@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -31,9 +34,6 @@ import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroad
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 /**
  * @author sslavin
@@ -194,7 +194,7 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
 
     @Override
     public void notificationPressedFor(@NonNull InAppWebView inAppView, @NonNull Message message, @NonNull NotificationAction action, Context context) {
-        Intent callbackIntent = null;
+        Intent callbackIntent;
         if (StringUtils.isNotBlank(message.getWebViewUrl())) {
             callbackIntent = contentIntentWrapper(context).createWebViewContentIntent(message);
         } else if (StringUtils.isNotBlank(message.getBrowserUrl())) {

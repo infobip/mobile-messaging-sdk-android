@@ -113,7 +113,7 @@ public class BaseNotificationHandlerTest extends MobileMessagingTestCase {
 //    }
 
     @Test
-    public void shouldSetHightPriorityForMessageWithBanner() {
+    public void shouldSetHighPriorityForMessageWithBanner() {
 
         // Given
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.DISPLAY_NOTIFICATION_ENABLED, true);

@@ -179,6 +179,7 @@ public class MobileMessagingCore
     private final PostNotificationsPermissionRequester postNotificationsPermissionRequester;
     private InAppClickReporter inAppClickReporter;
     private volatile JwtSupplier jwtSupplier;
+    private HashSet<String> trustedDomains;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
@@ -1132,6 +1133,15 @@ public class MobileMessagingCore
     public String getJwtFromSupplier() {
         if (jwtSupplier == null) return null;
         return jwtSupplier.getJwt();
+    }
+
+    public void setTrustedDomains(HashSet<String> trustedDomains) {
+        this.trustedDomains = trustedDomains;
+    }
+
+    public HashSet<String> getTrustedDomains() {
+        if (trustedDomains == null) return null;
+        return trustedDomains;
     }
 
     private boolean isDisplayNotificationEnabled() {
@@ -2207,6 +2217,7 @@ public class MobileMessagingCore
         private FirebaseOptions firebaseOptions;
         private Cryptor oldCryptor = null;
         private JwtSupplier jwtSupplier = null;
+        private HashSet<String> trustedDomains = null;
 
         public Builder(Application application) {
             if (null == application) {
@@ -2323,6 +2334,20 @@ public class MobileMessagingCore
         }
 
         /**
+         * Sets the HashSet of allowed domains for URLs that can be opened in webviews or external browsers.
+         * Only URLs matching the specified trusted domains will be allowed to open. URLs from untrusted domains will be blocked.
+         * If no trusted domains are configured, all URLs will be allowed (default behavior).
+         * Each domain should be in format "example.com" or "subdomain.example.com".
+         *
+         * @param trustedDomains the list of allowed domains
+         * @return {@link MobileMessaging.Builder}
+         */
+        public Builder withTrustedDomains(HashSet<String> trustedDomains) {
+            this.trustedDomains = trustedDomains;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessagingCore</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -2342,6 +2367,7 @@ public class MobileMessagingCore
             mobileMessagingCore.mobileNetworkStateListener = new MobileNetworkStateListener(application);
             mobileMessagingCore.playServicesSupport = new PlayServicesSupport();
             mobileMessagingCore.setJwtSupplier(jwtSupplier);
+            mobileMessagingCore.setTrustedDomains(trustedDomains);
 
             // do the force invalidation of old push cloud tokens
             boolean shouldResetToken = mobileMessagingCore.isPushServiceTypeChanged() && mobileMessagingCore.getPushRegistrationId() != null;
