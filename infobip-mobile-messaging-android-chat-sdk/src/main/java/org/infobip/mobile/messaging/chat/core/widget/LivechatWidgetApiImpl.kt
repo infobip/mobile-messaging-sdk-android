@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.infobip.mobile.messaging.MobileMessagingCore
 import org.infobip.mobile.messaging.chat.InAppChat
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.JwtProvider
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi.ExecutionListener
@@ -122,32 +121,6 @@ internal class LivechatWidgetApiImpl(
     override fun resumeConnection() {
         executeApiCall(LivechatWidgetMethod.resumeConnection) { listener ->
             resumeConnection(listener)
-        }
-    }
-
-    @Deprecated(
-        message = "Use send(message: MessagePayload) with MessagePayload.Basic() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
-    )
-    override fun sendMessage(message: String?, attachment: InAppChatMobileAttachment?) {
-        if (message?.isNotBlank() == true) {
-            send(MessagePayload.Basic(message, attachment))
-        } else if (attachment != null) {
-            send(MessagePayload.Basic(null, attachment))
-        } else {
-            propagateEvent { onMessageSent(LivechatWidgetResult.Error("Could not send message. Both message and attachment are null or empty.")) }
-        }
-    }
-
-    @Deprecated(
-        message = "Use send(message: MessagePayload) with MessagePayload.Draft() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
-    )
-    override fun sendDraft(draft: String) {
-        if (draft.isNotBlank()) {
-            send(MessagePayload.Draft(draft))
-        } else {
-            propagateEvent { onDraftSent(LivechatWidgetResult.Error("Could not send draft. Draft is null or empty.")) }
         }
     }
 

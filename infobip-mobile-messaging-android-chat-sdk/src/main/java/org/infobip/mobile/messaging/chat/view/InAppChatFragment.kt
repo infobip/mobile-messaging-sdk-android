@@ -13,8 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.ActionBar
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -25,9 +25,7 @@ import kotlinx.coroutines.withContext
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.InAppChat
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
-import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.core.SessionStorage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
@@ -51,29 +49,8 @@ import org.infobip.mobile.messaging.chat.view.chooser.BottomSheetRow
 import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
-import java.util.Locale
 
 class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.ResultListener {
-
-    /**
-     * Implement InAppChatActionBarProvider in your Activity, where InAppChatWebViewFragment will be added.
-     */
-    interface InAppChatActionBarProvider {
-        /**
-         * Provide original ActionBar, to give in-app chat ability to hide it and use it's own ActionBar.
-         * It will be hidden when in-app Chat fragment shown and returned back, when in-app Chat fragment hidden.
-         */
-        val originalSupportActionBar: ActionBar?
-
-        /**
-         * Implement back button behaviour.
-         * <br>
-         * Call following method with corresponding parameter:
-         * <br>
-         * [InAppChat.hideInAppChatFragment]
-         */
-        fun onInAppChatBackPressed()
-    }
 
     /**
      * [InAppChatFragment] events listener propagates chat related events.
@@ -96,27 +73,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
          * @param caption attachment caption
          * @return true if attachment preview has been handled, false otherwise
          */
-        @Deprecated("Use onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?) instead")
-        fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean
-
-        /**
-         * Called when attachment from chat has been interacted.
-         *
-         * It allows you to handle attachment preview on your own. Return true if you handled attachment preview.
-         * Return false to let [InAppChatFragment] handle attachment preview.
-         *
-         * @param url attachment url
-         * @param type attachment type
-         * @param caption attachment caption
-         * @return true if attachment preview has been handled, false otherwise
-         */
         fun onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean
 
         /**
          * Called by default InAppChat's Toolbar back navigation logic to exit chat. You are supposed to hide/remove [InAppChatFragment].
-         *
-         * If you showed [InAppChatFragment] using [InAppChat.showInAppChatFragment] use [InAppChat.hideInAppChatFragment] to hide InAppChatFragment.
-         * If you added [InAppChatFragment] using custom logic, it is up to you to get rid of [InAppChatFragment].
          */
         fun onExitChatPressed()
     }
@@ -226,15 +186,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         }
 
     /**
-     * Allows another way how to inject InAppChatActionBarProvider to InAppChatFragment.
-     * It is used in React Native plugin to handle multithread navigation.
-     */
-    var inAppChatActionBarProvider: InAppChatActionBarProvider? = null
-        get() {
-            return field ?: (requireActivity() as? InAppChatActionBarProvider)
-        }
-
-    /**
      * Allows to stop chat connection when fragment is hidden.
      * Chat is reconnected automatically once fragment is shown again.
      * Default value is false.
@@ -266,7 +217,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val contextThemeWrapper = ContextThemeWrapper(
             requireContext(),
@@ -343,39 +294,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
     //region Public
     /**
-     * Sends a message with optional [InAppChatMobileAttachment].
-     *
-     * Does nothing if [InAppChatFragment] not attached.
-     *
-     * @param message message to be send, max length allowed is 4096 characters
-     * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
-     */
-    @JvmOverloads
-    @Throws(IllegalArgumentException::class)
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
-    )
-    fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
-        send(MessagePayload.Basic(message, attachment))
-    }
-
-    /**
-     * Sends a draft message.
-     *
-     * Does nothing if [InAppChatFragment] not attached.
-     *
-     * @param draft message
-     */
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
-    )
-    fun sendChatMessageDraft(draft: String) {
-        send(MessagePayload.Draft(draft))
-    }
-
-    /**
      * Sends a message defined by [payload] data with optional [threadId].
      *
      * You can observe result by [InAppChatFragment.EventsListener.onChatSent] event.
@@ -386,25 +304,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     @JvmOverloads
     fun send(payload: MessagePayload, threadId: String? = null) {
         withBinding { it.ibLcChat.send(payload, threadId) }
-    }
-
-    /**
-     * Set contextual data of the livechat widget.
-     *
-     * If the function is called when [InAppChatFragment] is attached and the chat is loaded,
-     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
-     *
-     * Every function invocation will overwrite the previous contextual data.
-     *
-     *
-     * @param data contextual data in the form of JSON string
-     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
-     * @see [InAppChatFragment.EventsListener.onChatLoaded] to detect if chat is loaded
-     */
-    @Deprecated("Use sendContextualData(data: String, flag: MultithreadStrategy) instead")
-    fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
-        val flag = if (allMultiThreadStrategy) MultithreadStrategy.ALL else MultithreadStrategy.ACTIVE
-        sendContextualData(data, flag)
     }
 
     /**
@@ -488,28 +387,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     /**
      * Executes back navigation. In multithread widget it handles internal navigation
      * from [LivechatWidgetView.THREAD] back to [LivechatWidgetView.THREAD_LIST] using
-     * [InAppChatFragment.showThreadList], otherwise it triggers [InAppChatFragment.EventsListener.onExitChatPressed] event
-     * and [InAppChatFragment.InAppChatActionBarProvider.onInAppChatBackPressed].
+     * [InAppChatFragment.showThreadList], otherwise it triggers [InAppChatFragment.EventsListener.onExitChatPressed] event.
      *
      * It is default InAppChatFragment back navigation logic.
      */
     fun navigateBackOrCloseChat() {
         navigateBack()
-    }
-
-    /**
-     * Set an in-app chat's language
-     *
-     * Does nothing if [InAppChatFragment] not attached.
-     *
-     * @param locale locale's language is used by livechat widget and native parts
-     */
-    @Deprecated(
-        "Use setLanguage(LivechatWidgetLanguage) instead",
-        ReplaceWith("setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(locale))", "org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage")
-    )
-    fun setLanguage(locale: Locale) {
-        setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(locale))
     }
 
     /**
@@ -578,8 +461,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             binding.ibLcAppbar.show(withToolbar)
             binding.ibLcAppbar.invalidate()
             if (withToolbar) {
-                if (inAppChatActionBarProvider?.originalSupportActionBar?.isShowing == true)
-                    inAppChatActionBarProvider?.originalSupportActionBar?.hide()
                 binding.ibLcChatToolbar.setNavigationOnClickListener { navigateBack() }
             } else {
                 binding.ibLcChatToolbar.setNavigationOnClickListener(null)
@@ -601,10 +482,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     }
 
     private fun closeChatPage() {
-        if (withToolbar)
-            inAppChatActionBarProvider?.originalSupportActionBar?.show()
         backPressedCallback.isEnabled = false //when InAppChat is used as Activity need to disable callback before onBackPressed() is called to avoid endless loop
-        inAppChatActionBarProvider?.onInAppChatBackPressed()
         eventsListener?.onExitChatPressed()
     }
 
@@ -618,17 +496,9 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun initChat() {
         binding.ibLcChat.eventsListener = object : InAppChatView.EventsListener {
 
-            override fun onChatLoaded(controlsEnabled: Boolean) {
-                eventsListener?.onChatLoaded(controlsEnabled)
-            }
-
             override fun onChatLoadingFinished(result: LivechatWidgetResult<Unit>) {
                 binding.ibLcChatInput.isEnabled = result.isSuccess
                 eventsListener?.onChatLoadingFinished(result)
-            }
-
-            override fun onChatDisconnected() {
-                eventsListener?.onChatDisconnected()
             }
 
             override fun onChatConnectionPaused(result: LivechatWidgetResult<Unit>) {
@@ -638,23 +508,11 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 eventsListener?.onChatConnectionPaused(result)
             }
 
-            override fun onChatReconnected() {
-                eventsListener?.onChatReconnected()
-            }
-
             override fun onChatConnectionResumed(result: LivechatWidgetResult<Unit>) {
                 if (result.isSuccess) {
                     binding.ibLcChatInput.isEnabled = true
                 }
                 eventsListener?.onChatConnectionResumed(result)
-            }
-
-            override fun onChatMessageSent(result: LivechatWidgetResult<String?>) {
-                eventsListener?.onChatMessageSent(result)
-            }
-
-            override fun onChatDraftSent(result: LivechatWidgetResult<String?>) {
-                eventsListener?.onChatDraftSent(result)
             }
 
             override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
@@ -697,16 +555,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 setChatInputVisibility(isVisible)
             }
 
-            override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-                eventsListener?.onAttachmentPreviewOpened(url, type, caption)
-            }
-
             override fun onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
                 val handled = eventsListener?.onChatAttachmentPreviewOpened(url, type, caption) ?: false
                 if (!handled) {
                     val intent: Intent
                     if (type == "DOCUMENT") {
-                        intent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) }
+                        intent = Intent(Intent.ACTION_VIEW).apply { data = url?.toUri() }
                     } else {
                         intent = InAppChatAttachmentPreviewActivity.startIntent(
                             requireContext(),
@@ -723,10 +577,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 }
             }
 
-            override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
-                eventsListener?.onChatViewChanged(widgetView)
-            }
-
             override fun onChatViewChanged(widgetView: LivechatWidgetView) {
                 this@InAppChatFragment.widgetView = widgetView
                 updateInputVisibilityByMultiThreadView(widgetView)
@@ -738,10 +588,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 updateViews(widgetInfo)
                 MobileMessagingLogger.w(TAG, "WidgetInfo updated $widgetInfo")
                 eventsListener?.onChatWidgetInfoUpdated(widgetInfo)
-            }
-
-            override fun onChatWidgetThemeChanged(widgetThemeName: String) {
-                eventsListener?.onChatWidgetThemeChanged(widgetThemeName)
             }
 
             override fun onChatRawMessageReceived(rawMessage: String) {
@@ -845,12 +691,14 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         if (isMultiThread) {
             when (widgetView) {
                 LivechatWidgetView.THREAD,
-                LivechatWidgetView.SINGLE_MODE_THREAD -> setChatInputVisibility(true)
+                LivechatWidgetView.SINGLE_MODE_THREAD,
+                    -> setChatInputVisibility(true)
 
                 LivechatWidgetView.LOADING,
                 LivechatWidgetView.THREAD_LIST,
                 LivechatWidgetView.CLOSED_THREAD,
-                LivechatWidgetView.LOADING_THREAD -> setChatInputVisibility(false)
+                LivechatWidgetView.LOADING_THREAD,
+                    -> setChatInputVisibility(false)
             }
         } else {
             setChatInputVisibility(true)
@@ -887,7 +735,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             MobileMessagingLogger.e(TAG, "Attachment picker skipped: no allowed attachment extensions are configured in the LiveChat Widget.")
             return
         }
-        val specifications: Set<AttachmentSourceSpecification> = AttachmentHelper.getAvailableSourcesSpecifications(requireContext(), allowedExtensions)
+        val specifications: Set<AttachmentSourceSpecification> = InAppChatAttachment.getAvailableSourcesSpecifications(requireContext(), allowedExtensions)
         if (specifications.isEmpty()) {
             MobileMessagingLogger.e(TAG, "Attachment picker skipped: no available attachment sources match the allowed extensions configured in the LiveChat Widget.")
             return
@@ -937,7 +785,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             runCatching {
                 withContext(Dispatchers.Default) {
-                    AttachmentHelper.createInAppChatAttachment(context, uri, widgetInfo?.attachmentConfig?.maxSize?.toInt() ?: 0)
+                    InAppChatAttachment.makeAttachment(context, uri, widgetInfo?.attachmentConfig?.maxSize?.toInt() ?: 0)
                 }
             }.onFailure {
                 MobileMessagingLogger.e(TAG, "Failed to create In-app chat attachment", it)
@@ -993,10 +841,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun InAppChatEventsListener.toFragmentEventsListener(): EventsListener {
         return object : EventsListener {
 
-            override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean {
-                return false
-            }
-
             override fun onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?): Boolean {
                 return false
             }
@@ -1004,36 +848,16 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             override fun onExitChatPressed() {
             }
 
-            override fun onChatLoaded(controlsEnabled: Boolean) {
-                this@toFragmentEventsListener.onChatLoaded(controlsEnabled)
-            }
-
             override fun onChatLoadingFinished(result: LivechatWidgetResult<Unit>) {
                 this@toFragmentEventsListener.onChatLoadingFinished(result)
-            }
-
-            override fun onChatDisconnected() {
-                this@toFragmentEventsListener.onChatDisconnected()
             }
 
             override fun onChatConnectionPaused(result: LivechatWidgetResult<Unit>) {
                 this@toFragmentEventsListener.onChatConnectionPaused(result)
             }
 
-            override fun onChatReconnected() {
-                this@toFragmentEventsListener.onChatReconnected()
-            }
-
             override fun onChatConnectionResumed(result: LivechatWidgetResult<Unit>) {
                 this@toFragmentEventsListener.onChatConnectionResumed(result)
-            }
-
-            override fun onChatMessageSent(result: LivechatWidgetResult<String?>) {
-                this@toFragmentEventsListener.onChatMessageSent(result)
-            }
-
-            override fun onChatDraftSent(result: LivechatWidgetResult<String?>) {
-                this@toFragmentEventsListener.onChatDraftSent(result)
             }
 
             override fun onChatSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {
@@ -1076,20 +900,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 this@toFragmentEventsListener.onChatControlsVisibilityChanged(isVisible)
             }
 
-            override fun onChatViewChanged(widgetView: InAppChatWidgetView) {
-                this@toFragmentEventsListener.onChatViewChanged(widgetView)
-            }
-
             override fun onChatViewChanged(widgetView: LivechatWidgetView) {
                 this@toFragmentEventsListener.onChatViewChanged(widgetView)
             }
 
             override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
                 this@toFragmentEventsListener.onChatWidgetInfoUpdated(widgetInfo)
-            }
-
-            override fun onChatWidgetThemeChanged(widgetThemeName: String) {
-                this@toFragmentEventsListener.onChatWidgetThemeChanged(widgetThemeName)
             }
 
             override fun onChatRawMessageReceived(rawMessage: String) {

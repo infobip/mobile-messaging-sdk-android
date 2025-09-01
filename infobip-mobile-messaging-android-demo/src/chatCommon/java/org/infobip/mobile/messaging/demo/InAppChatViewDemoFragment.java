@@ -12,7 +12,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
-import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
@@ -20,6 +19,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.models.MessagePayload;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import androidx.annotation.NonNull;
@@ -36,6 +36,7 @@ public class InAppChatViewDemoFragment extends Fragment {
     private InAppChatView inAppChatView;
     private Button chatNavigateBackButton;
     private Button sendButton;
+    private static final String TAG = "InAppChatViewDemo";
 
     @Nullable
     @Override
@@ -82,103 +83,68 @@ public class InAppChatViewDemoFragment extends Fragment {
         InAppChatView.EventsListener eventsListener = new InAppChatView.EventsListener() {
 
             @Override
-            public void onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) {
-                //Widget theme was applied
-            }
-
-            @Override
             public void onChatLanguageChanged(@NonNull LivechatWidgetResult<String> result) {
-                //Widget language was changed
+                MobileMessagingLogger.d(TAG, "On chat language changed: " + result);
             }
 
             @Override
             public void onChatThreadCreated(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
-                 //Thread was created
+                MobileMessagingLogger.d(TAG, "On chat thread created: " + result);
             }
 
             @Override
             public void onChatThreadListShown(@NonNull LivechatWidgetResult<Unit> result) {
-                //Thread list was shown
+                MobileMessagingLogger.d(TAG, "On chat thread list shown: " + result);
             }
 
             @Override
             public void onChatThreadShown(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
-                //Thread was shown
+                MobileMessagingLogger.d(TAG, "On chat thread shown: " + result);
             }
 
             @Override
             public void onChatActiveThreadReceived(@NonNull LivechatWidgetResult<LivechatWidgetThread> result) {
-                //Active thread was received
+                MobileMessagingLogger.d(TAG, "On chat active thread received: " + result);
             }
 
             @Override
             public void onChatThreadsReceived(@NonNull LivechatWidgetResult<LivechatWidgetThreads> result) {
-                //Threads were received
+                MobileMessagingLogger.d(TAG, "On chat threads received: " + result);
             }
 
             @Override
             public void onChatContextualDataSent(@NonNull LivechatWidgetResult<String> result) {
-                //Contextual data was sent
-            }
-
-            @Override
-            public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
-                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
-            }
-
-            @Override
-            public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
-                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
+                MobileMessagingLogger.d(TAG, "On chat contextual data sent: " + result);
             }
 
             @Override
             public void onChatSent(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
-                //Message was sent
-            }
-
-            @Override
-            public void onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) {
-                //Chat connection was resumed
-            }
-
-            @Override
-            public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
-                //Chat connection was paused
+                MobileMessagingLogger.d(TAG, "On chat sent: " + result);
             }
 
             @Override
             public void onChatLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) {
-                //Chat was loaded, if result.isSuccess() = true there was no error
-            }
-
-            @Override
-            public void onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
-                //Handle attachment preview
+                MobileMessagingLogger.d(TAG, "On chat loading finished: " + result);
             }
 
             @Override
             public void onChatRawMessageReceived(@NonNull String rawMessage) {
-                //You can use raw message for further processing on your side
+                MobileMessagingLogger.d(TAG, "On chat raw message received: " + rawMessage);
             }
 
             @Override
-            public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
-                //Deprecated, use onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) instead
+            public void onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) {
+                MobileMessagingLogger.d(TAG, "On chat widget theme changed: " + result);
             }
 
             @Override
             public void onChatWidgetInfoUpdated(@NonNull WidgetInfo widgetInfo) {
-                //Useful livechat widget information
-            }
-
-            @Override
-            public void onChatViewChanged(@NonNull InAppChatWidgetView widgetView) {
-                //Deprecated method, use onChatViewChanged(LivechatWidgetView widgetView) instead
+                MobileMessagingLogger.d(TAG, "On chat widget info updated: " + widgetInfo);
             }
 
             @Override
             public void onChatViewChanged(@NonNull LivechatWidgetView widgetView) {
-                //Handle navigation in multithread livechat widget
+                MobileMessagingLogger.d(TAG, "On chat view changed: " + widgetView);
                 switch (widgetView) {
                     case LOADING:
                     case THREAD_LIST:
@@ -207,28 +173,23 @@ public class InAppChatViewDemoFragment extends Fragment {
             }
 
             @Override
-            public void onAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
-                //Deprecated, use onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) instead
-            }
-
-            @Override
             public void onChatControlsVisibilityChanged(boolean isVisible) {
-                //Handle chat controls visibility change, you can show/hide input based on isVisible value
+                MobileMessagingLogger.d(TAG, "On chat controls visibility changed: " + isVisible);
             }
 
             @Override
-            public void onChatLoaded(boolean controlsEnabled) {
-                //Deprecated, use onChatLoadingFinished(@NonNull LivechatWidgetResult<Unit> result) instead
+            public void onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat connection resumed: " + result);
             }
 
             @Override
-            public void onChatDisconnected() {
-                //Deprecated, use onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) instead
+            public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
+                MobileMessagingLogger.d(TAG, "On chat connection paused: " + result);
             }
 
             @Override
-            public void onChatReconnected() {
-                //Deprecated, use onChatConnectionResumed(@NonNull LivechatWidgetResult<Unit> result) instead
+            public void onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
+                MobileMessagingLogger.d(TAG, "On chat attachment preview opened: url=" + url + ", type=" + type + ", caption=" + caption);
             }
         };
         inAppChatView.setEventsListener(eventsListener);

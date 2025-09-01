@@ -33,7 +33,6 @@ import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
-import org.infobip.mobile.messaging.chat.core.InAppChatWidgetView;
 import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
@@ -42,7 +41,6 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
-import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
@@ -53,12 +51,10 @@ import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -67,7 +63,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import kotlin.Unit;
 
-public class MainActivity extends AppCompatActivity implements InAppChatFragment.InAppChatActionBarProvider {
+public class MainActivity extends AppCompatActivity {
 
     private final String TAG = "DemoApp";
     private final String EXTRA_AUTH_DATA = "org.infobip.mobile.messaging.demo.MainActivity.EXTRA_AUTH_DATA";
@@ -95,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
     private TextInputEditText subjectEditText = null;
     private LinearProgressIndicator progressBar = null;
     private Button openChatActivityButton = null;
-    private Button showChatFragmentButton = null;
     private Button openChatFragmentButton = null;
     private Button openChatViewButton = null;
 
@@ -124,18 +119,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         }
     };
 
-    /* InAppChatActionBarProvider */
-    @Nullable
-    @Override
-    public ActionBar getOriginalSupportActionBar() {
-        return getSupportActionBar();
-    }
-
-    @Override
-    public void onInAppChatBackPressed() {
-        inAppChat.hideInAppChatFragment(getSupportFragmentManager(), true);
-    }
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         this.subjectEditText = this.findViewById(R.id.subjectEditText);
         this.progressBar = this.findViewById(R.id.progressBar);
         this.openChatActivityButton = findViewById(R.id.openChatActivity);
-        this.showChatFragmentButton = findViewById(R.id.showChatFragment);
         this.openChatFragmentButton = findViewById(R.id.openChatFragment);
         this.openChatViewButton = findViewById(R.id.openChatView);
         setSupportActionBar(this.findViewById(R.id.toolbar));
@@ -153,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         setUpLivechatRegIdField();
         setUpSubjectTypeSpinner();
         setUpOpenChatActivityButton();
-        setUpShowChatFragmentButton();
         setUpOpenChatFragmentButton();
         setUpOpenChatViewButton();
         setUpAuthButton();
@@ -217,74 +198,71 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             return true;
         }
         else if (item.getGroupId() == R.id.languages) {
-            String language = langMenuIdToLocale(item.getItemId());
-            //change language of In-app chat and calls
+            LivechatWidgetLanguage language = lcLangFromId(item.getItemId());
             if (language != null) {
-                inAppChat.setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(language));
-                InfobipRtcUi.getInstance(this).setLanguage(new Locale(language));
-                Toast.makeText(this, getString(R.string.language_changed, item.getTitle()), Toast.LENGTH_SHORT).show();
+                InAppChat.getInstance(MainActivity.this).setLanguage(language);
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private String langMenuIdToLocale(@IdRes int menuId) {
+    public LivechatWidgetLanguage lcLangFromId(@IdRes int menuId) {
         if (menuId == R.id.english)
-            return "en-US";
+            return LivechatWidgetLanguage.ENGLISH;
         else if (menuId == R.id.turkish)
-            return "tr-TR";
+            return LivechatWidgetLanguage.TURKISH;
         else if (menuId == R.id.korean)
-            return "ko-KR";
+            return LivechatWidgetLanguage.KOREAN;
         else if (menuId == R.id.russian)
-            return "ru-RU";
+            return LivechatWidgetLanguage.RUSSIAN;
         else if (menuId == R.id.chinese_traditional)
-            return "zh-TW";
+            return LivechatWidgetLanguage.CHINESE_TRADITIONAL;
         else if (menuId == R.id.chinese_simplified)
-            return "zh-Hans";
+            return LivechatWidgetLanguage.CHINESE_SIMPLIFIED;
         else if (menuId == R.id.spanish)
-            return "es-ES";
+            return LivechatWidgetLanguage.SPANISH;
         else if (menuId == R.id.portuguese)
-            return "pt-PT";
+            return LivechatWidgetLanguage.PORTUGUESE;
         else if (menuId == R.id.polish)
-            return "pl-PL";
+            return LivechatWidgetLanguage.POLISH;
         else if (menuId == R.id.romanian)
-            return "ro-RO";
+            return LivechatWidgetLanguage.ROMANIAN;
         else if (menuId == R.id.arabic)
-            return "ar-AE";
+            return LivechatWidgetLanguage.ARABIC;
         else if (menuId == R.id.bosnian)
-            return "bs-BA";
+            return LivechatWidgetLanguage.BOSNIAN;
         else if (menuId == R.id.croatian)
-            return "hr-HR";
+            return LivechatWidgetLanguage.CROATIAN;
         else if (menuId == R.id.greek)
-            return "el-GR";
+            return LivechatWidgetLanguage.GREEK;
         else if (menuId == R.id.swedish)
-            return "sv-SE";
+            return LivechatWidgetLanguage.SWEDISH;
         else if (menuId == R.id.thai)
-            return "th-TH";
+            return LivechatWidgetLanguage.THAI;
         else if (menuId == R.id.lithuanian)
-            return "lt-LT";
+            return LivechatWidgetLanguage.LITHUANIAN;
         else if (menuId == R.id.danish)
-            return "da-DK";
+            return LivechatWidgetLanguage.DANISH;
         else if (menuId == R.id.latvian)
-            return "lv-LV";
+            return LivechatWidgetLanguage.LATVIAN;
         else if (menuId == R.id.hungarian)
-            return "hu-HU";
+            return LivechatWidgetLanguage.HUNGARIAN;
         else if (menuId == R.id.italian)
-            return "it-IT";
+            return LivechatWidgetLanguage.ITALIAN;
         else if (menuId == R.id.french)
-            return "fr-FR";
+            return LivechatWidgetLanguage.FRENCH;
         else if (menuId == R.id.slovenian)
-            return "sl-SI";
+            return LivechatWidgetLanguage.SLOVENIAN;
         else if (menuId == R.id.ukrainian)
-            return "uk-UA";
+            return LivechatWidgetLanguage.UKRAINIAN;
         else if (menuId == R.id.japanese)
-            return "ja-JP";
+            return LivechatWidgetLanguage.JAPANESE;
         else if (menuId == R.id.german)
-            return "de-DE";
+            return LivechatWidgetLanguage.GERMAN;
         else if (menuId == R.id.albanian)
-            return "sq-AL";
+            return LivechatWidgetLanguage.ALBANIAN;
         else if (menuId == R.id.serbian)
-            return "sr-Latn";
+            return LivechatWidgetLanguage.SERBIAN;
         else return null;
     }
 
@@ -357,7 +335,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
 
     private void onChatAvailabilityUpdated(boolean isAvailable, boolean showToast) {
         openChatActivityButton.setEnabled(isAvailable);
-        showChatFragmentButton.setEnabled(isAvailable);
         openChatFragmentButton.setEnabled(isAvailable);
         openChatViewButton.setEnabled(isAvailable);
         if (showToast)
@@ -403,16 +380,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
 
             @Override
-            public void onChatDraftSent(@NonNull LivechatWidgetResult<String> result) {
-                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
-            }
-
-            @Override
-            public void onChatMessageSent(@NonNull LivechatWidgetResult<String> result) {
-                //Deprecated, use onChatSent(LivechatWidgetResult<? extends LivechatWidgetMessage> result) instead
-            }
-
-            @Override
             public void onChatSent(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
                 MobileMessagingLogger.d(TAG, "On chat sent: " + result);
             }
@@ -428,11 +395,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
 
             @Override
-            public void onChatWidgetThemeChanged(@NonNull String widgetThemeName) {
-                //Deprecated, use onChatWidgetThemeChanged(LivechatWidgetResult<String>) instead
-            }
-
-            @Override
             public void onChatWidgetThemeChanged(@NonNull LivechatWidgetResult<String> result) {
                 MobileMessagingLogger.d(TAG, "On chat widget theme changed: " + result);
             }
@@ -440,11 +402,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             @Override
             public void onChatWidgetInfoUpdated(@NonNull WidgetInfo widgetInfo) {
                 MobileMessagingLogger.d(TAG, "On chat widget info updated: " + widgetInfo);
-            }
-
-            @Override
-            public void onChatViewChanged(@NonNull InAppChatWidgetView widgetView) {
-                //Deprecated, use onChatViewChanged(LivechatWidgetView) instead
             }
 
             @Override
@@ -463,23 +420,8 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
             }
 
             @Override
-            public void onChatReconnected() {
-                //Deprecated, use onChatConnectionResumed(LivechatWidgetResult<Unit>) instead
-            }
-
-            @Override
             public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
                 MobileMessagingLogger.d(TAG, "On chat connection paused: " + result);
-            }
-
-            @Override
-            public void onChatDisconnected() {
-                //Deprecated, use onChatConnectionPaused(LivechatWidgetResult<Unit>) instead
-            }
-
-            @Override
-            public void onChatLoaded(boolean controlsEnabled) {
-                //Deprecated, use onChatLoadingFinished(LivechatWidgetResult<Unit>) instead
             }
         });
     }
@@ -488,13 +430,6 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
         openChatActivityButton.setOnClickListener((v) -> {
             setInAppChatEventsListener();
             inAppChat.inAppChatScreen().show();
-        });
-    }
-
-    private void setUpShowChatFragmentButton() {
-        showChatFragmentButton.setOnClickListener((v) -> {
-            setInAppChatEventsListener();
-            inAppChat.showInAppChatFragment(getSupportFragmentManager(), R.id.fragmentContainer);
         });
     }
 
@@ -536,9 +471,10 @@ public class MainActivity extends AppCompatActivity implements InAppChatFragment
                     }
                 }
                 MobileMessagingLogger.d(TAG, "Providing JWT for " + authData + " = " + jwt);
-                if (StringUtils.isNotBlank(jwt)){
+                if (StringUtils.isNotBlank(jwt)) {
                     callback.onJwtReady(jwt);
-                } else {
+                }
+                else {
                     callback.onJwtError(new IllegalStateException("JWT is null, check widgetId and widget secret key."));
                 }
             };

@@ -1,6 +1,5 @@
 package org.infobip.mobile.messaging.chat.core.widget
 
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.JwtProvider
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.models.MessagePayload
@@ -134,46 +133,6 @@ interface LivechatWidgetApi {
      * To detect if the connection is resumed use [LivechatWidgetEventsListener.onConnectionResumed] event.
      */
     fun resumeConnection()
-
-    /**
-     * Sends a message with optional [InAppChatMobileAttachment].
-     *
-     * You can observe result by [LivechatWidgetEventsListener.onMessageSent] event.
-     *
-     * @param message message to be send, max length allowed is 4096 characters
-     * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
-     */
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
-    )
-    fun sendMessage(message: String?, attachment: InAppChatMobileAttachment? = null)
-
-    /**
-     * Sends a message
-     *
-     * You can observe result by [LivechatWidgetEventsListener.onMessageSent] event.
-     *
-     * @param message message to be send, max length allowed is 4096 characters
-     */
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Basic(message))"),
-    )
-    fun sendMessage(message: String) = sendMessage(message = message, attachment = null)
-
-    /**
-     * Sends a draft message.
-     *
-     * You can observe result by [LivechatWidgetEventsListener.onDraftSent] event.
-     *
-     * @param draft draft message to be send
-     */
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
-    )
-    fun sendDraft(draft: String)
 
     /**
      * Sends a message defined by the given [payload] to the specified [threadId], if provided.

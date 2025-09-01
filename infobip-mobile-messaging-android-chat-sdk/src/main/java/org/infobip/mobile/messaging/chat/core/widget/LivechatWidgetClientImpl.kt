@@ -3,7 +3,7 @@ package org.infobip.mobile.messaging.chat.core.widget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.models.HasAttachment
 import org.infobip.mobile.messaging.chat.models.MessagePayload
@@ -26,7 +26,7 @@ internal class LivechatWidgetClientImpl(
         private const val ARGUMENT_VISIBLE_PART_LENGTH: Int = 15
 
         fun shortenLog(log: String): String {
-            return AttachmentHelper.ATTACHMENT_URL_REGEX.replace(log) { matchResult ->
+            return InAppChatAttachment.ATTACHMENT_URL_REGEX.replace(log) { matchResult ->
                 val prefix = matchResult.groups["prefix"]?.value
                 val mimeType = matchResult.groups["mimeType"]?.value
                 val base64Prefix = matchResult.groups["base64Prefix"]?.value

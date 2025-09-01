@@ -23,9 +23,6 @@ public class WidgetInfo {
 
     private String primaryTextColor;
 
-    @Deprecated
-    private long maxUploadContentSize;
-
     private boolean multiThread;
 
     private boolean multiChannelConversationEnabled;

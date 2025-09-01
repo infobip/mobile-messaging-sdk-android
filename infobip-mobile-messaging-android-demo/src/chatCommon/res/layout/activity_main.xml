@@ -172,21 +172,10 @@
                     android:layout_height="wrap_content"
                     android:text="@string/mm_open_chat_activity"
                     android:enabled="false"
-                    app:layout_constraintBottom_toTopOf="@+id/showChatFragment"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/customization" />
-
-                <Button
-                    android:id="@+id/showChatFragment"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/mm_show_chat_fragment"
-                    android:enabled="false"
                     app:layout_constraintBottom_toTopOf="@+id/openChatFragment"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/openChatActivity" />
+                    app:layout_constraintTop_toBottomOf="@+id/customization" />
 
                 <Button
                     android:id="@+id/openChatFragment"
@@ -197,7 +186,7 @@
                     app:layout_constraintBottom_toTopOf="@+id/toolbarCheckbox"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/showChatFragment" />
+                    app:layout_constraintTop_toBottomOf="@+id/openChatActivity" />
 
                 <CheckBox
                     android:id="@+id/toolbarCheckbox"

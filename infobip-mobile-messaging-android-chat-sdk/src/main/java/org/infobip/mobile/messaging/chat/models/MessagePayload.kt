@@ -1,7 +1,7 @@
 package org.infobip.mobile.messaging.chat.models
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessageType
 import org.json.JSONObject
@@ -10,7 +10,7 @@ import org.json.JSONObject
  * Interface for classes that have an attachment.
  */
 interface HasAttachment {
-    val attachment: InAppChatMobileAttachment?
+    val attachment: InAppChatAttachment?
 }
 
 /**
@@ -65,7 +65,7 @@ sealed class MessagePayload(
      */
     data class Basic @Throws(IllegalArgumentException::class) @JvmOverloads constructor(
         val message: String?,
-        override val attachment: InAppChatMobileAttachment? = null,
+        override val attachment: InAppChatAttachment? = null,
     ) : MessagePayload(LivechatWidgetMessageType.BASIC), HasAttachment {
         init {
             require(message != null || attachment != null) {

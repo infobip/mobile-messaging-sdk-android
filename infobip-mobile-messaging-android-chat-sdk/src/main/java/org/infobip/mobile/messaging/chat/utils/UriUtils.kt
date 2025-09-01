@@ -15,7 +15,7 @@ import android.provider.MediaStore
 import android.provider.MediaStore.MediaColumns
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
-import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.io.File
 
@@ -33,8 +33,8 @@ fun Uri.copyFileToPublicDir(context: Context, directory: String = "DCIM/Infobip"
         val mimeType = sourceUri.mimeType(context) ?: return
 
         val collectionUri = when {
-            mimeType.startsWith(AttachmentHelper.IMAGE_MIME_TYPE_PREFIX) -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            mimeType.startsWith(AttachmentHelper.VIDEO_MIME_TYPE_PREFIX) -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            mimeType.startsWith(InAppChatAttachment.IMAGE_MIME_TYPE_PREFIX) -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            mimeType.startsWith(InAppChatAttachment.VIDEO_MIME_TYPE_PREFIX) -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
             else -> {
                 MobileMessagingLogger.e(TAG, "Failed to copy file to public folder. Unsupported MIME type: $mimeType")
                 return

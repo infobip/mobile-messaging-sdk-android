@@ -25,7 +25,6 @@ import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient
 import org.infobip.mobile.messaging.chat.InAppChat
 import org.infobip.mobile.messaging.chat.InAppChatErrors
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
 import org.infobip.mobile.messaging.chat.core.*
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl
@@ -37,7 +36,6 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView
-import org.infobip.mobile.messaging.chat.core.widget.toInAppChatWidgetView
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatBinding
 import org.infobip.mobile.messaging.chat.mobileapi.LivechatRegistrationChecker
 import org.infobip.mobile.messaging.chat.models.ContextualData
@@ -64,12 +62,6 @@ class InAppChatView @JvmOverloads constructor(
      * [InAppChatView] events listener propagates chat related events
      */
     interface EventsListener : InAppChatEventsListener {
-        /**
-         * Attachment from chat has been interacted.
-         */
-        @Deprecated("Use onChatAttachmentPreviewOpened(url: String?, type: String?, caption: String?) instead")
-        fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?)
-
         /**
          * Attachment from chat has been interacted.
          */
@@ -229,25 +221,6 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     /**
-     * Stops chat connection.
-     *
-     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
-     * Chat connection is stopped when [Lifecycle.State] is below [Lifecycle.State.STARTED].
-     *
-     * By chat connection you can control push notifications.
-     * Push notifications are active only when chat connection is not active.
-     *
-     * Can be used to enable chat's push notifications when [InAppChatView] is not visible.
-     * Use [restartConnection] to reestablish chat connection.
-     *
-     * To detect if chat connection is stopped use [EventsListener.onChatDisconnected] event from [EventsListener].
-     */
-    @Deprecated("Use pauseChatConnection() instead", ReplaceWith("pauseChatConnection()"))
-    fun stopConnection() {
-        pauseChatConnection()
-    }
-
-    /**
      * Use it to resume chat connection when you previously called [pauseChatConnection].
      *
      * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
@@ -265,49 +238,6 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     /**
-     * Use it to re-establish chat connection when you previously called [stopConnection].
-     *
-     * It is not needed to use it in most cases as chat connection is established and stopped based on [Lifecycle] provided in [init].
-     * Chat connection is active only when [Lifecycle.State] is at least [Lifecycle.State.STARTED].
-     *
-     * By chat connection you can control push notifications.
-     * Push notifications are suppressed while the chat connection is active.
-     *
-     * To detect if chat connection was re-established use [EventsListener.onChatReconnected] event from [EventsListener].
-     */
-    @Deprecated("Use resumeChatConnection() instead", ReplaceWith("resumeChatConnection()"))
-    fun restartConnection() {
-        resumeChatConnection()
-    }
-
-    /**
-     * Sends a message with optional [InAppChatMobileAttachment].
-     * @param message message to be send, max length allowed is 4096 characters
-     * @param attachment to create attachment use [InAppChatMobileAttachment]'s constructor where you provide attachment's mimeType, base64 and filename
-     */
-    @JvmOverloads
-    @Throws(IllegalArgumentException::class)
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Basic() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Basic(message, attachment))"),
-    )
-    fun sendChatMessage(message: String?, attachment: InAppChatMobileAttachment? = null) {
-        send(MessagePayload.Basic(message, attachment))
-    }
-
-    /**
-     * Sends a draft message.
-     * @param draft message
-     */
-    @Deprecated(
-        message = "Use send(payload: MessagePayload) with MessagePayload.Draft() instead",
-        replaceWith = ReplaceWith("send(MessagePayload.Draft(draft))")
-    )
-    fun sendChatMessageDraft(draft: String) {
-        send(MessagePayload.Draft(draft))
-    }
-
-    /**
      * Sends a message defined by the given [payload] to the specified [threadId], if provided.
      * Otherwise, the message will be sent to the currently active thread.
      *
@@ -319,24 +249,6 @@ class InAppChatView @JvmOverloads constructor(
     @JvmOverloads
     fun send(payload: MessagePayload, threadId: String? = null) {
         livechatWidgetApi.send(payload, threadId)
-    }
-
-    /**
-     * Set contextual data of the livechat widget.
-     *
-     * If the function is called when the chat is loaded,
-     * data will be sent immediately, otherwise they will be sent to the chat once it is loaded.
-     *
-     * Every function invocation will overwrite the previous contextual data.
-     *
-     * @param data contextual data in the form of JSON string
-     * @param allMultiThreadStrategy multithread strategy flag, true -> ALL, false -> ACTIVE
-     * @see [InAppChatView.EventsListener.onChatLoaded] to detect if chat is loaded
-     */
-    @Deprecated("Use sendContextualData(data: String, flag: MultithreadStrategy) instead")
-    fun sendContextualData(data: String, allMultiThreadStrategy: Boolean) {
-        val flag = if (allMultiThreadStrategy) MultithreadStrategy.ALL else MultithreadStrategy.ACTIVE
-        sendContextualData(data, flag)
     }
 
     /**
@@ -405,18 +317,6 @@ class InAppChatView @JvmOverloads constructor(
      */
     fun showThreadList() {
         livechatWidgetApi.showThreadList()
-    }
-
-    /**
-     * Set an in-app chat's language
-     * @param locale locale's language is used by livechat widget and in-app chat native parts
-     */
-    @Deprecated(
-        "Use setLanguage(LivechatWidgetLanguage) instead",
-        ReplaceWith("setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(locale))", "org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage")
-    )
-    fun setLanguage(locale: Locale) {
-        setLanguage(LivechatWidgetLanguage.findLanguageOrDefault(locale))
     }
 
     /**
@@ -572,7 +472,6 @@ class InAppChatView @JvmOverloads constructor(
                 }
             }
 
-            eventsListener?.onChatLoaded(mappedResult.isSuccess)
             eventsListener?.onChatLoadingFinished(mappedResult)
             lcRegIdChecker.sync()
             if (eventsListener == null && mappedResult.isError) {
@@ -581,7 +480,6 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onConnectionPaused(result: LivechatWidgetResult<Unit>) {
-            eventsListener?.onChatDisconnected()
             eventsListener?.onChatConnectionPaused(result)
             if (eventsListener == null && result.isError) {
                 MobileMessagingLogger.e(TAG, "Chat could not pause connection:", result.errorOrNull())
@@ -589,24 +487,9 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onConnectionResumed(result: LivechatWidgetResult<Unit>) {
-            eventsListener?.onChatReconnected()
             eventsListener?.onChatConnectionResumed(result)
             if (eventsListener == null && result.isError) {
                 MobileMessagingLogger.e(TAG, "Chat could not resume connection:", result.errorOrNull())
-            }
-        }
-
-        override fun onMessageSent(result: LivechatWidgetResult<String?>) {
-            eventsListener?.onChatMessageSent(result)
-            if (eventsListener == null && result.isError) {
-                MobileMessagingLogger.e(TAG, "Chat could not send message:", result.errorOrNull())
-            }
-        }
-
-        override fun onDraftSent(result: LivechatWidgetResult<String?>) {
-            eventsListener?.onChatDraftSent(result)
-            if (eventsListener == null && result.isError) {
-                MobileMessagingLogger.e(TAG, "Chat could not send draft:", result.errorOrNull())
             }
         }
 
@@ -642,7 +525,6 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onThemeChanged(result: LivechatWidgetResult<String?>) {
-            eventsListener?.onChatWidgetThemeChanged(result.getOrNull() ?: "")
             eventsListener?.onChatWidgetThemeChanged(result)
             if (eventsListener == null && result.isError) {
                 MobileMessagingLogger.e(TAG, "Chat could not set widget theme:", result.errorOrNull())
@@ -657,12 +539,10 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {
-            eventsListener?.onAttachmentPreviewOpened(url, type, caption)
             eventsListener?.onChatAttachmentPreviewOpened(url, type, caption)
         }
 
         override fun onWidgetViewChanged(view: LivechatWidgetView) {
-            eventsListener?.onChatViewChanged(view.toInAppChatWidgetView())
             eventsListener?.onChatViewChanged(view)
             inAppChatBroadcaster.chatViewChanged(view)
         }
@@ -882,7 +762,6 @@ class InAppChatView @JvmOverloads constructor(
                 widgetPrimaryColor,
                 widgetBackgroundColor,
                 widgetPrimaryTextColor,
-                attachmentMaxSize,
                 widgetMultiThread,
                 widgetMultichannelConversation,
                 callsEnabled,

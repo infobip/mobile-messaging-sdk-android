@@ -1,8 +1,7 @@
 package org.infobip.mobile.messaging.chat.core.widget
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
-import org.infobip.mobile.messaging.chat.attachments.AttachmentHelper
-import org.infobip.mobile.messaging.chat.attachments.InAppChatMobileAttachment
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.json.JSONObject
 import java.util.Date
@@ -39,7 +38,7 @@ sealed class LivechatWidgetMessage {
 
     data class Basic(
         val message: String? = null,
-        val attachment: InAppChatMobileAttachment? = null,
+        val attachment: InAppChatAttachment? = null,
         val thread: LivechatWidgetThread? = null,
         val moment: Date? = null,
         val id: String? = null,
@@ -140,17 +139,17 @@ internal class LivechatWidgetMessageAdapter : JsonSerializer.ObjectAdapter<Livec
         }.getOrNull()
     }
 
-    private fun deserializeAttachment(jsonObject: JSONObject): InAppChatMobileAttachment? {
+    private fun deserializeAttachment(jsonObject: JSONObject): InAppChatAttachment? {
         return runCatching {
-            var attachment: InAppChatMobileAttachment? = null
+            var attachment: InAppChatAttachment? = null
             if (jsonObject.has(LivechatWidgetMessage.Basic::attachment.name)) {
                 val attachmentUrl = jsonObject.optString(LivechatWidgetMessage.Basic::attachment.name).takeIf { it.isNotBlank() }
                 val fileName = jsonObject.optString(ATTACHMENT_FILE_NAME).takeIf { it.isNotBlank() }
                 if (attachmentUrl?.isNotBlank() == true) {
-                    attachment = AttachmentHelper.ATTACHMENT_URL_REGEX.find(attachmentUrl)?.let { matchResult ->
+                    attachment = InAppChatAttachment.ATTACHMENT_URL_REGEX.find(attachmentUrl)?.let { matchResult ->
                         val mimeType = matchResult.groups["mimeType"]?.value
                         val base64Value = matchResult.groups["base64Value"]?.value
-                        InAppChatMobileAttachment(mimeType, base64Value, fileName).takeIf { it.isValid }
+                        InAppChatAttachment(mimeType, base64Value, fileName).takeIf { it.isValid }
                     }
                 }
             }

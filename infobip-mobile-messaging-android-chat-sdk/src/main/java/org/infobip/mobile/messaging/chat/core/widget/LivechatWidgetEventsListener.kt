@@ -39,22 +39,6 @@ interface LivechatWidgetEventsListener {
     fun onConnectionResumed(result: LivechatWidgetResult<Unit>)
 
     /**
-     * Called when message is sent.
-     */
-    @Deprecated(
-        message = "Use onSent(LivechatWidgetResult<LivechatWidgetMessage?>) instead",
-    )
-    fun onMessageSent(result: LivechatWidgetResult<String?>)
-
-    /**
-     * Called when draft message is sent.
-     */
-    @Deprecated(
-        message = "Use onSent(LivechatWidgetResult<LivechatWidgetMessage?>) instead",
-    )
-    fun onDraftSent(result: LivechatWidgetResult<String?>)
-
-    /**
      * Called when any message payload is sent.
      */
     fun onSent(result: LivechatWidgetResult<LivechatWidgetMessage?>)
@@ -142,8 +126,6 @@ open class DefaultLivechatWidgetEventsListener : LivechatWidgetEventsListener {
     override fun onThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onConnectionPaused(result: LivechatWidgetResult<Unit>) {}
     override fun onConnectionResumed(result: LivechatWidgetResult<Unit>) {}
-    override fun onMessageSent(result: LivechatWidgetResult<String?>) {}
-    override fun onDraftSent(result: LivechatWidgetResult<String?>) {}
     override fun onSent(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}
     override fun onContextualDataSent(result: LivechatWidgetResult<String?>) {}
     override fun onThemeChanged(result: LivechatWidgetResult<String?>) {}
