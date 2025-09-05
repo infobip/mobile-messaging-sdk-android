@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.webkit.WebSettings.LOAD_NO_CACHE
 import android.webkit.WebView
 import kotlinx.coroutines.CoroutineScope
@@ -61,13 +60,6 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
         webViewClient = LivechatWidgetWebViewClient(webViewManager, instanceId)
         addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, instanceId, coroutineScope), LivechatWidgetJsInterface.name)
         livechatWidgetClient = LivechatWidgetClientImpl(this, instanceId, coroutineScope)
-        setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_UP -> v.requestFocusFromTouch()
-            }
-            false
-        }
     }
 
     fun loadWidgetPage(
