@@ -12,6 +12,7 @@ import android.util.Log;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,8 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> List<T> findAll(Class<T> cls) {
-        Cursor cursor = db().rawQuery("SELECT * FROM " + getTableName(cls), new String[0]);
+        String tableName = requireValidIdentifier(getTableName(cls));
+        Cursor cursor = db().query(tableName, null, null, null, null, null, null);
         List<T> objects = loadFromCursor(cursor, cls);
         cursor.close();
         return objects;
@@ -50,7 +52,9 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> T find(Class<T> cls, @NonNull String primaryKey) {
-        Cursor cursor = db().rawQuery("SELECT * FROM " + getTableName(cls) + " WHERE " + getPrimaryKeyColumn(cls) + " = ?", new String[]{primaryKey});
+        String tableName = requireValidIdentifier(getTableName(cls));
+        String primaryKeyColumn = requireValidIdentifier(getPrimaryKeyColumn(cls));
+        Cursor cursor = db().query(tableName, null, primaryKeyColumn + " = ?", new String[]{primaryKey}, null, null, null);
         List<T> objects = loadFromCursor(cursor, cls);
         cursor.close();
         return !objects.isEmpty() ? objects.get(0) : null;
@@ -58,23 +62,27 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> long countAll(Class<T> cls) {
-        return DatabaseUtils.queryNumEntries(db(), getTableName(cls));
+        String tableName = requireValidIdentifier(getTableName(cls));
+        return DatabaseUtils.queryNumEntries(db(), tableName);
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> long countAll(Class<T> cls, String sqlWhereCondition) {
-        return DatabaseUtils.queryNumEntries(db(), getTableName(cls), sqlWhereCondition);
+        String tableName = requireValidIdentifier(getTableName(cls));
+        return DatabaseUtils.queryNumEntries(db(), tableName, sqlWhereCondition);
     }
 
     @Override
     public void save(DatabaseContract.DatabaseObject object) {
-        db().insertWithOnConflict(object.getTableName(), null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+        String tableName = requireValidIdentifier(object.getTableName());
+        db().insertWithOnConflict(tableName, null, object.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     @Override
     public void insert(DatabaseContract.DatabaseObject object) throws PrimaryKeyViolationException {
         try {
-            db().insertOrThrow(object.getTableName(), null, object.getContentValues());
+            String tableName = requireValidIdentifier(object.getTableName());
+            db().insertOrThrow(tableName, null, object.getContentValues());
         } catch (SQLException ignored) {
             throw new PrimaryKeyViolationException();
         }
@@ -82,18 +90,27 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> void deleteAll(Class<T> cls) {
-        db().delete(getTableName(cls), null, new String[0]);
+        String tableName = requireValidIdentifier(getTableName(cls));
+        db().delete(tableName, null, new String[0]);
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> void delete(Class<T> cls, @NonNull String primaryKey) {
-        db().delete(getTableName(cls), getPrimaryKeyColumn(cls) + "=?", new String[]{primaryKey});
+        String tableName = requireValidIdentifier(getTableName(cls));
+        String primaryKeyColumn = requireValidIdentifier(getPrimaryKeyColumn(cls));
+        db().delete(tableName, primaryKeyColumn + "=?", new String[]{primaryKey});
     }
 
     @Override
     public <T extends DatabaseContract.DatabaseObject> void delete(Class<T> cls, String[] primaryKeys) {
-        db().delete(getTableName(cls), getPrimaryKeyColumn(cls) +
-                " IN (" + new String(new char[primaryKeys.length - 1]).replace("\0", "?,") + "?)", primaryKeys);
+        if (primaryKeys == null || primaryKeys.length == 0) {
+            return; // nothing to delete
+        }
+        String tableName = requireValidIdentifier(getTableName(cls));
+        String primaryKeyColumn = requireValidIdentifier(getPrimaryKeyColumn(cls));
+        String placeholders = String.join(",", Collections.nCopies(primaryKeys.length, "?"));
+        String whereClause = primaryKeyColumn + " IN (" + placeholders + ")";
+        db().delete(tableName, whereClause, primaryKeys);
     }
 
     private DatabaseContract.DatabaseObject emptyDatabaseObject(Class<? extends DatabaseContract.DatabaseObject> cls) {
@@ -142,6 +159,17 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
     private String getPrimaryKeyColumn(Class<? extends DatabaseContract.DatabaseObject> cls) {
         DatabaseContract.DatabaseObject o = emptyDatabaseObject(cls);
         return o != null ? o.getPrimaryKeyColumnName() : null;
+    }
+
+    private boolean isValidIdentifier(String identifier) {
+        return identifier != null && identifier.matches("[A-Za-z_][A-Za-z0-9_]*");
+    }
+
+    private String requireValidIdentifier(String identifier) {
+        if (!isValidIdentifier(identifier)) {
+            throw new IllegalArgumentException("Invalid identifier: " + identifier);
+        }
+        return identifier;
     }
 
     @Override
