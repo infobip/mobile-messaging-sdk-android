@@ -15,6 +15,8 @@ public class FetchInboxResponse {
 
     private int countTotal;
     private int countUnread;
+    private Integer countTotalFiltered;
+    private Integer countUnreadFiltered;
 
     private List<MessageResponse> messages;
 }

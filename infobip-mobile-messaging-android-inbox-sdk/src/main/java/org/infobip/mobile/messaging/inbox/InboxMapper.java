@@ -19,6 +19,8 @@ public class InboxMapper {
         Inbox inbox = new Inbox();
         inbox.setCountTotal(fetchInboxResponse.getCountTotal());
         inbox.setCountUnread(fetchInboxResponse.getCountUnread());
+        inbox.setCountTotalFiltered(fetchInboxResponse.getCountTotalFiltered());
+        inbox.setCountUnreadFiltered(fetchInboxResponse.getCountUnreadFiltered());
         if (fetchInboxResponse.getMessages() != null) {
             List<InboxMessage> inboxMessages = new ArrayList<>(fetchInboxResponse.getMessages().size());
             for (MessageResponse messageResponse : fetchInboxResponse.getMessages()) {

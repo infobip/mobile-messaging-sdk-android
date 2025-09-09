@@ -17,6 +17,10 @@ public class Inbox {
 
     private int countUnread;
 
+    private Integer countTotalFiltered;
+
+    private Integer countUnreadFiltered;
+
     private List<InboxMessage> messages;
 
     /**
@@ -39,6 +43,28 @@ public class Inbox {
 
     public void setCountUnread(int countUnread) {
         this.countUnread = countUnread;
+    }
+
+    /**
+     * Total number of messages that belong to filtered inbox slice.
+     */
+    public Integer getCountTotalFiltered() {
+        return countTotalFiltered;
+    }
+
+    public void setCountTotalFiltered(Integer countTotalFiltered) {
+        this.countTotalFiltered = countTotalFiltered;
+    }
+
+    /**
+     * Number of unread messages that belong to filtered inbox slice.
+     */
+    public Integer getCountUnreadFiltered() {
+        return countUnreadFiltered;
+    }
+
+    public void setCountUnreadFiltered(Integer countUnreadFiltered) {
+        this.countUnreadFiltered = countUnreadFiltered;
     }
 
     /**

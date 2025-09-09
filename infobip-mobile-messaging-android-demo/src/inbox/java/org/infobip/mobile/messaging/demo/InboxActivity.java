@@ -27,6 +27,7 @@ import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
     private MobileInbox mobileInbox;
     private String externalUserId;
     private String topic;
+    private List<String> topics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
 
         mobileInbox = MobileInbox.getInstance(this);
         topic = null;
+        topics = null;
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -88,6 +91,8 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
         tabs.addTab(tabs.newTab().setText(R.string.tb_all));
         tabs.addTab(tabs.newTab().setText(R.string.tb_promo));
         tabs.addTab(tabs.newTab().setText(R.string.tb_notifications));
+        tabs.addTab(tabs.newTab().setText(R.string.tb_offers));
+        tabs.addTab(tabs.newTab().setText(R.string.tb_promotions_notifications));
         tabs.addOnTabSelectedListener(tabSelectedListener());
     }
 
@@ -129,11 +134,18 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
             public void onTabSelected(TabLayout.Tab tab) {
                 Map<Integer, String> topicNameMap = new HashMap<>();
                 topicNameMap.put(0, null);
-                topicNameMap.put(1, "promo");
-                topicNameMap.put(2, "notifications");
+                topicNameMap.put(1, "Promotions");
+                topicNameMap.put(2, "Notifications");
+                topicNameMap.put(3, "Offers");
 
-                if (inbox != null && inbox.getCountTotal() > 0) {
+                if (tab.getPosition() == 4) {
+                    topic = null;
+                    topics = Arrays.asList("Promotions", "Notifications");
+                } else {
                     topic = topicNameMap.get(tab.getPosition());
+                    topics = null;
+                }
+                if (inbox != null && inbox.getCountTotal() > 0) {
                     updateInboxList();
                 }
             }
@@ -162,37 +174,37 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
     }
 
     private SwipeRefreshLayout.OnRefreshListener fetchInboxOnSwipeListener() {
-        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, topic, null);
-        return () -> mobileInbox.fetchInbox(externalUserId, filterOptions, new MobileMessaging.ResultListener<Inbox>() {
-            @Override
-            public void onResult(Result<Inbox, MobileMessagingError> result) {
-                if (result.isSuccess()) {
-                    inbox = result.getData();
-                    if (inbox.getCountTotal() > 0) {
-                        updateInboxList();
-                        updateCounterText();
+        return () -> {
+            MobileInboxFilterOptions filterOptions = topics != null ? new MobileInboxFilterOptions(null, null, topics, 5) :
+                    new MobileInboxFilterOptions(null, null, topic, 5);
+            mobileInbox.fetchInbox(externalUserId, filterOptions, new MobileMessaging.ResultListener<Inbox>() {
+                @Override
+                public void onResult(Result<Inbox, MobileMessagingError> result) {
+                    if (result.isSuccess()) {
+                        inbox = result.getData();
+                        if (inbox.getCountTotal() > 0) {
+                            updateInboxList();
+                            updateCounterText();
+                        } else {
+                            Toast.makeText(InboxActivity.this, R.string.inbox_empty, Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Toast.makeText(InboxActivity.this, R.string.inbox_empty, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(InboxActivity.this, R.string.cannot_update_inbox, Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(InboxActivity.this, R.string.cannot_update_inbox, Toast.LENGTH_SHORT).show();
+                    swipeLayout.setRefreshing(false);
                 }
-                swipeLayout.setRefreshing(false);
-            }
-        });
+            });
+        };
     }
 
     private View.OnClickListener onBackPressedListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Bundle arguments = new Bundle();
-                arguments.putBundle(Constants.BUNDLE_KEY_DEMO_INBOX, InboxBundleMapper.inboxToBundle(inbox));
+        return view -> {
+            Bundle arguments = new Bundle();
+            arguments.putBundle(Constants.BUNDLE_KEY_DEMO_INBOX, InboxBundleMapper.inboxToBundle(inbox));
 
-                Intent intent = new Intent(InboxActivity.this, MainActivity.class);
-                intent.putExtras(arguments);
-                InboxActivity.this.startActivity(intent);
-            }
+            Intent intent = new Intent(InboxActivity.this, MainActivity.class);
+            intent.putExtras(arguments);
+            InboxActivity.this.startActivity(intent);
         };
     }
 }

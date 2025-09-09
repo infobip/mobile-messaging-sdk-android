@@ -12,12 +12,13 @@ import static org.mockito.Mockito.verify;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.inbox.MobileApiInbox;
-import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
@@ -47,7 +48,7 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
         );
 
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
-                .willReturn(new FetchInboxResponse(1, 1, Collections.singletonList(new MessageResponse())));
+                .willReturn(new FetchInboxResponse(1, 1, null, null, Collections.singletonList(createMessageResponse("topic1"))));
     }
 
     @Test
@@ -99,9 +100,20 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void should_call_api_and_fetch_whole_inbox_when_topics_are_defined() {
+        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, new ArrayList<>(Arrays.asList("sometopic", "othertopic")), 15);
+
+        mobileInboxSynchronizer.fetchInbox(null, givenExternalUserId, filterOptions, inboxResultListener);
+
+        String resultToken = "App " + mobileMessagingCore.getApplicationCode();
+
+        verify(mobileApiInbox, after(300).times(1)).fetchInbox(givenExternalUserId, resultToken, null, null, null, 1000);
+    }
+
+    @Test
     public void should_call_api_and_work_with_null_messages_response() {
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
-                .willReturn(new FetchInboxResponse(0, 0, null));
+                .willReturn(new FetchInboxResponse(0, 0, null, null, null));
 
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, "sometopic", 15);
 
@@ -110,5 +122,90 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
         verify(inboxBroadcaster, after(300).atLeastOnce()).inboxFetched(dataCaptor.capture());
         Inbox returnedInbox = dataCaptor.getValue();
         assertNull(returnedInbox.getMessages());
+    }
+
+    @Test
+    public void should_filter_messages_by_multiple_topics() {
+        given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
+                .willReturn(new FetchInboxResponse(3, 3, null, null, Arrays.asList(
+                    createMessageResponse("msg1", "topic1"),
+                    createMessageResponse("msg2", "topic2"), 
+                    createMessageResponse("msg3", "topic3")
+                )));
+
+        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic3"), 15);
+
+        mobileInboxSynchronizer.fetchInbox(null, givenExternalUserId, filterOptions, inboxResultListener);
+
+        verify(inboxBroadcaster, after(300).atLeastOnce()).inboxFetched(dataCaptor.capture());
+        Inbox returnedInbox = dataCaptor.getValue();
+
+        assertEquals(2, returnedInbox.getMessages().size());
+        assertEquals("topic1", returnedInbox.getMessages().get(0).getTopic());
+        assertEquals("topic3", returnedInbox.getMessages().get(1).getTopic());
+    }
+
+    @Test
+    public void should_return_empty_list_when_no_topics_match() {
+        given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
+                .willReturn(new FetchInboxResponse(2, 2, null, null, Arrays.asList(
+                    createMessageResponse("msg1", "topic1"),
+                    createMessageResponse("msg2", "topic2")
+                )));
+
+        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic5", "topic6"), 15);
+
+        mobileInboxSynchronizer.fetchInbox(null, givenExternalUserId, filterOptions, inboxResultListener);
+
+        verify(inboxBroadcaster, after(300).atLeastOnce()).inboxFetched(dataCaptor.capture());
+        Inbox returnedInbox = dataCaptor.getValue();
+
+        assertEquals(0, returnedInbox.getMessages().size());
+    }
+
+    @Test
+    public void should_apply_limit_after_topic_filtering() {
+        given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
+                .willReturn(new FetchInboxResponse(5, 5, null, null, Arrays.asList(
+                    createMessageResponse("msg1", "topic1"),
+                    createMessageResponse("msg2", "topic1"),
+                    createMessageResponse("msg3", "topic2"),
+                    createMessageResponse("msg4", "topic1"),
+                    createMessageResponse("msg5", "topic3")
+                )));
+
+        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic2"), 2);
+
+        mobileInboxSynchronizer.fetchInbox(null, givenExternalUserId, filterOptions, inboxResultListener);
+
+        verify(mobileApiInbox, after(300).times(1)).fetchInbox(givenExternalUserId, "App " + mobileMessagingCore.getApplicationCode(), null, null, null, 1000);
+
+        verify(inboxBroadcaster, after(300).atLeastOnce()).inboxFetched(dataCaptor.capture());
+        Inbox returnedInbox = dataCaptor.getValue();
+
+        assertEquals(2, returnedInbox.getMessages().size());
+        assertEquals("topic1", returnedInbox.getMessages().get(0).getTopic());
+        assertEquals("topic1", returnedInbox.getMessages().get(1).getTopic());
+    }
+
+    @Test
+    public void should_not_apply_limit_when_filtered_messages_are_fewer_than_limit() {
+        given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
+                .willReturn(new FetchInboxResponse(3, 3, null, null, Arrays.asList(
+                    createMessageResponse("msg1", "topic1"),
+                    createMessageResponse("msg2", "topic2"),
+                    createMessageResponse("msg3", "topic3")
+                )));
+
+        MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic3"), 10);
+
+        mobileInboxSynchronizer.fetchInbox(null, givenExternalUserId, filterOptions, inboxResultListener);
+
+        verify(inboxBroadcaster, after(300).atLeastOnce()).inboxFetched(dataCaptor.capture());
+        Inbox returnedInbox = dataCaptor.getValue();
+
+        assertEquals(2, returnedInbox.getMessages().size());
+        assertEquals("topic1", returnedInbox.getMessages().get(0).getTopic());
+        assertEquals("topic3", returnedInbox.getMessages().get(1).getTopic());
     }
 }

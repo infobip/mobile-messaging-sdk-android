@@ -13,6 +13,8 @@
     <string name="tb_all">all</string>
     <string name="tb_promo">promo</string>
     <string name="tb_notifications">notifications</string>
+    <string name="tb_promotions_notifications">Promo, Notifications</string>
+    <string name="tb_offers">Offers</string>
     <string name="mark_as_seen">Do you want to mark message as seen?</string>
     <string name="cannot_update_inbox">Cannot update inbox</string>
     <string name="cannot_personalize">Cannot personalize: externalUserId is empty</string>

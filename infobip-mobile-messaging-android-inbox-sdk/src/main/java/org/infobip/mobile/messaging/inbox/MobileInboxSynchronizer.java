@@ -18,6 +18,9 @@ import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
 import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidParameterException;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MobileInboxSynchronizer {
 
     private final Context context;
@@ -26,6 +29,8 @@ public class MobileInboxSynchronizer {
     private final MobileInboxBroadcaster mobileInboxBroadcaster;
     private final MobileApiInbox mobileApiInbox;
     private final MRetryPolicy retryPolicy;
+
+    private static final Integer MULTIPLE_TOPICS_FETCH_LIMIT = 1000;
 
     public MobileInboxSynchronizer(Context context,
                                    MobileMessagingCore mobileMessagingCore,
@@ -60,7 +65,7 @@ public class MobileInboxSynchronizer {
                 String from = filterOptions.getFromDateTime() == null ? null : String.valueOf(filterOptions.getFromDateTime().getTime());
                 String to = filterOptions.getToDateTime() == null ? null : String.valueOf(filterOptions.getToDateTime().getTime());
                 String topic = isBlank(filterOptions.getTopic()) ? null : filterOptions.getTopic();
-                Integer limit = filterOptions.getLimit();
+                Integer limit = filterOptions.getTopics() == null ? filterOptions.getLimit() : MULTIPLE_TOPICS_FETCH_LIMIT;
                 return mobileApiInbox.fetchInbox(externalUserId, header, from, to, topic, limit);
             }
 
@@ -73,6 +78,7 @@ public class MobileInboxSynchronizer {
                 }
                 MobileMessagingLogger.v("FETCHING INBOX DONE <<<");
                 Inbox inbox = InboxMapper.fromBackend(fetchInboxResponse);
+                inbox = filterMessagesByTopics(inbox, filterOptions);
                 mobileInboxBroadcaster.inboxFetched(inbox);
 
                 if (listener != null) {
@@ -97,5 +103,30 @@ public class MobileInboxSynchronizer {
         }
                 .retryWith(retryPolicy)
                 .execute();
+    }
+
+    private Inbox filterMessagesByTopics(Inbox inbox, MobileInboxFilterOptions filterOptions) {
+        if (filterOptions != null) {
+            List<String> topics = filterOptions.getTopics();
+
+            if (topics != null && !topics.isEmpty()) {
+                List<InboxMessage> filteredMessages = new ArrayList<>();
+                for (InboxMessage inboxMessage : inbox.getMessages()) {
+                    if (topics.contains(inboxMessage.getTopic())) {
+                        filteredMessages.add(inboxMessage);
+                    }
+                }
+                filteredMessages = applyLimitToMessages(filteredMessages, filterOptions.getLimit());
+                inbox.setMessages(filteredMessages);
+            }
+        }
+        return inbox;
+    }
+
+    private List<InboxMessage> applyLimitToMessages(List<InboxMessage> messages, Integer limit) {
+        if (limit != null && limit > 0 && messages.size() > limit) {
+            return messages.subList(0, limit);
+        }
+        return messages;
     }
 }

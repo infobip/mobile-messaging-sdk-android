@@ -16,6 +16,7 @@ import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.android.MobileMessagingBaseTestCase;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
@@ -192,4 +193,37 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
         return inbox;
     }
 
+    /**
+     * Creates MessageResponse with provided topic for testing
+     *
+     * @param topic inbox topic of a message
+     * @return new MessageResponse with topic in internalData
+     */
+    protected static MessageResponse createMessageResponse(String topic) {
+        return createMessageResponse("messageId", topic);
+    }
+
+    /**
+     * Creates MessageResponse with provided messageId and topic for testing
+     *
+     * @param messageId message id for a message
+     * @param topic inbox topic of a message
+     * @return new MessageResponse with topic in internalData
+     */
+    protected static MessageResponse createMessageResponse(String messageId, String topic) {
+        InboxData inboxData = createInboxData(topic);
+        String internalData = InboxDataMapper.inboxDataToInternalData(inboxData);
+        
+        return new MessageResponse(
+            messageId,        // messageId
+            "Test Title",     // title  
+            "Test Body",      // body
+            null,            // sound
+            null,            // vibrate
+            null,            // silent
+            null,            // category
+            null,            // customPayload
+            internalData     // internalData
+        );
+    }
 }
