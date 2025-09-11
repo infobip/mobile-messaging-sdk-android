@@ -111,11 +111,17 @@ public class MobileInboxSynchronizer {
 
             if (topics != null && !topics.isEmpty()) {
                 List<InboxMessage> filteredMessages = new ArrayList<>();
+                int countUnreadFiltered = 0;
                 for (InboxMessage inboxMessage : inbox.getMessages()) {
                     if (topics.contains(inboxMessage.getTopic())) {
                         filteredMessages.add(inboxMessage);
+                        if (!inboxMessage.isSeen()) {
+                            ++countUnreadFiltered;
+                        }
                     }
                 }
+                inbox.setCountTotalFiltered(filteredMessages.size());
+                inbox.setCountUnreadFiltered(countUnreadFiltered);
                 filteredMessages = applyLimitToMessages(filteredMessages, filterOptions.getLimit());
                 inbox.setMessages(filteredMessages);
             }

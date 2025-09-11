@@ -200,7 +200,7 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @return new MessageResponse with topic in internalData
      */
     protected static MessageResponse createMessageResponse(String topic) {
-        return createMessageResponse("messageId", topic);
+        return createMessageResponse("messageId", topic, false);
     }
 
     /**
@@ -210,8 +210,8 @@ public abstract class MobileMessagingTestCase extends MobileMessagingBaseTestCas
      * @param topic inbox topic of a message
      * @return new MessageResponse with topic in internalData
      */
-    protected static MessageResponse createMessageResponse(String messageId, String topic) {
-        InboxData inboxData = createInboxData(topic);
+    protected static MessageResponse createMessageResponse(String messageId, String topic, Boolean seen) {
+        InboxData inboxData = createInboxData(topic, seen);
         String internalData = InboxDataMapper.inboxDataToInternalData(inboxData);
         
         return new MessageResponse(

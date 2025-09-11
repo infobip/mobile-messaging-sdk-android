@@ -124,7 +124,9 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
     }
 
     private void updateCounterText() {
-        String countsText = String.format("%s messages, %s unread", inbox.getCountTotal(), inbox.getCountUnread());
+        String countsText = String.format("%s messages total, %s unread total\n%s messages total filtered, %s unread filtered",
+                inbox.getCountTotal(), inbox.getCountUnread(), inbox.getCountTotalFiltered() != null ? inbox.getCountTotalFiltered() : inbox.getCountTotal(), inbox.getCountUnreadFiltered() != null ? inbox.getCountUnreadFiltered() : inbox.getCountUnread()
+        );
         counts.setText(countsText);
     }
 

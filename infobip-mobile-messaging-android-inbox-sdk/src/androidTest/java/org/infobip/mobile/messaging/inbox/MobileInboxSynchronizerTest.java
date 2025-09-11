@@ -127,10 +127,10 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
     @Test
     public void should_filter_messages_by_multiple_topics() {
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
-                .willReturn(new FetchInboxResponse(3, 3, null, null, Arrays.asList(
-                    createMessageResponse("msg1", "topic1"),
-                    createMessageResponse("msg2", "topic2"), 
-                    createMessageResponse("msg3", "topic3")
+                .willReturn(new FetchInboxResponse(3, 1, null, null, Arrays.asList(
+                    createMessageResponse("msg1", "topic1", true),
+                    createMessageResponse("msg2", "topic2", true),
+                    createMessageResponse("msg3", "topic3", false)
                 )));
 
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic3"), 15);
@@ -141,6 +141,10 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
         Inbox returnedInbox = dataCaptor.getValue();
 
         assertEquals(2, returnedInbox.getMessages().size());
+        assertEquals(2, returnedInbox.getCountTotalFiltered().intValue());
+        assertEquals(3, returnedInbox.getCountTotal());
+        assertEquals(1, returnedInbox.getCountUnread());
+        assertEquals(1, returnedInbox.getCountUnreadFiltered().intValue());
         assertEquals("topic1", returnedInbox.getMessages().get(0).getTopic());
         assertEquals("topic3", returnedInbox.getMessages().get(1).getTopic());
     }
@@ -149,8 +153,8 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
     public void should_return_empty_list_when_no_topics_match() {
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
                 .willReturn(new FetchInboxResponse(2, 2, null, null, Arrays.asList(
-                    createMessageResponse("msg1", "topic1"),
-                    createMessageResponse("msg2", "topic2")
+                    createMessageResponse("msg1", "topic1", false),
+                    createMessageResponse("msg2", "topic2", false)
                 )));
 
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic5", "topic6"), 15);
@@ -167,11 +171,11 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
     public void should_apply_limit_after_topic_filtering() {
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
                 .willReturn(new FetchInboxResponse(5, 5, null, null, Arrays.asList(
-                    createMessageResponse("msg1", "topic1"),
-                    createMessageResponse("msg2", "topic1"),
-                    createMessageResponse("msg3", "topic2"),
-                    createMessageResponse("msg4", "topic1"),
-                    createMessageResponse("msg5", "topic3")
+                    createMessageResponse("msg1", "topic1", false),
+                    createMessageResponse("msg2", "topic1", false),
+                    createMessageResponse("msg3", "topic2", false),
+                    createMessageResponse("msg4", "topic1", false),
+                    createMessageResponse("msg5", "topic3", false)
                 )));
 
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic2"), 2);
@@ -192,9 +196,9 @@ public class MobileInboxSynchronizerTest extends MobileMessagingTestCase {
     public void should_not_apply_limit_when_filtered_messages_are_fewer_than_limit() {
         given(mobileApiInbox.fetchInbox(any(), any(), any(), any(), any(), any()))
                 .willReturn(new FetchInboxResponse(3, 3, null, null, Arrays.asList(
-                    createMessageResponse("msg1", "topic1"),
-                    createMessageResponse("msg2", "topic2"),
-                    createMessageResponse("msg3", "topic3")
+                    createMessageResponse("msg1", "topic1", false),
+                    createMessageResponse("msg2", "topic2", false),
+                    createMessageResponse("msg3", "topic3", false)
                 )));
 
         MobileInboxFilterOptions filterOptions = new MobileInboxFilterOptions(null, null, Arrays.asList("topic1", "topic3"), 10);
