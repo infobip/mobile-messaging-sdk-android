@@ -259,6 +259,9 @@
         }
 
         function stringify(value) {
+            if (value instanceof Error) {
+                return value.message;
+            }
             switch (typeof value) {
                 case 'string': case 'object': return JSON.stringify(value);
                 default: return String(value);

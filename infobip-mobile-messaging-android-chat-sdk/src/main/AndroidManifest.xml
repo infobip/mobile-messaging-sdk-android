@@ -20,12 +20,10 @@
         android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".view.InAppChatAttachmentPreviewActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/IB_ChatDefaultTheme" />
         <activity
             android:name=".view.InAppChatActivity"
             android:noHistory="false"
-            android:screenOrientation="portrait"
             android:theme="@style/IB_ChatDefaultTheme" />
 
         <receiver

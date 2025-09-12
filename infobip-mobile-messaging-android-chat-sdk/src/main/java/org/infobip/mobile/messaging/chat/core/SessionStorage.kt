@@ -6,6 +6,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.models.ContextualData
+import org.infobip.mobile.messaging.chat.view.InAppChatErrorsHandler
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
@@ -49,6 +50,10 @@ internal object SessionStorage {
 
     @get:Synchronized
     @set:Synchronized
+    var inAppChatErrorsHandler: InAppChatErrorsHandler? = null
+
+    @get:Synchronized
+    @set:Synchronized
     var inAppChatNotificationInteractionHandler: InAppChatNotificationInteractionHandler? = null
 
     /**
@@ -64,6 +69,7 @@ internal object SessionStorage {
         contextualData = null
         lcWidgetConfigSyncResult = null
         inAppChatEventsListener = null
+        inAppChatErrorsHandler = null
         inAppChatNotificationInteractionHandler = null
         scope.coroutineContext.cancelChildren()
     }

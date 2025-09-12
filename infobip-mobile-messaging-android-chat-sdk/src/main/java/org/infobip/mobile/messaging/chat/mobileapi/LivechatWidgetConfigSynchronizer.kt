@@ -52,7 +52,7 @@ internal class LivechatWidgetConfigSynchronizer(
             return
         }
 
-        if (mmCore.isDepersonalizeInProgress()) {
+        if (mmCore.isDepersonalizeInProgress) {
             MobileMessagingLogger.d(TAG, "Livechat widget configuration sync skipped. Depersonalization is in progress.")
             listener?.onResult(Result(InternalSdkError.DEPERSONALIZATION_IN_PROGRESS.error))
             return
@@ -68,18 +68,18 @@ internal class LivechatWidgetConfigSynchronizer(
             override fun after(widgetInfo: WidgetInfo?) {
                 widgetInfo?.let {
                     MobileMessagingLogger.v("GET WIDGET CONFIGURATION DONE <<<")
-                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.key, widgetInfo.getId())
-                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key, widgetInfo.getTitle())
-                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key, widgetInfo.getPrimaryColor())
-                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key, widgetInfo.getBackgroundColor())
-                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR.key, widgetInfo.getPrimaryTextColor())
-                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, widgetInfo.isMultiThread())
-                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.key, widgetInfo.isMultiChannelConversationEnabled())
-                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key, widgetInfo.isCallsEnabled())
-                    widgetInfo.getThemeNames()?.let { themes ->
+                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID.key, widgetInfo.id)
+                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_TITLE.key, widgetInfo.title)
+                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_COLOR.key, widgetInfo.primaryColor)
+                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_BACKGROUND_COLOR.key, widgetInfo.backgroundColor)
+                    PreferenceHelper.saveString(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_PRIMARY_TEXT_COLOR.key, widgetInfo.primaryTextColor)
+                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, widgetInfo.isMultiThread)
+                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.key, widgetInfo.isMultiChannelConversationEnabled)
+                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key, widgetInfo.isCallsEnabled)
+                    widgetInfo.themeNames?.let { themes ->
                         PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.key, HashSet(themes))
                     }
-                    widgetInfo.getAttachmentConfig()?.let { attachmentConfig ->
+                    widgetInfo.attachmentConfig?.let { attachmentConfig ->
                         PreferenceHelper.saveLong(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE.key, attachmentConfig.maxSize)
                         PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED.key, attachmentConfig.isEnabled)
                         if (attachmentConfig.allowedExtensions != null) {
@@ -88,7 +88,7 @@ internal class LivechatWidgetConfigSynchronizer(
                     }
                     listener?.onResult(Result(widgetInfo))
                     chatBroadcaster.chatConfigurationSynced()
-                    chatBroadcaster.chatAvailabilityUpdated(IsChatAvailable.check(widgetInfo.getId(), mmCore))
+                    chatBroadcaster.chatAvailabilityUpdated(IsChatAvailable.check(widgetInfo.id, mmCore))
                 }
             }
 

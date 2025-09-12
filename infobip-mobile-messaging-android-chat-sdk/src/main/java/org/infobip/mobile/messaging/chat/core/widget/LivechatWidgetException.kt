@@ -1,34 +1,36 @@
 package org.infobip.mobile.messaging.chat.core.widget
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 
 class LivechatWidgetException(
-    override val message: String? = null,
-    val code: Int? = null,
-    val name: String? = null,
-    val origin: String? = null,
-    val platform: String? = null,
-) : RuntimeException(message) {
+    message: String? = null,
+    code: Int? = null,
+    name: String? = null,
+    origin: String? = null,
+    platform: String? = null,
+) : InAppChatException(message, code, name, origin, platform) {
 
     companion object {
         private val serializer = JsonSerializer(false)
-        const val PLATFORM_ANDROID = "Android"
-        const val ORIGIN_LIVECHAT = "Livechat"
-        const val ORIGIN_ANDROID_SDK = "Android SDK"
 
         internal fun parse(json: String, method: LivechatWidgetMethod? = null): LivechatWidgetException {
             var exception = runCatching {
                 serializer.deserialize(json, LivechatWidgetException::class.java)
-            }.getOrNull()
+            }.getOrNull() ?: LivechatWidgetException()
 
             //JSON like "{}" is parsed without error but exception is empty, this make sure we have a valid message and origin
-            if (exception == null || exception.message.isNullOrBlank() || exception.origin.isNullOrBlank()) {
+            if (exception.message.isNullOrBlank()) {
                 val message = if (method != null) {
-                    "${method.name}() failed with response: $json"
+                    "${method.name}() $json"
                 } else {
                     json
                 }
-                exception = LivechatWidgetException(message = message, origin = ORIGIN_LIVECHAT)
+                exception = exception.copy(message = message)
+            }
+
+            if (exception.origin.isNullOrBlank()) {
+                exception = exception.copy(origin = ORIGIN_LIVECHAT)
             }
 
             return exception
@@ -43,14 +45,14 @@ class LivechatWidgetException(
         }
     }
 
-    override fun toString(): String {
-        val stringBuilder = StringBuilder()
-        stringBuilder.appendLine(super.toString())
-        code?.let { stringBuilder.appendLine("\tcode=$it,") }
-        name?.let { stringBuilder.appendLine("\tname=$it,") }
-        origin?.let { stringBuilder.appendLine("\torigin=$it,") }
-        platform?.let { stringBuilder.appendLine("\tplatform=$it") }
-        return stringBuilder.toString()
+    private fun copy(
+        message: String? = this.message,
+        code: Int? = this.code,
+        name: String? = this.name,
+        origin: String? = this.origin,
+        platform: String? = this.platform,
+    ) : LivechatWidgetException {
+        return LivechatWidgetException(message, code, name, origin, platform)
     }
 
 }

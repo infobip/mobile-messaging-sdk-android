@@ -232,19 +232,23 @@ public abstract class InAppChat {
 
     /**
      * Set {@link InAppChatEventsListener} to listen for various in-app chat events.
-     * It allows you to observer chat related events when you show in-app chat using {@code InAppChat.inAppChatScreen().show()} or
-     * {@code InAppChat.showInAppChatFragment(fragmentManager, containerId)} functions.
+     * It allows you to observer chat related events when you show in-app chat using {@code InAppChat.inAppChatScreen().show()}.
      *
      * @param inAppChatEventsListener listener to report the events on
+     * @deprecated Use {@code InAppChat.getInstance(context).inAppChatScreen().eventsListener = listener} instead.
      */
-    public abstract void setEventsListener(InAppChatEventsListener inAppChatEventsListener);
+    @Deprecated
+    public abstract void setEventsListener(@Nullable InAppChatEventsListener inAppChatEventsListener);
 
     /**
      * Get current {@link InAppChatEventsListener}.
      *
      * @return {@link InAppChatEventsListener} listener to report the events on
      * @see org.infobip.mobile.messaging.chat.view.InAppChatEventsListener
+     * @deprecated Use {@code InAppChat.getInstance(context).inAppChatScreen().eventsListener} instead.
      */
+    @Nullable
+    @Deprecated
     public abstract InAppChatEventsListener getEventsListener();
 
     /**

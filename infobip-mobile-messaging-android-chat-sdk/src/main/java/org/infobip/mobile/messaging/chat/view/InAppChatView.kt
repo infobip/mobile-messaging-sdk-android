@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.view
 
 import android.annotation.SuppressLint
 import android.content.*
+import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.util.AttributeSet
@@ -14,16 +15,21 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.retry
 import org.infobip.mobile.messaging.*
 import org.infobip.mobile.messaging.api.chat.WidgetAttachmentConfig
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient
 import org.infobip.mobile.messaging.chat.InAppChat
-import org.infobip.mobile.messaging.chat.InAppChatErrors
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.core.*
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
@@ -55,7 +61,7 @@ class InAppChatView @JvmOverloads constructor(
     context: Context,
     private val attributes: AttributeSet? = null,
     defStyle: Int = 0,
-    defStyleRes: Int = 0
+    defStyleRes: Int = 0,
 ) : ConstraintLayout(context, attributes, defStyle, defStyleRes) {
 
     /**
@@ -70,9 +76,9 @@ class InAppChatView @JvmOverloads constructor(
 
     /**
      * [InAppChatView] errors handler allows you to define custom way to process [InAppChatView] errors.
-     * You can use [DefaultInAppChatErrorHandler] to override only necessary methods.
+     * You can use [DefaultInAppChatErrorsHandler] to override only necessary methods.
      */
-    interface ErrorsHandler : InAppChatErrorHandler
+    interface ErrorsHandler : InAppChatErrorsHandler
 
     companion object {
         private const val CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500L
@@ -81,6 +87,7 @@ class InAppChatView @JvmOverloads constructor(
         private const val TAG = "InAppChatView"
     }
 
+    private val connectivityManager: ConnectivityManager by lazy { context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
     private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
     private var style = StyleFactory.create(context, attributes).chatStyle()
     private val mmCore: MobileMessagingCore by lazy { MobileMessagingCore.getInstance(context) }
@@ -108,6 +115,9 @@ class InAppChatView @JvmOverloads constructor(
     }
     private val isWidgetLoaded: Boolean
         get() = livechatWidgetApi.isWidgetLoaded
+    private val isWidgetLoadingInProgress: Boolean
+        get() = binding.ibLcSpinner.isVisible
+    private var errorSnackbar: Snackbar? = null
 
     /**
      * [InAppChatView] event listener allows you to listen to livechat widget events.
@@ -123,50 +133,62 @@ class InAppChatView @JvmOverloads constructor(
 
     val defaultErrorsHandler: ErrorsHandler = object : ErrorsHandler {
 
-        private fun parseWidgetError(errorJson: String): String {
-            return runCatching {
-                val error = LivechatWidgetException.parse(errorJson)
-                val message: String? = error.message
-                val code: String? = error.code?.toString()
-                when {
-                    message?.isNotBlank() == true && code?.isNotBlank() == true -> "$message " + localizationUtils.getString(R.string.ib_chat_error_code, code)
-                    message?.isNotBlank() == true -> message
-                    code?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, localizationUtils.getString(R.string.ib_chat_error_code, code))
-                    else -> localizationUtils.getString(R.string.ib_chat_error, errorJson)
-                }
-            }.onFailure {
-                MobileMessagingLogger.e("Could not parse JS error json.", it)
-            }.getOrDefault(localizationUtils.getString(R.string.ib_chat_error, errorJson))
+        private fun getLocalisedMessage(exception: InAppChatException): String {
+            val message: String? = exception.message
+            val code: String? = exception.code?.toString()
+            return when {
+                message?.isNotBlank() == true && code?.isNotBlank() == true -> "$message " + localizationUtils.getString(R.string.ib_chat_error_code, code)
+                message?.isNotBlank() == true -> message
+                code?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, localizationUtils.getString(R.string.ib_chat_error_code, code))
+                else -> localizationUtils.getString(R.string.ib_chat_error, exception)
+            }
         }
 
         override fun handlerError(error: String) {
-            MobileMessagingLogger.e(TAG, "Unhandled error $error")
+            //Deprecated, handled by new API handleError(exception)
         }
 
         override fun handlerWidgetError(error: String) {
-            runCatching {
-                val message = if (CommonUtils.isJSON(error)) parseWidgetError(error) else error
-                Snackbar.make(binding.root, message, Snackbar.LENGTH_INDEFINITE)
-                    .also {
-                        var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
-                        if (textView == null) {
-                            textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
-                        }
-                        if (textView != null) {
-                            textView.maxLines = 4
-                        }
-                    }
-                    .setAction(R.string.ib_chat_ok) {}
-                    .show()
-            }
+            //Deprecated, handled by new API handleError(exception)
         }
 
         override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
-            if (hasConnection) {
-                hideNoInternetConnectionView()
-            } else {
-                showNoInternetConnectionView()
+            //Deprecated, handled by new API handleError(exception)
+        }
+
+        override fun handleError(exception: InAppChatException): Boolean {
+            when (exception) {
+                InAppChatException.NO_INTERNET_CONNECTION -> showNoInternetConnectionView()
+                is LivechatWidgetException -> {
+                    runCatching {
+                        Snackbar.make(binding.root, getLocalisedMessage(exception), Snackbar.LENGTH_INDEFINITE)
+                            .also {
+                                var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
+                                if (textView == null) {
+                                    textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
+                                }
+                                if (textView != null) {
+                                    textView.maxLines = 4
+                                }
+                            }
+                            .setAction(R.string.ib_chat_ok) {}
+                            .setActionTextColor(widgetInfo?.colorPrimary ?: Color.WHITE)
+                            .addCallback(object : Snackbar.Callback() {
+                                override fun onShown(sb: Snackbar?) {
+                                    errorSnackbar = sb
+                                }
+
+                                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                    errorSnackbar = null
+                                }
+                            })
+                            .show()
+                    }
+                }
+
+                else -> MobileMessagingLogger.e(TAG, "Not propagated exception $exception")
             }
+            return true
         }
 
     }
@@ -196,6 +218,7 @@ class InAppChatView @JvmOverloads constructor(
         updateWidgetInfo()
         inAppChat.activate()
         lifecycle.addObserver(lifecycleObserver)
+        observerNetworkConnection(lifecycle)
         loadWidget()
     }
 
@@ -459,12 +482,13 @@ class InAppChatView @JvmOverloads constructor(
 
             when (mappedResult) {
                 is LivechatWidgetResult.Error -> {
-                    errorsHandler.handlerWidgetError(mappedResult.throwable.message ?: localizationUtils.getString(R.string.ib_chat_error, "Unknown error"))
+                    handleWidgetError(mappedResult.throwable)
                     binding.ibLcSpinner.invisible()
                     binding.ibLcWebView.visible()
                 }
 
                 is LivechatWidgetResult.Success -> {
+                    errorSnackbar?.dismiss()
                     inAppChat.resetMessageCounter()
                     SessionStorage.contextualData?.let {
                         sendContextualData(it.data, it.allMultiThreadStrategy)
@@ -586,20 +610,13 @@ class InAppChatView @JvmOverloads constructor(
     private val broadcastEventsReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val action = intent.action ?: return
-            if (action == ConnectivityManager.CONNECTIVITY_ACTION) {
-                if (intent.hasExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY)) {
-                    inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.INTERNET_CONNECTION_ERROR, localizationUtils.getString(R.string.ib_chat_no_connection)))
-                } else {
-                    inAppChatErrors.removeError(InAppChatErrors.INTERNET_CONNECTION_ERROR)
-                }
-            } else if (action == InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key) {
-                inAppChatErrors.removeError(InAppChatErrors.CONFIG_SYNC_ERROR)
+            if (action == InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key) {
                 onWidgetSynced()
             } else if (action == Event.API_COMMUNICATION_ERROR.key && intent.hasExtra(BroadcastParameter.EXTRA_EXCEPTION)) {
-                val mobileMessagingError = intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as MobileMessagingError?
-                val errorCode = mobileMessagingError!!.code
+                val mobileMessagingError = intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as? MobileMessagingError
+                val errorCode = mobileMessagingError?.code
                 if (errorCode == CHAT_SERVICE_ERROR || errorCode == CHAT_WIDGET_NOT_FOUND) {
-                    inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, mobileMessagingError.message))
+                    handleWidgetError(mobileMessagingError.toLivechatWidgetException())
                 }
             }
         }
@@ -609,10 +626,8 @@ class InAppChatView @JvmOverloads constructor(
     private fun registerReceivers() {
         if (!receiversRegistered) {
             val intentFilter = IntentFilter()
-            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
             intentFilter.addAction(InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key)
             intentFilter.addAction(Event.API_COMMUNICATION_ERROR.key)
-            intentFilter.addAction(Event.REGISTRATION_CREATED.key)
             if (SystemInformation.isUpsideDownCakeOrAbove()) {
                 ContextCompat.registerReceiver(context, broadcastEventsReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED)
             } else {
@@ -630,6 +645,20 @@ class InAppChatView @JvmOverloads constructor(
     }
     //endregion
 
+    private fun observerNetworkConnection(lifecycle: Lifecycle) {
+        connectivityManager.networkStateFlow(lifecycle.coroutineScope)
+            .flowWithLifecycle(lifecycle)
+            .onEach { networkState ->
+                when (networkState) {
+                    NetworkState.AVAILABLE -> onInternetConnectionRestored()
+                    NetworkState.UNAVAILABLE -> onInternetConnectionLost()
+                }
+            }
+            .retry(3)
+            .catch { MobileMessagingLogger.e(TAG, "Failed to observe network state changes.", it) }
+            .launchIn(lifecycle.coroutineScope)
+    }
+
     private fun updateErrors() {
         val configSyncResult = SessionStorage.lcWidgetConfigSyncResult
         if (configSyncResult != null && !configSyncResult.isSuccess) {
@@ -646,29 +675,35 @@ class InAppChatView @JvmOverloads constructor(
             if (isInternetConnectionError || isPushRegIdMissing || isRegistrationPendingError)
                 return
 
-            inAppChatErrors.insertError(InAppChatErrors.Error(InAppChatErrors.CONFIG_SYNC_ERROR, error.message))
+            handleWidgetError(error.toLivechatWidgetException())
         }
     }
 
-    private val inAppChatErrors = InAppChatErrors { currentErrors, removedError, _ ->
-        if (removedError != null) {
-            if (InAppChatErrors.INTERNET_CONNECTION_ERROR == removedError.type) {
-                errorsHandler.handlerNoInternetConnectionError(true)
-                if (!isWidgetLoaded) {
-                    loadWidget()
-                }
-            }
-        }
+    private fun handleWidgetError(throwable: Throwable) {
+        val message = throwable.message ?: localizationUtils.getString(R.string.ib_chat_error, "Unknown error")
+        if (throwable is LivechatWidgetException)
+            handleErrorByNewApi(throwable)
+        else
+            handleErrorByNewApi(LivechatWidgetException.fromAndroid(message))
+        errorsHandler.handlerWidgetError(message)
+    }
 
-        for (error in currentErrors) {
-            if (InAppChatErrors.INTERNET_CONNECTION_ERROR == error.type) {
-                errorsHandler.handlerNoInternetConnectionError(false)
-            } else if (InAppChatErrors.CONFIG_SYNC_ERROR == error.type || InAppChatErrors.JS_ERROR == error.type) {
-                errorsHandler.handlerWidgetError(error.message)
-            } else {
-                errorsHandler.handlerError(error.message)
-            }
+    private fun onInternetConnectionLost() {
+        handleErrorByNewApi(InAppChatException.NO_INTERNET_CONNECTION)
+        errorsHandler.handlerNoInternetConnectionError(false)
+    }
+
+    private fun onInternetConnectionRestored() {
+        hideNoInternetConnectionView()
+        errorsHandler.handlerNoInternetConnectionError(true)
+        if (!isWidgetLoaded && !isWidgetLoadingInProgress) {
+            loadWidget()
         }
+    }
+
+    private fun handleErrorByNewApi(exception: InAppChatException) {
+        if (!errorsHandler.handleError(exception))
+            defaultErrorsHandler.handleError(exception)
     }
 
     private fun showNoInternetConnectionView(duration: Long = CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS) =
@@ -686,6 +721,14 @@ class InAppChatView @JvmOverloads constructor(
                 postDelayed({ this@with.invisible() }, duration)
             }
         }
+
+    private fun MobileMessagingError.toLivechatWidgetException(): LivechatWidgetException = LivechatWidgetException(
+        message = this.message,
+        code = this.code.toIntOrNull(),
+        name = this.type.name,
+        origin = InAppChatException.ORIGIN_ANDROID_SDK,
+        platform = InAppChatException.PLATFORM_ANDROID,
+    )
     //endregion
 
     //region Helpers

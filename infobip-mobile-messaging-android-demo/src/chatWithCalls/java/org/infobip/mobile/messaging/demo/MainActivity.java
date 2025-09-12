@@ -33,6 +33,7 @@ import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
 import org.infobip.mobile.messaging.chat.InAppChat;
 import org.infobip.mobile.messaging.chat.core.InAppChatEvent;
+import org.infobip.mobile.messaging.chat.core.InAppChatException;
 import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
@@ -40,6 +41,7 @@ import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThreads;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetView;
+import org.infobip.mobile.messaging.chat.view.InAppChatErrorsHandler;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle;
@@ -57,6 +59,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -341,8 +344,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.chat_availability, isAvailable), Toast.LENGTH_SHORT).show();
     }
 
-    private void setInAppChatEventsListener() {
-        inAppChat.setEventsListener(new InAppChatEventsListener() {
+    private InAppChatEventsListener getInAppChatEventsListener() {
+        return new InAppChatEventsListener() {
 
             @Override
             public void onChatLanguageChanged(@NonNull LivechatWidgetResult<String> result) {
@@ -423,12 +426,38 @@ public class MainActivity extends AppCompatActivity {
             public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
                 MobileMessagingLogger.d(TAG, "On chat connection paused: " + result);
             }
-        });
+        };
+    }
+
+    private InAppChatErrorsHandler getInAppChatErrorHandler() {
+        return new InAppChatErrorsHandler() {
+            @Override
+            public void handlerError(@NonNull String error) {
+                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle error: " + error);
+            }
+
+            @Override
+            public void handlerWidgetError(@NonNull String error) {
+                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle widget error: " + error);
+            }
+
+            @Override
+            public void handlerNoInternetConnectionError(boolean hasConnection) {
+                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle no internet connection error: " + hasConnection);
+            }
+
+            @Override
+            public boolean handleError(@NonNull InAppChatException exception) {
+                MobileMessagingLogger.d(TAG, "On demo app handle exception: " + exception.getMessage());
+                return true;
+            }
+        };
     }
 
     private void setUpOpenChatActivityButton() {
         openChatActivityButton.setOnClickListener((v) -> {
-            setInAppChatEventsListener();
+            //inAppChat.inAppChatScreen().setErrorHandler(getInAppChatErrorHandler());
+            inAppChat.inAppChatScreen().setEventsListener(getInAppChatEventsListener());
             inAppChat.inAppChatScreen().show();
         });
     }

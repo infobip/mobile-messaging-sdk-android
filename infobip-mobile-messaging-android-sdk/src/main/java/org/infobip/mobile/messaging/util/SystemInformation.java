@@ -11,6 +11,8 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import java.lang.reflect.Field;
 import java.util.Locale;
 
+import androidx.annotation.ChecksSdkIntAtLeast;
+
 /**
  * Created by sslavin on 21/04/16.
  */
@@ -49,11 +51,7 @@ public class SystemInformation {
             return androidABI;
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            androidABI = Build.CPU_ABI;
-        } else {
-            androidABI = Build.SUPPORTED_ABIS[0];
-        }
+        androidABI = Build.SUPPORTED_ABIS[0];
         return androidABI;
     }
 
@@ -71,20 +69,20 @@ public class SystemInformation {
             return deviceName;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            String deviceNameKey = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) ?
-                    Settings.Global.DEVICE_NAME :
-                    "device_name";
-            deviceName = Settings.Global.getString(context.getContentResolver(), deviceNameKey);
-        }
+        String deviceNameKey = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) ?
+                Settings.Global.DEVICE_NAME :
+                "device_name";
+        deviceName = Settings.Global.getString(context.getContentResolver(), deviceNameKey);
 
         return deviceName;
     }
 
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.TIRAMISU)
     public static boolean isTiramisuOrAbove() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
 
+    @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static boolean isUpsideDownCakeOrAbove() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
     }

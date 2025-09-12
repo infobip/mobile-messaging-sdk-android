@@ -22,7 +22,6 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import kotlin.coroutines.resume
-import kotlin.properties.Delegates
 
 internal class LivechatWidgetApiImpl(
     instanceId: InstanceId,
@@ -34,9 +33,9 @@ internal class LivechatWidgetApiImpl(
 ) : LivechatWidgetApi, LivechatWidgetWebViewManager {
 
     companion object {
-        private const val DEFAULT_LOADING_TIMEOUT_MS = 10_000L
-        private const val MIN_LOADING_TIMEOUT_MS = 5 * 1000
-        private const val MAX_LOADING_TIMEOUT_MS = 5 * 60 * 1000
+        private const val DEFAULT_LOADING_TIMEOUT_MS = 60 * 1000L
+        private const val MIN_LOADING_TIMEOUT_MS = 5 * 1000L
+        private const val MAX_LOADING_TIMEOUT_MS = 5 * 60 * 1000L
         private const val LOADING_CHECK_INTERVAL_MS = 100L
 
         private const val LOADING_FAIL_MSG = "Widget loading failed. Reason:"
@@ -82,13 +81,14 @@ internal class LivechatWidgetApiImpl(
     override var domain: String? by inAppChat::domain
 
     @set:Throws(IllegalArgumentException::class)
-    override var loadingTimeoutMillis: Long by Delegates.vetoable(DEFAULT_LOADING_TIMEOUT_MS) { _, _, newValue ->
-        if (newValue in MIN_LOADING_TIMEOUT_MS..MAX_LOADING_TIMEOUT_MS) {
-            true
-        } else {
-            throw IllegalArgumentException("Loading timeout must be between $MIN_LOADING_TIMEOUT_MS and $MAX_LOADING_TIMEOUT_MS milliseconds.")
+    override var loadingTimeoutMillis: Long = DEFAULT_LOADING_TIMEOUT_MS
+        set(value) {
+            if (value in MIN_LOADING_TIMEOUT_MS..MAX_LOADING_TIMEOUT_MS) {
+                field = value
+            } else {
+                throw IllegalArgumentException("Loading timeout must be between $MIN_LOADING_TIMEOUT_MS and $MAX_LOADING_TIMEOUT_MS milliseconds.")
+            }
         }
-    }
 
     override fun loadWidget(
         widgetId: String?,

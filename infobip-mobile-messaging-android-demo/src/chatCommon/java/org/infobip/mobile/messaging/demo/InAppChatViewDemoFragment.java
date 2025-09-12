@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import org.infobip.mobile.messaging.api.chat.WidgetInfo;
+import org.infobip.mobile.messaging.chat.core.InAppChatException;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread;
@@ -194,6 +195,12 @@ public class InAppChatViewDemoFragment extends Fragment {
         };
         inAppChatView.setEventsListener(eventsListener);
         inAppChatView.setErrorsHandler(new InAppChatView.ErrorsHandler() {
+            @Override
+            public boolean handleError(@NonNull InAppChatException exception) {
+                //Return true if you handled the exception, otherwise view's default handler will be used
+                return inAppChatView.getDefaultErrorsHandler().handleError(exception);
+            }
+
             @Override
             public void handlerError(@NonNull String error) {
                 //Your custom handling of general error or use default handler

@@ -37,7 +37,6 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
-import org.infobip.mobile.messaging.chat.view.InAppChatFragment;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -52,12 +51,9 @@ import java.util.concurrent.Executors;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
 public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
-    private final static String IN_APP_CHAT_FRAGMENT_TAG = InAppChatFragment.class.getName();
     private final static String TAG = "InAppChat";
     @SuppressLint("StaticFieldLeak")
     private static InAppChatImpl instance;
@@ -112,12 +108,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
         //InAppChatActivity is on foreground
         if (activity.getClass().toString().equals(InAppChatActivity.class.toString())) return true;
-
-        if (activity instanceof AppCompatActivity) {
-            //InAppChatFragment is visible and resumed
-            Fragment inAppChatFragment = ((AppCompatActivity) activity).getSupportFragmentManager().findFragmentByTag(IN_APP_CHAT_FRAGMENT_TAG);
-            return inAppChatFragment != null && inAppChatFragment.isVisible() && inAppChatFragment.isResumed();
-        }
 
         //InAppChatView is visible
         return isInAppChatViewPresent(activity);
@@ -251,7 +241,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @NonNull
     public InAppChatScreenImpl inAppChatScreen() {
         if (inAppChatScreen == null) {
-            inAppChatScreen = new InAppChatScreenImpl(context);
+            inAppChatScreen = new InAppChatScreenImpl(context, sessionStorage());
         }
         if (!isActivated()) {
             MobileMessagingLogger.e(TAG, "In-app chat wasn't activated, call activate()");
@@ -466,14 +456,16 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
     }
 
+    @Deprecated
     @Override
     public void setEventsListener(InAppChatEventsListener inAppChatEventsListener) {
-        sessionStorage().setInAppChatEventsListener(inAppChatEventsListener);
+        inAppChatScreen().setEventsListener(inAppChatEventsListener);
     }
 
+    @Deprecated
     @Override
     public InAppChatEventsListener getEventsListener() {
-        return sessionStorage().getInAppChatEventsListener();
+        return inAppChatScreen().getEventsListener();
     }
 
     @Override
