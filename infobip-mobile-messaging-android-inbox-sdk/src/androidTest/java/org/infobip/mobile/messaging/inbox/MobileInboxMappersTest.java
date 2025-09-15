@@ -5,9 +5,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.infobip.mobile.messaging.util.DateTimeUtil;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MobileInboxMappersTest {
 
@@ -48,15 +52,37 @@ public class MobileInboxMappersTest {
         int limit = 100;
         String topic = "topicName";
 
-        JSONObject jsonObject = new JSONObject("{\"fromDateTime\":\"" + fromDateStr + "\"," +
-                "\"toDateTime\":\"" + toDateStr + "\"," +
-                "\"topic\":\"" + topic + "\"," +
-                "\"limit\":" + limit + "}");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("fromDateTime", fromDateStr);
+        jsonObject.put("toDateTime", toDateStr);
+        jsonObject.put("topic", topic);
+        jsonObject.put("limit", limit);
 
         MobileInboxFilterOptions filterOptions = mobileInboxFilterOptionsFromJSON(jsonObject);
 
         assertEquals(limit, (int) filterOptions.getLimit());
         assertEquals("topicName", filterOptions.getTopic());
+        assertEquals(DateTimeUtil.ISO8601DateFromString(fromDateStr), filterOptions.getFromDateTime());
+        assertEquals(DateTimeUtil.ISO8601DateFromString(toDateStr), filterOptions.getToDateTime());
+    }
+
+    @Test
+    public void mobileInboxFilterOptionsFromJSON_is_object_with_topics_define() throws JSONException {
+        String fromDateStr = "2024-11-07T00:00:00Z";
+        String toDateStr = "2024-11-08T00:00:00Z";
+        int limit = 100;
+        List<String> topics = Arrays.asList("topic1", "topic2");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("fromDateTime", fromDateStr);
+        jsonObject.put("toDateTime", toDateStr);
+        jsonObject.put("topics", new JSONArray(topics));
+        jsonObject.put("limit", limit);
+
+        MobileInboxFilterOptions filterOptions = mobileInboxFilterOptionsFromJSON(jsonObject);
+
+        assertEquals(limit, (int) filterOptions.getLimit());
+        assertEquals(topics, filterOptions.getTopics());
         assertEquals(DateTimeUtil.ISO8601DateFromString(fromDateStr), filterOptions.getFromDateTime());
         assertEquals(DateTimeUtil.ISO8601DateFromString(toDateStr), filterOptions.getToDateTime());
     }
