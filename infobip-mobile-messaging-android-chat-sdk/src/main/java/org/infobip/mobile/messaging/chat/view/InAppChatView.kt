@@ -238,9 +238,6 @@ class InAppChatView @JvmOverloads constructor(
      */
     fun pauseChatConnection() {
         livechatWidgetApi.pauseConnection()
-        if (lifecycle?.currentState == Lifecycle.State.DESTROYED) {
-            binding.ibLcWebView.destroy()
-        }
     }
 
     /**
@@ -417,6 +414,9 @@ class InAppChatView @JvmOverloads constructor(
     private val lifecycleObserver = object : DefaultLifecycleObserver {
 
         override fun onCreate(owner: LifecycleOwner) {
+            if (livechatWidgetApi.eventsListener == null) {
+                livechatWidgetApi.eventsListener = livechatWidgetEventsListener
+            }
         }
 
         override fun onStart(owner: LifecycleOwner) {
@@ -442,19 +442,15 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
+            binding.ibLcWebView.destroy()
+            livechatWidgetApi.eventsListener = null
+            lifecycle?.removeObserver(this)
         }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        livechatWidgetApi.eventsListener = livechatWidgetEventsListener
         lifecycle?.addObserver(lifecycleObserver)
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        livechatWidgetApi.eventsListener = null
-        lifecycle?.removeObserver(lifecycleObserver)
     }
     //endregion
 
