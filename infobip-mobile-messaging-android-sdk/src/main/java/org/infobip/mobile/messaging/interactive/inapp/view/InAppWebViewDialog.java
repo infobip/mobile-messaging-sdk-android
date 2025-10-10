@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.interactive.inapp.view;
 
-import static android.content.Context.WINDOW_SERVICE;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -23,9 +21,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.PopupWindow;
 
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.R;
@@ -45,6 +40,11 @@ import org.infobip.mobile.messaging.util.UserAgentAdditions;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
+
+import static android.content.Context.WINDOW_SERVICE;
 
 public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListener {
     private static final String TAG = "[InAppWebViewDialog]";
@@ -197,7 +197,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         setActivityLifecycleListener(this);
 
         if (!PreferenceHelper.findBoolean(getActivity(), MobileMessagingProperty.FULL_FEATURE_IN_APPS_ENABLED)) {
-            MobileMessagingLogger.e(TAG, "InApp WebView dialog cannot be displayed because Full-featured In-Apps not enabled!");
+            MobileMessagingLogger.w(TAG, "InApp WebView dialog cannot be displayed because Full-featured In-Apps not enabled!");
         } else {
             try {
                 getActivity().runOnUiThread(() -> {
@@ -242,7 +242,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                     }
                 });
             } catch (Exception e) {
-                MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage());
+                MobileMessagingLogger.e(TAG, "Failed to display webview for message with ID " + message.getMessageId() + " due to: " + e.getMessage(), e);
             }
         }
     }
@@ -352,7 +352,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 MobileMessagingLogger.d(TAG, "Deleted local history");
             });
         } catch (Exception e) {
-            MobileMessagingLogger.e(TAG, "Failed to delete local history due to " + e.getMessage());
+            MobileMessagingLogger.e(TAG, "Failed to delete local history due to " + e.getMessage(), e);
         }
     }
 
@@ -408,7 +408,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
                 webView.setLayoutParams(viewFlowLayout);
             });
         } catch (Exception e) {
-            MobileMessagingLogger.e(TAG, "Failed due to " + e.getMessage());
+            MobileMessagingLogger.e(TAG, "Could not update page height due to " + e.getMessage(), e);
         }
     }
 

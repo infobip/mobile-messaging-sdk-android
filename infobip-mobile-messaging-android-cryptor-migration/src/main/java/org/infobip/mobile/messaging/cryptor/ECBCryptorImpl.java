@@ -1,10 +1,8 @@
 package org.infobip.mobile.messaging.cryptor;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Base64;
-import android.util.Log;
 
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.Cryptor;
 
 import java.security.Key;
@@ -14,6 +12,9 @@ import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Used only to migrate previously saved data.
@@ -32,7 +33,7 @@ public class ECBCryptorImpl extends Cryptor {
         try {
             sha = MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e(TAG, "ECBCryptor initialization failed.", e);
             return;
         }
         keyBytes = sha.digest(keyBytes);
@@ -72,7 +73,7 @@ public class ECBCryptorImpl extends Cryptor {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e(TAG, "Data encryption failed.", e);
             return null;
         }
     }
@@ -83,7 +84,7 @@ public class ECBCryptorImpl extends Cryptor {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            Log.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e(TAG, "Data decryption failed.", e);
             return null;
         }
     }

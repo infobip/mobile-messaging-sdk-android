@@ -80,7 +80,7 @@ public class VersionChecker {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("Error while checking version!");
+                MobileMessagingLogger.e("VERSION CHECK ERROR <<<", error);
                 stats.reportError(MobileMessagingStatsError.VERSION_CHECK_ERROR);
             }
         }
@@ -99,7 +99,7 @@ public class VersionChecker {
 
             return latestVersion.compareTo(currentVersion) > 0;
         } catch (Exception e) {
-            MobileMessagingLogger.w(TAG, "Cannot process versions: current(" + current + ") latest(" + latest + ") " + e);
+            MobileMessagingLogger.e(TAG, "Cannot process versions: current(" + current + ") latest(" + latest + ") ", e);
             return false;
         }
     }

@@ -1,13 +1,8 @@
 package org.infobip.mobile.messaging.app;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.Event;
 import org.infobip.mobile.messaging.Message;
@@ -15,6 +10,11 @@ import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.view.WebViewActivity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 
 public class ContentIntentWrapper {
     protected final Context context;
@@ -40,7 +40,7 @@ public class ContentIntentWrapper {
     public Intent createContentIntent(@NonNull Intent intent, @NonNull NotificationSettings notificationSettings) {
         Class callbackActivity = notificationSettings.getCallbackActivity();
         if (callbackActivity == null) {
-            MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
+            MobileMessagingLogger.w("Callback activity is not set, cannot proceed");
             return null;
         }
 

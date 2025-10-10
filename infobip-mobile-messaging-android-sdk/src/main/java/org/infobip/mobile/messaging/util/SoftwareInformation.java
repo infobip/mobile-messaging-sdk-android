@@ -3,13 +3,12 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
-
-import androidx.core.app.NotificationManagerCompat;
 
 import org.infobip.mobile.messaging.BuildConfig;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import androidx.core.app.NotificationManagerCompat;
 
 /**
  * Created by sslavin on 21/04/16.
@@ -34,7 +33,7 @@ public class SoftwareInformation {
         try {
             appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
         } catch (PackageManager.NameNotFoundException e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Could not obtain appVersion.", e);
         }
         return appVersion;
     }
@@ -49,7 +48,7 @@ public class SoftwareInformation {
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
             appName = packageManager.getApplicationLabel(applicationInfo).toString();
         } catch (Exception e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Could not obtain appName.", e);
         }
         return appName;
     }
@@ -64,7 +63,7 @@ public class SoftwareInformation {
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
             appIconResourceId = applicationInfo.icon;
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            MobileMessagingLogger.e("Could not obtain appIconResourceId.", e);
         }
 
         return appIconResourceId != null ? appIconResourceId : 0;

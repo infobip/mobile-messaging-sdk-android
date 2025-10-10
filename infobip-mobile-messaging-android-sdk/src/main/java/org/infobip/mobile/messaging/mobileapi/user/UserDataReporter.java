@@ -103,7 +103,7 @@ public class UserDataReporter {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
+                MobileMessagingLogger.e("USER DATA ERROR <<<", error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
@@ -118,7 +118,7 @@ public class UserDataReporter {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                     mobileMessagingCore.setUserDataReportedWithError();
                 } else {
-                    MobileMessagingLogger.v("User data synchronization will be postponed to a later time due to communication error");
+                    MobileMessagingLogger.w("User data synchronization will be postponed to a later time due to communication error");
                 }
 
                 broadcaster.error(mobileMessagingError);
@@ -148,7 +148,7 @@ public class UserDataReporter {
             public UserBody run(Void[] aVoid) {
                 MobileMessagingLogger.v("FETCHING USER DATA >>>");
                 UserBody userResponse = mobileApiUserData.getUser(mobileMessagingCore.getPushRegistrationId(), header);
-                MobileMessagingLogger.v("FETCHING USER DATA <<<", userResponse != null ? userResponse.toString() : null);
+                MobileMessagingLogger.v("FETCHING USER DATA DONE<<<", userResponse != null ? userResponse.toString() : null);
                 return userResponse;
             }
 
@@ -167,7 +167,7 @@ public class UserDataReporter {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("MobileMessaging API returned error (user data)! ", error);
+                MobileMessagingLogger.e("FETCHING USER DATA ERROR <<<", error);
                 stats.reportError(MobileMessagingStatsError.USER_DATA_SYNC_ERROR);
 
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);

@@ -164,7 +164,7 @@ internal class LivechatWidgetClientImpl(
                 }
             }.onFailure {
                 executionListener?.onResult(LivechatWidgetResult.Error(it))
-                MobileMessagingLogger.e(instanceId.tag(TAG), "Failed to execute webView JS script ${shortenScript(script)} + ${it.message}")
+                MobileMessagingLogger.e(instanceId.tag(TAG), "Failed to execute webView JS script ${shortenScript(script)} + ${it.message}", it)
             }
         }
     }

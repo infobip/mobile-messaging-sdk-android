@@ -2,13 +2,13 @@ package org.infobip.mobile.messaging.util;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
 import java.net.URI;
 import java.util.HashSet;
+
+import androidx.annotation.NonNull;
 
 public class DomainHelper {
     private final Context context;
@@ -28,7 +28,7 @@ public class DomainHelper {
                 if (domainName.equals(domain) || domainName.endsWith("." + domain)) return true;
             }
         } catch (Exception e) {
-            MobileMessagingLogger.e("Error parsing url: " + url + ", error: " + e);
+            MobileMessagingLogger.e("Error parsing url: " + url, e);
         }
 
         return false;

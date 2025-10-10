@@ -32,7 +32,7 @@ public class ModuleLoader {
             try {
                 module = implementation.newInstance();
             } catch (Exception e) {
-                MobileMessagingLogger.e("Cannot create module for class: " + cls.getName());
+                MobileMessagingLogger.e("Cannot create module for class: " + cls.getName(), e);
                 continue;
             }
             modules.put(implementation.getName(), module);
@@ -44,7 +44,7 @@ public class ModuleLoader {
         try {
             return cls.newInstance();
         } catch (Exception e) {
-            MobileMessagingLogger.e("Cannot create module for class: " + cls.getName());
+            MobileMessagingLogger.e("Cannot create module for class: " + cls.getName(), e);
             return null;
         }
     }
@@ -58,7 +58,7 @@ public class ModuleLoader {
             }
             metaData = ai.metaData;
         } catch (Exception e) {
-            MobileMessagingLogger.e("Failed to read meta data of application: " + e.getMessage());
+            MobileMessagingLogger.e("Failed to read meta data of application: " + e.getMessage(), e);
             return new HashSet<>();
         }
 
@@ -78,7 +78,7 @@ public class ModuleLoader {
                 //noinspection unchecked
                 classes.add((Class<T>) Class.forName(key));
             } catch (Exception ignored) {
-                MobileMessagingLogger.e("Cannot create class for: " + key);
+                MobileMessagingLogger.e("Cannot create class for: " + key, ignored);
             }
         }
         return classes;

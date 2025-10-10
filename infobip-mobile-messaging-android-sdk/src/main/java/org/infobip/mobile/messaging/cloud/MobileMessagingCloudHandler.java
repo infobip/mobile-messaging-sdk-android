@@ -4,15 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-import androidx.work.Data;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.infobip.mobile.messaging.dal.data.MessageDataMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Lazy;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.work.Data;
 
 public class MobileMessagingCloudHandler {
 
@@ -84,7 +84,7 @@ public class MobileMessagingCloudHandler {
     private void handleMessage(Context context, Data data) {
         String extra = data.getString(ACTION_CLOUD_MESSAGE_RECEIVE);
         if (extra == null) {
-            MobileMessagingLogger.e("No extras in data, cannot receive message");
+            MobileMessagingLogger.w("No extras in data, cannot receive message");
             return;
         }
         Message message = MessageDataMapper.messageFromString(extra);
@@ -131,7 +131,7 @@ public class MobileMessagingCloudHandler {
     private void handleMessage(Context context, @NonNull Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras == null) {
-            MobileMessagingLogger.e("No extras in intent, cannot receive message");
+            MobileMessagingLogger.w("No extras in intent, cannot receive message");
             return;
         }
 

@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.infobip.mobile.messaging.platform.Broadcaster;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 public class NotificationTapReceiverActivity extends Activity {
     private Broadcaster broadcaster;
@@ -42,12 +42,12 @@ public class NotificationTapReceiverActivity extends Activity {
     public void handleNotificationTap(Context context, Intent intent) {
         Bundle messageBundle = intent.getBundleExtra(BroadcastParameter.EXTRA_MESSAGE);
         if (messageBundle == null) {
-            MobileMessagingLogger.e("Received no message in NotificationTapReceiverActivity");
+            MobileMessagingLogger.w("Received no message in NotificationTapReceiverActivity");
             return;
         }
         Message message = Message.createFrom(messageBundle);
         if (message == null) {
-            MobileMessagingLogger.e("Received no message in NotificationTapReceiverActivity");
+            MobileMessagingLogger.w("Received no message in NotificationTapReceiverActivity");
             return;
         }
 

@@ -57,13 +57,13 @@ internal class LivechatRegistrationChecker(
         object : MAsyncTask<Void, String?>() {
 
             override fun run(ins: Array<out Void>?): String? {
-                MobileMessagingLogger.v("CHECK LIVECHAT REGISTRATION >>>")
+                MobileMessagingLogger.v(TAG,"CHECK LIVECHAT REGISTRATION >>>")
                 val pushRegIg = pushRegistrationId ?: mmCore.pushRegistrationId
                 require(pushRegIg?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing pushRegistrationId argument." }
                 val destinations: Array<out LivechatDestination>? = mobileApiAppInstance.getLivechatContactInformation(pushRegIg)?.liveChatDestinations
                 return when (destinations?.size) {
                     null, 0 -> {
-                        MobileMessagingLogger.d("Livechat contact information array is null or empty.")
+                        MobileMessagingLogger.d(TAG,"Livechat contact information array is null or empty.")
                         null
                     }
                     1 -> destinations.first().registrationId
@@ -82,7 +82,7 @@ internal class LivechatRegistrationChecker(
             }
 
             override fun after(livechatRegistrationId: String?) {
-                MobileMessagingLogger.v("CHECK LIVECHAT REGISTRATION DONE <<<")
+                MobileMessagingLogger.v(TAG,"CHECK LIVECHAT REGISTRATION DONE <<<")
                 if (livechatRegistrationId?.isNotBlank() == true && livechatRegistrationId != reportedRegistrationId) {
                     inAppChatBroadcaster.livechatRegistrationIdUpdated(livechatRegistrationId)
                     reportedRegistrationId = livechatRegistrationId
@@ -94,7 +94,7 @@ internal class LivechatRegistrationChecker(
             }
 
             override fun error(error: Throwable?) {
-                MobileMessagingLogger.e("CHECK LIVECHAT REGISTRATION ERROR <<<", error)
+                MobileMessagingLogger.e(TAG,"CHECK LIVECHAT REGISTRATION ERROR <<<", error)
                 isSyncInProgress = false
             }
 

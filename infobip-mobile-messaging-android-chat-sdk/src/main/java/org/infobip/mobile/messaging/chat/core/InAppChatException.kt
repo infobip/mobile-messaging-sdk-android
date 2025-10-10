@@ -48,7 +48,7 @@ open class InAppChatException(
                 putOpt("platform", platform)
             }
         } catch (e: Exception) {
-            MobileMessagingLogger.w("Cannot convert InAppChatException to JSON: ", e)
+            MobileMessagingLogger.e("Cannot convert InAppChatException to JSON: ", e)
             null
         }
     }

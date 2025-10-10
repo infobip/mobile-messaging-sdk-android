@@ -45,7 +45,7 @@ public class MoMessageMapper {
             if (statusCode < Message.Status.values().length) {
                 status = Message.Status.values()[statusCode];
             } else {
-                MobileMessagingLogger.e(delivery.getMessageId() + ":Unexpected status code: " + statusCode);
+                MobileMessagingLogger.w(delivery.getMessageId() + ":Unexpected status code: " + statusCode);
             }
             message.setStatus(status);
             messages.add(message);

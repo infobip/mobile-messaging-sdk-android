@@ -1,7 +1,6 @@
 package org.infobip.mobile.messaging.storage;
 
 import android.os.Bundle;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
@@ -107,8 +106,7 @@ public class StoredMessageMapper {
         try {
             return new JSONObject(string);
         } catch (JSONException e) {
-            MobileMessagingLogger.w(TAG, "Cannot parse (" + key + "): " + e.getMessage());
-            MobileMessagingLogger.d(TAG, Log.getStackTraceString(e));
+            MobileMessagingLogger.e(TAG, "Cannot parse (" + key + "): " + e.getMessage(), e);
             return null;
         }
     }

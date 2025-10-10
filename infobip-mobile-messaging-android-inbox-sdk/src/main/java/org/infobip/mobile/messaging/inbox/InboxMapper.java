@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.inbox;
 
-import androidx.annotation.NonNull;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
@@ -13,6 +11,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 public class InboxMapper {
     public static Inbox fromBackend(@NonNull FetchInboxResponse fetchInboxResponse) {
@@ -36,7 +36,7 @@ public class InboxMapper {
         try {
             customPayload = response.getCustomPayload() != null ? new JSONObject(response.getCustomPayload()) : null;
         } catch (JSONException e) {
-            MobileMessagingLogger.w("Cannot get Inbox response", e);
+            MobileMessagingLogger.e("Cannot get Inbox response", e);
         }
 
         final String internalData = response.getInternalData();
@@ -80,7 +80,7 @@ public class InboxMapper {
         try {
             return new JSONObject(inbox.toString());
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot convert Inbox toJSON", e);
+            MobileMessagingLogger.e("Cannot convert Inbox toJSON", e);
             return new JSONObject();
         }
     }

@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import androidx.annotation.NonNull;
-
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.DomainHelper;
 import org.infobip.mobile.messaging.view.WebViewActivity;
+
+import androidx.annotation.NonNull;
 
 public class ActivityStarterWrapper {
 
@@ -35,7 +35,7 @@ public class ActivityStarterWrapper {
         }
         Class<?> callbackActivity = notificationSettings.getCallbackActivity();
         if (callbackActivity == null) {
-            MobileMessagingLogger.e("Callback activity is not set, cannot proceed");
+            MobileMessagingLogger.w("Callback activity is not set, cannot proceed");
             return;
         }
 

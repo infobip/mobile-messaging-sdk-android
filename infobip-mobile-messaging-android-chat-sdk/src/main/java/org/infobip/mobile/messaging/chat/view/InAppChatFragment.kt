@@ -593,7 +593,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {
                 this@InAppChatFragment.widgetInfo = widgetInfo
                 updateViews(widgetInfo)
-                MobileMessagingLogger.w(TAG, "WidgetInfo updated $widgetInfo")
+                MobileMessagingLogger.d(TAG, "WidgetInfo updated $widgetInfo")
                 eventsListener?.onChatWidgetInfoUpdated(widgetInfo)
             }
 
@@ -743,12 +743,12 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     //region Attachment picker
     private fun showAttachmentActionDialog(allowedExtensions: Set<String>) {
         if (allowedExtensions.isEmpty()) {
-            MobileMessagingLogger.e(TAG, "Attachment picker skipped: no allowed attachment extensions are configured in the LiveChat Widget.")
+            MobileMessagingLogger.w(TAG, "Attachment picker skipped: no allowed attachment extensions are configured in the LiveChat Widget.")
             return
         }
         val specifications: Set<AttachmentSourceSpecification> = InAppChatAttachment.getAvailableSourcesSpecifications(requireContext(), allowedExtensions)
         if (specifications.isEmpty()) {
-            MobileMessagingLogger.e(TAG, "Attachment picker skipped: no available attachment sources match the allowed extensions configured in the LiveChat Widget.")
+            MobileMessagingLogger.w(TAG, "Attachment picker skipped: no available attachment sources match the allowed extensions configured in the LiveChat Widget.")
             return
         }
 
@@ -834,7 +834,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         noinline fallback: (() -> Unit)? = null,
         action: (IbFragmentChatBinding) -> Unit,
     ) {
-        _binding?.let(action) ?: fallback?.invoke() ?: MobileMessagingLogger.e(TAG, "Could not execute action, fragment is not attached yet")
+        _binding?.let(action) ?: fallback?.invoke() ?: MobileMessagingLogger.w(TAG, "Could not execute action, fragment is not attached yet")
     }
 
     private fun getLifecycleRegistry(): InAppChatFragmentLifecycleRegistry {

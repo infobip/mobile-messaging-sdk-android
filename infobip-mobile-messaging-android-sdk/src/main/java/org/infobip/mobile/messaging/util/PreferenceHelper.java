@@ -3,7 +3,6 @@ package org.infobip.mobile.messaging.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -14,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 /**
  * @author mstipanov
@@ -422,7 +423,7 @@ public abstract class PreferenceHelper {
                         privatePrefsEditor.putStringSet(key, (Set<String>) value);
                     }
                 } catch (Exception ignored) {
-                    MobileMessagingLogger.w(String.format("Failed to migrate key %s with value %s", key, value));
+                    MobileMessagingLogger.e(String.format("Failed to migrate key %s with value %s", key, value), ignored);
                 }
                 publicPrefsEditor.remove(key);
             }

@@ -6,6 +6,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
 import java.util.ArrayDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -48,7 +50,7 @@ public abstract class MMAsyncTask<Params, Progress, Result> {
     private static final RejectedExecutionHandler sRunOnSerialPolicy =
             new RejectedExecutionHandler() {
                 public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
-                    android.util.Log.w(LOG_TAG, "Exceeded ThreadPoolExecutor pool size");
+                    MobileMessagingLogger.w(LOG_TAG, "Exceeded ThreadPoolExecutor maximum pool size");
                     // As a last ditch fallback, run it on an executor with an unbounded queue.
                     // Create this executor lazily, hopefully almost never.
                     synchronized (this) {

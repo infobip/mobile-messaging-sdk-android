@@ -97,7 +97,7 @@ public class MessagesSynchronizer {
             public void error(Throwable error) {
                 mobileMessagingCore.addUnreportedMessageIds(unreportedMessageIds);
 
-                MobileMessagingLogger.e("MobileMessaging API returned error (synchronizing messages)! ", error);
+                MobileMessagingLogger.e("SYNC MESSAGES ERROR <<<", error);
                 stats.reportError(MobileMessagingStatsError.SYNC_MESSAGES_ERROR);
 
                 broadcaster.error(MobileMessagingError.createFrom(error));

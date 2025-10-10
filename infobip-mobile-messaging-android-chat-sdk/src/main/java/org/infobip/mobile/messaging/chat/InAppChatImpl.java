@@ -244,7 +244,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
             inAppChatScreen = new InAppChatScreenImpl(context, sessionStorage());
         }
         if (!isActivated()) {
-            MobileMessagingLogger.e(TAG, "In-app chat wasn't activated, call activate()");
+            MobileMessagingLogger.w(TAG, "In-app chat wasn't activated, call activate()");
         }
         return inAppChatScreen;
     }
@@ -338,26 +338,12 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
 
     @Override
     public void sendContextualData(@Nullable String data) {
-        sendContextualData(data, MultithreadStrategy.ACTIVE, new MobileMessaging.ResultListener<Void>() {
-            @Override
-            public void onResult(Result<Void, MobileMessagingError> result) {
-                if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG, "Send contextual data error: " + result.getError().getMessage());
-                }
-            }
-        });
+        sendContextualData(data, MultithreadStrategy.ACTIVE, null);
     }
 
     @Override
     public void sendContextualData(@Nullable String data, @Nullable MultithreadStrategy flag) {
-        sendContextualData(data, flag, new MobileMessaging.ResultListener<Void>() {
-            @Override
-            public void onResult(Result<Void, MobileMessagingError> result) {
-                if (!result.isSuccess()) {
-                    MobileMessagingLogger.e(TAG, "Send contextual data error: " + result.getError().getMessage());
-                }
-            }
-        });
+        sendContextualData(data, flag, null);
     }
 
     @Override

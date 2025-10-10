@@ -36,7 +36,7 @@ public abstract class DownloadImageTask extends MMAsyncTask<String, Void, Bitmap
                 // If exception is caused by http, skip retries.
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (!NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted() && imageUrl.substring(0, 5).toLowerCase().startsWith("http:")) {
-                        MobileMessagingLogger.e("HTTP not permitted, use https or override usesClearTextTraffic on the application level.");
+                        MobileMessagingLogger.w("HTTP not permitted, use https or override usesClearTextTraffic on the application level.");
                         break;
                     }
                 }

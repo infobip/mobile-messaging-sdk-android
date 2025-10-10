@@ -6,8 +6,6 @@ import android.database.DatabaseUtils;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import androidx.annotation.NonNull;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
@@ -16,6 +14,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * @author sslavin
@@ -122,7 +122,7 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
         try {
             emptyInstance = cls.newInstance();
         } catch (Exception e) {
-            MobileMessagingLogger.e(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Could not create instance of " + cls.getName(), e);
             throw new RuntimeException(e);
         }
         databaseObjectsCache.put(cls, emptyInstance);
@@ -144,7 +144,7 @@ public abstract class BaseDatabaseHelper extends SQLiteOpenHelper implements Dat
                     object.fillFromCursor(cursor);
                     objects.add(object);
                 } catch (Exception e) {
-                    MobileMessagingLogger.e(Log.getStackTraceString(e));
+                    MobileMessagingLogger.e("Could not load from cursor", e);
                 }
             } while (cursor.moveToNext());
         }

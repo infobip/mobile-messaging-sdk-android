@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
@@ -36,7 +35,7 @@ public class SystemInformation {
             try {
                 fieldValue = field.getInt(new Object());
             } catch (IllegalArgumentException | NullPointerException | IllegalAccessException e) {
-                MobileMessagingLogger.d(Log.getStackTraceString(e));
+                MobileMessagingLogger.e("Could not obtain Android system name", e);
             }
 
             if (fieldValue == Build.VERSION.SDK_INT) {

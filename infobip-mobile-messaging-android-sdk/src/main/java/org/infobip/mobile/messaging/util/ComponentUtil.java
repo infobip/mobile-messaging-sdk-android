@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MobileMessagingConnectivityReceiver;
@@ -17,6 +15,8 @@ import org.infobip.mobile.messaging.MobileMessagingSynchronizationReceiver;
 import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * Utility class for component state management
@@ -80,9 +80,9 @@ public class ComponentUtil {
     public static void enableComponent(Context context, Class componentClass) {
         try {
             ComponentUtil.setState(context, true, componentClass);
-            MobileMessagingLogger.w("Enabled " + componentClass.getName() + " for compatibility reasons");
+            MobileMessagingLogger.d("Enabled " + componentClass.getName() + " for compatibility reasons");
         } catch (Exception e) {
-            MobileMessagingLogger.d("Cannot enable " + componentClass.getName() + ": ", e);
+            MobileMessagingLogger.e("Cannot enable " + componentClass.getName() + ": ", e);
         }
     }
 
@@ -114,7 +114,7 @@ public class ComponentUtil {
         if (SoftwareInformation.isDebuggableApplicationBuild(context)) {
             throw exception;
         } else {
-            MobileMessagingLogger.e(exception.getMessage());
+            MobileMessagingLogger.e(exception.getMessage(), exception);
         }
     }
 }

@@ -3,8 +3,6 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.util.Pair;
 
-import androidx.annotation.Nullable;
-
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
@@ -23,6 +21,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.Nullable;
 
 
 public class UserMapper {
@@ -79,7 +79,7 @@ public class UserMapper {
             }
 
         } catch (Exception e) {
-            MobileMessagingLogger.e("User data migration failed %s", e.getMessage());
+            MobileMessagingLogger.e("User data migration failed %s", e);
             newUser = null;
         }
 
@@ -249,7 +249,7 @@ public class UserMapper {
         try {
             return gender != null ? User.Gender.valueOf(gender) : null;
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse gender", e);
+            MobileMessagingLogger.e("Cannot parse gender", e);
             return null;
         }
     }
@@ -258,7 +258,7 @@ public class UserMapper {
         try {
             return type != null ? User.Type.valueOf(type) : null;
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user type", e);
+            MobileMessagingLogger.e("Cannot parse user type", e);
             return null;
         }
     }

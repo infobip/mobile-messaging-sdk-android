@@ -1,8 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.user;
 
 
-import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
-
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.User;
@@ -23,6 +21,8 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
+
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
 
 public class PersonalizeSynchronizer {
 
@@ -99,7 +99,7 @@ public class PersonalizeSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("PERSONALIZE ERROR <<<", error);
+                MobileMessagingLogger.e("PERSONALIZE ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
@@ -145,7 +145,7 @@ public class PersonalizeSynchronizer {
 
                     @Override
                     public void error(Throwable error) {
-                        MobileMessagingLogger.v("DEPERSONALIZE ERROR <<<", error);
+                        MobileMessagingLogger.e("DEPERSONALIZE ERROR <<<", error);
                         MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
                         serverListener.onServerDepersonalizeFailed(error);
                         broadcaster.error(mobileMessagingError);
@@ -179,7 +179,7 @@ public class PersonalizeSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("DEPERSONALIZE ERROR <<<", error);
+                MobileMessagingLogger.e("DEPERSONALIZE ERROR <<<", error);
                 if (actionListener != null) {
                     actionListener.onUserInitiatedDepersonalizeFailed(error);
                 }
@@ -258,14 +258,14 @@ public class PersonalizeSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("MobileMessaging API returned error (repersonalize)! ", error);
+                MobileMessagingLogger.e("REPERSONALIZE ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 if (error instanceof BackendInvalidParameterException) {
                     mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                     mobileMessagingCore.setUserDataReportedWithError();
                 } else {
-                    MobileMessagingLogger.v("Repersonalization will be postponed to a later time due to communication error");
+                    MobileMessagingLogger.w("Repersonalization will be postponed to a later time due to communication error");
                 }
             }
         }

@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.cloud.firebase;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -12,6 +10,9 @@ import org.infobip.mobile.messaging.dal.json.JSONObjectAdapter;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
 import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * @author sslavin
@@ -45,17 +46,17 @@ public class FirebaseMessageMapper {
     public Message createMessage(RemoteMessage remoteMessage) {
         IBData data = getIBData(remoteMessage);
         if (data == null) {
-            MobileMessagingLogger.e(TAG, "Cannot retrieve message data for message ID " + remoteMessage.getMessageId());
+            MobileMessagingLogger.w(TAG, "Cannot retrieve message data for message ID " + remoteMessage.getMessageId());
             return null;
         }
 
         if (TextUtils.isEmpty(data.messageId)) {
-            MobileMessagingLogger.e(TAG, "Message ID is empty for " + remoteMessage);
+            MobileMessagingLogger.w(TAG, "Message ID is empty for " + remoteMessage);
             return null;
         }
 
         if (TextUtils.isEmpty(data.text)) {
-            MobileMessagingLogger.e(TAG, "Message text is empty for " + remoteMessage);
+            MobileMessagingLogger.w(TAG, "Message text is empty for " + remoteMessage);
             return null;
         }
 

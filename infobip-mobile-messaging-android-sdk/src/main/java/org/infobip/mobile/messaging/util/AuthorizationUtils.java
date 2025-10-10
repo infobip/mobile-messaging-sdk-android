@@ -95,7 +95,7 @@ public class AuthorizationUtils {
             try {
                 isValidJwt(token);
             } catch (JwtStructureValidationException | JwtExpirationException e) {
-                MobileMessagingLogger.e("JWT token structure is invalid or the token is expired.");
+                MobileMessagingLogger.e("JWT token structure is invalid or the token is expired.", e);
                 if (listener != null) {
                     listener.onResult(new Result<>(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(e)));
                 }

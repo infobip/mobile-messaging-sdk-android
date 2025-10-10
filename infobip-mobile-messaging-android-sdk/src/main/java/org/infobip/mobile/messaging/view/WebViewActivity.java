@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.view;
 
-import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -17,11 +15,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,6 +35,14 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.net.URISyntaxException;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.drawable.DrawableCompat;
+
+import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
 
 
 public class WebViewActivity extends AppCompatActivity {
@@ -149,7 +150,7 @@ public class WebViewActivity extends AppCompatActivity {
                 }
             } catch (URISyntaxException e) {
                 // not an intent URI
-                MobileMessagingLogger.w("Failed to resolve intent:// for web view URL " + innerUrl, e);
+                MobileMessagingLogger.e("Failed to resolve intent:// for web view URL " + innerUrl, e);
             }
         }
 
@@ -174,7 +175,7 @@ public class WebViewActivity extends AppCompatActivity {
                 context.startActivity(parsedUriIntent);
                 return true;
             } catch (ActivityNotFoundException e) {
-                MobileMessagingLogger.d("Browser is the default app for this intent, URL will be opened in webView");
+                MobileMessagingLogger.w("Browser is the default app for this intent, URL will be opened in webView");
                 return false;
             }
         } else {

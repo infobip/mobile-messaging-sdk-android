@@ -1,9 +1,6 @@
 package org.infobip.mobile.messaging.util;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Base64;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 
@@ -15,6 +12,9 @@ import java.util.Arrays;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 
 public class CryptorImpl extends Cryptor {
@@ -29,7 +29,7 @@ public class CryptorImpl extends Cryptor {
         try {
             sha = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Cryptor initialization failed.", e);
             return;
         }
         keyBytes = sha.digest(keyBytes);
@@ -71,7 +71,7 @@ public class CryptorImpl extends Cryptor {
             cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Data encryption failed.", e);
             return null;
         }
     }
@@ -82,7 +82,7 @@ public class CryptorImpl extends Cryptor {
             cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
             return cipher.doFinal(data);
         } catch (Exception e) {
-            MobileMessagingLogger.d(Log.getStackTraceString(e));
+            MobileMessagingLogger.e("Data decryption failed.", e);
             return null;
         }
     }

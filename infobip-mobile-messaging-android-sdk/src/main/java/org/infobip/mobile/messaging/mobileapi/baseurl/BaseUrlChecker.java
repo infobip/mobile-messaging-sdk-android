@@ -64,7 +64,7 @@ public class BaseUrlChecker {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("Error while checking base URL!");
+                MobileMessagingLogger.e("Error while checking base URL!", error);
                 isSyncInProgress.set(false);
             }
         }

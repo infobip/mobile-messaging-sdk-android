@@ -85,7 +85,7 @@ public class MobileMessageHandler {
 
     private void sendDeliveryReport(Message message) {
         if (StringUtils.isBlank(message.getMessageId())) {
-            MobileMessagingLogger.e("No ID received for message: " + message);
+            MobileMessagingLogger.w("No ID received for message: " + message);
             return;
         }
         MobileMessagingLogger.d("Sending DR: " + message.getMessageId());

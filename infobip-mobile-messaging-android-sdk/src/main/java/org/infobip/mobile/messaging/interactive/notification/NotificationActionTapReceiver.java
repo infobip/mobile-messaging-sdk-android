@@ -54,19 +54,19 @@ public class NotificationActionTapReceiver extends BroadcastReceiver {
 
         Message message = Message.createFrom(messageBundle);
         if (message == null) {
-            MobileMessagingLogger.e("Received no message in NotificationActionTapReceiver");
+            MobileMessagingLogger.w("Received no message in NotificationActionTapReceiver");
             return;
         }
 
         NotificationAction notificationAction = NotificationAction.createFrom(actionBundle);
         if (notificationAction == null) {
-            MobileMessagingLogger.e("Received no action in NotificationActionTapReceiver");
+            MobileMessagingLogger.w("Received no action in NotificationActionTapReceiver");
             return;
         }
 
         NotificationCategory notificationCategory = NotificationCategory.createFrom(categoryBundle);
         if (notificationCategory == null) {
-            MobileMessagingLogger.e("Received no notification category in NotificationActionTapReceiver");
+            MobileMessagingLogger.w("Received no notification category in NotificationActionTapReceiver");
             return;
         }
 

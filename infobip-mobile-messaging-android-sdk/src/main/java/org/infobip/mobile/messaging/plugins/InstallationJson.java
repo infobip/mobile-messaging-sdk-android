@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.plugins;
 
-import androidx.annotation.NonNull;
-
 import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
@@ -17,6 +15,8 @@ import org.json.JSONObject;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * Installation data mapper for JSON conversion in plugins
@@ -54,7 +54,7 @@ public class InstallationJson extends Installation {
             cleanupJsonMapForClient(installation.getCustomAttributes(), jsonObject);
             return jsonObject;
         } catch (JSONException e) {
-            MobileMessagingLogger.w("Cannot convert installation toJSON: ", e);
+            MobileMessagingLogger.e("Cannot convert installation toJSON: ", e);
             return new JSONObject();
         }
     }
@@ -76,7 +76,7 @@ public class InstallationJson extends Installation {
                 installation.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse installation fromJSON: ", e);
+            MobileMessagingLogger.e("Cannot parse installation fromJSON: ", e);
         }
 
         return installation;

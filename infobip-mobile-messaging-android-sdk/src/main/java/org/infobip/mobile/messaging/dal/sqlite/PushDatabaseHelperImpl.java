@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.dal.sqlite.DatabaseContract.MessageColumns;
@@ -95,7 +94,7 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
         }
 
         if (version != VER_CURRENT) {
-            MobileMessagingLogger.e("SQLite DB version is not what expected: " + VER_CURRENT);
+            MobileMessagingLogger.w("SQLite DB version is not what expected: " + VER_CURRENT);
         }
     }
 
@@ -146,7 +145,7 @@ public class PushDatabaseHelperImpl extends BaseDatabaseHelper {
                     message.statusMessage = cursor.getString(cursor.getColumnIndexOrThrow("status_message"));
                     messages.add(message);
                 } catch (Exception e) {
-                    MobileMessagingLogger.e(Log.getStackTraceString(e));
+                    MobileMessagingLogger.e("Could not load message.", e);
                 }
             } while (cursor.moveToNext());
         }

@@ -618,7 +618,7 @@ public class MainActivity extends AppCompatActivity {
                     () -> Toast.makeText(this, "Calls enabled!", Toast.LENGTH_SHORT).show(),
                     throwable -> {
                         Toast.makeText(this, "Cannot enable calls: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                        MobileMessagingLogger.e("MainActivity", throwable.getMessage(), throwable);
+                        MobileMessagingLogger.e("MainActivity", "Cannot enable calls: " + throwable.getMessage(), throwable);
                     }
             );
         });
@@ -627,7 +627,7 @@ public class MainActivity extends AppCompatActivity {
                     () -> Toast.makeText(this, "Calls disabled!", Toast.LENGTH_SHORT).show(),
                     throwable -> {
                         Toast.makeText(this, "Cannot disable calls: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                        MobileMessagingLogger.e("MainActivity", throwable.getMessage(), throwable);
+                        MobileMessagingLogger.e("MainActivity", "Cannot disable calls: " + throwable.getMessage(), throwable);
                     }
             );
         });
@@ -636,14 +636,14 @@ public class MainActivity extends AppCompatActivity {
         infobipRtcUi.setInCallButtons(
                 Arrays.asList(
                         new InCallButton.Mute(() -> {
-                            MobileMessagingLogger.i("MainActivity", "MUTE button pressed");
+                            MobileMessagingLogger.d("MainActivity", "MUTE button pressed");
                             return Unit.INSTANCE;
                         }),
                         new InCallButton.Custom(
                                 R.string.app_name, com.infobip.webrtc.ui.R.drawable.ic_calls_30,
                                 null,
                                 () -> {
-                                    MobileMessagingLogger.i("MainActivity", "CUSTOM button pressed");
+                                    MobileMessagingLogger.d("MainActivity", "CUSTOM button pressed");
                                     return Unit.INSTANCE;
                                 },
                                 customButtonChecked::isChecked,

@@ -217,7 +217,7 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     private fun downloadFile() {
         if (!permissionsRequestManager.isRequiredPermissionsGranted) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                MobileMessagingLogger.e(
+                MobileMessagingLogger.w(
                     "[InAppChat] Permissions required for attachments not granted",
                     ConfigurationException(
                         ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION,

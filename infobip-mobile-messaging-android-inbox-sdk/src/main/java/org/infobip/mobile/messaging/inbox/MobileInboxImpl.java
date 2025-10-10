@@ -1,11 +1,7 @@
 package org.infobip.mobile.messaging.inbox;
 
-import static org.infobip.mobile.messaging.api.support.util.StringUtils.isBlank;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
@@ -18,10 +14,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+
+import static org.infobip.mobile.messaging.api.support.util.StringUtils.isBlank;
 
 public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule {
     @SuppressLint("StaticFieldLeak")
@@ -61,7 +60,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     @Override
     public void fetchInbox(@NonNull String token, @NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
         if (isBlank(token) || isBlank(externalUserId)) {
-            MobileMessagingLogger.e("[Inbox] One or more required parameters is empty. Check token and externalUserId");
+            MobileMessagingLogger.w("[Inbox] One or more required parameters is empty. Check token and externalUserId");
             return;
         }
         mobileInboxSynchronizer().fetchInbox(token, externalUserId, filterOptions, messageResultListener);
@@ -70,7 +69,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     @Override
     public void fetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
         if (isBlank(externalUserId)) {
-            MobileMessagingLogger.e("[Inbox] externalUserId was empty");
+            MobileMessagingLogger.w("[Inbox] externalUserId was empty");
             return;
         }
         mobileInboxSynchronizer().fetchInbox(null, externalUserId, filterOptions, messageResultListener);
@@ -79,7 +78,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     @Override
     public void setSeen(@NonNull String externalUserId, @NonNull String[] messageIDs, MobileMessaging.ResultListener<String[]> listener) {
         if (isBlank(externalUserId)) {
-            MobileMessagingLogger.e("[Inbox] externalUserId was empty");
+            MobileMessagingLogger.w("[Inbox] externalUserId was empty");
             return;
         }
         if (messageIDs.length == 0) {
@@ -183,7 +182,7 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
             JSONArray topic = inbox.optJSONArray("inbox");
             return topic != null && topic.length() > 0;
         } catch (JSONException e) {
-            MobileMessagingLogger.e(e.getMessage());
+            MobileMessagingLogger.e(e.getMessage(), e);
             return false;
         }
     }

@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.inbox;
 
-import static org.infobip.mobile.messaging.util.StringUtils.isBlank;
-
 import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessaging;
@@ -20,6 +18,8 @@ import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.infobip.mobile.messaging.util.StringUtils.isBlank;
 
 public class MobileInboxSynchronizer {
 
@@ -72,7 +72,7 @@ public class MobileInboxSynchronizer {
             @Override
             public void after(FetchInboxResponse fetchInboxResponse) {
                 if (fetchInboxResponse == null) {
-                    MobileMessagingLogger.v("FETCHING INBOX WAS NULL <<<");
+                    MobileMessagingLogger.w("Fetched inbox is empty.");
                     listener.onResult(new Result<>(new Inbox()));
                     return;
                 }
@@ -88,7 +88,7 @@ public class MobileInboxSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("FETCHING INBOX ERROR <<<", error);
+                MobileMessagingLogger.e("FETCHING INBOX ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 if (error instanceof BackendInvalidParameterException) {

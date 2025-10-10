@@ -8,9 +8,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.R;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
@@ -19,6 +16,9 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * @author sslavin
@@ -69,7 +69,7 @@ public class InAppViewDialog implements InAppNativeView {
                         return;
                     }
                     // better not displaying in-app than crashing UI
-                    MobileMessagingLogger.e("Failed to build in-app view due to " + e.getMessage());
+                    MobileMessagingLogger.e("Failed to build in-app view due to " + e.getMessage(), e);
                 }
             }
         });

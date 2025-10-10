@@ -51,7 +51,7 @@ public class InAppChatBroadcasterImpl implements InAppChatBroadcaster {
             context.sendBroadcast(intent);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         } catch (Exception ex) {
-            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage());
+            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage(), ex);
         }
     }
 

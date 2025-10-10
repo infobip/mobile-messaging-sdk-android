@@ -90,7 +90,7 @@ public class UserEventsSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("USER SESSION REPORT ERROR <<<", error);
+                MobileMessagingLogger.e("USER SESSION REPORT ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
                 mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
             }
@@ -154,7 +154,7 @@ public class UserEventsSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("CUSTOM EVENT REPORT ERROR <<<", error);
+                MobileMessagingLogger.e("CUSTOM EVENT REPORT ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
                 mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                 broadcaster.error(mobileMessagingError);
@@ -194,7 +194,7 @@ public class UserEventsSynchronizer {
 
                     @Override
                     public void error(Throwable error) {
-                        MobileMessagingLogger.v("CUSTOM EVENT REPORT ERROR <<<", error);
+                        MobileMessagingLogger.e("CUSTOM EVENT REPORT ERROR <<<", error);
                         MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
                         mobileMessagingCore.handleNoRegistrationError(mobileMessagingError);
                         broadcaster.error(mobileMessagingError);

@@ -2,8 +2,6 @@ package org.infobip.mobile.messaging.mobileapi.inapp;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
-
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.api.support.util.ApiConstants;
@@ -24,6 +22,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+
+import androidx.annotation.NonNull;
 
 public class InAppClickReporter {
     private final MobileMessagingCore mobileMessagingCore;
@@ -70,11 +70,11 @@ public class InAppClickReporter {
                     return clickActions;
                 }
 
-                MobileMessagingLogger.v("INAPPCLICK >>>");
+                MobileMessagingLogger.v("INAPP CLICK REPORT >>>");
                 for (String clickAction : clickActions) {
                     makeHttpRequest(clickAction);
                 }
-                MobileMessagingLogger.v("INAPPCLICK DONE <<<");
+                MobileMessagingLogger.v("INAPP CLICK REPORT DONE <<<");
 
                 return clickActions;
             }
@@ -87,7 +87,7 @@ public class InAppClickReporter {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.e("Error reporting in-app click status!");
+                MobileMessagingLogger.e("INAPP CLICK REPORT ERROR <<<", error);
                 stats.reportError(MobileMessagingStatsError.IN_APP_CLICK_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
             }

@@ -71,7 +71,7 @@ class InAppChatActivity : AppCompatActivity() {
                 .replace(R.id.ib_in_app_chat_fragment, fragment, IN_APP_CHAT_FRAGMENT_TAG)
                 .commit()
         }.onFailure {
-            MobileMessagingLogger.w(TAG, "Failed to show InAppChatFragment.", it)
+            MobileMessagingLogger.e(TAG, "Failed to show InAppChatFragment.", it)
         }
     }
 
@@ -200,7 +200,7 @@ class InAppChatActivity : AppCompatActivity() {
                 intent.removeExtra(BroadcastParameter.EXTRA_MESSAGE)
             }
         }.onFailure {
-            MobileMessagingLogger.w(TAG, "Failed to send initial livechat message.", it)
+            MobileMessagingLogger.e(TAG, "Failed to send initial livechat message.", it)
         }
     }
 

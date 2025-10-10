@@ -93,7 +93,7 @@ internal class LivechatWidgetConfigSynchronizer(
             }
 
             override fun error(error: Throwable?) {
-                MobileMessagingLogger.v("GET WIDGET CONFIGURATION ERROR <<<", error)
+                MobileMessagingLogger.e("GET WIDGET CONFIGURATION ERROR <<<", error)
 
                 val mobileMessagingError = MobileMessagingError.createFrom(error)
                 if (error is BackendInvalidParameterException) {

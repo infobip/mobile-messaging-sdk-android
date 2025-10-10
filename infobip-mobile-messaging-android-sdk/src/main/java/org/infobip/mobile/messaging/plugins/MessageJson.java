@@ -2,8 +2,6 @@ package org.infobip.mobile.messaging.plugins;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.json.JSONArray;
@@ -12,6 +10,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 /**
  * Message data mapper for JSON conversion in plugins
@@ -51,7 +51,7 @@ public class MessageJson {
                     .putOpt("inAppOpenTitle", message.getInAppOpenTitle())
                     .putOpt("inAppDismissTitle", message.getInAppDismissTitle());
         } catch (JSONException e) {
-            MobileMessagingLogger.w("Cannot convert message to JSON: ", e);
+            MobileMessagingLogger.e("Cannot convert message to JSON: ", e);
             return null;
         }
     }

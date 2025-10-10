@@ -2,7 +2,6 @@ package org.infobip.mobile.messaging.interactive.platform;
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -12,6 +11,8 @@ import org.infobip.mobile.messaging.interactive.NotificationCategory;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * @author tjuric
@@ -48,7 +49,7 @@ public class AndroidInteractiveBroadcaster implements InteractiveBroadcaster {
             context.sendBroadcast(intent);
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         } catch (Exception ex) {
-            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage());
+            MobileMessagingLogger.e("Failed to send broadcast for action " + intent.getAction() + " due to exception " + ex.getMessage(), ex);
         }
     }
 

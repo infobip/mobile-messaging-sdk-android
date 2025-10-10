@@ -1,8 +1,6 @@
 package org.infobip.mobile.messaging.mobileapi.appinstance;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Installation;
@@ -30,6 +28,9 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 
 public class InstallationSynchronizer {
@@ -189,7 +190,7 @@ public class InstallationSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("CREATE INSTALLATION ERROR <<<", error);
+                MobileMessagingLogger.e("CREATE INSTALLATION ERROR <<<", error);
 
                 mobileMessagingCore.setCloudTokenReported(false);
                 stats.reportError(MobileMessagingStatsError.REGISTRATION_SYNC_ERROR);
@@ -283,7 +284,7 @@ public class InstallationSynchronizer {
 
             @Override
             public void error(Throwable error) {
-                MobileMessagingLogger.v("UPDATE INSTALLATION ERROR <<<", error);
+                MobileMessagingLogger.e("UPDATE INSTALLATION ERROR <<<", error);
                 MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
 
                 if (error instanceof BackendInvalidParameterException) {
@@ -377,7 +378,7 @@ public class InstallationSynchronizer {
                 if (listener != null) {
                     listener.onResult(new Result<>(mobileMessagingCore.getInstallation(true), mobileMessagingError));
                 }
-                MobileMessagingLogger.v("GET INSTALLATION ERROR <<<", error);
+                MobileMessagingLogger.e("GET INSTALLATION ERROR <<<", error);
             }
         }
                 .retryWith(retryPolicyProvider.DEFAULT())

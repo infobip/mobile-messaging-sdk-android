@@ -106,7 +106,7 @@ public class MoMessageSender {
 
             @Override
             public void error(Message[] messages, Throwable error) {
-                MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!");
+                MobileMessagingLogger.e("MobileMessaging API returned error (sending message)!", error);
                 stats.reportError(MobileMessagingStatsError.MESSAGE_SEND_ERROR);
                 broadcaster.error(MobileMessagingError.createFrom(error));
 

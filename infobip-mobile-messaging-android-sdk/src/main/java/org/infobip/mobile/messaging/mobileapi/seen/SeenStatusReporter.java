@@ -68,9 +68,9 @@ public class SeenStatusReporter {
                         }
 
                         SeenMessages seenMessages = SeenMessagesMapper.fromMessageIds(messageIDs);
-                        MobileMessagingLogger.v("SEEN >>>", seenMessages);
+                        MobileMessagingLogger.v("SEEN STATUS REPORT >>>", seenMessages);
                         mobileApiMessages.reportSeen(seenMessages);
-                        MobileMessagingLogger.v("SEEN DONE <<<");
+                        MobileMessagingLogger.v("SEEN STATUS REPORT DONE <<<");
                         mobileMessagingCore.removeUnreportedSeenMessageIds(messageIDs);
                         return messageIDs;
                     }
@@ -83,7 +83,7 @@ public class SeenStatusReporter {
 
                     @Override
                     public void error(Throwable error) {
-                        MobileMessagingLogger.e("Error reporting seen status!");
+                        MobileMessagingLogger.e("SEEN STATUS REPORT ERROR <<<", error);
                         stats.reportError(MobileMessagingStatsError.SEEN_REPORTING_ERROR);
                         broadcaster.error(MobileMessagingError.createFrom(error));
                     }

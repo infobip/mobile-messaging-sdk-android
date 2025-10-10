@@ -257,13 +257,13 @@ public class MobileApiResourceProvider {
         if (StringUtils.isNotBlank(appCode))
             properties.put("api.key", MobileMessagingCore.getApplicationCode(context));
         else
-            MobileMessagingLogger.e("Missing api.key value, application code is not provided to MobileMessaging library.");
+            MobileMessagingLogger.w("Missing api.key value, application code is not provided to MobileMessaging library.");
 
         String sdkVersion = SoftwareInformation.getSDKVersionWithPostfixForUserAgent(context);
         if (StringUtils.isNotBlank(sdkVersion))
             properties.put("library.version", sdkVersion);
         else
-            MobileMessagingLogger.e("Missing library.version value, sdk version is not available.");
+            MobileMessagingLogger.w("Missing library.version value, sdk version is not available.");
 
 
         generator = new Generator.Builder()

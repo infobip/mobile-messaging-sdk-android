@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
 import androidx.core.content.FileProvider
 import org.infobip.mobile.messaging.chat.R
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.io.File
 
 /**
@@ -19,7 +19,7 @@ class InAppChatAttachmentFileProvider : FileProvider(R.xml.file_paths) {
 
     companion object {
 
-        private const val tag = "InAppChatAttachmentFileProvider"
+        private const val TAG = "InAppChatAttachmentFileProvider"
 
         /**
          * Creates an empty file for a photo or video.
@@ -38,7 +38,7 @@ class InAppChatAttachmentFileProvider : FileProvider(R.xml.file_paths) {
                 else
                     File(photosFolder, fileName)
             }.onFailure {
-                Log.e(tag, "Failed to create file.", it)
+                MobileMessagingLogger.e(TAG, "Failed to create file.", it)
             }.getOrNull()
         }
 
@@ -52,7 +52,7 @@ class InAppChatAttachmentFileProvider : FileProvider(R.xml.file_paths) {
                     val authority = context.packageName + ".fileprovider"
                     getUriForFile(context.applicationContext, authority, file)
                 }.onFailure {
-                    Log.e(tag, "Failed to create file Uri.", it)
+                    MobileMessagingLogger.e(TAG, "Failed to create file Uri.", it)
                 }.getOrNull()
             }
         }

@@ -1,7 +1,5 @@
 package org.infobip.mobile.messaging.notification;
 
-import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
-
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -13,15 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
-import androidx.arch.core.util.Function;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.BitmapCompat;
 
 import org.infobip.mobile.messaging.ConfigurationException;
 import org.infobip.mobile.messaging.Message;
@@ -44,6 +33,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.arch.core.util.Function;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.BitmapCompat;
+
+import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
+
 /**
  * @author sslavin
  * @since 15/09/16.
@@ -65,7 +64,7 @@ public class BaseNotificationHandler {
     public void cancelAllNotifications() {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager == null) {
-            MobileMessagingLogger.e("Unable to get notification manager and cancel notifications");
+            MobileMessagingLogger.w("Unable to get notification manager and cancel notifications");
             return;
         }
 
@@ -88,7 +87,7 @@ public class BaseNotificationHandler {
         try {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager == null) {
-                MobileMessagingLogger.e("Unable to get notification manager and display notification");
+                MobileMessagingLogger.w("Unable to get notification manager and display notification");
                 return false;
             }
             Notification notification = builder.build();
@@ -97,8 +96,8 @@ public class BaseNotificationHandler {
             return true;
 
         } catch (SecurityException se) {
-            MobileMessagingLogger.e("Unable to vibrate", new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE));
-            MobileMessagingLogger.d(Log.getStackTraceString(se));
+            ConfigurationException exception = new ConfigurationException(ConfigurationException.Reason.MISSING_REQUIRED_PERMISSION, Manifest.permission.VIBRATE);
+            MobileMessagingLogger.e("Unable to vibrate: " + exception.getMessage(), se);
             return false;
         }
     }
@@ -176,7 +175,7 @@ public class BaseNotificationHandler {
             return validateBitmap(bitmap);
 
         } catch (Exception e) {
-            MobileMessagingLogger.e(e.getMessage());
+            MobileMessagingLogger.e("Could not fetch image", e);
             return null;
         }
     }
@@ -191,7 +190,7 @@ public class BaseNotificationHandler {
                 || bitmap.getHeight() == 0
                 || isBitmapEmpty(bitmap)) {
 
-            MobileMessagingLogger.e("Got empty or malformed Bitmap, ignoring it");
+            MobileMessagingLogger.w("Got empty or malformed Bitmap, ignoring it");
             return null;
         }
 
@@ -342,7 +341,7 @@ public class BaseNotificationHandler {
 
         Uri soundUri = Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + sound);
         if (soundUri == null) {
-            MobileMessagingLogger.e("Cannot create uri for sound: " + sound + " messageId: " + message.getMessageId());
+            MobileMessagingLogger.w("Cannot create uri for sound: " + sound + " messageId: " + message.getMessageId());
             return;
         }
         MobileMessagingLogger.w("Trying to play custom sound: " + sound + " messageId: " + message.getMessageId());

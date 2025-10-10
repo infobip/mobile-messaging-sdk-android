@@ -3,10 +3,10 @@ package org.infobip.mobile.messaging.chat.view.styles
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.core.graphics.toColorInt
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -71,7 +71,7 @@ data class PluginChatCustomization(
                     JsonSerializer().deserialize(it, PluginChatCustomization::class.java)
                 }
             } catch (e: JSONException) {
-                Log.e(TAG, "parse($jsonString)", e)
+                MobileMessagingLogger.e(TAG, "parse($jsonString)", e)
                 null
             }
         }
@@ -156,7 +156,7 @@ data class PluginChatCustomization(
         return try {
             this?.toColorInt()
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "toColorIntOrNull($this)", e)
+            MobileMessagingLogger.e(TAG, "toColorIntOrNull($this)", e)
             null
         }
     }
@@ -179,7 +179,7 @@ data class PluginChatCustomization(
             }
             resId
         } catch (e: Exception) {
-            Log.e(TAG, "toResId($resPath)", e)
+            MobileMessagingLogger.e(TAG, "toResId($resPath)", e)
             null
         }
     }
@@ -189,7 +189,7 @@ data class PluginChatCustomization(
         return try {
             drawableLoader.loadDrawable(context, this)
         } catch (e: Exception) {
-            Log.e(TAG, "toDrawable($this)", e)
+            MobileMessagingLogger.e(TAG, "toDrawable($this)", e)
             null
         }
     }

@@ -1,9 +1,5 @@
 package org.infobip.mobile.messaging.plugins;
 
-import static org.infobip.mobile.messaging.plugins.InstallationJson.cleanupJsonMapForClient;
-
-import androidx.annotation.NonNull;
-
 import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.CustomAttributesMapper;
@@ -24,6 +20,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+
+import static org.infobip.mobile.messaging.plugins.InstallationJson.cleanupJsonMapForClient;
 
 /**
  * User data mapper for JSON conversion in plugins
@@ -90,7 +90,7 @@ public class UserJson extends User {
                 user.setTags(jsonArrayFromJSONObjectToSet(json, UserAtts.tags));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user fromJSON: ", e);
+            MobileMessagingLogger.e("Cannot parse user fromJSON: ", e);
         }
 
         try {
@@ -104,7 +104,7 @@ public class UserJson extends User {
                 user.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user fromJSON custom attributes: ", e);
+            MobileMessagingLogger.e("Cannot parse user fromJSON custom attributes: ", e);
         }
 
         return user;
@@ -136,14 +136,14 @@ public class UserJson extends User {
                     bday = DateTimeUtil.dateFromYMDString(json.optString(UserAtts.birthday));
                     userAttributes.setBirthday(bday);
                 } catch (ParseException e) {
-                    MobileMessagingLogger.w("Cannot parse user birthday: ", e);
+                    MobileMessagingLogger.e("Cannot parse user birthday: ", e);
                 }
             }
             if (json.has(UserAtts.tags)) {
                 userAttributes.setTags(jsonArrayFromJSONObjectToSet(json, UserAtts.tags));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user attributes: ", e);
+            MobileMessagingLogger.e("Cannot parse user attributes: ", e);
         }
 
         try {
@@ -157,7 +157,7 @@ public class UserJson extends User {
                 userAttributes.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user custom attributes: ", e);
+            MobileMessagingLogger.e("Cannot parse user custom attributes: ", e);
         }
 
         return userAttributes;
@@ -176,7 +176,7 @@ public class UserJson extends User {
                 userIdentity.setEmails(jsonArrayFromJSONObjectToSet(json, UserAtts.emails));
             }
         } catch (Exception e) {
-            MobileMessagingLogger.w("Cannot parse user identity: ", e);
+            MobileMessagingLogger.e("Cannot parse user identity: ", e);
         }
         return userIdentity;
     }
