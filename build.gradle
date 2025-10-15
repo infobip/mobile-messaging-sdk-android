@@ -1,6 +1,6 @@
 buildscript {
     //Kotlin-Gradle-AGP compatibility matrix https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-    ext.mm_kotlinVersion = "2.0.21"
+    ext.mm_kotlinVersion = "2.1.0"
     ext.mm_gradlePluginVersion = '8.9.1'
     ext.mm_desugarJdkVersion = "2.1.3"
 
