@@ -18,6 +18,7 @@ import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStartedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.ErrorEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantBlindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
@@ -32,6 +33,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnblindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
@@ -41,6 +43,8 @@ import com.infobip.webrtc.sdk.api.event.call.RemoteReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.StartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.StoppedTalkingEvent
 import com.infobip.webrtc.sdk.api.event.listener.ApplicationCallEventListener
 import com.infobip.webrtc.sdk.api.event.listener.WebrtcCallEventListener
 import com.infobip.webrtc.sdk.api.model.ErrorCode
@@ -51,25 +55,35 @@ internal interface RtcUiCallEventListener {
     fun onEstablished(callEstablishedEvent: CallEstablishedEvent?)
     fun onHangup(callHangupEvent: CallHangupEvent?)
     fun onError(errorCode: ErrorCode?)
+    fun onReconnecting(reconnectingEvent: ReconnectingEvent?)
+    fun onReconnected(reconnectedEvent: ReconnectedEvent?)
 
     fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?)
     fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?)
     fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?)
     fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?)
     fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?)
-
+    fun onStartedTalking(startedTalkingEvent: StartedTalkingEvent?)
+    fun onStoppedTalking(stoppedTalkingEvent: StoppedTalkingEvent?)
+    fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?)
+    fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?)
+    fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?)
+    fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?)
+    fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?)
+    fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?)
     fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?)
     fun onConferenceLeft(conferenceLeftEvent: ConferenceLeftEvent?)
+    fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?)
+    fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?)
+    fun onRoleChanged(roleChangedEvent: RoleChangedEvent?)
 
     fun onParticipantJoining(participantJoiningEvent: ParticipantJoiningEvent?)
     fun onParticipantJoined(participantJoinedEvent: ParticipantJoinedEvent?)
     fun onParticipantLeft(participantLeftEvent: ParticipantLeftEvent?)
-
     fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?)
     fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?)
     fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?)
     fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?)
-
     fun onParticipantMuted(participantMutedEvent: ParticipantMutedEvent?)
     fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?)
     fun onParticipantDeafen(participantDeafEvent: ParticipantDeafEvent?)
@@ -78,21 +92,8 @@ internal interface RtcUiCallEventListener {
     fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?)
     fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?)
     fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?)
-
-    fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?)
-    fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?)
-
-    fun onReconnecting(reconnectingEvent: ReconnectingEvent?)
-    fun onReconnected(reconnectedEvent: ReconnectedEvent?)
-
-    fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?)
-    fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?)
-    fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?)
-    fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?)
-    fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?)
-    fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?)
-
-    fun onRoleChanged(roleChangedEvent: RoleChangedEvent?)
+    fun onParticipantBlinded(participantBlindedEvent: ParticipantBlindedEvent?)
+    fun onParticipantUnblinded(participantUnblindedEvent: ParticipantUnblindedEvent?)
     fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?)
 }
 
@@ -276,6 +277,22 @@ internal fun RtcUiCallEventListener.toAppCallEventListener(): ApplicationCallEve
 
         override fun onParticipantUndeaf(participantUndeafEvent: ParticipantUndeafEvent?) {
             this@toAppCallEventListener.onParticipantUndeafen(participantUndeafEvent)
+        }
+
+        override fun onParticipantBlinded(participantBlindedEvent: ParticipantBlindedEvent?) {
+            this@toAppCallEventListener.onParticipantBlinded(participantBlindedEvent)
+        }
+
+        override fun onParticipantUnblinded(participantUnblindedEvent: ParticipantUnblindedEvent?) {
+            this@toAppCallEventListener.onParticipantUnblinded(participantUnblindedEvent)
+        }
+
+        override fun onStartedTalking(startedTalkingEvent: StartedTalkingEvent?) {
+            this@toAppCallEventListener.onStartedTalking(startedTalkingEvent)
+        }
+
+        override fun onStoppedTalking(stoppedTalkingEvent: StoppedTalkingEvent?) {
+            this@toAppCallEventListener.onStoppedTalking(stoppedTalkingEvent)
         }
 
         override fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?) {

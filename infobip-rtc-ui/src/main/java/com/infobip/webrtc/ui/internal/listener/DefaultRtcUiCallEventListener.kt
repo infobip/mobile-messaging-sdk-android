@@ -17,6 +17,7 @@ import com.infobip.webrtc.sdk.api.event.call.DialogJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStartedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantBlindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
@@ -31,6 +32,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnblindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
@@ -38,6 +40,8 @@ import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
 import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.StartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.StoppedTalkingEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
 
 internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
@@ -60,6 +64,10 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {}
 
     override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {}
+
+    override fun onStartedTalking(startedTalkingEvent: StartedTalkingEvent?) {}
+
+    override fun onStoppedTalking(stoppedTalkingEvent: StoppedTalkingEvent?) {}
 
     override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {}
 
@@ -94,6 +102,10 @@ internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
     override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {}
 
     override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {}
+
+    override fun onParticipantBlinded(participantBlindedEvent: ParticipantBlindedEvent?) {}
+
+    override fun onParticipantUnblinded(participantUnblindedEvent: ParticipantUnblindedEvent?) {}
 
     override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
 

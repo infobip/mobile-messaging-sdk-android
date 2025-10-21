@@ -86,9 +86,14 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.10.1"
     implementation "com.google.android.material:material:$mm_materialVersion"
 
-    api ("com.infobip:infobip-rtc:2.5.19") {
+    api ("com.infobip:infobip-rtc:2.5.24") {
         transitive = true
+        // com.infobip:google-webrtc is Google's WebRTC wrapped by Infobip with custom changes.
+        // It is excluded here to avoid duplication, as we declare it separately below.
+        exclude group: 'com.infobip', module: 'google-webrtc'
     }
+    // Declare google-webrtc as a separate API dependency so consumers can exclude it if needed
+    api 'com.infobip:google-webrtc:1.0.45036'
 
     testImplementation "junit:junit:$mm_junitVersion"
 
