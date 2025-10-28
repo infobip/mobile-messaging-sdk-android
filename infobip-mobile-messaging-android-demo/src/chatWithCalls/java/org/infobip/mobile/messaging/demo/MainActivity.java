@@ -59,7 +59,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -432,21 +431,6 @@ public class MainActivity extends AppCompatActivity {
     private InAppChatErrorsHandler getInAppChatErrorHandler() {
         return new InAppChatErrorsHandler() {
             @Override
-            public void handlerError(@NonNull String error) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle error: " + error);
-            }
-
-            @Override
-            public void handlerWidgetError(@NonNull String error) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle widget error: " + error);
-            }
-
-            @Override
-            public void handlerNoInternetConnectionError(boolean hasConnection) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle no internet connection error: " + hasConnection);
-            }
-
-            @Override
             public boolean handleError(@NonNull InAppChatException exception) {
                 MobileMessagingLogger.d(TAG, "On demo app handle exception: " + exception.getMessage());
                 return true;
@@ -456,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUpOpenChatActivityButton() {
         openChatActivityButton.setOnClickListener((v) -> {
-            //inAppChat.inAppChatScreen().setErrorHandler(getInAppChatErrorHandler());
+//            inAppChat.inAppChatScreen().setErrorHandler(getInAppChatErrorHandler());
             inAppChat.inAppChatScreen().setEventsListener(getInAppChatEventsListener());
             inAppChat.inAppChatScreen().show();
         });

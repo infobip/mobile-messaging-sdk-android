@@ -237,24 +237,6 @@ public class InAppChatFragmentDemoFragment extends Fragment {
                 return fragment.getDefaultErrorsHandler().handleError(exception);
             }
 
-            @Override
-            public void handlerError(@NonNull String error) {
-                //Your custom handling of general error or use default handler
-                fragment.getDefaultErrorsHandler().handlerError(error);
-            }
-
-            @Override
-            public void handlerWidgetError(@NonNull String error) {
-                //Your custom handling of Livechat widget error or use default handler
-                fragment.getDefaultErrorsHandler().handlerWidgetError(error);
-            }
-
-            @Override
-            public void handlerNoInternetConnectionError(boolean hasConnection) {
-                //Your custom handling of missing network connection error or use default handler
-                fragment.getDefaultErrorsHandler().handlerNoInternetConnectionError(hasConnection);
-            }
-
         });
         FragmentManager fm = getChildFragmentManager();
         FragmentTransaction fragmentTransaction = fm.beginTransaction();

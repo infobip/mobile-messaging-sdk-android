@@ -430,21 +430,6 @@ public class MainActivity extends AppCompatActivity {
         return new InAppChatErrorsHandler() {
 
             @Override
-            public void handlerError(@NonNull String error) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle error: " + error);
-            }
-
-            @Override
-            public void handlerWidgetError(@NonNull String error) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle widget error: " + error);
-            }
-
-            @Override
-            public void handlerNoInternetConnectionError(boolean hasConnection) {
-                MobileMessagingLogger.d(TAG, "[DEPRECATED] On demo app handle no internet connection error: " + hasConnection);
-            }
-
-            @Override
             public boolean handleError(@NonNull InAppChatException exception) {
                 MobileMessagingLogger.d(TAG, "On demo app handle exception: " + exception.getMessage());
                 return true;

@@ -2,6 +2,7 @@ package org.infobip.mobile.messaging.chat.models
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessageType
 import org.json.JSONObject
@@ -38,16 +39,16 @@ sealed class MessagePayload(
      * @property message The text content of the draft. Must be non-blank and no longer than
      * [LivechatWidgetApi.MESSAGE_MAX_LENGTH] characters.
      *
-     * @throws IllegalArgumentException If [message] is blank or exceeds the maximum allowed length.
+     * @throws InAppChatException If [message] is blank or exceeds the maximum allowed length.
      */
-    data class Draft @Throws(IllegalArgumentException::class) constructor(
+    data class Draft @Throws(InAppChatException::class) constructor(
         val message: String
     ) : MessagePayload(LivechatWidgetMessageType.DRAFT) {
         init {
-            require(message.isNotBlank()) { "Message cannot be blank." }
-            require(message.length <= LivechatWidgetApi.MESSAGE_MAX_LENGTH) {
-                "Message length exceeds the maximum allowed length of ${LivechatWidgetApi.MESSAGE_MAX_LENGTH} characters."
-            }
+            if (message.isBlank())
+                throw InAppChatException.InvalidMessagePayload("Draft message cannot be blank.")
+            if (message.length > LivechatWidgetApi.MESSAGE_MAX_LENGTH)
+                throw InAppChatException.InvalidMessagePayload("Draft message length exceeds the maximum allowed length of ${LivechatWidgetApi.MESSAGE_MAX_LENGTH} characters.")
         }
     }
 
@@ -60,26 +61,24 @@ sealed class MessagePayload(
      * [LivechatWidgetApi.MESSAGE_MAX_LENGTH] characters, if present.
      * @property attachment An optional attachment associated with the message. Must be valid if provided.
      *
-     * @throws IllegalArgumentException If both [message] and [attachment] are null,
+     * @throws InAppChatException If both [message] and [attachment] are null,
      * if [message] is blank or too long, or if [attachment] is invalid.
      */
-    data class Basic @Throws(IllegalArgumentException::class) @JvmOverloads constructor(
+    data class Basic @Throws(InAppChatException::class) @JvmOverloads constructor(
         val message: String?,
         override val attachment: InAppChatAttachment? = null,
     ) : MessagePayload(LivechatWidgetMessageType.BASIC), HasAttachment {
         init {
-            require(message != null || attachment != null) {
-                "Either message or attachment must be provided."
-            }
+            if (message == null && attachment == null)
+                throw InAppChatException.InvalidMessagePayload("Either message or attachment must be provided.")
             if (message != null) {
-                require(message.isNotBlank()) { "Message cannot be blank." }
-                require(message.length <= LivechatWidgetApi.MESSAGE_MAX_LENGTH) {
-                    "Message length exceeds the maximum allowed length of ${LivechatWidgetApi.MESSAGE_MAX_LENGTH} characters."
-                }
+                if (message.isBlank())
+                    throw InAppChatException.InvalidMessagePayload("Message cannot be blank.")
+                if (message.length > LivechatWidgetApi.MESSAGE_MAX_LENGTH)
+                    throw InAppChatException.InvalidMessagePayload("Message length exceeds the maximum allowed length of ${LivechatWidgetApi.MESSAGE_MAX_LENGTH} characters.")
             }
-            if (attachment != null) {
-                require(attachment.isValid) { "Attachment is not valid." }
-            }
+            if (attachment != null && !attachment.isValid)
+                throw InAppChatException.InvalidMessageAttachment()
         }
     }
 

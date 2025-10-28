@@ -14,9 +14,7 @@ sealed class LivechatWidgetResult<out T> {
 
     data class Error(
         val throwable: Throwable,
-    ) : LivechatWidgetResult<Nothing>() {
-        constructor(message: String) : this(LivechatWidgetException.fromAndroid(message))
-    }
+    ) : LivechatWidgetResult<Nothing>()
 
     val isSuccess
         get() = this is Success

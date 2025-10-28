@@ -126,24 +126,6 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     var eventsListener: EventsListener? = null
 
     val defaultErrorsHandler = object : ErrorsHandler {
-        override fun handlerError(error: String) {
-            withBinding {
-                it.ibLcChat.defaultErrorsHandler.handlerError(error)
-            }
-        }
-
-        override fun handlerWidgetError(error: String) {
-            withBinding {
-                it.ibLcChat.defaultErrorsHandler.handlerWidgetError(error)
-            }
-        }
-
-        override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
-            withBinding {
-                it.ibLcChat.defaultErrorsHandler.handlerNoInternetConnectionError(hasConnection)
-            }
-        }
-
         override fun handleError(exception: InAppChatException): Boolean {
             withBinding {
                 return it.ibLcChat.defaultErrorsHandler.handleError(exception)
@@ -219,6 +201,25 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      * Default value is true.
      */
     var handleBackPress = true
+
+    /**
+     * Timeout duration for loading chat in milliseconds.
+     *
+     * It has no effect if set to null or fragment is not attached yet.
+     *
+     * - **Minimum allowed:** 5,000 ms (5 seconds)
+     * - **Maximum allowed:** 300,000 ms (5 minutes)
+     * - **Default value:** 10,000 ms (10 seconds)
+     *
+     * @throws InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue if the value is set outside the allowed range.
+     */
+    @set:Throws(InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue::class)
+    var loadingTimeoutMillis: Long?
+        get() = _binding?.ibLcChat?.loadingTimeoutMillis
+        set(value) {
+            if (value != null)
+                _binding?.ibLcChat?.loadingTimeoutMillis = value
+        }
 
     //region Lifecycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -603,22 +604,9 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             }
         }
         binding.ibLcChat.errorsHandler = object : InAppChatView.ErrorsHandler {
-            override fun handlerError(error: String) {
-                errorsHandler.handlerError(error)
-            }
-
-            override fun handlerWidgetError(error: String) {
-                errorsHandler.handlerWidgetError(error)
-            }
-
-            override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
-                errorsHandler.handlerNoInternetConnectionError(hasConnection)
-            }
-
             override fun handleError(exception: InAppChatException): Boolean {
                 return errorsHandler.handleError(exception)
             }
-
         }
         binding.ibLcChat.init(getLifecycleRegistry().lifecycle)
     }
@@ -800,7 +788,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             }.onFailure {
                 MobileMessagingLogger.e(TAG, "Failed to create In-app chat attachment", it)
                 val messageRes =
-                    if (it.message == "Attachment data is too large") R.string.ib_chat_allowed_attachment_size_exceeded else R.string.ib_chat_cant_create_attachment
+                    if ((it as? InAppChatException)?.technicalMessage?.contains("Attachment exceeds maximum allowed size") == true)
+                        R.string.ib_chat_allowed_attachment_size_exceeded
+                    else
+                        R.string.ib_chat_cant_create_attachment
                 Toast.makeText(
                     context,
                     localizationUtils.getString(messageRes),

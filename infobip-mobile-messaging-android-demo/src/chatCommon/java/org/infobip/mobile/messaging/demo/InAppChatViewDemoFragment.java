@@ -200,24 +200,6 @@ public class InAppChatViewDemoFragment extends Fragment {
                 //Return true if you handled the exception, otherwise view's default handler will be used
                 return inAppChatView.getDefaultErrorsHandler().handleError(exception);
             }
-
-            @Override
-            public void handlerError(@NonNull String error) {
-                //Your custom handling of general error or use default handler
-                inAppChatView.getDefaultErrorsHandler().handlerError(error);
-            }
-
-            @Override
-            public void handlerWidgetError(@NonNull String error) {
-                //Your custom handling of Livechat widget error or use default handler
-                inAppChatView.getDefaultErrorsHandler().handlerWidgetError(error);
-            }
-
-            @Override
-            public void handlerNoInternetConnectionError(boolean hasConnection) {
-                //Your custom handling of missing network connection error or use default handler
-                inAppChatView.getDefaultErrorsHandler().handlerNoInternetConnectionError(hasConnection);
-            }
         });
     }
 

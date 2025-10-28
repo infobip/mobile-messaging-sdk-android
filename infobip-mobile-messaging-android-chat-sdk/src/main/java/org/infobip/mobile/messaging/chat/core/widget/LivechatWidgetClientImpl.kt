@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.models.HasAttachment
 import org.infobip.mobile.messaging.chat.models.MessagePayload
@@ -44,14 +45,14 @@ internal class LivechatWidgetClientImpl(
 
     override fun send(payload: MessagePayload, threadId: String?, executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
         if (payload is HasAttachment && payload.attachment?.isValid == false) {
-            executionListener?.onResult(LivechatWidgetResult.Error("Message attachment is not valid."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.InvalidMessageAttachment()))
             return
         }
 
         runCatching {
             MessagePayload.serialize(payload)
         }.onFailure {
-            executionListener?.onResult(LivechatWidgetResult.Error(it.message ?: "Failed to serialize message payload."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.MessageSerializationError(it)))
         }.onSuccess { serializedPayload ->
             if (threadId.isNullOrBlank())
                 executeScript(LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload + ")", executionListener)
@@ -62,19 +63,19 @@ internal class LivechatWidgetClientImpl(
 
     override fun createThread(payload: MessagePayload, executionListener: LivechatWidgetApi.ExecutionListener<String>?) {
         if (payload is MessagePayload.Draft) {
-            executionListener?.onResult(LivechatWidgetResult.Error("Initial message must not be of type MessagePayload.Draft"))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.InvalidInitialMessageType()))
             return
         }
 
         if (payload is HasAttachment && payload.attachment?.isValid == false) {
-            executionListener?.onResult(LivechatWidgetResult.Error("Message attachment is not valid."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.InvalidMessageAttachment()))
             return
         }
 
         runCatching {
             MessagePayload.serialize(payload)
         }.onFailure {
-            executionListener?.onResult(LivechatWidgetResult.Error(it.message ?: "Failed to serialize message payload."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.MessageSerializationError(it)))
         }.onSuccess { serializedPayload ->
             executeScript(LivechatWidgetMethod.createThread.name + "(" + serializedPayload + ")", executionListener)
         }
@@ -95,7 +96,7 @@ internal class LivechatWidgetClientImpl(
         if (data.isNotBlank()) {
             executeScript(LivechatWidgetMethod.sendContextualData.name + "(" + data + ", '" + multiThreadFlag + "')", executionListener)
         } else {
-            executionListener?.onResult(LivechatWidgetResult.Error("Could not send contextual data. Data is null or empty."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.InvalidContextualData()))
         }
     }
 
@@ -136,7 +137,7 @@ internal class LivechatWidgetClientImpl(
         if (threadId.isNotBlank()) {
             executeScript(buildWidgetMethodInvocation(LivechatWidgetMethod.showThread.name, threadId), executionListener)
         } else {
-            executionListener?.onResult(LivechatWidgetResult.Error("Could not show thread. ThreadId is empty or blank."))
+            executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.InvalidThreadId()))
         }
     }
 
@@ -152,8 +153,8 @@ internal class LivechatWidgetClientImpl(
      */
     private fun executeScript(script: String, executionListener: LivechatWidgetApi.ExecutionListener<String>? = null) {
         coroutineScope.launch(Dispatchers.Main) {
+            val scriptToLog = shortenScript(script)
             runCatching {
-                val scriptToLog = shortenScript(script)
                 MobileMessagingLogger.d(instanceId.tag(TAG), "Called Widget API: $scriptToLog")
                 webView.evaluateJavascript(script) { value: String? ->
                     val valueToLog = if ((value != null && "null" != value && "{}" != value)) " => $value" else ""
@@ -164,7 +165,7 @@ internal class LivechatWidgetClientImpl(
                 }
             }.onFailure {
                 executionListener?.onResult(LivechatWidgetResult.Error(it))
-                MobileMessagingLogger.e(instanceId.tag(TAG), "Failed to execute webView JS script ${shortenScript(script)} + ${it.message}", it)
+                MobileMessagingLogger.e(instanceId.tag(TAG), "Failed to execute webView JS script $scriptToLog + ${it.message}", it)
             }
         }
     }
@@ -183,20 +184,22 @@ internal class LivechatWidgetClientImpl(
     }
 
     private fun shortenScript(script: String?): String? {
-        if (script != null && script.length > MAX_ALLOWED_SCRIPT_LENGTH) {
-            val builder = StringBuilder()
-            val methodNameEndIndex = script.indexOf("(")
-            if (methodNameEndIndex > 0) {
-                val methodName = script.substring(0, methodNameEndIndex)
-                builder.append(methodName)
-                val paramsSubstring = script.substring(methodNameEndIndex + 1, script.length - 1)
-                val shortenScript = shortenLog(paramsSubstring)
-                builder.append("(")
-                builder.append(shortenScript)
-                builder.append(")")
+        return runCatching {
+            if (script != null && script.length > MAX_ALLOWED_SCRIPT_LENGTH) {
+                val builder = StringBuilder()
+                val methodNameEndIndex = script.indexOf("(")
+                if (methodNameEndIndex > 0) {
+                    val methodName = script.substring(0, methodNameEndIndex)
+                    builder.append(methodName)
+                    val paramsSubstring = script.substring(methodNameEndIndex + 1, script.length - 1)
+                    val shortenScript = shortenLog(paramsSubstring)
+                    builder.append("(")
+                    builder.append(shortenScript)
+                    builder.append(")")
+                }
+                return builder.toString()
             }
-            return builder.toString()
-        }
-        return script
+            return script
+        }.getOrDefault(script)
     }
 }

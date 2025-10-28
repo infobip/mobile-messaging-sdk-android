@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.annotation.StyleRes
+import androidx.core.graphics.toColorInt
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.utils.colorBackground
@@ -41,19 +42,19 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         @StyleRes
         val textAppearance: Int = R.style.IB_Chat_Input_TextAppearance
         @ColorInt
-        val textColor: Int = Color.parseColor("#242424")
+        val textColor: Int = "#242424".toColorInt()
         @ColorInt
         val backgroundColor: Int = Color.WHITE
         @StringRes
         val hintTextRes: Int = R.string.ib_chat_message_hint
         @ColorInt
-        val hintTextColor: Int = Color.parseColor("#808080")
+        val hintTextColor: Int = "#808080".toColorInt()
         val iconTint: ColorStateList = colorStateListOf(
-            intArrayOf(-android.R.attr.state_enabled) to Color.parseColor("#808080"),
+            intArrayOf(-android.R.attr.state_enabled) to "#808080".toColorInt(),
             intArrayOf(android.R.attr.state_enabled) to Color.BLACK,
         )
         @ColorInt
-        val separatorLineColor: Int = Color.parseColor("#19000000")
+        val separatorLineColor: Int = "#19000000".toColorInt()
         val isSeparatorLineVisible: Boolean = true
     }
 
@@ -128,7 +129,7 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         internal operator fun invoke(
             context: Context,
             attrs: AttributeSet?,
-            widgetInfo: WidgetInfo?
+            widgetInfo: WidgetInfo?,
         ): InAppChatInputViewStyle {
             context.obtainStyledAttributes(
                 attrs,
@@ -140,20 +141,20 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
 
                 val textAppearance = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputTextAppearance, 0).takeIfDefined()
                 val textColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputTextColor, Defaults.textColor)
-                val backgroundColor = widgetInfo?.colorBackground.takeIf { isDefaultTheme }
+                val backgroundColor = widgetInfo?.colorBackground.takeIf { isDefaultTheme || !hasValue(R.styleable.InAppChatInputViewStyleable_ibChatInputBackgroundColor) }
                     ?: getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputBackgroundColor, Defaults.backgroundColor)
                 val (hintTextRes, hintText) = resolveStringWithResId(context, R.styleable.InAppChatInputViewStyleable_ibChatInputHintText, Defaults.hintTextRes)
                 val hintTextColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputHintTextColor, Defaults.hintTextColor)
                 val attachmentIcon = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentIcon, R.drawable.ib_chat_attachment_btn_icon).takeIfDefined()
                 val widgetConfigButtonTintList = widgetInfo.buttonTintList
-                val attachmentIconTint = widgetConfigButtonTintList.takeIf { isDefaultTheme }
+                val attachmentIconTint = widgetConfigButtonTintList.takeIf { isDefaultTheme || !hasValue(R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentIconTint) }
                     ?: getColorStateList(R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentIconTint)
                     ?: widgetConfigButtonTintList
                     ?: Defaults.iconTint
                 val attachmentBackgroundDrawable = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentBackgroundDrawable, 0).takeIfDefined()
                 val attachmentBackgroundColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputAttachmentBackgroundColor, 0).takeIfDefined()
                 val sendIcon = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputSendIcon, R.drawable.ib_chat_send_btn_icon).takeIfDefined()
-                val sendIconTint = widgetConfigButtonTintList.takeIf { isDefaultTheme }
+                val sendIconTint = widgetConfigButtonTintList.takeIf { isDefaultTheme || !hasValue(R.styleable.InAppChatInputViewStyleable_ibChatInputSendIconTint) }
                     ?: getColorStateList(R.styleable.InAppChatInputViewStyleable_ibChatInputSendIconTint)
                     ?: widgetConfigButtonTintList
                     ?: Defaults.iconTint
@@ -161,7 +162,7 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
                 val sendBackgroundColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputSendBackgroundColor, 0).takeIfDefined()
                 val separatorLineColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputSeparatorLineColor, Defaults.separatorLineColor)
                 val isSeparatorLineVisible = getBoolean(R.styleable.InAppChatInputViewStyleable_ibChatInputSeparatorLineVisible, Defaults.isSeparatorLineVisible)
-                val cursorColor = widgetInfo?.colorPrimary?.takeIf { isDefaultTheme }
+                val cursorColor = widgetInfo?.colorPrimary?.takeIf { isDefaultTheme || !hasValue(R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor) }
                     ?: getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor, textColor)
 
                 recycle()

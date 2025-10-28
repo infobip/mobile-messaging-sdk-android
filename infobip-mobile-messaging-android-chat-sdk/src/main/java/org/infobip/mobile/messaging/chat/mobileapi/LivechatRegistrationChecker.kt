@@ -6,6 +6,7 @@ import org.infobip.mobile.messaging.api.appinstance.LivechatDestination
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcaster
 import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -59,7 +60,9 @@ internal class LivechatRegistrationChecker(
             override fun run(ins: Array<out Void>?): String? {
                 MobileMessagingLogger.v(TAG,"CHECK LIVECHAT REGISTRATION >>>")
                 val pushRegIg = pushRegistrationId ?: mmCore.pushRegistrationId
-                require(pushRegIg?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing pushRegistrationId argument." }
+                if (pushRegIg.isNullOrBlank()) {
+                    throw InAppChatException.MissingPushRegistrationId()
+                }
                 val destinations: Array<out LivechatDestination>? = mobileApiAppInstance.getLivechatContactInformation(pushRegIg)?.liveChatDestinations
                 return when (destinations?.size) {
                     null, 0 -> {
@@ -69,7 +72,9 @@ internal class LivechatRegistrationChecker(
                     1 -> destinations.first().registrationId
                     else -> {
                         val wId = widgetId ?: propertyHelper.findString(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ID)
-                        require(wId?.isNotBlank() == true) { "Cannot obtain livechatRegistrationId. Missing widgetId argument." }
+                        if (wId.isNullOrBlank()) {
+                            throw InAppChatException.MissingLivechatWidgetId()
+                        }
                         val widget = destinations.firstOrNull { it.widgetId == wId }
                         if (widget == null) {
                             MobileMessagingLogger.d(TAG,"Livechat contact information for widget id = $wId does not exits.")

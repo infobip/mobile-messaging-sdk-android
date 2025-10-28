@@ -1,5 +1,6 @@
 package org.infobip.mobile.messaging.chat.core.widget
 
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.core.JwtProvider
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
 import org.infobip.mobile.messaging.chat.models.MessagePayload
@@ -63,9 +64,9 @@ interface LivechatWidgetApi {
      * - **Maximum allowed:** 300,000 ms (5 minutes)
      * - **Default value:** 10,000 ms (10 seconds)
      *
-     * @throws IllegalStateException if the value is set outside the allowed range.
+     * @throws InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue if the value is set outside the allowed range.
      */
-    @set:Throws(IllegalStateException::class)
+    @set:Throws(InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue::class)
     var loadingTimeoutMillis: Long
 
     /**

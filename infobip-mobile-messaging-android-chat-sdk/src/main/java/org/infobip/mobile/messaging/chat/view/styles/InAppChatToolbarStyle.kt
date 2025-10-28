@@ -271,8 +271,8 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
                 }
             }
 
-            if (style.titleText.isNullOrBlank() && widgetInfo?.getTitle()?.isNotBlank() == true) {
-                style = style.copy(titleText = widgetInfo.getTitle(), titleTextRes = null)
+            if (style.titleText.isNullOrBlank() && widgetInfo?.title?.isNotBlank() == true) {
+                style = style.copy(titleText = widgetInfo.title, titleTextRes = null)
             }
 
             return style

@@ -8,6 +8,8 @@ import android.content.res.Resources.Theme
 import android.content.res.TypedArray
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -245,4 +247,16 @@ internal fun TypedArray.resolveStringWithResId(
         value = context.getString(resource)
     }
     return Pair(resource, value)
+}
+
+fun AttributeSet?.obtainStyledAttributes(context: Context, attrs: IntArray, defStyleAttr: Int = 0, defStyleRes: Int = 0, execute: (TypedArray) -> Unit) {
+    var ta: TypedArray? = null
+    try {
+        ta = context.obtainStyledAttributes(this, attrs, defStyleAttr, defStyleRes)
+        ta.let { execute.invoke(it) }
+    } catch (e: Exception) {
+        Log.e("obtainStyledAttributes", e.localizedMessage.orEmpty(), e)
+    } finally {
+        ta?.recycle()
+    }
 }

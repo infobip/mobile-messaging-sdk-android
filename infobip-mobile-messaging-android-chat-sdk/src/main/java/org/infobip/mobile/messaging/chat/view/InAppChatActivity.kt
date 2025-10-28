@@ -168,18 +168,6 @@ class InAppChatActivity : AppCompatActivity() {
     private fun getErrorsHandler(): ErrorsHandler? {
         return InAppChat.getInstance(this).inAppChatScreen().errorHandler?.let { activityErrorHandler ->
             object : ErrorsHandler {
-                override fun handlerError(error: String) {
-                    activityErrorHandler.handlerError(error)
-                }
-
-                override fun handlerWidgetError(error: String) {
-                    activityErrorHandler.handlerWidgetError(error)
-                }
-
-                override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
-                    activityErrorHandler.handlerNoInternetConnectionError(hasConnection)
-                }
-
                 override fun handleError(exception: InAppChatException): Boolean {
                     return activityErrorHandler.handleError(exception)
                 }

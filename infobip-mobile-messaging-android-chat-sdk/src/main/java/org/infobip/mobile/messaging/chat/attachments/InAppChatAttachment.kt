@@ -11,7 +11,9 @@ import android.net.Uri
 import android.util.Base64
 import android.webkit.MimeTypeMap
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
+import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.models.AttachmentSourceSpecification
 import org.infobip.mobile.messaging.chat.utils.fileName
 import org.infobip.mobile.messaging.chat.utils.mimeType
@@ -41,11 +43,11 @@ data class InAppChatAttachment(
          *
          * @param context Context to access the content resolver.
          * @param uri Uri of the attachment.
-         * @param maxBytesSize Maximum allowed size in bytes for the attachment. If the attachment exceeds this size, an [IllegalStateException] is thrown.
+         * @param maxBytesSize Maximum allowed size in bytes for the attachment. If the attachment exceeds this size, an [InAppChatException] is thrown.
          * @return InAppChatAttachment created from the given Uri.
-         * @throws IllegalStateException if the attachment exceeds the specified maxBytesSize or if there is an error during processing.
+         * @throws InAppChatException if the attachment exceeds the specified maxBytesSize or if there is an error during processing.
          */
-        @Throws(IllegalStateException::class)
+        @Throws(InAppChatException::class)
         @JvmStatic
         fun makeAttachment(
             context: Context,
@@ -54,13 +56,13 @@ data class InAppChatAttachment(
         ): InAppChatAttachment {
             val mimeType: String? = uri.mimeType(context)
             if (mimeType.isNullOrBlank())
-                throw IllegalStateException("Failed to get mime type")
+                throw InAppChatException.AttachmentCreationFailed("Could not get mime type.")
             val contentResolver: ContentResolver? = context.contentResolver
             if (contentResolver != null) {
                 val inputStream = contentResolver.openInputStream(uri)
                 val data: ByteArray?
                 if (AttachmentSourceSpecification.Camera.allowedFileExtension.any { mimeType.equals(it, ignoreCase = true) }) {
-                    val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream) ?: throw IllegalStateException("Failed to decode bitmap")
+                    val bitmap: Bitmap = BitmapFactory.decodeStream(inputStream) ?: throw InAppChatException.AttachmentCreationFailed("Failed to decode bitmap.")
                     val scaledBitmap = scaleCompressAndRotateBitmap(context, uri, bitmap, maxBytesSize)
                     data = (scaledBitmap ?: bitmap).toByteArray()
                     bitmap.recycle()
@@ -71,20 +73,20 @@ data class InAppChatAttachment(
 
 
                 if (data == null)
-                    throw IllegalStateException("Attachment data is null")
+                    throw InAppChatException.AttachmentCreationFailed("Attachment data is null.")
                 if (data.isEmpty())
-                    throw IllegalStateException("Attachment data is empty")
+                    throw InAppChatException.AttachmentCreationFailed("Attachment data is empty.")
                 if (data.size > maxBytesSize)
-                    throw IllegalStateException("Attachment data is too large")
+                    throw InAppChatException.AttachmentCreationFailed("Attachment exceeds maximum allowed size of $maxBytesSize bytes.")
 
                 val encodedData: String? = Base64.encodeToString(data, Base64.DEFAULT)
                 val fileName = requireFileName(context, uri, mimeType)
                 return if (encodedData?.isNotBlank() == true && fileName.isNotBlank())
                     InAppChatAttachment(mimeType, encodedData, fileName)
                 else
-                    throw IllegalStateException("Attachment encoded data or file name is blank")
+                    throw InAppChatException.AttachmentCreationFailed("Failed to encode attachment data or determine file name.")
             } else {
-                throw IllegalStateException("Could not get content resolver")
+                throw InAppChatException.AttachmentCreationFailed("Could not access content resolver.")
             }
         }
 
@@ -130,7 +132,7 @@ data class InAppChatAttachment(
             context: Context,
             uri: Uri,
             originalBitmap: Bitmap,
-            targetSizeInBytes: Int
+            targetSizeInBytes: Int,
         ): Bitmap? {
             return runCatching {
                 val cr = context.applicationContext.contentResolver
@@ -155,7 +157,7 @@ data class InAppChatAttachment(
                 } while (byteArrayOutputStream.size() > targetSizeInBytes)
 
                 if (byteArrayOutputStream.size() > targetSizeInBytes) {
-                    scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, 800, 800, true)
+                    scaledBitmap = originalBitmap.scale(800, 800)
                     return scaleCompressAndRotateBitmap(context, uri, scaledBitmap, targetSizeInBytes)
                 }
 

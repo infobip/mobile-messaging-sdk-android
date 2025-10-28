@@ -34,4 +34,15 @@
         android:visibility="invisible"
         android:text="@string/ib_chat_no_connection" />
 
+    <org.infobip.mobile.messaging.chat.view.ErrorView
+        android:id="@+id/ib_lc_error_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </merge>

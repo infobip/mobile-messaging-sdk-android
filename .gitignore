@@ -44,3 +44,7 @@ captures/
 #Jenkins
 .android/
 *.gpg
+
+# Claude Code configuration (keep local only)
+.claude/
+CLAUDE.md

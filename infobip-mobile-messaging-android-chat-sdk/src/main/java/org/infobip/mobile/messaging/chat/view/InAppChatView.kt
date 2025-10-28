@@ -35,7 +35,6 @@ import org.infobip.mobile.messaging.chat.core.*
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetEventsListener
-import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetException
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetMessage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetResult
@@ -137,56 +136,40 @@ class InAppChatView @JvmOverloads constructor(
             val message: String? = exception.message
             val code: String? = exception.code?.toString()
             return when {
-                message?.isNotBlank() == true && code?.isNotBlank() == true -> "$message " + localizationUtils.getString(R.string.ib_chat_error_code, code)
-                message?.isNotBlank() == true -> message
                 code?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, localizationUtils.getString(R.string.ib_chat_error_code, code))
+                message?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, message)
                 else -> localizationUtils.getString(R.string.ib_chat_error, exception)
-            }
-        }
-
-        override fun handlerError(error: String) {
-            //Deprecated, handled by new API handleError(exception)
-        }
-
-        override fun handlerWidgetError(error: String) {
-            //Deprecated, handled by new API handleError(exception)
-        }
-
-        override fun handlerNoInternetConnectionError(hasConnection: Boolean) {
-            //Deprecated, handled by new API handleError(exception)
+            }.dropLastWhile { it == '.' }
         }
 
         override fun handleError(exception: InAppChatException): Boolean {
-            when (exception) {
-                InAppChatException.NO_INTERNET_CONNECTION -> showNoInternetConnectionView()
-                is LivechatWidgetException -> {
-                    runCatching {
-                        Snackbar.make(binding.root, getLocalisedMessage(exception), Snackbar.LENGTH_INDEFINITE)
-                            .also {
-                                var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
-                                if (textView == null) {
-                                    textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
-                                }
-                                if (textView != null) {
-                                    textView.maxLines = 4
-                                }
+            if (exception is InAppChatException.NoInternetConnection) {
+                showNoInternetConnectionView()
+            } else {
+                runCatching {
+                    Snackbar.make(binding.root, getLocalisedMessage(exception), Snackbar.LENGTH_INDEFINITE)
+                        .also {
+                            var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
+                            if (textView == null) {
+                                textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
                             }
-                            .setAction(R.string.ib_chat_ok) {}
-                            .setActionTextColor(widgetInfo?.colorPrimary ?: Color.WHITE)
-                            .addCallback(object : Snackbar.Callback() {
-                                override fun onShown(sb: Snackbar?) {
-                                    errorSnackbar = sb
-                                }
+                            if (textView != null) {
+                                textView.maxLines = 4
+                            }
+                        }
+                        .setAction(R.string.ib_chat_ok) {}
+                        .setActionTextColor(widgetInfo?.colorPrimary ?: Color.WHITE)
+                        .addCallback(object : Snackbar.Callback() {
+                            override fun onShown(sb: Snackbar?) {
+                                errorSnackbar = sb
+                            }
 
-                                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                                    errorSnackbar = null
-                                }
-                            })
-                            .show()
-                    }
+                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                errorSnackbar = null
+                            }
+                        })
+                        .show()
                 }
-
-                else -> MobileMessagingLogger.e(TAG, "Not propagated exception $exception")
             }
             return true
         }
@@ -194,9 +177,23 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     /**
-     * Allows you to set custom [InAppChatView.ErrorsHandler] handler to process [InAppChatView] errors on your own.
+     * Allows you to set custom [InAppChatView.ErrorsHandler] handler to process chat errors on your own.
      */
     var errorsHandler: ErrorsHandler = defaultErrorsHandler
+
+    /**
+     * Timeout duration for loading chat in milliseconds.
+     *
+     * This value must be set **before** calling [init].
+     *
+     * - **Minimum allowed:** 5,000 ms (5 seconds)
+     * - **Maximum allowed:** 300,000 ms (5 minutes)
+     * - **Default value:** 10,000 ms (10 seconds)
+     *
+     * @throws InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue if the value is set outside the allowed range.
+     */
+    @set:Throws(InAppChatException.LivechatWidgetInvalidLoadingTimeoutValue::class)
+    var loadingTimeoutMillis: Long by livechatWidgetApi::loadingTimeoutMillis
 
     init {
         applyStyle(style)
@@ -219,6 +216,7 @@ class InAppChatView @JvmOverloads constructor(
         inAppChat.activate()
         lifecycle.addObserver(lifecycleObserver)
         observerNetworkConnection(lifecycle)
+        binding.ibLcErrorView.setAction { loadWidget() }
         loadWidget()
     }
 
@@ -460,8 +458,8 @@ class InAppChatView @JvmOverloads constructor(
         override fun onPageStarted(url: String?) {}
 
         override fun onPageFinished(url: String?) {
-            binding.ibLcSpinner.invisible()
-            binding.ibLcWebView.visible()
+            binding.ibLcSpinner.hide()
+            binding.ibLcWebView.show()
         }
 
         override fun onLoadingFinished(result: LivechatWidgetResult<Boolean>) {
@@ -471,16 +469,22 @@ class InAppChatView @JvmOverloads constructor(
                     if (result.payload) {
                         LivechatWidgetResult.Success(Unit)
                     } else {
-                        LivechatWidgetResult.Error("Chat has been reset and is no longer loaded.")
+                        LivechatWidgetResult.Error(InAppChatException.ChatResetExecuted())
                     }
                 }
             }
 
+            //Final design not know yet
+            //binding.ibLcSpinner.hide()
+            //binding.ibLcErrorView.show(mappedResult.isError)
+            //binding.ibLcWebView.show(mappedResult.isSuccess)
             when (mappedResult) {
                 is LivechatWidgetResult.Error -> {
-                    handleWidgetError(mappedResult.throwable)
-                    binding.ibLcSpinner.invisible()
-                    binding.ibLcWebView.visible()
+                    val error = if (mappedResult.throwable is InAppChatException)
+                        mappedResult.throwable
+                    else
+                        InAppChatException.LivechatWidgetApiError(mappedResult.throwable)
+                    handleError(error)
                 }
 
                 is LivechatWidgetResult.Success -> {
@@ -609,10 +613,12 @@ class InAppChatView @JvmOverloads constructor(
             if (action == InAppChatEvent.CHAT_CONFIGURATION_SYNCED.key) {
                 onWidgetSynced()
             } else if (action == Event.API_COMMUNICATION_ERROR.key && intent.hasExtra(BroadcastParameter.EXTRA_EXCEPTION)) {
-                val mobileMessagingError = intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as? MobileMessagingError
+                val mobileMessagingError: MobileMessagingError? = intent.getSerializableExtra(BroadcastParameter.EXTRA_EXCEPTION) as? MobileMessagingError
                 val errorCode = mobileMessagingError?.code
-                if (errorCode == CHAT_SERVICE_ERROR || errorCode == CHAT_WIDGET_NOT_FOUND) {
-                    handleWidgetError(mobileMessagingError.toLivechatWidgetException())
+                when {
+                    errorCode == CHAT_SERVICE_ERROR -> handleError(InAppChatException.ChatServiceError())
+                    errorCode == CHAT_WIDGET_NOT_FOUND -> handleError(InAppChatException.LivechatWidgetNotFound())
+                    mobileMessagingError != null -> MobileMessagingLogger.e("Unhandled MobileMessagingError: $mobileMessagingError")
                 }
             }
         }
@@ -671,35 +677,24 @@ class InAppChatView @JvmOverloads constructor(
             if (isInternetConnectionError || isPushRegIdMissing || isRegistrationPendingError)
                 return
 
-            handleWidgetError(error.toLivechatWidgetException())
+            handleError(InAppChatException.MobileMessagingError(error))
         }
     }
 
-    private fun handleWidgetError(throwable: Throwable) {
-        val message = throwable.message ?: localizationUtils.getString(R.string.ib_chat_error, "Unknown error")
-        if (throwable is LivechatWidgetException)
-            handleErrorByNewApi(throwable)
-        else
-            handleErrorByNewApi(LivechatWidgetException.fromAndroid(message))
-        errorsHandler.handlerWidgetError(message)
+    private fun handleError(exception: InAppChatException) {
+        if (!errorsHandler.handleError(exception))
+            defaultErrorsHandler.handleError(exception)
     }
 
     private fun onInternetConnectionLost() {
-        handleErrorByNewApi(InAppChatException.NO_INTERNET_CONNECTION)
-        errorsHandler.handlerNoInternetConnectionError(false)
+        handleError(InAppChatException.NoInternetConnection())
     }
 
     private fun onInternetConnectionRestored() {
         hideNoInternetConnectionView()
-        errorsHandler.handlerNoInternetConnectionError(true)
         if (!isWidgetLoaded && !isWidgetLoadingInProgress) {
             loadWidget()
         }
-    }
-
-    private fun handleErrorByNewApi(exception: InAppChatException) {
-        if (!errorsHandler.handleError(exception))
-            defaultErrorsHandler.handleError(exception)
     }
 
     private fun showNoInternetConnectionView(duration: Long = CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS) =
@@ -717,21 +712,14 @@ class InAppChatView @JvmOverloads constructor(
                 postDelayed({ this@with.invisible() }, duration)
             }
         }
-
-    private fun MobileMessagingError.toLivechatWidgetException(): LivechatWidgetException = LivechatWidgetException(
-        message = this.message,
-        code = this.code.toIntOrNull(),
-        name = this.type.name,
-        origin = InAppChatException.ORIGIN_ANDROID_SDK,
-        platform = InAppChatException.PLATFORM_ANDROID,
-    )
     //endregion
 
     //region Helpers
     private fun loadWidget() {
         with(binding) {
-            ibLcSpinner.visible()
-            ibLcWebView.invisible()
+            errorSnackbar?.dismiss()
+            ibLcSpinner.show()
+            ibLcWebView.hide()
             livechatWidgetApi.loadWidget(widgetId = widgetInfo?.id)
         }
     }
@@ -755,6 +743,8 @@ class InAppChatView @JvmOverloads constructor(
         } else if (style.networkConnectionText != null) {
             ibLcConnectionError.text = style.networkConnectionText
         }
+        ibLcErrorView.setTitle(localizationUtils.getString(R.string.ib_chat_error, "").replaceAfter(':', "").trim().dropLast(1))
+        ibLcErrorView.setActionIconTint(style.progressBarColor)
     }
 
     private fun updateWidgetInfo() {
