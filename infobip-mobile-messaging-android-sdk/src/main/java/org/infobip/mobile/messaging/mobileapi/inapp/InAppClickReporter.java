@@ -4,7 +4,8 @@ import android.content.Context;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
-import org.infobip.mobile.messaging.api.support.util.ApiConstants;
+import org.infobip.mobile.messaging.api.clickreporter.MobileApiClickReporter;
+import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
@@ -16,14 +17,7 @@ import org.infobip.mobile.messaging.stats.MobileMessagingStatsError;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.infobip.mobile.messaging.util.StringUtils;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
-
-import androidx.annotation.NonNull;
 
 public class InAppClickReporter {
     private final MobileMessagingCore mobileMessagingCore;
@@ -33,6 +27,7 @@ public class InAppClickReporter {
     private final Broadcaster broadcaster;
     private final BatchReporter batchReporter;
     private final MRetryPolicy retryPolicy;
+    private final MobileApiClickReporter mobileApiClickReporter;
 
     public InAppClickReporter(
             MobileMessagingCore mobileMessagingCore,
@@ -41,7 +36,8 @@ public class InAppClickReporter {
             Executor executor,
             Broadcaster broadcaster,
             BatchReporter batchReporter,
-            MRetryPolicy retryPolicy) {
+            MRetryPolicy retryPolicy,
+            MobileApiClickReporter mobileApiClickReporter) {
         this.mobileMessagingCore = mobileMessagingCore;
         this.context = context;
         this.stats = stats;
@@ -49,6 +45,7 @@ public class InAppClickReporter {
         this.broadcaster = broadcaster;
         this.batchReporter = batchReporter;
         this.retryPolicy = retryPolicy;
+        this.mobileApiClickReporter = mobileApiClickReporter;
     }
 
     public void sync() {
@@ -96,17 +93,6 @@ public class InAppClickReporter {
                 .execute(executor));
     }
 
-    private @NonNull Map<String, String> getHeaders(String[] payload) {
-        Map<String, String> headers = new HashMap<>();
-        if (mobileMessagingCore.getApplicationCode() != null) {
-            headers.put(ApiConstants.AUTHORIZATION, "App " + mobileMessagingCore.getApplicationCode());
-            headers.put(ApiConstants.PUSH_REGISTRATION_ID, mobileMessagingCore.getPushRegistrationId());
-            headers.put("buttonidx", payload[1]);
-            headers.put(ApiConstants.USER_AGENT, payload[2]);
-        }
-        return headers;
-    }
-
     private void makeHttpRequest(String clickAction) {
         String[] payload = clickAction.split(StringUtils.COMMA_WITH_SPACE); // [0] - clickUrl, [1] - buttonIdx, [2] - userAgent, [3] - attempt
         if (Integer.parseInt(payload[3]) == retryPolicy.getMaxRetries()) {
@@ -114,24 +100,22 @@ public class InAppClickReporter {
             return;
         }
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(payload[0]).openConnection();
+            String clickUrl = payload[0];
+            String authorization = "App " + mobileMessagingCore.getApplicationCode();
+            String pushRegistrationId = mobileMessagingCore.getPushRegistrationId();
+            String buttonIdx = payload[1];
+            String userAgent = payload[2];
 
-            conn.setRequestMethod("GET");
+            mobileApiClickReporter.get(clickUrl, authorization, pushRegistrationId, buttonIdx, userAgent);
 
-            for (Map.Entry<String, String> header : getHeaders(payload).entrySet()) {
-                conn.setRequestProperty(header.getKey(), header.getValue());
-            }
-
-            int responseCode = conn.getResponseCode();
-            MobileMessagingLogger.d("Response Code : " + responseCode);
-            if (responseCode == 200) {
-                mobileMessagingCore.removeReportedInAppClickActions(clickAction);
-            } else {
-                mobileMessagingCore.removeReportedInAppClickActions(clickAction);
-                payload[3] = String.valueOf(Integer.parseInt(payload[3]) + 1);
-                PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS, StringUtils.concat(payload, StringUtils.COMMA_WITH_SPACE));
-            }
-        } catch (IOException e) {
+            MobileMessagingLogger.d("InApp click reported successfully to: " + clickUrl);
+            mobileMessagingCore.removeReportedInAppClickActions(clickAction);
+        } catch (ApiException e) {
+            MobileMessagingLogger.e("Failed to report InApp click: " + e.getMessage());
+            mobileMessagingCore.removeReportedInAppClickActions(clickAction);
+            payload[3] = String.valueOf(Integer.parseInt(payload[3]) + 1);
+            PreferenceHelper.appendToStringArray(context, MobileMessagingProperty.INFOBIP_UNREPORTED_IN_APP_CLICK_URLS, StringUtils.concat(payload, StringUtils.COMMA_WITH_SPACE));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

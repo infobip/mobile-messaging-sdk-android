@@ -1,8 +1,11 @@
 package org.infobip.mobile.messaging.api.support;
 
+import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.loadPackageInfo;
+
 import org.infobip.mobile.messaging.api.support.http.ApiKey;
 import org.infobip.mobile.messaging.api.support.http.Body;
 import org.infobip.mobile.messaging.api.support.http.Credentials;
+import org.infobip.mobile.messaging.api.support.http.FullUrl;
 import org.infobip.mobile.messaging.api.support.http.Header;
 import org.infobip.mobile.messaging.api.support.http.Headers;
 import org.infobip.mobile.messaging.api.support.http.HttpRequest;
@@ -33,8 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.Data;
 import lombok.NonNull;
-
-import static org.infobip.mobile.messaging.api.support.util.ReflectionUtils.loadPackageInfo;
 
 /**
  * Generates Mobile API proxies.
@@ -322,7 +323,7 @@ public class Generator {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             ProxyCache proxyCache = getProxyCache(method);
-            String uri = StringUtils.join("/", baseUrl, proxyCache.getUri());
+            String uri;
 
             Map<String, Collection<Object>> queryParams = new HashMap<>(proxyCache.getDefaultQueryParams());
             Map<String, Collection<Object>> headerMap = new HashMap<>(proxyCache.getDefaultHeaderMap());
@@ -331,21 +332,36 @@ public class Generator {
 
             Parameter[] parameters = proxyCache.getParameters();
             Object body = null;
+
+            boolean hasFullUrl = false;
+            boolean hasUriAnnotations = false;
+
+            uri = StringUtils.join("/", baseUrl, proxyCache.getUri());
+
             for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
                 Parameter parameter = parameters[i];
                 Object arg = args[i];
+
                 if (null != parameter.getBody()) {
                     body = arg;
+                }
+
+                FullUrl fullUrl = parameter.getFullUrl();
+                if (null != fullUrl) {
+                    uri = arg.toString();
+                    hasFullUrl = true;
                 }
 
                 Version version = parameter.getVersion();
                 if (null != version) {
                     uri = uri.replace("{version}", arg.toString());
+                    hasUriAnnotations = true;
                 }
 
-                Path p = parameter.getPath();
-                if (null != p) {
-                    uri = uri.replace("{" + p.name() + "}", arg.toString());
+                Path path = parameter.getPath();
+                if (null != path) {
+                    uri = uri.replace("{" + path.name() + "}", arg.toString());
+                    hasUriAnnotations = true;
                 }
 
                 Query q = parameter.getQuery();
@@ -355,6 +371,7 @@ public class Generator {
                     if (value != null) {
                         queryParams.put(name, value);
                     }
+                    hasUriAnnotations = true;
                 }
 
                 Header h = parameter.getHeader();
@@ -364,7 +381,12 @@ public class Generator {
                 }
             }
 
-            if (uri.endsWith("/")) {
+            // Validate after processing that @FullUrl wasn't mixed with URI-building annotations
+            if (hasFullUrl && hasUriAnnotations) {
+                throw new IllegalArgumentException("@FullUrl cannot be combined with @Version, @Path, or @Query annotations");
+            }
+
+            if (uri != null && uri.endsWith("/")) {
                 uri = uri.substring(0, uri.length() - 1);
             }
 
@@ -398,6 +420,7 @@ public class Generator {
         private final Query query;
         private final Header header;
         private final Version version;
+        private final FullUrl fullUrl;
     }
 
     @Data
@@ -447,6 +470,7 @@ public class Generator {
                         , getAnnotation(annotations, Query.class)
                         , getAnnotation(annotations, Header.class)
                         , getAnnotation(annotations, Version.class)
+                        , getAnnotation(annotations, FullUrl.class)
                 );
                 parameters[i++] = parameter;
             }

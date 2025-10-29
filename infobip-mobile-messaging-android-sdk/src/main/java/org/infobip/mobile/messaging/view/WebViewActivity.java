@@ -1,5 +1,7 @@
 package org.infobip.mobile.messaging.view;
 
+import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -26,6 +28,16 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.R;
@@ -35,14 +47,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.net.URISyntaxException;
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.graphics.drawable.DrawableCompat;
-
-import static android.content.Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER;
 
 
 public class WebViewActivity extends AppCompatActivity {
@@ -59,6 +63,9 @@ public class WebViewActivity extends AppCompatActivity {
         setTheme(webViewSettingsResolver.getWebViewTheme());
 
         super.onCreate(savedInstanceState);
+
+        applyWindowInsets();
+
         setContentView(R.layout.ib_activity_webview);
         Toolbar toolbar = findViewById(R.id.ib_toolbar_webview);
         setSupportActionBar(toolbar);
@@ -198,12 +205,34 @@ public class WebViewActivity extends AppCompatActivity {
         return false;
     }
 
+    private void applyWindowInsets() {
+        if (getWindow() != null) {
+            View decorView = getWindow().getDecorView();
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            ViewCompat.setOnApplyWindowInsetsListener(decorView, (view, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(
+                        WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime()
+                );
+                view.setPadding(
+                        insets.left,
+                        insets.top,
+                        insets.right,
+                        insets.bottom
+                );
+                return WindowInsetsCompat.CONSUMED;
+            });
+
+            decorView.post(() -> ViewCompat.requestApplyInsets(decorView));
+        }
+    }
+
     private void applyStylesFromConfig(Toolbar toolbar, TextView tvToolbarTitle) {
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = getTheme();
         // toolbar background color
         theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true);
         toolbar.setBackgroundColor(typedValue.data);
+        getWindow().getDecorView().getRootView().setBackgroundColor(typedValue.data);
 
         tvToolbarTitle.setTextAppearance(this, androidx.appcompat.R.style.TextAppearance_AppCompat_Widget_ActionBar_Title);
 

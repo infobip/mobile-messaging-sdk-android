@@ -1,5 +1,9 @@
 package org.infobip.mobile.messaging;
 
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.UserMapper.toJson;
+import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
+
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +14,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -96,13 +103,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.UserMapper.toJson;
-import static org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker.SESSION_BOUNDS_DELIMITER;
 
 /**
  * @author sslavin
@@ -2142,7 +2142,7 @@ public class MobileMessagingCore
     @NonNull
     private InAppClickReporter inAppClickReporter() {
         if (inAppClickReporter == null) {
-            inAppClickReporter = new InAppClickReporter(this, context, stats, registrationAlignedExecutor, broadcaster, new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)), retryPolicyProvider.DEFAULT());
+            inAppClickReporter = new InAppClickReporter(this, context, stats, registrationAlignedExecutor, broadcaster, new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)), retryPolicyProvider.DEFAULT(), mobileApiResourceProvider().getMobileApiClickReporter(context));
         }
         return inAppClickReporter;
     }
