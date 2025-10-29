@@ -1,12 +1,20 @@
+/*
+ * ForegroundStateMonitorImpl.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp.foreground;
 
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * @author sslavin

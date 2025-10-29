@@ -1,10 +1,11 @@
+/*
+ * QueuedDialogStackTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp.view;
-
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.interactive.NotificationAction;
@@ -13,6 +14,12 @@ import org.infobip.mobile.messaging.interactive.inapp.view.ctx.InAppNativeCtx;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author sslavin

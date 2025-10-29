@@ -1,11 +1,16 @@
+/*
+ * PlayServicesSupport.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.cloud;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
 
@@ -16,6 +21,9 @@ import org.infobip.mobile.messaging.cloud.firebase.FirebaseAppProvider;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.apiavailability.ApiAvailability;
+
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * @author mstipanov

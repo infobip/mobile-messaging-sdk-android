@@ -1,6 +1,11 @@
+/*
+ * MoMessageSenderTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.messages;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -28,11 +33,13 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
+
 import static java.util.Arrays.asList;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;

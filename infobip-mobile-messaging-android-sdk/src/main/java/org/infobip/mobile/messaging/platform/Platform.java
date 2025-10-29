@@ -1,9 +1,14 @@
+/*
+ * Platform.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.platform;
 
 import android.content.Context;
 import android.os.Build;
-
-import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -16,6 +21,8 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.ComponentUtil;
 
 import java.util.concurrent.Executor;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * This class will try to keep all common components which hold Android Context inside.

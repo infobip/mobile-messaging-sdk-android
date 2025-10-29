@@ -1,11 +1,14 @@
+/*
+ * MobileMessagingBaseTestCase.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.android;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -24,6 +27,10 @@ import org.skyscreamer.jsonassert.comparator.CustomComparator;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * @author sslavin

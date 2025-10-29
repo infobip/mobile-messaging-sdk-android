@@ -1,7 +1,11 @@
+/*
+ * CustomEventJsonTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.plugins;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.infobip.mobile.messaging.CustomEvent;
 import org.json.JSONException;
@@ -9,6 +13,9 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.Objects;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CustomEventJsonTest {
     @Test

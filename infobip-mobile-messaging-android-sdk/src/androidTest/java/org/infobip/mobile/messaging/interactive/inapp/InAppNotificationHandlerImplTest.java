@@ -1,25 +1,18 @@
+/*
+ * InAppNotificationHandlerImplTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.content.Intent;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MessageHandlerModule;
+import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
 import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
@@ -39,6 +32,20 @@ import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * @author sslavin

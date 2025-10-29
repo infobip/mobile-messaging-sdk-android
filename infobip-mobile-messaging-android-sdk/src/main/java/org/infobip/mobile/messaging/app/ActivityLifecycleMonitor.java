@@ -1,3 +1,10 @@
+/*
+ * ActivityLifecycleMonitor.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.app;
 
 import android.annotation.SuppressLint;
@@ -7,11 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.ComponentActivity;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import org.infobip.mobile.messaging.LocalEvent;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -20,6 +22,11 @@ import org.infobip.mobile.messaging.mobileapi.events.UserSessionTracker;
 import org.infobip.mobile.messaging.util.SystemInformation;
 
 import java.util.Collection;
+
+import androidx.activity.ComponentActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /**
  * @author sslavin

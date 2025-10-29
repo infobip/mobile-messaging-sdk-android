@@ -1,14 +1,21 @@
+/*
+ * MobileInboxBroadcasterImpl.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.inbox;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import org.infobip.mobile.messaging.BroadcastParameter;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MobileInboxBroadcasterImpl implements MobileInboxBroadcaster {
     private final Context context;

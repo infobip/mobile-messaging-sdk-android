@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <string name="mm_audio_permission_required">Zur Bearbeitung von Anrufen ist eine Audioberechtigung erforderlich.</string>
     <string name="mm_bt_connect_permission_required">Um Ihr über Bluetooth verbundenes Gerät für Anrufe verwenden zu können, ist eine Bluetooth-Verbindungsberechtigung erforderlich.</string>

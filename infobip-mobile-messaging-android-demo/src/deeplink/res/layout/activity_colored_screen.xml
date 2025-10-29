@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  activity_colored_screen.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rl_screen"
     android:layout_width="match_parent"

@@ -1,20 +1,22 @@
+/*
+ * BaseNotificationHandlerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.notification;
-
-import static junit.framework.Assert.assertEquals;
 
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 
-import androidx.core.app.NotificationCompat;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -23,6 +25,10 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import androidx.core.app.NotificationCompat;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author sslavin

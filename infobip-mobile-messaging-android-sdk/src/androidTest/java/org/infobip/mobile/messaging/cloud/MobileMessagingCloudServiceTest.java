@@ -1,15 +1,17 @@
+/*
+ * MobileMessagingCloudServiceTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.cloud;
-
-import static org.mockito.Mockito.doReturn;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -22,7 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
-import java.util.concurrent.Executor;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import static org.mockito.Mockito.doReturn;
 
 /**
  * @author sslavin

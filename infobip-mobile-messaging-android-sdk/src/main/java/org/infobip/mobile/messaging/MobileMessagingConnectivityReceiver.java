@@ -1,13 +1,21 @@
+/*
+ * MobileMessagingConnectivityReceiver.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.util.MobileNetworkInformation;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Connectivity receiver for pre-7.0 Nougat devices

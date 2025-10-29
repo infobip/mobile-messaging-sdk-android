@@ -1,6 +1,11 @@
+/*
+ * MobileInboxBroadcasterTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.inbox;
-
-import static org.junit.Assert.assertEquals;
 
 import android.content.Intent;
 
@@ -10,6 +15,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
 
 public class MobileInboxBroadcasterTest extends MobileMessagingTestCase {
 

@@ -21,6 +21,7 @@ plugins {
     id 'org.jetbrains.kotlin.android' version "$mm_kotlinVersion" apply false
     id "org.sonarqube" version "4.4.1.3373"
     id "jacoco"
+    id 'com.diffplug.spotless' version '8.0.0' apply false
 }
 
 ext {
@@ -54,6 +55,8 @@ allprojects {
 //It's required to be applied here, to have `subprojects.publish` task available
 subprojects {
     apply plugin: "maven-publish"
+    apply plugin: 'com.diffplug.spotless'
+
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
         kotlinOptions {
             jvmTarget = "1.8"
@@ -67,6 +70,59 @@ subprojects {
                 }
             }
         }
+    }
+
+    // Spotless configuration for copyright headers
+    spotless {
+        java {
+            target 'src/**/*.java'
+            targetExclude '**/build/**', '**/generated/**', '**/DebugServer.java'
+
+            if (project.name == 'infobip-rtc-ui') {
+                licenseHeaderFile rootProject.file('spotless/copyright-header-rtc.txt')
+            } else {
+                licenseHeaderFile rootProject.file('spotless/copyright-header.txt')
+            }
+        }
+
+        kotlin {
+            target 'src/**/*.kt'
+            targetExclude '**/build/**', '**/generated/**'
+
+            if (project.name == 'infobip-rtc-ui') {
+                licenseHeaderFile rootProject.file('spotless/copyright-header-rtc.txt')
+            } else {
+                licenseHeaderFile rootProject.file('spotless/copyright-header.txt')
+            }
+        }
+
+        format 'xml', {
+            target 'src/**/*.xml'
+            targetExclude '**/build/**', '**/generated/**'
+
+            //<[a-zA-Z] matching the beginning of the XML root tag, everything before that will be replaced with the license header
+            if (project.name == 'infobip-rtc-ui') {
+                licenseHeaderFile rootProject.file('spotless/copyright-header-xml-rtc.txt'),  '<[a-zA-Z]'
+            } else {
+                licenseHeaderFile rootProject.file('spotless/copyright-header-xml.txt'),  '<[a-zA-Z]'
+            }
+        }
+    }
+
+    /*
+     * 1. build task → depends on check task
+     * 2. check task → depends on spotlessCheck task (and test)
+     * 3. spotlessCheck → validates code formatting
+     *
+     * So when you run ./gradlew build, it will:
+     * - Run tests
+     * - Run Spotless formatting checks
+     * - Build the project
+     *
+     * If Spotless finds any formatting violations or missing copyright, the build will fail.
+     */
+    tasks.named('check') {
+        dependsOn 'spotlessCheck'
     }
 }
 

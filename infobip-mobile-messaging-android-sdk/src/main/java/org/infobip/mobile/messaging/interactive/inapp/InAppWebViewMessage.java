@@ -1,7 +1,11 @@
+/*
+ * InAppWebViewMessage.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -11,6 +15,9 @@ import org.infobip.mobile.messaging.dal.json.JSONArrayAdapter;
 import org.infobip.mobile.messaging.dal.json.JSONObjectAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class InAppWebViewMessage extends Message {
 

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  fragment_lc_widget_api.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"

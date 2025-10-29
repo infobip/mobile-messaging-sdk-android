@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  backup_rules.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <full-backup-content>
     <include
         domain="sharedpref"

@@ -1,9 +1,17 @@
+/*
+ * PreferenceHelperWrapper.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp.cache;
 
 import android.content.Context;
-import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+
+import androidx.annotation.Nullable;
 
 /**
  * Temporary wrapper for preference helper

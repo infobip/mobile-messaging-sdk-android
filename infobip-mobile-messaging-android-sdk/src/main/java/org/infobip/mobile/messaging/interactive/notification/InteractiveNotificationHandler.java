@@ -1,13 +1,16 @@
+/*
+ * InteractiveNotificationHandler.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.notification;
 
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.RemoteInput;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
@@ -18,6 +21,10 @@ import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBun
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationCategoryBundleMapper;
 import org.infobip.mobile.messaging.notification.BaseNotificationHandler;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
 
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_MESSAGE;
 import static org.infobip.mobile.messaging.BroadcastParameter.EXTRA_NOTIFICATION_ID;

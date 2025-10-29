@@ -1,9 +1,15 @@
+/*
+ * MobileMessagingCloudHandlerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.cloud;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import junit.framework.TestCase;
 
@@ -14,6 +20,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 @RunWith(AndroidJUnit4.class)
 public class MobileMessagingCloudHandlerTest extends TestCase {

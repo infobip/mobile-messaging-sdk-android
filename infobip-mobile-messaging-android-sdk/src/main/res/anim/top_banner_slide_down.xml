@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  top_banner_slide_down.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <set xmlns:android="http://schemas.android.com/apk/res/android">
     <translate
         android:duration="@android:integer/config_mediumAnimTime"

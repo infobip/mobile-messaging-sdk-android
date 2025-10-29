@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <string name="ib_chat_no_connection">Pas de connection</string>
     <string name="ib_iv_btn_send_desc">Envoyer un message de discussion</string>

@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ib_activity_webview.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".view.WebViewActivity">
+    tools:context=".view.WebViewActivity"
+    >
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/ib_toolbar_webview"

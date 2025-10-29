@@ -1,15 +1,22 @@
+/*
+ * AuthorizationUtilsTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
+
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class AuthorizationUtilsTest {
 

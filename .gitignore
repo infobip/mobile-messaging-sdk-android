@@ -33,7 +33,10 @@ proguard/
 captures/
 
 #IntelliJ IDEA files
-.idea/
+.idea/*
+# BUT allow copyright configuration to be shared with team
+!.idea/copyright/
+!.idea/scopes/
 *.iws
 *.ipr
 *.iml

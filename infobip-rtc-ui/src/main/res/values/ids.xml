@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ids.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <item name="rtc_ui_hang_up_button" type="id" />
     <item name="rtc_ui_mic_button" type="id" />

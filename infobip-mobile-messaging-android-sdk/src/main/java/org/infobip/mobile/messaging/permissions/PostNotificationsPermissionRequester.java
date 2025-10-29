@@ -1,13 +1,20 @@
+/*
+ * PostNotificationsPermissionRequester.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.permissions;
 
 import android.Manifest;
 import android.os.Build;
 
-import androidx.annotation.NonNull;
-import androidx.activity.ComponentActivity;
-
-import org.infobip.mobile.messaging.resources.R;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.resources.R;
+
+import androidx.activity.ComponentActivity;
+import androidx.annotation.NonNull;
 
 public class PostNotificationsPermissionRequester implements PermissionsRequestManager.PermissionsRequester {
     private PermissionsRequestManager permissionsRequestManager;

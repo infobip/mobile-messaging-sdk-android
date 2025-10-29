@@ -1,6 +1,11 @@
+/*
+ * JsonSerializerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.api.support.http.serialization;
-
-import static org.junit.Assert.assertEquals;
 
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -10,6 +15,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author sslavin

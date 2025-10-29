@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  colors.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <color name="rtc_ui_white">#ffffff</color>
     <color name="rtc_ui_error">#C84714</color>

@@ -1,11 +1,15 @@
+/*
+ * InAppNotificationHandlerImpl.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp;
 
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
@@ -34,6 +38,9 @@ import org.infobip.mobile.messaging.interactive.platform.AndroidInteractiveBroad
 import org.infobip.mobile.messaging.interactive.platform.InteractiveBroadcaster;
 import org.infobip.mobile.messaging.interactive.predefined.PredefinedActionsProvider;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 /**
  * @author sslavin

@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <string name="mm_audio_permission_required">需要音频权限来处理通话</string>
     <string name="mm_bt_connect_permission_required">需要蓝牙连接权限才能使用蓝牙连接设备进行通话。</string>

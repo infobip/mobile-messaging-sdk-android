@@ -1,3 +1,10 @@
+/*
+ * MobileMessagingFirebaseService.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.cloud.firebase;
 
 import android.content.Context;
@@ -6,7 +13,6 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import org.infobip.mobile.messaging.Message;
-import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudService;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 

@@ -1,8 +1,15 @@
+/*
+ * SHA256.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.util;
 
-import androidx.annotation.NonNull;
-
 import java.security.MessageDigest;
+
+import androidx.annotation.NonNull;
 
 public class SHA256 {
     public static @NonNull String calc(String str) {

@@ -1,11 +1,11 @@
+/*
+ * DefaultApiClientTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.api.support.http.client;
-
-import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
-import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_READ_TIMEOUT;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
 import org.junit.After;
@@ -21,6 +21,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;
+import static org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient.DEFAULT_READ_TIMEOUT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author mstipanov

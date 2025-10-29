@@ -1,5 +1,31 @@
+/*
+ * PersonalizeSynchronizerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
 
+
+import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
+import org.infobip.mobile.messaging.api.support.ApiErrorCode;
+import org.infobip.mobile.messaging.api.support.ApiIOException;
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.mobileapi.Result;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import androidx.annotation.NonNull;
 
 import static junit.framework.Assert.assertEquals;
 import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
@@ -15,26 +41,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-
-import androidx.annotation.NonNull;
-
-import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
-import org.infobip.mobile.messaging.api.support.ApiErrorCode;
-import org.infobip.mobile.messaging.api.support.ApiIOException;
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
-import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
-import org.infobip.mobile.messaging.mobileapi.Result;
-import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 

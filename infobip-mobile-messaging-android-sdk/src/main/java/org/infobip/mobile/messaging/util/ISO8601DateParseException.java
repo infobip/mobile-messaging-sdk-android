@@ -1,3 +1,10 @@
+/*
+ * ISO8601DateParseException.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-8601 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.util;
 
 /**

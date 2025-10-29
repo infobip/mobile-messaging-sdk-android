@@ -1,9 +1,11 @@
+/*
+ * PrivacySettingsTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.storage;
-
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Installation;
@@ -23,6 +25,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.NonNull;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 public class PrivacySettingsTest extends MobileMessagingTestCase {
 

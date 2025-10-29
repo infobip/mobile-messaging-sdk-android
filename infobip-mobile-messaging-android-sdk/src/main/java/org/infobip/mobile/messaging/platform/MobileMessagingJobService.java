@@ -1,3 +1,10 @@
+/*
+ * MobileMessagingJobService.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.platform;
 
 import android.annotation.SuppressLint;
@@ -9,12 +16,13 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 
 import static org.infobip.mobile.messaging.platform.MobileMessagingJob.ON_NETWORK_AVAILABLE_JOB_ID;
 import static org.infobip.mobile.messaging.platform.MobileMessagingJob.getScheduleId;

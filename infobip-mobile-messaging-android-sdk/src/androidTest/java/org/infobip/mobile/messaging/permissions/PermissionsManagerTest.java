@@ -1,16 +1,22 @@
+/*
+ * PermissionsManagerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.permissions;
 
-import static org.mockito.Mockito.doReturn;
-
 import android.Manifest;
-
 import android.content.pm.PackageManager;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import static org.mockito.Mockito.doReturn;
 
 public class PermissionsManagerTest extends MobileMessagingTestCase {
     private PermissionsHelper.PermissionsRequestListener permissionsRequestListenerMock;

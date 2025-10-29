@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <string name="mm_audio_permission_required">통화를 처리하려면 오디오 권한이 필요합니다.</string>
     <string name="mm_bt_connect_permission_required">블루투스 연결 기기를 사용하여 통화를 하기 위해서는 블루투스 연결 권한이 필요합니다.</string>

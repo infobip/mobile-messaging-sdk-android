@@ -1,3 +1,10 @@
+/*
+ * MobileNetworkInformation.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.util;
 
 import android.Manifest;
@@ -5,8 +12,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import androidx.core.content.ContextCompat;
 import android.telephony.TelephonyManager;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * Created by sslavin on 22/04/16.

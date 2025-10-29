@@ -1,9 +1,11 @@
+/*
+ * CustomAttributeTypeTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
-import static org.junit.Assert.assertFalse;
 
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
@@ -22,6 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
+import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
+import static org.junit.Assert.assertFalse;
 
 public class CustomAttributeTypeTest extends MobileMessagingTestCase {
 

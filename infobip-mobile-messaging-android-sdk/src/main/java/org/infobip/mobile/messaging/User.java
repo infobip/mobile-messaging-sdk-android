@@ -1,18 +1,25 @@
+/*
+ * User.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
 
-import static org.infobip.mobile.messaging.UserMapper.fromBundle;
-import static org.infobip.mobile.messaging.UserMapper.mapEmailsToBackend;
-import static org.infobip.mobile.messaging.UserMapper.mapPhonesToBackend;
-
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import androidx.annotation.Nullable;
+
+import static org.infobip.mobile.messaging.UserMapper.fromBundle;
+import static org.infobip.mobile.messaging.UserMapper.mapEmailsToBackend;
+import static org.infobip.mobile.messaging.UserMapper.mapPhonesToBackend;
 
 public class User extends UserAttributes {
 

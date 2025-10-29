@@ -1,3 +1,10 @@
+/*
+ * PermissionsRequestManager.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.permissions;
 
 import android.app.Activity;
@@ -5,6 +12,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.resources.R;
+
+import java.util.Map;
+import java.util.Set;
 
 import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResult;
@@ -14,12 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.collection.ArraySet;
 import androidx.fragment.app.Fragment;
-
-import org.infobip.mobile.messaging.resources.R;
-import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
-
-import java.util.Map;
-import java.util.Set;
 
 public class PermissionsRequestManager {
     public interface PermissionsRequester {

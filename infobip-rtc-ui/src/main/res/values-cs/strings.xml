@@ -1,3 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <resources>
     <string name="mm_audio_permission_required">Ke zpracování hovorů je vyžadováno oprávnění ke zvuku.</string>
     <string name="mm_bt_connect_permission_required">K používání zařízení připojeného přes Bluetooth pro hovory je vyžadováno oprávnění k připojení Bluetooth.</string>

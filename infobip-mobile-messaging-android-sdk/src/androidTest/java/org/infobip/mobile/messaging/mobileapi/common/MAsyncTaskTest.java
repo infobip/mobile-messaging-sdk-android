@@ -1,10 +1,11 @@
+/*
+ * MAsyncTaskTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.common;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
@@ -19,6 +20,12 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
+
+import androidx.annotation.NonNull;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 
 /**
  * @author sslavin

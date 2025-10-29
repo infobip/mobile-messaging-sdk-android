@@ -1,11 +1,10 @@
 /*
- * Mobile Messaging Android Showcase app
- * FileUtils.kt
+ * UriUtils.kt
+ * Mobile Messaging SDK
  *
- * Created by jdzubak on 6/2/2025.
- * Copyright © 2025 Infobip Ltd. All rights reserved.
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
  */
-
 package org.infobip.mobile.messaging.chat.utils
 
 import android.content.ContentValues

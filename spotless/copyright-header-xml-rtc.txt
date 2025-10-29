@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  $FILE
+  Infobip RTC UI
+
+  Copyright (c) 2016-$YEAR Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->

@@ -1,14 +1,14 @@
+/*
+ * MobileMessagingTestCase.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.tools;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.withSettings;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.google.firebase.FirebaseOptions;
 
@@ -47,6 +47,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * @author sslavin

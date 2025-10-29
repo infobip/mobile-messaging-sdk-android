@@ -1,11 +1,19 @@
+/*
+ * ShowOrNot.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp.rules;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
-import androidx.annotation.Size;
 
 import org.infobip.mobile.messaging.interactive.NotificationAction;
 import org.infobip.mobile.messaging.interactive.NotificationCategory;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Size;
 
 /**
  * @author sslavin

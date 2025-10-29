@@ -1,11 +1,19 @@
+/*
+ * MessageHandlerModuleTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
 
 import android.content.Context;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 import static junit.framework.Assert.assertNotNull;

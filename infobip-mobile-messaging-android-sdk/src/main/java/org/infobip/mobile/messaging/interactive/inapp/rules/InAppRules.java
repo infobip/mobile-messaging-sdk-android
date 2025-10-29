@@ -1,6 +1,11 @@
+/*
+ * InAppRules.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive.inapp.rules;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.NotificationSettings;
@@ -17,6 +22,8 @@ import org.infobip.mobile.messaging.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import androidx.annotation.NonNull;
 
 /**
  * @author sslavin

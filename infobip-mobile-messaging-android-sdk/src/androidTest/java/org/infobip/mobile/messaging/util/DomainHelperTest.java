@@ -1,13 +1,20 @@
+/*
+ * DomainHelperTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.util;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.junit.Test;
 
 import java.util.HashSet;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DomainHelperTest extends MobileMessagingTestCase {
 

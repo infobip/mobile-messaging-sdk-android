@@ -1,14 +1,22 @@
+/*
+ * NotificationAction.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.interactive;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.NotificationSettings;
 import org.infobip.mobile.messaging.interactive.dal.bundle.NotificationActionBundleMapper;
 import org.infobip.mobile.messaging.util.ResourceLoader;
 import org.infobip.mobile.messaging.util.StringUtils;
+
+import androidx.annotation.NonNull;
 
 /**
  * Notification action class

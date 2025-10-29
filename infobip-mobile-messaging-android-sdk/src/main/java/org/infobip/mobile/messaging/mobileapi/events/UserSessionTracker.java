@@ -1,14 +1,22 @@
+/*
+ * UserSessionTracker.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.events;
 
 import android.content.Context;
 import android.os.Handler;
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.MobileMessagingProperty;
 import org.infobip.mobile.messaging.app.ActivityLifecycleMonitor;
 import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
+
+import androidx.annotation.NonNull;
 
 public class UserSessionTracker {
 

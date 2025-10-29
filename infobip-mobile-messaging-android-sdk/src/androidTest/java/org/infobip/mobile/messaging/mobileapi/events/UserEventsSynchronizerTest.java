@@ -1,6 +1,11 @@
+/*
+ * UserEventsSynchronizerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.events;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.CustomEvent;
@@ -21,7 +26,6 @@ import org.infobip.mobile.messaging.platform.Time;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -30,6 +34,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
+
+import androidx.annotation.NonNull;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

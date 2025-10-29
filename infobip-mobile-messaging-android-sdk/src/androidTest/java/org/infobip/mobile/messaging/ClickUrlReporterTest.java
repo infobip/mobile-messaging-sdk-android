@@ -1,6 +1,11 @@
+/*
+ * ClickUrlReporterTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
-
-import static org.mockito.Mockito.mock;
 
 import org.infobip.mobile.messaging.api.clickreporter.MobileApiClickReporter;
 import org.infobip.mobile.messaging.interactive.inapp.InAppWebViewMessage;
@@ -15,6 +20,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
+
+import static org.mockito.Mockito.mock;
 
 public class ClickUrlReporterTest extends MobileMessagingTestCase {
 

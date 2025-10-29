@@ -1,4 +1,21 @@
+/*
+ * SystemDataReportTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
+
+import org.infobip.mobile.messaging.api.appinstance.AppInstance;
+import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
+import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.util.PreferenceHelper;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
+
+import java.util.Map;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -10,16 +27,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-
-import org.infobip.mobile.messaging.api.appinstance.AppInstance;
-import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
-import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
-import org.infobip.mobile.messaging.util.PreferenceHelper;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.BDDMockito;
-
-import java.util.Map;
 
 /**
  * @author sslavin

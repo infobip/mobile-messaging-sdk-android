@@ -1,8 +1,13 @@
+/*
+ * MAsyncTask.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.common;
 
 import android.annotation.SuppressLint;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.support.ApiBackendExceptionWithContent;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
@@ -17,6 +22,8 @@ import org.infobip.mobile.messaging.mobileapi.common.exceptions.BackendInvalidPa
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executor;
+
+import androidx.annotation.NonNull;
 
 /**
  * Wrapper object over native AsyncTask

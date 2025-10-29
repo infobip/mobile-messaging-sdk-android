@@ -1,11 +1,11 @@
+/*
+ * BaseUrlCheckerTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi.baseurl;
-
-import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS;
-import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_LAST_TIME;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.api.baseurl.BaseUrlResponse;
@@ -15,6 +15,13 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.concurrent.Executor;
+
+import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_INTERVAL_HOURS;
+import static org.infobip.mobile.messaging.MobileMessagingProperty.BASEURL_CHECK_LAST_TIME;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class BaseUrlCheckerTest extends MobileMessagingTestCase {
 

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="RTC UI Scope" pattern="file[infobip-mobile-messaging-android.infobip-rtc-ui.main]:*||file[infobip-mobile-messaging-android.infobip-rtc-ui.main]:java//*||file[infobip-mobile-messaging-android.infobip-rtc-ui.main]:res//*" />
+</component>

@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
-<files-path/> is Context.getFilesDir()
-<cache-path/> is Context.getCacheDir()
-<external-path/> is Environment.getExternalStorageDirectory()
-<external-files-path/> is Context.getExternalFilesDir(String)
-<external-cache-path/> is Context.getExternalCacheDir()
-<external-media-path/> is Context.getExternalMediaDirs()
--->
+  file_paths.xml
+  Mobile Messaging SDK
 
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
 <paths>
     <external-files-path
         name="Infobip"
         path="DCIM" /> <!-- Dir = Environment.DIRECTORY_DCIM/Infobip -->
 </paths>
+<!--
+    <files-path/> is Context.getFilesDir()
+    <cache-path/> is Context.getCacheDir()
+    <external-path/> is Environment.getExternalStorageDirectory()
+    <external-files-path/> is Context.getExternalFilesDir(String)
+    <external-cache-path/> is Context.getExternalCacheDir()
+    <external-media-path/> is Context.getExternalMediaDirs()
+-->

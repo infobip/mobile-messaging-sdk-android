@@ -1,15 +1,22 @@
+/*
+ * UserStoreTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
-
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-
-import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import androidx.annotation.NonNull;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
 public class UserStoreTest extends MobileMessagingTestCase {
 

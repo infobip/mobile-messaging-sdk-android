@@ -1,7 +1,12 @@
+/*
+ * MobileMessagingError.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.mobileapi;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -11,6 +16,9 @@ import org.infobip.mobile.messaging.util.JwtStructureValidationException;
 
 import java.io.Serializable;
 import java.util.Locale;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class MobileMessagingError implements Serializable {
 

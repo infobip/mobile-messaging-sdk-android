@@ -1,3 +1,10 @@
+/*
+ * MobileMessaging.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging;
 
 import android.Manifest;
@@ -5,11 +12,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.annotation.RequiresPermission;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -25,6 +27,11 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.RequiresPermission;
 
 /**
  * The main configuration class. It is used to configure and start the Mobile Messaging System.

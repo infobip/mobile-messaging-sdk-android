@@ -1,8 +1,11 @@
+/*
+ * MobileInboxMappersTest.java
+ * Mobile Messaging SDK
+ *
+ * Copyright (c) 2016-2025 Infobip Limited
+ * Licensed under the Apache License, Version 2.0
+ */
 package org.infobip.mobile.messaging.inbox;
-
-import static org.infobip.mobile.messaging.inbox.MobileInboxFilterOptionsJson.mobileInboxFilterOptionsFromJSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.json.JSONArray;
@@ -12,6 +15,10 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.infobip.mobile.messaging.inbox.MobileInboxFilterOptionsJson.mobileInboxFilterOptionsFromJSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MobileInboxMappersTest {
 
