@@ -1206,7 +1206,7 @@ public class MobileMessagingCore
     }
 
     public Installation getInstallation(boolean restrictData) {
-        boolean reportEnabled = false;
+        boolean reportEnabled = true;
         if (restrictData) {
             reportEnabled = PreferenceHelper.findBoolean(context, MobileMessagingProperty.REPORT_SYSTEM_INFO);
         }

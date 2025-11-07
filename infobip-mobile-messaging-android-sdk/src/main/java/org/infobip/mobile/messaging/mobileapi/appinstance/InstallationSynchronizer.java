@@ -9,6 +9,9 @@ package org.infobip.mobile.messaging.mobileapi.appinstance;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+
 import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;
@@ -36,9 +39,6 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-
 
 public class InstallationSynchronizer {
 
@@ -55,6 +55,30 @@ public class InstallationSynchronizer {
     private volatile boolean isSyncStarting;
 
     private static class PushInstallation extends Installation {
+        public PushInstallation() {
+        }
+
+        public PushInstallation(Installation installation) {
+            super(installation.getPushRegistrationId(),
+                    installation.isPushRegistrationEnabled(),
+                    installation.getNotificationsEnabled(),
+                    installation.getSdkVersion(),
+                    installation.getAppVersion(),
+                    installation.getOs(),
+                    installation.getOsVersion(),
+                    installation.getDeviceManufacturer(),
+                    installation.getDeviceModel(),
+                    installation.getDeviceSecure(),
+                    installation.getLanguage(),
+                    installation.getDeviceTimezoneOffset(),
+                    installation.getApplicationUserId(),
+                    installation.getDeviceName(),
+                    installation.isPrimaryDevice(),
+                    installation.getPushServiceType(),
+                    installation.getPushServiceToken(),
+                    installation.getCustomAttributes());
+        }
+
         void setServiceType() {
             super.setPushServiceType();
         }
@@ -344,7 +368,7 @@ public class InstallationSynchronizer {
         if (!mobileMessagingCore.isRegistrationAvailable()) {
             MobileMessagingLogger.w("Registration not available yet, you can fetch installation when push registration ID becomes available");
             if (listener != null) {
-                listener.onResult(new Result(mobileMessagingCore.getInstallation(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+                listener.onResult(new Result(mobileMessagingCore.getInstallation(true), InternalSdkError.NO_VALID_REGISTRATION.getError()));
             }
             return;
         }
@@ -359,6 +383,7 @@ public class InstallationSynchronizer {
             @Override
             public void after(AppInstance instance) {
                 Installation installation = InstallationMapper.fromBackend(instance);
+                PushInstallation pushInstallation = new PushInstallation(installation);
                 if (installation.isPrimaryDevice() != null) {
                     mobileMessagingCore.savePrimarySetting(installation.isPrimaryDevice());
                 }
@@ -367,8 +392,11 @@ public class InstallationSynchronizer {
                 }
                 mobileMessagingCore.saveCustomAttributes(installation.getCustomAttributes());
 
+                pushInstallation.setToken(mobileMessagingCore.getCloudToken());
+                pushInstallation.setServiceType();
+
                 if (listener != null) {
-                    listener.onResult(new Result<>(installation));
+                    listener.onResult(new Result<>(pushInstallation));
                 }
                 mobileMessagingCore.setShouldRepersonalize(false);
                 MobileMessagingLogger.v("GET INSTALLATION DONE <<<");
