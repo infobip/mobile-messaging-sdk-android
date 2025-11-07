@@ -8,6 +8,27 @@
 package org.infobip.mobile.messaging;
 
 
+import static junit.framework.Assert.assertEquals;
+import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
@@ -22,25 +43,9 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import androidx.annotation.NonNull;
-
-import static junit.framework.Assert.assertEquals;
-import static org.infobip.mobile.messaging.util.DateTimeUtil.dateFromYMDString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
 
 public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
@@ -50,7 +55,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     private ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
 
     private String givenFirstName = "John";
-    private Date givenBirthday = new Date(1999, 1, 1);
+    private Date givenBirthday = new Date(89, 10, 21);
     private String givenExternalUserId = "extId";
     private Set<String> givenPhones = CollectionUtils.setOf("111", "222");
     private Set<String> givenEmails = CollectionUtils.setOf("email1@mail.com", "email2@mail.com");
@@ -67,8 +72,9 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     @Test
     public void test_personalize_without_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
-        givenUserData();
         UserIdentity userIdentity = givenIdentity();
+
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBodyEmpty());
 
         //when
         mobileMessaging.personalize(userIdentity, null, true, userResultListener);
@@ -79,7 +85,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         User returnedUser = userCaptor.getValue();
         verifyIdentity(returnedUser);
         assertNull(returnedUser.getFirstName());
-        assertNull(returnedUser.getCustomAttributes());
+        assertTrue(returnedUser.getCustomAttributes().isEmpty());
         assertNull(returnedUser.getListCustomAttributeItems(KEY_FOR_LIST));
         assertNull(returnedUser.getTags());
         assertNull(returnedUser.getGender());
@@ -87,13 +93,12 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertNull(returnedUser.getFirstName());
         assertNull(returnedUser.getMiddleName());
 
-        assertJEquals(returnedUser, mobileMessagingCore.getUser());
+        assertJEquals(returnedUser, mobileMessagingCore.getUser(), "map", "customAttributes");
     }
 
     @Test
     public void test_personalize_with_user_atts_with_force_depersonalize_completed() throws Exception {
         //given
-        givenUserData();
         UserIdentity userIdentity = givenIdentity();
         String newFirstName = "Darth";
         String newLastName = "Vader";
@@ -105,6 +110,14 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         userAttributes.setLastName(newLastName);
         userAttributes.setMiddleName(newMiddleName);
         userAttributes.setGender(newGender);
+
+        UserBody userBody = userBodyEmpty();
+        userBody.setFirstName(newFirstName);
+        userBody.setMiddleName(newMiddleName);
+        userBody.setLastName(newLastName);
+        userBody.setGender(String.valueOf(newGender));
+
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
 
         //when
         mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
@@ -118,12 +131,12 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(newLastName, returnedUser.getLastName());
         assertEquals(newMiddleName, returnedUser.getMiddleName());
         assertEquals(newGender, returnedUser.getGender());
-        assertNull(returnedUser.getCustomAttributes());
+        assertTrue(returnedUser.getCustomAttributes().isEmpty());
         assertNull(returnedUser.getListCustomAttributeItems(KEY_FOR_LIST));
         assertNull(returnedUser.getTags());
         assertNull(returnedUser.getBirthday());
 
-        assertJEquals(returnedUser, mobileMessagingCore.getUser());
+        assertJEquals(returnedUser, mobileMessagingCore.getUser(), "map", "customAttributes");
     }
 
     @Test
@@ -131,6 +144,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         //given
         givenUserData();
         UserIdentity userIdentity = givenIdentity();
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
 
         //when
         mobileMessaging.personalize(userIdentity, null, false, userResultListener);
@@ -141,9 +155,8 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         verifyIdentity(returnedUser);
         assertEquals(givenFirstName, returnedUser.getFirstName());
         assertEquals(givenBirthday, returnedUser.getBirthday());
-        assertJEquals(givenCustomAtts, returnedUser.getCustomAttributes());
-
-        assertJEquals(returnedUser, mobileMessagingCore.getUser());
+        assertTrue(returnedUser.getCustomAttributes().isEmpty());
+        assertJEquals(returnedUser, mobileMessagingCore.getUser(), "map", "customAttributes");
     }
 
     @Test
@@ -273,6 +286,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         UserIdentity userIdentity = givenIdentity();
         Date newBirthday = dateFromYMDString("١٩٨٩-١١-٢١");
 
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
 
         UserAttributes userAttributes = new UserAttributes();
         userAttributes.setBirthday(newBirthday);
@@ -286,7 +300,32 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         User returnedUser = userCaptor.getValue();
         verifyIdentity(returnedUser);
         assertEquals(newBirthday, returnedUser.getBirthday());
-        assertJEquals(returnedUser, mobileMessagingCore.getUser());
+        assertJEquals(returnedUser, mobileMessaging.getUser(), "map", "customAttributes");
+    }
+
+    @Test
+    public void test_server_data_added() {
+        //given
+        givenUserData();
+        UserIdentity userIdentity = givenIdentity();
+
+        UserAttributes userAttributes = new UserAttributes();
+        userAttributes.setLastName("D'Uh");
+        UserBody userBody = userBody();
+        userBody.setLastName("D'Uh");
+
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
+
+
+        //when
+        mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
+
+        //then
+        verifyNeededPrefsCleanUp(false);
+        verify(broadcaster, after(300).atLeastOnce()).personalized(userCaptor.capture());
+        User returnedUser = userCaptor.getValue();
+        verifyIdentity(returnedUser);
+        assertEquals("D'Uh", returnedUser.getLastName());
     }
 
     private void givenUserData() {
@@ -295,7 +334,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         user.setBirthday(givenBirthday);
         user.setCustomAttributes(givenCustomAtts);
         user.setListCustomAttribute(KEY_FOR_LIST, new ListCustomAttributeValue(getListCustomValueItems()));
-        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion",  true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
+        SystemData systemData = new SystemData("SomeSdkVersion", "SomeOsVersion", "SomeDeviceManufacturer", "SomeDeviceModel", "SomeAppVersion", true, true, "SomeLanguage", "SomeDeviceName", "GMT+1");
 
         String savedUser = UserMapper.toJson(user);
         PreferenceHelper.saveString(context, MobileMessagingProperty.USER_DATA, savedUser);
@@ -341,5 +380,28 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         assertEquals(givenEmails, returnedUser.getEmails());
         assertEquals(givenPhones, returnedUser.getPhones());
         assertEquals(givenExternalUserId, returnedUser.getExternalUserId());
+    }
+
+    private UserBody userBody() {
+        UserBody userBody = userBodyEmpty();
+        userBody.setFirstName(givenFirstName);
+        userBody.setBirthday("1989-11-21");
+
+        return userBody;
+    }
+
+    private UserBody userBodyEmpty() {
+        UserBody userBody = new UserBody();
+        userBody.setExternalUserId(givenExternalUserId);
+        Set<UserBody.Email> emails = new HashSet<>();
+        emails.add(new UserBody.Email("email1@mail.com"));
+        emails.add(new UserBody.Email("email2@mail.com"));
+        userBody.setEmails(emails);
+        Set<UserBody.Phone> phones = new HashSet<>();
+        phones.add(new UserBody.Phone("111"));
+        phones.add(new UserBody.Phone("222"));
+        userBody.setPhones(phones);
+
+        return userBody;
     }
 }

@@ -21,7 +21,7 @@ import java.util.Map;
 @Version("1")
 public interface MobileApiUserData {
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/personalize")
-    void personalize(@Path(name = "regId") String regId,
+    UserBody personalize(@Path(name = "regId") String regId,
                      @Header(name = "Authorization") String accessToken,
                      @Query(name = "forceDepersonalize", value = "false") boolean forceDepersonalize,
                      @Query(name = "keepAsLead", value = "false") boolean keepAsLead,

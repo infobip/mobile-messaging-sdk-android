@@ -138,7 +138,7 @@ public class UserJson extends User {
                 userAttributes.setGender(UserMapper.genderFromBackend(json.optString(UserAtts.gender)));
             }
             if (json.has(UserAtts.birthday)) {
-                Date bday = null;
+                Date bday;
                 try {
                     bday = DateTimeUtil.dateFromYMDString(json.optString(UserAtts.birthday));
                     userAttributes.setBirthday(bday);
@@ -189,7 +189,7 @@ public class UserJson extends User {
     }
 
     private static Set<String> jsonArrayFromJSONObjectToSet(JSONObject jsonObject, String arrayName) {
-        Set<String> set = new HashSet<String>();
+        Set<String> set = new HashSet<>();
         JSONArray jsonArray = jsonObject.optJSONArray(arrayName);
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {

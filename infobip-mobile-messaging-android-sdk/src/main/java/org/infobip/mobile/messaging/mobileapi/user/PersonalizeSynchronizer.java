@@ -13,8 +13,10 @@ import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserAttributes;
 import org.infobip.mobile.messaging.UserIdentity;
+import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiAppInstance;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiUserData;
+import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
@@ -93,25 +95,25 @@ public class PersonalizeSynchronizer {
             return;
         }
 
-        new MRetryableTask<UserPersonalizeBody, Void>() {
+        new MRetryableTask<UserPersonalizeBody, UserBody>() {
 
             @Override
-            public Void run(UserPersonalizeBody[] userPersonalizeBodies) {
+            public UserBody run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("PERSONALIZE >>>", userPersonalizeBody);
-                mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, userPersonalizeBody);
-                return null;
+                UserBody userResponse = mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, userPersonalizeBody);
+                MobileMessagingLogger.v("PERSONALIZE USER DATA <<<", userResponse != null ? userResponse.toString() : null);
+                return userResponse;
             }
 
             @Override
-            public void after(Void aVoid) {
+            public void after(UserBody userResponse) {
+                User user = UserMapper.fromBackend(userResponse);
                 MobileMessagingLogger.v("PERSONALIZE DONE <<<");
-                mobileMessagingCore.setUserDataReported(new User(userIdentity, userAttributes), true);
-
-                User userToReturn = mobileMessagingCore.getUser();
-                broadcaster.personalized(userToReturn);
+                mobileMessagingCore.setUserDataReported(user, true);
+                broadcaster.personalized(user);
 
                 if (listener != null) {
-                    listener.onResult(new Result<>(userToReturn));
+                    listener.onResult(new Result<>(user));
                 }
             }
 

@@ -7,6 +7,9 @@
  */
 package org.infobip.mobile.messaging.plugins;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserAttributes;
@@ -18,9 +21,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class UserJsonTest {
     private final static int USER_CLASS_NUMBER_OF_PARAMS = 12;
@@ -48,6 +48,7 @@ public class UserJsonTest {
 
         assertNull(user.getInstallations());
     }
+
 
     @Test
     public void userIdentityFromJSON_should_resolve() throws JSONException {
