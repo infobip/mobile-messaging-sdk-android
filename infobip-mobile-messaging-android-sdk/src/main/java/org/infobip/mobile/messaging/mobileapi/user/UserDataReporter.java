@@ -60,6 +60,16 @@ public class UserDataReporter {
             return;
         }
 
+        try {
+            UserDataValidator.validate(user);
+        } catch (UserDataValidationException e) {
+            MobileMessagingLogger.e("USER DATA VALIDATION ERROR - User data does not meet API requirements", e);
+            if (listener != null) {
+                listener.onResult(new Result(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(e)));
+            }
+            return;
+        }
+
         final String pushRegistrationId = mobileMessagingCore.getPushRegistrationId();
         if (StringUtils.isBlank(pushRegistrationId)) {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");

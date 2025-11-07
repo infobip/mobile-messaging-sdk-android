@@ -63,6 +63,17 @@ public class PersonalizeSynchronizer {
     }
 
     public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, boolean keepAsLead, final MobileMessaging.ResultListener<User> listener) {
+        try {
+            UserDataValidator.validate(userIdentity);
+            UserDataValidator.validate(userAttributes);
+        } catch (UserDataValidationException e) {
+            MobileMessagingLogger.e("PERSONALIZE VALIDATION ERROR - User data does not meet API requirements", e);
+            if (listener != null) {
+                listener.onResult(new Result<>(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(e)));
+            }
+            return;
+        }
+
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
