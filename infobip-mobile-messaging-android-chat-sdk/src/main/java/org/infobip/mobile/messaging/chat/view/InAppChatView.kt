@@ -482,9 +482,9 @@ class InAppChatView @JvmOverloads constructor(
             }
 
             //Final design not know yet
-            //binding.ibLcSpinner.hide()
             //binding.ibLcErrorView.show(mappedResult.isError)
-            //binding.ibLcWebView.show(mappedResult.isSuccess)
+            binding.ibLcSpinner.hide()
+            binding.ibLcWebView.show()
             when (mappedResult) {
                 is LivechatWidgetResult.Error -> {
                     val error = if (mappedResult.throwable is InAppChatException)

@@ -284,7 +284,7 @@ internal class LivechatWidgetApiImpl(
                                     widgetTheme = theme,
                                     language = language
                                 )
-                            continuation.invokeOnCancellation {
+                                continuation.invokeOnCancellation {
                                     setContinuation(null)
                                 }
                             }
