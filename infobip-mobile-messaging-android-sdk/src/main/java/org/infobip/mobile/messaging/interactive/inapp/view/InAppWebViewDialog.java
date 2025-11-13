@@ -240,7 +240,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
 
                     setupWebViewForDisplaying(cardView);
 
-                    Map<String, String> headers = getAuthorizationHeader();
+                    Map<String, String> headers = getInappWebViewHeaders();
 
                     if (headers.isEmpty()) {
                         webView.loadUrl(message.url);
@@ -261,14 +261,12 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     }
 
     @NonNull
-    private Map<String, String> getAuthorizationHeader() {
-        String applicationCode = MobileMessagingCore.getApplicationCode(activityWrapper.getActivity());
-        String pushRegistrationId = MobileMessagingCore.getInstance(getActivity()).getPushRegistrationId();
+    private Map<String, String> getInappWebViewHeaders() {
         UserAgentUtil userAgentUtil = new UserAgentUtil();
         Map<String, String> headers = new HashMap<>();
-        if (applicationCode != null) {
-            headers.put("Authorization", "App " + applicationCode);
-            headers.put("User-Agent", userAgentUtil.getUserAgent(UserAgentAdditions.getLibVersion(), UserAgentAdditions.getAdditions(activityWrapper.getActivity())));
+        headers.put("User-Agent", userAgentUtil.getUserAgent(UserAgentAdditions.getLibVersion(), UserAgentAdditions.getAdditions(activityWrapper.getActivity())));
+        String pushRegistrationId = MobileMessagingCore.getInstance(getActivity()).getPushRegistrationId();
+        if (pushRegistrationId != null) {
             headers.put("pushregistrationid", pushRegistrationId);
         }
         return headers;
