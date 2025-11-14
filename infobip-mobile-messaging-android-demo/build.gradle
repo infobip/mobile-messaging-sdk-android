@@ -129,7 +129,6 @@ dependencies {
 
     implementation "androidx.appcompat:appcompat:$mm_appCompatVersion"
     implementation "com.google.android.material:material:$mm_materialVersion"
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 
@@ -137,10 +136,6 @@ dependencies {
 
     //To add WebRTC use build flavour "chatWithCalls"
     chatWithCallsImplementation project(':infobip-rtc-ui')
-
-    //To add JWT use build flavour "chat" and "chatWithCalls"
-    chatImplementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
-    chatWithCallsImplementation 'com.nimbusds:nimbus-jose-jwt:9.0.1'
 
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")

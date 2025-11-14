@@ -29,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
@@ -660,6 +661,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             .filter { it.isNotEmpty() }
             .map { if (it.length > LivechatWidgetApi.MESSAGE_MAX_LENGTH) it.substring(0, LivechatWidgetApi.MESSAGE_MAX_LENGTH) else it }
             .onEach { draft -> withBinding { it.ibLcChat.send(MessagePayload.Draft(draft)) } }
+            .catch { MobileMessagingLogger.e(TAG, "Failed to send draft message", it) }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
