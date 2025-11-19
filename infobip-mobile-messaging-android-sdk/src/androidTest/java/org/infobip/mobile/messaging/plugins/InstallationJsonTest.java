@@ -7,6 +7,7 @@
  */
 package org.infobip.mobile.messaging.plugins;
 
+import org.infobip.mobile.messaging.CustomAttributeValue;
 import org.infobip.mobile.messaging.Installation;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -53,7 +55,10 @@ public class InstallationJsonTest {
         assertEquals(installation.getPushServiceType().toString(), json.get("pushServiceType"));
         assertEquals(installation.getSdkVersion(), json.get("sdkVersion"));
         assertTrue(json.has("customAttributes"));
-        assertEquals("null", json.get("customAttributes").toString());
+
+        JSONObject value = json.getJSONObject("customAttributes");
+
+        assertEquals("value", value.get("key"));
     }
 
     @Test
@@ -103,7 +108,10 @@ public class InstallationJsonTest {
                 "somepushservicetoken",
                 null
         );
-        installation.setCustomAttributes(null);
+
+        HashMap<String, CustomAttributeValue> customAttsValueHashMap = new HashMap<>();
+        customAttsValueHashMap.put("key", new CustomAttributeValue("value"));
+        installation.setCustomAttributes(customAttsValueHashMap);
 
         return installation;
     }

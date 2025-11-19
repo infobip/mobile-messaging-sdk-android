@@ -15,7 +15,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class MessageJsonTest {
-    private final static int MESSAGE_JSON_NUMBER_OF_PARAMS = 19;
+    private final static int MESSAGE_JSON_NUMBER_OF_PARAMS = 20;
 
     @Test
     public void toJSON_should_be_expected_number_of_parameters() throws JSONException {
@@ -26,9 +26,13 @@ public class MessageJsonTest {
         assert json != null;
         assertEquals(message.getMessageId(), json.getString("messageId"));
         assertEquals(MESSAGE_JSON_NUMBER_OF_PARAMS, json.length());
+
+        JSONObject customs = (JSONObject) json.get("customPayload");
+        JSONObject cvstm = message.getCustomPayload();
+        assertEquals(cvstm, customs);
     }
 
-    private Message message() {
+    private Message message() throws JSONException {
         return new Message(
                 "someID",
                 "someTitle",
@@ -42,7 +46,7 @@ public class MessageJsonTest {
                 0,
                 0,
                 0,
-                null,
+                new JSONObject("{\"key\": \"value\"}"),
                 null,
                 "someDestination",
                 Message.Status.SUCCESS,

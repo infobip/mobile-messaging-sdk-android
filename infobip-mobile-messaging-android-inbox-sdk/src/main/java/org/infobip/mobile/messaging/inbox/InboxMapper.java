@@ -7,19 +7,20 @@
  */
 package org.infobip.mobile.messaging.inbox;
 
+import androidx.annotation.NonNull;
+
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
 import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.platform.Time;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.NonNull;
 
 public class InboxMapper {
     public static Inbox fromBackend(@NonNull FetchInboxResponse fetchInboxResponse) {
@@ -74,7 +75,9 @@ public class InboxMapper {
                         InternalDataMapper.getInternalDataDeeplinkUri(internalData),
                         InternalDataMapper.getInternalDataInAppOpenTitle(internalData),
                         InternalDataMapper.getInternalDataInAppDismissTitle(internalData)),
-                InboxDataMapper.inboxDataFromInternalData(internalData));
+                InboxDataMapper.inboxTopicFromInternalData(internalData),
+                InboxDataMapper.inboxSeenFromInternalData(internalData)
+        );
 
         InternalDataMapper.updateMessageWithInternalData(message, internalData);
         return message;
@@ -85,10 +88,50 @@ public class InboxMapper {
             return new JSONObject();
         }
         try {
-            return new JSONObject(inbox.toString());
+            JSONObject jsonObject = new JSONObject().put("countTotal", inbox.getCountTotal())
+                    .put("countUnread", inbox.getCountUnread())
+                    .putOpt("countTotalFiltered", inbox.getCountTotalFiltered())
+                    .putOpt("countUnreadFiltered", inbox.getCountUnreadFiltered());
+            JSONArray jsonArray = new JSONArray();
+            for (InboxMessage message : inbox.getMessages()) {
+                jsonArray.put(toJSON(message));
+            }
+            jsonObject.putOpt("messages", jsonArray);
+            return jsonObject;
         } catch (Exception e) {
             MobileMessagingLogger.e("Cannot convert Inbox toJSON", e);
             return new JSONObject();
+        }
+    }
+
+    private static JSONObject toJSON(final InboxMessage message) {
+        try {
+            return new JSONObject()
+                    .putOpt("messageId", message.getMessageId())
+                    .putOpt("title", message.getTitle())
+                    .putOpt("body", message.getBody())
+                    .putOpt("sound", message.getSound())
+                    .putOpt("vibrate", message.isVibrate())
+                    .putOpt("icon", message.getIcon())
+                    .putOpt("silent", message.isSilent())
+                    .putOpt("category", message.getCategory())
+                    .putOpt("from", message.getFrom())
+                    .putOpt("receivedTimestamp", message.getReceivedTimestamp())
+                    .putOpt("customPayload", message.getCustomPayload())
+                    .putOpt("contentUrl", message.getContentUrl())
+                    .putOpt("seen", message.getSeenTimestamp() != 0)
+                    .putOpt("seenDate", message.getSeenTimestamp())
+                    .putOpt("chat", message.isChatMessage())
+                    .putOpt("browserUrl", message.getBrowserUrl())
+                    .putOpt("webViewUrl", message.getWebViewUrl())
+                    .putOpt("deeplink", message.getDeeplink())
+                    .putOpt("inAppOpenTitle", message.getInAppOpenTitle())
+                    .putOpt("inAppDismissTitle", message.getInAppDismissTitle())
+                    .putOpt("topic", message.getTopic())
+                    .putOpt("seen", message.isSeen());
+        } catch (JSONException e) {
+            MobileMessagingLogger.e("Cannot convert message to JSON: ", e);
+            return null;
         }
     }
 }

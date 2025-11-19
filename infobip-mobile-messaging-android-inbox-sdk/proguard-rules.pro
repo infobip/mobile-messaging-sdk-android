@@ -21,6 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class org.infobip.mobile.messaging.inbox.Inbox { *; }
--keep class org.infobip.mobile.messaging.inbox.InboxData { *; }
--keep class org.infobip.mobile.messaging.inbox.InboxData$* { *; }
 -keep class org.infobip.mobile.messaging.inbox.InboxMessage { *; }

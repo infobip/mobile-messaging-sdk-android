@@ -7,34 +7,43 @@
  */
 package org.infobip.mobile.messaging.inbox;
 
+import static org.infobip.mobile.messaging.inbox.MobileInboxFilterOptionsJson.mobileInboxFilterOptionsFromJSON;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.infobip.mobile.messaging.inbox.MobileInboxFilterOptionsJson.mobileInboxFilterOptionsFromJSON;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class MobileInboxMappersTest {
 
     @Test
     public void inboxMapper_toJSON_return_empty_for_null() {
         JSONObject inbox = InboxMapper.toJSON(null);
-        assertEquals(inbox.length(), 0);
+        assertEquals(0, inbox.length());
     }
 
     @Test
-    public void inboxMapper_toJSON() {
+    public void inboxMapper_toJSON() throws JSONException {
         Inbox inbox = new Inbox();
         inbox.setCountTotal(2);
         inbox.setCountUnread(1);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("custom", "value");
+        List<InboxMessage> messages = new ArrayList<>();
+        messages.add(new InboxMessage("123", "title", "message", "kittens", false, null,
+                true, null, null, 1, 1, 1, jsonObject, null, null,
+                null, null, null, "topic", false, null, 1, null, null, null, null, null, null));
+        inbox.setMessages(messages);
         JSONObject inboxJSON = InboxMapper.toJSON(inbox);
-        assertEquals(inboxJSON.toString(), "{\"countTotal\":2,\"countUnread\":1}");
+
+        assertEquals("{\"countTotal\":2,\"countUnread\":1,\"messages\":[{\"messageId\":\"123\",\"title\":\"title\",\"body\":\"message\",\"sound\":\"kittens\",\"vibrate\":false,\"silent\":true,\"receivedTimestamp\":1,\"customPayload\":{\"custom\":\"value\"},\"seen\":false,\"seenDate\":1,\"chat\":false,\"topic\":\"topic\"}]}", inboxJSON.toString());
     }
 
     @Test

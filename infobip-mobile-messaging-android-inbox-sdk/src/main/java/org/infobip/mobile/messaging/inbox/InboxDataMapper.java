@@ -7,9 +7,9 @@
  */
 package org.infobip.mobile.messaging.inbox;
 
-import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
-
 import androidx.annotation.Nullable;
+
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 
 /**
  * Used to parse Inbox stringified json from internalData
@@ -18,25 +18,47 @@ public final class InboxDataMapper {
 
     private static final JsonSerializer serializer = new JsonSerializer(false);
 
-    /**
-     * Serializes json data to InboxData object
-     *
-     * @param internalDataJson inboxData to deserialize
-     * @return InboxData object from json data
-     */
-    @Nullable
-    public static InboxData inboxDataFromInternalData(String internalDataJson) {
-        return internalDataJson != null ? serializer.deserialize(internalDataJson, InboxData.class) : null;
+    private static class Inbox {
+        String topic;
+
+        boolean seen;
+
+        public Inbox(String topic, boolean seen) {
+            this.topic = topic;
+            this.seen = seen;
+        }
     }
 
     /**
-     * Serializes InboxData object to json data
+     * Serializes inbox object to json data
      *
-     * @param inbox inboxData object to serialize
-     * @return String - inboxData as json string
+     * @param topic - message topic to serialize
+     * @param seen  - message seen status to serialize
+     * @return String - Inbox as json string
      */
     @Nullable
-    public static String inboxDataToInternalData(InboxData inbox) {
-        return inbox != null ? serializer.serialize(inbox) : null;
+    public static String inboxDataToInternalData(String topic, boolean seen) {
+        return topic != null ? serializer.serialize(new Inbox(topic, seen)) : null;
+    }
+
+    /**
+     * Returns inbox topic from internal data
+     *
+     * @param internalDataJson internalDataJson to deserialize
+     * @return topic string
+     */
+    @Nullable
+    public static String inboxTopicFromInternalData(String internalDataJson) {
+        return internalDataJson != null ? serializer.deserialize(internalDataJson, Inbox.class).topic : null;
+    }
+
+    /**
+     * Returns inbox seen from internal data
+     *
+     * @param internalDataJson internalDataJson to deserialize
+     * @return seen boolean
+     */
+    public static boolean inboxSeenFromInternalData(String internalDataJson) {
+        return internalDataJson != null && serializer.deserialize(internalDataJson, Inbox.class).seen;
     }
 }

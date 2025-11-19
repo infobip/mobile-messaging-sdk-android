@@ -11,14 +11,14 @@ import org.infobip.mobile.messaging.Message;
 import org.json.JSONObject;
 
 public class InboxMessage extends Message {
+    private String topic;
+    private boolean seen;
 
-    private InboxData inboxData;
-
-    public static InboxMessage createFrom(Message message, InboxData inboxData) {
+    public static InboxMessage createFrom(Message message, String topic, boolean seen) {
         return new InboxMessage(message.getMessageId(), message.getTitle(), message.getBody(), message.getSound(), message.isVibrate(), message.getIcon(),
                 message.isSilent(), message.getCategory(), message.getFrom(), message.getReceivedTimestamp(), message.getSeenTimestamp(), message.getSentTimestamp(),
                 message.getCustomPayload(), message.getInternalData(), message.getDestination(), message.getStatus(), message.getStatusMessage(), message.getContentUrl(),
-                inboxData, message.getInAppStyle(), message.getInAppExpiryTimestamp(), message.getWebViewUrl(), message.getBrowserUrl(), message.getMessageType(), message.getDeeplink(),
+                topic, seen, message.getInAppStyle(), message.getInAppExpiryTimestamp(), message.getWebViewUrl(), message.getBrowserUrl(), message.getMessageType(), message.getDeeplink(),
                 message.getInAppOpenTitle(), message.getInAppDismissTitle());
     }
 
@@ -30,25 +30,30 @@ public class InboxMessage extends Message {
                 inboxMessage.getInAppOpenTitle(), inboxMessage.getInAppDismissTitle());
     }
 
-    private InboxMessage(String messageId, String title, String body, String sound, boolean vibrate, String icon, boolean silent, String category,
-                         String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp, JSONObject customPayload, String internalData,
-                         String destination, Status status, String statusMessage, String contentUrl, InboxData inboxData, InAppStyle inAppStyle, long expiryTime,
-                         String webViewUrl, String browserUrl, String messageType, String deeplink, String inAppOpenTitle, String inAppDismissTitle) {
+    InboxMessage(String messageId, String title, String body, String sound, boolean vibrate, String icon, boolean silent, String category,
+                 String from, long receivedTimestamp, long seenTimestamp, long sentTimestamp, JSONObject customPayload, String internalData,
+                 String destination, Status status, String statusMessage, String contentUrl, String topic, boolean seen, InAppStyle inAppStyle, long expiryTime,
+                 String webViewUrl, String browserUrl, String messageType, String deeplink, String inAppOpenTitle, String inAppDismissTitle) {
         super(messageId, title, body, sound, vibrate, icon, silent, category, from, receivedTimestamp, seenTimestamp, sentTimestamp, customPayload,
                 internalData, destination, status, statusMessage, contentUrl, inAppStyle, expiryTime, webViewUrl, browserUrl, messageType, deeplink,
                 inAppOpenTitle, inAppDismissTitle);
-        this.inboxData = inboxData;
+        this.topic = topic;
+        this.seen = seen;
     }
 
-    public String getTopic() { return getInboxData().getTopic(); }
+    public String getTopic() {
+        return topic;
+    }
 
-    void setInboxData(InboxData inboxData) { this.inboxData = inboxData; }
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
 
-    InboxData getInboxData() { return this.inboxData; }
-
-    public boolean isSeen() { return getInboxData().isSeen(); }
+    public boolean isSeen() {
+        return seen;
+    }
 
     public void setSeen() {
-        setInboxData(new InboxData(getInboxData().getTopic(), true));
+        this.seen = true;
     }
 }
