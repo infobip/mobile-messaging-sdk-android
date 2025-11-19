@@ -10,7 +10,10 @@ package org.infobip.mobile.messaging.inbox;
 import static org.infobip.mobile.messaging.inbox.MobileInboxFilterOptionsJson.mobileInboxFilterOptionsFromJSON;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import org.infobip.mobile.messaging.api.inbox.FetchInboxResponse;
+import org.infobip.mobile.messaging.api.messages.MessageResponse;
 import org.infobip.mobile.messaging.util.DateTimeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,6 +22,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MobileInboxMappersTest {
@@ -44,6 +48,49 @@ public class MobileInboxMappersTest {
         JSONObject inboxJSON = InboxMapper.toJSON(inbox);
 
         assertEquals("{\"countTotal\":2,\"countUnread\":1,\"messages\":[{\"messageId\":\"123\",\"title\":\"title\",\"body\":\"message\",\"sound\":\"kittens\",\"vibrate\":false,\"silent\":true,\"receivedTimestamp\":1,\"customPayload\":{\"custom\":\"value\"},\"seen\":false,\"seenDate\":1,\"chat\":false,\"topic\":\"topic\"}]}", inboxJSON.toString());
+    }
+
+    @Test
+    public void inboxMapper_fromBackend_should_include_topic_and_seen() {
+        MessageResponse messageResponse = new MessageResponse(
+                "message-id",
+                "title",
+                "message text",
+                null,
+                "true",
+                null,
+                null,
+                "{\"targetUrl\":\"www.someDomain.com\",\"someData\":\"someData\",\"deeplink\":\"screen_one\"}",
+                "{\n" +
+                        "  \"bulkId\" : \"some-valid-bulk-id\",\n" +
+                        "  \"inApp\" : false,\n" +
+                        "  \"atts\" : [ {\n" +
+                        "    \"url\" : \"https://www.infobip.com/kittens.png\"\n" +
+                        "  } ],\n" +
+                        "  \"deeplink\" : \"showcaseApp://deeplink/ProfileScreen\",\n" +
+                        "  \"validUntil\" : 1757493217000,\n" +
+                        "  \"inbox\" : {\n" +
+                        "    \"topic\" : \"Promotions\",\n" +
+                        "    \"seen\" : true\n" +
+                        "  },\n" +
+                        "  \"sendDateTime\" : 1757493207500\n" +
+                        "}");
+        FetchInboxResponse fetchInboxResponse = new FetchInboxResponse();
+        fetchInboxResponse.setCountUnread(4);
+        fetchInboxResponse.setCountTotal(5);
+        fetchInboxResponse.setCountUnreadFiltered(1);
+        fetchInboxResponse.setCountTotalFiltered(1);
+        fetchInboxResponse.setMessages(Collections.singletonList(messageResponse));
+
+        Inbox inbox = InboxMapper.fromBackend(fetchInboxResponse);
+        InboxMessage inboxMessage = inbox.getMessages().getFirst();
+
+        assertEquals(4, inbox.getCountUnread());
+        assertEquals(5, inbox.getCountTotal());
+        assertEquals(1, (int) inbox.getCountUnreadFiltered());
+        assertEquals(1, (int) inbox.getCountTotalFiltered());
+        assertEquals("Promotions", inboxMessage.getTopic());
+        assertTrue(inboxMessage.isSeen());
     }
 
     @Test

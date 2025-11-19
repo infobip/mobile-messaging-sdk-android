@@ -10,6 +10,7 @@ package org.infobip.mobile.messaging.inbox;
 import androidx.annotation.Nullable;
 
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
+import org.infobip.mobile.messaging.dal.json.InternalDataMapper;
 
 /**
  * Used to parse Inbox stringified json from internalData
@@ -18,14 +19,45 @@ public final class InboxDataMapper {
 
     private static final JsonSerializer serializer = new JsonSerializer(false);
 
-    private static class Inbox {
-        String topic;
+    static class InboxData extends InternalDataMapper.InternalData {
+        private final Inbox inbox;
 
-        boolean seen;
+        public InboxData(Inbox inbox) {
+            this.inbox = inbox;
+        }
 
-        public Inbox(String topic, boolean seen) {
-            this.topic = topic;
-            this.seen = seen;
+        public InboxData(String topic, boolean isSeen) {
+            this.inbox = new Inbox(topic, isSeen);
+        }
+
+        public String getTopic() {
+            return getInbox().getTopic();
+        }
+
+        public boolean isSeen() {
+            return getInbox().isSeen();
+        }
+
+        protected Inbox getInbox() {
+            return inbox;
+        }
+
+        static class Inbox {
+            private final String topic;
+            private final boolean seen;
+
+            public Inbox(String topic, boolean seen) {
+                this.topic = topic;
+                this.seen = seen;
+            }
+
+            public String getTopic() {
+                return this.topic;
+            }
+
+            public boolean isSeen() {
+                return this.seen;
+            }
         }
     }
 
@@ -38,7 +70,7 @@ public final class InboxDataMapper {
      */
     @Nullable
     public static String inboxDataToInternalData(String topic, boolean seen) {
-        return topic != null ? serializer.serialize(new Inbox(topic, seen)) : null;
+        return topic != null ? serializer.serialize(new InboxData(topic, seen)) : null;
     }
 
     /**
@@ -49,7 +81,7 @@ public final class InboxDataMapper {
      */
     @Nullable
     public static String inboxTopicFromInternalData(String internalDataJson) {
-        return internalDataJson != null ? serializer.deserialize(internalDataJson, Inbox.class).topic : null;
+        return internalDataJson != null ? serializer.deserialize(internalDataJson, InboxData.class).getTopic() : null;
     }
 
     /**
@@ -59,6 +91,6 @@ public final class InboxDataMapper {
      * @return seen boolean
      */
     public static boolean inboxSeenFromInternalData(String internalDataJson) {
-        return internalDataJson != null && serializer.deserialize(internalDataJson, Inbox.class).seen;
+        return internalDataJson != null && serializer.deserialize(internalDataJson, InboxData.class).isSeen();
     }
 }
