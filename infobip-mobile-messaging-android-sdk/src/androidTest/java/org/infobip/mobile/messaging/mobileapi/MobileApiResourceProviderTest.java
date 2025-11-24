@@ -13,7 +13,9 @@ import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.UserAgentAdditions;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
@@ -133,6 +135,72 @@ public class MobileApiResourceProviderTest extends MobileMessagingTestCase {
             String result = UserAgentAdditions.removeNotSupportedChars(test);
             assertEquals(result, should);
         }
+    }
+
+    @Test
+    public void shouldHandleNewBaseUrlHeaderCaseInsensitiveMixedCase() {
+        // Test with mixed case "New-Base-URL" (HTTP/1.1 style)
+        MobileMessagingCore.setApiUri(context, "https://initial1.com");
+        String initialUrl = MobileMessagingCore.getApiUri(context);
+        assertEquals("https://initial1.com", initialUrl);
+
+        MobileApiResourceProvider provider = new MobileApiResourceProvider();
+        // Initialize generator by calling a getter method
+        provider.getMobileApiVersion(context);
+        MobileApiResourceProvider.BaseUrlManager baseUrlManager = provider.new BaseUrlManager(context);
+
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> values = new ArrayList<>();
+        values.add("https://new-mixed.com");
+        headers.put("New-Base-URL", values);
+
+        baseUrlManager.beforeResponse(200, headers);
+
+        assertEquals("https://new-mixed.com", MobileMessagingCore.getApiUri(context));
+    }
+
+    @Test
+    public void shouldHandleNewBaseUrlHeaderCaseInsensitiveLowercase() {
+        // Test with lowercase "new-base-url" (HTTP/2 style)
+        MobileMessagingCore.setApiUri(context, "https://initial2.com");
+        String initialUrl = MobileMessagingCore.getApiUri(context);
+        assertEquals("https://initial2.com", initialUrl);
+
+        MobileApiResourceProvider provider = new MobileApiResourceProvider();
+        // Initialize generator by calling a getter method
+        provider.getMobileApiVersion(context);
+        MobileApiResourceProvider.BaseUrlManager baseUrlManager = provider.new BaseUrlManager(context);
+
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> values = new ArrayList<>();
+        values.add("https://new-lower.com");
+        headers.put("new-base-url", values);
+
+        baseUrlManager.beforeResponse(200, headers);
+
+        assertEquals("https://new-lower.com", MobileMessagingCore.getApiUri(context));
+    }
+
+    @Test
+    public void shouldHandleNewBaseUrlHeaderCaseInsensitiveUppercase() {
+        // Test with uppercase "NEW-BASE-URL"
+        MobileMessagingCore.setApiUri(context, "https://initial3.com");
+        String initialUrl = MobileMessagingCore.getApiUri(context);
+        assertEquals("https://initial3.com", initialUrl);
+
+        MobileApiResourceProvider provider = new MobileApiResourceProvider();
+        // Initialize generator by calling a getter method
+        provider.getMobileApiVersion(context);
+        MobileApiResourceProvider.BaseUrlManager baseUrlManager = provider.new BaseUrlManager(context);
+
+        Map<String, List<String>> headers = new HashMap<>();
+        List<String> values = new ArrayList<>();
+        values.add("https://new-upper.com");
+        headers.put("NEW-BASE-URL", values);
+
+        baseUrlManager.beforeResponse(200, headers);
+
+        assertEquals("https://new-upper.com", MobileMessagingCore.getApiUri(context));
     }
 
 //    @Test

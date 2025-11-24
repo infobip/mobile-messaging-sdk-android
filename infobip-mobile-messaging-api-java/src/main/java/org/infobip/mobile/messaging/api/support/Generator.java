@@ -58,7 +58,7 @@ import lombok.NonNull;
 public class Generator {
 
     private DefaultApiClient apiClient;
-    private String baseUrl = "https://mobile.infobip.com/";
+    private volatile String baseUrl = "https://mobile.infobip.com/";
     private ConcurrentHashMap<Class<?>, CachingInvocationHandler> proxyCacheMap = new ConcurrentHashMap<>();
     private Properties properties = System.getProperties();
     private int connectTimeout = DefaultApiClient.DEFAULT_CONNECT_TIMEOUT;

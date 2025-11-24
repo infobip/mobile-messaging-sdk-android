@@ -74,7 +74,7 @@ public class MobileApiResourceProvider {
             request.getHeaders().put(CustomApiHeaders.APPLICATION_CODE.getValue(), Collections.<Object>singletonList(MobileMessagingCore.getApplicationCodeHash(context)));
 
             String baseUrl = MobileMessagingCore.getApiUri(context);
-            if (generator.getBaseUrl() == baseUrl) {
+            if (baseUrl != null && baseUrl.equals(generator.getBaseUrl())) {
                 return request;
             }
 
@@ -87,7 +87,7 @@ public class MobileApiResourceProvider {
         }
 
         @Override
-        public void beforeResponse(int responseCode, Map<String, List<String>> headers) {
+        public synchronized void beforeResponse(int responseCode, Map<String, List<String>> headers) {
             if (PreferenceHelper.findBoolean(context, MobileMessagingProperty.API_URI_PROVIDED_BY_INTEGRATOR)) {
                 return;
             }
@@ -109,7 +109,15 @@ public class MobileApiResourceProvider {
 
             isPreviousFailed = isFailedNotThrottlingRequest;
 
-            List<String> values = headers.get(CustomApiHeaders.NEW_BASE_URL.getValue());
+            // Case-insensitive header lookup (HTTP/2 lowercases all header names)
+            List<String> values = null;
+            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+                if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(CustomApiHeaders.NEW_BASE_URL.getValue())) {
+                    values = entry.getValue();
+                    break;
+                }
+            }
+
             if (values == null || values.isEmpty() || StringUtils.isBlank(values.get(0))) {
                 return;
             }
