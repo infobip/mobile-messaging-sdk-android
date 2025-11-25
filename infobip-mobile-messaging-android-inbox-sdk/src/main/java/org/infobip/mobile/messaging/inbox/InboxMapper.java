@@ -108,27 +108,25 @@ public class InboxMapper {
         try {
             return new JSONObject()
                     .putOpt("messageId", message.getMessageId())
+                    .putOpt("topic", message.getTopic())
+                    .putOpt("seen", message.isSeen())
                     .putOpt("title", message.getTitle())
                     .putOpt("body", message.getBody())
                     .putOpt("sound", message.getSound())
                     .putOpt("vibrate", message.isVibrate())
-                    .putOpt("icon", message.getIcon())
                     .putOpt("silent", message.isSilent())
                     .putOpt("category", message.getCategory())
-                    .putOpt("from", message.getFrom())
-                    .putOpt("receivedTimestamp", message.getReceivedTimestamp())
                     .putOpt("customPayload", message.getCustomPayload())
+                    .putOpt("internalData", message.getInternalData())
                     .putOpt("contentUrl", message.getContentUrl())
-                    .putOpt("seen", message.getSeenTimestamp() != 0)
-                    .putOpt("seenDate", message.getSeenTimestamp())
-                    .putOpt("chat", message.isChatMessage())
                     .putOpt("browserUrl", message.getBrowserUrl())
-                    .putOpt("webViewUrl", message.getWebViewUrl())
                     .putOpt("deeplink", message.getDeeplink())
+                    .putOpt("webViewUrl", message.getWebViewUrl())
                     .putOpt("inAppOpenTitle", message.getInAppOpenTitle())
                     .putOpt("inAppDismissTitle", message.getInAppDismissTitle())
-                    .putOpt("topic", message.getTopic())
-                    .putOpt("seen", message.isSeen());
+                    .putOpt("sentTimestamp", message.getSentTimestamp())
+                    .putOpt("receivedTimestamp", message.getReceivedTimestamp()
+                    );
         } catch (JSONException e) {
             MobileMessagingLogger.e("Cannot convert message to JSON: ", e);
             return null;
