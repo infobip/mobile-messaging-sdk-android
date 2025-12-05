@@ -71,6 +71,8 @@
         <item name="ibChatInputSeparatorLineColor">@color/ib_chat_separator_color</item>
         <item name="ibChatInputSeparatorLineVisible">true</item>
         <item name="ibChatInputCursorColor">@color/ib_chat_text_color</item>
+        <item name="ibChatInputCharCounterDefaultColor">@color/ib_chat_char_counter_default</item>
+        <item name="ibChatInputCharCounterAlertColor">@color/ib_chat_char_counter_alert</item>
     </style>
 
     <style name="IB.Chat.Input.TextAppearance" parent="TextAppearance.MaterialComponents.Body1" />

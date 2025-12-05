@@ -10,4 +10,6 @@
     <color name="ib_chat_text_color">#242424</color>
     <color name="ib_chat_hint_text_color">#808080</color>
     <color name="ib_chat_separator_color">#19000000</color>
+    <color name="ib_chat_char_counter_default">#808080</color>
+    <color name="ib_chat_char_counter_alert">#F44336</color>
 </resources>

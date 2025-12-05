@@ -44,6 +44,9 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
     @ColorInt val separatorLineColor: Int = Defaults.separatorLineColor,
     val isSeparatorLineVisible: Boolean = Defaults.isSeparatorLineVisible,
     @ColorInt val cursorColor: Int = Defaults.textColor,
+    @StyleRes val charCounterTextAppearance: Int? = Defaults.charCounterTextAppearance,
+    @ColorInt val charCounterDefaultColor: Int = Defaults.charCounterDefaultColor,
+    @ColorInt val charCounterAlertColor: Int = Defaults.charCounterAlertColor,
 ) {
     object Defaults {
         @StyleRes
@@ -63,6 +66,15 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         @ColorInt
         val separatorLineColor: Int = "#19000000".toColorInt()
         val isSeparatorLineVisible: Boolean = true
+
+        @StyleRes
+        val charCounterTextAppearance: Int? = null
+
+        @ColorInt
+        val charCounterDefaultColor: Int = "#808080".toColorInt()
+
+        @ColorInt
+        val charCounterAlertColor: Int = "#F44336".toColorInt()
     }
 
     class Builder {
@@ -83,6 +95,9 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         private var separatorLineColor: Int = Defaults.separatorLineColor
         private var isSeparatorLineVisible: Boolean = Defaults.isSeparatorLineVisible
         private var cursorColor: Int = Defaults.textColor
+        private var charCounterTextAppearance: Int? = Defaults.charCounterTextAppearance
+        private var charCounterDefaultColor: Int = Defaults.charCounterDefaultColor
+        private var charCounterAlertColor: Int = Defaults.charCounterAlertColor
 
         fun setTextAppearance(@StyleRes textAppearance: Int?) = apply { textAppearance?.let { this.textAppearance = it } }
         fun setTextColor(@ColorInt textColor: Int?) = apply { textColor?.let { this.textColor = it } }
@@ -101,6 +116,9 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         fun setSeparatorLineColor(@ColorInt separatorLineColor: Int?) = apply { separatorLineColor?.let { this.separatorLineColor = it } }
         fun setIsSeparatorLineVisible(isSeparatorLineVisible: Boolean?) = apply { isSeparatorLineVisible?.let { this.isSeparatorLineVisible = it } }
         fun setCursorColor(@ColorInt cursorColor: Int?) = apply { cursorColor?.let { this.cursorColor = it } }
+        fun setCharCounterTextAppearance(@StyleRes textAppearance: Int?) = apply { textAppearance?.let { this.charCounterTextAppearance = it } }
+        fun setCharCounterDefaultColor(@ColorInt charCounterDefaultColor: Int?) = apply { charCounterDefaultColor?.let { this.charCounterDefaultColor = it } }
+        fun setCharCounterAlertColor(@ColorInt charCounterAlertColor: Int?) = apply { charCounterAlertColor?.let { this.charCounterAlertColor = it } }
 
         fun build() = InAppChatInputViewStyle(
             textAppearance = textAppearance,
@@ -119,7 +137,10 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
             sendBackgroundColor = sendBackgroundColor,
             separatorLineColor = separatorLineColor,
             isSeparatorLineVisible = isSeparatorLineVisible,
-            cursorColor = cursorColor
+            cursorColor = cursorColor,
+            charCounterTextAppearance = charCounterTextAppearance,
+            charCounterDefaultColor = charCounterDefaultColor,
+            charCounterAlertColor = charCounterAlertColor
         )
     }
 
@@ -171,6 +192,9 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
                 val isSeparatorLineVisible = getBoolean(R.styleable.InAppChatInputViewStyleable_ibChatInputSeparatorLineVisible, Defaults.isSeparatorLineVisible)
                 val cursorColor = widgetInfo?.colorPrimary?.takeIf { isDefaultTheme || !hasValue(R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor) }
                     ?: getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputCursorColor, textColor)
+                val charCounterTextAppearance = getResourceId(R.styleable.InAppChatInputViewStyleable_ibChatInputCharCounterTextAppearance, 0).takeIfDefined()
+                val charCounterDefaultColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputCharCounterDefaultColor, Defaults.charCounterDefaultColor)
+                val charCounterAlertColor = getColor(R.styleable.InAppChatInputViewStyleable_ibChatInputCharCounterAlertColor, Defaults.charCounterAlertColor)
 
                 recycle()
                 return InAppChatInputViewStyle(
@@ -190,7 +214,10 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
                     sendBackgroundColor = sendBackgroundColor,
                     separatorLineColor = separatorLineColor,
                     isSeparatorLineVisible = isSeparatorLineVisible,
-                    cursorColor = cursorColor
+                    cursorColor = cursorColor,
+                    charCounterTextAppearance = charCounterTextAppearance,
+                    charCounterDefaultColor = charCounterDefaultColor,
+                    charCounterAlertColor = charCounterAlertColor
                 )
             }
         }

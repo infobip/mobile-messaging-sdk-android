@@ -63,6 +63,9 @@
         <attr name="ibChatInputSeparatorLineColor" format="color|reference" />
         <attr name="ibChatInputSeparatorLineVisible" format="boolean" />
         <attr name="ibChatInputCursorColor" format="color|reference" />
+        <attr name="ibChatInputCharCounterTextAppearance" format="reference" />
+        <attr name="ibChatInputCharCounterDefaultColor" format="color|reference" />
+        <attr name="ibChatInputCharCounterAlertColor" format="color|reference" />
     </declare-styleable>
 
 </resources>

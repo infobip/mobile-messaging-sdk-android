@@ -64,6 +64,9 @@ data class PluginChatCustomization(
     val chatInputSeparatorLineColor: String? = null,
     val isChatInputSeparatorLineVisible: Boolean = false,
     val chatInputCursorColor: String? = null,
+    val chatInputCharCounterTextAppearance: String? = null,
+    val chatInputCharCounterDefaultColor: String? = null,
+    val chatInputCharCounterAlertColor: String? = null,
 ) {
     interface DrawableLoader {
         fun loadDrawable(context: Context, drawableSrc: String?): Drawable?
@@ -146,6 +149,9 @@ data class PluginChatCustomization(
             .setSeparatorLineColor(chatInputSeparatorLineColor.toColorIntOrNull())
             .setIsSeparatorLineVisible(isChatInputSeparatorLineVisible)
             .setCursorColor(chatInputCursorColor.toColorIntOrNull())
+            .setCharCounterTextAppearance(chatInputCharCounterTextAppearance.toResId(context))
+            .setCharCounterDefaultColor(chatInputCharCounterDefaultColor.toColorIntOrNull())
+            .setCharCounterAlertColor(chatInputCharCounterAlertColor.toColorIntOrNull())
             .setAttachmentIconTint(chatInputAttachmentIconTint.toColorIntOrNull()?.let { ColorStateList.valueOf(it) })
             .setSendIconTint(chatInputSendIconTint.toColorIntOrNull()?.let { ColorStateList.valueOf(it) })
             .build()

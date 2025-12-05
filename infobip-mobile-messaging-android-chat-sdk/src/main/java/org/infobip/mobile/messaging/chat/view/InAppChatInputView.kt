@@ -10,6 +10,7 @@ package org.infobip.mobile.messaging.chat.view
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Build
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -21,6 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
+import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.databinding.IbViewChatInputBinding
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.hideKeyboard
@@ -43,11 +45,13 @@ class InAppChatInputView @JvmOverloads constructor(
 
     companion object {
         private const val CHAT_INPUT_VISIBILITY_ANIM_DURATION_MILLIS: Long = 300
+        private const val CHAT_INPUT_COUNTER_VISIBILITY_THRESHOLD: Long = 4000
     }
 
     private val binding = IbViewChatInputBinding.inflate(LayoutInflater.from(context), this)
     private var style = StyleFactory.create(context, attributes).chatInputViewStyle()
     private val localizationUtils = LocalizationUtils.getInstance(context)
+    private var textWatcher: TextWatcher? = null
 
     init {
         if (style.attachmentIcon == null) {
@@ -58,6 +62,7 @@ class InAppChatInputView @JvmOverloads constructor(
         }
         applyStyle(style)
         binding.sendButton.isEnabled = getInputText()?.isNotBlank() == true
+        addTextChangedListener()
     }
 
     fun applyWidgetInfoStyle(widgetInfo: WidgetInfo) {
@@ -97,7 +102,24 @@ class InAppChatInputView @JvmOverloads constructor(
             topSeparator.setBackgroundColor(style.separatorLineColor)
             topSeparator.show(style.isSeparatorLineVisible)
             messageInput.setCursorDrawableColor(style.cursorColor)
+            style.charCounterTextAppearance?.let { messageInputLayout.setCounterTextAppearance(it) }
         }
+        updateCharacterCounter(getInputText()?.length ?: 0)
+    }
+
+    private fun addTextChangedListener() {
+        binding.messageInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val textLength = s?.length ?: 0
+                val isWithinLimit = textLength <= LivechatWidgetApi.MESSAGE_MAX_LENGTH
+                val isNotEmpty = s?.isNotEmpty() == true
+                binding.sendButton.isEnabled = isNotEmpty && isWithinLimit
+                updateCharacterCounter(textLength)
+            }
+
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        }.also { textWatcher = it })
     }
 
     private fun TextView.setCursorDrawableColor(@ColorInt color: Int) {
@@ -207,4 +229,21 @@ class InAppChatInputView @JvmOverloads constructor(
         binding.messageInput.hideKeyboard()
     }
 
+    private fun updateCharacterCounter(textLength: Int) {
+        val isCounterEnabled = textLength > CHAT_INPUT_COUNTER_VISIBILITY_THRESHOLD
+        if (isCounterEnabled) {
+            val counterColor = if (textLength > LivechatWidgetApi.MESSAGE_MAX_LENGTH) {
+                style.charCounterAlertColor
+            } else {
+                style.charCounterDefaultColor
+            }
+            binding.messageInputLayout.counterTextColor = ColorStateList.valueOf(counterColor)
+        }
+        binding.messageInputLayout.isCounterEnabled = isCounterEnabled
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        textWatcher?.let { binding.messageInput.removeTextChangedListener(it) }
+    }
 }

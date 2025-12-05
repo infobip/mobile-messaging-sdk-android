@@ -641,7 +641,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
             }
 
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                binding.ibLcChatInput.setSendButtonEnabled(s.isNotEmpty())
+                // nothing
             }
 
             override fun afterTextChanged(s: Editable) {
@@ -668,12 +668,9 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
     private fun initSendButton() = with(binding.ibLcChatInput) {
         setSendButtonClickListener {
             getInputText()?.let { msg ->
-                msg.chunkedSequence(LivechatWidgetApi.MESSAGE_MAX_LENGTH)
-                    .forEach { message ->
-                        if (message.isNotBlank()) {
-                            binding.ibLcChat.send(MessagePayload.Basic(message))
-                        }
-                    }
+                if (msg.isNotBlank()) {
+                    binding.ibLcChat.send(MessagePayload.Basic(msg))
+                }
                 clearInputText()
             }
         }
