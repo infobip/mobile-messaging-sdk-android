@@ -10,10 +10,9 @@ package com.infobip.webrtc.ui
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiError
@@ -197,8 +196,8 @@ interface InfobipRtcUi {
         override fun build(): InfobipRtcUi {
             return getInstance(context).also { sdk ->
                 this.rtcUiMode?.let { mode ->
-                    val defaultSuccessListener = SuccessListener { Log.d(TAG, "$mode calls enabled.") }
-                    val defaultErrorListener = ErrorListener { Log.d(TAG, "Failed to enabled $mode calls.", it) }
+                    val defaultSuccessListener = SuccessListener { RtcUiLogger.d("$mode calls enabled.") }
+                    val defaultErrorListener = ErrorListener { RtcUiLogger.d("Failed to enabled $mode calls.") }
                     when (mode) {
                         RtcUiMode.CUSTOM -> {
                             this.identity?.let { identity ->

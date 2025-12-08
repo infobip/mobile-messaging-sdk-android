@@ -15,7 +15,6 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
@@ -52,7 +51,6 @@ import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.RtcUiCallErrorMapper
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.RtcUiCallErrorMapperFactory
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegateFactory
 import com.infobip.webrtc.ui.internal.listener.DefaultRtcUiCallEventListener
@@ -66,6 +64,7 @@ import com.infobip.webrtc.ui.internal.utils.applyWindowInsets
 import com.infobip.webrtc.ui.internal.utils.navigate
 import com.infobip.webrtc.ui.internal.utils.setStatusBarColor
 import com.infobip.webrtc.ui.internal.utils.throttleFirst
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.RtcUiError
 import com.infobip.webrtc.ui.view.styles.Colors
 import com.infobip.webrtc.ui.view.styles.Icons
@@ -160,7 +159,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             .onEach { Toast.makeText(this@CallActivity, it, Toast.LENGTH_LONG).show() }
             .flowOn(Dispatchers.Main)
             .flowWithLifecycle(lifecycle, Lifecycle.State.CREATED)
-            .catch { Log.e(TAG, "Call messages flow error.", it) }
+            .catch { RtcUiLogger.e("Call messages flow error.", throwable = it) }
             .launchIn(lifecycleScope)
 
         viewModel.state
@@ -176,7 +175,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
             .flowOn(Dispatchers.Main)
             .flowWithLifecycle(lifecycle)
-            .catch { Log.e(TAG, "Call state flow error.", it) }
+            .catch { RtcUiLogger.e("Call state flow error.", throwable = it) }
             .launchIn(lifecycleScope)
     }
 
@@ -185,7 +184,7 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val permission = Manifest.permission.RECORD_AUDIO
             when {
-                ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED -> Log.d(TAG, "$permission permission granted")
+                ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED -> RtcUiLogger.d("$permission permission granted")
                 ActivityCompat.shouldShowRequestPermissionRationale(this, permission) -> showRationale(permission)
                 else -> permissionsToRequest.add(permission)
             }
@@ -193,13 +192,13 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val btPermission = Manifest.permission.BLUETOOTH_CONNECT
             when {
-                ContextCompat.checkSelfPermission(this, btPermission) == PackageManager.PERMISSION_GRANTED -> Log.d(TAG, "$btPermission permission granted")
+                ContextCompat.checkSelfPermission(this, btPermission) == PackageManager.PERMISSION_GRANTED -> RtcUiLogger.d("$btPermission permission granted")
                 ActivityCompat.shouldShowRequestPermissionRationale(this, btPermission) -> showRationale(btPermission)
                 else -> permissionsToRequest.add(btPermission)
             }
             val phoneStatePermission = Manifest.permission.READ_PHONE_STATE
             when {
-                ContextCompat.checkSelfPermission(this, phoneStatePermission) == PackageManager.PERMISSION_GRANTED -> Log.d(TAG, "$phoneStatePermission permission granted")
+                ContextCompat.checkSelfPermission(this, phoneStatePermission) == PackageManager.PERMISSION_GRANTED -> RtcUiLogger.d("$phoneStatePermission permission granted")
                 ActivityCompat.shouldShowRequestPermissionRationale(this, phoneStatePermission) -> showRationale(phoneStatePermission)
                 else -> permissionsToRequest.add(phoneStatePermission)
             }

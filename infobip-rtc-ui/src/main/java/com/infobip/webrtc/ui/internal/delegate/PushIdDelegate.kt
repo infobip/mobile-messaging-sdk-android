@@ -8,8 +8,7 @@
 package com.infobip.webrtc.ui.internal.delegate
 
 import android.content.Context
-import android.util.Log
-import com.infobip.webrtc.ui.internal.core.TAG
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import org.infobip.mobile.messaging.MobileMessaging
 
 internal interface PushIdDelegate {
@@ -23,7 +22,7 @@ internal class PushIdDelegateImpl(private val context: Context) : PushIdDelegate
             MobileMessaging.getInstance(context)
                 .installation
                 .pushRegistrationId
-        }.onFailure { Log.e(TAG, "Failed to obtain push registration id.", it) }
+        }.onFailure { RtcUiLogger.e("Failed to obtain push registration id.", throwable = it) }
             .getOrNull()
     }
 

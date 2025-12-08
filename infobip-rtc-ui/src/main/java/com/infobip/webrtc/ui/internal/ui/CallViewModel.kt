@@ -8,7 +8,6 @@
 package com.infobip.webrtc.ui.internal.ui
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infobip.webrtc.sdk.api.event.network.NetworkQualityChangedEvent
@@ -18,10 +17,10 @@ import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.impl.event.listener.DefaultNetworkQualityEventListener
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.listener.RtcUiCallEventListener
 import com.infobip.webrtc.ui.internal.model.CallState
 import com.infobip.webrtc.ui.internal.ui.view.CallAlert
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -144,7 +143,7 @@ internal class CallViewModel : ViewModel() {
             updateState { copy(isLocalScreenShare = true) }
         }
         result.onFailure {
-            Log.e(TAG, "Action start screen share failed.", it)
+            RtcUiLogger.e("Action start screen share failed.", throwable = it)
         }
         return result
     }
@@ -154,7 +153,7 @@ internal class CallViewModel : ViewModel() {
             updateState { copy(isLocalScreenShare = false) }
             callsDelegate.stopScreenShare()
         }.onFailure {
-            Log.e(TAG, "Action stop screen share failed.", it)
+            RtcUiLogger.e("Action stop screen share failed.", throwable = it)
         }
     }
 
@@ -163,7 +162,7 @@ internal class CallViewModel : ViewModel() {
             val newValue = !state.value.isLocalVideo
             callsDelegate.cameraVideo(newValue)
         }.onFailure {
-            Log.e(TAG, "Action camera failed.", it)
+            RtcUiLogger.e("Action camera failed.", throwable = it)
         }
     }
 
@@ -173,7 +172,7 @@ internal class CallViewModel : ViewModel() {
             callsDelegate.mute(newValue)
             updateState { copy(isMuted = newValue) }
         }.onFailure {
-            Log.e(TAG, "Action mute failed.", it)
+            RtcUiLogger.e("Action mute failed.", throwable = it)
         }
     }
 

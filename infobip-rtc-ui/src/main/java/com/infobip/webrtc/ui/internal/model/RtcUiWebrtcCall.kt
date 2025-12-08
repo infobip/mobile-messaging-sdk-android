@@ -8,7 +8,6 @@
 package com.infobip.webrtc.ui.internal.model
 
 import android.content.Context
-import android.util.Log
 import com.infobip.webrtc.sdk.api.call.DataChannel
 import com.infobip.webrtc.sdk.api.call.IncomingWebrtcCall
 import com.infobip.webrtc.sdk.api.call.WebrtcCall
@@ -26,6 +25,7 @@ import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.internal.listener.RtcUiCallEventListener
 import com.infobip.webrtc.ui.internal.listener.toWebRtcCallEventListener
 import com.infobip.webrtc.ui.internal.utils.applyIf
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import java.util.Date
 
 //region Base
@@ -89,7 +89,7 @@ internal abstract class BaseRtcUiWebrtcCall(
         runCatching {
             activeCall.sendDTMF(dtmf)
         }.onFailure {
-            Log.e("MMWebrtcCall", "sendDTMF($dtmf) failed", it)
+            RtcUiLogger.e("sendDTMF($dtmf) failed", tag = "RtcUiWebrtcCall", throwable = it)
         }
     }
 

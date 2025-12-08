@@ -8,7 +8,6 @@
 package com.infobip.webrtc.ui.internal.listener
 
 import android.content.Context
-import android.util.Log
 import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
 import com.infobip.webrtc.sdk.api.event.listener.IncomingApplicationCallEventListener
 import com.infobip.webrtc.sdk.api.event.listener.IncomingCallEventListener
@@ -16,12 +15,12 @@ import com.infobip.webrtc.sdk.api.event.rtc.IncomingApplicationCallEvent
 import com.infobip.webrtc.sdk.api.event.rtc.IncomingWebrtcCallEvent
 import com.infobip.webrtc.sdk.api.model.CallStatus
 import com.infobip.webrtc.sdk.api.model.ErrorCode
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.model.CallAction
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingAppCallImpl
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingCall
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingWebrtcCallImpl
 import com.infobip.webrtc.ui.internal.service.ActiveCallService
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 
 internal class IncomingCallEventListenerImpl(
     private val context: Context,
@@ -35,12 +34,12 @@ internal class IncomingCallEventListenerImpl(
     private val eventListener = object : DefaultRtcUiCallEventListener() {
 
         override fun onHangup(callHangupEvent: CallHangupEvent?) {
-            Log.d(TAG, "onHangup ${callHangupEvent?.errorCode?.name}")
+            RtcUiLogger.d("onHangup ${callHangupEvent?.errorCode?.name}")
             ActiveCallService.start(context, CallAction.CALL_FINISHED)
         }
 
         override fun onError(errorCode: ErrorCode?) {
-            Log.d(TAG, "onError ${errorCode?.name}")
+            RtcUiLogger.d("onError ${errorCode?.name}")
             ActiveCallService.start(context, CallAction.CALL_FINISHED)
         }
     }

@@ -11,13 +11,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.telephony.TelephonyManager
-import android.util.Log
 import android.widget.Toast
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.RtcUiCallErrorMapperFactory
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.model.CallAction
 import com.infobip.webrtc.ui.internal.service.ActiveCallService
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.RtcUiError
 
 class PhoneStateBroadcastReceiver : BroadcastReceiver() {
@@ -28,7 +27,7 @@ class PhoneStateBroadcastReceiver : BroadcastReceiver() {
         if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {
             val phoneState = intent.getStringExtra(TelephonyManager.EXTRA_STATE)
             if (phoneState != null) {
-                Log.d(TAG, "Phone state has changed: $phoneState")
+                RtcUiLogger.d("Phone state has changed: $phoneState")
                 when (phoneState) {
                     TelephonyManager.EXTRA_STATE_RINGING -> {} // Incoming call ringing
 

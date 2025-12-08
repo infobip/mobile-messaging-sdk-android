@@ -8,12 +8,11 @@
 package com.infobip.webrtc.ui.service
 
 import android.content.Context
-import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.infobip.webrtc.sdk.impl.push.PushRegistrationService
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.core.TAG
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService
 
 abstract class InfobipRtcUiFirebaseService: FirebaseMessagingService() {
@@ -23,19 +22,19 @@ abstract class InfobipRtcUiFirebaseService: FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         if (Companion.onMessageReceived(this, message)) {
-            Log.d(TAG, "RemoteMessage handled by InfobipRtcUiFirebaseService")
+            RtcUiLogger.d("RemoteMessage handled by InfobipRtcUiFirebaseService")
             return
         }
         if (MobileMessagingFirebaseService.onMessageReceived(this, message)) {
-            Log.d(TAG, "RemoteMessage handled by MobileMessagingFirebaseService")
+            RtcUiLogger.d("RemoteMessage handled by MobileMessagingFirebaseService")
             return
         }
         onMessageReceivedDelegate(message)
-        Log.d(TAG, "RemoteMessage delegated to ${this::class.java.simpleName}")
+        RtcUiLogger.d("RemoteMessage delegated to ${this::class.java.simpleName}")
     }
 
     override fun onNewToken(token: String) {
-        Log.d(TAG, "On new FCM token: $token")
+        RtcUiLogger.d("On new FCM token: $token")
         Companion.onNewToken(this, token)
         MobileMessagingFirebaseService.onNewToken(this, token)
         onNewTokenDelegate(token)

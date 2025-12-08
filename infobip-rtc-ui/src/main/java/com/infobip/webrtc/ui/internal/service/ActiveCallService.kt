@@ -20,7 +20,6 @@ import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -30,7 +29,6 @@ import com.infobip.webrtc.ui.RtcUiCallErrorMapper
 import com.infobip.webrtc.ui.internal.core.Cache
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.core.RtcUiCallErrorMapperFactory
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegate
 import com.infobip.webrtc.ui.internal.delegate.PhoneStateDelegateFactory
@@ -39,6 +37,7 @@ import com.infobip.webrtc.ui.internal.delegate.VibratorImpl
 import com.infobip.webrtc.ui.internal.model.CallAction
 import com.infobip.webrtc.ui.internal.notification.CALL_NOTIFICATION_ID
 import com.infobip.webrtc.ui.internal.notification.CallNotificationFactory
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.RtcUiError
 
 class ActiveCallService : BaseService() {
@@ -84,7 +83,7 @@ class ActiveCallService : BaseService() {
                     context.startService(intent)
                 }
             }.onFailure {
-                Log.e(TAG, "Could not start service with argument = action: $action, peer: $peer, foreground: $foreground", it)
+                RtcUiLogger.e("Could not start service with argument = action: $action, peer: $peer, foreground: $foreground", throwable = it)
             }
         }
 
@@ -106,7 +105,7 @@ class ActiveCallService : BaseService() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Handle action: ${intent?.action.orEmpty()}")
+        RtcUiLogger.d("Handle action: ${intent?.action.orEmpty()}")
         val action: String? = intent?.action
         val callAction = CallAction.fromValue(action) ?: return START_NOT_STICKY
         val peer = intent?.getStringExtra(PEER_EXTRA)?.takeIf { it.isNotBlank() }?.also { cachedPeer = it }
@@ -134,7 +133,7 @@ class ActiveCallService : BaseService() {
                     startForeground(notificationHelper.createIncomingCallNotification(this, peer, getString(R.string.mm_incoming_call)))
                     startRinging()
                 } else {
-                    Log.e(TAG, "Incoming call not handled! callStatus=$activeCallStatus, hasPushPermission=$hasPushPermission")
+                    RtcUiLogger.e("Incoming call not handled! callStatus=$activeCallStatus, hasPushPermission=$hasPushPermission")
                 }
             }
 
@@ -233,7 +232,7 @@ class ActiveCallService : BaseService() {
                 start()
             }
         }.onFailure {
-            Log.e(TAG, "startReconnectingTone() failed")
+            RtcUiLogger.e("startReconnectingTone() failed")
         }
     }
 
@@ -259,7 +258,7 @@ class ActiveCallService : BaseService() {
                 start()
             }
         }.onFailure {
-            Log.e(TAG, "stopReconnectingTone() failed")
+            RtcUiLogger.e("stopReconnectingTone() failed")
         }
     }
 
@@ -278,7 +277,7 @@ class ActiveCallService : BaseService() {
                 start()
             }
         }.onFailure {
-            Log.e(TAG, "playCallFinishedTone() failed")
+            RtcUiLogger.e("playCallFinishedTone() failed")
         }
     }
 
@@ -306,7 +305,7 @@ class ActiveCallService : BaseService() {
             stop()
             release()
         }.onFailure {
-            Log.e(TAG, "stop() and released() failed")
+            RtcUiLogger.e("stop() and released() failed")
         }
     }
 

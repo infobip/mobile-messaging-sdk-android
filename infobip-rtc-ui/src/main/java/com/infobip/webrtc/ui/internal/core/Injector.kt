@@ -20,13 +20,12 @@ import com.infobip.webrtc.ui.internal.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.internal.delegate.PushIdDelegateImpl
 import com.infobip.webrtc.ui.internal.notification.CallNotificationFactory
 import com.infobip.webrtc.ui.internal.notification.CallNotificationFactoryImpl
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.infobip.mobile.messaging.api.rtc.MobileApiRtc
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider
-
-internal const val TAG = "InfobipRtcUi"
 
 internal object Injector {
 
@@ -46,8 +45,10 @@ internal object Injector {
     val appCodeDelegate: AppCodeDelegate by lazy { AppCodeDelegateImpl(appContext) }
 
     fun getWebrtcUi(context: Context): InfobipRtcUi {
-        if (!Injector::appContext.isInitialized)
+        if (!Injector::appContext.isInitialized) {
             appContext = context.applicationContext
+            RtcUiLogger.init(appContext)
+        }
         return webrtcUi ?: runCatching {
             InfobipRtcUiImpl(
                 appContext,

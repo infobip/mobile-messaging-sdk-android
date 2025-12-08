@@ -12,12 +12,11 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.ServiceCompat
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.notification.CallNotificationFactory
 import com.infobip.webrtc.ui.internal.notification.SCREEN_SHARE_NOTIFICATION_ID
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 
 class ScreenShareService : BaseService() {
     private val notificationHelper: CallNotificationFactory by lazy { Injector.notificationFactory }
@@ -41,7 +40,7 @@ class ScreenShareService : BaseService() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "Handle action: ${intent?.action.orEmpty()}")
+        RtcUiLogger.d("Handle action: ${intent?.action.orEmpty()}")
         when (intent?.action) {
             ACTION_START_SCREEN_SHARE -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -65,7 +64,7 @@ class ScreenShareService : BaseService() {
                 isRunning = false
             }
 
-            else -> Log.d(TAG, "Unhandled intent action: ${intent?.action.orEmpty()}")
+            else -> RtcUiLogger.d("Unhandled intent action: ${intent?.action.orEmpty()}")
         }
         return START_NOT_STICKY
     }

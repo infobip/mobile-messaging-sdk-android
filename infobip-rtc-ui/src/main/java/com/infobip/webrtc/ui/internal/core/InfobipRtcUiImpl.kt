@@ -8,7 +8,6 @@
 package com.infobip.webrtc.ui.internal.core
 
 import android.content.Context
-import android.util.Log
 import com.infobip.webrtc.sdk.api.InfobipRTC
 import com.infobip.webrtc.sdk.api.model.push.Status
 import com.infobip.webrtc.ui.ErrorListener
@@ -19,6 +18,7 @@ import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
 import com.infobip.webrtc.ui.internal.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.internal.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
@@ -69,7 +69,7 @@ internal class InfobipRtcUiImpl(
 
         callsScope.launch {
             runCatching {
-                Log.d(TAG, "Enabling $rtcUiMode calls for identity $identity.")
+                RtcUiLogger.d("Enabling $rtcUiMode calls for identity $identity.")
                 tokenProvider.getToken(identity)?.let { token ->
                     if (listenType == ListenType.PUSH) {
                         if (!notificationPermissionDelegate.hasPermission()) {
@@ -95,10 +95,7 @@ internal class InfobipRtcUiImpl(
                 successListener = successListener,
                 errorListener = errorListener
             )
-        } ?: Log.d(
-            TAG,
-            "Could not obtain identity value(pushRegistrationId), waiting for broadcast."
-        )
+        } ?: RtcUiLogger.d("Could not obtain identity value(pushRegistrationId), waiting for broadcast.")
     }
 
     override fun enableInAppChatCalls(
@@ -113,14 +110,14 @@ internal class InfobipRtcUiImpl(
                 successListener = successListener,
                 errorListener = errorListener
             )
-        } ?: Log.d(TAG, "Waiting for broadcast with livechatRegistrationId.")
+        } ?: RtcUiLogger.d("Waiting for broadcast with livechatRegistrationId.")
     }
 
     override fun disableCalls(successListener: SuccessListener?, errorListener: ErrorListener?) {
         runCatching {
             val identity = cache.identity
             require(identity.isNotEmpty()) { "Calls are not registered." }
-            Log.d(TAG, "Disabling calls for identity $identity.")
+            RtcUiLogger.d("Disabling calls for identity $identity.")
             callsScope.launch {
                 val webRtcToken = tokenProvider.getToken(identity)
                 require(webRtcToken?.isNotBlank() == true) { "Missing WebRTC token." }
@@ -156,7 +153,7 @@ internal class InfobipRtcUiImpl(
         onSuccess: (Unit) -> Unit = {},
     ) {
         callsDelegate.enablePush(token, cache.configurationId) {
-            Log.d(TAG, "Registration for calls push result: ${it.status}, ${it.description}")
+            RtcUiLogger.d("Registration for calls push result: ${it.status}, ${it.description}")
             if (it.status != Status.SUCCESS) {
                 onError(IllegalStateException("Registration for calls push failed. Reason: ${it.description}"))
             } else {

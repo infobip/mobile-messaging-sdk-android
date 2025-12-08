@@ -22,7 +22,6 @@ import android.graphics.Rect
 import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -49,7 +48,6 @@ import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.databinding.FragmentInCallBinding
 import com.infobip.webrtc.ui.internal.core.Injector
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.model.CallState
 import com.infobip.webrtc.ui.internal.service.ScreenShareService
 import com.infobip.webrtc.ui.internal.ui.CallViewModel
@@ -60,6 +58,7 @@ import com.infobip.webrtc.ui.internal.ui.view.PipParamsFactory
 import com.infobip.webrtc.ui.internal.ui.view.RowImageButton
 import com.infobip.webrtc.ui.internal.utils.px
 import com.infobip.webrtc.ui.internal.utils.show
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.InCallButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -129,12 +128,12 @@ class InCallFragment : Fragment() {
                     while (!ScreenShareService.isRunning) {
                         if (counter > 10)
                             break
-                        Log.d(TAG, "Waiting for ScreenShareService...")
+                        RtcUiLogger.d("Waiting for ScreenShareService...")
                         delay(20)
                         counter++
                     }
                     if (ScreenShareService.isRunning) {
-                        Log.d(TAG, "Starting screen sharing")
+                        RtcUiLogger.d("Starting screen sharing")
                         viewModel.shareScreen(ScreenCapturer(result.resultCode, result.data))
                             .onSuccess {
                                 onScreenShareStateChanged()
@@ -192,7 +191,7 @@ class InCallFragment : Fragment() {
                 it.removeSink(binding.remoteVideo)
                 it.removeSink(binding.remoteVideoScreenSharing)
             }
-            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .catch { RtcUiLogger.e("Failed to remove sink", throwable = it) }
             .launchWithLifecycle()
         viewModel.localVideoTrack
             .onEach(::handleLocalVideoTrack)
@@ -202,18 +201,18 @@ class InCallFragment : Fragment() {
                 it.removeSink(binding.localVideo)
                 it.removeSink(binding.localVideoScreenSharing)
             }
-            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .catch { RtcUiLogger.e("Failed to remove sink", throwable = it) }
             .launchWithLifecycle()
         viewModel.screenShareTrack
             .onEach(::handleScreenShareTrack)
             .launchWithLifecycle()
         viewModel.screenShareTrackToBeRemoved
             .onEach { it.removeSink(binding.remoteVideo) }
-            .catch { Log.e(TAG, "Failed to remove sink", it) }
+            .catch { RtcUiLogger.e("Failed to remove sink", throwable = it) }
             .launchWithLifecycle()
         viewModel.state
             .onEach(::renderState)
-            .catch { Log.e(TAG, "Failed to render state", it) }
+            .catch { RtcUiLogger.e("Failed to render state", throwable = it) }
             .launchWithLifecycle()
         setUpScreen()
     }
@@ -431,7 +430,7 @@ class InCallFragment : Fragment() {
 
     private fun renderState(state: CallState) {
         with(state) {
-            Log.d(TAG, state.toString())
+            RtcUiLogger.d(state.toString())
             val timeFormatted = viewModel.formatTime(elapsedTimeSeconds)
             if (isRemoteVideo || isLocalScreenShare && !isPip) {
                 binding.elapsedTimeVideo.text = timeFormatted
@@ -497,7 +496,7 @@ class InCallFragment : Fragment() {
         runCatching {
             track?.addSink(localVideoRenderer)
         }.onFailure {
-            Log.e(TAG, "Handle local video sink failed.", it)
+            RtcUiLogger.e("Handle local video sink failed.", throwable = it)
         }
     }
 
@@ -505,7 +504,7 @@ class InCallFragment : Fragment() {
         runCatching {
             track?.addSink(remoteVideoRenderer)
         }.onFailure {
-            Log.e(TAG, "Handle remote video sink failed.", it)
+            RtcUiLogger.e("Handle remote video sink failed.", throwable = it)
         }
     }
 
@@ -514,7 +513,7 @@ class InCallFragment : Fragment() {
             track?.addSink(binding.remoteVideo)
             onScreenShareStateChanged()
         }.onFailure {
-            Log.e(TAG, "Handle remote video sink failed.", it)
+            RtcUiLogger.e("Handle remote video sink failed.", throwable = it)
         }
     }
 
@@ -536,7 +535,7 @@ class InCallFragment : Fragment() {
                 addSink(localVideoRenderer)
             }
         }.onFailure {
-            Log.e(TAG, "Handle local video sink failed.", it)
+            RtcUiLogger.e("Handle local video sink failed.", throwable = it)
         }
     }
 
@@ -548,7 +547,7 @@ class InCallFragment : Fragment() {
                 addSink(remoteVideoRenderer)
             }
         }.onFailure {
-            Log.e(TAG, "Handle local video sink failed.", it)
+            RtcUiLogger.e("Handle local video sink failed.", throwable = it)
         }
     }
 
@@ -715,7 +714,7 @@ class InCallFragment : Fragment() {
             if (isPipSupported)
                 context?.unregisterReceiver(pipActionsReceiver)
         }.onFailure {
-            Log.e(TAG, "Cleanup failed.", it)
+            RtcUiLogger.e("Cleanup failed.", throwable = it)
         }
         super.onDestroyView()
     }

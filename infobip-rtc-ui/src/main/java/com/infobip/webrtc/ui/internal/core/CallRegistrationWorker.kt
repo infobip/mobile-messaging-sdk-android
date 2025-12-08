@@ -12,7 +12,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.BackoffPolicy
@@ -26,6 +25,7 @@ import androidx.work.WorkerParameters
 import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.ListenType
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.coroutineScope
@@ -96,19 +96,19 @@ internal class CallRegistrationWorker(
                     listenType = ListenType.PUSH,
                     successListener = {
                         successListener?.onSuccess()
-                        Log.d(TAG, "$mode calls enabled from broadcast. ")
+                        RtcUiLogger.d("$mode calls enabled from broadcast. ")
                         if (cont.isActive)
                             cont.resume(Result.success())
                     },
                     errorListener = {
                         errorListener?.onError(it)
-                        Log.e(TAG, "Failed to enabled $mode calls from broadcast.", it)
+                        RtcUiLogger.e("Failed to enabled $mode calls from broadcast.", throwable = it)
                         if (runAttemptCount <= MAX_ATTEMPT_COUNT) {
-                            Log.d(TAG, "Exception occurred, attempt: $runAttemptCount/$MAX_ATTEMPT_COUNT")
+                            RtcUiLogger.d("Exception occurred, attempt: $runAttemptCount/$MAX_ATTEMPT_COUNT")
                             if (cont.isActive)
                                 cont.resume(Result.retry())
                         } else {
-                            Log.d(TAG, "Max attempt reached, return Failure")
+                            RtcUiLogger.d("Max attempt reached, return Failure")
                             if (cont.isActive)
                                 cont.resume(Result.failure())
                         }
@@ -121,7 +121,7 @@ internal class CallRegistrationWorker(
     private suspend fun InfobipRtcUi.disableCallsForPreviousIdentity() = coroutineScope {
         val mode = Injector.cache.rtcUiMode
         val onResultAction: (CancellableContinuation<Unit>, String) -> Unit = { cont, msg ->
-            Log.d(TAG, msg)
+            RtcUiLogger.d(msg)
             if (cont.isActive)
                 cont.resume(Unit)
         }

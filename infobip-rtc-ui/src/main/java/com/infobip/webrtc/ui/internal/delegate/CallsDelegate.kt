@@ -8,7 +8,6 @@
 package com.infobip.webrtc.ui.internal.delegate
 
 import android.content.Context
-import android.util.Log
 import com.infobip.webrtc.sdk.api.InfobipRTC
 import com.infobip.webrtc.sdk.api.call.ApplicationCall
 import com.infobip.webrtc.sdk.api.call.IncomingApplicationCall
@@ -23,7 +22,6 @@ import com.infobip.webrtc.sdk.api.model.push.EnablePushNotificationResult
 import com.infobip.webrtc.sdk.api.model.video.RTCVideoTrack
 import com.infobip.webrtc.sdk.api.model.video.ScreenCapturer
 import com.infobip.webrtc.sdk.api.options.VideoOptions
-import com.infobip.webrtc.ui.internal.core.TAG
 import com.infobip.webrtc.ui.internal.listener.IncomingCallEventListenerImpl
 import com.infobip.webrtc.ui.internal.listener.RtcUiCallEventListener
 import com.infobip.webrtc.ui.internal.model.CallState
@@ -32,6 +30,7 @@ import com.infobip.webrtc.ui.internal.model.RtcUiCall
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingAppCallImpl
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingCall
 import com.infobip.webrtc.ui.internal.model.RtcUiIncomingWebrtcCallImpl
+import com.infobip.webrtc.ui.logging.RtcUiLogger
 
 internal interface CallsDelegate {
     fun accept()
@@ -187,7 +186,7 @@ internal class CallsDelegateImpl(
     }
 
     override fun handleIncomingCall(data: Map<String, String>): Boolean {
-        Log.d(TAG, "Incoming call push message received $data")
+        RtcUiLogger.d("Incoming call push message received $data")
         var handled = false
         if (infobipRtc.isIncomingCall(data)) {
             infobipRtc.handleIncomingCall(data, context, IncomingCallEventListenerImpl(context, data))
