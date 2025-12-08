@@ -39,7 +39,7 @@ object RtcUiLogger {
      *
      * @param context Application context
      */
-    internal fun init(context: Context) {
+    fun init(context: Context) {
         this.context = context.applicationContext
     }
 
@@ -47,7 +47,7 @@ object RtcUiLogger {
      * Force logging to be enabled regardless of debuggable flag.
      * Useful for troubleshooting production issues.
      */
-    internal fun enforce() {
+    fun enforce() {
         isEnforced = true
     }
 
@@ -67,10 +67,9 @@ object RtcUiLogger {
      *
      * @return true if logging is enabled
      */
-    internal fun isLoggingEnabled(): Boolean {
-        val ctx = context ?: return false
-        val isDebuggable = (ctx.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-        return isDebuggable || isEnforced
+    fun isLoggingEnabled(): Boolean {
+        val isDebuggable = context?.let { ctx -> (ctx.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0 } ?: false
+        return isEnforced || isDebuggable
     }
 
     /**
