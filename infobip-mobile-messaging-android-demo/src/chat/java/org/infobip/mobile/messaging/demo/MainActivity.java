@@ -649,7 +649,10 @@ public class MainActivity extends AppCompatActivity {
                                     Color.RED,
                                     Color.GRAY,
                                     true,
-                                    Color.MAGENTA
+                                    Color.MAGENTA,
+                                    null,
+                                    Color.YELLOW,
+                                    Color.GREEN
                             )
                     )
             );
