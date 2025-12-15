@@ -41,6 +41,11 @@ public final class MobileMessagingLogger {
         writer = logWriter;
     }
 
+    public static void reset() {
+        isEnforced = false;
+        writer = new LogcatWriter();
+    }
+
     public static boolean loggingEnabled() {
         boolean isDebuggable = (context != null && 0 != (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
         return isDebuggable || isEnforced;

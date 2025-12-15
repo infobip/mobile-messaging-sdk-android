@@ -62,6 +62,15 @@ object RtcUiLogger {
     }
 
     /**
+     * Reset logger to default state.
+     * Clears custom writer and enforcement flag.
+     */
+    fun reset() {
+        isEnforced = false
+        writer = RtcUiLogcatWriter()
+    }
+
+    /**
      * Check if logging is currently enabled.
      * Returns true if app is debuggable OR logging is enforced.
      *
