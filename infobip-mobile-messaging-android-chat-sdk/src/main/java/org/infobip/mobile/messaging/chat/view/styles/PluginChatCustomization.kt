@@ -21,14 +21,14 @@ data class PluginChatToolbarCustomization(
     val titleTextAppearance: String? = null,
     val titleTextColor: String? = null,
     val titleText: String? = null,
-    val isTitleCentered: Boolean = false,
+    val titleCentered: Boolean = false,
     val backgroundColor: String? = null,
     val navigationIcon: String? = null,
     val navigationIconTint: String? = null,
     val subtitleTextAppearance: String? = null, // android only
     val subtitleTextColor: String? = null, // android only
     val subtitleText: String? = null, // android only
-    val isSubtitleCentered: Boolean = false, // android only
+    val subtitleCentered: Boolean = false, // android only
 )
 
 data class PluginChatCustomization(
@@ -62,7 +62,7 @@ data class PluginChatCustomization(
     val chatInputSendBackgroundDrawable: String? = null,
     val chatInputSendBackgroundColor: String? = null,
     val chatInputSeparatorLineColor: String? = null,
-    val isChatInputSeparatorLineVisible: Boolean = false,
+    val chatInputSeparatorLineVisible: Boolean = false,
     val chatInputCursorColor: String? = null,
     val chatInputCharCounterTextAppearance: String? = null,
     val chatInputCharCounterDefaultColor: String? = null,
@@ -100,11 +100,11 @@ data class PluginChatCustomization(
             .setTitleTextAppearance(chatToolbar?.titleTextAppearance.toResId(context))
             .setTitleTextColor(chatToolbar?.titleTextColor.toColorIntOrNull())
             .setTitleText(chatToolbar?.titleText)
-            .setIsTitleCentered(chatToolbar?.isTitleCentered)
+            .setIsTitleCentered(chatToolbar?.titleCentered)
             .setSubtitleTextAppearance(chatToolbar?.subtitleTextAppearance.toResId(context))
             .setSubtitleTextColor(chatToolbar?.subtitleTextColor.toColorIntOrNull())
             .setSubtitleText(chatToolbar?.subtitleText)
-            .setIsSubtitleCentered(chatToolbar?.isSubtitleCentered)
+            .setIsSubtitleCentered(chatToolbar?.subtitleCentered)
             .build()
 
         val attachmentPreviewToolbarStyle = InAppChatToolbarStyle.Builder()
@@ -118,11 +118,11 @@ data class PluginChatCustomization(
             .setTitleTextAppearance(attachmentPreviewToolbar?.titleTextAppearance.toResId(context))
             .setTitleTextColor(attachmentPreviewToolbar?.titleTextColor.toColorIntOrNull())
             .setTitleText(attachmentPreviewToolbar?.titleText)
-            .setIsTitleCentered(attachmentPreviewToolbar?.isTitleCentered)
+            .setIsTitleCentered(attachmentPreviewToolbar?.titleCentered)
             .setSubtitleTextAppearance(attachmentPreviewToolbar?.subtitleTextAppearance.toResId(context))
             .setSubtitleTextColor(attachmentPreviewToolbar?.subtitleTextColor.toColorIntOrNull())
             .setSubtitleText(attachmentPreviewToolbar?.subtitleText)
-            .setIsSubtitleCentered(attachmentPreviewToolbar?.isSubtitleCentered)
+            .setIsSubtitleCentered(attachmentPreviewToolbar?.subtitleCentered)
             .build()
 
         val chatStyle = InAppChatStyle.Builder()
@@ -147,7 +147,7 @@ data class PluginChatCustomization(
             .setSendBackgroundDrawable(chatInputSendBackgroundDrawable.toDrawable(context, drawableLoader))
             .setSendBackgroundColor(chatInputSendBackgroundColor.toColorIntOrNull())
             .setSeparatorLineColor(chatInputSeparatorLineColor.toColorIntOrNull())
-            .setIsSeparatorLineVisible(isChatInputSeparatorLineVisible)
+            .setIsSeparatorLineVisible(chatInputSeparatorLineVisible)
             .setCursorColor(chatInputCursorColor.toColorIntOrNull())
             .setCharCounterTextAppearance(chatInputCharCounterTextAppearance.toResId(context))
             .setCharCounterDefaultColor(chatInputCharCounterDefaultColor.toColorIntOrNull())
