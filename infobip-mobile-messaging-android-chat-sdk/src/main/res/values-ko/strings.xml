@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">메시지를 보내십시오...</string>
     <string name="ib_chat_cant_create_attachment">선택한 파일에서 첨부 파일을 만들 수 없습니다.</string>
     <string name="ib_chat_ok">좋아요</string>
-    <string name="ib_chat_error">문제가 발생했습니다: %1$s.</string>
+    <string name="ib_chat_error">문제가 발생했습니다</string>
     <string name="ib_chat_error_code">오류 코드: %1$s.</string>
     <string name="ib_chat_save">구하다</string>
     <string name="ib_chat_attachments_take_a_photo">사진을 찍으십시오</string>
     <string name="ib_chat_attachments_record_video">비디오 녹화</string>
     <string name="ib_chat_attachments_select_file">파일을 선택하십시오</string>
     <string name="ib_chat_attachments_select_from_gallery">갤러리에서 선택하십시오</string>
+    <string name="ib_chat_error_description">나중에 다시 시도하거나 고객 지원에 문의하세요.</string>
+    <string name="ib_chat_refresh">새로고침</string>
 </resources>

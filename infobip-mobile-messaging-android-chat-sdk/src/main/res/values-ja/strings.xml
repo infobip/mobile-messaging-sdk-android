@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">メッセージを送信...</string>
     <string name="ib_chat_cant_create_attachment">選択したファイルから添付ファイルを作成できません</string>
     <string name="ib_chat_ok">わかりました</string>
-    <string name="ib_chat_error">問題が発生しました: %1$s.</string>
+    <string name="ib_chat_error">問題が発生しました</string>
     <string name="ib_chat_error_code">エラー コード: %1$s.</string>
     <string name="ib_chat_save">保存</string>
     <string name="ib_chat_attachments_take_a_photo">写真を撮ってください</string>
     <string name="ib_chat_attachments_record_video">ビデオを録画します</string>
     <string name="ib_chat_attachments_select_file">[ファイル]を選択します</string>
     <string name="ib_chat_attachments_select_from_gallery">ギャラリーから選択します</string>
+    <string name="ib_chat_error_description">後でもう一度お試いただくか、カスタマーサポートにお問い合わせください。</string>
+    <string name="ib_chat_refresh">更新</string>
 </resources>

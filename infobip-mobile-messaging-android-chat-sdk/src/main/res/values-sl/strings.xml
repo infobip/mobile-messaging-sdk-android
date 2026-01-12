@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">Dodelite jih lahko v nastavitvah aplikacije.</string>
     <string name="ib_chat_cant_create_attachment">Iz izbrane datoteke ni mogoče ustvariti priloge</string>
     <string name="ib_chat_ok">V redu</string>
-    <string name="ib_chat_error">Nekaj ​​je šlo narobe: %1$s.</string>
+    <string name="ib_chat_error">Nekaj ​​je šlo narobe</string>
     <string name="ib_chat_error_code">Koda napake: %1$s.</string>
     <string name="ib_chat_save">Shrani</string>
     <string name="ib_chat_attachments_take_a_photo">Posnemite fotografijo</string>
     <string name="ib_chat_attachments_record_video">Snemanje video</string>
     <string name="ib_chat_attachments_select_file">Izberite datoteko</string>
     <string name="ib_chat_attachments_select_from_gallery">Izberite v galeriji</string>
+    <string name="ib_chat_error_description">Poskusite ponovno pozneje ali se obrnite na podporo za stranke.</string>
+    <string name="ib_chat_refresh">Osveži</string>
 </resources>

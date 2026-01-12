@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">Můžete je udělit v nastavení aplikace.</string>
     <string name="ib_chat_cant_create_attachment">Z vybraného souboru nelze vytvořit přílohu</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Něco se pokazilo: %1$s.</string>
+    <string name="ib_chat_error">Něco se pokazilo</string>
     <string name="ib_chat_error_code">Kód chyby: %1$s.</string>
     <string name="ib_chat_save">Uložit</string>
     <string name="ib_chat_attachments_take_a_photo">Pořídit fotografii</string>
     <string name="ib_chat_attachments_record_video">Nahrávat video</string>
     <string name="ib_chat_attachments_select_file">Vyberte soubor</string>
     <string name="ib_chat_attachments_select_from_gallery">Vyberte z galerie</string>
+    <string name="ib_chat_error_description">Zkuste to později nebo se obraťte na podporu zákazníků.</string>
+    <string name="ib_chat_refresh">Obnovit</string>
 </resources>

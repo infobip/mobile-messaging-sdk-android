@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">Μπορείτε να τα παραχωρήσετε στις ρυθμίσεις της εφαρμογής.</string>
     <string name="ib_chat_cant_create_attachment">Δεν είναι δυνατή η δημιουργία συνημμένου από το επιλεγμένο αρχείο</string>
     <string name="ib_chat_ok">Εντάξει</string>
-    <string name="ib_chat_error">Κάτι πήγε στραβά: %1$s.</string>
+    <string name="ib_chat_error">Κάτι πήγε στραβά</string>
     <string name="ib_chat_error_code">Κωδικός σφάλματος: %1$s.</string>
     <string name="ib_chat_save">Αποθηκεύσετε</string>
     <string name="ib_chat_attachments_take_a_photo">Τραβήξτε μια φωτογραφία</string>
     <string name="ib_chat_attachments_record_video">Καταγραφή βίντεο</string>
     <string name="ib_chat_attachments_select_file">Επιλέξτε αρχείο</string>
     <string name="ib_chat_attachments_select_from_gallery">Επιλέξτε από τη γκαλερί</string>
+    <string name="ib_chat_error_description">Δοκιμάστε ξανά αργότερα ή επικοινωνήστε με την υποστήριξη πελατών.</string>
+    <string name="ib_chat_refresh">Ανανέωση</string>
 </resources>

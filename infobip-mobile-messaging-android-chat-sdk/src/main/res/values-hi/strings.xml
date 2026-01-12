@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_title">अनुमतियाँ प्रदान नहीं की गईं</string>
     <string name="ib_chat_cant_create_attachment">चयनित फ़ाइल से अटैचमेंट नहीं बना सकता</string>
     <string name="ib_chat_ok">ठीक है</string>
-    <string name="ib_chat_error">कुछ ग़लत हुआ: %1$s.</string>
+    <string name="ib_chat_error">कुछ ग़लत हुआ</string>
     <string name="ib_chat_error_code">त्रुटि कोड: %1$s.</string>
     <string name="ib_chat_save">बचाना</string>
     <string name="ib_chat_attachments_take_a_photo">एक तस्वीर लें</string>
     <string name="ib_chat_attachments_record_video">रिकॉर्ड वीडियो</string>
     <string name="ib_chat_attachments_select_file">फ़ाइल का चयन करें</string>
     <string name="ib_chat_attachments_select_from_gallery">गैलरी से चयन करें</string>
+    <string name="ib_chat_error_description">बाद में पुनः प्रयास करें या ग्राहक समर्थन से संपर्क करें।</string>
+    <string name="ib_chat_refresh">रीफ्रेश करें</string>
 </resources>

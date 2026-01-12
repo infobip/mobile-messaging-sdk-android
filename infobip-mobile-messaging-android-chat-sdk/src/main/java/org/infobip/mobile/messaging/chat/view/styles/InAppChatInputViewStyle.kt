@@ -26,6 +26,54 @@ import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
 import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
 
+/**
+ * Style configuration for the InAppChat message input field and buttons.
+ *
+ * This data class defines the visual appearance of the message input area,
+ * including the text input field, attachment button, send button, separator line,
+ * cursor, and character counter.
+ *
+ * ### Property Resolution Priority
+ * When multiple configuration sources are present, properties are resolved in this order:
+ * 1. Runtime values set via [Builder] (highest priority)
+ * 2. XML theme attributes (attributes prefixed with `ibChat*`)
+ * 3. WidgetInfo server configuration
+ * 4. [Defaults] object values (lowest priority)
+ *
+ * ### Programmatic Usage Example
+ * ```kotlin
+ * val inputStyle = InAppChatInputViewStyle.Builder()
+ *     .setTextColor(Color.BLACK)
+ *     .setBackgroundColor(Color.WHITE)
+ *     .setHintText("Type a message...")
+ *     .setSendIconTint(colorStateListOf(Color.GRAY, Color.BLUE))
+ *     .build()
+ *
+ * val theme = InAppChatTheme(
+ *     chatToolbarStyle = toolbarStyle,
+ *     attachmentToolbarStyle = attachmentStyle,
+ *     chatStyle = chatStyle,
+ *     chatInputViewStyle = inputStyle
+ * )
+ * ```
+ *
+ * ### XML Theme Configuration Example
+ * ```xml
+ * <style name="MyChat.Input" parent="IB.Chat.Input">
+ *     <item name="ibChatInputTextColor">@color/dark_text</item>
+ *     <item name="ibChatInputBackgroundColor">@color/light_background</item>
+ *     <item name="ibChatInputHintText">@string/type_message</item>
+ * </style>
+ *
+ * <style name="IB_AppTheme.Chat" parent="IB_ChatDefaultTheme">
+ *     <item name="ibChatInputStyle">@style/MyChat.Input</item>
+ * </style>
+ * ```
+ *
+ * @see InAppChatTheme for complete theme configuration
+ * @see Builder for programmatic customization
+ * @see Defaults for default values
+ */
 data class InAppChatInputViewStyle @JvmOverloads constructor(
     @StyleRes val textAppearance: Int? = Defaults.textAppearance,
     @ColorInt val textColor: Int = Defaults.textColor,
@@ -48,35 +96,49 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
     @ColorInt val charCounterDefaultColor: Int = Defaults.charCounterDefaultColor,
     @ColorInt val charCounterAlertColor: Int = Defaults.charCounterAlertColor,
 ) {
+    /**
+     * Default values for [InAppChatInputViewStyle] properties.
+     *
+     * These values are applied when properties are not explicitly set through
+     * [Builder], XML theme attributes, or WidgetInfo server configuration.
+     *
+     * The 4-level resolution priority is:
+     * 1. Runtime Builder values (highest priority)
+     * 2. XML theme attributes
+     * 3. WidgetInfo configuration
+     * 4. These default values (lowest priority)
+     */
     object Defaults {
-        @StyleRes
-        val textAppearance: Int = R.style.IB_Chat_Input_TextAppearance
-        @ColorInt
-        val textColor: Int = "#242424".toColorInt()
-        @ColorInt
-        val backgroundColor: Int = Color.WHITE
-        @StringRes
-        val hintTextRes: Int = R.string.ib_chat_message_hint
-        @ColorInt
-        val hintTextColor: Int = "#808080".toColorInt()
+        @StyleRes val textAppearance: Int = R.style.IB_Chat_Input_TextAppearance
+        @ColorInt val textColor: Int = "#242424".toColorInt()
+        @ColorInt val backgroundColor: Int = Color.WHITE
+        @StringRes val hintTextRes: Int = R.string.ib_chat_message_hint
+        @ColorInt val hintTextColor: Int = "#808080".toColorInt()
         val iconTint: ColorStateList = colorStateListOf(
             intArrayOf(-android.R.attr.state_enabled) to "#808080".toColorInt(),
             intArrayOf(android.R.attr.state_enabled) to Color.BLACK,
         )
-        @ColorInt
-        val separatorLineColor: Int = "#19000000".toColorInt()
+        @ColorInt val separatorLineColor: Int = "#19000000".toColorInt()
         val isSeparatorLineVisible: Boolean = true
-
-        @StyleRes
-        val charCounterTextAppearance: Int? = null
-
-        @ColorInt
-        val charCounterDefaultColor: Int = "#808080".toColorInt()
-
-        @ColorInt
-        val charCounterAlertColor: Int = "#F44336".toColorInt()
+        @StyleRes val charCounterTextAppearance: Int? = null
+        @ColorInt val charCounterDefaultColor: Int = "#808080".toColorInt()
+        @ColorInt val charCounterAlertColor: Int = "#F44336".toColorInt()
     }
 
+    /**
+     * Fluent builder for creating [InAppChatInputViewStyle] instances with customized properties.
+     *
+     * All setter methods return the builder instance for method chaining.
+     *
+     * Example:
+     * ```kotlin
+     * val style = InAppChatInputViewStyle.Builder()
+     *     .setTextColor(Color.BLACK)
+     *     .setBackgroundColor(Color.WHITE)
+     *     .setHintText("Type message...")
+     *     .build()
+     * ```
+     */
     class Builder {
         private var textAppearance: Int = Defaults.textAppearance
         private var textColor: Int = Defaults.textColor

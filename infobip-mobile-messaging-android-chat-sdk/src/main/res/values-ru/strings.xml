@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Отправить сообщение...</string>
     <string name="ib_chat_cant_create_attachment">Невозможно создать вложение из выбранного файла</string>
     <string name="ib_chat_ok">ХОРОШО</string>
-    <string name="ib_chat_error">Что-то пошло не так: %1$s.</string>
+    <string name="ib_chat_error">Что-то пошло не так</string>
     <string name="ib_chat_error_code">Код ошибки: %1$s.</string>
     <string name="ib_chat_save">Сохранять</string>
     <string name="ib_chat_attachments_take_a_photo">Сделайте фото</string>
     <string name="ib_chat_attachments_record_video">Записать видео</string>
     <string name="ib_chat_attachments_select_file">Выберите файл</string>
     <string name="ib_chat_attachments_select_from_gallery">Выберите из галереи</string>
+    <string name="ib_chat_error_description">Повторите попытку позже или обратитесь в службу поддержки клиентов.</string>
+    <string name="ib_chat_refresh">Обновить</string>
 </resources>

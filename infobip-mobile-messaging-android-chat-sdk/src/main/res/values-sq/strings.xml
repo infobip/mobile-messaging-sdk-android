@@ -9,7 +9,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="ib_chat_allowed_attachment_size_exceeded">Është tejkaluar madhësia maksimale e lejuar e bashkëngjitjes</string>
     <string name="ib_chat_cant_create_attachment">Nuk mund të krijohet bashkëngjitje nga skedari i zgjedhur</string>
-    <string name="ib_chat_error">Dicka shkoi keq: %1$s.</string>
+    <string name="ib_chat_error">Dicka shkoi keq</string>
     <string name="ib_chat_message_hint">Dergo nje mesazh</string>
     <string name="ib_chat_no_connection">NUK KA LIDHJE</string>
     <string name="ib_chat_ok">OK</string>
@@ -24,4 +24,6 @@
     <string name="ib_chat_attachments_record_video">Video Regjistro</string>
     <string name="ib_chat_attachments_select_file">Zgjidhni skedarin</string>
     <string name="ib_chat_attachments_select_from_gallery">Zgjidhni nga Galeria</string>
+    <string name="ib_chat_error_description">Provoni përsëri më vonë ose kontaktoni mbështetjen e klientit.</string>
+    <string name="ib_chat_refresh">Përditëso</string>
 </resources>

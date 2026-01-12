@@ -8,7 +8,10 @@
 package org.infobip.mobile.messaging.chat.view
 
 import android.annotation.SuppressLint
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
@@ -32,13 +35,21 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retry
-import org.infobip.mobile.messaging.*
+import org.infobip.mobile.messaging.BroadcastParameter
+import org.infobip.mobile.messaging.Event
+import org.infobip.mobile.messaging.MessageHandlerModule
+import org.infobip.mobile.messaging.MobileMessagingCore
 import org.infobip.mobile.messaging.api.chat.WidgetAttachmentConfig
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.api.support.http.client.DefaultApiClient
 import org.infobip.mobile.messaging.chat.InAppChat
 import org.infobip.mobile.messaging.chat.R
-import org.infobip.mobile.messaging.chat.core.*
+import org.infobip.mobile.messaging.chat.core.InAppChatBroadcaster
+import org.infobip.mobile.messaging.chat.core.InAppChatBroadcasterImpl
+import org.infobip.mobile.messaging.chat.core.InAppChatEvent
+import org.infobip.mobile.messaging.chat.core.InAppChatException
+import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
+import org.infobip.mobile.messaging.chat.core.SessionStorage
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApiImpl
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetEventsListener
@@ -54,14 +65,22 @@ import org.infobip.mobile.messaging.chat.models.ContextualData
 import org.infobip.mobile.messaging.chat.models.MessagePayload
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
-import org.infobip.mobile.messaging.chat.utils.*
+import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
+import org.infobip.mobile.messaging.chat.utils.NetworkState
+import org.infobip.mobile.messaging.chat.utils.colorPrimary
+import org.infobip.mobile.messaging.chat.utils.hide
+import org.infobip.mobile.messaging.chat.utils.invisible
+import org.infobip.mobile.messaging.chat.utils.networkStateFlow
+import org.infobip.mobile.messaging.chat.utils.setProgressTint
+import org.infobip.mobile.messaging.chat.utils.show
+import org.infobip.mobile.messaging.chat.utils.toColorStateList
+import org.infobip.mobile.messaging.chat.utils.visible
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError
 import org.infobip.mobile.messaging.util.SystemInformation
-import java.util.*
 
 class InAppChatView @JvmOverloads constructor(
     context: Context,
@@ -140,13 +159,8 @@ class InAppChatView @JvmOverloads constructor(
     val defaultErrorsHandler: ErrorsHandler = object : ErrorsHandler {
 
         private fun getLocalisedMessage(exception: InAppChatException): String {
-            val message: String? = exception.message
-            val code: String? = exception.code?.toString()
-            return when {
-                code?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, localizationUtils.getString(R.string.ib_chat_error_code, code))
-                message?.isNotBlank() == true -> localizationUtils.getString(R.string.ib_chat_error, message)
-                else -> localizationUtils.getString(R.string.ib_chat_error, exception)
-            }.dropLastWhile { it == '.' }
+            val reason = getErrorReason(exception)
+            return localizationUtils.getString(R.string.ib_chat_error) + ": " + reason
         }
 
         override fun handleError(exception: InAppChatException): Boolean {
@@ -464,10 +478,7 @@ class InAppChatView @JvmOverloads constructor(
 
         override fun onPageStarted(url: String?) {}
 
-        override fun onPageFinished(url: String?) {
-            binding.ibLcSpinner.hide()
-            binding.ibLcWebView.show()
-        }
+        override fun onPageFinished(url: String?) {}
 
         override fun onLoadingFinished(result: LivechatWidgetResult<Boolean>) {
             val mappedResult: LivechatWidgetResult<Unit> = when (result) {
@@ -481,18 +492,11 @@ class InAppChatView @JvmOverloads constructor(
                 }
             }
 
-            //Final design not know yet
-            //binding.ibLcErrorView.show(mappedResult.isError)
             binding.ibLcSpinner.hide()
-            binding.ibLcWebView.show()
+            binding.ibLcErrorView.show(!mappedResult.isSuccess)
+            binding.ibLcWebView.show(mappedResult.isSuccess)
             when (mappedResult) {
-                is LivechatWidgetResult.Error -> {
-                    val error = if (mappedResult.throwable is InAppChatException)
-                        mappedResult.throwable
-                    else
-                        InAppChatException.LivechatWidgetApiError(mappedResult.throwable)
-                    handleError(error)
-                }
+                is LivechatWidgetResult.Error -> binding.ibLcErrorView.setReason(getErrorReason(mappedResult.throwable))
 
                 is LivechatWidgetResult.Success -> {
                     errorSnackbar?.dismiss()
@@ -693,6 +697,16 @@ class InAppChatView @JvmOverloads constructor(
             defaultErrorsHandler.handleError(exception)
     }
 
+    private fun getErrorReason(throwable: Throwable): String {
+        val code = (throwable as? InAppChatException)?.code
+        val message: String? = throwable.message
+        return when {
+            code != null -> localizationUtils.getString(R.string.ib_chat_error_code, code)
+            message?.isNotBlank() == true -> message
+            else -> throwable.toString()
+        }
+    }
+
     private fun onInternetConnectionLost() {
         handleError(InAppChatException.NoInternetConnection())
     }
@@ -727,6 +741,7 @@ class InAppChatView @JvmOverloads constructor(
             errorSnackbar?.dismiss()
             ibLcSpinner.show()
             ibLcWebView.hide()
+            ibLcErrorView.hide()
             livechatWidgetApi.loadWidget(widgetId = widgetInfo?.id)
         }
     }
@@ -736,22 +751,8 @@ class InAppChatView @JvmOverloads constructor(
         root.setBackgroundColor(style.backgroundColor)
         ibLcWebView.setBackgroundColor(style.backgroundColor)
         ibLcSpinner.setProgressTint(style.progressBarColor.toColorStateList())
-        ibLcConnectionError.setBackgroundColor(style.networkConnectionLabelBackgroundColor)
-        style.networkConnectionTextAppearance?.let {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ibLcConnectionError.setTextAppearance(it)
-            } else {
-                ibLcConnectionError.setTextAppearance(context, it)
-            }
-        }
-        ibLcConnectionError.setTextColor(style.networkConnectionTextColor)
-        if (style.networkConnectionTextRes != null) {
-            ibLcConnectionError.text = localizationUtils.getString(style.networkConnectionTextRes)
-        } else if (style.networkConnectionText != null) {
-            ibLcConnectionError.text = style.networkConnectionText
-        }
-        ibLcErrorView.setTitle(localizationUtils.getString(R.string.ib_chat_error, "").replaceAfter(':', "").trim().dropLast(1))
-        ibLcErrorView.setActionIconTint(style.progressBarColor)
+        ibLcConnectionError.applyStyle(style)
+        ibLcErrorView.applyStyle(style)
     }
 
     private fun updateWidgetInfo() {

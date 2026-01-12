@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">U kunt ze toekennen in toepassingsinstellingen.</string>
     <string name="ib_chat_cant_create_attachment">Kan geen bijlage maken van geselecteerd bestand</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Er is iets misgegaan: %1$s.</string>
+    <string name="ib_chat_error">Er is iets misgegaan</string>
     <string name="ib_chat_error_code">Foutcode: %1$s.</string>
     <string name="ib_chat_save">Redden</string>
     <string name="ib_chat_attachments_take_a_photo">Maak een foto</string>
     <string name="ib_chat_attachments_record_video">Video opnemen</string>
     <string name="ib_chat_attachments_select_file">Selecteer Bestand</string>
     <string name="ib_chat_attachments_select_from_gallery">Kies uit galerij</string>
+    <string name="ib_chat_error_description">Probeer het later opnieuw of neem contact op met klantenondersteuning.</string>
+    <string name="ib_chat_refresh">Vernieuwen</string>
 </resources>

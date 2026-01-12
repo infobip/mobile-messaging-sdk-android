@@ -13,7 +13,7 @@
 
     <!-- Default resources for customizable strings -->
     <string name="ib_chat_message_hint">Send a message…</string>
-    <string name="ib_chat_no_connection">No connection</string>
+    <string name="ib_chat_no_connection">No internet connection.</string>
     <string name="ib_iv_btn_send_desc">Send chat message</string>
     <string name="ib_iv_btn_send_attachment_desc">Send attachment</string>
     <string name="ib_iv_input_border_desc">Top border</string>
@@ -22,11 +22,13 @@
     <string name="ib_chat_permissions_not_granted_message">You can grant them in application settings.</string>
     <string name="ib_chat_cant_create_attachment">Cannot create attachment from selected file</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Something went wrong: %1$s.</string>
+    <string name="ib_chat_error">Something went wrong</string>
     <string name="ib_chat_error_code">Error code: %1$s.</string>
     <string name="ib_chat_save">Save</string>
     <string name="ib_chat_attachments_take_a_photo">Take a photo</string>
     <string name="ib_chat_attachments_record_video">Record video</string>
     <string name="ib_chat_attachments_select_file">Select file</string>
     <string name="ib_chat_attachments_select_from_gallery">Select from Gallery</string>
+    <string name="ib_chat_error_description">Try again, later or contact customer support.</string>
+    <string name="ib_chat_refresh">Refresh</string>
 </resources>

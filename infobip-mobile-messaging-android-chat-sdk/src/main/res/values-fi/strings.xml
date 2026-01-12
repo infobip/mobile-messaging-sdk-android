@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">Voit myöntää heille sovellusasetuksissa.</string>
     <string name="ib_chat_cant_create_attachment">Valitusta tiedostosta ei voi luoda liitettä</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Jotain meni pieleen: %1$s.</string>
+    <string name="ib_chat_error">Jotain meni pieleen</string>
     <string name="ib_chat_error_code">Virhekoodi: %1$s.</string>
     <string name="ib_chat_save">Tallentaa</string>
     <string name="ib_chat_attachments_take_a_photo">Ottaa valokuva</string>
     <string name="ib_chat_attachments_record_video">Nauhoittaa video</string>
     <string name="ib_chat_attachments_select_file">Valitse tiedosto</string>
     <string name="ib_chat_attachments_select_from_gallery">Valitse galleriasta</string>
+    <string name="ib_chat_error_description">Yritä myöhemmin uudelleen tai ota yhteyttä asiakastukeen.</string>
+    <string name="ib_chat_refresh">Päivitä</string>
 </resources>

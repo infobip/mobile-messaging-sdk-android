@@ -50,12 +50,27 @@
     </style>
 
     <style name="IB.Chat" parent="IB">
-        <item name="ibChatBackgroundColor">@android:color/white</item>
-        <item name="ibChatProgressBarColor">@android:color/black</item>
+        <item name="ibChatBackgroundColor">@color/ib_chat_background</item>
+        <item name="ibChatProgressBarColor">@color/ib_chat_progress_bar</item>
         <item name="ibChatNetworkConnectionErrorText">@string/ib_chat_no_connection</item>
-        <item name="ibChatNetworkConnectionErrorTextColor">@android:color/black</item>
+        <item name="ibChatNetworkConnectionErrorTextColor">@color/ib_chat_network_connection_error_text</item>
         <item name="ibChatNetworkConnectionErrorTextAppearance">@null</item>
-        <item name="ibChatNetworkConnectionErrorLabelBackgroundColor">@color/ib_chat_hint_text_color</item>
+        <item name="ibChatNetworkConnectionErrorBackgroundColor">@color/ib_chat_network_connection_error_background</item>
+        <item name="ibChatNetworkConnectionErrorIcon">@drawable/ib_chat_network_error_icon</item>
+        <item name="ibChatNetworkConnectionErrorIconTint">@color/ib_chat_network_connection_error_icon</item>
+        <item name="ibChatNetworkConnectionErrorIconVisible">true</item>
+        <item name="ibChatErrorTitleText">@string/ib_chat_error</item>
+        <item name="ibChatErrorTitleTextColor">@color/ib_chat_error_title_text</item>
+        <item name="ibChatErrorTitleTextAppearance">@null</item>
+        <item name="ibChatErrorDescriptionText">@string/ib_chat_error_description</item>
+        <item name="ibChatErrorDescriptionTextColor">@color/ib_chat_error_description_text</item>
+        <item name="ibChatErrorDescriptionTextAppearance">@null</item>
+        <item name="ibChatErrorBackgroundColor">@color/ib_chat_error_background</item>
+        <item name="ibChatErrorIcon">@drawable/ib_chat_error</item>
+        <item name="ibChatErrorIconTint">@null</item>
+        <item name="ibChatErrorRefreshButtonText">@string/ib_chat_refresh</item>
+        <item name="ibChatErrorRefreshButtonTextColor">@color/ib_chat_error_action_button_text</item>
+        <item name="ibChatErrorRefreshButtonVisible">true</item>
     </style>
 
     <style name="IB.Chat.Input" parent="IB">

@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Skicka ett meddelande...</string>
     <string name="ib_chat_cant_create_attachment">Det går inte att skapa bilaga från den valda filen</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Något gick fel: %1$s.</string>
+    <string name="ib_chat_error">Något gick fel</string>
     <string name="ib_chat_error_code">Felkod: %1$s.</string>
     <string name="ib_chat_save">Spara</string>
     <string name="ib_chat_attachments_take_a_photo">Ta ett foto</string>
     <string name="ib_chat_attachments_record_video">Inspelningsvideo</string>
     <string name="ib_chat_attachments_select_file">Välj fil</string>
     <string name="ib_chat_attachments_select_from_gallery">Välj från galleriet</string>
+    <string name="ib_chat_error_description">Försök igen senare eller kontakta kundsupport.</string>
+    <string name="ib_chat_refresh">Uppdatera</string>
 </resources>

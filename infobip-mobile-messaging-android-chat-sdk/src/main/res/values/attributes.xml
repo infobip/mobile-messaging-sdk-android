@@ -43,7 +43,23 @@
         <attr name="ibChatNetworkConnectionErrorText" format="string|reference" />
         <attr name="ibChatNetworkConnectionErrorTextColor" format="color|reference" />
         <attr name="ibChatNetworkConnectionErrorTextAppearance" format="reference" />
-        <attr name="ibChatNetworkConnectionErrorLabelBackgroundColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorLabelBackgroundColor" format="color|reference" /> <!-- Deprecated - replaced by ibChatNetworkConnectionErrorBackgroundColor -->
+        <attr name="ibChatNetworkConnectionErrorBackgroundColor" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorIcon" format="reference" />
+        <attr name="ibChatNetworkConnectionErrorIconTint" format="color|reference" />
+        <attr name="ibChatNetworkConnectionErrorIconVisible" format="boolean" />
+        <attr name="ibChatErrorTitleText" format="string|reference" />
+        <attr name="ibChatErrorTitleTextColor" format="color|reference" />
+        <attr name="ibChatErrorTitleTextAppearance" format="reference" />
+        <attr name="ibChatErrorDescriptionText" format="string|reference" />
+        <attr name="ibChatErrorDescriptionTextColor" format="color|reference" />
+        <attr name="ibChatErrorDescriptionTextAppearance" format="reference" />
+        <attr name="ibChatErrorBackgroundColor" format="color|reference" />
+        <attr name="ibChatErrorIcon" format="reference" />
+        <attr name="ibChatErrorIconTint" format="color|reference" />
+        <attr name="ibChatErrorRefreshButtonText" format="string|reference" />
+        <attr name="ibChatErrorRefreshButtonTextColor" format="color|reference" />
+        <attr name="ibChatErrorRefreshButtonVisible" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="InAppChatInputViewStyleable">

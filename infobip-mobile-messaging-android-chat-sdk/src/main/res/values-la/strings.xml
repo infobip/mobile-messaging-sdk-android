@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_title">Quae non permissiones</string>
     <string name="ib_chat_cant_create_attachment">Non potest creare affectum ex lectus file</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Aliquid erravit: %1$s.</string>
+    <string name="ib_chat_error">Aliquid erravit</string>
     <string name="ib_chat_error_code">Error code: %1$s.</string>
     <string name="ib_chat_save">salvare</string>
     <string name="ib_chat_attachments_take_a_photo">Accipies photo</string>
     <string name="ib_chat_attachments_record_video">Recordum video</string>
     <string name="ib_chat_attachments_select_file">Lego File</string>
     <string name="ib_chat_attachments_select_from_gallery">Eligere de Gallery</string>
+    <string name="ib_chat_error_description">Denuo conare vel ad auxilium clientium referre.</string>
+    <string name="ib_chat_refresh">Repete</string>
 </resources>

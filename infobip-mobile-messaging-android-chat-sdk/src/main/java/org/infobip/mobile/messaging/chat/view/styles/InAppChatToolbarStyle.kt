@@ -30,7 +30,63 @@ import org.infobip.mobile.messaging.chat.utils.isAttributePresent
 import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
 import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle.Companion.createChatAttachmentStyle
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle.Companion.createChatToolbarStyle
 
+/**
+ * Style configuration for the InAppChat toolbar.
+ *
+ * This data class defines the visual appearance and behavior of the chat toolbar and
+ * attachment preview toolbar. The same style class is used for both purposes with
+ * different factory methods applying appropriate defaults.
+ *
+ * ### Dual Usage
+ * - [createChatToolbarStyle] - Toolbar for main chat screen
+ * - [createChatAttachmentStyle] - Toolbar for attachment preview screen
+ *
+ * ### Property Resolution Priority
+ * When multiple configuration sources are present, properties are resolved in this order:
+ * 1. Runtime values set via [Builder] (highest priority)
+ * 2. XML theme attributes (attributes prefixed with `ibChat*`)
+ * 3. WidgetInfo server configuration
+ * 4. [Defaults] object values (lowest priority)
+ *
+ * ### Programmatic Usage Example
+ * ```kotlin
+ * val toolbarStyle = InAppChatToolbarStyle.Builder()
+ *     .setToolbarBackgroundColor(Color.BLUE)
+ *     .setTitleText("Chat")
+ *     .setNavigationIconTint(Color.WHITE)
+ *     .build()
+ *
+ * val theme = InAppChatTheme(
+ *     chatToolbarStyle = toolbarStyle,
+ *     attachmentToolbarStyle = toolbarStyle,
+ *     chatStyle = chatStyle,
+ *     chatInputViewStyle = inputStyle
+ * )
+ * ```
+ *
+ * ### XML Theme Configuration Example
+ * ```xml
+ * <style name="MyChat.Toolbar" parent="IB.Chat.Toolbar">
+ *     <item name="ibChatToolbarBackgroundColor">@color/primary_blue</item>
+ *     <item name="ibChatStatusBarBackgroundColor">@color/primary_dark_blue</item>
+ *     <item name="ibChatTitleText">@string/chat_title</item>
+ * </style>
+ *
+ * <style name="IB_AppTheme.Chat" parent="IB_ChatDefaultTheme">
+ *     <item name="ibChatToolbarStyle">@style/MyChat.Toolbar</item>
+ *     <item name="ibChatAttachmentToolbarStyle">@style/MyChat.Toolbar.Attachment</item>
+ * </style>
+ * ```
+ *
+ * @see InAppChatTheme for complete theme configuration
+ * @see Builder for programmatic customization
+ * @see Defaults for default values
+ * @see createChatToolbarStyle for main chat toolbar creation
+ * @see createChatAttachmentStyle for attachment toolbar creation
+ */
 data class InAppChatToolbarStyle @JvmOverloads constructor(
     @ColorInt val toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor,
     @ColorInt val statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor,
@@ -50,6 +106,18 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
     @StringRes val subtitleTextRes: Int? = null,
     val isSubtitleCentered: Boolean = Defaults.isSubtitleCentered
 ) {
+    /**
+     * Default values for [InAppChatToolbarStyle] properties.
+     *
+     * These values are applied when properties are not explicitly set through
+     * [Builder], XML theme attributes, or WidgetInfo server configuration.
+     *
+     * The 4-level resolution priority is:
+     * 1. Runtime Builder values (highest priority)
+     * 2. XML theme attributes
+     * 3. WidgetInfo configuration
+     * 4. These default values (lowest priority)
+     */
     object Defaults {
         @ColorInt val toolbarBackgroundColor: Int = Color.BLACK
         @ColorInt val statusBarBackgroundColor: Int = Color.BLACK
@@ -62,6 +130,19 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
         const val isSubtitleCentered: Boolean = false
     }
 
+    /**
+     * Fluent builder for creating [InAppChatToolbarStyle] instances with customized properties.
+     *
+     * All setter methods return the builder instance for method chaining.
+     *
+     * Example:
+     * ```kotlin
+     * val style = InAppChatToolbarStyle.Builder()
+     *     .setToolbarBackgroundColor(Color.BLUE)
+     *     .setTitleText("Chat")
+     *     .build()
+     * ```
+     */
     class Builder {
         private var toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor
         private var statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor
@@ -307,36 +388,22 @@ data class InAppChatToolbarStyle @JvmOverloads constructor(
 }
 
 internal fun InAppChatToolbarStyle.apply(toolbar: MaterialToolbar?) {
-    toolbar?.let {
-        val localizationUtils = LocalizationUtils.getInstance(it.context)
-        it.navigationIcon = navigationIcon ?: it.context.getDrawableCompat(R.drawable.ic_chat_arrow_back)
-        it.setNavigationIconTint(navigationIconTint)
-        it.setBackgroundColor(toolbarBackgroundColor)
-        if (titleTextRes != null) {
-            it.title = localizationUtils.getString(titleTextRes)
-        } else if (titleText != null) {
-            it.title = titleText
-        }
-        titleTextAppearance?.let { appearance ->
-            toolbar.setTitleTextAppearance(
-                    toolbar.context,
-                    appearance
-            )
-        }
-        it.setTitleTextColor(titleTextColor)
-        isTitleCentered.let { isCentered -> it.isTitleCentered = isCentered }
-        if (subtitleTextRes != null) {
-            it.subtitle = localizationUtils.getString(subtitleTextRes)
-        } else if (subtitleText != null) {
-            it.subtitle = subtitleText
-        }
-        subtitleTextAppearance?.let { appearance ->
-            toolbar.setSubtitleTextAppearance(
-                    toolbar.context,
-                    appearance
-            )
-        }
-        it.setSubtitleTextColor(subtitleTextColor)
-        isSubtitleCentered.let { isCentered -> it.isSubtitleCentered = isCentered }
+    val style = this
+    if (toolbar != null){
+        val context = toolbar.context
+        val localizationUtils = LocalizationUtils.getInstance(context)
+        toolbar.navigationIcon = style.navigationIcon ?: context.getDrawableCompat(R.drawable.ic_chat_arrow_back)
+        toolbar.setNavigationIconTint(style.navigationIconTint)
+        toolbar.setBackgroundColor(style.toolbarBackgroundColor)
+        val titleText = style.titleTextRes?.let { resId -> localizationUtils.getString(resId) } ?: style.titleText
+        titleText?.let { text -> toolbar.title = text }
+        style.titleTextAppearance?.let { appearance -> toolbar.setTitleTextAppearance(context, appearance) }
+        toolbar.setTitleTextColor(style.titleTextColor)
+        toolbar.isTitleCentered = style.isTitleCentered
+        val subtitleText = style.subtitleTextRes?.let { resId -> localizationUtils.getString(resId) } ?: style.subtitleText
+        subtitleText?.let { text -> toolbar.subtitle = text }
+        style.subtitleTextAppearance?.let { appearance -> toolbar.setSubtitleTextAppearance(context, appearance) }
+        toolbar.setSubtitleTextColor(style.subtitleTextColor)
+        toolbar.isSubtitleCentered = style.isSubtitleCentered
     }
 }

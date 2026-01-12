@@ -12,4 +12,15 @@
     <color name="ib_chat_separator_color">#19000000</color>
     <color name="ib_chat_char_counter_default">#808080</color>
     <color name="ib_chat_char_counter_alert">#F44336</color>
+
+    <!-- InAppChatView colors -->
+    <color name="ib_chat_background">@android:color/white</color>
+    <color name="ib_chat_progress_bar">@android:color/black</color>
+    <color name="ib_chat_network_connection_error_text">@android:color/white</color>
+    <color name="ib_chat_network_connection_error_background">#CF182E</color>
+    <color name="ib_chat_network_connection_error_icon">@android:color/white</color>
+    <color name="ib_chat_error_title_text">@android:color/black</color>
+    <color name="ib_chat_error_description_text">#808080</color>
+    <color name="ib_chat_error_background">@android:color/white</color>
+    <color name="ib_chat_error_action_button_text">@android:color/black</color>
 </resources>

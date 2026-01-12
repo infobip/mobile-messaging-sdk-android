@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Pošalji poruku...</string>
     <string name="ib_chat_cant_create_attachment">Nije moguće stvoriti privitak iz odabrane datoteke</string>
     <string name="ib_chat_ok">U redu</string>
-    <string name="ib_chat_error">Nešto nije u redu: %1$s.</string>
+    <string name="ib_chat_error">Nešto nije u redu</string>
     <string name="ib_chat_error_code">Kôd pogreške: %1$s.</string>
     <string name="ib_chat_save">Uštedjeti</string>
     <string name="ib_chat_attachments_take_a_photo">Fotografirati</string>
     <string name="ib_chat_attachments_record_video">Snimite video</string>
     <string name="ib_chat_attachments_select_file">Odaberite datoteku</string>
     <string name="ib_chat_attachments_select_from_gallery">Odaberite iz galerije</string>
+    <string name="ib_chat_error_description">Pokušajte ponovo kasnije ili obratite se korisničkoj podršci.</string>
+    <string name="ib_chat_refresh">Osvežavanje</string>
 </resources>

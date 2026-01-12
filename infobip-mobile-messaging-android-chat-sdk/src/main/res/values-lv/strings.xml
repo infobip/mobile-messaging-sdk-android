@@ -19,11 +19,13 @@
     <string name="ib_chat_permissions_not_granted_message">Varat tos piešķirt lietojumprogrammas iestatījumos.</string>
     <string name="ib_chat_cant_create_attachment">Nevar izveidot pielikumu no atlasītā faila</string>
     <string name="ib_chat_ok">Labi</string>
-    <string name="ib_chat_error">Kaut kas nogāja greizi: %1$s.</string>
+    <string name="ib_chat_error">Kaut kas nogāja greizi</string>
     <string name="ib_chat_error_code">Kļūdas kods: %1$s.</string>
     <string name="ib_chat_save">Saglabāt</string>
     <string name="ib_chat_attachments_take_a_photo">Nofotografēt</string>
     <string name="ib_chat_attachments_record_video">Ierakstīt video</string>
     <string name="ib_chat_attachments_select_file">Atlasīt failu</string>
     <string name="ib_chat_attachments_select_from_gallery">Izvēlēties no galerijas</string>
+    <string name="ib_chat_error_description">Mēģiniet vēlāk vai sazinieties ar klientu atbalstu.</string>
+    <string name="ib_chat_refresh">Atsvaidzināt</string>
 </resources>

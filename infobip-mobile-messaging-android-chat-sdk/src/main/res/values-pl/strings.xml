@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Wyślij wiadomość...</string>
     <string name="ib_chat_cant_create_attachment">Nie można utworzyć załącznika z wybranego pliku</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Coś poszło nie tak: %1$s.</string>
+    <string name="ib_chat_error">Coś poszło nie tak</string>
     <string name="ib_chat_error_code">Kod błędu: %1$s.</string>
     <string name="ib_chat_save">Ratować</string>
     <string name="ib_chat_attachments_take_a_photo">Zrób zdjęcie</string>
     <string name="ib_chat_attachments_record_video">Nagrywać wideo</string>
     <string name="ib_chat_attachments_select_file">Wybierz plik</string>
     <string name="ib_chat_attachments_select_from_gallery">Wybierz z galerii</string>
+    <string name="ib_chat_error_description">Spróbuj ponownie później lub skontaktuj się z obsługą klienta.</string>
+    <string name="ib_chat_refresh">Odśwież</string>
 </resources>

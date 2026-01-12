@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Poslať správu...</string>
     <string name="ib_chat_cant_create_attachment">Nie je možné vytvoriť prílohu z vybraného súboru</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Niečo sa pokazilo: %1$s.</string>
+    <string name="ib_chat_error">Niečo sa pokazilo</string>
     <string name="ib_chat_error_code">Kód chyby: %1$s.</string>
     <string name="ib_chat_save">Uložiť</string>
     <string name="ib_chat_attachments_take_a_photo">Odfotografovať</string>
     <string name="ib_chat_attachments_record_video">Zaznamenať</string>
     <string name="ib_chat_attachments_select_file">Vyberte súbor</string>
     <string name="ib_chat_attachments_select_from_gallery">Vyberte z galérie</string>
+    <string name="ib_chat_error_description">Skúste to neskôr alebo kontaktujte podporu zákazníkov.</string>
+    <string name="ib_chat_refresh">Obnoviť</string>
 </resources>

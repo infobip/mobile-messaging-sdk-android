@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Enviar uma mensagem...</string>
     <string name="ib_chat_cant_create_attachment">Não é possível criar anexo do arquivo selecionado</string>
     <string name="ib_chat_ok">OK</string>
-    <string name="ib_chat_error">Algo deu errado: %1$s.</string>
+    <string name="ib_chat_error">Algo deu errado</string>
     <string name="ib_chat_error_code">Código de erro: %1$s.</string>
     <string name="ib_chat_save">Salvar</string>
     <string name="ib_chat_attachments_take_a_photo">Tire uma foto</string>
     <string name="ib_chat_attachments_record_video">Gravar vídeo</string>
     <string name="ib_chat_attachments_select_file">Selecione Arquivo</string>
     <string name="ib_chat_attachments_select_from_gallery">Selecione na galeria</string>
+    <string name="ib_chat_error_description">Tente novamente mais tarde ou entre em contato com o suporte ao cliente.</string>
+    <string name="ib_chat_refresh">Atualizar</string>
 </resources>

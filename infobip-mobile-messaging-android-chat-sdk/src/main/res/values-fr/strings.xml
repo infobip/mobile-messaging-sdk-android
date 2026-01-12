@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Envoyer un message...</string>
     <string name="ib_chat_cant_create_attachment">Impossible de créer une pièce jointe à partir du fichier sélectionné</string>
     <string name="ib_chat_ok">D\'ACCORD</string>
-    <string name="ib_chat_error">Quelque chose s\'est mal passé : %1$s.</string>
+    <string name="ib_chat_error">Quelque chose s\'est mal passé </string>
     <string name="ib_chat_error_code">Code d\'erreur : %1$s.</string>
     <string name="ib_chat_save">Sauvegarder</string>
     <string name="ib_chat_attachments_take_a_photo">Prendre une photo</string>
     <string name="ib_chat_attachments_record_video">Enregistrer la vidéo</string>
     <string name="ib_chat_attachments_select_file">Sélectionner le fichier</string>
     <string name="ib_chat_attachments_select_from_gallery">Sélectionner dans la galerie</string>
+    <string name="ib_chat_error_description">Réessayez plus tard ou contactez le support client.</string>
+    <string name="ib_chat_refresh">Actualiser</string>
 </resources>

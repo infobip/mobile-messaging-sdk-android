@@ -10,7 +10,6 @@ package org.infobip.mobile.messaging.chat.view
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Context
-import android.content.res.ColorStateList
 import android.os.Build
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -20,6 +19,7 @@ import androidx.annotation.ColorInt
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.core.widget.TextViewCompat
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi
@@ -30,6 +30,7 @@ import org.infobip.mobile.messaging.chat.utils.setImageTint
 import org.infobip.mobile.messaging.chat.utils.setThrottleFirstOnClickListener
 import org.infobip.mobile.messaging.chat.utils.setTint
 import org.infobip.mobile.messaging.chat.utils.show
+import org.infobip.mobile.messaging.chat.utils.toColorStateList
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatInputViewStyle
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -76,20 +77,11 @@ class InAppChatInputView @JvmOverloads constructor(
             topSeparator.contentDescription = localizationUtils.getString(R.string.ib_iv_input_border_desc)
             attachmentButton.contentDescription = localizationUtils.getString(R.string.ib_iv_btn_send_attachment_desc)
             sendButton.contentDescription = localizationUtils.getString(R.string.ib_iv_btn_send_desc)
-            style.textAppearance?.let {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    messageInput.setTextAppearance(it)
-                } else {
-                    messageInput.setTextAppearance(context, it)
-                }
-            }
+            style.textAppearance?.let { TextViewCompat.setTextAppearance(messageInput, it) }
             messageInput.setTextColor(style.textColor)
             root.setBackgroundColor(style.backgroundColor)
-            if (style.hintTextRes != null) {
-                messageInput.hint = localizationUtils.getString(style.hintTextRes)
-            } else if (style.hintText != null) {
-                messageInput.hint = style.hintText
-            }
+            val hintText = style.hintTextRes?.let { localizationUtils.getString(it) } ?: style.hintText
+            hintText?.let { messageInput.hint = it }
             messageInput.setHintTextColor(style.hintTextColor)
             style.attachmentIcon?.let { attachmentButton.setImageDrawable(it) }
             style.attachmentIconTint?.let { attachmentButton.setImageTint(it) }
@@ -104,8 +96,8 @@ class InAppChatInputView @JvmOverloads constructor(
             messageInput.setCursorDrawableColor(style.cursorColor)
             style.charCounterTextAppearance?.let { messageInputLayout.setCounterTextAppearance(it) }
             style.charCounterTextAppearance?.let { messageInputLayout.setCounterOverflowTextAppearance(it) }
-            messageInputLayout.counterTextColor = ColorStateList.valueOf(style.charCounterDefaultColor)
-            messageInputLayout.counterOverflowTextColor = ColorStateList.valueOf(style.charCounterAlertColor)
+            messageInputLayout.counterTextColor = style.charCounterDefaultColor.toColorStateList()
+            messageInputLayout.counterOverflowTextColor = style.charCounterAlertColor.toColorStateList()
         }
     }
 

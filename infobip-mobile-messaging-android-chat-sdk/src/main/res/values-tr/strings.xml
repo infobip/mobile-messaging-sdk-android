@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Mesaj gönder...</string>
     <string name="ib_chat_cant_create_attachment">Seçili dosyadan ek oluşturulamıyor</string>
     <string name="ib_chat_ok">TAMAM</string>
-    <string name="ib_chat_error">Bir şeyler ters gitti: %1$s.</string>
+    <string name="ib_chat_error">Bir şeyler ters gitti</string>
     <string name="ib_chat_error_code">Hata kodu: %1$s.</string>
     <string name="ib_chat_save">Kaydetmek</string>
     <string name="ib_chat_attachments_take_a_photo">Fotoğraf çekmek</string>
     <string name="ib_chat_attachments_record_video">Kayıt Videosu</string>
     <string name="ib_chat_attachments_select_file">Dosyayı seçin</string>
     <string name="ib_chat_attachments_select_from_gallery">Galeri\'den seçin</string>
+    <string name="ib_chat_error_description">Daha sonra tekrar deneyin veya müşteri desteğiyle iletişime geçin.</string>
+    <string name="ib_chat_refresh">Yenile</string>
 </resources>

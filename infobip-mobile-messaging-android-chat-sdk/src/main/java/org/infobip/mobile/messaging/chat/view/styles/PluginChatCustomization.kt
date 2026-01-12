@@ -8,11 +8,11 @@
 package org.infobip.mobile.messaging.chat.view.styles
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.core.graphics.toColorInt
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
+import org.infobip.mobile.messaging.chat.utils.toColorStateList
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.json.JSONException
 import org.json.JSONObject
@@ -39,11 +39,27 @@ data class PluginChatCustomization(
     val attachmentPreviewToolbar: PluginChatToolbarCustomization? = null,
     val attachmentPreviewToolbarSaveMenuItemIcon: String? = null,
     val attachmentPreviewToolbarMenuItemsIconTint: String? = null,
-    // NetworkError
+    //Network error
     val networkErrorText: String? = null,
     val networkErrorTextColor: String? = null,
     val networkErrorTextAppearance: String? = null,
     val networkErrorLabelBackgroundColor: String? = null,
+    val networkErrorIcon: String? = null,
+    val networkErrorIconTint: String? = null,
+    val networkErrorIconVisible: Boolean? = null,
+    // Error Screen
+    val chatErrorTitleText: String? = null,
+    val chatErrorTitleTextColor: String? = null,
+    val chatErrorTitleTextAppearance: String? = null,
+    val chatErrorDescriptionText: String? = null,
+    val chatErrorDescriptionTextColor: String? = null,
+    val chatErrorDescriptionTextAppearance: String? = null,
+    val chatErrorBackgroundColor: String? = null,
+    val chatErrorIcon: String? = null,
+    val chatErrorIconTint: String? = null,
+    val chatErrorRefreshButtonText: String? = null,
+    val chatErrorRefreshButtonTextColor: String? = null,
+    val chatErrorRefreshButtonVisible: Boolean? = null,
     // Chat
     val chatBackgroundColor: String? = null,
     val chatProgressBarColor: String? = null,
@@ -128,10 +144,25 @@ data class PluginChatCustomization(
         val chatStyle = InAppChatStyle.Builder()
             .setBackgroundColor(chatBackgroundColor.toColorIntOrNull())
             .setProgressBarColor(chatProgressBarColor.toColorIntOrNull())
-            .setNetworkConnectionText(networkErrorText)
-            .setNetworkConnectionTextAppearance(networkErrorTextAppearance.toResId(context))
-            .setNetworkConnectionTextColor(networkErrorTextColor.toColorIntOrNull())
-            .setNetworkConnectionLabelBackgroundColor(networkErrorLabelBackgroundColor.toColorIntOrNull())
+            .setNetworkConnectionErrorText(networkErrorText)
+            .setNetworkConnectionErrorTextColor(networkErrorTextColor.toColorIntOrNull())
+            .setNetworkConnectionErrorTextAppearance(networkErrorTextAppearance.toResId(context))
+            .setNetworkConnectionErrorBackgroundColor(networkErrorLabelBackgroundColor.toColorIntOrNull())
+            .setNetworkConnectionErrorIcon(networkErrorIcon.toDrawable(context, drawableLoader))
+            .setNetworkConnectionErrorIconTint(networkErrorIconTint.toColorIntOrNull())
+            .setNetworkConnectionErrorIconVisible(networkErrorIconVisible)
+            .setErrorTitleText(chatErrorTitleText)
+            .setErrorTitleTextColor(chatErrorTitleTextColor.toColorIntOrNull())
+            .setErrorTitleTextAppearance(chatErrorTitleTextAppearance.toResId(context))
+            .setErrorDescriptionText(chatErrorDescriptionText)
+            .setErrorDescriptionTextColor(chatErrorDescriptionTextColor.toColorIntOrNull())
+            .setErrorDescriptionTextAppearance(chatErrorDescriptionTextAppearance.toResId(context))
+            .setErrorBackgroundColor(chatErrorBackgroundColor.toColorIntOrNull())
+            .setErrorIcon(chatErrorIcon.toDrawable(context, drawableLoader))
+            .setErrorIconTint(chatErrorIconTint.toColorIntOrNull())
+            .setErrorRefreshButtonText(chatErrorRefreshButtonText)
+            .setErrorRefreshButtonTextColor(chatErrorRefreshButtonTextColor.toColorIntOrNull())
+            .setErrorRefreshButtonVisible(chatErrorRefreshButtonVisible)
             .build()
 
         val inputViewStyle = InAppChatInputViewStyle.Builder()
@@ -152,8 +183,8 @@ data class PluginChatCustomization(
             .setCharCounterTextAppearance(chatInputCharCounterTextAppearance.toResId(context))
             .setCharCounterDefaultColor(chatInputCharCounterDefaultColor.toColorIntOrNull())
             .setCharCounterAlertColor(chatInputCharCounterAlertColor.toColorIntOrNull())
-            .setAttachmentIconTint(chatInputAttachmentIconTint.toColorIntOrNull()?.let { ColorStateList.valueOf(it) })
-            .setSendIconTint(chatInputSendIconTint.toColorIntOrNull()?.let { ColorStateList.valueOf(it) })
+            .setAttachmentIconTint(chatInputAttachmentIconTint.toColorIntOrNull().toColorStateList())
+            .setSendIconTint(chatInputSendIconTint.toColorIntOrNull().toColorStateList())
             .build()
 
         return InAppChatTheme(

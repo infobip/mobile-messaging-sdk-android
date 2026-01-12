@@ -17,11 +17,13 @@
     <string name="ib_chat_message_hint">Send en besked...</string>
     <string name="ib_chat_cant_create_attachment">Kan ikke oprette en vedhæftet fil fra den valgte fil</string>
     <string name="ib_chat_ok">Okay</string>
-    <string name="ib_chat_error">Noget gik galt: %1$s.</string>
+    <string name="ib_chat_error">Noget gik galt</string>
     <string name="ib_chat_error_code">Fejlkode: %1$s.</string>
     <string name="ib_chat_save">Gemme</string>
     <string name="ib_chat_attachments_take_a_photo">Tag et foto</string>
     <string name="ib_chat_attachments_record_video">Optag video</string>
     <string name="ib_chat_attachments_select_file">Vælg fil</string>
     <string name="ib_chat_attachments_select_from_gallery">Vælg fra galleriet</string>
+    <string name="ib_chat_error_description">Prøv igen senere eller kontakt kundesupport.</string>
+    <string name="ib_chat_refresh">Opdater</string>
 </resources>

@@ -17,11 +17,13 @@
     <string name="ib_chat_permissions_not_granted_message">您可以在应用设置中授予权限</string>
     <string name="ib_chat_cant_create_attachment">无法由选择的文件创建附件</string>
     <string name="ib_chat_ok">好的</string>
-    <string name="ib_chat_error">出现错误：%1$s.</string>
+    <string name="ib_chat_error">出现错误</string>
     <string name="ib_chat_error_code">错误代码：%1$s.</string>
     <string name="ib_chat_save">节省</string>
     <string name="ib_chat_attachments_take_a_photo">拍照</string>
     <string name="ib_chat_attachments_record_video">记录视频</string>
     <string name="ib_chat_attachments_select_file">选择文件</string>
     <string name="ib_chat_attachments_select_from_gallery">从画廊中选择</string>
+    <string name="ib_chat_error_description">请稍后重试或联系客户支持。</string>
+    <string name="ib_chat_refresh">刷新</string>
 </resources>
