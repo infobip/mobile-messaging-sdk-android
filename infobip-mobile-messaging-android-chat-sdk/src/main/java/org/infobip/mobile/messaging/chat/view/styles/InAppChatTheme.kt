@@ -41,7 +41,7 @@ package org.infobip.mobile.messaging.chat.view.styles
  *         .build(),
  *     chatStyle = InAppChatStyle.Builder()
  *         .setBackgroundColor(Color.WHITE)
- *         .setErrorBackgroundColor(Color.WHITE)
+ *         .setChatFullScreenErrorBackgroundColor(Color.WHITE)
  *         .build(),
  *     chatInputViewStyle = InAppChatInputViewStyle.Builder()
  *         .setTextColor(Color.BLACK)

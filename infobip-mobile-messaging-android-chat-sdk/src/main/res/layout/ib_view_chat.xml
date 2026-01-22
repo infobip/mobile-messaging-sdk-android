@@ -30,17 +30,6 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <org.infobip.mobile.messaging.chat.view.NetworkConnectionErrorView
-        android:id="@+id/ib_lc_connection_error"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:visibility="invisible"
-        tools:visibility="visible"
-        />
-
     <org.infobip.mobile.messaging.chat.view.ErrorView
         android:id="@+id/ib_lc_error_view"
         android:layout_width="0dp"

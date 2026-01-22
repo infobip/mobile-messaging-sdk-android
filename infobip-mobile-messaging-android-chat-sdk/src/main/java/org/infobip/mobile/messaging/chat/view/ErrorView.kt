@@ -51,21 +51,35 @@ class ErrorView @JvmOverloads constructor(
 
     fun applyStyle(style: InAppChatStyle) {
         with(binding) {
-            setBackgroundColor(style.errorBackgroundColor)
-            val titleText = style.errorTitleTextRes?.let { localizationUtils.getString(it) } ?: style.errorTitleText
+            setBackgroundColor(style.chatFullScreenErrorBackgroundColor)
+            val titleText = style.chatFullScreenErrorTitleTextRes?.let { localizationUtils.getString(it) }
+                ?: style.chatFullScreenErrorTitleText
             titleText?.let { ibLcErrorViewTitle.text = it }
-            style.errorTitleTextAppearance?.let { TextViewCompat.setTextAppearance(ibLcErrorViewTitle, it) }
-            ibLcErrorViewTitle.setTextColor(style.errorTitleTextColor)
-            val descriptionText = style.errorDescriptionTextRes?.let { localizationUtils.getString(it) } ?: style.errorDescriptionText
+            style.chatFullScreenErrorTitleTextAppearance?.let {
+                TextViewCompat.setTextAppearance(
+                    ibLcErrorViewTitle,
+                    it
+                )
+            }
+            ibLcErrorViewTitle.setTextColor(style.chatFullScreenErrorTitleTextColor)
+            val descriptionText = style.chatFullScreenErrorDescriptionTextRes?.let { localizationUtils.getString(it) }
+                ?: style.chatFullScreenErrorDescriptionText
             descriptionText?.let { updateDescription(it, this@ErrorView.reason) }
-            style.errorDescriptionTextAppearance?.let { TextViewCompat.setTextAppearance(ibLcErrorViewDesc, it) }
-            ibLcErrorViewDesc.setTextColor(style.errorDescriptionTextColor)
-            style.errorIcon?.let { ibLcErrorViewImage.setImageDrawable(it) }
-            style.errorIconTint?.let { ibLcErrorViewImage.setColorFilter(it) }
-            val refreshButtonText = style.errorRefreshButtonTextRes?.let { localizationUtils.getString(it) } ?: style.errorRefreshButtonText
+            style.chatFullScreenErrorDescriptionTextAppearance?.let {
+                TextViewCompat.setTextAppearance(
+                    ibLcErrorViewDesc,
+                    it
+                )
+            }
+            ibLcErrorViewDesc.setTextColor(style.chatFullScreenErrorDescriptionTextColor)
+            style.chatFullScreenErrorIcon?.let { ibLcErrorViewImage.setImageDrawable(it) }
+            style.chatFullScreenErrorIconTint?.let { ibLcErrorViewImage.setColorFilter(it) }
+            val refreshButtonText =
+                style.chatFullScreenErrorRefreshButtonTextRes?.let { localizationUtils.getString(it) }
+                    ?: style.chatFullScreenErrorRefreshButtonText
             refreshButtonText?.let { ibLcErrorViewActionBtn.text = it }
-            ibLcErrorViewActionBtn.setTextColor(style.errorRefreshButtonTextColor)
-            ibLcErrorViewActionBtn.show(style.errorRefreshButtonVisible)
+            ibLcErrorViewActionBtn.setTextColor(style.chatFullScreenErrorRefreshButtonTextColor)
+            ibLcErrorViewActionBtn.show(style.chatFullScreenErrorRefreshButtonVisible)
         }
     }
 

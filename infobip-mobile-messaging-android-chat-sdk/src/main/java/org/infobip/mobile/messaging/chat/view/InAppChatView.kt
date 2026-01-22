@@ -12,15 +12,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -67,14 +64,11 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.NetworkState
-import org.infobip.mobile.messaging.chat.utils.colorPrimary
 import org.infobip.mobile.messaging.chat.utils.hide
-import org.infobip.mobile.messaging.chat.utils.invisible
 import org.infobip.mobile.messaging.chat.utils.networkStateFlow
 import org.infobip.mobile.messaging.chat.utils.setProgressTint
 import org.infobip.mobile.messaging.chat.utils.show
 import org.infobip.mobile.messaging.chat.utils.toColorStateList
-import org.infobip.mobile.messaging.chat.utils.visible
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
@@ -165,32 +159,20 @@ class InAppChatView @JvmOverloads constructor(
 
         override fun handleError(exception: InAppChatException): Boolean {
             if (exception is InAppChatException.NoInternetConnection) {
-                showNoInternetConnectionView()
+                InAppChatSnackbar.showConnectionError(
+                    view = binding.root,
+                    style = style,
+                    onSnackbarShown = { errorSnackbar = it },
+                    onSnackbarDismissed = { errorSnackbar = null }
+                )
             } else {
-                runCatching {
-                    Snackbar.make(binding.root, getLocalisedMessage(exception), Snackbar.LENGTH_INDEFINITE)
-                        .also {
-                            var textView = it.view.findViewById<TextView>(androidx.core.R.id.text)
-                            if (textView == null) {
-                                textView = it.view.findViewById(com.google.android.material.R.id.snackbar_text)
-                            }
-                            if (textView != null) {
-                                textView.maxLines = 4
-                            }
-                        }
-                        .setAction(R.string.ib_chat_ok) {}
-                        .setActionTextColor(widgetInfo?.colorPrimary ?: Color.WHITE)
-                        .addCallback(object : Snackbar.Callback() {
-                            override fun onShown(sb: Snackbar?) {
-                                errorSnackbar = sb
-                            }
-
-                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                                errorSnackbar = null
-                            }
-                        })
-                        .show()
-                }
+                InAppChatSnackbar.showChatError(
+                    view = binding.root,
+                    message = getLocalisedMessage(exception),
+                    style = style,
+                    onSnackbarShown = { errorSnackbar = it },
+                    onSnackbarDismissed = { errorSnackbar = null }
+                )
             }
             return true
         }
@@ -499,7 +481,7 @@ class InAppChatView @JvmOverloads constructor(
                 is LivechatWidgetResult.Error -> binding.ibLcErrorView.setReason(getErrorReason(mappedResult.throwable))
 
                 is LivechatWidgetResult.Success -> {
-                    errorSnackbar?.dismiss()
+                    hideSnackbar()
                     inAppChat.resetMessageCounter()
                     SessionStorage.contextualData?.let {
                         sendContextualData(it.data, it.allMultiThreadStrategy)
@@ -712,33 +694,23 @@ class InAppChatView @JvmOverloads constructor(
     }
 
     private fun onInternetConnectionRestored() {
-        hideNoInternetConnectionView()
+        hideSnackbar()
         if (!isWidgetLoaded && !isWidgetLoadingInProgress) {
             loadWidget()
         }
     }
-
-    private fun showNoInternetConnectionView(duration: Long = CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS) =
-        with(binding.ibLcConnectionError) {
-            if (isInvisible) {
-                this@with.visible()
-                animate().translationY(height.toFloat()).duration = duration
-            }
-        }
-
-    private fun hideNoInternetConnectionView(duration: Long = CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS) =
-        with(binding.ibLcConnectionError) {
-            if (isVisible) {
-                animate().translationY(0f).duration = duration
-                postDelayed({ this@with.invisible() }, duration)
-            }
-        }
     //endregion
 
     //region Helpers
+    private fun hideSnackbar() {
+        // the dismiss() fade out animation causes blinking, this alternative looks fine
+        errorSnackbar?.view?.visibility = android.view.View.GONE
+        errorSnackbar = null
+    }
+
     private fun loadWidget() {
         with(binding) {
-            errorSnackbar?.dismiss()
+            hideSnackbar()
             ibLcSpinner.show()
             ibLcWebView.hide()
             ibLcErrorView.hide()
@@ -751,7 +723,6 @@ class InAppChatView @JvmOverloads constructor(
         root.setBackgroundColor(style.backgroundColor)
         ibLcWebView.setBackgroundColor(style.backgroundColor)
         ibLcSpinner.setProgressTint(style.progressBarColor.toColorStateList())
-        ibLcConnectionError.applyStyle(style)
         ibLcErrorView.applyStyle(style)
     }
 

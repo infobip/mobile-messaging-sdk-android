@@ -46,7 +46,12 @@ data class PluginChatCustomization(
     val networkErrorLabelBackgroundColor: String? = null,
     val networkErrorIcon: String? = null,
     val networkErrorIconTint: String? = null,
-    val networkErrorIconVisible: Boolean? = null,
+    // Snackbar error
+    val chatBannerErrorTextColor: String? = null,
+    val chatBannerErrorTextAppearance: String? = null,
+    val chatBannerErrorBackgroundColor: String? = null,
+    val chatBannerErrorIcon: String? = null,
+    val chatBannerErrorIconTint: String? = null,
     // Error Screen
     val chatErrorTitleText: String? = null,
     val chatErrorTitleTextColor: String? = null,
@@ -150,19 +155,23 @@ data class PluginChatCustomization(
             .setNetworkConnectionErrorBackgroundColor(networkErrorLabelBackgroundColor.toColorIntOrNull())
             .setNetworkConnectionErrorIcon(networkErrorIcon.toDrawable(context, drawableLoader))
             .setNetworkConnectionErrorIconTint(networkErrorIconTint.toColorIntOrNull())
-            .setNetworkConnectionErrorIconVisible(networkErrorIconVisible)
-            .setErrorTitleText(chatErrorTitleText)
-            .setErrorTitleTextColor(chatErrorTitleTextColor.toColorIntOrNull())
-            .setErrorTitleTextAppearance(chatErrorTitleTextAppearance.toResId(context))
-            .setErrorDescriptionText(chatErrorDescriptionText)
-            .setErrorDescriptionTextColor(chatErrorDescriptionTextColor.toColorIntOrNull())
-            .setErrorDescriptionTextAppearance(chatErrorDescriptionTextAppearance.toResId(context))
-            .setErrorBackgroundColor(chatErrorBackgroundColor.toColorIntOrNull())
-            .setErrorIcon(chatErrorIcon.toDrawable(context, drawableLoader))
-            .setErrorIconTint(chatErrorIconTint.toColorIntOrNull())
-            .setErrorRefreshButtonText(chatErrorRefreshButtonText)
-            .setErrorRefreshButtonTextColor(chatErrorRefreshButtonTextColor.toColorIntOrNull())
-            .setErrorRefreshButtonVisible(chatErrorRefreshButtonVisible)
+            .setChatSnackbarErrorTextColor(chatBannerErrorTextColor.toColorIntOrNull())
+            .setChatSnackbarErrorTextAppearance(chatBannerErrorTextAppearance.toResId(context))
+            .setChatSnackbarErrorBackgroundColor(chatBannerErrorBackgroundColor.toColorIntOrNull())
+            .setChatSnackbarErrorIcon(chatBannerErrorIcon.toDrawable(context, drawableLoader))
+            .setChatSnackbarErrorIconTint(chatBannerErrorIconTint.toColorIntOrNull())
+            .setChatFullScreenErrorTitleText(chatErrorTitleText)
+            .setChatFullScreenErrorTitleTextColor(chatErrorTitleTextColor.toColorIntOrNull())
+            .setChatFullScreenErrorTitleTextAppearance(chatErrorTitleTextAppearance.toResId(context))
+            .setChatFullScreenErrorDescriptionText(chatErrorDescriptionText)
+            .setChatFullScreenErrorDescriptionTextColor(chatErrorDescriptionTextColor.toColorIntOrNull())
+            .setChatFullScreenErrorDescriptionTextAppearance(chatErrorDescriptionTextAppearance.toResId(context))
+            .setChatFullScreenErrorBackgroundColor(chatErrorBackgroundColor.toColorIntOrNull())
+            .setChatFullScreenErrorIcon(chatErrorIcon.toDrawable(context, drawableLoader))
+            .setChatFullScreenErrorIconTint(chatErrorIconTint.toColorIntOrNull())
+            .setChatFullScreenErrorRefreshButtonText(chatErrorRefreshButtonText)
+            .setChatFullScreenErrorRefreshButtonTextColor(chatErrorRefreshButtonTextColor.toColorIntOrNull())
+            .setChatFullScreenErrorRefreshButtonVisible(chatErrorRefreshButtonVisible)
             .build()
 
         val inputViewStyle = InAppChatInputViewStyle.Builder()

@@ -674,19 +674,28 @@ public class MainActivity extends AppCompatActivity {
                     null,
                     true
             );
+            InAppChatStyle chatStyle = new InAppChatStyle.Builder()
+                .setBackgroundColor(Color.LTGRAY)
+                .setProgressBarColor(Color.MAGENTA)
+                .setNetworkConnectionErrorText("Offline")
+                .setNetworkConnectionErrorTextColor(Color.BLACK)
+                .setNetworkConnectionLabelBackgroundColor(Color.CYAN)
+                .setNetworkConnectionErrorIconTint(Color.WHITE)
+                .setChatFullScreenErrorTitleText("Runtime Error!")
+                .setChatFullScreenErrorTitleTextColor(Color.RED)
+                .setChatFullScreenErrorDescriptionText("This is a runtime customization example. Error code: %d")
+                .setChatFullScreenErrorDescriptionTextColor(Color.DKGRAY)
+                .setChatFullScreenErrorBackgroundColor(Color.LTGRAY)
+                .setChatFullScreenErrorIconTint(Color.MAGENTA)
+                .setChatFullScreenErrorRefreshButtonTextColor(Color.BLUE)
+                .setChatFullScreenErrorRefreshButtonVisible(true)
+                .build();
+
             inAppChat.setTheme(
                     new InAppChatTheme(
                             toolbar,
                             toolbar,
-                            new InAppChatStyle(
-                                    Color.LTGRAY,
-                                    Color.MAGENTA,
-                                    "Offline",
-                                    null,
-                                    null,
-                                    Color.BLACK,
-                                    Color.CYAN
-                            ),
+                            chatStyle,
                             new InAppChatInputViewStyle(
                                     org.infobip.mobile.messaging.chat.R.style.IB_Chat_Input_TextAppearance,
                                     Color.BLACK,

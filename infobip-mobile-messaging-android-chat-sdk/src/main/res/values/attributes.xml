@@ -47,19 +47,23 @@
         <attr name="ibChatNetworkConnectionErrorBackgroundColor" format="color|reference" />
         <attr name="ibChatNetworkConnectionErrorIcon" format="reference" />
         <attr name="ibChatNetworkConnectionErrorIconTint" format="color|reference" />
-        <attr name="ibChatNetworkConnectionErrorIconVisible" format="boolean" />
-        <attr name="ibChatErrorTitleText" format="string|reference" />
-        <attr name="ibChatErrorTitleTextColor" format="color|reference" />
-        <attr name="ibChatErrorTitleTextAppearance" format="reference" />
-        <attr name="ibChatErrorDescriptionText" format="string|reference" />
-        <attr name="ibChatErrorDescriptionTextColor" format="color|reference" />
-        <attr name="ibChatErrorDescriptionTextAppearance" format="reference" />
-        <attr name="ibChatErrorBackgroundColor" format="color|reference" />
-        <attr name="ibChatErrorIcon" format="reference" />
-        <attr name="ibChatErrorIconTint" format="color|reference" />
-        <attr name="ibChatErrorRefreshButtonText" format="string|reference" />
-        <attr name="ibChatErrorRefreshButtonTextColor" format="color|reference" />
-        <attr name="ibChatErrorRefreshButtonVisible" format="boolean" />
+        <attr name="ibChatSnackbarErrorTextColor" format="color|reference" />
+        <attr name="ibChatSnackbarErrorTextAppearance" format="reference" />
+        <attr name="ibChatSnackbarErrorBackgroundColor" format="color|reference" />
+        <attr name="ibChatSnackbarErrorIcon" format="reference" />
+        <attr name="ibChatSnackbarErrorIconTint" format="color|reference" />
+        <attr name="ibChatFullScreenErrorTitleText" format="string|reference"/>
+        <attr name="ibChatFullScreenErrorTitleTextColor" format="color|reference"/>
+        <attr name="ibChatFullScreenErrorTitleTextAppearance" format="reference"/>
+        <attr name="ibChatFullScreenErrorDescriptionText" format="string|reference"/>
+        <attr name="ibChatFullScreenErrorDescriptionTextColor" format="color|reference"/>
+        <attr name="ibChatFullScreenErrorDescriptionTextAppearance" format="reference"/>
+        <attr name="ibChatFullScreenErrorBackgroundColor" format="color|reference"/>
+        <attr name="ibChatFullScreenErrorIcon" format="reference"/>
+        <attr name="ibChatFullScreenErrorIconTint" format="color|reference"/>
+        <attr name="ibChatFullScreenErrorRefreshButtonText" format="string|reference"/>
+        <attr name="ibChatFullScreenErrorRefreshButtonTextColor" format="color|reference"/>
+        <attr name="ibChatFullScreenErrorRefreshButtonVisible" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="InAppChatInputViewStyleable">

@@ -58,19 +58,26 @@
         <item name="ibChatNetworkConnectionErrorBackgroundColor">@color/ib_chat_network_connection_error_background</item>
         <item name="ibChatNetworkConnectionErrorIcon">@drawable/ib_chat_network_error_icon</item>
         <item name="ibChatNetworkConnectionErrorIconTint">@color/ib_chat_network_connection_error_icon</item>
-        <item name="ibChatNetworkConnectionErrorIconVisible">true</item>
-        <item name="ibChatErrorTitleText">@string/ib_chat_error</item>
-        <item name="ibChatErrorTitleTextColor">@color/ib_chat_error_title_text</item>
-        <item name="ibChatErrorTitleTextAppearance">@null</item>
-        <item name="ibChatErrorDescriptionText">@string/ib_chat_error_description</item>
-        <item name="ibChatErrorDescriptionTextColor">@color/ib_chat_error_description_text</item>
-        <item name="ibChatErrorDescriptionTextAppearance">@null</item>
-        <item name="ibChatErrorBackgroundColor">@color/ib_chat_error_background</item>
-        <item name="ibChatErrorIcon">@drawable/ib_chat_error</item>
-        <item name="ibChatErrorIconTint">@null</item>
-        <item name="ibChatErrorRefreshButtonText">@string/ib_chat_refresh</item>
-        <item name="ibChatErrorRefreshButtonTextColor">@color/ib_chat_error_action_button_text</item>
-        <item name="ibChatErrorRefreshButtonVisible">true</item>
+        <item name="ibChatSnackbarErrorTextColor">@null</item>
+        <item name="ibChatSnackbarErrorTextAppearance">@null</item>
+        <item name="ibChatSnackbarErrorBackgroundColor">@null</item>
+        <item name="ibChatSnackbarErrorIcon">@null</item>
+        <item name="ibChatSnackbarErrorIconTint">@null</item>
+        <item name="ibChatFullScreenErrorTitleText">@string/ib_chat_error</item>
+        <item name="ibChatFullScreenErrorTitleTextColor">@color/ib_chat_error_title_text</item>
+        <item name="ibChatFullScreenErrorTitleTextAppearance">@null</item>
+        <item name="ibChatFullScreenErrorDescriptionText">@string/ib_chat_error_description</item>
+        <item name="ibChatFullScreenErrorDescriptionTextColor">@color/ib_chat_error_description_text
+        </item>
+        <item name="ibChatFullScreenErrorDescriptionTextAppearance">@null</item>
+        <item name="ibChatFullScreenErrorBackgroundColor">@color/ib_chat_error_background</item>
+        <item name="ibChatFullScreenErrorIcon">@drawable/ib_chat_error</item>
+        <item name="ibChatFullScreenErrorIconTint">@null</item>
+        <item name="ibChatFullScreenErrorRefreshButtonText">@string/ib_chat_refresh</item>
+        <item name="ibChatFullScreenErrorRefreshButtonTextColor">
+          @color/ib_chat_error_action_button_text
+        </item>
+        <item name="ibChatFullScreenErrorRefreshButtonVisible">true</item>
     </style>
 
     <style name="IB.Chat.Input" parent="IB">

@@ -24,6 +24,8 @@ import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
 import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
 import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Builder
+import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Defaults
 
 /**
  * Style configuration for the InAppChat main view.
@@ -49,8 +51,8 @@ import org.infobip.mobile.messaging.chat.utils.takeIfDefined
  * val chatStyle = InAppChatStyle.Builder()
  *     .setBackgroundColor(Color.WHITE)
  *     .setProgressBarColor(Color.BLUE)
- *     .setErrorTitleText("Oops! Something went wrong")
- *     .setErrorBackgroundColor(Color.WHITE)
+ *     .setChatFullScreenErrorTitleText("Oops! Something went wrong")
+ *     .setChatFullScreenErrorBackgroundColor(Color.WHITE)
  *     .setNetworkConnectionErrorBackgroundColor(Color.RED)
  *     .build()
  *
@@ -69,8 +71,8 @@ import org.infobip.mobile.messaging.chat.utils.takeIfDefined
  * <style name="MyChat" parent="IB.Chat">
  *     <item name="ibChatBackgroundColor">@color/white</item>
  *     <item name="ibChatProgressBarColor">@color/blue</item>
- *     <item name="ibChatErrorTitleText">@string/error_title</item>
- *     <item name="ibChatErrorBackgroundColor">@color/error_bg</item>
+ *     <item name="ibChatFullScreenErrorTitleText">@string/error_title</item>
+ *     <item name="ibChatFullScreenErrorBackgroundColor">@color/error_bg</item>
  *     <item name="ibChatNetworkConnectionErrorBackgroundColor">@color/error_red</item>
  * </style>
  *
@@ -98,22 +100,26 @@ data class InAppChatStyle @JvmOverloads constructor(
     @ColorInt val networkConnectionErrorBackgroundColor: Int = networkConnectionLabelBackgroundColor,
     val networkConnectionErrorIcon: Drawable? = null,
     @ColorInt val networkConnectionErrorIconTint: Int = Defaults.networkConnectionErrorIconTint,
-    val networkConnectionErrorIconVisible: Boolean = Defaults.networkConnectionErrorIconVisible,
-    val errorTitleText: String? = null,
-    @StringRes val errorTitleTextRes: Int? = Defaults.errorTitleTextRes,
-    @ColorInt val errorTitleTextColor: Int = Defaults.errorTitleTextColor,
-    @StyleRes val errorTitleTextAppearance: Int? = null,
-    val errorDescriptionText: String? = null,
-    @StringRes val errorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes,
-    @ColorInt val errorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor,
-    @StyleRes val errorDescriptionTextAppearance: Int? = null,
-    @ColorInt val errorBackgroundColor: Int = Defaults.errorBackgroundColor,
-    val errorIcon: Drawable? = null,
-    @ColorInt val errorIconTint: Int? = null,
-    val errorRefreshButtonText: String? = null,
-    @StringRes val errorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes,
-    @ColorInt val errorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor,
-    val errorRefreshButtonVisible: Boolean = Defaults.errorRefreshButtonVisible,
+    @ColorInt val chatSnackbarErrorTextColor: Int? = null,
+    @StyleRes val chatSnackbarErrorTextAppearance: Int? = null,
+    @ColorInt val chatSnackbarErrorBackgroundColor: Int? = null,
+    val chatSnackbarErrorIcon: Drawable? = null,
+    @ColorInt val chatSnackbarErrorIconTint: Int? = null,
+    val chatFullScreenErrorTitleText: String? = null,
+    @StringRes val chatFullScreenErrorTitleTextRes: Int? = Defaults.errorTitleTextRes,
+    @ColorInt val chatFullScreenErrorTitleTextColor: Int = Defaults.errorTitleTextColor,
+    @StyleRes val chatFullScreenErrorTitleTextAppearance: Int? = null,
+    val chatFullScreenErrorDescriptionText: String? = null,
+    @StringRes val chatFullScreenErrorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes,
+    @ColorInt val chatFullScreenErrorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor,
+    @StyleRes val chatFullScreenErrorDescriptionTextAppearance: Int? = null,
+    @ColorInt val chatFullScreenErrorBackgroundColor: Int = Defaults.errorBackgroundColor,
+    val chatFullScreenErrorIcon: Drawable? = null,
+    @ColorInt val chatFullScreenErrorIconTint: Int? = null,
+    val chatFullScreenErrorRefreshButtonText: String? = null,
+    @StringRes val chatFullScreenErrorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes,
+    @ColorInt val chatFullScreenErrorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor,
+    val chatFullScreenErrorRefreshButtonVisible: Boolean = Defaults.errorRefreshButtonVisible,
 ) {
     /**
      * Default values for [InAppChatStyle] properties.
@@ -134,7 +140,6 @@ data class InAppChatStyle @JvmOverloads constructor(
         @ColorInt val networkConnectionErrorTextColor: Int = Color.WHITE
         @ColorInt val networkConnectionErrorBackgroundColor: Int = "#CF182E".toColorInt()
         @ColorInt val networkConnectionErrorIconTint: Int = Color.WHITE
-        val networkConnectionErrorIconVisible: Boolean = true
         @StringRes val errorTitleTextRes: Int = R.string.ib_chat_error
         @ColorInt val errorTitleTextColor: Int = Color.BLACK
         @StringRes val errorDescriptionTextRes: Int = R.string.ib_chat_error_description
@@ -154,8 +159,8 @@ data class InAppChatStyle @JvmOverloads constructor(
      * ```kotlin
      * val style = InAppChatStyle.Builder()
      *     .setBackgroundColor(Color.WHITE)
-     *     .setErrorTitleText("Error!")
-     *     .setErrorBackgroundColor(Color.LIGHT_GRAY)
+     *     .setChatFullScreenErrorTitleText("Error!")
+     *     .setChatFullScreenErrorBackgroundColor(Color.LIGHT_GRAY)
      *     .build()
      * ```
      */
@@ -169,22 +174,26 @@ data class InAppChatStyle @JvmOverloads constructor(
         private var networkConnectionErrorBackgroundColor: Int = Defaults.networkConnectionErrorBackgroundColor
         private var networkConnectionErrorIcon: Drawable? = null
         private var networkConnectionErrorIconTint: Int = Defaults.networkConnectionErrorIconTint
-        private var networkConnectionErrorIconVisible: Boolean = Defaults.networkConnectionErrorIconVisible
-        private var errorTitleText: String? = null
-        private var errorTitleTextRes: Int? = Defaults.errorTitleTextRes
-        private var errorTitleTextColor: Int = Defaults.errorTitleTextColor
-        private var errorTitleTextAppearance: Int? = null
-        private var errorDescriptionText: String? = null
-        private var errorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes
-        private var errorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor
-        private var errorDescriptionTextAppearance: Int? = null
-        private var errorBackgroundColor: Int = Defaults.errorBackgroundColor
-        private var errorIcon: Drawable? = null
-        private var errorIconTint: Int? = null
-        private var errorRefreshButtonText: String? = null
-        private var errorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes
-        private var errorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor
-        private var errorRefreshButtonVisible: Boolean = Defaults.errorRefreshButtonVisible
+        private var chatSnackbarErrorTextColor: Int? = null
+        private var chatSnackbarErrorTextAppearance: Int? = null
+        private var chatSnackbarErrorBackgroundColor: Int? = null
+        private var chatSnackbarErrorIcon: Drawable? = null
+        private var chatSnackbarErrorIconTint: Int? = null
+        private var chatFullScreenErrorTitleText: String? = null
+        private var chatFullScreenErrorTitleTextRes: Int? = Defaults.errorTitleTextRes
+        private var chatFullScreenErrorTitleTextColor: Int = Defaults.errorTitleTextColor
+        private var chatFullScreenErrorTitleTextAppearance: Int? = null
+        private var chatFullScreenErrorDescriptionText: String? = null
+        private var chatFullScreenErrorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes
+        private var chatFullScreenErrorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor
+        private var chatFullScreenErrorDescriptionTextAppearance: Int? = null
+        private var chatFullScreenErrorBackgroundColor: Int = Defaults.errorBackgroundColor
+        private var chatFullScreenErrorIcon: Drawable? = null
+        private var chatFullScreenErrorIconTint: Int? = null
+        private var chatFullScreenErrorRefreshButtonText: String? = null
+        private var chatFullScreenErrorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes
+        private var chatFullScreenErrorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor
+        private var chatFullScreenErrorRefreshButtonVisible: Boolean = Defaults.errorRefreshButtonVisible
 
         fun setBackgroundColor(@ColorInt backgroundColor: Int?) = apply { backgroundColor?.let { this.backgroundColor = it } }
         fun setProgressBarColor(@ColorInt progressBarColor: Int?) = apply { progressBarColor?.let { this.progressBarColor = it } }
@@ -205,22 +214,63 @@ data class InAppChatStyle @JvmOverloads constructor(
         fun setNetworkConnectionErrorBackgroundColor(@ColorInt networkConnectionErrorBackgroundColor: Int?) = apply { networkConnectionErrorBackgroundColor?.let { this.networkConnectionErrorBackgroundColor = it } }
         fun setNetworkConnectionErrorIcon(networkConnectionErrorIcon: Drawable?) = apply { networkConnectionErrorIcon?.let { this.networkConnectionErrorIcon = it } }
         fun setNetworkConnectionErrorIconTint(@ColorInt networkConnectionErrorIconTint: Int?) = apply { networkConnectionErrorIconTint?.let { this.networkConnectionErrorIconTint = it } }
-        fun setNetworkConnectionErrorIconVisible(networkConnectionErrorIconVisible: Boolean?) = apply { networkConnectionErrorIconVisible?.let { this.networkConnectionErrorIconVisible = it } }
-        fun setErrorTitleText(errorTitleText: String?) = apply { errorTitleText?.let { this.errorTitleText = it} }
-        fun setErrorTitleTextRes(@StringRes errorTitleTextRes: Int?) = apply { errorTitleTextRes?.let { this.errorTitleTextRes = it} }
-        fun setErrorTitleTextColor(@ColorInt errorTitleTextColor: Int?) = apply { errorTitleTextColor?.let { this.errorTitleTextColor = it} }
-        fun setErrorTitleTextAppearance(@StyleRes errorTitleTextAppearance: Int?) = apply { errorTitleTextAppearance?.let { this.errorTitleTextAppearance = it} }
-        fun setErrorDescriptionText(errorDescriptionText: String?) = apply { errorDescriptionText?.let { this.errorDescriptionText = it} }
-        fun setErrorDescriptionTextRes(@StringRes errorDescriptionTextRes: Int?) = apply { errorDescriptionTextRes?.let { this.errorDescriptionTextRes = it} }
-        fun setErrorDescriptionTextColor(@ColorInt errorDescriptionTextColor: Int?) = apply { errorDescriptionTextColor?.let { this.errorDescriptionTextColor = it} }
-        fun setErrorDescriptionTextAppearance(@StyleRes errorDescriptionTextAppearance: Int?) = apply { errorDescriptionTextAppearance?.let { this.errorDescriptionTextAppearance = it} }
-        fun setErrorBackgroundColor(@ColorInt errorBackgroundColor: Int?) = apply { errorBackgroundColor?.let { this.errorBackgroundColor = it} }
-        fun setErrorIcon(errorIcon: Drawable?) = apply { errorIcon?.let { this.errorIcon = it} }
-        fun setErrorIconTint(@ColorInt errorIconTint: Int?) = apply { errorIconTint?.let { this.errorIconTint = it} }
-        fun setErrorRefreshButtonText(errorRefreshButtonText: String?) = apply { errorRefreshButtonText?.let { this.errorRefreshButtonText = it} }
-        fun setErrorRefreshButtonTextRes(@StringRes errorRefreshButtonTextRes: Int?) = apply { errorRefreshButtonTextRes?.let { this.errorRefreshButtonTextRes = it} }
-        fun setErrorRefreshButtonTextColor(@ColorInt errorRefreshButtonTextColor: Int?) = apply { errorRefreshButtonTextColor?.let { this.errorRefreshButtonTextColor = it} }
-        fun setErrorRefreshButtonVisible(errorRefreshButtonVisible: Boolean?) = apply { errorRefreshButtonVisible?.let { this.errorRefreshButtonVisible = it} }
+        fun setChatSnackbarErrorTextColor(@ColorInt chatSnackbarErrorTextColor: Int?) = apply { chatSnackbarErrorTextColor?.let { this.chatSnackbarErrorTextColor = it } }
+        fun setChatSnackbarErrorTextAppearance(@StyleRes chatSnackbarErrorTextAppearance: Int?) = apply { chatSnackbarErrorTextAppearance?.let { this.chatSnackbarErrorTextAppearance = it } }
+        fun setChatSnackbarErrorBackgroundColor(@ColorInt chatSnackbarErrorBackgroundColor: Int?) = apply { chatSnackbarErrorBackgroundColor?.let { this.chatSnackbarErrorBackgroundColor = it } }
+        fun setChatSnackbarErrorIcon(chatSnackbarErrorIcon: Drawable?) = apply { chatSnackbarErrorIcon?.let { this.chatSnackbarErrorIcon = it } }
+        fun setChatSnackbarErrorIconTint(@ColorInt chatSnackbarErrorIconTint: Int?) = apply { chatSnackbarErrorIconTint?.let { this.chatSnackbarErrorIconTint = it } }
+        fun setChatFullScreenErrorTitleText(chatFullScreenErrorTitleText: String?) =
+            apply { chatFullScreenErrorTitleText?.let { this.chatFullScreenErrorTitleText = it } }
+
+        fun setChatFullScreenErrorTitleTextRes(@StringRes chatFullScreenErrorTitleTextRes: Int?) =
+            apply { chatFullScreenErrorTitleTextRes?.let { this.chatFullScreenErrorTitleTextRes = it } }
+
+        fun setChatFullScreenErrorTitleTextColor(@ColorInt chatFullScreenErrorTitleTextColor: Int?) =
+            apply { chatFullScreenErrorTitleTextColor?.let { this.chatFullScreenErrorTitleTextColor = it } }
+
+        fun setChatFullScreenErrorTitleTextAppearance(@StyleRes chatFullScreenErrorTitleTextAppearance: Int?) =
+            apply { chatFullScreenErrorTitleTextAppearance?.let { this.chatFullScreenErrorTitleTextAppearance = it } }
+
+        fun setChatFullScreenErrorDescriptionText(chatFullScreenErrorDescriptionText: String?) =
+            apply { chatFullScreenErrorDescriptionText?.let { this.chatFullScreenErrorDescriptionText = it } }
+
+        fun setChatFullScreenErrorDescriptionTextRes(@StringRes chatFullScreenErrorDescriptionTextRes: Int?) =
+            apply { chatFullScreenErrorDescriptionTextRes?.let { this.chatFullScreenErrorDescriptionTextRes = it } }
+
+        fun setChatFullScreenErrorDescriptionTextColor(@ColorInt chatFullScreenErrorDescriptionTextColor: Int?) =
+            apply { chatFullScreenErrorDescriptionTextColor?.let { this.chatFullScreenErrorDescriptionTextColor = it } }
+
+        fun setChatFullScreenErrorDescriptionTextAppearance(@StyleRes chatFullScreenErrorDescriptionTextAppearance: Int?) =
+            apply {
+                chatFullScreenErrorDescriptionTextAppearance?.let {
+                    this.chatFullScreenErrorDescriptionTextAppearance = it
+                }
+            }
+
+        fun setChatFullScreenErrorBackgroundColor(@ColorInt chatFullScreenErrorBackgroundColor: Int?) =
+            apply { chatFullScreenErrorBackgroundColor?.let { this.chatFullScreenErrorBackgroundColor = it } }
+
+        fun setChatFullScreenErrorIcon(chatFullScreenErrorIcon: Drawable?) =
+            apply { chatFullScreenErrorIcon?.let { this.chatFullScreenErrorIcon = it } }
+
+        fun setChatFullScreenErrorIconTint(@ColorInt chatFullScreenErrorIconTint: Int?) =
+            apply { chatFullScreenErrorIconTint?.let { this.chatFullScreenErrorIconTint = it } }
+
+        fun setChatFullScreenErrorRefreshButtonText(chatFullScreenErrorRefreshButtonText: String?) =
+            apply { chatFullScreenErrorRefreshButtonText?.let { this.chatFullScreenErrorRefreshButtonText = it } }
+
+        fun setChatFullScreenErrorRefreshButtonTextRes(@StringRes chatFullScreenErrorRefreshButtonTextRes: Int?) =
+            apply { chatFullScreenErrorRefreshButtonTextRes?.let { this.chatFullScreenErrorRefreshButtonTextRes = it } }
+
+        fun setChatFullScreenErrorRefreshButtonTextColor(@ColorInt chatFullScreenErrorRefreshButtonTextColor: Int?) =
+            apply {
+                chatFullScreenErrorRefreshButtonTextColor?.let {
+                    this.chatFullScreenErrorRefreshButtonTextColor = it
+                }
+            }
+
+        fun setChatFullScreenErrorRefreshButtonVisible(chatFullScreenErrorRefreshButtonVisible: Boolean?) =
+            apply { chatFullScreenErrorRefreshButtonVisible?.let { this.chatFullScreenErrorRefreshButtonVisible = it } }
 
         fun build() = InAppChatStyle(
             backgroundColor = backgroundColor,
@@ -232,22 +282,26 @@ data class InAppChatStyle @JvmOverloads constructor(
             networkConnectionErrorBackgroundColor = networkConnectionErrorBackgroundColor,
             networkConnectionErrorIcon = networkConnectionErrorIcon,
             networkConnectionErrorIconTint = networkConnectionErrorIconTint,
-            networkConnectionErrorIconVisible = networkConnectionErrorIconVisible,
-            errorTitleText = errorTitleText,
-            errorTitleTextRes = errorTitleTextRes,
-            errorTitleTextColor = errorTitleTextColor,
-            errorTitleTextAppearance = errorTitleTextAppearance,
-            errorDescriptionText = errorDescriptionText,
-            errorDescriptionTextRes = errorDescriptionTextRes,
-            errorDescriptionTextColor = errorDescriptionTextColor,
-            errorDescriptionTextAppearance = errorDescriptionTextAppearance,
-            errorBackgroundColor = errorBackgroundColor,
-            errorIcon = errorIcon,
-            errorIconTint = errorIconTint,
-            errorRefreshButtonText = errorRefreshButtonText,
-            errorRefreshButtonTextRes = errorRefreshButtonTextRes,
-            errorRefreshButtonTextColor = errorRefreshButtonTextColor,
-            errorRefreshButtonVisible = errorRefreshButtonVisible,
+            chatSnackbarErrorTextColor = chatSnackbarErrorTextColor,
+            chatSnackbarErrorTextAppearance = chatSnackbarErrorTextAppearance,
+            chatSnackbarErrorBackgroundColor = chatSnackbarErrorBackgroundColor,
+            chatSnackbarErrorIcon = chatSnackbarErrorIcon,
+            chatSnackbarErrorIconTint = chatSnackbarErrorIconTint,
+            chatFullScreenErrorTitleText = chatFullScreenErrorTitleText,
+            chatFullScreenErrorTitleTextRes = chatFullScreenErrorTitleTextRes,
+            chatFullScreenErrorTitleTextColor = chatFullScreenErrorTitleTextColor,
+            chatFullScreenErrorTitleTextAppearance = chatFullScreenErrorTitleTextAppearance,
+            chatFullScreenErrorDescriptionText = chatFullScreenErrorDescriptionText,
+            chatFullScreenErrorDescriptionTextRes = chatFullScreenErrorDescriptionTextRes,
+            chatFullScreenErrorDescriptionTextColor = chatFullScreenErrorDescriptionTextColor,
+            chatFullScreenErrorDescriptionTextAppearance = chatFullScreenErrorDescriptionTextAppearance,
+            chatFullScreenErrorBackgroundColor = chatFullScreenErrorBackgroundColor,
+            chatFullScreenErrorIcon = chatFullScreenErrorIcon,
+            chatFullScreenErrorIconTint = chatFullScreenErrorIconTint,
+            chatFullScreenErrorRefreshButtonText = chatFullScreenErrorRefreshButtonText,
+            chatFullScreenErrorRefreshButtonTextRes = chatFullScreenErrorRefreshButtonTextRes,
+            chatFullScreenErrorRefreshButtonTextColor = chatFullScreenErrorRefreshButtonTextColor,
+            chatFullScreenErrorRefreshButtonVisible = chatFullScreenErrorRefreshButtonVisible,
         )
     }
 
@@ -312,70 +366,93 @@ data class InAppChatStyle @JvmOverloads constructor(
                     Defaults.networkConnectionErrorIconTint
                 )
 
-                val networkConnectionErrorIconVisible = getBoolean(
-                    R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorIconVisible,
-                    Defaults.networkConnectionErrorIconVisible
-                )
+                val chatSnackbarErrorTextColor = getColor(
+                    R.styleable.InAppChatViewStyleable_ibChatSnackbarErrorTextColor,
+                    0
+                ).takeIfDefined()
+
+                val chatSnackbarErrorTextAppearance = getResourceId(
+                    R.styleable.InAppChatViewStyleable_ibChatSnackbarErrorTextAppearance,
+                    0
+                ).takeIfDefined()
+
+                val chatSnackbarErrorBackgroundColor = getColor(
+                    R.styleable.InAppChatViewStyleable_ibChatSnackbarErrorBackgroundColor,
+                    0
+                ).takeIfDefined()
+
+                val chatSnackbarErrorIcon = getResourceId(
+                    R.styleable.InAppChatViewStyleable_ibChatSnackbarErrorIcon,
+                    0
+                ).takeIfDefined()
+
+                val chatSnackbarErrorIconTint = getColor(
+                    R.styleable.InAppChatViewStyleable_ibChatSnackbarErrorIconTint,
+                    0
+                ).takeIfDefined()
 
                 val (errorTitleTextRes, errorTitleText) = resolveStringWithResId(
                     context,
-                    R.styleable.InAppChatViewStyleable_ibChatErrorTitleText,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorTitleText,
                     Defaults.errorTitleTextRes
                 )
 
                 val errorTitleTextColor = getColor(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorTitleTextColor,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorTitleTextColor,
                     Defaults.errorTitleTextColor
                 )
 
                 val errorTitleTextAppearance = getResourceId(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorTitleTextAppearance,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorTitleTextAppearance,
                     0
                 ).takeIfDefined()
 
                 val (errorDescriptionTextRes, errorDescriptionText) = resolveStringWithResId(
                     context,
-                    R.styleable.InAppChatViewStyleable_ibChatErrorDescriptionText,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorDescriptionText,
                     Defaults.errorDescriptionTextRes
                 )
 
                 val errorDescriptionTextColor = getColor(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorDescriptionTextColor,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorDescriptionTextColor,
                     Defaults.errorDescriptionTextColor
                 )
 
                 val errorDescriptionTextAppearance = getResourceId(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorDescriptionTextAppearance,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorDescriptionTextAppearance,
                     0
                 ).takeIfDefined()
 
                 val errorBackgroundColor = getColor(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorBackgroundColor,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorBackgroundColor,
                     Defaults.errorBackgroundColor
                 )
 
                 val errorIcon = getResourceId(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorIcon,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorIcon,
                     R.drawable.ib_chat_error
                 )
 
                 val errorIconTint = getColor(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorIconTint,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorIconTint,
                     0
                 ).takeIfDefined()
 
                 val (errorRefreshButtonTextRes, errorRefreshButtonText) = resolveStringWithResId(
                     context,
-                    R.styleable.InAppChatViewStyleable_ibChatErrorRefreshButtonText,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorRefreshButtonText,
                     Defaults.errorRefreshButtonTextRes
                 )
 
                 val errorRefreshButtonTextColor =
-                    widgetInfo?.colorPrimary?.takeIf { isIbDefaultTheme || !hasValue(R.styleable.InAppChatViewStyleable_ibChatErrorRefreshButtonTextColor) }
-                        ?: getColor(R.styleable.InAppChatViewStyleable_ibChatErrorRefreshButtonTextColor, Defaults.errorRefreshButtonTextColor)
+                    widgetInfo?.colorPrimary?.takeIf { isIbDefaultTheme || !hasValue(R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorRefreshButtonTextColor) }
+                        ?: getColor(
+                            R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorRefreshButtonTextColor,
+                            Defaults.errorRefreshButtonTextColor
+                        )
 
                 val errorRefreshButtonVisible = getBoolean(
-                    R.styleable.InAppChatViewStyleable_ibChatErrorRefreshButtonVisible,
+                    R.styleable.InAppChatViewStyleable_ibChatFullScreenErrorRefreshButtonVisible,
                     Defaults.errorRefreshButtonVisible
                 )
 
@@ -390,22 +467,25 @@ data class InAppChatStyle @JvmOverloads constructor(
                     networkConnectionErrorBackgroundColor = networkConnectionErrorBackgroundColor,
                     networkConnectionErrorIcon = context.getDrawableCompat(networkConnectionErrorIcon),
                     networkConnectionErrorIconTint = networkConnectionErrorIconTint,
-                    networkConnectionErrorIconVisible = networkConnectionErrorIconVisible,
-                    errorTitleText = errorTitleText,
-                    errorTitleTextRes = errorTitleTextRes,
-                    errorTitleTextColor = errorTitleTextColor,
-                    errorTitleTextAppearance = errorTitleTextAppearance,
-                    errorDescriptionText = errorDescriptionText,
-                    errorDescriptionTextRes = errorDescriptionTextRes,
-                    errorDescriptionTextColor = errorDescriptionTextColor,
-                    errorDescriptionTextAppearance = errorDescriptionTextAppearance,
-                    errorBackgroundColor = errorBackgroundColor,
-                    errorIcon = context.getDrawableCompat(errorIcon),
-                    errorIconTint = errorIconTint,
-                    errorRefreshButtonText = errorRefreshButtonText,
-                    errorRefreshButtonTextRes = errorRefreshButtonTextRes,
-                    errorRefreshButtonTextColor = errorRefreshButtonTextColor,
-                    errorRefreshButtonVisible = errorRefreshButtonVisible,
+                    chatSnackbarErrorTextColor = chatSnackbarErrorTextColor,
+                    chatSnackbarErrorBackgroundColor = chatSnackbarErrorBackgroundColor,
+                    chatSnackbarErrorIcon = chatSnackbarErrorIcon?.let { context.getDrawableCompat(it) },
+                    chatSnackbarErrorIconTint = chatSnackbarErrorIconTint,
+                    chatFullScreenErrorTitleText = errorTitleText,
+                    chatFullScreenErrorTitleTextRes = errorTitleTextRes,
+                    chatFullScreenErrorTitleTextColor = errorTitleTextColor,
+                    chatFullScreenErrorTitleTextAppearance = errorTitleTextAppearance,
+                    chatFullScreenErrorDescriptionText = errorDescriptionText,
+                    chatFullScreenErrorDescriptionTextRes = errorDescriptionTextRes,
+                    chatFullScreenErrorDescriptionTextColor = errorDescriptionTextColor,
+                    chatFullScreenErrorDescriptionTextAppearance = errorDescriptionTextAppearance,
+                    chatFullScreenErrorBackgroundColor = errorBackgroundColor,
+                    chatFullScreenErrorIcon = context.getDrawableCompat(errorIcon),
+                    chatFullScreenErrorIconTint = errorIconTint,
+                    chatFullScreenErrorRefreshButtonText = errorRefreshButtonText,
+                    chatFullScreenErrorRefreshButtonTextRes = errorRefreshButtonTextRes,
+                    chatFullScreenErrorRefreshButtonTextColor = errorRefreshButtonTextColor,
+                    chatFullScreenErrorRefreshButtonVisible = errorRefreshButtonVisible,
                 )
             }
         }
