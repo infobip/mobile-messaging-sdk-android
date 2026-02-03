@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.net.toUri
+import androidx.core.text.layoutDirection
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -262,6 +263,8 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
         if (this.isHidden)
             return //on configChange (uiMode) fragment is recreated and this fun is called, skip init views
         localizationUtils = LocalizationUtils.getInstance(requireContext())
+        val language = InAppChat.getInstance(requireContext()).language
+        view.layoutDirection = language.locale.layoutDirection
         getLifecycleRegistry()
         initViews()
         initBackPressHandler()
