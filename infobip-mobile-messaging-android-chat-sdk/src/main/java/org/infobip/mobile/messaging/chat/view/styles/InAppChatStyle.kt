@@ -89,7 +89,7 @@ data class InAppChatStyle @JvmOverloads constructor(
     @ColorInt val backgroundColor: Int = Defaults.backgroundColor,
     @ColorInt val progressBarColor: Int = Defaults.progressBarColor,
     @Deprecated("Use networkConnectionErrorText instead.", ReplaceWith("networkConnectionErrorText")) val networkConnectionText: String? = null,
-    @Deprecated("Use networkConnectionErrorTextRes instead.", ReplaceWith("networkConnectionErrorTextRes")) @StringRes val networkConnectionTextRes: Int? = Defaults.networkConnectionErrorTextRes,
+    @Deprecated("Use networkConnectionErrorTextRes instead.", ReplaceWith("networkConnectionErrorTextRes")) @StringRes val networkConnectionTextRes: Int? = null,
     @Deprecated("Use networkConnectionErrorTextAppearance instead.", ReplaceWith("networkConnectionErrorTextAppearance")) @StyleRes val networkConnectionTextAppearance: Int? = null,
     @Deprecated("Use networkConnectionErrorTextColor instead.", ReplaceWith("networkConnectionErrorTextColor")) @ColorInt val networkConnectionTextColor: Int = Defaults.networkConnectionErrorTextColor,
     @Deprecated("Use networkConnectionErrorBackgroundColor instead.", ReplaceWith("networkConnectionErrorBackgroundColor")) @ColorInt val networkConnectionLabelBackgroundColor: Int = Defaults.networkConnectionErrorBackgroundColor,
@@ -136,7 +136,6 @@ data class InAppChatStyle @JvmOverloads constructor(
     object Defaults {
         @ColorInt val backgroundColor: Int = Color.WHITE
         @ColorInt val progressBarColor: Int = Color.BLACK
-        @StringRes val networkConnectionErrorTextRes: Int = R.string.ib_chat_no_connection
         @ColorInt val networkConnectionErrorTextColor: Int = Color.WHITE
         @ColorInt val networkConnectionErrorBackgroundColor: Int = "#CF182E".toColorInt()
         @ColorInt val networkConnectionErrorIconTint: Int = Color.WHITE
@@ -168,7 +167,7 @@ data class InAppChatStyle @JvmOverloads constructor(
         private var backgroundColor: Int = Defaults.backgroundColor
         private var progressBarColor: Int = Defaults.progressBarColor
         private var networkConnectionErrorText: String? = null
-        private var networkConnectionErrorTextRes: Int? = Defaults.networkConnectionErrorTextRes
+        private var networkConnectionErrorTextRes: Int? = null
         private var networkConnectionErrorTextAppearance: Int? = null
         private var networkConnectionErrorTextColor: Int = Defaults.networkConnectionErrorTextColor
         private var networkConnectionErrorBackgroundColor: Int = Defaults.networkConnectionErrorBackgroundColor
@@ -207,8 +206,8 @@ data class InAppChatStyle @JvmOverloads constructor(
         fun setNetworkConnectionTextColor(@ColorInt networkConnectionTextColor: Int?) = setNetworkConnectionErrorTextColor(networkConnectionTextColor)
         @Deprecated("Use setNetworkConnectionErrorBackgroundColor() instead.", ReplaceWith("setNetworkConnectionErrorBackgroundColor(networkConnectionLabelBackgroundColor)"))
         fun setNetworkConnectionLabelBackgroundColor(@ColorInt networkConnectionLabelBackgroundColor: Int?) = setNetworkConnectionErrorBackgroundColor(networkConnectionLabelBackgroundColor)
-        fun setNetworkConnectionErrorText(networkConnectionErrorText: String?) = apply { networkConnectionErrorText?.let { this.networkConnectionErrorText = it } }
-        fun setNetworkConnectionErrorTextRes(@StringRes networkConnectionErrorTextRes: Int?) = apply { networkConnectionErrorTextRes?.let { this.networkConnectionErrorTextRes = it } }
+        fun setNetworkConnectionErrorText(networkConnectionErrorText: String?) = apply { this.networkConnectionErrorText = networkConnectionErrorText }
+        fun setNetworkConnectionErrorTextRes(@StringRes networkConnectionErrorTextRes: Int?) = apply { this.networkConnectionErrorTextRes = networkConnectionErrorTextRes }
         fun setNetworkConnectionErrorTextAppearance(@StyleRes networkConnectionErrorTextAppearance: Int?) = apply { networkConnectionErrorTextAppearance?.let { this.networkConnectionErrorTextAppearance = it } }
         fun setNetworkConnectionErrorTextColor(@ColorInt networkConnectionErrorTextColor: Int?) = apply { networkConnectionErrorTextColor?.let { this.networkConnectionErrorTextColor = it } }
         fun setNetworkConnectionErrorBackgroundColor(@ColorInt networkConnectionErrorBackgroundColor: Int?) = apply { networkConnectionErrorBackgroundColor?.let { this.networkConnectionErrorBackgroundColor = it } }
@@ -348,7 +347,7 @@ data class InAppChatStyle @JvmOverloads constructor(
                 val (networkConnectionErrorTextRes, networkConnectionErrorText) = resolveStringWithResId(
                     context,
                     R.styleable.InAppChatViewStyleable_ibChatNetworkConnectionErrorText,
-                    Defaults.networkConnectionErrorTextRes
+                    null
                 )
 
                 val networkConnectionErrorTextAppearance = getResourceId(

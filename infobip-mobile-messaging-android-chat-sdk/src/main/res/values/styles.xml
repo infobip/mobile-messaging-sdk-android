@@ -52,7 +52,7 @@
     <style name="IB.Chat" parent="IB">
         <item name="ibChatBackgroundColor">@color/ib_chat_background</item>
         <item name="ibChatProgressBarColor">@color/ib_chat_progress_bar</item>
-        <item name="ibChatNetworkConnectionErrorText">@string/ib_chat_no_connection</item>
+        <item name="ibChatNetworkConnectionErrorText">@null</item>
         <item name="ibChatNetworkConnectionErrorTextColor">@color/ib_chat_network_connection_error_text</item>
         <item name="ibChatNetworkConnectionErrorTextAppearance">@null</item>
         <item name="ibChatNetworkConnectionErrorBackgroundColor">@color/ib_chat_network_connection_error_background</item>

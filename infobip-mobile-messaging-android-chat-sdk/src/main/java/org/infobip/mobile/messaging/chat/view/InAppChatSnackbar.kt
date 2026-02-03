@@ -37,8 +37,7 @@ object InAppChatSnackbar {
         onSnackbarDismissed: (() -> Unit)? = null
     ) {
         val localizationUtils = LocalizationUtils.getInstance(view.context)
-        val errorText = style.networkConnectionErrorTextRes
-            ?.let { localizationUtils.getString(it) }
+        val errorText = style.networkConnectionErrorTextRes?.let { localizationUtils.getString(it) }
             ?: style.networkConnectionErrorText
             ?: view.context.getString(R.string.ib_chat_no_connection)
 
@@ -105,8 +104,8 @@ object InAppChatSnackbar {
                 style.chatSnackbarErrorBackgroundColor?.let { setBackgroundTint(it) }
                 val textView = this.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text)
                 style.chatSnackbarErrorTextColor?.let { textView?.setTextColor(it) }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && style.networkConnectionErrorTextAppearance != null) {
-                    textView?.setTextAppearance(style.networkConnectionErrorTextAppearance)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && style.chatSnackbarErrorTextAppearance != null) {
+                    textView?.setTextAppearance(style.chatSnackbarErrorTextAppearance)
                 }
                 textView?.maxLines = 4
 

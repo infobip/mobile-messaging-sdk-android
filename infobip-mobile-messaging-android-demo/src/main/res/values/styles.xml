@@ -41,6 +41,12 @@
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
+  <style name="InAppChat.Demo.Snackbar.TextAppearance" parent="TextAppearance.MaterialComponents.Headline6">
+    <item name="android:textStyle">bold</item>
+    <item name="android:textAllCaps">true</item>
+    <item name="fontFamily">sans-serif-medium</item>
+  </style>
+
     <style name="InAppChat.Demo.Toolbar.AttachmentPreview" parent="InAppChat.Demo.Toolbar">
         <item name="ibChatSubtitleCentered">true</item>
     </style>
