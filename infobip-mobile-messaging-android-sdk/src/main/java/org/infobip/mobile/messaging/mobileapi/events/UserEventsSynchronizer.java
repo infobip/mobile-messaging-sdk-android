@@ -7,6 +7,8 @@
  */
 package org.infobip.mobile.messaging.mobileapi.events;
 
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.userSessionReport;
+
 import org.infobip.mobile.messaging.CustomEvent;
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.InstallationMapper;
@@ -19,6 +21,7 @@ import org.infobip.mobile.messaging.api.appinstance.UserCustomEventBody;
 import org.infobip.mobile.messaging.api.appinstance.UserSessionEventBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -38,6 +41,7 @@ public class UserEventsSynchronizer {
     private final Executor executor;
     private final MRetryPolicy policy;
     private final BatchReporter batchReporter;
+    private final DebouncingGuard debouncingGuard;
 
     public UserEventsSynchronizer(
             MobileMessagingCore mobileMessagingCore,
@@ -45,7 +49,8 @@ public class UserEventsSynchronizer {
             MobileApiAppInstance mobileApiAppInstance,
             MRetryPolicy policy,
             Executor executor,
-            BatchReporter batchReporter) {
+            BatchReporter batchReporter,
+            DebouncingGuard debouncingGuard) {
 
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
@@ -53,6 +58,7 @@ public class UserEventsSynchronizer {
         this.policy = policy;
         this.executor = executor;
         this.batchReporter = batchReporter;
+        this.debouncingGuard = debouncingGuard;
     }
 
     public void reportSessions() {
@@ -76,6 +82,11 @@ public class UserEventsSynchronizer {
         // if we already reported the active session and session bounds are also reported (absent) we don't send a request
         if (userSessionEventBody == null ||
                 sessionStartsMillis == lastReportedSessionStartTime && userSessionEventBody.getSessionBounds().size() == 0) {
+            return;
+        }
+
+        if (!debouncingGuard.shouldAllow(userSessionReport, userSessionEventBody)) {
+            MobileMessagingLogger.w("USER SESSION REPORT DROPPED - duplicate within debounce window");
             return;
         }
 

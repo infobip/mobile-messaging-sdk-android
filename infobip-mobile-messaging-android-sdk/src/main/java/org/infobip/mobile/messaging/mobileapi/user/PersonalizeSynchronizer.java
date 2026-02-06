@@ -7,6 +7,10 @@
  */
 package org.infobip.mobile.messaging.mobileapi.user;
 
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.depersonalizeById;
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.personalize;
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.repersonalize;
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
 
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -20,6 +24,7 @@ import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.appinstance.UserPersonalizeBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -31,8 +36,6 @@ import org.infobip.mobile.messaging.util.StringUtils;
 
 import java.util.concurrent.Executor;
 
-import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
-
 public class PersonalizeSynchronizer {
 
     private final MobileMessagingCore mobileMessagingCore;
@@ -43,6 +46,7 @@ public class PersonalizeSynchronizer {
     private final BatchReporter batchReporter;
     private final MRetryPolicy policy;
     private final DepersonalizeServerListener serverListener;
+    private final DebouncingGuard debouncingGuard;
 
     public PersonalizeSynchronizer(
             MobileMessagingCore mobileMessagingCore,
@@ -52,7 +56,8 @@ public class PersonalizeSynchronizer {
             MRetryPolicy policy,
             Executor executor,
             BatchReporter batchReporter,
-            DepersonalizeServerListener serverListener) {
+            DepersonalizeServerListener serverListener,
+            DebouncingGuard debouncingGuard) {
 
         this.mobileMessagingCore = mobileMessagingCore;
         this.broadcaster = broadcaster;
@@ -62,6 +67,7 @@ public class PersonalizeSynchronizer {
         this.executor = executor;
         this.batchReporter = batchReporter;
         this.serverListener = serverListener;
+        this.debouncingGuard = debouncingGuard;
     }
 
     public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, boolean keepAsLead, final MobileMessaging.ResultListener<User> listener) {
@@ -80,6 +86,21 @@ public class PersonalizeSynchronizer {
             MobileMessagingLogger.w("Registration not available yet, will patch user data later");
             if (listener != null) {
                 listener.onResult(new Result<>(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
+            return;
+        }
+
+        PersonalizeOperationData opData = new PersonalizeOperationData(
+                userIdentity != null ? userIdentity.getMap() : null,
+                userAttributes != null ? userAttributes.getMap() : null,
+                forceDepersonalize,
+                keepAsLead
+        );
+
+        if (!debouncingGuard.shouldAllow(personalize, opData)) {
+            MobileMessagingLogger.w("PERSONALIZE DROPPED - duplicate within debounce window");
+            if (listener != null) {
+                listener.onResult(new Result<>(mobileMessagingCore.getUser()));
             }
             return;
         }
@@ -179,6 +200,14 @@ public class PersonalizeSynchronizer {
     }
 
     public void depersonalize(String unreportedDepersonalizedPushRegId, final DepersonalizeActionListener actionListener) {
+        if (!debouncingGuard.shouldAllow(depersonalizeById, unreportedDepersonalizedPushRegId)) {
+            MobileMessagingLogger.w("DEPERSONALIZE DROPPED - duplicate within debounce window");
+            if (actionListener != null) {
+                actionListener.onUserInitiatedDepersonalizeCompleted();
+            }
+            return;
+        }
+
         new MRetryableTask<String, Void>() {
 
             @Override
@@ -249,6 +278,18 @@ public class PersonalizeSynchronizer {
 
         if (StringUtils.isBlank(mobileMessagingCore.getPushRegistrationId())) {
             MobileMessagingLogger.w("Registration not available yet, will repersonalize user later");
+            return;
+        }
+
+        PersonalizeOperationData opData = new PersonalizeOperationData(
+                userPersonalizeBody.getUserIdentity(),
+                userPersonalizeBody.getUserAttributes(),
+                null,
+                null
+        );
+
+        if (!debouncingGuard.shouldAllow(repersonalize, opData)) {
+            MobileMessagingLogger.w("REPERSONALIZE DROPPED - duplicate within debounce window");
             return;
         }
 

@@ -7,12 +7,23 @@
  */
 package org.infobip.mobile.messaging;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.annotation.SuppressLint;
 
 import org.infobip.mobile.messaging.api.messages.MobileApiMessages;
 import org.infobip.mobile.messaging.api.messages.SyncMessagesBody;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.appinstance.InstallationSynchronizer;
 import org.infobip.mobile.messaging.mobileapi.common.MRetryPolicy;
@@ -32,16 +43,6 @@ import org.mockito.Mockito;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * @author pandric on 08/03/2017.
@@ -83,7 +84,7 @@ public class RetryableSynchronizersTest extends MobileMessagingTestCase {
         Executor executor = Executors.newSingleThreadExecutor();
         messagesSynchronizer = new MessagesSynchronizer(spy, stats, executor, broadcaster, retryPolicy, mobileMessageHandler, mobileApiMessages);
         installationSynchronizer = new InstallationSynchronizer(context, mobileMessagingCore, stats, executor, broadcaster, retryPolicyProvider, mobileApiAppInstance);
-        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiUserData);
+        userDataReporter = new UserDataReporter(mobileMessagingCore, executor, broadcaster, retryPolicyProvider, stats, mobileApiUserData, new DebouncingGuard(PreferenceHelper.findLong(context, MobileMessagingProperty.DEBOUNCE_WINDOW_MS)));
     }
 
     @Test

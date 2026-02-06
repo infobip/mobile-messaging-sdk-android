@@ -47,6 +47,7 @@ import org.infobip.mobile.messaging.interactive.MobileInteractiveImpl;
 import org.infobip.mobile.messaging.interactive.notification.InteractiveNotificationHandler;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
@@ -187,6 +188,7 @@ public class MobileMessagingCore
     private InAppClickReporter inAppClickReporter;
     private volatile JwtSupplier jwtSupplier;
     private HashSet<String> trustedDomains;
+    private volatile DebouncingGuard debouncingGuard;
 
     protected MobileMessagingCore(Context context) {
         this(context, new AndroidBroadcaster(context), Executors.newSingleThreadExecutor(), new ModuleLoader(context), new FirebaseAppProvider(context));
@@ -2106,7 +2108,8 @@ public class MobileMessagingCore
     private UserDataReporter userDataReporter() {
         if (userDataReporter == null) {
             userDataReporter = new UserDataReporter(this, registrationAlignedExecutor,
-                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiUserData(context));
+                    broadcaster, retryPolicyProvider, stats, mobileApiResourceProvider().getMobileApiUserData(context),
+                    debouncingGuard());
         }
         return userDataReporter;
     }
@@ -2122,7 +2125,8 @@ public class MobileMessagingCore
                     retryPolicyProvider.DEFAULT(),
                     registrationAlignedExecutor,
                     new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
-                    this);
+                    this,
+                    debouncingGuard());
         }
         return personalizeSynchronizer;
     }
@@ -2194,7 +2198,8 @@ public class MobileMessagingCore
                     mobileApiResourceProvider().getMobileApiAppInstance(context),
                     retryPolicyProvider.DEFAULT(),
                     registrationAlignedExecutor,
-                    new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)));
+                    new BatchReporter(PreferenceHelper.findLong(context, MobileMessagingProperty.BATCH_REPORTING_DELAY)),
+                    debouncingGuard());
         }
         return userEventsSynchronizer;
     }
@@ -2203,6 +2208,13 @@ public class MobileMessagingCore
     public void registerForRemoteNotifications() {
         setRemoteNotificationsEnabled(context, true);
         MobileMessagingCore.getInstance(context).getPostNotificationsPermissionRequester().requestPermission();
+    }
+
+    private DebouncingGuard debouncingGuard() {
+        if (debouncingGuard == null) {
+            debouncingGuard = new DebouncingGuard(PreferenceHelper.findLong(context, MobileMessagingProperty.DEBOUNCE_WINDOW_MS));
+        }
+        return debouncingGuard;
     }
 
     /**

@@ -24,8 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
@@ -311,6 +309,8 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         UserAttributes userAttributes = new UserAttributes();
         userAttributes.setLastName("D'Uh");
+        userAttributes.setCustomAttribute("some-value", new CustomAttributeValue(new Date()));
+
         UserBody userBody = userBody();
         userBody.setLastName("D'Uh");
 
@@ -319,6 +319,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //when
         mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
+        mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
 
         //then
         verifyNeededPrefsCleanUp(false);
@@ -326,6 +327,21 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         User returnedUser = userCaptor.getValue();
         verifyIdentity(returnedUser);
         assertEquals("D'Uh", returnedUser.getLastName());
+    }
+
+    @Test
+    public void test_debounced_second_identical_personalize() {
+        //given
+        givenUserData();
+        UserIdentity userIdentity = givenIdentity();
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
+
+        //when
+        mobileMessaging.personalize(userIdentity, null, false, userResultListener);
+        mobileMessaging.personalize(userIdentity, null, false, userResultListener);
+
+        //then
+        verify(broadcaster, after(600).atMostOnce()).personalized(userCaptor.capture());
     }
 
     private void givenUserData() {

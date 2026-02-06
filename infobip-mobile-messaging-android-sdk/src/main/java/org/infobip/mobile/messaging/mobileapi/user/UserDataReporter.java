@@ -7,6 +7,11 @@
  */
 package org.infobip.mobile.messaging.mobileapi.user;
 
+import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.fetch;
+import static org.infobip.mobile.messaging.mobileapi.DebouncingGuard.OperationType.patch;
+import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
+
 import org.infobip.mobile.messaging.Installation;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
@@ -15,6 +20,7 @@ import org.infobip.mobile.messaging.UserMapper;
 import org.infobip.mobile.messaging.api.appinstance.MobileApiUserData;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
@@ -32,9 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import static org.infobip.mobile.messaging.UserMapper.filterOutDeletedData;
-import static org.infobip.mobile.messaging.util.AuthorizationUtils.getAuthorizationHeader;
-
 
 @SuppressWarnings("unchecked")
 public class UserDataReporter {
@@ -45,14 +48,16 @@ public class UserDataReporter {
     private final MobileMessagingStats stats;
     private final MobileApiUserData mobileApiUserData;
     private final RetryPolicyProvider retryPolicyProvider;
+    private final DebouncingGuard debouncingGuard;
 
-    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiUserData mobileApiUserData) {
+    public UserDataReporter(MobileMessagingCore mobileMessagingCore, Executor executor, Broadcaster broadcaster, RetryPolicyProvider retryPolicyProvider, MobileMessagingStats stats, MobileApiUserData mobileApiUserData, DebouncingGuard debouncingGuard) {
         this.executor = executor;
         this.broadcaster = broadcaster;
         this.mobileMessagingCore = mobileMessagingCore;
         this.stats = stats;
         this.retryPolicyProvider = retryPolicyProvider;
         this.mobileApiUserData = mobileApiUserData;
+        this.debouncingGuard = debouncingGuard;
     }
 
     public void patch(final MobileMessaging.ResultListener listener, final User user) {
@@ -66,6 +71,14 @@ public class UserDataReporter {
             MobileMessagingLogger.e("USER DATA VALIDATION ERROR - User data does not meet API requirements", e);
             if (listener != null) {
                 listener.onResult(new Result(mobileMessagingCore.getUser(), MobileMessagingError.createFrom(e)));
+            }
+            return;
+        }
+
+        if (!debouncingGuard.shouldAllow(patch, user.getMap())) {
+            MobileMessagingLogger.v("PATCH USER DROPPED - duplicate within debounce window");
+            if (listener != null) {
+                listener.onResult(new Result(mobileMessagingCore.getUser()));
             }
             return;
         }
@@ -151,6 +164,14 @@ public class UserDataReporter {
             MobileMessagingLogger.w("Registration not available yet, you can fetch user data when push registration ID becomes available");
             if (listener != null) {
                 listener.onResult(new Result(mobileMessagingCore.getUser(), InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
+            return;
+        }
+
+        if (!debouncingGuard.shouldAllow(fetch, null)) {
+            MobileMessagingLogger.v("FETCH USER DROPPED - within debounce window");
+            if (listener != null) {
+                listener.onResult(new Result(mobileMessagingCore.getUser()));
             }
             return;
         }

@@ -18,6 +18,7 @@ import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
 import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.common.MRetryPolicy;
 import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
@@ -74,7 +75,7 @@ public class UserEventsSynchronizerTest extends MobileMessagingTestCase {
         userSessionEventCaptor = ArgumentCaptor.forClass(UserSessionEventBody.class);
         RetryPolicyProvider retryPolicyProvider = new RetryPolicyProvider(context);
         MRetryPolicy retryPolicy = retryPolicyProvider.DEFAULT();
-        userEventsSynchronizer = new UserEventsSynchronizer(mobileMessagingCore, broadcaster, mobileApiAppInstance, retryPolicy, executor, new BatchReporter(100L));
+        userEventsSynchronizer = new UserEventsSynchronizer(mobileMessagingCore, broadcaster, mobileApiAppInstance, retryPolicy, executor, new BatchReporter(100L), new DebouncingGuard(PreferenceHelper.findLong(context, MobileMessagingProperty.DEBOUNCE_WINDOW_MS)));
     }
 
     @Test
