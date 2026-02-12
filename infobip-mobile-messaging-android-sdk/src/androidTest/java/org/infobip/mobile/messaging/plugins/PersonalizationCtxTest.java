@@ -7,13 +7,13 @@
  */
 package org.infobip.mobile.messaging.plugins;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
 
 public class PersonalizationCtxTest {
 

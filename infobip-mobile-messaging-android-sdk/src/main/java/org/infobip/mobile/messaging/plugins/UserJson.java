@@ -7,6 +7,10 @@
  */
 package org.infobip.mobile.messaging.plugins;
 
+import static org.infobip.mobile.messaging.plugins.InstallationJson.cleanupJsonMapForClient;
+
+import androidx.annotation.NonNull;
+
 import com.google.gson.reflect.TypeToken;
 
 import org.infobip.mobile.messaging.CustomAttributesMapper;
@@ -28,10 +32,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import androidx.annotation.NonNull;
-
-import static org.infobip.mobile.messaging.plugins.InstallationJson.cleanupJsonMapForClient;
-
 /**
  * User data mapper for JSON conversion in plugins
  */
@@ -46,7 +46,7 @@ public class UserJson extends User {
             cleanupJsonMapForClient(user.getCustomAttributes(), jsonObject);
             return jsonObject;
         } catch (JSONException e) {
-            e.printStackTrace();
+            MobileMessagingLogger.e("Cannot convert user to JSON: ", e);
             return new JSONObject();
         }
     }
@@ -65,26 +65,29 @@ public class UserJson extends User {
 
         try {
             if (json.has(UserAtts.externalUserId)) {
-                user.setExternalUserId(json.optString(UserAtts.externalUserId));
+                user.setExternalUserId(jsonNullOrValue(json, UserAtts.externalUserId));
             }
             if (json.has(UserAtts.firstName)) {
-                user.setFirstName(json.optString(UserAtts.firstName));
+                user.setFirstName(jsonNullOrValue(json, UserAtts.firstName));
             }
             if (json.has(UserAtts.lastName)) {
-                user.setLastName(json.optString(UserAtts.lastName));
+                user.setLastName(jsonNullOrValue(json, UserAtts.lastName));
             }
             if (json.has(UserAtts.middleName)) {
-                user.setMiddleName(json.optString(UserAtts.middleName));
+                user.setMiddleName(jsonNullOrValue(json, UserAtts.middleName));
             }
             if (json.has(UserAtts.gender)) {
-                user.setGender(UserMapper.genderFromBackend(json.optString(UserAtts.gender)));
+                user.setGender(UserMapper.genderFromBackend(jsonNullOrValue(json, UserAtts.gender)));
             }
             if (json.has(UserAtts.birthday)) {
-                Date bday = null;
-                try {
+                Date bday;
+                if (json.isNull(UserAtts.birthday)) {
+                    user.setBirthday(null);
+                } else try {
                     bday = DateTimeUtil.dateFromYMDString(json.optString(UserAtts.birthday));
                     user.setBirthday(bday);
                 } catch (ParseException e) {
+                    MobileMessagingLogger.e("Cannot parse user's birthday fromJSON: ", e);
                 }
             }
             if (json.has(UserAtts.phones)) {
@@ -102,13 +105,17 @@ public class UserJson extends User {
 
         try {
             if (json.has(UserAtts.customAttributes)) {
-                java.lang.reflect.Type type = new TypeToken<Map<String, Object>>() {
-                }.getType();
-                Map<String, Object> customAttributes = new JsonSerializer().deserialize(json.optString(UserAtts.customAttributes), type);
-                if (!CustomAttributesMapper.validate(customAttributes)) {
-                    throw new IllegalArgumentException("Custom attributes are invalid.");
+                if (json.isNull(UserAtts.customAttributes)) {
+                    user.setCustomAttributes(null);
+                } else {
+                    java.lang.reflect.Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
+                    Map<String, Object> customAttributes = new JsonSerializer().deserialize(json.optString(UserAtts.customAttributes), type);
+                    if (!CustomAttributesMapper.validate(customAttributes)) {
+                        throw new IllegalArgumentException("Custom attributes are invalid.");
+                    }
+                    user.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
                 }
-                user.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
             }
         } catch (Exception e) {
             MobileMessagingLogger.e("Cannot parse user fromJSON custom attributes: ", e);
@@ -126,24 +133,26 @@ public class UserJson extends User {
 
         try {
             if (json.has(UserAtts.firstName)) {
-                userAttributes.setFirstName(json.optString(UserAtts.firstName));
+                userAttributes.setFirstName(jsonNullOrValue(json, UserAtts.firstName));
             }
             if (json.has(UserAtts.lastName)) {
-                userAttributes.setLastName(json.optString(UserAtts.lastName));
+                userAttributes.setLastName(jsonNullOrValue(json, UserAtts.lastName));
             }
             if (json.has(UserAtts.middleName)) {
-                userAttributes.setMiddleName(json.optString(UserAtts.middleName));
+                userAttributes.setMiddleName(jsonNullOrValue(json, UserAtts.middleName));
             }
             if (json.has(UserAtts.gender)) {
-                userAttributes.setGender(UserMapper.genderFromBackend(json.optString(UserAtts.gender)));
+                userAttributes.setGender(UserMapper.genderFromBackend(jsonNullOrValue(json, UserAtts.gender)));
             }
             if (json.has(UserAtts.birthday)) {
                 Date bday;
-                try {
+                if (json.isNull(UserAtts.birthday)) {
+                    userAttributes.setBirthday(null);
+                } else try {
                     bday = DateTimeUtil.dateFromYMDString(json.optString(UserAtts.birthday));
                     userAttributes.setBirthday(bday);
                 } catch (ParseException e) {
-                    MobileMessagingLogger.e("Cannot parse user birthday: ", e);
+                    MobileMessagingLogger.e("Cannot parse user attributes birthday: ", e);
                 }
             }
             if (json.has(UserAtts.tags)) {
@@ -155,13 +164,17 @@ public class UserJson extends User {
 
         try {
             if (json.has(UserAtts.customAttributes)) {
-                java.lang.reflect.Type type = new TypeToken<Map<String, Object>>() {
-                }.getType();
-                Map<String, Object> customAttributes = new JsonSerializer().deserialize(json.optString(UserAtts.customAttributes), type);
-                if (!CustomAttributesMapper.validate(customAttributes)) {
-                    throw new IllegalArgumentException("Custom attributes are invalid.");
+                if (json.isNull(UserAtts.customAttributes)) {
+                    userAttributes.setCustomAttributes(null);
+                } else {
+                    java.lang.reflect.Type type = new TypeToken<Map<String, Object>>() {
+                    }.getType();
+                    Map<String, Object> customAttributes = new JsonSerializer().deserialize(json.optString(UserAtts.customAttributes), type);
+                    if (!CustomAttributesMapper.validate(customAttributes)) {
+                        throw new IllegalArgumentException("Custom attributes are invalid.");
+                    }
+                    userAttributes.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
                 }
-                userAttributes.setCustomAttributes(CustomAttributesMapper.customAttsFromBackend(customAttributes));
             }
         } catch (Exception e) {
             MobileMessagingLogger.e("Cannot parse user custom attributes: ", e);
@@ -174,7 +187,7 @@ public class UserJson extends User {
         UserIdentity userIdentity = new UserIdentity();
         try {
             if (json.has(UserAtts.externalUserId)) {
-                userIdentity.setExternalUserId(json.optString(UserAtts.externalUserId));
+                userIdentity.setExternalUserId(json.isNull(UserAtts.externalUserId) ? null : json.getString(UserAtts.externalUserId));
             }
             if (json.has(UserAtts.phones)) {
                 userIdentity.setPhones(jsonArrayFromJSONObjectToSet(json, UserAtts.phones));
@@ -191,11 +204,20 @@ public class UserJson extends User {
     private static Set<String> jsonArrayFromJSONObjectToSet(JSONObject jsonObject, String arrayName) {
         Set<String> set = new HashSet<>();
         JSONArray jsonArray = jsonObject.optJSONArray(arrayName);
-        if (jsonArray != null) {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                set.add(jsonArray.optString(i));
-            }
+
+        if (jsonArray == null || jsonArray.length() == 0) {
+            return null;
         }
-        return set;
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            if (!(jsonArray.isNull(i) || jsonArray.optString(i).isEmpty()))
+                set.add(jsonArray.optString(i));
+        }
+
+        return set.isEmpty() ? null : set;
+    }
+
+    private static String jsonNullOrValue(JSONObject json, String attribute) throws JSONException {
+        return json.isNull(attribute) ? null : json.getString(attribute);
     }
 }

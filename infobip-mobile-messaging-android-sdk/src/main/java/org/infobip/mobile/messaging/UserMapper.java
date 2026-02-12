@@ -10,6 +10,8 @@ package org.infobip.mobile.messaging;
 import android.os.Bundle;
 import android.util.Pair;
 
+import androidx.annotation.Nullable;
+
 import org.infobip.mobile.messaging.api.appinstance.AppInstance;
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
@@ -28,8 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import androidx.annotation.Nullable;
 
 
 public class UserMapper {
@@ -148,7 +148,7 @@ public class UserMapper {
     }
 
     private static List<Map<String, Object>> mapDestinationsToBackend(Set<String> destinations, String addressKey) {
-        if (destinations == null) {
+        if (destinations == null || destinations.isEmpty()) {
             return null;
         }
 

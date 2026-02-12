@@ -7,6 +7,18 @@
  */
 package org.infobip.mobile.messaging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.infobip.mobile.messaging.api.appinstance.UserAtts;
 import org.infobip.mobile.messaging.api.appinstance.UserBody;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
@@ -25,19 +37,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
-
 public class UserSyncTest extends MobileMessagingTestCase {
 
     private ArgumentCaptor<User> dataCaptor;
@@ -55,7 +54,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_user_data_fetch() throws Exception {
+    public void test_user_data_fetch() {
         mobileMessaging.fetchUser(resultListener);
 
         verify(mobileApiUserData, after(500).times(1)).getUser(anyString(), anyString());
@@ -85,7 +84,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_add_standard_atts() throws Exception {
+    public void test_add_standard_atts() {
         User givenUser = new User();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2000, 1, 1);
@@ -130,7 +129,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
 
         List<ListCustomAttributeItem> items = getListCustomValueItems();
         List<Map<String, Object>> listMap = new LinkedList<>();
-        for (ListCustomAttributeItem item: items) {
+        for (ListCustomAttributeItem item : items) {
             listMap.add(item.getMap());
         }
 
@@ -152,7 +151,7 @@ public class UserSyncTest extends MobileMessagingTestCase {
     }
 
     @Test
-    public void test_remove_custom_element() throws Exception {
+    public void test_remove_custom_element() {
 
         User givenUser = new User();
         givenUser.setCustomAttribute("myKey1", new CustomAttributeValue("Some string"));
