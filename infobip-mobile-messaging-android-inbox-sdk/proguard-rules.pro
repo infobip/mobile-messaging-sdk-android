@@ -22,3 +22,4 @@
 
 -keep class org.infobip.mobile.messaging.inbox.Inbox { *; }
 -keep class org.infobip.mobile.messaging.inbox.InboxMessage { *; }
+-keep class org.infobip.mobile.messaging.inbox.InboxDataMapper$** { *; }

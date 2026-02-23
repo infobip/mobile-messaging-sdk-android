@@ -31,11 +31,13 @@ public final class InboxDataMapper {
         }
 
         public String getTopic() {
-            return getInbox().getTopic();
+            Inbox inbox = getInbox();
+            return inbox != null ? inbox.getTopic() : null;
         }
 
         public boolean isSeen() {
-            return getInbox().isSeen();
+            Inbox inbox = getInbox();
+            return inbox != null && inbox.isSeen();
         }
 
         protected Inbox getInbox() {
@@ -81,7 +83,11 @@ public final class InboxDataMapper {
      */
     @Nullable
     public static String inboxTopicFromInternalData(String internalDataJson) {
-        return internalDataJson != null ? serializer.deserialize(internalDataJson, InboxData.class).getTopic() : null;
+        try {
+            return internalDataJson != null ? serializer.deserialize(internalDataJson, InboxData.class).getTopic() : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -91,6 +97,10 @@ public final class InboxDataMapper {
      * @return seen boolean
      */
     public static boolean inboxSeenFromInternalData(String internalDataJson) {
-        return internalDataJson != null && serializer.deserialize(internalDataJson, InboxData.class).isSeen();
+        try {
+            return internalDataJson != null && serializer.deserialize(internalDataJson, InboxData.class).isSeen();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
