@@ -41,12 +41,17 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
         private const val DEFAULT_WIDGET_URI = "https://livechat.infobip.com/widget.js"
     }
 
+    @Volatile
+    var isDestroyed: Boolean = false
+        private set
+
     private val widgetPageUri = context.getString(R.string.ib_livechat_widget_page_uri)
     private val widgetUri = context.getString(R.string.ib_livechat_widget_uri)
 
     var livechatWidgetClient: LivechatWidgetClient? = null
         private set
     var instanceId: String? = null
+        private set
 
     init {
         settings.apply {
@@ -60,9 +65,11 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
     }
 
     fun setup(
+        instanceId: InstanceId,
         webViewManager: LivechatWidgetWebViewManager,
         coroutineScope: CoroutineScope
     ) {
+        this.instanceId = instanceId
         webChromeClient = LivechatWidgetWebChromeClient(instanceId)
         webViewClient = LivechatWidgetWebViewClient(webViewManager, instanceId)
         addJavascriptInterface(LivechatWidgetJsInterfaceImpl(webViewManager, instanceId, coroutineScope), LivechatWidgetJsInterface.name)
@@ -110,5 +117,59 @@ internal class LivechatWidgetWebView @JvmOverloads constructor(
     }
 
     private fun String.encode(): String = Uri.encode(this)
+
+    override fun destroy() {
+        isDestroyed = true
+        super.destroy()
+    }
+
+    override fun loadUrl(url: String) {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring loadUrl call on destroyed WebView")
+            return
+        }
+        super.loadUrl(url)
+    }
+
+    override fun evaluateJavascript(script: String, resultCallback: android.webkit.ValueCallback<String?>?) {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring evaluateJavascript call on destroyed WebView")
+            resultCallback?.onReceiveValue(null)
+            return
+        }
+        super.evaluateJavascript(script, resultCallback)
+    }
+
+    override fun clearHistory() {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring clearHistory call on destroyed WebView")
+            return
+        }
+        super.clearHistory()
+    }
+
+    override fun clearCache(includeDiskFiles: Boolean) {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring clearCache call on destroyed WebView")
+            return
+        }
+        super.clearCache(includeDiskFiles)
+    }
+
+    override fun onResume() {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring onResume call on destroyed WebView")
+            return
+        }
+        super.onResume()
+    }
+
+    override fun onPause() {
+        if (isDestroyed) {
+            MobileMessagingLogger.w(instanceId?.tag(TAG), "Ignoring onPause call on destroyed WebView")
+            return
+        }
+        super.onPause()
+    }
 
 }

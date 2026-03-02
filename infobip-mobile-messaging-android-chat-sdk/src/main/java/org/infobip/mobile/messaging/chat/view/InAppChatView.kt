@@ -64,6 +64,7 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
 import org.infobip.mobile.messaging.chat.utils.LocalizationUtils
 import org.infobip.mobile.messaging.chat.utils.NetworkState
+import org.infobip.mobile.messaging.chat.utils.WebViewDataDirectoryHelper
 import org.infobip.mobile.messaging.chat.utils.hide
 import org.infobip.mobile.messaging.chat.utils.networkStateFlow
 import org.infobip.mobile.messaging.chat.utils.setProgressTint
@@ -100,14 +101,13 @@ class InAppChatView @JvmOverloads constructor(
     interface ErrorsHandler : InAppChatErrorsHandler
 
     companion object {
-        private const val CHAT_NOT_AVAILABLE_ANIM_DURATION_MILLIS = 500L
         private const val CHAT_SERVICE_ERROR = "12"
         private const val CHAT_WIDGET_NOT_FOUND = "24"
         private const val TAG = "InAppChatView"
     }
 
     private val connectivityManager: ConnectivityManager by lazy { context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
-    private val binding = IbViewChatBinding.inflate(LayoutInflater.from(context), this)
+    private val binding = inflateWithProcessLockHandling()
     private var style = StyleFactory.create(context, attributes).chatStyle()
     private val mmCore: MobileMessagingCore by lazy { MobileMessagingCore.getInstance(context) }
     private val inAppChat by lazy { InAppChat.getInstance(context) }
@@ -443,8 +443,8 @@ class InAppChatView @JvmOverloads constructor(
         }
 
         override fun onDestroy(owner: LifecycleOwner) {
+            (livechatWidgetApi as? LivechatWidgetApiImpl)?.release()
             binding.ibLcWebView.destroy()
-            livechatWidgetApi.eventsListener = null
             lifecycle?.removeObserver(this)
         }
     }
@@ -702,6 +702,27 @@ class InAppChatView @JvmOverloads constructor(
     //endregion
 
     //region Helpers
+    private fun inflateWithProcessLockHandling(): IbViewChatBinding {
+        return try {
+            IbViewChatBinding.inflate(LayoutInflater.from(context), this)
+        } catch (e: RuntimeException) {
+            val msg = e.message
+            if (msg != null && msg.contains("Using WebView from more than one process")) {
+                MobileMessagingLogger.w(TAG, "WebView multi-process lock during inflation, attempting cleanup...", e)
+                removeAllViews()
+                val cleaned = WebViewDataDirectoryHelper.cleanupStaleDataDirectory(context)
+                if (cleaned) {
+                    MobileMessagingLogger.d(TAG, "Retrying inflation after data directory cleanup...")
+                    IbViewChatBinding.inflate(LayoutInflater.from(context), this)
+                } else {
+                    throw e
+                }
+            } else {
+                throw e
+            }
+        }
+    }
+
     private fun hideSnackbar() {
         // the dismiss() fade out animation causes blinking, this alternative looks fine
         errorSnackbar?.view?.visibility = android.view.View.GONE

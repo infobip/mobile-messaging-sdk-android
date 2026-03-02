@@ -10,6 +10,8 @@ package org.infobip.mobile.messaging.chat.core.widget
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -32,12 +34,12 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import kotlin.coroutines.resume
 
 internal class LivechatWidgetApiImpl(
-    instanceId: InstanceId,
+    private val instanceId: InstanceId,
     private val webView: LivechatWidgetWebView,
     private val mmCore: MobileMessagingCore,
     private val inAppChat: InAppChat,
     private val propertyHelper: PropertyHelper,
-    private val coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope,
 ) : LivechatWidgetApi, LivechatWidgetWebViewManager {
 
     companion object {
@@ -47,14 +49,16 @@ internal class LivechatWidgetApiImpl(
         private const val LOADING_CHECK_INTERVAL_MS = 100L
     }
 
+    private val childJob = SupervisorJob(coroutineScope.coroutineContext[Job])
+    private val scope = CoroutineScope(Dispatchers.Main + childJob)
+
     init {
-        webView.instanceId = instanceId
-        webView.setup(this, coroutineScope)
+        webView.setup(instanceId, this, scope)
     }
 
     /**
      *  Widget loading coroutine continuation. It is used to control - resume/cancel widget loading coroutine.
-     *  @Volatile ensures visibility across threads. All writes must happen on [webViewDispatcher] (Main thread).
+     *  @Volatile ensures visibility across threads. All writes must happen on Main thread.
      */
     @Volatile
     private var widgetLoadingContinuation: CancellableContinuation<Boolean>? = null
@@ -68,14 +72,9 @@ internal class LivechatWidgetApiImpl(
 
     private val loadingMutex = Mutex()
 
-    /**
-     * All [webView] interactions must be executed on the same thread.
-     */
-    private val webViewDispatcher = Dispatchers.Main
-
     //region LivechatWidgetApi
     /**
-     * @Volatile ensures visibility across threads. All writes must happen on [webViewDispatcher] (Main thread).
+     * @Volatile ensures visibility across threads. All writes must happen on Main thread.
      */
     @Volatile
     override var isWidgetLoaded: Boolean = false
@@ -104,7 +103,7 @@ internal class LivechatWidgetApiImpl(
         theme: String?,
         language: LivechatWidgetLanguage?,
     ) {
-        coroutineScope.launch(webViewDispatcher) {
+        scope.launch {
             runCatching {
                 loadWidgetInternal(
                     providedWidgetId = widgetId,
@@ -186,7 +185,7 @@ internal class LivechatWidgetApiImpl(
     }
 
     override fun reset() {
-        coroutineScope.launch(webViewDispatcher) {
+        scope.launch {
             val result = LivechatWidgetResult.Success(false)
             val handled = resumeWidgetLoadingContinuation(result)
             if (!handled) {
@@ -213,25 +212,36 @@ internal class LivechatWidgetApiImpl(
             openNewThread(listener)
         }
     }
+
+    /**
+     * Releases resources held by this instance.
+     * Cancels all pending coroutines and removes the events listener.
+     * Must be called before the associated [webView] is destroyed to prevent
+     * coroutines from executing on a destroyed WebView.
+     */
+    internal fun release() {
+        eventsListener = null
+        childJob.cancel()
+    }
     //endregion
 
     //region internal helpers
     /**
-     * Sets widget loading continuation. All writes are dispatched to [webViewDispatcher] (Main thread).
+     * Sets widget loading continuation. All writes are dispatched to Main thread.
      * Since Main dispatcher is single-threaded, this ensures thread-safe writes.
      */
     private fun setContinuation(continuation: CancellableContinuation<Boolean>?) {
-        coroutineScope.launch(webViewDispatcher) {
+        scope.launch {
             widgetLoadingContinuation = continuation
         }
     }
 
     /**
-     * Updates [isWidgetLoaded] flag. All writes are dispatched to [webViewDispatcher] (Main thread).
+     * Updates [isWidgetLoaded] flag. All writes are dispatched to Main thread.
      * Since Main dispatcher is single-threaded, this ensures thread-safe writes.
      */
     private fun updateWidgetLoaded(loaded: Boolean) {
-        coroutineScope.launch(webViewDispatcher) {
+        scope.launch {
             isWidgetLoaded = loaded
         }
     }
@@ -259,7 +269,7 @@ internal class LivechatWidgetApiImpl(
                 pushRegId.isNullOrBlank() -> throw InAppChatException.MissingPushRegistrationId()
                 widgetId.isNullOrBlank() -> throw InAppChatException.MissingLivechatWidgetId()
                 isWidgetLoadingInProgress -> {
-                    MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), "Another widget loading is in progress.")
+                    MobileMessagingLogger.d(instanceId.tag(LivechatWidgetApi.TAG), "Another widget loading is in progress.")
                     withTimeout(loadingTimeoutMillis) {
                         while (isActive && isWidgetLoadingInProgress) {
                             delay(LOADING_CHECK_INTERVAL_MS)
@@ -339,8 +349,8 @@ internal class LivechatWidgetApiImpl(
     private fun onWidgetLoadingFinished(result: LivechatWidgetResult<Boolean>) {
         updateWidgetLoaded(result.getOrNull() == true)
         when (result) {
-            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(webView.instanceId.tag(LivechatWidgetApi.TAG), "Widget loading error:", result.throwable)
-            is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(webView.instanceId.tag(LivechatWidgetApi.TAG), if (result.payload) "Widget successfully loaded." else "Widget has been reset and is no longer loaded.")
+            is LivechatWidgetResult.Error -> MobileMessagingLogger.e(instanceId.tag(LivechatWidgetApi.TAG), "Widget loading error:", result.throwable)
+            is LivechatWidgetResult.Success<Boolean> -> MobileMessagingLogger.d(instanceId.tag(LivechatWidgetApi.TAG), if (result.payload) "Widget successfully loaded." else "Widget has been reset and is no longer loaded.")
         }
         propagateEvent { onLoadingFinished(result) }
     }
@@ -352,7 +362,7 @@ internal class LivechatWidgetApiImpl(
         method: LivechatWidgetMethod,
         apiCall: LivechatWidgetClient.(ExecutionListener<String>) -> Unit,
     ) {
-        coroutineScope.launch(webViewDispatcher) {
+        scope.launch {
             runCatching {
                 runCatching {
                     loadWidgetInternal()
@@ -401,7 +411,7 @@ internal class LivechatWidgetApiImpl(
 
     override fun onWidgetViewChanged(widgetView: LivechatWidgetView) {
         if (!isWidgetLoaded && widgetView != LivechatWidgetView.LOADING) {
-            coroutineScope.launch {
+            scope.launch {
                 resumeWidgetLoadingContinuation(LivechatWidgetResult.Success(true))
             }
         }
@@ -478,7 +488,7 @@ internal class LivechatWidgetApiImpl(
      */
     private fun propagateEvent(action: LivechatWidgetEventsListener.() -> Unit) {
         eventsListener?.let { listener ->
-            coroutineScope.launch(Dispatchers.Main) {
+            scope.launch {
                 listener.action()
             }
         }

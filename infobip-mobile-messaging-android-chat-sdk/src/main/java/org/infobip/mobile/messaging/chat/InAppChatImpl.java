@@ -42,6 +42,7 @@ import org.infobip.mobile.messaging.chat.mobileapi.LivechatWidgetConfigSynchroni
 import org.infobip.mobile.messaging.chat.models.ContextualData;
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
+import org.infobip.mobile.messaging.chat.utils.WebViewDataDirectoryHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
 import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
@@ -86,6 +87,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public void init(Context appContext) {
         this.context = appContext;
+        WebViewDataDirectoryHelper.INSTANCE.cleanupStaleDataDirectoryIfNeeded(appContext);
     }
 
     @Override
@@ -501,16 +503,39 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     // region private functions
     synchronized private LivechatWidgetApi livechatWidgetApi() {
         if (lcWidgetApi == null) {
-            lcWidgetApi = new LivechatWidgetApiImpl(
-                    LivechatWidgetApi.INSTANCE_ID_LC_WIDGET_API,
-                    new LivechatWidgetWebView(context),
-                    mobileMessagingCore(),
-                    this,
-                    propertyHelper(),
-                    sessionStorage().getScope()
-            );
+            lcWidgetApi = createLivechatWidgetApi();
         }
         return lcWidgetApi;
+    }
+
+    // java
+    private LivechatWidgetApi createLivechatWidgetApi() {
+        LivechatWidgetWebView webView = createWebViewWithProcessLockHandling();
+        return new LivechatWidgetApiImpl(
+                LivechatWidgetApi.INSTANCE_ID_LC_WIDGET_API,
+                webView,
+                mobileMessagingCore(),
+                this,
+                propertyHelper(),
+                sessionStorage().getScope()
+        );
+    }
+
+    private LivechatWidgetWebView createWebViewWithProcessLockHandling() {
+        try {
+            return new LivechatWidgetWebView(context);
+        } catch (RuntimeException e) {
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("Using WebView from more than one process")) {
+                MobileMessagingLogger.w(TAG, "WebView multi-process lock on first creation, attempting cleanup...", e);
+                boolean cleaned = WebViewDataDirectoryHelper.INSTANCE.cleanupStaleDataDirectory(context);
+                if (cleaned) {
+                    MobileMessagingLogger.d(TAG, "Retrying WebView creation after data directory cleanup...");
+                    return new LivechatWidgetWebView(context);
+                }
+            }
+            throw e;
+        }
     }
 
     synchronized private AndroidBroadcaster coreBroadcaster() {
