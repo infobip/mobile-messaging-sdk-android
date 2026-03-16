@@ -224,6 +224,7 @@ internal class CallViewModel : ViewModel() {
             _localTrackToBeRemoved.tryEmit(it)
         }
     }
+
     fun emitRemoteTrackToRemove() {
         state.value.remoteVideoTrack?.let {
             _remoteTrackToBeRemoved.tryEmit(it)

@@ -24,6 +24,10 @@ import com.infobip.webrtc.sdk.api.event.call.DialogJoinedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStartedEvent
 import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
+import com.infobip.webrtc.sdk.api.event.call.MachineDetectionFailedEvent
+import com.infobip.webrtc.sdk.api.event.call.MachineDetectionFinishedEvent
+import com.infobip.webrtc.sdk.api.event.call.MessageReceivedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantBlindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
@@ -38,6 +42,7 @@ import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantStoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnblindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
@@ -45,84 +50,72 @@ import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
 import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.StartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.StoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.TalkingWhileMutedEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
 
 internal open class DefaultRtcUiCallEventListener : RtcUiCallEventListener {
+    // Call core events
     override fun onRinging(callRingingEvent: CallRingingEvent?) {}
-
     override fun onEarlyMedia(callEarlyMediaEvent: CallEarlyMediaEvent?) {}
-
     override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {}
-
     override fun onHangup(callHangupEvent: CallHangupEvent?) {}
-
     override fun onError(errorCode: ErrorCode?) {}
-
-    override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {}
-
-    override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {}
-
-    override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {}
-
-    override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {}
-
-    override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {}
-
-    override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {}
-
-    override fun onConferenceLeft(conferenceLeftEvent: ConferenceLeftEvent?) {}
-
-    override fun onParticipantJoining(participantJoiningEvent: ParticipantJoiningEvent?) {}
-
-    override fun onParticipantJoined(participantJoinedEvent: ParticipantJoinedEvent?) {}
-
-    override fun onParticipantLeft(participantLeftEvent: ParticipantLeftEvent?) {}
-
-    override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {}
-
-    override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {}
-
-    override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {}
-
-    override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {}
-
-    override fun onParticipantMuted(participantMutedEvent: ParticipantMutedEvent?) {}
-
-    override fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?) {}
-
-    override fun onParticipantDeafen(participantDeafEvent: ParticipantDeafEvent?) {}
-
-    override fun onParticipantUndeafen(participantUndeafEvent: ParticipantUndeafEvent?) {}
-
-    override fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?) {}
-
-    override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {}
-
-    override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {}
-
-    override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {}
-
-    override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
-
-    override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
-
-    override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {}
-
-    override fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?) {}
-
-    override fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?) {}
-
-    override fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?) {}
-
-    override fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?) {}
-
-    override fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?) {}
-
+    override fun onRoleChanged(roleChangedEvent: RoleChangedEvent?) {}
+    override fun onMessageReceived(messageReceivedEvent: MessageReceivedEvent?) {}
     override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {}
-
     override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {}
 
-    override fun onRoleChanged(roleChangedEvent: RoleChangedEvent?) {}
+    // Call recording
+    override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {}
+    override fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?) {}
 
+    // Local talking
+    override fun onTalkingWhileMuted(talkingWhileMutedEvent: TalkingWhileMutedEvent?) {}
+    override fun onStartedTalking(startedTalkingEvent: StartedTalkingEvent?) {}
+    override fun onStoppedTalking(stoppedTalkingEvent: StoppedTalkingEvent?) {}
+
+    // Local media
+    override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {}
+    override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {}
+    override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {}
+    override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {}
+    override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {}
+
+    // Conference
+    override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {}
+    override fun onConferenceLeft(conferenceLeftEvent: ConferenceLeftEvent?) {}
+    override fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?) {}
+    override fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?) {}
+
+    // Participant
+    override fun onParticipantJoining(participantJoiningEvent: ParticipantJoiningEvent?) {}
+    override fun onParticipantJoined(participantJoinedEvent: ParticipantJoinedEvent?) {}
+    override fun onParticipantLeft(participantLeftEvent: ParticipantLeftEvent?) {}
+    override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {}
+    override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {}
+    override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {}
+    override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {}
+    override fun onParticipantMuted(participantMutedEvent: ParticipantMutedEvent?) {}
+    override fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?) {}
+    override fun onParticipantDeafen(participantDeafEvent: ParticipantDeafEvent?) {}
+    override fun onParticipantUndeafen(participantUndeafEvent: ParticipantUndeafEvent?) {}
+    override fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?) {}
+    override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {}
+    override fun onParticipantBlinded(participantBlindedEvent: ParticipantBlindedEvent?) {}
+    override fun onParticipantUnblinded(participantUnblindedEvent: ParticipantUnblindedEvent?) {}
+    override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {}
+    override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {}
     override fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?) {}
+
+    // Dialog
+    override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {}
+    override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {}
+    override fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?) {}
+    override fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?) {}
+
+    // Machine detection
+    override fun onMachineDetectionFinished(machineDetectionFinishedEvent: MachineDetectionFinishedEvent?) {}
+    override fun onMachineDetectionFailed(machineDetectionFailedEvent: MachineDetectionFailedEvent?) {}
 }

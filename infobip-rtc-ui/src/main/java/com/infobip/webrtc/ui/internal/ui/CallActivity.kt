@@ -28,24 +28,52 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.infobip.webrtc.sdk.api.event.call.CallEarlyMediaEvent
 import com.infobip.webrtc.sdk.api.event.call.CallEstablishedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallHangupEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.CallRecordingStoppedEvent
 import com.infobip.webrtc.sdk.api.event.call.CallRingingEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoRemovedEvent
 import com.infobip.webrtc.sdk.api.event.call.CameraVideoUpdatedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.ConferenceRecordingStoppedEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogLeftEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStartedEvent
+import com.infobip.webrtc.sdk.api.event.call.DialogRecordingStoppedEvent
+import com.infobip.webrtc.sdk.api.event.call.MachineDetectionFailedEvent
+import com.infobip.webrtc.sdk.api.event.call.MachineDetectionFinishedEvent
+import com.infobip.webrtc.sdk.api.event.call.MessageReceivedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantBlindedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantCameraVideoRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantDeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantDisconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantJoinedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantJoiningEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantLeftEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantMutedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantReconnectedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantRoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantStartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantStoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUnblindedEvent
+import com.infobip.webrtc.sdk.api.event.call.ParticipantUndeafEvent
 import com.infobip.webrtc.sdk.api.event.call.ParticipantUnmutedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectedEvent
 import com.infobip.webrtc.sdk.api.event.call.ReconnectingEvent
+import com.infobip.webrtc.sdk.api.event.call.RoleChangedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareAddedEvent
 import com.infobip.webrtc.sdk.api.event.call.ScreenShareRemovedEvent
+import com.infobip.webrtc.sdk.api.event.call.StartedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.StoppedTalkingEvent
+import com.infobip.webrtc.sdk.api.event.call.TalkingWhileMutedEvent
 import com.infobip.webrtc.sdk.api.model.ErrorCode
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.RtcUiCallErrorMapper
@@ -274,77 +302,20 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
     private fun listenCallEvents() {
         viewModel.setEventListener(object : DefaultRtcUiCallEventListener() {
 
-            override fun onError(errorCode: ErrorCode?) {
-                val message = errorMapper.getMessageForError(RtcUiError(errorCode ?: ErrorCode.UNKNOWN))
-                viewModel.onError(message)
-            }
-
-            override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {
-                viewModel.emitLocalTrackToRemove()
-                viewModel.updateState { copy(localVideoTrack = cameraVideoAddedEvent?.track) }
-            }
-
-            override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {
-                viewModel.emitLocalTrackToRemove()
-                viewModel.updateState { copy(localVideoTrack = cameraVideoUpdatedEvent?.track) }
-            }
-
-            override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {
-                viewModel.emitLocalTrackToRemove()
-                viewModel.updateState { copy(localVideoTrack = null) }
-            }
-
-            override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
-                viewModel.updateState { copy(isLocalScreenShare = true) }
-            }
-
-            override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
-                viewModel.updateState { copy(isLocalScreenShare = false) }
-            }
-
-            override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {
-                viewModel.emitRemoteTrackToRemove()
-                viewModel.updateState { copy(remoteVideoTrack = participantCameraVideoAddedEvent?.track) }
-            }
-
-            override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {
-                viewModel.emitRemoteTrackToRemove()
-                viewModel.updateState { copy(remoteVideoTrack = null, showControls = true) }
-            }
-
-            override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {
-                viewModel.emitScreenShareTrackToRemove()
-                viewModel.updateState { copy(screenShareTrack = participantScreenShareAddedEvent?.track) }
-            }
-
-            override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {
-                viewModel.emitScreenShareTrackToRemove()
-                viewModel.updateState { copy(screenShareTrack = null, showControls = true) }
-            }
-
-            override fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?) {
-                viewModel.updateState { copy(isPeerMuted = false) }
-            }
-
-            override fun onParticipantMuted(participantMutedEvent: ParticipantMutedEvent?) {
-                viewModel.updateState { copy(isPeerMuted = true) }
-            }
-
-            override fun onParticipantLeft(participantLeftEvent: ParticipantLeftEvent?) {
-                viewModel.updateState { copy(isFinished = true) }
-            }
-
-            override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {
-                viewModel.updateState { copy(isFinished = true) }
-            }
-
+            //region Call core events
             override fun onRinging(callRingingEvent: CallRingingEvent?) {
+                RtcUiLogger.d("onRinging")
                 runOnUiThread {
                     ActiveCallService.start(applicationContext, CallAction.CALL_RINGING)
                 }
             }
 
+            override fun onEarlyMedia(callEarlyMediaEvent: CallEarlyMediaEvent?) {
+                RtcUiLogger.d("onEarlyMedia")
+            }
+
             override fun onEstablished(callEstablishedEvent: CallEstablishedEvent?) {
+                RtcUiLogger.d("onEstablished")
                 viewModel.updateState { copy(isEstablished = true) }
                 runOnUiThread {
                     ActiveCallService.start(applicationContext, CallAction.CALL_ESTABLISHED)
@@ -352,11 +323,27 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onHangup(callHangupEvent: CallHangupEvent?) {
+                RtcUiLogger.d("onHangup")
                 val message = errorMapper.getMessageForError(RtcUiError(callHangupEvent?.errorCode ?: ErrorCode.UNKNOWN))
                 viewModel.updateState { copy(isFinished = true, error = message) }
             }
 
+            override fun onError(errorCode: ErrorCode?) {
+                RtcUiLogger.d("onError")
+                val message = errorMapper.getMessageForError(RtcUiError(errorCode ?: ErrorCode.UNKNOWN))
+                viewModel.onError(message)
+            }
+
+            override fun onRoleChanged(roleChangedEvent: RoleChangedEvent?) {
+                RtcUiLogger.d("onRoleChanged")
+            }
+
+            override fun onMessageReceived(messageReceivedEvent: MessageReceivedEvent?) {
+                RtcUiLogger.d("onMessageReceived")
+            }
+
             override fun onReconnecting(reconnectingEvent: ReconnectingEvent?) {
+                RtcUiLogger.d("onReconnecting")
                 viewModel.updateState { copy(callAlert = CallAlert.Mode.Reconnecting) }
                 runOnUiThread {
                     ActiveCallService.start(applicationContext, CallAction.CALL_RECONNECTING)
@@ -364,11 +351,197 @@ class CallActivity : AppCompatActivity(R.layout.activity_call) {
             }
 
             override fun onReconnected(reconnectedEvent: ReconnectedEvent?) {
+                RtcUiLogger.d("onReconnected")
                 viewModel.updateState { copy(callAlert = null) }
                 runOnUiThread {
                     ActiveCallService.start(applicationContext, CallAction.CALL_RECONNECTED)
                 }
             }
+            //endregion
+
+            //region Call recording
+            override fun onCallRecordingStarted(callRecordingStarted: CallRecordingStartedEvent?) {
+                RtcUiLogger.d("onCallRecordingStarted")
+            }
+
+            override fun onCallRecordingStopped(callRecordingStoppedEvent: CallRecordingStoppedEvent?) {
+                RtcUiLogger.d("onCallRecordingStopped")
+            }
+            //endregion
+
+            //region Local talking
+            override fun onTalkingWhileMuted(talkingWhileMutedEvent: TalkingWhileMutedEvent?) {
+                RtcUiLogger.d("onTalkingWhileMuted")
+            }
+
+            override fun onStartedTalking(startedTalkingEvent: StartedTalkingEvent?) {
+                RtcUiLogger.d("onStartedTalking")
+            }
+
+            override fun onStoppedTalking(stoppedTalkingEvent: StoppedTalkingEvent?) {
+                RtcUiLogger.d("onStoppedTalking")
+            }
+            //endregion
+
+            //region Local media
+            override fun onCameraVideoAdded(cameraVideoAddedEvent: CameraVideoAddedEvent?) {
+                RtcUiLogger.d("onCameraVideoAdded")
+                viewModel.emitLocalTrackToRemove()
+                viewModel.updateState { copy(localVideoTrack = cameraVideoAddedEvent?.track) }
+            }
+
+            override fun onCameraVideoUpdated(cameraVideoUpdatedEvent: CameraVideoUpdatedEvent?) {
+                RtcUiLogger.d("onCameraVideoUpdated")
+                viewModel.emitLocalTrackToRemove()
+                viewModel.updateState { copy(localVideoTrack = cameraVideoUpdatedEvent?.track) }
+            }
+
+            override fun onCameraVideoRemoved(cameraVideoRemovedEvent: CameraVideoRemovedEvent?) {
+                RtcUiLogger.d("onCameraVideoRemoved")
+                viewModel.emitLocalTrackToRemove()
+                viewModel.updateState { copy(localVideoTrack = null) }
+            }
+
+            override fun onScreenShareAdded(screenShareAddedEvent: ScreenShareAddedEvent?) {
+                RtcUiLogger.d("onScreenShareAdded")
+                viewModel.updateState { copy(isLocalScreenShare = true) }
+            }
+
+            override fun onScreenShareRemoved(screenShareRemovedEvent: ScreenShareRemovedEvent?) {
+                RtcUiLogger.d("onScreenShareRemoved")
+                viewModel.updateState { copy(isLocalScreenShare = false) }
+            }
+            //endregion
+
+            //region Conference
+            override fun onConferenceJoined(conferenceJoinedEvent: ConferenceJoinedEvent?) {
+                RtcUiLogger.d("onConferenceJoined")
+            }
+
+            override fun onConferenceLeft(conferenceLeftEvent: ConferenceLeftEvent?) {
+                RtcUiLogger.d("onConferenceLeft")
+            }
+
+            override fun onConferenceRecordingStarted(conferenceRecordingStartedEvent: ConferenceRecordingStartedEvent?) {
+                RtcUiLogger.d("onConferenceRecordingStarted")
+            }
+
+            override fun onConferenceRecordingStopped(conferenceRecordingStoppedEvent: ConferenceRecordingStoppedEvent?) {
+                RtcUiLogger.d("onConferenceRecordingStopped")
+            }
+            //endregion
+
+            //region Participant
+            override fun onParticipantJoining(participantJoiningEvent: ParticipantJoiningEvent?) {
+                RtcUiLogger.d("onParticipantJoining")
+            }
+
+            override fun onParticipantJoined(participantJoinedEvent: ParticipantJoinedEvent?) {
+                RtcUiLogger.d("onParticipantJoined")
+            }
+
+            override fun onParticipantLeft(participantLeftEvent: ParticipantLeftEvent?) {
+                RtcUiLogger.d("onParticipantLeft")
+            }
+
+            override fun onParticipantCameraVideoAdded(participantCameraVideoAddedEvent: ParticipantCameraVideoAddedEvent?) {
+                RtcUiLogger.d("onParticipantCameraVideoAdded")
+                viewModel.emitRemoteTrackToRemove()
+                viewModel.updateState { copy(remoteVideoTrack = participantCameraVideoAddedEvent?.track) }
+            }
+
+            override fun onParticipantCameraVideoRemoved(participantCameraVideoRemovedEvent: ParticipantCameraVideoRemovedEvent?) {
+                RtcUiLogger.d("onParticipantCameraVideoRemoved")
+                viewModel.emitRemoteTrackToRemove()
+                viewModel.updateState { copy(remoteVideoTrack = null, showControls = true) }
+            }
+
+            override fun onParticipantScreenShareAdded(participantScreenShareAddedEvent: ParticipantScreenShareAddedEvent?) {
+                RtcUiLogger.d("onParticipantScreenShareAdded")
+                viewModel.emitScreenShareTrackToRemove()
+                viewModel.updateState { copy(screenShareTrack = participantScreenShareAddedEvent?.track) }
+            }
+
+            override fun onParticipantScreenShareRemoved(participantScreenShareRemovedEvent: ParticipantScreenShareRemovedEvent?) {
+                RtcUiLogger.d("onParticipantScreenShareRemoved")
+                viewModel.emitScreenShareTrackToRemove()
+                viewModel.updateState { copy(screenShareTrack = null, showControls = true) }
+            }
+
+            override fun onParticipantMuted(participantMutedEvent: ParticipantMutedEvent?) {
+                RtcUiLogger.d("onParticipantMuted")
+                viewModel.updateState { copy(isPeerMuted = true) }
+            }
+
+            override fun onParticipantUnmuted(participantUnmutedEvent: ParticipantUnmutedEvent?) {
+                RtcUiLogger.d("onParticipantUnmuted")
+                viewModel.updateState { copy(isPeerMuted = false) }
+            }
+
+            override fun onParticipantDeafen(participantDeafEvent: ParticipantDeafEvent?) {
+                RtcUiLogger.d("onParticipantDeafen")
+            }
+
+            override fun onParticipantUndeafen(participantUndeafEvent: ParticipantUndeafEvent?) {
+                RtcUiLogger.d("onParticipantUndeafen")
+            }
+
+            override fun onParticipantStartedTalking(participantStartedTalkingEvent: ParticipantStartedTalkingEvent?) {
+                RtcUiLogger.d("onParticipantStartedTalking")
+            }
+
+            override fun onParticipantStoppedTalking(participantStoppedTalkingEvent: ParticipantStoppedTalkingEvent?) {
+                RtcUiLogger.d("onParticipantStoppedTalking")
+            }
+
+            override fun onParticipantBlinded(participantBlindedEvent: ParticipantBlindedEvent?) {
+                RtcUiLogger.d("onParticipantBlinded")
+            }
+
+            override fun onParticipantUnblinded(participantUnblindedEvent: ParticipantUnblindedEvent?) {
+                RtcUiLogger.d("onParticipantUnblinded")
+            }
+
+            override fun onParticipantDisconnected(participantDisconnectedEvent: ParticipantDisconnectedEvent?) {
+                RtcUiLogger.d("onParticipantDisconnected")
+            }
+
+            override fun onParticipantReconnected(participantReconnectedEvent: ParticipantReconnectedEvent?) {
+                RtcUiLogger.d("onParticipantReconnected")
+            }
+
+            override fun onParticipantRoleChanged(participantRoleChangedEvent: ParticipantRoleChangedEvent?) {
+                RtcUiLogger.d("onParticipantRoleChanged")
+            }
+            //endregion
+
+            //region Dialog
+            override fun onDialogJoined(dialogJoinedEvent: DialogJoinedEvent?) {
+                RtcUiLogger.d("onDialogJoined")
+            }
+
+            override fun onDialogLeft(dialogLeftEvent: DialogLeftEvent?) {
+                RtcUiLogger.d("onDialogLeft")
+            }
+
+            override fun onDialogRecordingStarted(dialogRecordingStartedEvent: DialogRecordingStartedEvent?) {
+                RtcUiLogger.d("onDialogRecordingStarted")
+            }
+
+            override fun onDialogRecordingStopped(dialogRecordingStoppedEvent: DialogRecordingStoppedEvent?) {
+                RtcUiLogger.d("onDialogRecordingStopped")
+            }
+            //endregion
+
+            //region Machine detection
+            override fun onMachineDetectionFinished(machineDetectionFinishedEvent: MachineDetectionFinishedEvent?) {
+                RtcUiLogger.d("onMachineDetectionFinished")
+            }
+
+            override fun onMachineDetectionFailed(machineDetectionFailedEvent: MachineDetectionFailedEvent?) {
+                RtcUiLogger.d("onMachineDetectionFailed")
+            }
+            //endregion
         })
     }
 

@@ -86,7 +86,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.10.1"
     implementation "com.google.android.material:material:$mm_materialVersion"
 
-    api ("com.infobip:infobip-rtc:2.5.19") {
+    api ("com.infobip:infobip-rtc:2.5.28") {
         transitive = true
     }
 
