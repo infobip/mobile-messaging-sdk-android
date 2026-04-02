@@ -75,6 +75,7 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     private final ActivityWrapper activityWrapper;
     private InAppWebViewMessage message;
     private static int PAGE_LOAD_PROGRESS = 0;
+    private boolean shown = false;
     ConnectionTimeoutHandler timeoutHandler = null;
     View dialogView;
     CardView cardView;
@@ -83,7 +84,10 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         this.callback = callback;
         this.activityWrapper = activityWrapper;
         displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        Activity activity = getActivity();
+        if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
+            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        }
         coreBroadcaster();
     }
 
@@ -208,6 +212,11 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         } else {
             try {
                 getActivity().runOnUiThread(() -> {
+                    if (getActivity().isFinishing() || getActivity().isDestroyed()) {
+                        MobileMessagingLogger.w(TAG, "Activity is finishing/destroyed when trying to show WebView dialog. Dismissing.");
+                        callback.dismissed(InAppWebViewDialog.this);
+                        return;
+                    }
                     LayoutInflater inflater = getActivity().getLayoutInflater();
                     dialogView = inflater.inflate(R.layout.ib_inapp_webview, null, false);
 
@@ -315,6 +324,11 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 MobileMessagingLogger.d(TAG, "onPageCommitVisible()");
+                if (getActivity().isFinishing() || getActivity().isDestroyed()) {
+                    MobileMessagingLogger.w(TAG, "Activity is finishing/destroyed in onPageCommitVisible. Cleaning up.");
+                    cleanupOnShowFailure();
+                    return;
+                }
                 if (message.type == InAppWebViewMessage.InAppWebViewType.BANNER)
                     webView.loadUrl("javascript:window.InfobipMobileMessaging.readBodyHeight()");
                 if (isBanner())
@@ -418,22 +432,47 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
     }
 
     private void showWebViewDialog(View dialogView, InAppWebViewPosition position, InAppWebViewMessage.InAppWebViewType type) {
-        switch (type) {
-            case BANNER:
-                if (position == InAppWebViewPosition.TOP)
-                    popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 0);
-                else
-                    popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-                break;
-            case FULLSCREEN:
-                popupWindow.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
-                popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
-                break;
-            default:
-                popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+        Activity activity = getActivity();
+        if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+            MobileMessagingLogger.w(TAG, "Cannot show in-app dialog - activity is not in a valid state");
+            cleanupOnShowFailure();
+            return;
+        }
+
+        try {
+            switch (type) {
+                case BANNER:
+                    if (position == InAppWebViewPosition.TOP)
+                        popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 0);
+                    else
+                        popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+                    break;
+                case FULLSCREEN:
+                    popupWindow.setHeight(WindowManager.LayoutParams.MATCH_PARENT);
+                    popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+                    break;
+                default:
+                    popupWindow.showAtLocation(dialogView, Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL, 0, 0);
+            }
+            shown = true;
+        } catch (WindowManager.BadTokenException e) {
+            MobileMessagingLogger.w(TAG, "Cannot show in-app dialog - window token is no longer valid", e);
+            cleanupOnShowFailure();
+            return;
         }
 
         setMessageSeen();
+    }
+
+    private void cleanupOnShowFailure() {
+        setActivityLifecycleListener(null);
+        if (webView != null) {
+            webView.destroy();
+        }
+        if (popupWindow != null && popupWindow.isShowing()) {
+            popupWindow.dismiss();
+        }
+        callback.dismissed(this);
     }
 
     private void setMessageSeen() {
@@ -452,6 +491,11 @@ public class InAppWebViewDialog implements InAppWebView, ActivityLifecycleListen
         final ActivityLifecycleMonitor activityLifecycleMonitor = MobileMessagingCore.getInstance(getActivity()).getActivityLifecycleMonitor();
         if (getActivity() != null && activityLifecycleMonitor != null)
             activityLifecycleMonitor.activityListener = listener;
+    }
+
+    @Override
+    public boolean wasShown() {
+        return shown;
     }
 
     private boolean isBanner() {

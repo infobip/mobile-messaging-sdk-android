@@ -9,12 +9,15 @@ package org.infobip.mobile.messaging.interactive.inapp;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.OpenLivechatAction;
+import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.app.ActivityStarterWrapper;
 import org.infobip.mobile.messaging.app.ContentIntentWrapper;
 import org.infobip.mobile.messaging.interactive.MobileInteractive;
@@ -48,6 +51,9 @@ import androidx.annotation.VisibleForTesting;
  */
 
 public class InAppNotificationHandlerImpl implements InAppNotificationHandler, InAppView.Callback {
+    private static final String TAG = "[InAppNotificationHandler]";
+    private static final int RETRY_DELAY_MS = 500;
+    private static final int MAX_WEBVIEW_RETRIES = 3;
     private final MobileInteractive mobileInteractive;
     private final InAppViewFactory inAppViewFactory;
     private final InAppRules inAppRules;
@@ -57,6 +63,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     private final ActivityStarterWrapper activityStarterWrapper;
     private final MessageHandlerModule inAppChatModule;
     private ContentIntentWrapper contentIntentWrapper;
+    private InAppWebViewMessage pendingWebViewMessage;
+    private int webViewRetryCount = 0;
 
     @VisibleForTesting
     InAppNotificationHandlerImpl(MobileInteractive mobileInteractive, InAppViewFactory inAppViewFactory, InAppRules inAppRules, OneMessageCache oneMessageCache, DialogStack dialogStack,
@@ -158,6 +166,8 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
         }
 
         if (displayingEnabled) {
+            pendingWebViewMessage = message;
+            webViewRetryCount = 0;
             dialogStack.add(createInAppWebCtx(message, showOrNot));
         } else {
             interactiveBroadcaster.inAppNotificationIsReadyToDisplay(message);
@@ -236,5 +246,17 @@ public class InAppNotificationHandlerImpl implements InAppNotificationHandler, I
     @Override
     public void dismissed(@NonNull InAppView inAppView) {
         dialogStack.remove(inAppView);
+        if (inAppView instanceof InAppWebView) {
+            InAppWebView webView = (InAppWebView) inAppView;
+            if (!webView.wasShown() && pendingWebViewMessage != null && webViewRetryCount < MAX_WEBVIEW_RETRIES) {
+                MobileMessagingLogger.w(TAG, "InApp WebView dismissed without being shown. Re-caching message for retry " + (webViewRetryCount + 1) + "/" + MAX_WEBVIEW_RETRIES);
+                oneMessageCache.save(pendingWebViewMessage);
+                webViewRetryCount++;
+                new Handler(Looper.getMainLooper()).postDelayed(this::appWentToForeground, RETRY_DELAY_MS);
+            } else {
+                webViewRetryCount = 0;
+            }
+        }
+        pendingWebViewMessage = null;
     }
 }

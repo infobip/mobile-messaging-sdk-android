@@ -14,4 +14,6 @@ import androidx.annotation.NonNull;
 
 public interface InAppWebView extends InAppView {
     void show(@NonNull InAppWebViewMessage message, @NonNull NotificationAction... actions);
+
+    boolean wasShown();
 }

@@ -331,6 +331,40 @@ public class InAppNotificationHandlerImplTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void shouldRecacheWebViewMessageWhenDismissedWithoutBeingShown() {
+        InAppWebViewMessage webViewMessage = inAppWebViewMessage(InAppWebViewMessage.InAppWebViewPosition.TOP, InAppWebViewMessage.InAppWebViewType.POPUP);
+        NotificationAction[] actions = actions();
+        ShowOrNot showOrNot = ShowOrNot.showNow(null, actions, activity);
+
+        when(inAppRules.shouldDisplayDialogFor(any(InAppWebViewMessage.class))).thenReturn(showOrNot);
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
+        when(inAppViewFactory.create(eq(activity), any(InAppView.Callback.class), eq(webViewMessage))).thenReturn(inAppWebView);
+        when(inAppWebView.wasShown()).thenReturn(false);
+
+        inAppNotificationHandler.handleMessage(webViewMessage);
+        inAppNotificationHandler.dismissed(inAppWebView);
+
+        verify(oneMessageCache, times(1)).save(eq(webViewMessage));
+    }
+
+    @Test
+    public void shouldNotRecacheWebViewMessageWhenDismissedAfterBeingShown() {
+        InAppWebViewMessage webViewMessage = inAppWebViewMessage(InAppWebViewMessage.InAppWebViewPosition.TOP, InAppWebViewMessage.InAppWebViewType.POPUP);
+        NotificationAction[] actions = actions();
+        ShowOrNot showOrNot = ShowOrNot.showNow(null, actions, activity);
+
+        when(inAppRules.shouldDisplayDialogFor(any(InAppWebViewMessage.class))).thenReturn(showOrNot);
+        when(inAppRules.areModalInAppNotificationsEnabled()).thenReturn(true);
+        when(inAppViewFactory.create(eq(activity), any(InAppView.Callback.class), eq(webViewMessage))).thenReturn(inAppWebView);
+        when(inAppWebView.wasShown()).thenReturn(true);
+
+        inAppNotificationHandler.handleMessage(webViewMessage);
+        inAppNotificationHandler.dismissed(inAppWebView);
+
+        verify(oneMessageCache, never()).save(any(Message.class));
+    }
+
+    @Test
     public void shouldClearDialogStackWhenEntersForeground() {
         inAppNotificationHandler.appWentToForeground();
 
