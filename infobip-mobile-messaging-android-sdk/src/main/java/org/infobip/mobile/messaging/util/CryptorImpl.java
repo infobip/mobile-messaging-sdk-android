@@ -64,12 +64,17 @@ public class CryptorImpl extends Cryptor {
             return null;
         }
 
-        byte[] encrypted = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
-        byte[] decrypted = decodeAES128(encrypted);
-        if (decrypted == null) {
+        try {
+            byte[] encrypted = Base64.decode(encryptedBase64Data, Base64.DEFAULT);
+            byte[] decrypted = decodeAES128(encrypted);
+            if (decrypted == null) {
+                return null;
+            }
+            return new String(decrypted);
+        } catch (Exception e) {
+            MobileMessagingLogger.e("Data decryption failed.", e);
             return null;
         }
-        return new String(decrypted);
     }
 
     private byte[] encodeAES128(byte[] data) {

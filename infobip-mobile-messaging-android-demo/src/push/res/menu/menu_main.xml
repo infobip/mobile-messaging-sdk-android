@@ -33,6 +33,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_personalize"
+        android:title="@string/menu_action_personalize"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_depersonalize"
         android:title="@string/menu_action_depersonalize"
         app:showAsAction="never" />

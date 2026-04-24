@@ -125,6 +125,26 @@ public class PreferenceHelperTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void test_selfHealingDecrypt_removesUnreadableEntry() throws Exception {
+        // Write encrypted value with current cryptor
+        PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "TestRegId");
+        assertTrue(PreferenceHelper.contains(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
+        assertEquals("TestRegId", PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID));
+
+        // Tamper with the encrypted value to simulate unreadable data (e.g. different ANDROID_ID after restore)
+        Cryptor cryptor = new CryptorImpl(DeviceInformation.getDeviceID(context));
+        String encryptedKey = cryptor.encrypt(MobileMessagingProperty.INFOBIP_REGISTRATION_ID.getKey());
+        PreferenceHelper.getDefaultMMSharedPreferences(context).edit()
+                .putString(encryptedKey, "corrupted_base64_data_that_cannot_be_decrypted")
+                .commit();
+
+        // Self-healing: should return default (null) and remove the stale entry
+        String result = PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID);
+        assertNull(result);
+        assertFalse(PreferenceHelper.getDefaultMMSharedPreferences(context).contains(encryptedKey));
+    }
+
+    @Test
     public void test_shouldFindAndRemoveDeviceInstanceIdAsEncryptedProperty() throws Exception {
         PreferenceHelper.saveString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID, "StubStringValue");
 

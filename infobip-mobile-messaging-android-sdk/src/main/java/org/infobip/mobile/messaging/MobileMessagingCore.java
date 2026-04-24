@@ -2400,6 +2400,7 @@ public class MobileMessagingCore
 
         private void cleanupLibraryDataIfAppCodeWasChanged(Context applicationContext) {
             PreferenceHelper.migrateCryptorIfNeeded(applicationContext, oldCryptor);
+            reconcileLostInstallationIdentity(applicationContext);
             String existingApplicationCodeHash = MobileMessagingCore.getStoredApplicationCodeHash(applicationContext);
             if (shouldSaveApplicationCode(applicationContext)) {
                 String existingApplicationCode = MobileMessagingCore.getStoredApplicationCode(applicationContext);
@@ -2420,6 +2421,55 @@ public class MobileMessagingCore
                     }
                 }
             }
+        }
+    }
+
+    static void reconcileLostInstallationIdentity(Context context) {
+        if (PreferenceHelper.findString(context, MobileMessagingProperty.INFOBIP_REGISTRATION_ID) != null) {
+            MobileMessagingLogger.d("Reconciliation: installation identity valid, skipping");
+            return;
+        }
+        if (PreferenceHelper.findString(context, MobileMessagingProperty.CLOUD_TOKEN) != null) {
+            MobileMessagingLogger.d("Reconciliation: cloud token present, skipping");
+            return;
+        }
+        if (!PreferenceHelper.contains(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED)
+                && !PreferenceHelper.contains(context, MobileMessagingProperty.UNIVERSAL_INSTALLATION_ID)) {
+            MobileMessagingLogger.d("Reconciliation: no existing installation state, skipping");
+            return;
+        }
+
+        MobileMessagingLogger.w("Reconciliation: installation identity lost, resetting dependent state");
+        PreferenceHelper.remove(context, MobileMessagingProperty.CLOUD_TOKEN_REPORTED);
+        PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_PUSH_SERVICE_TYPE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNIVERSAL_INSTALLATION_ID);
+        PreferenceHelper.remove(context, MobileMessagingProperty.MOBILE_CARRIER_NAME);
+        PreferenceHelper.remove(context, MobileMessagingProperty.MOBILE_COUNTRY_CODE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.MOBILE_NETWORK_CODE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.SIM_CARRIER_NAME);
+        PreferenceHelper.remove(context, MobileMessagingProperty.SIM_COUNTRY_CODE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.SIM_NETWORK_CODE);
+        PreferenceHelper.remove(context, MobileMessagingProperty.UNREPORTED_SYSTEM_DATA);
+        PreferenceHelper.remove(context, MobileMessagingProperty.REPORTED_SYSTEM_DATA_HASH);
+        PreferenceHelper.remove(context, MobileMessagingProperty.SYSTEM_DATA_VERSION_POSTFIX);
+
+        reflagPreservedState(context);
+    }
+
+    private static void reflagPreservedState(Context context) {
+        if (PreferenceHelper.findString(context, MobileMessagingProperty.APP_USER_ID) != null) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_APP_USER_ID_UNREPORTED, true);
+        }
+        if (PreferenceHelper.contains(context, MobileMessagingProperty.PUSH_REGISTRATION_ENABLED)) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.UNREPORTED_PUSH_REGISTRATION_ENABLED, true);
+        }
+        if (PreferenceHelper.contains(context, MobileMessagingProperty.IS_PRIMARY)) {
+            PreferenceHelper.saveBoolean(context, MobileMessagingProperty.IS_PRIMARY_UNREPORTED,
+                    PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_PRIMARY));
+        }
+        String customAttributes = PreferenceHelper.findString(context, MobileMessagingProperty.CUSTOM_ATTRIBUTES);
+        if (customAttributes != null) {
+            PreferenceHelper.saveString(context, MobileMessagingProperty.UNREPORTED_CUSTOM_ATTRIBUTES, customAttributes);
         }
     }
 }

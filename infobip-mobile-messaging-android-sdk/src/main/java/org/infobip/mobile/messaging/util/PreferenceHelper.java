@@ -87,8 +87,20 @@ public abstract class PreferenceHelper {
         }
 
         String encryptedKey = cryptor.encrypt(key);
-        String encryptedValue = sharedPreferences.getString(encryptedKey, defaultValue);
-        return cryptor.decrypt(encryptedValue);
+        String encryptedValue = sharedPreferences.getString(encryptedKey, null);
+        if (encryptedValue == null) {
+            // Intentionally null, not defaultValue: the old code path passed defaultValue
+            // into decrypt(), which returned null for blank/null input. All callers of
+            // encrypted properties expect null when the key is absent.
+            return null;
+        }
+        String decrypted = cryptor.decrypt(encryptedValue);
+        if (decrypted == null) {
+            MobileMessagingLogger.w("Removing unreadable encrypted preference for key: " + key);
+            sharedPreferences.edit().remove(encryptedKey).apply();
+            return defaultValue;
+        }
+        return decrypted;
     }
 
     public static void saveString(Context context, MobileMessagingProperty property, String value) {
