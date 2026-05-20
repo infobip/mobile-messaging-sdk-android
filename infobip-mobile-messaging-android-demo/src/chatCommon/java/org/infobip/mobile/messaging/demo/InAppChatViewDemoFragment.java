@@ -29,6 +29,7 @@ import org.infobip.mobile.messaging.chat.models.MessagePayload;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -198,6 +199,12 @@ public class InAppChatViewDemoFragment extends Fragment {
             @Override
             public void onChatAttachmentPreviewOpened(@Nullable String url, @Nullable String type, @Nullable String caption) {
                 MobileMessagingLogger.d(TAG, "On chat attachment preview opened: url=" + url + ", type=" + type + ", caption=" + caption);
+            }
+
+            @Override
+            public boolean onChatUrlInteracted(@NotNull String url) {
+                MobileMessagingLogger.d(TAG, "On chat url interacted: " + url);
+                return false;
             }
         };
         inAppChatView.setEventsListener(eventsListener);

@@ -7,6 +7,9 @@
  */
 package org.infobip.mobile.messaging.chat.core.widget
 
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+
 /**
  * Interface provides WebView events together with events from Livechat Widget.
  */
@@ -19,4 +22,5 @@ internal interface LivechatWidgetWebViewManager {
     fun onWidgetRawMessageReceived(message: String?)
     fun onWidgetApiError(method: LivechatWidgetMethod, errorPayload: String?)
     fun onWidgetApiSuccess(method: LivechatWidgetMethod, successPayload: String?)
+    fun onWidgetUrlInteracted(webView: WebView?, request: WebResourceRequest?)
 }

@@ -113,6 +113,20 @@ interface LivechatWidgetEventsListener {
      */
     fun onRawMessageReceived(message: String?)
 
+    /**
+     * Called when a URL inside the livechat widget was interacted.
+     *
+     * Use this to intercept URL interactions at the raw widget level.
+     *
+     * Return `true` if you handled URL interaction.
+     * Return `false` to let the SDK handle it: `http`/`https` URLs are opened via
+     * [android.content.Intent.ACTION_VIEW]; other schemes are discarded.
+     *
+     * @param url the URL being interacted with
+     * @return `true` if the URL was handled, `false` otherwise
+     */
+    fun onWidgetUrlInteracted(url: String?): Boolean
+
 }
 
 /**
@@ -127,6 +141,7 @@ open class DefaultLivechatWidgetEventsListener : LivechatWidgetEventsListener {
     override fun onAttachmentPreviewOpened(url: String?, type: String?, caption: String?) {}
     override fun onWidgetViewChanged(view: LivechatWidgetView) {}
     override fun onRawMessageReceived(message: String?) {}
+    override fun onWidgetUrlInteracted(url: String?): Boolean = false
     override fun onThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {}
     override fun onActiveThreadReceived(result: LivechatWidgetResult<LivechatWidgetThread?>) {}
     override fun onThreadCreated(result: LivechatWidgetResult<LivechatWidgetMessage?>) {}

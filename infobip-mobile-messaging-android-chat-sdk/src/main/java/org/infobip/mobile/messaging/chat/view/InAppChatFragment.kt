@@ -336,7 +336,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
      *
      * @param data contextual data in the form of JSON string
      * @param flag multithread strategy [MultithreadStrategy]
-     * @see [InAppChatFragment.EventsListener.onChatLoaded] to detect if chat is loaded
+     * @see [InAppChatFragment.EventsListener.onChatLoadingFinished] to detect if chat is loaded
      */
     fun sendContextualData(data: String, flag: MultithreadStrategy) {
         withBinding(
@@ -612,6 +612,10 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
 
             override fun onChatRawMessageReceived(rawMessage: String) {
                 eventsListener?.onChatRawMessageReceived(rawMessage)
+            }
+
+            override fun onChatUrlInteracted(url: String): Boolean {
+                return eventsListener?.onChatUrlInteracted(url) ?: false
             }
         }
         binding.ibLcChat.errorsHandler = object : InAppChatView.ErrorsHandler {

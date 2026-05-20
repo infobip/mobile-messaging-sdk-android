@@ -111,6 +111,23 @@ interface InAppChatEventsListener {
      */
     fun onChatRawMessageReceived(rawMessage: String)
 
+    /**
+     * Called when a URL inside the chat was interacted.
+     *
+     * Allows the host application to intercept and handle URL clicks from the chat
+     * (e.g. to open a deep link, an in-app browser, or a custom flow).
+     *
+     * Return `true` if you handled URL interaction.
+     * Return `false` to let the SDK handle it: `http`/`https` URLs are opened via
+     * [android.content.Intent.ACTION_VIEW]; other schemes are discarded.
+     *
+     * Only called for non-blank URLs.
+     *
+     * @param url the non-blank URL being interacted with
+     * @return `true` if the URL was handled by the caller, `false` otherwise
+     */
+    fun onChatUrlInteracted(url: String): Boolean
+
 }
 
 /**
@@ -134,6 +151,7 @@ open class DefaultInAppChatEventsListener : InAppChatEventsListener {
     override fun onChatThreadShown(result: LivechatWidgetResult<LivechatWidgetThread>) {}
     override fun onChatThreadListShown(result: LivechatWidgetResult<Unit>) {}
     override fun onChatLanguageChanged(result: LivechatWidgetResult<String?>) {}
+    override fun onChatUrlInteracted(url: String): Boolean = false
 }
 
 /**
@@ -159,6 +177,7 @@ open class DefaultInAppChatFragmentEventsListener : InAppChatFragment.EventsList
     override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
     override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
     override fun onChatRawMessageReceived(rawMessage: String) {}
+    override fun onChatUrlInteracted(url: String): Boolean = false
 }
 
 /**
@@ -183,4 +202,5 @@ open class DefaultInAppChatViewEventsListener : InAppChatView.EventsListener {
     override fun onChatViewChanged(widgetView: LivechatWidgetView) {}
     override fun onChatWidgetInfoUpdated(widgetInfo: WidgetInfo) {}
     override fun onChatRawMessageReceived(rawMessage: String) {}
+    override fun onChatUrlInteracted(url: String): Boolean = false
 }

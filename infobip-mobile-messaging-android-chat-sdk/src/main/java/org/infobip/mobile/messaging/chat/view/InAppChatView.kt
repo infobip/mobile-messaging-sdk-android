@@ -282,7 +282,7 @@ class InAppChatView @JvmOverloads constructor(
      *
      * @param data contextual data in the form of JSON string
      * @param flag multithread strategy [MultithreadStrategy]
-     * @see [InAppChatView.EventsListener.onChatLoaded] to detect if chat is loaded
+     * @see [InAppChatView.EventsListener.onChatLoadingFinished] to detect if chat is loaded
      */
     fun sendContextualData(data: String, flag: MultithreadStrategy) {
         if (isWidgetLoaded) {
@@ -567,6 +567,11 @@ class InAppChatView @JvmOverloads constructor(
         override fun onRawMessageReceived(message: String?) {
             if (message?.isNotBlank() == true)
                 eventsListener?.onChatRawMessageReceived(message)
+        }
+
+        override fun onWidgetUrlInteracted(url: String?): Boolean {
+            if (url.isNullOrBlank()) return false
+            return eventsListener?.onChatUrlInteracted(url) ?: false
         }
 
         override fun onThreadsReceived(result: LivechatWidgetResult<LivechatWidgetThreads>) {

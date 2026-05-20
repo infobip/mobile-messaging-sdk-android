@@ -7,14 +7,12 @@
  */
 package org.infobip.mobile.messaging.chat.core.widget
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.webkit.SslErrorHandler
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.core.net.toUri
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 
 internal class LivechatWidgetWebViewClient(
@@ -47,16 +45,7 @@ internal class LivechatWidgetWebViewClient(
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        val url = request?.url?.toString()
-        return if (url != null && (url.startsWith("http://") || url.startsWith("https://"))) {
-            runCatching {
-                view?.context?.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                true
-            }.onFailure { throwable ->
-                MobileMessagingLogger.e(instanceId.tag(TAG), "Could not open URL.", throwable)
-            }.getOrDefault(false)
-        } else {
-            false
-        }
+        widgetWebViewManager.onWidgetUrlInteracted(view, request)
+        return true //mark as handled = never override localhost chat page url
     }
 }

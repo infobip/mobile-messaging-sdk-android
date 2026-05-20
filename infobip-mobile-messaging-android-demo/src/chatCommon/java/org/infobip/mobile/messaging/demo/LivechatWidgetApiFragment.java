@@ -129,6 +129,12 @@ public class LivechatWidgetApiFragment extends Fragment {
         livechatWidgetApi.setEventsListener(new LivechatWidgetEventsListener() {
 
             @Override
+            public boolean onWidgetUrlInteracted(@Nullable String url) {
+                addLog("onWidgetUrlInteracted: " , url);
+                return false;
+            }
+
+            @Override
             public void onSent(@NonNull LivechatWidgetResult<? extends LivechatWidgetMessage> result) {
                 addLog("onSent result: ", result.toString());
             }

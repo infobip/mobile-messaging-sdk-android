@@ -169,6 +169,10 @@ class InAppChatActivity : AppCompatActivity() {
             override fun onChatRawMessageReceived(rawMessage: String) {
                 activityEventsListener?.onChatRawMessageReceived(rawMessage)
             }
+
+            override fun onChatUrlInteracted(url: String): Boolean {
+                return activityEventsListener?.onChatUrlInteracted(url) ?: false
+            }
         }
     }
 

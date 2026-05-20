@@ -65,6 +65,7 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import kotlin.Unit;
 
@@ -75,7 +76,7 @@ import kotlin.Unit;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TAG = "DemoApp";
+    private final String TAG = "DemoApp-MainActivity";
     private final String EXTRA_AUTH_DATA = "org.infobip.mobile.messaging.demo.MainActivity.EXTRA_AUTH_DATA";
     /**
      * Widget ID
@@ -429,6 +430,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChatConnectionPaused(@NonNull LivechatWidgetResult<Unit> result) {
                 MobileMessagingLogger.d(TAG, "On chat connection paused: " + result);
+            }
+
+            @Override
+            public boolean onChatUrlInteracted(@NotNull String url) {
+                MobileMessagingLogger.d(TAG, "On chat url interacted: " + url);
+                return false;
             }
 
         };
