@@ -20,6 +20,7 @@ public class PersonalizationCtx {
     public UserAttributes userAttributes;
     public boolean forceDepersonalize;
     public boolean keepAsLead;
+    public boolean setDeviceAsPrimary;
 
     public static PersonalizationCtx resolvePersonalizationCtx(JSONObject args) throws JSONException, IllegalArgumentException {
         if (args == null) {
@@ -31,6 +32,7 @@ public class PersonalizationCtx {
         ctx.userIdentity = UserJson.userIdentityFromJSON(args.getJSONObject("userIdentity"));
         ctx.userAttributes = UserJson.userAttributesFromJSON(args.optJSONObject("userAttributes"));
         ctx.keepAsLead = args.optBoolean("keepAsLead", false);
+        ctx.setDeviceAsPrimary = args.optBoolean("setDeviceAsPrimary", false);
         return ctx;
     }
 }

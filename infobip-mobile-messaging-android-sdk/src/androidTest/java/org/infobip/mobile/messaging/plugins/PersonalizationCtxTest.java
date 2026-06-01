@@ -10,6 +10,7 @@ package org.infobip.mobile.messaging.plugins;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,9 +26,19 @@ public class PersonalizationCtxTest {
 
         assertFalse(personalizationCtx.forceDepersonalize);
         assertFalse(personalizationCtx.keepAsLead);
+        assertFalse(personalizationCtx.setDeviceAsPrimary);
         assertEquals("someId", personalizationCtx.userIdentity.getExternalUserId());
         assertNull(personalizationCtx.userAttributes);
         assertNull(personalizationCtx.userIdentity.getPhones());
         assertNull(personalizationCtx.userIdentity.getEmails());
+    }
+
+    @Test
+    public void should_resolve_set_device_as_primary_when_provided() throws JSONException {
+        JSONObject json = new JSONObject("{\"userIdentity\":{\"externalUserId\":\"someId\"},\"setDeviceAsPrimary\":true}");
+
+        PersonalizationCtx personalizationCtx = PersonalizationCtx.resolvePersonalizationCtx(json);
+
+        assertTrue(personalizationCtx.setDeviceAsPrimary);
     }
 }

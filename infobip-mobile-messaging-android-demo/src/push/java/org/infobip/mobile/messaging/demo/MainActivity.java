@@ -126,6 +126,18 @@ public class MainActivity extends AppCompatActivity {
                 actionPersonalize();
                 return true;
 
+            case R.id.action_personalize_force:
+                actionPersonalizeForce();
+                return true;
+
+            case R.id.action_personalize_keep_as_lead:
+                actionPersonalizeKeepAsLead();
+                return true;
+
+            case R.id.action_personalize_set_as_primary:
+                actionPersonalizeSetAsPrimary();
+                return true;
+
             case R.id.action_depersonalize:
                 actionDepersonalize();
                 return true;
@@ -203,22 +215,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void actionPersonalize() {
+        showPersonalizeDialog((userIdentity, param) ->
+                mobileMessaging.personalize(userIdentity, null, false, personalizeListener(param)));
+    }
+
+    private void actionPersonalizeForce() {
+        showPersonalizeDialog((userIdentity, param) ->
+                mobileMessaging.personalize(userIdentity, null, true, personalizeListener(param)));
+    }
+
+    private void actionPersonalizeKeepAsLead() {
+        showPersonalizeDialog((userIdentity, param) ->
+                mobileMessaging.personalize(userIdentity, null, false, true, personalizeListener(param)));
+    }
+
+    private void actionPersonalizeSetAsPrimary() {
+        showPersonalizeDialog((userIdentity, param) ->
+                mobileMessaging.personalize(userIdentity, null, false, false, true, personalizeListener(param)));
+    }
+
+    private void showPersonalizeDialog(PersonalizeAction action) {
         User user = mobileMessaging.getUser();
         String currentExtUserId = user != null ? user.getExternalUserId() : "";
         showDialog(R.string.dialog_title_personalize, currentExtUserId != null ? currentExtUserId : "", param -> {
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setExternalUserId(param);
-            mobileMessaging.personalize(userIdentity, null, false, new MobileMessaging.ResultListener<User>() {
-                @Override
-                public void onResult(Result<User, MobileMessagingError> result) {
-                    if (result.isSuccess()) {
-                        Toast.makeText(MainActivity.this, "Personalized: " + param, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Failed: " + result.getError().getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
+            action.run(userIdentity, param);
         });
+    }
+
+    private MobileMessaging.ResultListener<User> personalizeListener(String param) {
+        return new MobileMessaging.ResultListener<User>() {
+            @Override
+            public void onResult(Result<User, MobileMessagingError> result) {
+                if (result.isSuccess()) {
+                    Toast.makeText(MainActivity.this, "Personalized: " + param, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Failed: " + result.getError().getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+    }
+
+    private interface PersonalizeAction {
+        void run(UserIdentity userIdentity, String extUserId);
     }
 
     private void actionDepersonalize() {

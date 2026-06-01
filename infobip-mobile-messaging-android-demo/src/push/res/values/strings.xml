@@ -19,6 +19,9 @@
     <string name="menu_action_enable_primary">Enable primary</string>
     <string name="menu_action_disable_primary">Disable primary</string>
     <string name="menu_action_personalize">Personalize</string>
+    <string name="menu_action_personalize_force">Personalize (force depersonalize)</string>
+    <string name="menu_action_personalize_keep_as_lead">Personalize (keep as lead)</string>
+    <string name="menu_action_personalize_set_as_primary">Personalize (set as primary)</string>
     <string name="menu_action_depersonalize">Depersonalize</string>
 
     <!-- Dialogs -->

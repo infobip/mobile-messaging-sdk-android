@@ -15,16 +15,19 @@ class PersonalizeOperationData {
     private final Map<String, Object> userAttributes;
     private final Boolean forceDepersonalize;
     private final Boolean keepAsLead;
+    private final Boolean setDeviceAsPrimary;
 
     PersonalizeOperationData(
             Map<String, Object> userIdentity,
             Map<String, Object> userAttributes,
             Boolean forceDepersonalize,
-            Boolean keepAsLead) {
+            Boolean keepAsLead,
+            Boolean setDeviceAsPrimary) {
         this.userIdentity = userIdentity;
         this.userAttributes = userAttributes;
         this.forceDepersonalize = forceDepersonalize;
         this.keepAsLead = keepAsLead;
+        this.setDeviceAsPrimary = setDeviceAsPrimary;
     }
 
     @Override
@@ -33,7 +36,8 @@ class PersonalizeOperationData {
                 deepHashMap(userIdentity),
                 deepHashMap(userAttributes),
                 forceDepersonalize,
-                keepAsLead
+                keepAsLead,
+                setDeviceAsPrimary
         );
     }
 
@@ -45,6 +49,7 @@ class PersonalizeOperationData {
         PersonalizeOperationData other = (PersonalizeOperationData) obj;
         return Objects.equals(forceDepersonalize, other.forceDepersonalize) &&
                 Objects.equals(keepAsLead, other.keepAsLead) &&
+                Objects.equals(setDeviceAsPrimary, other.setDeviceAsPrimary) &&
                 deepEquals(userIdentity, other.userIdentity) &&
                 deepEquals(userAttributes, other.userAttributes);
     }

@@ -25,6 +25,7 @@ public interface MobileApiUserData {
                      @Header(name = "Authorization") String accessToken,
                      @Query(name = "forceDepersonalize", value = "false") boolean forceDepersonalize,
                      @Query(name = "keepAsLead", value = "false") boolean keepAsLead,
+                     @Query(name = "setDeviceAsPrimary", value = "false") boolean setDeviceAsPrimary,
                      @Body UserPersonalizeBody userPersonalizeBody);
 
     @HttpRequest(method = HttpMethod.POST, value = "{regId}/repersonalize")

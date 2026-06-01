@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
@@ -72,7 +73,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         //given
         UserIdentity userIdentity = givenIdentity();
 
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBodyEmpty());
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBodyEmpty());
 
         //when
         mobileMessaging.personalize(userIdentity, null, true, userResultListener);
@@ -115,7 +116,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         userBody.setLastName(newLastName);
         userBody.setGender(String.valueOf(newGender));
 
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
 
         //when
         mobileMessaging.personalize(userIdentity, userAttributes, true, userResultListener);
@@ -142,7 +143,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         //given
         givenUserData();
         UserIdentity userIdentity = givenIdentity();
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
 
         //when
         mobileMessaging.personalize(userIdentity, null, false, userResultListener);
@@ -177,7 +178,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //given
         doThrow(new ApiIOException(ApiErrorCode.PERSONALIZATION_IMPOSSIBLE, "Personalize impossible"))
-                .when(mobileApiUserData).personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any(UserPersonalizeBody.class));
+                .when(mobileApiUserData).personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any(UserPersonalizeBody.class));
         UserIdentity userIdentity = new UserIdentity();
         userIdentity.setExternalUserId(givenExternalUserId);
 
@@ -196,7 +197,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //given
         doThrow(new ApiIOException(ApiErrorCode.AMBIGUOUS_PERSONALIZE_CANDIDATES, "Ambiguous personalize candidates"))
-                .when(mobileApiUserData).personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any(UserPersonalizeBody.class));
+                .when(mobileApiUserData).personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any(UserPersonalizeBody.class));
         UserIdentity userIdentity = new UserIdentity();
         userIdentity.setExternalUserId(givenExternalUserId);
 
@@ -284,7 +285,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         UserIdentity userIdentity = givenIdentity();
         Date newBirthday = dateFromYMDString("١٩٨٩-١١-٢١");
 
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
 
         UserAttributes userAttributes = new UserAttributes();
         userAttributes.setBirthday(newBirthday);
@@ -314,7 +315,7 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
         UserBody userBody = userBody();
         userBody.setLastName("D'Uh");
 
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBody);
 
 
         //when
@@ -330,11 +331,39 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void test_personalize_with_set_as_primary_sends_query_param() throws Exception {
+        //given
+        UserIdentity userIdentity = givenIdentity();
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBodyEmpty());
+
+        //when
+        mobileMessaging.personalize(userIdentity, null, false, false, true, userResultListener);
+
+        //then
+        verify(mobileApiUserData, timeout(1000).times(1))
+                .personalize(anyString(), anyString(), eq(false), eq(false), eq(true), any(UserPersonalizeBody.class));
+    }
+
+    @Test
+    public void test_personalize_without_set_as_primary_omits_query_param() throws Exception {
+        //given
+        UserIdentity userIdentity = givenIdentity();
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBodyEmpty());
+
+        //when
+        mobileMessaging.personalize(userIdentity, null, false, userResultListener);
+
+        //then
+        verify(mobileApiUserData, timeout(1000).times(1))
+                .personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), eq(false), any(UserPersonalizeBody.class));
+    }
+
+    @Test
     public void test_debounced_second_identical_personalize() {
         //given
         givenUserData();
         UserIdentity userIdentity = givenIdentity();
-        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
+        given(mobileApiUserData.personalize(anyString(), anyString(), anyBoolean(), anyBoolean(), anyBoolean(), any())).willReturn(userBody());
 
         //when
         mobileMessaging.personalize(userIdentity, null, false, userResultListener);

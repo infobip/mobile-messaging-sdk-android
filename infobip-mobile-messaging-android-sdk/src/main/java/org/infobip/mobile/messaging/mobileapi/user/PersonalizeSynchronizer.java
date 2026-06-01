@@ -70,7 +70,7 @@ public class PersonalizeSynchronizer {
         this.debouncingGuard = debouncingGuard;
     }
 
-    public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, boolean keepAsLead, final MobileMessaging.ResultListener<User> listener) {
+    public void personalize(final UserIdentity userIdentity, final UserAttributes userAttributes, final boolean forceDepersonalize, boolean keepAsLead, boolean setDeviceAsPrimary, final MobileMessaging.ResultListener<User> listener) {
         try {
             UserDataValidator.validate(userIdentity);
             UserDataValidator.validate(userAttributes);
@@ -94,7 +94,8 @@ public class PersonalizeSynchronizer {
                 userIdentity != null ? userIdentity.getMap() : null,
                 userAttributes != null ? userAttributes.getMap() : null,
                 forceDepersonalize,
-                keepAsLead
+                keepAsLead,
+                setDeviceAsPrimary
         );
 
         if (!debouncingGuard.shouldAllow(personalize, opData)) {
@@ -110,7 +111,6 @@ public class PersonalizeSynchronizer {
         if (userAttributes != null && userAttributes.hasDataToReport()) {
             userPersonalizeBody.setUserAttributes(userAttributes.getMap());
         }
-
         String header = getAuthorizationHeader(mobileMessagingCore, listener);
         if (header == null) {
             return;
@@ -121,7 +121,7 @@ public class PersonalizeSynchronizer {
             @Override
             public UserBody run(UserPersonalizeBody[] userPersonalizeBodies) {
                 MobileMessagingLogger.v("PERSONALIZE >>>", userPersonalizeBody);
-                UserBody userResponse = mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, userPersonalizeBody);
+                UserBody userResponse = mobileApiUserData.personalize(mobileMessagingCore.getPushRegistrationId(), header, forceDepersonalize, keepAsLead, setDeviceAsPrimary, userPersonalizeBody);
                 MobileMessagingLogger.v("PERSONALIZE USER DATA <<<", userResponse != null ? userResponse.toString() : null);
                 return userResponse;
             }
@@ -284,6 +284,7 @@ public class PersonalizeSynchronizer {
         PersonalizeOperationData opData = new PersonalizeOperationData(
                 userPersonalizeBody.getUserIdentity(),
                 userPersonalizeBody.getUserAttributes(),
+                null,
                 null,
                 null
         );

@@ -38,6 +38,21 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/action_personalize_force"
+        android:title="@string/menu_action_personalize_force"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_personalize_keep_as_lead"
+        android:title="@string/menu_action_personalize_keep_as_lead"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_personalize_set_as_primary"
+        android:title="@string/menu_action_personalize_set_as_primary"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_depersonalize"
         android:title="@string/menu_action_depersonalize"
         app:showAsAction="never" />
