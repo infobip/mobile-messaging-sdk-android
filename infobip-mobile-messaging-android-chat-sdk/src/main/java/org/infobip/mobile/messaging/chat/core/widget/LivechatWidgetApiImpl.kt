@@ -50,6 +50,8 @@ internal class LivechatWidgetApiImpl(
         private const val MIN_LOADING_TIMEOUT_MS = 5 * 1000L
         private const val MAX_LOADING_TIMEOUT_MS = 5 * 60 * 1000L
         private const val LOADING_CHECK_INTERVAL_MS = 100L
+
+        private val loadingMutex = Mutex()
     }
 
     private val childJob = SupervisorJob(coroutineScope.coroutineContext[Job])
@@ -72,8 +74,6 @@ internal class LivechatWidgetApiImpl(
      * Listener for the result of [openNewThread] method. [LivechatWidgetEventsListener] is not used as [openNewThread] is a special internal only function.
      */
     private var openNewThreadResultListener: ((LivechatWidgetResult<Unit>) -> Unit)? = null
-
-    private val loadingMutex = Mutex()
 
     //region LivechatWidgetApi
     /**
