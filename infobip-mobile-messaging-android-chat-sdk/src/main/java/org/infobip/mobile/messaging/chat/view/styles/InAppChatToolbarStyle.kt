@@ -88,22 +88,22 @@ import org.infobip.mobile.messaging.chat.view.styles.InAppChatToolbarStyle.Compa
  * @see createChatAttachmentStyle for attachment toolbar creation
  */
 data class InAppChatToolbarStyle @JvmOverloads constructor(
-    @ColorInt val toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor,
-    @ColorInt val statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor,
+    @field:ColorInt val toolbarBackgroundColor: Int = Defaults.toolbarBackgroundColor,
+    @field:ColorInt val statusBarBackgroundColor: Int = Defaults.statusBarBackgroundColor,
     val lightStatusBarIcons: Boolean = Defaults.lightStatusBarIcons,
     val navigationIcon: Drawable? = null,
-    @ColorInt val navigationIconTint: Int = Defaults.navigationIconTint,
+    @field:ColorInt val navigationIconTint: Int = Defaults.navigationIconTint,
     val saveAttachmentMenuItemIcon: Drawable? = null,
-    @ColorInt val menuItemsIconTint: Int = Defaults.menuItemsIconTint,
-    @StyleRes val titleTextAppearance: Int? = null,
-    @ColorInt val titleTextColor: Int = Defaults.titleTextColor,
+    @field:ColorInt val menuItemsIconTint: Int = Defaults.menuItemsIconTint,
+    @field:StyleRes val titleTextAppearance: Int? = null,
+    @field:ColorInt val titleTextColor: Int = Defaults.titleTextColor,
     val titleText: String? = null,
-    @StringRes val titleTextRes: Int? = null,
+    @field:StringRes val titleTextRes: Int? = null,
     val isTitleCentered: Boolean = Defaults.isTitleCentered,
-    @StyleRes val subtitleTextAppearance: Int? = null,
-    @ColorInt val subtitleTextColor: Int = Defaults.subtitleTextColor,
+    @field:StyleRes val subtitleTextAppearance: Int? = null,
+    @field:ColorInt val subtitleTextColor: Int = Defaults.subtitleTextColor,
     val subtitleText: String? = null,
-    @StringRes val subtitleTextRes: Int? = null,
+    @field:StringRes val subtitleTextRes: Int? = null,
     val isSubtitleCentered: Boolean = Defaults.isSubtitleCentered
 ) {
     /**

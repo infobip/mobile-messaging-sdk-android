@@ -8,11 +8,12 @@
 package org.infobip.mobile.messaging.chat.view.styles
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
 import androidx.core.graphics.toColorInt
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
-import org.infobip.mobile.messaging.chat.utils.toColorStateList
+import org.infobip.mobile.messaging.chat.utils.colorStateListOf
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.json.JSONException
 import org.json.JSONObject
@@ -76,10 +77,12 @@ data class PluginChatCustomization(
     val chatInputHintTextColor: String? = null,
     val chatInputAttachmentIcon: String? = null,
     val chatInputAttachmentIconTint: String? = null,
+    val chatInputAttachmentDisabledIconTint: String? = null,
     val chatInputAttachmentBackgroundDrawable: String? = null,
     val chatInputAttachmentBackgroundColor: String? = null,
     val chatInputSendIcon: String? = null,
     val chatInputSendIconTint: String? = null,
+    val chatInputSendDisabledIconTint: String? = null,
     val chatInputSendBackgroundDrawable: String? = null,
     val chatInputSendBackgroundColor: String? = null,
     val chatInputSeparatorLineColor: String? = null,
@@ -181,9 +184,21 @@ data class PluginChatCustomization(
             .setHintText(chatInputHintText)
             .setHintTextColor(chatInputHintTextColor.toColorIntOrNull())
             .setAttachmentIcon(chatInputAttachmentIcon.toDrawable(context, drawableLoader))
+            .setAttachmentIconTint(
+                createColorStateList(
+                    enabledColor = chatInputAttachmentIconTint,
+                    disabledColor = chatInputAttachmentDisabledIconTint
+                )
+            )
             .setAttachmentBackgroundDrawable(chatInputAttachmentBackgroundDrawable.toDrawable(context, drawableLoader))
             .setAttachmentBackgroundColor(chatInputAttachmentBackgroundColor.toColorIntOrNull())
             .setSendIcon(chatInputSendIcon.toDrawable(context, drawableLoader))
+            .setSendIconTint(
+                createColorStateList(
+                    enabledColor = chatInputSendIconTint,
+                    disabledColor = chatInputSendDisabledIconTint
+                )
+            )
             .setSendBackgroundDrawable(chatInputSendBackgroundDrawable.toDrawable(context, drawableLoader))
             .setSendBackgroundColor(chatInputSendBackgroundColor.toColorIntOrNull())
             .setSeparatorLineColor(chatInputSeparatorLineColor.toColorIntOrNull())
@@ -192,8 +207,6 @@ data class PluginChatCustomization(
             .setCharCounterTextAppearance(chatInputCharCounterTextAppearance.toResId(context))
             .setCharCounterDefaultColor(chatInputCharCounterDefaultColor.toColorIntOrNull())
             .setCharCounterAlertColor(chatInputCharCounterAlertColor.toColorIntOrNull())
-            .setAttachmentIconTint(chatInputAttachmentIconTint.toColorIntOrNull().toColorStateList())
-            .setSendIconTint(chatInputSendIconTint.toColorIntOrNull().toColorStateList())
             .build()
 
         return InAppChatTheme(
@@ -203,6 +216,24 @@ data class PluginChatCustomization(
             inputViewStyle
         )
     }
+
+    private fun createColorStateList(
+        enabledColor: String?,
+        disabledColor: String?,
+    ): ColorStateList? {
+        val enabledColorInt: Int? = enabledColor.toColorIntOrNull()
+        val disabledColorInt: Int? = disabledColor.toColorIntOrNull()
+
+        return if (enabledColorInt != null || disabledColorInt != null) {
+            colorStateListOf(
+                intArrayOf(-android.R.attr.state_enabled) to (disabledColorInt ?: InAppChatInputViewStyle.Defaults.disabledIconTint),
+                intArrayOf(android.R.attr.state_enabled) to (enabledColorInt ?: InAppChatInputViewStyle.Defaults.enabledIconTint)
+            )
+        } else {
+            null
+        }
+    }
+
 
     @ColorInt
     private fun String?.toColorIntOrNull(): Int? {

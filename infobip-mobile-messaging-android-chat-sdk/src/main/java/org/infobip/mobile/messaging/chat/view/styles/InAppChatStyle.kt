@@ -24,8 +24,6 @@ import org.infobip.mobile.messaging.chat.utils.getDrawableCompat
 import org.infobip.mobile.messaging.chat.utils.isIbDefaultTheme
 import org.infobip.mobile.messaging.chat.utils.resolveStringWithResId
 import org.infobip.mobile.messaging.chat.utils.takeIfDefined
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Builder
-import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Defaults
 
 /**
  * Style configuration for the InAppChat main view.
@@ -86,39 +84,34 @@ import org.infobip.mobile.messaging.chat.view.styles.InAppChatStyle.Defaults
  * @see Defaults for default values
  */
 data class InAppChatStyle @JvmOverloads constructor(
-    @ColorInt val backgroundColor: Int = Defaults.backgroundColor,
-    @ColorInt val progressBarColor: Int = Defaults.progressBarColor,
-    @Deprecated("Use networkConnectionErrorText instead.", ReplaceWith("networkConnectionErrorText")) val networkConnectionText: String? = null,
-    @Deprecated("Use networkConnectionErrorTextRes instead.", ReplaceWith("networkConnectionErrorTextRes")) @StringRes val networkConnectionTextRes: Int? = null,
-    @Deprecated("Use networkConnectionErrorTextAppearance instead.", ReplaceWith("networkConnectionErrorTextAppearance")) @StyleRes val networkConnectionTextAppearance: Int? = null,
-    @Deprecated("Use networkConnectionErrorTextColor instead.", ReplaceWith("networkConnectionErrorTextColor")) @ColorInt val networkConnectionTextColor: Int = Defaults.networkConnectionErrorTextColor,
-    @Deprecated("Use networkConnectionErrorBackgroundColor instead.", ReplaceWith("networkConnectionErrorBackgroundColor")) @ColorInt val networkConnectionLabelBackgroundColor: Int = Defaults.networkConnectionErrorBackgroundColor,
-    val networkConnectionErrorText: String? = networkConnectionText,
-    @StringRes val networkConnectionErrorTextRes: Int? = networkConnectionTextRes,
-    @StyleRes val networkConnectionErrorTextAppearance: Int? = networkConnectionTextAppearance,
-    @ColorInt val networkConnectionErrorTextColor: Int = networkConnectionTextColor,
-    @ColorInt val networkConnectionErrorBackgroundColor: Int = networkConnectionLabelBackgroundColor,
+    @field:ColorInt val backgroundColor: Int = Defaults.backgroundColor,
+    @field:ColorInt val progressBarColor: Int = Defaults.progressBarColor,
+    val networkConnectionErrorText: String? = null,
+    @field:StringRes val networkConnectionErrorTextRes: Int? = null,
+    @field:StyleRes val networkConnectionErrorTextAppearance: Int? = null,
+    @field:ColorInt val networkConnectionErrorTextColor: Int = Defaults.networkConnectionErrorTextColor,
+    @field:ColorInt val networkConnectionErrorBackgroundColor: Int = Defaults.networkConnectionErrorBackgroundColor,
     val networkConnectionErrorIcon: Drawable? = null,
-    @ColorInt val networkConnectionErrorIconTint: Int = Defaults.networkConnectionErrorIconTint,
-    @ColorInt val chatSnackbarErrorTextColor: Int? = null,
-    @StyleRes val chatSnackbarErrorTextAppearance: Int? = null,
-    @ColorInt val chatSnackbarErrorBackgroundColor: Int? = null,
+    @field:ColorInt val networkConnectionErrorIconTint: Int = Defaults.networkConnectionErrorIconTint,
+    @field:ColorInt val chatSnackbarErrorTextColor: Int? = null,
+    @field:StyleRes val chatSnackbarErrorTextAppearance: Int? = null,
+    @field:ColorInt val chatSnackbarErrorBackgroundColor: Int? = null,
     val chatSnackbarErrorIcon: Drawable? = null,
-    @ColorInt val chatSnackbarErrorIconTint: Int? = null,
+    @field:ColorInt val chatSnackbarErrorIconTint: Int? = null,
     val chatFullScreenErrorTitleText: String? = null,
-    @StringRes val chatFullScreenErrorTitleTextRes: Int? = Defaults.errorTitleTextRes,
-    @ColorInt val chatFullScreenErrorTitleTextColor: Int = Defaults.errorTitleTextColor,
-    @StyleRes val chatFullScreenErrorTitleTextAppearance: Int? = null,
+    @field:StringRes val chatFullScreenErrorTitleTextRes: Int? = Defaults.errorTitleTextRes,
+    @field:ColorInt val chatFullScreenErrorTitleTextColor: Int = Defaults.errorTitleTextColor,
+    @field:StyleRes val chatFullScreenErrorTitleTextAppearance: Int? = null,
     val chatFullScreenErrorDescriptionText: String? = null,
-    @StringRes val chatFullScreenErrorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes,
-    @ColorInt val chatFullScreenErrorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor,
-    @StyleRes val chatFullScreenErrorDescriptionTextAppearance: Int? = null,
-    @ColorInt val chatFullScreenErrorBackgroundColor: Int = Defaults.errorBackgroundColor,
+    @field:StringRes val chatFullScreenErrorDescriptionTextRes: Int? = Defaults.errorDescriptionTextRes,
+    @field:ColorInt val chatFullScreenErrorDescriptionTextColor: Int = Defaults.errorDescriptionTextColor,
+    @field:StyleRes val chatFullScreenErrorDescriptionTextAppearance: Int? = null,
+    @field:ColorInt val chatFullScreenErrorBackgroundColor: Int = Defaults.errorBackgroundColor,
     val chatFullScreenErrorIcon: Drawable? = null,
-    @ColorInt val chatFullScreenErrorIconTint: Int? = null,
+    @field:ColorInt val chatFullScreenErrorIconTint: Int? = null,
     val chatFullScreenErrorRefreshButtonText: String? = null,
-    @StringRes val chatFullScreenErrorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes,
-    @ColorInt val chatFullScreenErrorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor,
+    @field:StringRes val chatFullScreenErrorRefreshButtonTextRes: Int? = Defaults.errorRefreshButtonTextRes,
+    @field:ColorInt val chatFullScreenErrorRefreshButtonTextColor: Int = Defaults.errorRefreshButtonTextColor,
     val chatFullScreenErrorRefreshButtonVisible: Boolean = Defaults.errorRefreshButtonVisible,
 ) {
     /**
@@ -196,16 +189,6 @@ data class InAppChatStyle @JvmOverloads constructor(
 
         fun setBackgroundColor(@ColorInt backgroundColor: Int?) = apply { backgroundColor?.let { this.backgroundColor = it } }
         fun setProgressBarColor(@ColorInt progressBarColor: Int?) = apply { progressBarColor?.let { this.progressBarColor = it } }
-        @Deprecated("Use setNetworkConnectionErrorText() instead.", ReplaceWith("setNetworkConnectionErrorText(networkConnectionText)"))
-        fun setNetworkConnectionText(networkConnectionText: String?) = setNetworkConnectionErrorText(networkConnectionText)
-        @Deprecated("Use setNetworkConnectionErrorTextRes() instead.", ReplaceWith("setNetworkConnectionErrorTextRes(networkConnectionTextRes)"))
-        fun setNetworkConnectionTextRes(@StringRes networkConnectionTextRes: Int?) = setNetworkConnectionErrorTextRes(networkConnectionTextRes)
-        @Deprecated("Use setNetworkConnectionErrorTextAppearance() instead.", ReplaceWith("setNetworkConnectionErrorTextAppearance(networkConnectionTextAppearance)"))
-        fun setNetworkConnectionTextAppearance(@StyleRes networkConnectionTextAppearance: Int?) = setNetworkConnectionErrorTextAppearance(networkConnectionTextAppearance)
-        @Deprecated("Use setNetworkConnectionErrorTextColor() instead.", ReplaceWith("setNetworkConnectionErrorTextColor(networkConnectionTextColor)"))
-        fun setNetworkConnectionTextColor(@ColorInt networkConnectionTextColor: Int?) = setNetworkConnectionErrorTextColor(networkConnectionTextColor)
-        @Deprecated("Use setNetworkConnectionErrorBackgroundColor() instead.", ReplaceWith("setNetworkConnectionErrorBackgroundColor(networkConnectionLabelBackgroundColor)"))
-        fun setNetworkConnectionLabelBackgroundColor(@ColorInt networkConnectionLabelBackgroundColor: Int?) = setNetworkConnectionErrorBackgroundColor(networkConnectionLabelBackgroundColor)
         fun setNetworkConnectionErrorText(networkConnectionErrorText: String?) = apply { this.networkConnectionErrorText = networkConnectionErrorText }
         fun setNetworkConnectionErrorTextRes(@StringRes networkConnectionErrorTextRes: Int?) = apply { this.networkConnectionErrorTextRes = networkConnectionErrorTextRes }
         fun setNetworkConnectionErrorTextAppearance(@StyleRes networkConnectionErrorTextAppearance: Int?) = apply { networkConnectionErrorTextAppearance?.let { this.networkConnectionErrorTextAppearance = it } }

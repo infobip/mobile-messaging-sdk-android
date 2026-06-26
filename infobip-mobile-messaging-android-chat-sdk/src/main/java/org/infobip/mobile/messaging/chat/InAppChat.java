@@ -15,7 +15,6 @@ import org.infobip.mobile.messaging.chat.core.JwtProvider;
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetApi;
 import org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetLanguage;
-import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 
 import androidx.annotation.NonNull;
@@ -236,27 +235,6 @@ public abstract class InAppChat {
      */
     @Nullable
     public abstract String getChatPushBody();
-
-    /**
-     * Set {@link InAppChatEventsListener} to listen for various in-app chat events.
-     * It allows you to observer chat related events when you show in-app chat using {@code InAppChat.inAppChatScreen().show()}.
-     *
-     * @param inAppChatEventsListener listener to report the events on
-     * @deprecated Use {@code InAppChat.getInstance(context).inAppChatScreen().eventsListener = listener} instead.
-     */
-    @Deprecated
-    public abstract void setEventsListener(@Nullable InAppChatEventsListener inAppChatEventsListener);
-
-    /**
-     * Get current {@link InAppChatEventsListener}.
-     *
-     * @return {@link InAppChatEventsListener} listener to report the events on
-     * @see org.infobip.mobile.messaging.chat.view.InAppChatEventsListener
-     * @deprecated Use {@code InAppChat.getInstance(context).inAppChatScreen().eventsListener} instead.
-     */
-    @Nullable
-    @Deprecated
-    public abstract InAppChatEventsListener getEventsListener();
 
     /**
      * Get instance of {@link LivechatWidgetApi} to interact with livechat widget

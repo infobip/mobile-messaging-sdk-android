@@ -75,26 +75,26 @@ import org.infobip.mobile.messaging.chat.utils.takeIfDefined
  * @see Defaults for default values
  */
 data class InAppChatInputViewStyle @JvmOverloads constructor(
-    @StyleRes val textAppearance: Int? = Defaults.textAppearance,
-    @ColorInt val textColor: Int = Defaults.textColor,
-    @ColorInt val backgroundColor: Int = Defaults.backgroundColor,
+    @field:StyleRes val textAppearance: Int? = Defaults.textAppearance,
+    @field:ColorInt val textColor: Int = Defaults.textColor,
+    @field:ColorInt val backgroundColor: Int = Defaults.backgroundColor,
     val hintText: String? = null,
-    @StringRes val hintTextRes: Int? = Defaults.hintTextRes,
-    @ColorInt val hintTextColor: Int = Defaults.hintTextColor,
+    @field:StringRes val hintTextRes: Int? = Defaults.hintTextRes,
+    @field:ColorInt val hintTextColor: Int = Defaults.hintTextColor,
     val attachmentIcon: Drawable? = null,
     val attachmentIconTint: ColorStateList? = Defaults.iconTint,
     val attachmentBackgroundDrawable: Drawable? = null,
-    @ColorInt val attachmentBackgroundColor: Int? = null,
+    @field:ColorInt val attachmentBackgroundColor: Int? = null,
     val sendIcon: Drawable? = null,
     val sendIconTint: ColorStateList? = Defaults.iconTint,
     val sendBackgroundDrawable: Drawable? = null,
-    @ColorInt val sendBackgroundColor: Int? = null,
-    @ColorInt val separatorLineColor: Int = Defaults.separatorLineColor,
+    @field:ColorInt val sendBackgroundColor: Int? = null,
+    @field:ColorInt val separatorLineColor: Int = Defaults.separatorLineColor,
     val isSeparatorLineVisible: Boolean = Defaults.isSeparatorLineVisible,
-    @ColorInt val cursorColor: Int = Defaults.textColor,
-    @StyleRes val charCounterTextAppearance: Int? = Defaults.charCounterTextAppearance,
-    @ColorInt val charCounterDefaultColor: Int = Defaults.charCounterDefaultColor,
-    @ColorInt val charCounterAlertColor: Int = Defaults.charCounterAlertColor,
+    @field:ColorInt val cursorColor: Int = Defaults.textColor,
+    @field:StyleRes val charCounterTextAppearance: Int? = Defaults.charCounterTextAppearance,
+    @field:ColorInt val charCounterDefaultColor: Int = Defaults.charCounterDefaultColor,
+    @field:ColorInt val charCounterAlertColor: Int = Defaults.charCounterAlertColor,
 ) {
     /**
      * Default values for [InAppChatInputViewStyle] properties.
@@ -114,9 +114,11 @@ data class InAppChatInputViewStyle @JvmOverloads constructor(
         @ColorInt val backgroundColor: Int = Color.WHITE
         @StringRes val hintTextRes: Int = R.string.ib_chat_message_hint
         @ColorInt val hintTextColor: Int = "#808080".toColorInt()
+        @ColorInt val enabledIconTint: Int = Color.BLACK
+        @ColorInt val disabledIconTint: Int = hintTextColor
         val iconTint: ColorStateList = colorStateListOf(
-            intArrayOf(-android.R.attr.state_enabled) to "#808080".toColorInt(),
-            intArrayOf(android.R.attr.state_enabled) to Color.BLACK,
+            intArrayOf(-android.R.attr.state_enabled) to enabledIconTint,
+            intArrayOf(android.R.attr.state_enabled) to disabledIconTint,
         )
         @ColorInt val separatorLineColor: Int = "#19000000".toColorInt()
         val isSeparatorLineVisible: Boolean = true

@@ -62,8 +62,8 @@ class InAppChatInputView @JvmOverloads constructor(
             style = style.copy(sendIcon = ContextCompat.getDrawable(context, R.drawable.ib_chat_send_btn_icon))
         }
         applyStyle(style)
-        binding.sendButton.isEnabled = getInputText()?.isNotBlank() == true
         addTextChangedListener()
+        updateSendButtonEnabledState()
     }
 
     fun applyWidgetInfoStyle(widgetInfo: WidgetInfo) {
@@ -105,15 +105,18 @@ class InAppChatInputView @JvmOverloads constructor(
         binding.messageInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val textLength = s?.length ?: 0
-                val isWithinLimit = textLength <= LivechatWidgetApi.MESSAGE_MAX_LENGTH
-                val isNotEmpty = s?.isNotEmpty() == true
-                binding.sendButton.isEnabled = isNotEmpty && isWithinLimit
-                binding.messageInputLayout.isCounterEnabled = textLength > CHAT_INPUT_COUNTER_VISIBILITY_THRESHOLD
+                updateSendButtonEnabledState(s)
+                binding.messageInputLayout.isCounterEnabled = (s?.length ?: 0) > CHAT_INPUT_COUNTER_VISIBILITY_THRESHOLD
             }
 
             override fun afterTextChanged(s: android.text.Editable?) {}
         }.also { textWatcher = it })
+    }
+
+    private fun updateSendButtonEnabledState(text: CharSequence? = binding.messageInput.text) {
+        val enabled = !text.isNullOrBlank() && text.length <= LivechatWidgetApi.MESSAGE_MAX_LENGTH
+        binding.sendButton.isEnabled = enabled
+        binding.sendButton.refreshDrawableState()
     }
 
     private fun TextView.setCursorDrawableColor(@ColorInt color: Int) {
@@ -159,7 +162,11 @@ class InAppChatInputView @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         this.children.forEach {
-            it.isEnabled = enabled
+            if (it.id == R.id.sendButton && enabled) {
+                updateSendButtonEnabledState()
+            } else {
+                it.isEnabled = enabled
+            }
         }
     }
 

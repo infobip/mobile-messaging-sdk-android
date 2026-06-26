@@ -44,7 +44,6 @@ import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty;
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper;
 import org.infobip.mobile.messaging.chat.utils.WebViewDataDirectoryHelper;
 import org.infobip.mobile.messaging.chat.view.InAppChatActivity;
-import org.infobip.mobile.messaging.chat.view.InAppChatEventsListener;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.chat.view.styles.InAppChatTheme;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
@@ -449,18 +448,6 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
     @Override
     public String getChatPushBody() {
         return PreferenceHelper.findString(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
-    }
-
-    @Deprecated
-    @Override
-    public void setEventsListener(InAppChatEventsListener inAppChatEventsListener) {
-        inAppChatScreen().setEventsListener(inAppChatEventsListener);
-    }
-
-    @Deprecated
-    @Override
-    public InAppChatEventsListener getEventsListener() {
-        return inAppChatScreen().getEventsListener();
     }
 
     @Override

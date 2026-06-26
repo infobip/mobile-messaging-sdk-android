@@ -66,6 +66,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -662,66 +663,87 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUpRuntimeCustomization() {
         findViewById(R.id.customization).setOnClickListener(v -> {
-            InAppChatToolbarStyle toolbar = new InAppChatToolbarStyle(
-                    Color.LTGRAY,
-                    Color.LTGRAY,
-                    false,
-                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_decline, getTheme()),
-                    Color.MAGENTA,
-                    ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_accept, getTheme()),
-                    Color.RED,
-                    R.style.InAppChat_Demo_Toolbar_Title_TextAppearance,
-                    Color.BLACK,
-                    "Chat",
-                    null,
-                    true,
-                    null,
-                    Color.DKGRAY,
-                    "#1",
-                    null,
-                    true
-            );
+            InAppChatToolbarStyle toolbarStyle = new InAppChatToolbarStyle.Builder()
+                    .setToolbarBackgroundColor(Color.LTGRAY)
+                    .setStatusBarBackgroundColor(Color.LTGRAY)
+                    .setLightStatusBarIcons(false)
+                    .setNavigationIcon(ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_decline, getTheme()))
+                    .setNavigationIconTint(Color.MAGENTA)
+                    .setSaveAttachmentMenuItemIcon(ResourcesCompat.getDrawable(getResources(), org.infobip.mobile.messaging.resources.R.drawable.mm_ic_button_accept, getTheme()))
+                    .setMenuItemsIconTint(Color.RED)
+                    .setTitleTextAppearance(R.style.InAppChat_Demo_Toolbar_Title_TextAppearance)
+                    .setTitleTextColor(Color.BLACK)
+                    .setTitleText("Chat")
+                    .setIsTitleCentered(true)
+                    .setSubtitleTextColor(Color.DKGRAY)
+                    .setSubtitleText("#1")
+                    .setIsSubtitleCentered(true)
+                    .build();
+
             InAppChatStyle chatStyle = new InAppChatStyle.Builder()
-                .setBackgroundColor(Color.LTGRAY)
-                .setProgressBarColor(Color.MAGENTA)
-                .setNetworkConnectionErrorText("Offline")
-                .setNetworkConnectionErrorTextColor(Color.BLACK)
-                .setNetworkConnectionLabelBackgroundColor(Color.CYAN)
-                .setNetworkConnectionErrorIconTint(Color.WHITE)
-                .setChatFullScreenErrorTitleText("Runtime Error!")
-                .setChatFullScreenErrorTitleTextColor(Color.RED)
-                .setChatFullScreenErrorDescriptionText("This is a runtime customization example. Error code: %d")
-                .setChatFullScreenErrorDescriptionTextColor(Color.DKGRAY)
-                .setChatFullScreenErrorBackgroundColor(Color.LTGRAY)
-                .setChatFullScreenErrorIconTint(Color.MAGENTA)
-                .setChatFullScreenErrorRefreshButtonTextColor(Color.BLUE)
-                .setChatFullScreenErrorRefreshButtonVisible(true)
-                .build();
+                    .setBackgroundColor(Color.LTGRAY)
+                    .setProgressBarColor(Color.MAGENTA)
+                    .setNetworkConnectionErrorText("Offline")
+                    .setNetworkConnectionErrorTextColor(Color.BLACK)
+                    .setNetworkConnectionErrorBackgroundColor(Color.CYAN)
+                    .setNetworkConnectionErrorIcon(AppCompatResources.getDrawable(this, R.drawable.ic_notification))
+                    .setNetworkConnectionErrorTextAppearance(R.style.InAppChat_Demo_Toolbar_Title_TextAppearance)
+                    .setNetworkConnectionErrorIconTint(Color.WHITE)
+                    .setChatSnackbarErrorTextColor(Color.WHITE)
+                    .setChatSnackbarErrorTextAppearance(R.style.InAppChat_Demo_Toolbar_Title_TextAppearance)
+                    .setChatSnackbarErrorBackgroundColor(Color.RED)
+                    .setChatSnackbarErrorIcon(AppCompatResources.getDrawable(this, org.infobip.mobile.messaging.chat.R.drawable.ib_chat_refresh_icon))
+                    .setChatSnackbarErrorIconTint(Color.YELLOW)
+                    .setChatFullScreenErrorTitleText("Runtime Error!")
+                    .setChatFullScreenErrorTitleTextColor(Color.RED)
+                    .setChatFullScreenErrorDescriptionText("This is a runtime customization example. Error code: %d")
+                    .setChatFullScreenErrorDescriptionTextColor(Color.DKGRAY)
+                    .setChatFullScreenErrorBackgroundColor(Color.LTGRAY)
+                    .setChatFullScreenErrorIconTint(Color.MAGENTA)
+                    .setChatFullScreenErrorRefreshButtonTextColor(Color.BLUE)
+                    .setChatFullScreenErrorRefreshButtonVisible(true)
+                    .build();
+
+            ColorStateList inputButtonTint = new ColorStateList(
+                    new int[][] {
+                            new int[] { -android.R.attr.state_enabled },
+                            new int[] { android.R.attr.state_enabled }
+                    },
+                    new int[] {
+                            Color.GRAY,
+                            Color.MAGENTA
+                    }
+            );
+
+            InAppChatInputViewStyle inputStyle = new InAppChatInputViewStyle.Builder()
+                    .setTextAppearance(org.infobip.mobile.messaging.chat.R.style.IB_Chat_Input_TextAppearance)
+                    .setTextColor(Color.BLACK)
+                    .setBackgroundColor(Color.LTGRAY)
+                    .setHintText("Type message")
+                    .setHintTextRes(null)
+                    .setHintTextColor(Color.GRAY)
+                    .setAttachmentIcon(ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_add, getTheme()))
+                    .setAttachmentIconTint(inputButtonTint)
+                    .setAttachmentBackgroundDrawable(null)
+                    .setAttachmentBackgroundColor(Color.RED)
+                    .setSendIcon(ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_send, getTheme()))
+                    .setSendIconTint(inputButtonTint)
+                    .setSendBackgroundDrawable(null)
+                    .setSendBackgroundColor(Color.WHITE)
+                    .setSeparatorLineColor(Color.GRAY)
+                    .setIsSeparatorLineVisible(true)
+                    .setCursorColor(Color.MAGENTA)
+                    .setCharCounterTextAppearance(null)
+                    .setCharCounterDefaultColor(Color.YELLOW)
+                    .setCharCounterAlertColor(Color.GREEN)
+                    .build();
 
             inAppChat.setTheme(
                     new InAppChatTheme(
-                            toolbar,
-                            toolbar,
+                            toolbarStyle,
+                            toolbarStyle,
                             chatStyle,
-                            new InAppChatInputViewStyle(
-                                    org.infobip.mobile.messaging.chat.R.style.IB_Chat_Input_TextAppearance,
-                                    Color.BLACK,
-                                    Color.LTGRAY,
-                                    "Type message",
-                                    null,
-                                    Color.GRAY,
-                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_add, getTheme()),
-                                    ColorStateList.valueOf(Color.MAGENTA),
-                                    null,
-                                    Color.RED,
-                                    ResourcesCompat.getDrawable(getResources(), android.R.drawable.ic_menu_send, getTheme()),
-                                    ColorStateList.valueOf(Color.MAGENTA),
-                                    null,
-                                    Color.RED,
-                                    Color.GRAY,
-                                    true,
-                                    Color.MAGENTA
-                            )
+                            inputStyle
                     )
             );
             Toast.makeText(this, "Custom style applied", Toast.LENGTH_SHORT).show();
