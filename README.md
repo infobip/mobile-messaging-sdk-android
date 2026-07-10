@@ -8,7 +8,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
 ## Requirements
 
 - Android Studio
-- Supported API Levels: 21 (Android 5.0 - Lollipop) - 36 (Android 16)
+- Supported API Levels: 21 (Android 5.0 - Lollipop) - 37 (Android 17)
 - <a href="https://developer.android.com/jetpack/androidx/migrate" target="_blank">AndroidX</a>
 
 ## Quick start guide
