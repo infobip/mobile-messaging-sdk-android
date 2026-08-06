@@ -105,42 +105,49 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id) {
-            case R.id.action_erase:
-                actionErase();
-                return true;
+        if (id == R.id.action_erase) {
+            actionErase();
+            return true;
+        }
 
-            case R.id.action_phone:
-                actionPhone();
-                return true;
+        if (id == R.id.action_phone) {
+            actionPhone();
+            return true;
+        }
 
-            case R.id.action_registration_id:
-                actionRegistrationId();
-                return true;
+        if (id == R.id.action_registration_id) {
+            actionRegistrationId();
+            return true;
+        }
 
-            case R.id.action_primary:
-                actionPrimary();
-                return true;
+        if (id == R.id.action_primary) {
+            actionPrimary();
+            return true;
+        }
 
-            case R.id.action_personalize:
-                actionPersonalize();
-                return true;
+        if (id == R.id.action_personalize) {
+            actionPersonalize();
+            return true;
+        }
 
-            case R.id.action_personalize_force:
-                actionPersonalizeForce();
-                return true;
+        if (id == R.id.action_personalize_force) {
+            actionPersonalizeForce();
+            return true;
+        }
 
-            case R.id.action_personalize_keep_as_lead:
-                actionPersonalizeKeepAsLead();
-                return true;
+        if (id == R.id.action_personalize_keep_as_lead) {
+            actionPersonalizeKeepAsLead();
+            return true;
+        }
 
-            case R.id.action_personalize_set_as_primary:
-                actionPersonalizeSetAsPrimary();
-                return true;
+        if (id == R.id.action_personalize_set_as_primary) {
+            actionPersonalizeSetAsPrimary();
+            return true;
+        }
 
-            case R.id.action_depersonalize:
-                actionDepersonalize();
-                return true;
+        if (id == R.id.action_depersonalize) {
+            actionDepersonalize();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

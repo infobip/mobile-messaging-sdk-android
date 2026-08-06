@@ -33,6 +33,10 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     signingConfigs {
         release {
             storeFile file("${property(project, 'signingKeystore', 'KEYSTORE')}")
@@ -53,7 +57,7 @@ android {
         release {
             minifyEnabled true
             debuggable false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
     }
@@ -116,6 +120,10 @@ android {
 
 }
 
+tasks.named("sonarResolver").configure {
+    dependsOn tasks.matching { it.name.startsWith("generate") && it.name.endsWith("ResValues") }
+}
+
 dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$mm_constraintLayoutVersion"
     testImplementation "junit:junit:$mm_junitVersion"
@@ -140,7 +148,6 @@ dependencies {
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
 
-    implementation "androidx.multidex:multidex:$mm_multidexVersion"
 }
 
 private static String property(Project project, String projectKey, String environmentKey) {

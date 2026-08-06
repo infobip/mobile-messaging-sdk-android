@@ -25,9 +25,6 @@
 #-renamesourcefileattribute SourceFile
 
 
--printmapping mobile-messaging-chat-out.map
--keepparameternames
--renamesourcefileattribute SourceFile
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,EnclosingMethod
 
 # Preserve all annotations.

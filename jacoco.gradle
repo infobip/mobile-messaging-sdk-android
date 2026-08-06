@@ -1,44 +1,57 @@
 //to generate coverage report call "debugCoverage" and "jacocoTestReport" tasks
-afterEvaluate {
-    project.plugins.apply('jacoco')
+project.plugins.apply('jacoco')
 
-    project.jacoco {
-        toolVersion '0.8.10'
-    }
-
-    project.tasks.withType(Test) {
-        it.jacoco.includeNoLocationClasses = true
-        it.jacoco.excludes = ['jdk.internal.*']
-    }
-
-    //coverage for api-java module
-    if (!project.plugins.hasPlugin('com.android.library')) {
-        jacocoTestReport {
-            reports {
-                xml.required = true
-                html.required = true
-            }
-        }.dependsOn(test)
-        return
-    }
-
-    //coverage for other modules
-    (android.hasProperty('applicationVariants') ? android.'applicationVariants' : android.'libraryVariants')
-            .all { variant ->
-                def variantName = variant.name
-                def capVariantName = variantName.capitalize()
-                def connectedAndroidTestTaskName = "connected${capVariantName}AndroidTest"
-                def testUnitTestTaskName = "test${capVariantName}UnitTest"
-                if (project.tasks.findByName(connectedAndroidTestTaskName) && project.tasks.findByName(testUnitTestTaskName)) {
-                    createCoverageTask(variantName, connectedAndroidTestTaskName, testUnitTestTaskName, project)
-                }
-            }
+project.jacoco {
+    toolVersion '0.8.10'
 }
 
-private void createCoverageTask(variantName, uiTestTaskName, unitTestTaskName, final Project project) {
-    project.tasks.create(name: "${variantName}Coverage", type: JacocoReport, dependsOn: [uiTestTaskName, unitTestTaskName]) {
+project.tasks.withType(Test).configureEach {
+    it.jacoco.includeNoLocationClasses = true
+    it.jacoco.excludes = ['jdk.internal.*']
+}
+
+def debugCoverageTask = project.tasks.register('debugCoverage') {
+    group = 'Verification'
+    description = 'Runs Jacoco coverage reports for the debug build.'
+}
+
+if (!project.plugins.hasPlugin('com.android.library')) {
+    project.tasks.named('jacocoTestReport', JacocoReport) {
+        group = "Reporting"
+        description = "Generates Jacoco coverage reports."
+        dependsOn(project.tasks.named('test'))
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        executionData.from = fileTree(dir: project.projectDir, includes: ["**/*.exec", "**/*.ec"])
+    }
+    debugCoverageTask.configure {
+        dependsOn(project.tasks.named('jacocoTestReport'))
+    }
+    return
+}
+
+androidComponents {
+    onVariants(selector().withBuildType('debug')) { variant ->
+        def variantName = variant.name
+        def capVariantName = variantName.capitalize()
+        def connectedAndroidTestTaskName = "connected${capVariantName}AndroidTest"
+        def testUnitTestTaskName = "test${capVariantName}UnitTest"
+        if (project.tasks.findByName(connectedAndroidTestTaskName) && project.tasks.findByName(testUnitTestTaskName)) {
+            def coverageReportTask = createCoverageTask(variantName, connectedAndroidTestTaskName, testUnitTestTaskName, project)
+            debugCoverageTask.configure {
+                dependsOn(coverageReportTask)
+            }
+        }
+    }
+}
+
+private def createCoverageTask(variantName, uiTestTaskName, unitTestTaskName, final Project project) {
+    return project.tasks.register("${variantName}Coverage", JacocoReport) {
         group = "Reporting"
         description = "Generate Jacoco coverage reports for the ${variantName} build."
+        dependsOn(uiTestTaskName, unitTestTaskName)
         reports {
             xml.required = true
             html.required = true
@@ -64,8 +77,8 @@ private void createCoverageTask(variantName, uiTestTaskName, unitTestTaskName, f
                 '**/*Directions.*',
                 '**/*Binding.*'
         ]
-        def jClassPaths = "${layout.buildDirectory}/intermediates/javac/${variantName}/classes"
-        def kClassPaths = "${layout.buildDirectory}/tmp/kotlin-classes/${variantName}"
+        def jClassPaths = "${project.layout.buildDirectory}/intermediates/javac/${variantName}/classes"
+        def kClassPaths = "${project.layout.buildDirectory}/tmp/kotlin-classes/${variantName}"
         def javaClasses = fileTree(dir: jClassPaths, excludes: excludes)
         def kotlinClasses = fileTree(dir: kClassPaths, excludes: excludes)
         classDirectories.from = files([javaClasses, kotlinClasses])

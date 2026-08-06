@@ -1,9 +1,7 @@
 #ProGuard rules for Infobip RTC UI library
 
 #General setup
--printmapping infobip-rtc-ui-out.map
 -keepparameternames
--renamesourcefileattribute SourceFile
 -keepattributes Signature,Exceptions,*Annotation*,InnerClasses,PermittedSubclasses,EnclosingMethod,Deprecated,SourceFile,LineNumberTable
 -keepattributes *Annotation*
 -keepattributes RuntimeVisibleAnnotations
@@ -67,18 +65,8 @@
 }
 
 #Android UI related classes
--dontusemixedcaseclassnames
--verbose
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
-
--allowaccessmodification
 -keepattributes *Annotation*
--renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
--repackageclasses ''
-
--dontnote android.net.http.**
--dontnote org.apache.http.**
 
 -keep class androidx.** { *; }
 -keep class android.content.**

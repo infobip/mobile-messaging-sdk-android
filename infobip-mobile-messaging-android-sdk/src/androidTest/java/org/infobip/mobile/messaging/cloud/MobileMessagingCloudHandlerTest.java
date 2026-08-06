@@ -11,8 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import junit.framework.TestCase;
-
 import org.infobip.mobile.messaging.Message;
 import org.infobip.mobile.messaging.dal.bundle.MessageBundleMapper;
 import org.junit.Before;
@@ -23,8 +21,10 @@ import org.mockito.Mockito;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(AndroidJUnit4.class)
-public class MobileMessagingCloudHandlerTest extends TestCase {
+public class MobileMessagingCloudHandlerTest {
 
     private RegistrationTokenHandler registrationTokenHandler = Mockito.mock(RegistrationTokenHandler.class);
     private MobileMessageHandler mobileMessageHandler = Mockito.mock(MobileMessageHandler.class);

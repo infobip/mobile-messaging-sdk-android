@@ -21,15 +21,13 @@ android {
     compileSdk = mm_compileSdkVersion
 
     publishing {
-        multipleVariants {
-            allVariants()
+        singleVariant("release") {
             withJavadocJar()
             withSourcesJar()
         }
     }
     defaultConfig {
         minSdkVersion mm_minSdkVersion
-        targetSdkVersion mm_targetSdkVersion
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -59,6 +57,12 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    lint {
+        targetSdk 37
+    }
+    testOptions {
+        targetSdk 37
+    }
 }
 
 dependencies {
@@ -85,7 +89,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.10.1"
     implementation "com.google.android.material:material:$mm_materialVersion"
 
-    api ("com.infobip:infobip-rtc:2.5.28") {
+    api ("com.infobip:infobip-rtc:2.5.40") {
         transitive = true
     }
 
@@ -97,38 +101,6 @@ dependencies {
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$mm_desugarJdkVersion"
 }
 
-android.libraryVariants.configureEach { variant ->
-    def name = variant.buildType.name
-    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        Task javaCompileTask
-        if (variant.hasProperty('javaCompileProvider')) {
-            // Android 3.3.0+
-            javaCompileTask = variant.javaCompileProvider.get()
-        } else {
-            javaCompileTask = variant.javaCompile
-        }
-
-        dependsOn javaCompileTask
-        from javaCompileTask.destinationDirectory
-
-        manifest {
-            attributes(
-                    "Bundle-Name": 'parse-android',
-                    "Bundle-Version": project.version
-            )
-        }
-
-        exclude '**/R.class'
-        exclude '**/R\$*.class'
-        exclude '**/Manifest.class'
-        exclude '**/Manifest\$*.class'
-        exclude '**/BuildConfig.class'
-    }
-
-    artifacts {
-        archives jar
-    }
-}
 
 ext {
     PUBLISH_ARTIFACT_ID = 'infobip-rtc-ui'

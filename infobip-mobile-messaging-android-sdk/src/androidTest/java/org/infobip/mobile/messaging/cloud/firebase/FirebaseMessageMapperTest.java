@@ -11,18 +11,24 @@ import android.os.Bundle;
 
 import com.google.firebase.messaging.RemoteMessage;
 
-import junit.framework.TestCase;
-
 import org.infobip.mobile.messaging.Message;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.json.JSONException;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author sslavin
  * @since 05/09/2018.
  */
-public class FirebaseMessageMapperTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class FirebaseMessageMapperTest {
 
+    @Test
     public void test_shouldMapRemoteMessage() throws JSONException {
 
         final String ibData = dqjson("{" +
@@ -74,6 +80,7 @@ public class FirebaseMessageMapperTest extends TestCase {
         assertEquals(Message.InAppStyle.MODAL, message.getInAppStyle());
     }
 
+    @Test
     public void test_shouldMapInAppStyleStringInRemoteMessage() {
 
         final String ibData = dqjson("{" +

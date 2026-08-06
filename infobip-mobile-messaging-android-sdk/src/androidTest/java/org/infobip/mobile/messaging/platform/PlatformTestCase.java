@@ -7,13 +7,11 @@
  */
 package org.infobip.mobile.messaging.platform;
 
-import junit.framework.TestCase;
-
 import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 
 import java.util.concurrent.Executor;
 
-public abstract class PlatformTestCase extends TestCase {
+public abstract class PlatformTestCase {
     protected void resetSdkVersion(int sdkVersionInt) {
         Platform.reset(sdkVersionInt);
     }

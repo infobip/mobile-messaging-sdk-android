@@ -21,8 +21,7 @@ android {
     compileSdk = mm_compileSdkVersion
 
     publishing {
-        multipleVariants {
-            allVariants()
+        singleVariant("release") {
             withJavadocJar()
             withSourcesJar()
         }
@@ -30,9 +29,6 @@ android {
 
     defaultConfig {
         minSdkVersion mm_minSdkVersion
-        targetSdkVersion mm_targetSdkVersion
-        versionCode 1
-        versionName project.version
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -56,7 +52,7 @@ android {
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -71,10 +67,14 @@ android {
 
     lint {
         abortOnError false
+        targetSdk 37
     }
 
     packagingOptions {
         resources.excludes.add("META-INF/*")
+    }
+    testOptions {
+        targetSdk 37
     }
 
 
@@ -117,38 +117,6 @@ dependencies {
     androidTestImplementation "androidx.multidex:multidex:$mm_multidexVersion"
 }
 
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        Task javaCompileTask
-        if (variant.hasProperty('javaCompileProvider')) {
-            // Android 3.3.0+
-            javaCompileTask = variant.javaCompileProvider.get()
-        } else {
-            javaCompileTask = variant.javaCompile
-        }
-
-        dependsOn javaCompileTask
-        from javaCompileTask.destinationDirectory
-
-        manifest {
-            attributes(
-                    "Bundle-Name": 'parse-android',
-                    "Bundle-Version": project.version
-            )
-        }
-
-        exclude '**/R.class'
-        exclude '**/R\$*.class'
-        exclude '**/Manifest.class'
-        exclude '**/Manifest\$*.class'
-        exclude '**/BuildConfig.class'
-    }
-
-    artifacts {
-        archives jar
-    }
-}
 
 ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-android-chat-sdk'

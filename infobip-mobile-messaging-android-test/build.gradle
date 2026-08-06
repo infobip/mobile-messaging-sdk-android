@@ -17,7 +17,6 @@ android {
 
     defaultConfig {
         minSdkVersion mm_minSdkVersion
-        targetSdkVersion mm_targetSdkVersion
 
         // since AGP 4.1 "VERSION_NAME" is not included anymore to BuildConfig
         // https://issuetracker.google.com/issues/154275579
@@ -31,11 +30,15 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     lint {
         abortOnError false
+        targetSdk 37
+    }
+    testOptions {
+        targetSdk 37
     }
 }
 
@@ -51,37 +54,5 @@ dependencies {
     implementation "junit:junit:$mm_junitVersion"
     api('org.skyscreamer:jsonassert:1.5.0') {
         exclude group: "org.json", module: "json"
-    }
-}
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        Task javaCompileTask
-        if (variant.hasProperty('javaCompileProvider')) {
-            // Android 3.3.0+
-            javaCompileTask = variant.javaCompileProvider.get()
-        } else {
-            javaCompileTask = variant.javaCompile
-        }
-
-        dependsOn javaCompileTask
-        from javaCompileTask.destinationDirectory
-
-        manifest {
-            attributes(
-                    "Bundle-Name": 'parse-android',
-                    "Bundle-Version": project.version
-            )
-        }
-
-        exclude '**/R.class'
-        exclude '**/R\$*.class'
-        exclude '**/Manifest.class'
-        exclude '**/Manifest\$*.class'
-        exclude '**/BuildConfig.class'
-    }
-
-    artifacts {
-        archives jar
     }
 }

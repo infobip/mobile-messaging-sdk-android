@@ -16,9 +16,6 @@
 #   public *;
 #}
 
--printmapping mobile-messaging-out.map
--keepparameternames
--renamesourcefileattribute SourceFile
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,EnclosingMethod
 
 # Preserve all annotations.

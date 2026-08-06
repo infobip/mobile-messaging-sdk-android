@@ -76,6 +76,13 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mm_mockitoCoreVersion"
 }
 
+sonar {
+    properties {
+        property "sonar.java.binaries", "${buildDir}/classes/java/main"
+        property "sonar.java.test.binaries", "${buildDir}/classes/java/test"
+    }
+}
+
 ext {
     PUBLISH_ARTIFACT_ID = 'infobip-mobile-messaging-api-java'
 }
