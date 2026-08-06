@@ -140,7 +140,7 @@ dependencies {
     //To add cryptor use build flavour "cryptorMigration"
     cryptorMigrationImplementation project(":infobip-mobile-messaging-android-cryptor-migration")
 
-    implementation "com.android.support:multidex:$mm_multidexVersion"
+    implementation "androidx.multidex:multidex:$mm_multidexVersion"
 }
 
 private static String property(Project project, String projectKey, String environmentKey) {

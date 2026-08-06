@@ -114,7 +114,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$mm_androidJunitVersion"
     androidTestImplementation "junit:junit:$mm_junitVersion"
     androidTestImplementation "io.mockk:mockk-android:1.13.11"
-    androidTestImplementation "com.android.support:multidex:$mm_multidexVersion"
+    androidTestImplementation "androidx.multidex:multidex:$mm_multidexVersion"
 }
 
 android.libraryVariants.all { variant ->
