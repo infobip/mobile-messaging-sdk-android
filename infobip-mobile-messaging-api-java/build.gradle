@@ -2,12 +2,12 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
-    id 'io.freefair.lombok' version '8.4'
+    id 'io.freefair.lombok' version '9.5.0'
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     withJavadocJar()
     withSourcesJar()
 }

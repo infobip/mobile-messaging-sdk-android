@@ -51,7 +51,7 @@ android {
             property(project, 'google_app_id', 'GOOGLE_APP_ID')?.with { resValue "string", "google_app_id", delegate }
             property(project, 'infobip_application_code', 'INFOBIP_APPLICATION_CODE')?.with { resValue "string", "infobip_application_code", delegate }
             property(project, 'infobip_api_uri', 'INFOBIP_API_URI')?.with { resValue "string", "infobip_api_uri", delegate }
-            property(project, 'infobip_inappchat_widget_uri', 'INFOBIP_INAPPCHAT_WIDGET_URI')?.with { resValue "string", "ib_inappchat_widget_uri", delegate }
+            property(project, 'infobip_livechat_widget_uri', 'INFOBIP_LIVECHAT_WIDGET_URI')?.with { resValue "string", "ib_livechat_widget_uri", delegate }
         }
 
         release {
