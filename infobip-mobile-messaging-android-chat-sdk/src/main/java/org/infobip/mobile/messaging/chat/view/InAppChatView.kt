@@ -786,6 +786,7 @@ class InAppChatView @JvmOverloads constructor(
             val widgetMultiThread = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD)
             val widgetMultichannelConversation = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION)
             val callsEnabled = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED)
+            val useNewDesign = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_NEW_DESIGN_ENABLED)
             val themeNames: Set<String>? = propertyHelper.findStringSet(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES)
             val attachmentMaxSize = propertyHelper.findLong(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE)
             val attachmentIsEnabled = propertyHelper.findBoolean(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED)
@@ -799,6 +800,7 @@ class InAppChatView @JvmOverloads constructor(
                 widgetMultiThread,
                 widgetMultichannelConversation,
                 callsEnabled,
+                useNewDesign,
                 themeNames?.toList(),
                 WidgetAttachmentConfig(
                     attachmentMaxSize,

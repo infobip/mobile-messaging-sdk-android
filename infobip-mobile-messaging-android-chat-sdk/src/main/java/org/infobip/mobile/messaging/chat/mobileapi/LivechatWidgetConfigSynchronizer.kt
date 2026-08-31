@@ -83,6 +83,7 @@ internal class LivechatWidgetConfigSynchronizer(
                     PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTITHREAD.key, widgetInfo.isMultiThread)
                     PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION.key, widgetInfo.isMultiChannelConversationEnabled)
                     PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_CALLS_ENABLED.key, widgetInfo.isCallsEnabled)
+                    PreferenceHelper.saveBoolean(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_NEW_DESIGN_ENABLED.key, widgetInfo.isUseNewDesign)
                     widgetInfo.themeNames?.let { themes ->
                         PreferenceHelper.saveStringSet(context, MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_THEMES.key, HashSet(themes))
                     }

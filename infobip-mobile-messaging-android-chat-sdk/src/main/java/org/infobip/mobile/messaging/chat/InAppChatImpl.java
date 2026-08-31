@@ -287,6 +287,7 @@ public class InAppChatImpl extends InAppChat implements MessageHandlerModule {
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_ACTIVATED);
         propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_LANGUAGE);
+        propertyHelper().remove(MobileMessagingChatProperty.IN_APP_CHAT_WIDGET_NEW_DESIGN_ENABLED);
         PreferenceHelper.remove(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_TITLE);
         PreferenceHelper.remove(context, MobileMessagingProperty.DEFAULT_IN_APP_CHAT_PUSH_BODY);
         resetMessageCounter();

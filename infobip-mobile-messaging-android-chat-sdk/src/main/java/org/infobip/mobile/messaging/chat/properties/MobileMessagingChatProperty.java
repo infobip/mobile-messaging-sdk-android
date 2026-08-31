@@ -17,6 +17,7 @@ public enum MobileMessagingChatProperty {
     IN_APP_CHAT_WIDGET_MULTITHREAD("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTITHREAD", false),
     IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_MULTICHANNEL_CONVERSATION", false),
     IN_APP_CHAT_WIDGET_CALLS_ENABLED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_CALLS_ENABLED", false),
+    IN_APP_CHAT_WIDGET_NEW_DESIGN_ENABLED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_NEW_DESIGN_ENABLED", false),
     IN_APP_CHAT_WIDGET_THEMES("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_THEMES", null),
     IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_ATTACHMENT_ENABLED", true),
     IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE", 10_485_760L),  //10 MiB

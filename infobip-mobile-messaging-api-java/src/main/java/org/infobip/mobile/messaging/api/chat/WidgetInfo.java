@@ -36,6 +36,8 @@ public class WidgetInfo {
 
     private boolean callsEnabled;
 
+    private boolean useNewDesign;
+
     private List<String> themeNames;
 
     @SerializedName("attachments")
