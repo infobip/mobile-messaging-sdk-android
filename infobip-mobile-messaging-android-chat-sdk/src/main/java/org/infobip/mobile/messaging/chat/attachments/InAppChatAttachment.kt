@@ -26,6 +26,9 @@ import org.infobip.mobile.messaging.chat.utils.fileName
 import org.infobip.mobile.messaging.chat.utils.mimeType
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 data class InAppChatAttachment(
@@ -40,6 +43,7 @@ data class InAppChatAttachment(
     companion object {
 
         private const val TAG = "InAppChatAttachment"
+        private const val CAMERA_CAPTURE_PREFIX = "livechat"
         const val IMAGE_MIME_TYPE_PREFIX = "image/"
         const val VIDEO_MIME_TYPE_PREFIX = "video/"
 
@@ -125,6 +129,11 @@ data class InAppChatAttachment(
                 fileName += ".$extension"
             }
             return fileName
+        }
+
+        internal fun generateCaptureFileName(extension: String): String {
+            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date(System.currentTimeMillis()))
+            return "${CAMERA_CAPTURE_PREFIX}_$timestamp.${extension}"
         }
         //endregion
 

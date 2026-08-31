@@ -28,6 +28,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.infobip.mobile.messaging.chat.R
+import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachmentFileProvider
 import org.infobip.mobile.messaging.chat.models.AttachmentSource
 
@@ -121,11 +122,11 @@ internal class InAppChatActivityResultDelegateImpl(
     }
 
     override fun capturePhoto(photoFileExtension: String) {
-        useCamera(photoActionLauncher, "Photo-${System.currentTimeMillis()}.$photoFileExtension", AttachmentSource.Camera)
+        useCamera(photoActionLauncher, InAppChatAttachment.generateCaptureFileName(photoFileExtension), AttachmentSource.Camera)
     }
 
     override fun recordVideo(videoFileExtension: String) {
-        useCamera(videoActionLauncher, "Video-${System.currentTimeMillis()}.$videoFileExtension", AttachmentSource.VideoRecorder)
+        useCamera(videoActionLauncher, InAppChatAttachment.generateCaptureFileName(videoFileExtension), AttachmentSource.VideoRecorder)
     }
 
     private fun useCamera(launcher: ActivityResultLauncher<Uri>, fileName: String, source: AttachmentSource) {
