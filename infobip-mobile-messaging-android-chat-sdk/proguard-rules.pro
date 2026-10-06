@@ -52,8 +52,29 @@
     public protected *;
 }
 
--keepclassmembers class org.infobip.mobile.messaging.chat.** {
-    @kotlin.Metadata *;
+-keep class kotlin.Metadata { *; }
+
+# Gson-deserialized models. Kotlin properties are backed by private fields,
+# which are not covered by the public API keep rules above.
+
+-keep class org.infobip.mobile.messaging.chat.core.InAppChatException {
+    <fields>;
+}
+-keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetException {
+    <fields>;
+    <init>(...);
+}
+-keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread {
+    <fields>;
+    <init>(...);
+}
+-keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatCustomization {
+    <fields>;
+    <init>(...);
+}
+-keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatToolbarCustomization {
+    <fields>;
+    <init>(...);
 }
 
 # Preserve the special static methods that are required in all enumeration

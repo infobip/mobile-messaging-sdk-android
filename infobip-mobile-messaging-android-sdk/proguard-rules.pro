@@ -81,6 +81,7 @@
 
 # Gson specific classes
 -keep class sun.misc.Unsafe.** { *; }
+-keep class sun.misc.Unsafe { *; }
 #-dontwarn sun.misc.Unsafe
 #-keep class com.google.gson.stream.** { *; }
 
@@ -95,6 +96,7 @@
 -keep class org.infobip.mobile.messaging.interactive.NotificationCategory { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper { *; }
 -keep class org.infobip.mobile.messaging.cloud.firebase.FirebaseMessageMapper$* { *; }
+-keep class org.infobip.mobile.messaging.SystemData { <fields>; <init>(...); }
 -keep class org.infobip.mobile.messaging.mobileapi.** { *; }
 
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
