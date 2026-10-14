@@ -16,6 +16,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -24,6 +25,7 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -74,6 +76,7 @@ import org.infobip.mobile.messaging.platform.Broadcaster;
 import org.infobip.mobile.messaging.platform.MobileMessagingJobService;
 import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.platform.Time;
+import org.infobip.mobile.messaging.resources.R;
 import org.infobip.mobile.messaging.stats.MobileMessagingStats;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.storage.MessageStoreWrapper;
@@ -104,6 +107,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -311,19 +315,32 @@ public class MobileMessagingCore
             return;
         }
 
-        CharSequence channelName = SoftwareInformation.getAppName(context);
+        String appName = SoftwareInformation.getAppName(context);
 
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID, channelName, true, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_VIBRATION, channelName + " Vibration", true, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_SOUND, channelName + " Sound", false, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_QUIET, channelName + " Quiet", false, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID, getChannelName(R.string.mm_notification_channel_default, appName), true, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_VIBRATION, getChannelName(R.string.mm_notification_channel_vibration, appName), true, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_SOUND, getChannelName(R.string.mm_notification_channel_sound, appName), false, true, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(MM_DEFAULT_CHANNEL_ID_QUIET, getChannelName(R.string.mm_notification_channel_quiet, appName), false, false, null, null, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
 
         NotificationSettings notificationSettings = getNotificationSettings();
         if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
-            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, channelName + " High Priority", true, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
-            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION, channelName + " High Priority, Vibration", true, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
-            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND, channelName + " High Priority, Sound", false, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
-            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET, channelName + " High Priority, Quiet", false, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID, getChannelName(R.string.mm_notification_channel_high_priority, appName), true, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION, getChannelName(R.string.mm_notification_channel_high_priority_vibration, appName), true, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND, getChannelName(R.string.mm_notification_channel_high_priority_sound, appName), false, true, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET, getChannelName(R.string.mm_notification_channel_high_priority_quiet, appName), false, false, null, null, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+        }
+    }
+
+    /**
+     * Resolves notification channel name from string resources, so that applications can override and translate it.
+     * Falls back to the application name if the resource can't be resolved or formatted (e.g. invalid format specifier in an application override).
+     */
+    private String getChannelName(@StringRes int resId, String appName) {
+        try {
+            return context.getString(resId, appName);
+        } catch (Resources.NotFoundException | IllegalFormatException e) {
+            MobileMessagingLogger.e("Could not resolve notification channel name.", e);
+            return appName;
         }
     }
 
@@ -376,19 +393,19 @@ public class MobileMessagingCore
             return;
         }
 
-        CharSequence appName = SoftwareInformation.getAppName(context);
+        String appName = SoftwareInformation.getAppName(context);
         if (channelName != null)
             appName = appName + " " + channelName;
 
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build();
-        createNotificationChannel(channelId + "_vibration", appName + "_vibration", true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(channelId, appName, false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(channelId + "_vibration", getChannelName(R.string.mm_notification_channel_custom_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(channelId, getChannelName(R.string.mm_notification_channel_custom, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
 
 
         if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
-            createNotificationChannel(channelId + "_high_priority, vibration", appName + " High Priority, Vibration", true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
-            createNotificationChannel(channelId + "_high_priority", appName + " High Priority", false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(channelId + "_high_priority, vibration", getChannelName(R.string.mm_notification_channel_custom_high_priority_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(channelId + "_high_priority", getChannelName(R.string.mm_notification_channel_custom_high_priority, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
         }
     }
 

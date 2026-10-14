@@ -14,4 +14,20 @@
     <string name="mm_button_settings">设置</string>
     <string name="mm_post_notifications_settings_title">更改通知设置</string>
     <string name="mm_post_notifications_settings_message">始终允许推送通知，使应用可在被关闭或未被使用时发送通知</string>
+
+    <!-- Notification channel names. %1$s is replaced with the application name. Override in the application to customize or translate. -->
+    <string name="mm_notification_channel_default">%1$s</string>
+    <string name="mm_notification_channel_vibration">%1$s 振动</string>
+    <string name="mm_notification_channel_sound">%1$s 提示音</string>
+    <string name="mm_notification_channel_quiet">%1$s 静音</string>
+    <string name="mm_notification_channel_high_priority">%1$s 高优先级</string>
+    <string name="mm_notification_channel_high_priority_vibration">%1$s 高优先级，振动</string>
+    <string name="mm_notification_channel_high_priority_sound">%1$s 高优先级，提示音</string>
+    <string name="mm_notification_channel_high_priority_quiet">%1$s 高优先级，静音</string>
+
+    <!-- Custom sound notification channel names. %1$s is replaced with the application name followed by the custom channel name. -->
+    <string name="mm_notification_channel_custom">%1$s</string>
+    <string name="mm_notification_channel_custom_vibration">%1$s 振动</string>
+    <string name="mm_notification_channel_custom_high_priority">%1$s 高优先级</string>
+    <string name="mm_notification_channel_custom_high_priority_vibration">%1$s 高优先级，振动</string>
 </resources>
