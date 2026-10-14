@@ -1,0 +1,31 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    plugins {
+        id("org.jetbrains.kotlin.android") version providers.gradleProperty("mm_kotlinVersion").get()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+include(
+    ":infobip-mobile-messaging-api-java",
+    ":infobip-mobile-messaging-android-sdk",
+    ":infobip-mobile-messaging-android-demo",
+    ":infobip-mobile-messaging-android-test",
+    ":infobip-mobile-messaging-android-resources",
+    ":infobip-mobile-messaging-android-chat-sdk",
+    ":infobip-mobile-messaging-android-cryptor-migration",
+    ":infobip-mobile-messaging-android-inbox-sdk",
+    ":infobip-rtc-ui"
+)
+
+System.setProperty("sonar.gradle.skipCompile", "true")

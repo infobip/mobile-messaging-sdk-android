@@ -90,7 +90,7 @@ public class MobileInboxMappersTest {
         fetchInboxResponse.setMessages(Collections.singletonList(messageResponse));
 
         Inbox inbox = InboxMapper.fromBackend(fetchInboxResponse);
-        InboxMessage inboxMessage = inbox.getMessages().getFirst();
+        InboxMessage inboxMessage = inbox.getMessages().get(0);
 
         assertEquals(4, inbox.getCountUnread());
         assertEquals(5, inbox.getCountTotal());
