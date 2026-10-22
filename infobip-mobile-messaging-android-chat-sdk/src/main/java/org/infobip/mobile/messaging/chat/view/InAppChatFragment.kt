@@ -579,7 +579,7 @@ class InAppChatFragment : Fragment(), InAppChatFragmentActivityResultDelegate.Re
                 val handled = eventsListener?.onChatAttachmentPreviewOpened(url, type, caption) ?: false
                 if (!handled) {
                     val intent: Intent
-                    if (type == "DOCUMENT") {
+                    if (type == "DOCUMENT" && caption?.endsWith(".pdf", ignoreCase = true) != true) {
                         intent = Intent(Intent.ACTION_VIEW).apply { data = url?.toUri() }
                     } else {
                         intent = InAppChatAttachmentPreviewActivity.startIntent(

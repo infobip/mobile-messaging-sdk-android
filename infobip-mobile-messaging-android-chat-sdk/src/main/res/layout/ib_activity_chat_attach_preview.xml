@@ -37,6 +37,28 @@
         app:layout_constraintTop_toBottomOf="@+id/ib_lc_appbar"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/ib_lc_chat_attach_rv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/ib_lc_appbar"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <TextView
+        android:id="@+id/ib_lc_chat_attach_error_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:gravity="center"
+        android:textColor="?android:attr/textColorPrimary"
+        tools:text="@string/ib_chat_attachment_preview_failed"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/ib_lc_appbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <ProgressBar
         android:id="@+id/ib_lc_chat_attach_pb"
         android:layout_width="50dp"

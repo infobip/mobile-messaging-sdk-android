@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Kies uit galerij</string>
     <string name="ib_chat_error_description">Probeer het later opnieuw of neem contact op met klantenondersteuning.</string>
     <string name="ib_chat_refresh">Vernieuwen</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Documentpagina</string>
+    <string name="ib_chat_attachment_preview_failed">Voorbeeld is niet beschikbaar voor deze bijlage</string>
 </resources>

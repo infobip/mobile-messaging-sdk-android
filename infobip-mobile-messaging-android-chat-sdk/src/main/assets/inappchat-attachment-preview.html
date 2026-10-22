@@ -1,81 +1,85 @@
+<!DOCTYPE html>
 <html lang="En">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
+        * {
             margin: 0;
-            background-color: black;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        #ib-container {
+        body {
+            background-color: black;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
         #ib-attachment {
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 90vh;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
         }
 
         img, video {
             max-width: 100%;
             max-height: 100%;
+            display: block;
+        }
+
+        audio {
+            width: 100%;
         }
     </style>
 </head>
 <body>
-<div id="ib-container">
-    <div id="ib-attachment">
-        <a id="download-image" href=""></a>
-    </div>
-</div>
+<div id="ib-attachment"></div>
 <script>
-        const url = getQueryParameter('attachmentUrl');
-        const type = getQueryParameter('attachmentType');
+    const url = getQueryParameter('attachmentUrl');
+    const type = getQueryParameter('attachmentType');
 
-        document.getElementById('download-image').href = url;
+    document.getElementById('ib-attachment').innerHTML = buildMediaHtml(url, type);
 
-        window.downloadAttachment = function() {
-            document.getElementById('download-image').click();
-        };
-
-        (function() {
-            const attachmentContainer = document.getElementById('ib-attachment');
-            const attachElement = resolveAttachElement(type, url);
-            attachmentContainer.appendChild(attachElement);
-        })();
-
-        function resolveAttachElement(type, url) {
-            let attachElement;
-
-            switch (type) {
-                case "IMAGE": {
-                    attachElement = new Image();
-                    attachElement.target = '_blank';
-                } break;
-
-                case "VIDEO": {
-                    attachElement = document.createElement('video');
-                    attachElement.setAttribute("controls","controls");
-                } break;
-
-                case "DOCUMENT": {
-                    attachElement = document.createElement('img');
-                    attachElement.type = 'application/pdf';
-                    url = './file-not-found.png';
-                } break;
-            }
-            attachElement.src = url;
-            return attachElement;
+    function buildMediaHtml(url, type) {
+        if (!url) {
+            return fileNotFoundHtml();
         }
 
-        function getQueryParameter(name) {
-           if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search)) {
-               return decodeURIComponent(name[1]);
-           }
+        const escapedUrl = escapeUrl(url);
+
+        switch (type) {
+            case "IMAGE":
+                return '<img src="' + escapedUrl + '" />';
+
+            case "VIDEO":
+                return '<video src="' + escapedUrl + '" controls playsinline></video>';
+
+            case "AUDIO":
+                return '<audio src="' + escapedUrl + '" controls></audio>';
+
+            // DOCUMENT is not handled here, natively by InAppChatAttachmentPreviewActivity instead.
+
+            default:
+                return fileNotFoundHtml();
         }
-    </script>
+    }
+
+    function fileNotFoundHtml() {
+        return '<img src="./file-not-found.png" />';
+    }
+
+    function escapeUrl(url) {
+        return url.replace(/"/g, '&quot;');
+    }
+
+    function getQueryParameter(name) {
+        const match = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+</script>
 </body>
 </html>

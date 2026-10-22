@@ -28,4 +28,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Izvēlēties no galerijas</string>
     <string name="ib_chat_error_description">Mēģiniet vēlāk vai sazinieties ar klientu atbalstu.</string>
     <string name="ib_chat_refresh">Atsvaidzināt</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Dokumenta lapa</string>
+    <string name="ib_chat_attachment_preview_failed">Šim pielikumam priekšskatījums nav pieejams</string>
 </resources>

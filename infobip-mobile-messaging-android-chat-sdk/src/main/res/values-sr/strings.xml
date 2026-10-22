@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Изаберите из галерије</string>
     <string name="ib_chat_error_description">Pokušajte ponovo kasnije ili kontaktirajte podršku za korisnike.</string>
     <string name="ib_chat_refresh">Osvežavanje</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Stranica dokumenta</string>
+    <string name="ib_chat_attachment_preview_failed">Pregled nije dostupan za ovaj prilog</string>
 </resources>

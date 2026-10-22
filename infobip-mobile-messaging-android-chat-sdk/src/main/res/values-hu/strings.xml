@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Válasszon a galériából</string>
     <string name="ib_chat_error_description">Próbálja meg később, vagy lépjen kapcsolatba az ügyfélszolgálattal.</string>
     <string name="ib_chat_refresh">Frissítés</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Dokumentumoldal</string>
+    <string name="ib_chat_attachment_preview_failed">Ehhez a melléklethez nem érhető el előnézet</string>
 </resources>

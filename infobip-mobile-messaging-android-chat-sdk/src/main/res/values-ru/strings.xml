@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Выберите из галереи</string>
     <string name="ib_chat_error_description">Повторите попытку позже или обратитесь в службу поддержки клиентов.</string>
     <string name="ib_chat_refresh">Обновить</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Страница документа</string>
+    <string name="ib_chat_attachment_preview_failed">Предварительный просмотр недоступен для этого вложения</string>
 </resources>

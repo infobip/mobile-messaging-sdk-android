@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Pilih daripada galeri</string>
     <string name="ib_chat_error_description">Cuba lagi nanti atau hubungi sokongan pelanggan.</string>
     <string name="ib_chat_refresh">Segarkan</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Halaman dokumen</string>
+    <string name="ib_chat_attachment_preview_failed">Pratonton tidak tersedia untuk lampiran ini</string>
 </resources>

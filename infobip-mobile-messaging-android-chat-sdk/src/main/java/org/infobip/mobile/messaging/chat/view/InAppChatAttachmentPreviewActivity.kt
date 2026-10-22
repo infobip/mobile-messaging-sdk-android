@@ -28,12 +28,18 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.launch
 import org.infobip.mobile.messaging.ConfigurationException
 import org.infobip.mobile.messaging.api.chat.WidgetInfo
 import org.infobip.mobile.messaging.chat.R
+import org.infobip.mobile.messaging.chat.attachments.InAppChatPdfDownloader
+import org.infobip.mobile.messaging.chat.attachments.InAppChatPdfPageAdapter
+import org.infobip.mobile.messaging.chat.attachments.InAppChatPdfRenderer
 import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachment
-import org.infobip.mobile.messaging.chat.core.InAppChatAttachmentPreviewClient
-import org.infobip.mobile.messaging.chat.core.InAppChatAttachmentPreviewClientImpl
+import org.infobip.mobile.messaging.chat.attachments.InAppChatWebAttachmentResolver
 import org.infobip.mobile.messaging.chat.databinding.IbActivityChatAttachPreviewBinding
 import org.infobip.mobile.messaging.chat.properties.MobileMessagingChatProperty
 import org.infobip.mobile.messaging.chat.properties.PropertyHelper
@@ -52,15 +58,24 @@ import org.infobip.mobile.messaging.chat.view.styles.apply
 import org.infobip.mobile.messaging.chat.view.styles.factory.StyleFactory
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger
 import org.infobip.mobile.messaging.permissions.PermissionsRequestManager
-import java.util.UUID
+import java.io.File
 
 class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     PermissionsRequestManager.PermissionsRequester {
 
     companion object {
+        private const val TAG = "InAppChatAttachmentPreview"
         private const val EXTRA_URL = "ib_chat_attachment_url"
         private const val EXTRA_TYPE = "ib_chat_attachment_type"
         private const val EXTRA_CAPTION = "ib_chat_attachment_caption"
+        private const val PDF_CACHE_DIR_NAME = "ib_chat_attachments"
+        private const val PDF_CACHE_FILE_NAME = "preview.pdf"
+        private const val STATE_PDF_PAGE_POSITION = "ib_chat_pdf_page_position"
+
+        private const val TYPE_IMAGE = "IMAGE"
+        private const val TYPE_VIDEO = "VIDEO"
+        private const val TYPE_AUDIO = "AUDIO"
+        private const val TYPE_DOCUMENT = "DOCUMENT"
 
         @JvmStatic
         fun startIntent(context: Context, url: String?, type: String?, caption: String?): Intent {
@@ -82,10 +97,12 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
 
     private lateinit var binding: IbActivityChatAttachPreviewBinding
     private val permissionsRequestManager = PermissionsRequestManager(this, this)
+    private val attachmentResolver = InAppChatWebAttachmentResolver()
+    private val pdfDownloader = InAppChatPdfDownloader()
+    private var pdfRenderer: InAppChatPdfRenderer? = null
+    private var pdfPagePosition = 0
     private var attachment: InAppChatWebAttachment? = null
     private var toolbarStyle: InAppChatToolbarStyle? = null
-    private lateinit var webViewClient: InAppChatAttachmentPreviewClient
-    private var isWebViewLoaded = false
 
     override fun attachBaseContext(newBase: Context?) {
         super.attachBaseContext(newBase?.applyInAppChatLanguage())
@@ -95,7 +112,6 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         setTheme(InAppChatThemeResolver.getChatViewTheme(this))
         super.onCreate(savedInstanceState)
         binding = IbActivityChatAttachPreviewBinding.inflate(layoutInflater)
-        webViewClient = InAppChatAttachmentPreviewClientImpl(binding.ibLcChatAttachWv)
         ContextCompat.registerReceiver(
             this@InAppChatAttachmentPreviewActivity,
             onFileDownloadingComplete,
@@ -104,8 +120,14 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         )
         setContentView(binding.root)
         applyWindowInsets()
-        initViews()
-        loadPreviewPage()
+        initToolbar()
+        pdfPagePosition = savedInstanceState?.getInt(STATE_PDF_PAGE_POSITION) ?: 0
+        val url = intent.getStringExtra(EXTRA_URL)
+        if (!url.isNullOrBlank() && intent.getStringExtra(EXTRA_TYPE) == TYPE_DOCUMENT) {
+            loadPdfPreview(url)
+        } else {
+            loadPreviewPage()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -122,14 +144,22 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val layoutManager = binding.ibLcChatAttachRv.layoutManager as? LinearLayoutManager
+        val position = layoutManager?.findFirstVisibleItemPosition() ?: RecyclerView.NO_POSITION
+        if (position != RecyclerView.NO_POSITION) {
+            outState.putInt(STATE_PDF_PAGE_POSITION, position)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(onFileDownloadingComplete)
-    }
-
-    private fun initViews() {
-        initToolbar()
-        initWebView()
+        binding.ibLcChatAttachRv.adapter = null
+        pdfRenderer?.close()
+        pdfRenderer = null
+        clearPdfCache()
     }
 
     private fun initToolbar() {
@@ -172,6 +202,9 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
     private fun initWebView() = with(binding.ibLcChatAttachWv) {
         settings.javaScriptEnabled = true
         settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        settings.setSupportZoom(true)
+        settings.builtInZoomControls = true
+        settings.displayZoomControls = false
         isClickable = true
         webViewClient = object : WebViewClient() {
 
@@ -183,42 +216,45 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 binding.ibLcChatAttachPb.show()
-                isWebViewLoaded = false
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 binding.ibLcChatAttachPb.hide()
-                isWebViewLoaded = true
             }
-
-        }
-
-        setDownloadListener { url, _, contentDisposition, mimetype, _ ->
-            binding.ibLcChatAttachPb.show()
-            this@InAppChatAttachmentPreviewActivity.attachment = InAppChatWebAttachment(
-                url,
-                contentDisposition,
-                mimetype
-            )
-            downloadFile()
         }
     }
 
     private fun triggerDownload() {
-        /**
-         * Prefer to fetch using WebView's DownloadManager, it provides contentDisposition we can parse fileName from.
-         * If WebView is not loaded there is a fallback to caption.
-         */
-        if (isWebViewLoaded && ::webViewClient.isInitialized) {
-            webViewClient.downloadAttachment()
-        } else {
-            attachment = InAppChatWebAttachment(
-                url = intent.getStringExtra(EXTRA_URL).orEmpty(),
-                fileName = intent.getStringExtra(EXTRA_CAPTION) ?: UUID.randomUUID().toString()
-            )
+        val url = intent.getStringExtra(EXTRA_URL).orEmpty()
+        val fallbackFileName = fallbackFileName()
+        binding.ibLcChatAttachPb.show()
+        lifecycleScope.launch {
+            attachment = attachmentResolver.resolve(url, fallbackFileName)
             downloadFile()
         }
+    }
+
+    /**
+     * File name used when the real one can not be resolved from the attachment's response headers.
+     *
+     * The caption usually carries the original file name, so it is preferred, but only when it has
+     * an extension. Otherwise a generated name is used, with the extension derived from the
+     * attachment type - a file without one is not recognized by the system.
+     */
+    private fun fallbackFileName(): String {
+        val caption = intent.getStringExtra(EXTRA_CAPTION)?.trim()
+        if (!caption.isNullOrEmpty() && caption.substringAfterLast('.', "").isNotEmpty()) {
+            return caption
+        }
+        val extension = when (intent.getStringExtra(EXTRA_TYPE)?.uppercase()) {
+            TYPE_IMAGE -> ".jpg"
+            TYPE_VIDEO -> ".mp4"
+            TYPE_AUDIO -> ".mp3"
+            TYPE_DOCUMENT -> ".pdf"
+            else -> ""
+        }
+        return "attachment_${System.currentTimeMillis()}$extension"
     }
 
     private fun downloadFile() {
@@ -236,16 +272,19 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
         }
         attachment?.let {
             binding.ibLcChatAttachPb.show()
+            val fileName = it.fileName.replace('/', '_').replace('\\', '_').trim()
             val request = DownloadManager.Request(Uri.parse(it.url))
             request.allowScanningByMediaScanner()
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, it.fileName)
+            request.setTitle(fileName)
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
             val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
             dm.enqueue(request)
         }
     }
 
     private fun loadPreviewPage() {
+        initWebView()
         val previewPageUrl = getString(R.string.ib_inappchat_attachment_preview_uri)
         val attachmentUrl: String? = intent.getStringExtra(EXTRA_URL)
         val attachmentType: String? = intent.getStringExtra(EXTRA_TYPE)
@@ -256,6 +295,69 @@ class InAppChatAttachmentPreviewActivity : AppCompatActivity(),
             .build()
             .toString()
         binding.ibLcChatAttachWv.loadUrl(resultUrl)
+    }
+    //endregion
+
+    //region PDF preview
+    /**
+     * Renders the document locally.
+     *
+     * The attachment url is signed and may carry credentials, so it must not be handed to a
+     * third party viewer. The document is downloaded into the application's cache instead and
+     * rendered by [InAppChatPdfRenderer].
+     */
+    private fun loadPdfPreview(url: String) {
+        binding.ibLcChatAttachWv.hide()
+        binding.ibLcChatAttachPb.show()
+        lifecycleScope.launch {
+            runCatching {
+                val file = pdfDownloader.download(url, pdfCacheFile())
+                InAppChatPdfRenderer.open(file)
+            }.onSuccess { renderer ->
+                pdfRenderer?.close()
+                pdfRenderer = renderer
+                showPdfPages(renderer)
+            }.onFailure {
+                MobileMessagingLogger.e(TAG, "Could not render document preview.", it)
+                showPreviewError()
+            }
+            binding.ibLcChatAttachPb.hide()
+        }
+    }
+
+    private fun showPdfPages(renderer: InAppChatPdfRenderer) {
+        binding.ibLcChatAttachRv.apply {
+            val layoutManager = LinearLayoutManager(this@InAppChatAttachmentPreviewActivity)
+            this.layoutManager = layoutManager
+            adapter = InAppChatPdfPageAdapter(renderer, lifecycleScope)
+            // The pages are rendered asynchronously, the position can only be restored once
+            // the adapter has them.
+            layoutManager.scrollToPosition(pdfPagePosition)
+            show()
+        }
+    }
+
+    private fun showPreviewError() {
+        binding.ibLcChatAttachRv.hide()
+        binding.ibLcChatAttachErrorTv.apply {
+            setText(R.string.ib_chat_attachment_preview_failed)
+            show()
+        }
+    }
+
+    /**
+     * File the previewed document is cached in.
+     *
+     * A fixed name is enough, the preview shows a single document and [clearPdfCache] removes
+     * the file once the preview is closed.
+     */
+    private fun pdfCacheFile(): File = File(File(cacheDir, PDF_CACHE_DIR_NAME), PDF_CACHE_FILE_NAME)
+
+    /**
+     * Removes documents cached for previewing, they are kept only while the preview is open.
+     */
+    private fun clearPdfCache() {
+        runCatching { File(cacheDir, PDF_CACHE_DIR_NAME).deleteRecursively() }
     }
     //endregion
 

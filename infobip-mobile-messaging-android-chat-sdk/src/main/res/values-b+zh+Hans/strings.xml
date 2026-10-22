@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">从画廊中选择</string>
     <string name="ib_chat_error_description">请稍后重试或联系客户支持。</string>
     <string name="ib_chat_refresh">刷新</string>
+    <string name="ib_chat_attachment_pdf_page_desc">文档页面</string>
+    <string name="ib_chat_attachment_preview_failed">此附件无法预览</string>
 </resources>

@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">เลือกจากแกลเลอรี่</string>
     <string name="ib_chat_error_description">ลองใหม่อีกครั้งในภายหลังหรือติดต่อฝ่ายสนับสนุนลูกค้า</string>
     <string name="ib_chat_refresh">รีเฟรช</string>
+    <string name="ib_chat_attachment_pdf_page_desc">หน้าเอกสาร</string>
+    <string name="ib_chat_attachment_preview_failed">ไม่สามารถดูตัวอย่างไฟล์แนบนี้ได้</string>
 </resources>

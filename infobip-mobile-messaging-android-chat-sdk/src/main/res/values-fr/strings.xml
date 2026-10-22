@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Sélectionner dans la galerie</string>
     <string name="ib_chat_error_description">Réessayez plus tard ou contactez le support client.</string>
     <string name="ib_chat_refresh">Actualiser</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Page du document</string>
+    <string name="ib_chat_attachment_preview_failed">L\'aperçu n\'est pas disponible pour cette pièce jointe</string>
 </resources>

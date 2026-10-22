@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Izberite v galeriji</string>
     <string name="ib_chat_error_description">Poskusite ponovno pozneje ali se obrnite na podporo za stranke.</string>
     <string name="ib_chat_refresh">Osveži</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Stran dokumenta</string>
+    <string name="ib_chat_attachment_preview_failed">Predogled za to prilogo ni na voljo</string>
 </resources>

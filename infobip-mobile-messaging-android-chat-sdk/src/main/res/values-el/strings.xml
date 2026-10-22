@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Επιλέξτε από τη γκαλερί</string>
     <string name="ib_chat_error_description">Δοκιμάστε ξανά αργότερα ή επικοινωνήστε με την υποστήριξη πελατών.</string>
     <string name="ib_chat_refresh">Ανανέωση</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Σελίδα εγγράφου</string>
+    <string name="ib_chat_attachment_preview_failed">Η προεπισκόπηση δεν είναι διαθέσιμη για αυτό το συνημμένο</string>
 </resources>

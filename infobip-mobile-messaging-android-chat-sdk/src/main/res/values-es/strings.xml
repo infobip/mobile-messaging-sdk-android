@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Seleccionar de la galería</string>
     <string name="ib_chat_error_description">Intente de nuevo más tarde o comuníquese con el soporte al cliente.</string>
     <string name="ib_chat_refresh">Actualizar</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Página del documento</string>
+    <string name="ib_chat_attachment_preview_failed">La vista previa no está disponible para este archivo adjunto</string>
 </resources>

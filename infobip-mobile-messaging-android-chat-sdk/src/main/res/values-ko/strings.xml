@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">갤러리에서 선택하십시오</string>
     <string name="ib_chat_error_description">나중에 다시 시도하거나 고객 지원에 문의하세요.</string>
     <string name="ib_chat_refresh">새로고침</string>
+    <string name="ib_chat_attachment_pdf_page_desc">문서 페이지</string>
+    <string name="ib_chat_attachment_preview_failed">이 첨부 파일은 미리 볼 수 없습니다</string>
 </resources>

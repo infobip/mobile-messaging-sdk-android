@@ -31,4 +31,6 @@
     <string name="ib_chat_attachments_select_from_gallery">Select from Gallery</string>
     <string name="ib_chat_error_description">Try again, later or contact customer support.</string>
     <string name="ib_chat_refresh">Refresh</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Document page</string>
+    <string name="ib_chat_attachment_preview_failed">Preview is not available for this attachment</string>
 </resources>

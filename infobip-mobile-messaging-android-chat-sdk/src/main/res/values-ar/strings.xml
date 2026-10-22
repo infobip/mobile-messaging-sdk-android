@@ -26,4 +26,6 @@
     <string name="ib_chat_attachments_select_from_gallery">اختر من المعرض</string>
     <string name="ib_chat_error_description">حاول مرة أخرى لاحقاً أو اتصل بدعم العملاء.</string>
     <string name="ib_chat_refresh">تحديث</string>
+    <string name="ib_chat_attachment_pdf_page_desc">صفحة المستند</string>
+    <string name="ib_chat_attachment_preview_failed">المعاينة غير متوفرة لهذا المرفق</string>
 </resources>
