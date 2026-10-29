@@ -51,3 +51,5 @@ captures/
 # Claude Code configuration (keep local only)
 .claude/
 CLAUDE.md
+/AGENTS.md
+/memory/

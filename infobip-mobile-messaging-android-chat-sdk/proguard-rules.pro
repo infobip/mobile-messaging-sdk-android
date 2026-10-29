@@ -16,88 +16,113 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Runtime metadata required by Kotlin, Gson, nested classes and annotations.
+-keepattributes Exceptions,InnerClasses,EnclosingMethod,Signature,SourceFile,LineNumberTable,*Annotation*
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-
--keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,EnclosingMethod
+# Keep Kotlin metadata.
+-keep class kotlin.Metadata { *; }
 
 # Preserve all annotations.
-
 -keepattributes *Annotation*
 
-# Preserve all public classes, and their public and protected fields and
-# methods.
+# ---------------------------------------------------------------------------
+# Public/protected SDK API
+# ---------------------------------------------------------------------------
 
+# Public classes, including abstract and sealed classes.
+# Kotlin sealed classes have no separate ProGuard selector.
 -keep public class org.infobip.mobile.messaging.chat.** {
     public protected *;
 }
 
-# Keep sealed classes and their nested types
 -keep public class org.infobip.mobile.messaging.chat.**$* {
     public protected *;
 }
 
+# Public interfaces and nested interfaces.
 -keep public interface org.infobip.mobile.messaging.chat.** {
     public protected *;
 }
 
-# Keep interfaces and their nested types
 -keep public interface org.infobip.mobile.messaging.chat.**$* {
     public protected *;
 }
 
--keep class kotlin.Metadata { *; }
-
-# Gson-deserialized models. Kotlin properties are backed by private fields,
-# which are not covered by the public API keep rules above.
-
--keep class org.infobip.mobile.messaging.chat.core.InAppChatException {
-    <fields>;
-}
--keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetException {
-    <fields>;
-    <init>(...);
-}
--keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread {
-    <fields>;
-    <init>(...);
-}
--keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatCustomization {
-    <fields>;
-    <init>(...);
-}
--keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatToolbarCustomization {
-    <fields>;
-    <init>(...);
+# Public enums, their constants and generated members.
+-keep public enum org.infobip.mobile.messaging.chat.** {
+    *;
 }
 
-# Preserve the special static methods that are required in all enumeration
-# classes.
+-keep public enum org.infobip.mobile.messaging.chat.**$* {
+    *;
+}
 
--keepclassmembers class org.infobip.mobile.messaging.chat.** extends java.lang.Enum {
+
+# ---------------------------------------------------------------------------
+# Internal runtime boundaries
+# ---------------------------------------------------------------------------
+
+# Loaded from AndroidManifest metadata through Class.forName() and newInstance().
+-keep class org.infobip.mobile.messaging.chat.InAppChatImpl {
+    public <init>();
+}
+
+# Methods called from JavaScript by name.
+-keepclassmembers class org.infobip.mobile.messaging.chat.** {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# Preserve enum names used by JSON, JavaScript, broadcasts and toString().
+# Includes LivechatWidgetMethod, LivechatWidgetView,
+# LivechatWidgetMessageType, LivechatWidgetThreadStatus and
+# MultithreadStrategy.
+-keepclassmembers enum org.infobip.mobile.messaging.chat.** {
     <fields>;
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
--keep public enum org.infobip.mobile.messaging.chat.** { *; }
 
 # Preserve all .class method names.
-
 -keepclassmembernames class org.infobip.mobile.messaging.chat.** {
     java.lang.Class class$(java.lang.String);
     java.lang.Class class$(java.lang.String, boolean);
 }
 
 # Preserve all native method names and the names of their classes.
-
 -keepclasseswithmembernames class org.infobip.mobile.messaging.chat.** {
     native <methods>;
+}
+
+
+# ---------------------------------------------------------------------------
+# Gson reflective deserialization
+# ---------------------------------------------------------------------------
+
+# Used directly and as Array<LivechatWidgetThread>.
+-keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetThread {
+    <fields>;
+    <init>(...);
+}
+
+# LivechatWidgetException stores its JSON values in inherited private fields.
+-keep class org.infobip.mobile.messaging.chat.core.InAppChatException {
+    <fields>;
+}
+
+-keep class org.infobip.mobile.messaging.chat.core.widget.LivechatWidgetException {
+    <fields>;
+    <init>(...);
+}
+
+# Plugin customization and nested toolbar models.
+-keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatCustomization {
+    <fields>;
+    <init>(...);
+}
+
+-keep class org.infobip.mobile.messaging.chat.view.styles.PluginChatToolbarCustomization {
+    <fields>;
+    <init>(...);
 }
 
 # Explicitly preserve all serialization members. The Serializable interface
@@ -105,7 +130,6 @@
 # You can comment this out if your library doesn't use serialization.
 # If your code contains serializable classes that have to be backward
 # compatible, please refer to the manual.
-
 -keepclassmembers class org.infobip.mobile.messaging.chat.** implements java.io.Serializable {
     static final long serialVersionUID;
     static final java.io.ObjectStreamField[] serialPersistentFields;

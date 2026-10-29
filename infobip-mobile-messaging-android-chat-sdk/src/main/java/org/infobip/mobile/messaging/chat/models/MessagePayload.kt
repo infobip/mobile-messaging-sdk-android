@@ -116,12 +116,12 @@ internal class MessagePayloadAdapter : JsonSerializer.ObjectAdapter<MessagePaylo
 
     override fun serialize(value: MessagePayload?): String? {
         return when (value) {
-            is MessagePayload.Draft -> return JSONObject().apply {
+            is MessagePayload.Draft -> JSONObject().apply {
                 put("message", value.message)
                 put("type", value.type.name)
             }.toString()
 
-            is MessagePayload.Basic -> return JSONObject().apply {
+            is MessagePayload.Basic -> JSONObject().apply {
                 if (value.message?.isNotBlank() == true) {
                     put("message", value.message)
                 }
@@ -132,7 +132,7 @@ internal class MessagePayloadAdapter : JsonSerializer.ObjectAdapter<MessagePaylo
                 put("type", value.type.name)
             }.toString()
 
-            is MessagePayload.CustomData -> return JSONObject().apply {
+            is MessagePayload.CustomData -> JSONObject().apply {
                 put("customData", value.customData)
                 if (value.agentMessage != null) {
                     put("agentMessage", value.agentMessage)

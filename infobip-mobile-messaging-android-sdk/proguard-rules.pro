@@ -112,3 +112,14 @@
 # Retain generic signatures of TypeToken and its subclasses with R8 version 3.0 and higher.
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+
+# WorkManager uses a Room-generated database implementation created through reflection.
+# Room 2.5.0 keeps the generated class but not its constructor required by R8 full mode.
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    <init>();
+}
+
+# WorkManager 2.8.1 keeps InputMerger subclasses but not their constructors required by reflection.
+-keepclassmembers class * extends androidx.work.InputMerger {
+    public <init>();
+}
