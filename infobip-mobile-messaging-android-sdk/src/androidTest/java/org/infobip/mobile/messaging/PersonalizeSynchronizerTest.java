@@ -22,8 +22,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 
@@ -33,8 +40,19 @@ import org.infobip.mobile.messaging.api.support.ApiErrorCode;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.api.support.util.CollectionUtils;
+import org.infobip.mobile.messaging.cloud.MobileMessageHandler;
+import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
+import org.infobip.mobile.messaging.cloud.RegistrationTokenHandler;
+import org.infobip.mobile.messaging.cloud.firebase.FirebaseRegistrationTokenHandler;
+import org.infobip.mobile.messaging.mobileapi.BatchReporter;
+import org.infobip.mobile.messaging.mobileapi.DebouncingGuard;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
+import org.infobip.mobile.messaging.mobileapi.common.RetryPolicyProvider;
+import org.infobip.mobile.messaging.mobileapi.user.DepersonalizeServerListener;
+import org.infobip.mobile.messaging.mobileapi.user.PersonalizeSynchronizer;
+import org.infobip.mobile.messaging.platform.Lazy;
+import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.Test;
@@ -60,12 +78,22 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
     private Set<String> givenEmails = CollectionUtils.setOf("email1@mail.com", "email2@mail.com");
     private Map<String, CustomAttributeValue> givenCustomAtts = new HashMap<>();
 
+    private Lazy<MobileMessagingCloudHandler, Context> originalMobileMessagingCloudHandler;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         enableMessageStoreForReceivedMessages();
         givenCustomAtts.put("someKey", new CustomAttributeValue("someValue"));
+        originalMobileMessagingCloudHandler = Platform.mobileMessagingCloudHandler;
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        Platform.sdkInt = Build.VERSION.SDK_INT;
+        Platform.mobileMessagingCloudHandler = originalMobileMessagingCloudHandler;
+        super.tearDown();
     }
 
     @Test
@@ -371,6 +399,151 @@ public class PersonalizeSynchronizerTest extends MobileMessagingTestCase {
 
         //then
         verify(broadcaster, after(600).atMostOnce()).personalized(userCaptor.capture());
+    }
+
+    @Test
+    public void test_depersonalize_completed_resets_cloud_token_by_default() {
+        //given
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+        givenUserData();
+
+        //when
+        mobileMessaging.depersonalize();
+
+        //then
+        verify(broadcaster, after(300).atLeastOnce()).depersonalized();
+        verify(tokenHandler, timeout(1000)).reissueToken();
+    }
+
+    @Test
+    public void test_depersonalize_completed_with_app_managed_fcm_token_lifecycle_does_not_reset_cloud_token() {
+        //given
+        MobileMessagingCore.setAppManagedFcmTokenLifecycle(context, true);
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+        givenUserData();
+
+        //when
+        mobileMessaging.depersonalize();
+
+        //then
+        verify(broadcaster, after(300).atLeastOnce()).depersonalized();
+        assertFalse(PreferenceHelper.findBoolean(context, MobileMessagingProperty.IS_DEPERSONALIZE_UNREPORTED));
+        verifyNeededPrefsCleanUp();
+        assertNull(mobileMessagingCore.getUser());
+        verifyTokenNotDeletedNorReissued(tokenHandler);
+    }
+
+    @Test
+    public void test_depersonalize_with_listener_completed_with_app_managed_fcm_token_lifecycle_does_not_reset_cloud_token() {
+        //given
+        MobileMessagingCore.setAppManagedFcmTokenLifecycle(context, true);
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+        givenUserData();
+
+        //when
+        mobileMessaging.depersonalize(successPendingResultListener);
+
+        //then
+        verify(successPendingResultListener, after(500).times(1)).onResult(captor.capture());
+        assertTrue(captor.getValue().isSuccess());
+        verifyNeededPrefsCleanUp();
+        verifyTokenNotDeletedNorReissued(tokenHandler);
+    }
+
+    @Test
+    public void test_repersonalize_without_user_data_resets_cloud_token_by_default() {
+        //given
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+        assertNull(mobileMessagingCore.getUser());
+
+        //when
+        givenPersonalizeSynchronizer(mobileMessagingCore).repersonalize();
+
+        //then
+        verify(tokenHandler, timeout(1000)).reissueToken();
+    }
+
+    @Test
+    public void test_repersonalize_without_user_data_with_app_managed_fcm_token_lifecycle_does_not_reset_cloud_token() {
+        //given
+        MobileMessagingCore.setAppManagedFcmTokenLifecycle(context, true);
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+        assertNull(mobileMessagingCore.getUser());
+
+        //when
+        givenPersonalizeSynchronizer(mobileMessagingCore).repersonalize();
+
+        //then
+        verifyTokenNotDeletedNorReissued(tokenHandler);
+    }
+
+    @Test
+    public void test_reset_cloud_token_with_app_managed_fcm_token_lifecycle_does_not_reset_cloud_token() {
+        //given
+        MobileMessagingCore.setAppManagedFcmTokenLifecycle(context, true);
+        RegistrationTokenHandler tokenHandler = givenRegistrationTokenHandlerMock();
+
+        //when
+        mobileMessagingCore.resetCloudToken(true);
+        mobileMessagingCore.resetCloudToken(false);
+
+        //then
+        verifyTokenNotDeletedNorReissued(tokenHandler);
+    }
+
+    @Test
+    public void test_new_token_is_processed_with_app_managed_fcm_token_lifecycle() {
+        //given
+        MobileMessagingCore.setAppManagedFcmTokenLifecycle(context, true);
+        FirebaseRegistrationTokenHandler tokenHandler = new FirebaseRegistrationTokenHandler(mobileMessagingCore, broadcaster);
+
+        //when
+        tokenHandler.handleNewToken("newToken");
+
+        //then
+        verify(broadcaster).tokenReceived("newToken");
+        assertEquals("newToken", mobileMessagingCore.getCloudToken());
+    }
+
+    /**
+     * Dispatches cloud actions in-process (pre-Oreo path without WAKE_LOCK) instead of via WorkManager,
+     * so that the actual token action can be verified on the returned handler.
+     */
+    private RegistrationTokenHandler givenRegistrationTokenHandlerMock() {
+        Platform.sdkInt = Build.VERSION_CODES.N_MR1;
+        Context contextWithoutWakeLock = new ContextWrapper(context) {
+            @Override
+            public int checkPermission(String permission, int pid, int uid) {
+                if (Manifest.permission.WAKE_LOCK.equals(permission)) {
+                    return PackageManager.PERMISSION_DENIED;
+                }
+                return super.checkPermission(permission, pid, uid);
+            }
+        };
+        RegistrationTokenHandler tokenHandler = mock(RegistrationTokenHandler.class);
+        Platform.reset(new MobileMessagingCloudHandler(tokenHandler, mock(MobileMessageHandler.class)));
+        mobileMessagingCore = MobileMessagingTestable.create(contextWithoutWakeLock, broadcaster, mobileApiResourceProvider, firebaseAppProvider);
+        mobileMessaging = mobileMessagingCore;
+        return tokenHandler;
+    }
+
+    private void verifyTokenNotDeletedNorReissued(RegistrationTokenHandler tokenHandler) {
+        verify(tokenHandler, after(500).never()).reissueToken();
+        verify(tokenHandler, never()).cleanupToken();
+        verify(tokenHandler, never()).acquireNewToken();
+    }
+
+    private PersonalizeSynchronizer givenPersonalizeSynchronizer(MobileMessagingCore core) {
+        return new PersonalizeSynchronizer(
+                core,
+                broadcaster,
+                mobileApiAppInstance,
+                mobileApiUserData,
+                new RetryPolicyProvider(context).DEFAULT(),
+                Runnable::run,
+                new BatchReporter(100L),
+                mock(DepersonalizeServerListener.class),
+                new DebouncingGuard(PreferenceHelper.findLong(context, MobileMessagingProperty.DEBOUNCE_WINDOW_MS)));
     }
 
     private void givenUserData() {

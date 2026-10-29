@@ -1516,6 +1516,14 @@ public class MobileMessagingCore
         PreferenceHelper.saveBoolean(context, MobileMessagingProperty.BANNER_FOREGROUND_NOTIFICATIONS, bannerForegroundNotifications);
     }
 
+    public static void setAppManagedFcmTokenLifecycle(Context context, boolean appManagedFcmTokenLifecycle) {
+        PreferenceHelper.saveBoolean(context, MobileMessagingProperty.APP_MANAGED_FCM_TOKEN_LIFECYCLE, appManagedFcmTokenLifecycle);
+    }
+
+    public boolean isAppManagedFcmTokenLifecycle() {
+        return PreferenceHelper.findBoolean(context, MobileMessagingProperty.APP_MANAGED_FCM_TOKEN_LIFECYCLE.getKey(), false);
+    }
+
     static boolean shouldSaveApplicationCode(Context context) {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.SAVE_APP_CODE_ON_DISK.getKey(), true);
     }
@@ -1596,6 +1604,10 @@ public class MobileMessagingCore
     }
 
     public void resetCloudToken(boolean force) {
+        if (isAppManagedFcmTokenLifecycle()) {
+            MobileMessagingLogger.d("Skipping cloud token reset, FCM token lifecycle is managed by the app");
+            return;
+        }
         if (force || !didSyncRecently()) {
             MobileMessagingCloudService.enqueueTokenReset(context, firebaseAppProvider);
         }

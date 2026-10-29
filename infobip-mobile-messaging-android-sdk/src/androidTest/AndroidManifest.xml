@@ -9,9 +9,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- icon and launcher activity are required by MobileMessaging.Builder to resolve default notification settings -->
     <application
+        android:icon="@android:drawable/sym_def_app_icon"
         android:usesCleartextTraffic="true"
         tools:replace="android:usesCleartextTraffic"
-        tools:targetApi="m" />
+        tools:targetApi="m">
+
+        <activity
+            android:name="org.infobip.mobile.messaging.platform.MockActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
 
 </manifest>

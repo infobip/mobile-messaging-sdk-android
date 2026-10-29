@@ -81,6 +81,7 @@ public enum MobileMessagingProperty {
     NOTIFICATION_CHANNEL_NAME("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_NAME", null),
     NOTIFICATION_CHANNEL_AUDIO("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_AUDIO", null),
     BANNER_FOREGROUND_NOTIFICATIONS("org.infobip.mobile.messaging.infobip.BANNER_FOREGROUND_NOTIFICATIONS", false),
+    APP_MANAGED_FCM_TOKEN_LIFECYCLE("org.infobip.mobile.messaging.infobip.APP_MANAGED_FCM_TOKEN_LIFECYCLE", false),
     // END
 
     // START: privacy settings prefs

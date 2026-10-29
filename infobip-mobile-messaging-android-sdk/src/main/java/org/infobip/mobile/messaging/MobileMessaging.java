@@ -617,6 +617,7 @@ public abstract class MobileMessaging {
         private JwtSupplier jwtSupplier = null;
         private boolean bannerForegroundNotifications = false;
         private HashSet<String> trustedDomains = null;
+        private boolean appManagedFcmTokenLifecycle = false;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -1059,6 +1060,35 @@ public abstract class MobileMessaging {
         }
 
         /**
+         * Lets the application manage the FCM token lifecycle by itself.
+         * <p>
+         * When enabled, SDK will not delete ({@code FirebaseMessaging.deleteToken()}) nor force regeneration
+         * ({@code FirebaseMessaging.getToken()}) of the FCM token as part of depersonalization or repersonalization.
+         * SDK still performs its internal depersonalization cleanup, and keeps processing new tokens provided via
+         * {@link org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService#onNewToken(Context, String)}.
+         * <p>
+         * <b>Note:</b> the application is then responsible for renewing the FCM token if it is required after depersonalization.
+         * Calling {@code FirebaseMessaging.getToken()} does not trigger {@code onNewToken()} while the token is unchanged,
+         * so if the SDK needs to (re-)register the token, the application has to provide it via
+         * {@link org.infobip.mobile.messaging.cloud.firebase.MobileMessagingFirebaseService#onNewToken(Context, String)}.
+         * When the push registration is invalidated on the server side, the SDK will not force a new token on repersonalization,
+         * and the installation stays unregistered for push until a new token is provided (the same token won't restore it).
+         * The token is still reset when the application code or push service type changes.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withAppManagedFcmTokenLifecycle(true)
+         *       .build();}
+         * </pre>
+         *
+         * @param appManagedFcmTokenLifecycle set to true to prevent SDK from deleting and reissuing FCM token on depersonalization or repersonalization
+         * @return {@link Builder}
+         */
+        public Builder withAppManagedFcmTokenLifecycle(boolean appManagedFcmTokenLifecycle) {
+            this.appManagedFcmTokenLifecycle = appManagedFcmTokenLifecycle;
+            return this;
+        }
+
+        /**
          * Builds the <i>MobileMessaging</i> configuration. Registration token patch is started by default.
          * Any messages received in the past will be reported as delivered!
          *
@@ -1091,6 +1121,7 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setSharedPrefsStorage(application, usePrivateSharedPrefs);
             MobileMessagingCore.setCustomNotificationChannel(application, channelId, channelName, notificationAudio);
             MobileMessagingCore.setBannerForegroundNotifications(application, bannerForegroundNotifications);
+            MobileMessagingCore.setAppManagedFcmTokenLifecycle(application, appManagedFcmTokenLifecycle);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)
