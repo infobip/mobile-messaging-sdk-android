@@ -12,12 +12,12 @@ import android.app.Activity
 import android.content.Context
 import com.infobip.webrtc.ui.internal.core.Injector
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.internal.utils.resourcesWebrtcConfigurationId
 import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
 import com.infobip.webrtc.ui.model.RtcUiError
 import com.infobip.webrtc.ui.view.styles.InfobipRtcUiTheme
-import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.Locale
 
 /**
@@ -238,8 +238,8 @@ interface InfobipRtcUi {
         fun getInstance(context: Context): InfobipRtcUi {
             val sdk = Injector.getWebrtcUi(context)
 
-            if (Injector.cache.configurationId.isBlank()) {
-                getWebRtcPushConfigurationIdFromResources(context)?.let {
+            if (Injector.cache.configurationId.isNullOrBlank()) {
+                context.resourcesWebrtcConfigurationId?.let {
                     Injector.cache.configurationId = it
                 }
             }
@@ -248,24 +248,13 @@ interface InfobipRtcUi {
             return sdk
         }
 
-        private fun getWebRtcPushConfigurationIdFromResources(context: Context): String? {
-            val resource = ResourceLoader.loadResourceByName(
-                context,
-                "string",
-                "infobip_webrtc_configuration_id"
-            )
-            return if (resource > 0) {
-                context.resources.getString(resource)
-            } else null
-        }
-
         private fun validateMobileMessagingApplicationCode() {
             if (Injector.appCodeDelegate.getApplicationCode().isNullOrBlank())
                 throw IllegalArgumentException("Application code is not provided to MobileMessaging library, make sure it is available in resources or Mobile Messaging SDK builder.")
         }
 
         private fun validateWebRtcPushConfigurationId() {
-            if (Injector.cache.configurationId.isBlank())
+            if (Injector.cache.configurationId.isNullOrBlank())
                 throw IllegalArgumentException("Webrtc push configuration ID is not provided to InfobipRtcUi library, make sure it is available in resources or InfobipRtcUi SDK builder.")
         }
 

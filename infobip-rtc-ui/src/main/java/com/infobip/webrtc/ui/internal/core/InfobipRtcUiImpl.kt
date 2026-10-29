@@ -18,6 +18,7 @@ import com.infobip.webrtc.ui.internal.delegate.CallsDelegate
 import com.infobip.webrtc.ui.internal.delegate.NotificationPermissionDelegate
 import com.infobip.webrtc.ui.internal.delegate.PushIdDelegate
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.internal.utils.resourcesWebrtcConfigurationId
 import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.InCallButton
 import com.infobip.webrtc.ui.model.ListenType
@@ -152,12 +153,17 @@ internal class InfobipRtcUiImpl(
         onError: (Throwable) -> Unit = {},
         onSuccess: (Unit) -> Unit = {},
     ) {
-        callsDelegate.enablePush(token, cache.configurationId) {
-            RtcUiLogger.d("Registration for calls push result: ${it.status}, ${it.description}")
-            if (it.status != Status.SUCCESS) {
-                onError(IllegalStateException("Registration for calls push failed. Reason: ${it.description}"))
-            } else {
-                onSuccess(Unit)
+        val configurationId = cache.configurationId.takeIf { !it.isNullOrBlank() } ?: context.resourcesWebrtcConfigurationId
+        if (configurationId.isNullOrBlank())
+            onError(IllegalStateException("Missing or invalid WebRTC push configuration ID."))
+        else {
+            callsDelegate.enablePush(token, configurationId) {
+                RtcUiLogger.d("Registration for calls push result: ${it.status}, ${it.description}")
+                if (it.status != Status.SUCCESS) {
+                    onError(IllegalStateException("Registration for calls push failed. Reason: ${it.description}"))
+                } else {
+                    onSuccess(Unit)
+                }
             }
         }
     }

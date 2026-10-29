@@ -49,7 +49,9 @@ internal interface CallRegistrationLifetimeCache {
 
 internal class CallRegistrationLifetimeCacheImpl : CallRegistrationLifetimeCache {
 
+    @Volatile
     override var identity: String = ""
+    @Volatile
     override var rtcUiMode: RtcUiMode? = null
 
     override fun clear() {
@@ -65,7 +67,7 @@ internal class CallRegistrationLifetimeCacheImpl : CallRegistrationLifetimeCache
  * Cache is cleared when SDK is removed from memory - app is killed.
  */
 internal interface SdkLifetimeCache {
-    var configurationId: String
+    var configurationId: String?
     var activityClass: Class<out Activity>
     var autoDeclineOnMissingNotificationPermission: Boolean
     var autoDeclineOnMissingReadPhoneStatePermission: Boolean
@@ -88,7 +90,8 @@ internal interface SdkLifetimeCache {
 
 internal class SdkLifetimeCacheImpl : SdkLifetimeCache {
 
-    override var configurationId: String = ""
+    @Volatile
+    override var configurationId: String? = null
     override var activityClass: Class<out Activity> = CallActivity::class.java
     override var autoDeclineOnMissingNotificationPermission: Boolean = true
     override var autoDeclineOnMissingReadPhoneStatePermission: Boolean = false
@@ -115,6 +118,7 @@ internal class SdkLifetimeCacheImpl : SdkLifetimeCache {
             InCallButton.FlipCam(),
         )
     override var callErrorMapper: RtcUiCallErrorMapper? = null
+    @Volatile
     override var livechatRegistrationId: String? = null
 }
 //endregion

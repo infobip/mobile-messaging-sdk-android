@@ -25,6 +25,7 @@ import androidx.work.WorkerParameters
 import com.infobip.webrtc.ui.InfobipRtcUi
 import com.infobip.webrtc.ui.R
 import com.infobip.webrtc.ui.internal.model.RtcUiMode
+import com.infobip.webrtc.ui.internal.utils.resourcesWebrtcConfigurationId
 import com.infobip.webrtc.ui.logging.RtcUiLogger
 import com.infobip.webrtc.ui.model.ListenType
 import kotlinx.coroutines.CancellableContinuation
@@ -33,6 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class CallRegistrationWorker(
     private val context: Context,
@@ -74,6 +76,13 @@ internal class CallRegistrationWorker(
     }
 
     override suspend fun doWork(): Result {
+        val configurationId = Injector.cache.configurationId.takeIf { !it.isNullOrBlank() } ?: context.resourcesWebrtcConfigurationId
+        if (configurationId.isNullOrBlank()) {
+            RtcUiLogger.init(applicationContext)
+            RtcUiLogger.d("InfobipRtcUi not initialized in this process, dropping stale call registration.")
+            return Result.failure()
+        }
+
         val webrtcUi = Injector.getWebrtcUi(applicationContext)
         val identity = params.inputData.getString(ARG_IDENTITY)
         val previousIdentity = Injector.cache.identity
@@ -96,7 +105,7 @@ internal class CallRegistrationWorker(
                     listenType = ListenType.PUSH,
                     successListener = {
                         successListener?.onSuccess()
-                        RtcUiLogger.d("$mode calls enabled from broadcast. ")
+                        RtcUiLogger.d("$mode calls enabled from broadcast.")
                         if (cont.isActive)
                             cont.resume(Result.success())
                     },
@@ -132,7 +141,7 @@ internal class CallRegistrationWorker(
             )
         }
         Injector.cache.rtcUiMode = mode
-        delay(2000L) //Delay gives WebRTC BE time to process action
+        delay(2000L.milliseconds) //Delay gives WebRTC BE time to process action
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {

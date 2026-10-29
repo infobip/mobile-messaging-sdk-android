@@ -58,7 +58,6 @@ import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -436,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onChatUrlInteracted(@NotNull String url) {
+            public boolean onChatUrlInteracted(@NonNull String url) {
                 MobileMessagingLogger.d(TAG, "On chat url interacted: " + url);
                 return false;
             }

@@ -33,6 +33,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.infobip.mobile.messaging.util.ResourceLoader
 import java.util.Locale
 
 
@@ -221,3 +222,15 @@ internal fun Activity?.setStatusBarColor(@ColorInt color: Int?) {
         this?.window?.decorView?.rootView?.setBackgroundColor(color)
     }
 }
+
+internal val Context.resourcesWebrtcConfigurationId : String?
+    get() {
+        val resource = ResourceLoader.loadResourceByName(
+            this,
+            "string",
+            "infobip_webrtc_configuration_id"
+        )
+        return if (resource > 0) {
+            this.resources.getString(resource)
+        } else null
+    }

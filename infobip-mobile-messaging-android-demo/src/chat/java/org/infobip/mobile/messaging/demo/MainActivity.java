@@ -434,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onChatUrlInteracted(@NotNull String url) {
+            public boolean onChatUrlInteracted(@NonNull String url) {
                 MobileMessagingLogger.d(TAG, "On chat url interacted: " + url);
                 return false;
             }

@@ -29,7 +29,6 @@ import org.infobip.mobile.messaging.chat.models.MessagePayload;
 import org.infobip.mobile.messaging.chat.view.InAppChatView;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
 import org.infobip.mobile.messaging.util.StringUtils;
-import org.jetbrains.annotations.NotNull;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -202,7 +201,7 @@ public class InAppChatViewDemoFragment extends Fragment {
             }
 
             @Override
-            public boolean onChatUrlInteracted(@NotNull String url) {
+            public boolean onChatUrlInteracted(@NonNull String url) {
                 MobileMessagingLogger.d(TAG, "On chat url interacted: " + url);
                 return false;
             }
