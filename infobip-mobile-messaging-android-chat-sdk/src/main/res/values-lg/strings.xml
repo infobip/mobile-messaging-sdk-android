@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="ib_chat_message_hint">Weereza obubaka…</string>
+    <string name="ib_chat_no_connection">Tewali muyungagano gwa yintaneeti.</string>
+    <string name="ib_iv_btn_send_desc">Weereza obubaka bw’emboozi</string>
+    <string name="ib_iv_btn_send_attachment_desc">Weereza fayiro eyungiddwako</string>
+    <string name="ib_iv_input_border_desc">Olukoloboze olw’okungulu</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Fayiro eyungiddwako esusse obunene obukkirizibwa</string>
+    <string name="ib_chat_permissions_not_granted_title">Olukusa teruweereddwa</string>
+    <string name="ib_chat_permissions_not_granted_message">Osobola okuwa olukusa mu nteekateeka z’enkola.</string>
+    <string name="ib_chat_cant_create_attachment">Tekisoboka kukola fayiro eyungiddwako okuva mu fayiro erondeddwa</string>
+    <string name="ib_chat_ok">Kale</string>
+    <string name="ib_chat_error">Waliwo ekikyamu</string>
+    <string name="ib_chat_error_code">Koodi y’ensobi: %1$s.</string>
+    <string name="ib_chat_save">Tereka</string>
+    <string name="ib_chat_attachments_take_a_photo">Kuba ekifaananyi</string>
+    <string name="ib_chat_attachments_record_video">Kwata vidiyo</string>
+    <string name="ib_chat_attachments_select_file">Londa fayiro</string>
+    <string name="ib_chat_attachments_select_from_gallery">Londa okuva mu ggwanika ly’ebifaananyi</string>
+    <string name="ib_chat_error_description">Ddamu ogezeeko oluvannyuma oba tuukirira abayambi ba bakasitoma.</string>
+    <string name="ib_chat_refresh">Ddamu ogezeeko</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Omuko gw’ekiwandiiko</string>
+    <string name="ib_chat_attachment_preview_failed">Okulaba nga tekunnaggulawo tekuliwo ku fayiro eno eyungiddwako</string>
+</resources>

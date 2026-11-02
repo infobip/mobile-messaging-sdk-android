@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_audio_permission_required">Uruhushya rwa mikoro rurakenewe kugira ngo ukoreshe amahamagara.</string>
+    <string name="mm_bt_connect_permission_required">Uruhushya rwo guhuza Bluetooth rurakenewe kugira ngo ukoreshe igikoresho cyawe gihujwe na Bluetooth mu guhamagara.</string>
+    <string name="mm_read_phone_state_permission_required">Uruhushya rwo kumenya imimerere ya telefoni rurakenewe kugira ngo wirinde guhamagara kuri WebRTC no ku muyoboro wa telefoni icyarimwe.</string>
+    <string name="mm_call_finished">Ihamagara rirangiye</string>
+    <string name="mm_call_weak_internet_connection">Umuyoboro wawe uri gutuma ireme ry’ihamagara riba ribi</string>
+    <string name="mm_calls_notification_channel">Amahamagara</string>
+    <string name="mm_cancel">Hagarika</string>
+    <string name="mm_flip_camera">Hindura kamera</string>
+    <string name="mm_hangup">Soza guhamagara</string>
+    <string name="mm_in_call">Uri guhamagara</string>
+    <string name="mm_in_call_notification_channel">Ihamagara rikomeje</string>
+    <string name="mm_incoming_call">Ihamagara ryinjira</string>
+    <string name="mm_microphone">Mikoro</string>
+    <string name="mm_microphone_muted">Yacecekeshijwe</string>
+    <string name="mm_mute">Cecekesha</string>
+    <string name="mm_notification_permission_required_declining_call">Uruhushya rw’imenyesha ntiruhari. Ihamagara ryinjira ririmo kwangwa.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Uruhushya rwo kumenya imimerere ya telefoni ntiruhari. Ihamagara ryinjira ririmo kwangwa.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Hari ihamagara ryo ku muyoboro wa telefoni rikomeje. Ihamagara ryinjira ririmo kwangwa.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Hari ihamagara ryo ku muyoboro wa telefoni rikomeje. Ihamagara rirangiye.</string>
+    <string name="mm_ok">Sawa</string>
+    <string name="mm_call_registration_notification_channel">Iyandikwa ry’amahamagara</string>
+    <string name="mm_call_registration_notification_description">Iyandikwa ry’amahamagara rirakomeje</string>
+    <string name="mm_screen_share">Sangiza ecran</string>
+    <string name="mm_screen_sharing">Gusangiza ecran</string>
+    <string name="mm_screen_sharing_description">Ecran yawe irimo gusangizwa</string>
+    <string name="mm_speaker">Indangururamajwi</string>
+    <string name="mm_unknown">Ntibizwi</string>
+    <string name="mm_unknown_error">Ikosa ritazwi</string>
+    <string name="mm_unmute">Kuraho gucecekesha</string>
+    <string name="mm_video">Videwo</string>
+    <string name="mm_video_call">Ihamagara rya videwo</string>
+    <string name="mm_video_permission_required">Uruhushya rwa kamera rurakenewe ku mahamagara ya videwo.</string>
+    <string name="mm_your_microphone_is_muted">Mikoro yawe yacecekeshijwe</string>
+    <string name="mm_you_are_sharing_a_screen">Urimo gusangiza ecran.</string>
+    <string name="mm_stop_sharing_screen"><u>Hagarika gusangiza ecran</u></string>
+    <string name="mm_connection_problems">Ihamagara ryacitse. Turimo kugerageza kongera guhuza…</string>
+</resources>

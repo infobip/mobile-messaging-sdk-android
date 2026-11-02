@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_audio_permission_required">Ruhusa ya maikrofoni inahitajika ili kushughulikia simu.</string>
+    <string name="mm_bt_connect_permission_required">Ruhusa ya kuunganisha Bluetooth inahitajika ili kutumia kifaa chako kilichounganishwa kwa Bluetooth kwa simu.</string>
+    <string name="mm_read_phone_state_permission_required">Ruhusa ya hali ya simu inahitajika ili kuepuka simu za WebRTC na za mtandao wa simu kwa wakati mmoja.</string>
+    <string name="mm_call_finished">Simu imekamilika</string>
+    <string name="mm_call_weak_internet_connection">Mtandao wako unasababisha ubora duni wa simu</string>
+    <string name="mm_calls_notification_channel">Simu</string>
+    <string name="mm_cancel">Ghairi</string>
+    <string name="mm_flip_camera">Badilisha kamera</string>
+    <string name="mm_hangup">Kata simu</string>
+    <string name="mm_in_call">Kwenye simu</string>
+    <string name="mm_in_call_notification_channel">Simu inayoendelea</string>
+    <string name="mm_incoming_call">Simu inayoingia</string>
+    <string name="mm_microphone">Maikrofoni</string>
+    <string name="mm_microphone_muted">Imenyamazishwa</string>
+    <string name="mm_mute">Nyamazisha</string>
+    <string name="mm_notification_permission_required_declining_call">Ruhusa ya arifa haipo. Simu inayoingia inakataliwa.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Ruhusa ya hali ya simu haipo. Simu inayoingia inakataliwa.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Kuna simu ya mtandao wa simu inayoendelea. Simu inayoingia inakataliwa.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Kuna simu ya mtandao wa simu inayoendelea. Simu imekamilika.</string>
+    <string name="mm_ok">Sawa</string>
+    <string name="mm_call_registration_notification_channel">Usajili wa simu</string>
+    <string name="mm_call_registration_notification_description">Usajili wa simu unaendelea</string>
+    <string name="mm_screen_share">Shiriki skrini</string>
+    <string name="mm_screen_sharing">Kushiriki skrini</string>
+    <string name="mm_screen_sharing_description">Skrini yako inashirikiwa</string>
+    <string name="mm_speaker">Spika</string>
+    <string name="mm_unknown">Haijulikani</string>
+    <string name="mm_unknown_error">Hitilafu isiyojulikana</string>
+    <string name="mm_unmute">Washa maikrofoni</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Simu ya video</string>
+    <string name="mm_video_permission_required">Ruhusa ya kamera inahitajika kwa simu za video.</string>
+    <string name="mm_your_microphone_is_muted">Maikrofoni yako imenyamazishwa</string>
+    <string name="mm_you_are_sharing_a_screen">Unashiriki skrini.</string>
+    <string name="mm_stop_sharing_screen"><u>Acha kushiriki skrini</u></string>
+    <string name="mm_connection_problems">Simu imekatika. Inajaribu kuunganisha tena…</string>
+</resources>

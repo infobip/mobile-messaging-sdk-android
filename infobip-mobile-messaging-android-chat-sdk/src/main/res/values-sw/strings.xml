@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="ib_chat_message_hint">Tuma ujumbe…</string>
+    <string name="ib_chat_no_connection">Hakuna muunganisho wa intaneti.</string>
+    <string name="ib_iv_btn_send_desc">Tuma ujumbe wa mazungumzo</string>
+    <string name="ib_iv_btn_send_attachment_desc">Tuma kiambatisho</string>
+    <string name="ib_iv_input_border_desc">Ukingo wa juu</string>
+    <string name="ib_chat_allowed_attachment_size_exceeded">Kiambatisho kimezidi ukubwa wa juu unaoruhusiwa</string>
+    <string name="ib_chat_permissions_not_granted_title">Ruhusa hazijatolewa</string>
+    <string name="ib_chat_permissions_not_granted_message">Unaweza kutoa ruhusa hizo katika mipangilio ya programu.</string>
+    <string name="ib_chat_cant_create_attachment">Imeshindikana kuunda kiambatisho kutoka kwenye faili iliyochaguliwa</string>
+    <string name="ib_chat_ok">Sawa</string>
+    <string name="ib_chat_error">Hitilafu imetokea</string>
+    <string name="ib_chat_error_code">Msimbo wa hitilafu: %1$s.</string>
+    <string name="ib_chat_save">Hifadhi</string>
+    <string name="ib_chat_attachments_take_a_photo">Piga picha</string>
+    <string name="ib_chat_attachments_record_video">Rekodi video</string>
+    <string name="ib_chat_attachments_select_file">Chagua faili</string>
+    <string name="ib_chat_attachments_select_from_gallery">Chagua kutoka kwenye matunzio</string>
+    <string name="ib_chat_error_description">Jaribu tena baadaye au wasiliana na usaidizi kwa wateja.</string>
+    <string name="ib_chat_refresh">Onyesha upya</string>
+    <string name="ib_chat_attachment_pdf_page_desc">Ukurasa wa hati</string>
+    <string name="ib_chat_attachment_preview_failed">Onyesho la kukagua halipatikani kwa kiambatisho hiki</string>
+</resources>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_button_accept">Kkiriza</string>
+    <string name="mm_button_decline">Gaana</string>
+    <string name="mm_button_open">Ggulawo</string>
+    <string name="mm_button_cancel">Sazaamu</string>
+    <string name="mm_button_settings">Enteekateeka</string>
+    <string name="mm_post_notifications_settings_title">Zza obuggya enteekateeka z’ebimanyisibwa</string>
+    <string name="mm_post_notifications_settings_message">Kkiriza enkola okuweereza ebimanyisibwa buli kiseera esobole okubiraga ne bwe kiba nga eggaddwa oba teri mu kukozesebwa</string>
+
+    <string name="mm_notification_channel_default">%1$s</string>
+    <string name="mm_notification_channel_vibration">%1$s Okukankana</string>
+    <string name="mm_notification_channel_sound">%1$s Eddoboozi</string>
+    <string name="mm_notification_channel_quiet">%1$s Okusirika</string>
+    <string name="mm_notification_channel_high_priority">%1$s Ekikulu Ennyo</string>
+    <string name="mm_notification_channel_high_priority_vibration">%1$s Ekikulu Ennyo, Okukankana</string>
+    <string name="mm_notification_channel_high_priority_sound">%1$s Ekikulu Ennyo, Eddoboozi</string>
+    <string name="mm_notification_channel_high_priority_quiet">%1$s Ekikulu Ennyo, Okusirika</string>
+
+    <string name="mm_notification_channel_custom">%1$s</string>
+    <string name="mm_notification_channel_custom_vibration">%1$s Okukankana</string>
+    <string name="mm_notification_channel_custom_high_priority">%1$s Ekikulu Ennyo</string>
+    <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Ekikulu Ennyo, Okukankana</string>
+</resources>

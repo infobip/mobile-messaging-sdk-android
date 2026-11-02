@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_button_accept">Kubali</string>
+    <string name="mm_button_decline">Kataa</string>
+    <string name="mm_button_open">Fungua</string>
+    <string name="mm_button_cancel">Ghairi</string>
+    <string name="mm_button_settings">Mipangilio</string>
+    <string name="mm_post_notifications_settings_title">Sasisha mipangilio ya arifa</string>
+    <string name="mm_post_notifications_settings_message">Ruhusu programu kutuma arifa wakati wote ili iweze kukuonyesha arifa hata wakati imefungwa au haitumiki</string>
+
+    <string name="mm_notification_channel_default">%1$s</string>
+    <string name="mm_notification_channel_vibration">%1$s Mtetemo</string>
+    <string name="mm_notification_channel_sound">%1$s Sauti</string>
+    <string name="mm_notification_channel_quiet">%1$s Kimya</string>
+    <string name="mm_notification_channel_high_priority">%1$s Kipaumbele cha Juu</string>
+    <string name="mm_notification_channel_high_priority_vibration">%1$s Kipaumbele cha Juu, Mtetemo</string>
+    <string name="mm_notification_channel_high_priority_sound">%1$s Kipaumbele cha Juu, Sauti</string>
+    <string name="mm_notification_channel_high_priority_quiet">%1$s Kipaumbele cha Juu, Kimya</string>
+
+    <string name="mm_notification_channel_custom">%1$s</string>
+    <string name="mm_notification_channel_custom_vibration">%1$s Mtetemo</string>
+    <string name="mm_notification_channel_custom_high_priority">%1$s Kipaumbele cha Juu</string>
+    <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Kipaumbele cha Juu, Mtetemo</string>
+</resources>

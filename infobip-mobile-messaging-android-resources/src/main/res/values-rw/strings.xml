@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_button_accept">Emera</string>
+    <string name="mm_button_decline">Anga</string>
+    <string name="mm_button_open">Fungura</string>
+    <string name="mm_button_cancel">Hagarika</string>
+    <string name="mm_button_settings">Igenamiterere</string>
+    <string name="mm_post_notifications_settings_title">Vugurura igenamiterere ry’imenyesha</string>
+    <string name="mm_post_notifications_settings_message">Emerera porogaramu kohereza imenyesha igihe cyose kugira ngo ishobole kuzohereza n’igihe porogaramu ifunze cyangwa idakoreshwa</string>
+
+    <string name="mm_notification_channel_default">%1$s</string>
+    <string name="mm_notification_channel_vibration">%1$s Kunyeganyega</string>
+    <string name="mm_notification_channel_sound">%1$s Ijwi</string>
+    <string name="mm_notification_channel_quiet">%1$s Bucece</string>
+    <string name="mm_notification_channel_high_priority">%1$s Icy’ingenzi Cyane</string>
+    <string name="mm_notification_channel_high_priority_vibration">%1$s Icy’ingenzi Cyane, Kunyeganyega</string>
+    <string name="mm_notification_channel_high_priority_sound">%1$s Icy’ingenzi Cyane, Ijwi</string>
+    <string name="mm_notification_channel_high_priority_quiet">%1$s Icy’ingenzi Cyane, Bucece</string>
+
+    <string name="mm_notification_channel_custom">%1$s</string>
+    <string name="mm_notification_channel_custom_vibration">%1$s Kunyeganyega</string>
+    <string name="mm_notification_channel_custom_high_priority">%1$s Icy’ingenzi Cyane</string>
+    <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Icy’ingenzi Cyane, Kunyeganyega</string>
+</resources>

@@ -156,5 +156,20 @@
             android:enabled="true"
             android:title="@string/serbian"
             app:showAsAction="never" />
+        <item
+            android:id="@+id/kinyarwanda"
+            android:enabled="true"
+            android:title="@string/kinyarwanda"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/luganda"
+            android:enabled="true"
+            android:title="@string/luganda"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/swahili"
+            android:enabled="true"
+            android:title="@string/swahili"
+            app:showAsAction="never" />
     </group>
 </menu>

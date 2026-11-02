@@ -272,6 +272,12 @@ public class MainActivity extends AppCompatActivity {
             return LivechatWidgetLanguage.ALBANIAN;
         else if (menuId == R.id.serbian)
             return LivechatWidgetLanguage.SERBIAN;
+        else if (menuId == R.id.kinyarwanda)
+            return LivechatWidgetLanguage.KINYARWANDA;
+        else if (menuId == R.id.luganda)
+            return LivechatWidgetLanguage.LUGANDA;
+        else if (menuId == R.id.swahili)
+            return LivechatWidgetLanguage.SWAHILI_KENYA;
         else return null;
     }
 

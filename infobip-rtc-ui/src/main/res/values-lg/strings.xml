@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_audio_permission_required">Olukusa lwa mikulafooni lwetaagisa okukwata essimu.</string>
+    <string name="mm_bt_connect_permission_required">Olukusa lw’okuyunga Bluetooth lwetaagisa okukozesa ekyuma kyo ekiyungiddwa ku Bluetooth mu ssimu.</string>
+    <string name="mm_read_phone_state_permission_required">Olukusa lw’embeera y’essimu lwetaagisa okwewala essimu za WebRTC n’essimu z’omukutu gw’essimu mu kiseera kye kimu.</string>
+    <string name="mm_call_finished">Essimu ewedde</string>
+    <string name="mm_call_weak_internet_connection">Omukutu gwo guleetera essimu okuba n’omutindo omubi</string>
+    <string name="mm_calls_notification_channel">Amasimu</string>
+    <string name="mm_cancel">Sazaamu</string>
+    <string name="mm_flip_camera">Kyusa kkamera</string>
+    <string name="mm_hangup">Ggyako essimu</string>
+    <string name="mm_in_call">Oli ku ssimu</string>
+    <string name="mm_in_call_notification_channel">Ku ssimu</string>
+    <string name="mm_incoming_call">Essimu eyingira</string>
+    <string name="mm_microphone">Mikulafooni</string>
+    <string name="mm_microphone_muted">Esirisiddwa</string>
+    <string name="mm_mute">Sirisa</string>
+    <string name="mm_notification_permission_required_declining_call">Olukusa lw’ebimanyisibwa teruliwo. Essimu eyingira egaanibwa.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Olukusa lw’embeera y’essimu teruliwo. Essimu eyingira egaanibwa.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Waliwo essimu y’omukutu gw’essimu egenda mu maaso. Essimu eyingira egaanibwa.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Waliwo essimu y’omukutu gw’essimu egenda mu maaso. Essimu ewedde.</string>
+    <string name="mm_ok">Kale</string>
+    <string name="mm_call_registration_notification_channel">Okwewandiisa essimu</string>
+    <string name="mm_call_registration_notification_description">Okwewandiisa essimu kugenda mu maaso</string>
+    <string name="mm_screen_share">Gabana olutimbe</string>
+    <string name="mm_screen_sharing">Okugabana olutimbe</string>
+    <string name="mm_screen_sharing_description">Olutimbe lwo lugabanyizibwa</string>
+    <string name="mm_speaker">Omuzindaalo</string>
+    <string name="mm_unknown">Tekimanyiddwa</string>
+    <string name="mm_unknown_error">Ensobi etamanyiddwa</string>
+    <string name="mm_unmute">Ggyako okusirisa</string>
+    <string name="mm_video">Vidiyo</string>
+    <string name="mm_video_call">Essimu ya vidiyo</string>
+    <string name="mm_video_permission_required">Olukusa lwa kkamera lwetaagisa ku ssimu za vidiyo.</string>
+    <string name="mm_your_microphone_is_muted">Mikulafooni yo esirisiddwa</string>
+    <string name="mm_you_are_sharing_a_screen">Ogabana olutimbe.</string>
+    <string name="mm_stop_sharing_screen"><u>Lekera awo okugabana olutimbe</u></string>
+    <string name="mm_connection_problems">Essimu yabadde ekutuddwako. Tugezaako okuddamu okuyunga…</string>
+</resources>

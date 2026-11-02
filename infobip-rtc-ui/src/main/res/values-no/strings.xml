@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Infobip RTC UI
+
+  Copyright (c) 2016-2026 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+    <string name="mm_audio_permission_required">Tillatelse til å bruke mikrofonen kreves for å håndtere anrop.</string>
+    <string name="mm_bt_connect_permission_required">Tillatelse til Bluetooth-tilkobling kreves for å bruke den tilkoblede Bluetooth-enheten din til anrop.</string>
+    <string name="mm_read_phone_state_permission_required">Tillatelse til å lese telefonstatus kreves for å unngå samtidige WebRTC- og mobilanrop.</string>
+    <string name="mm_call_finished">Anrop avsluttet</string>
+    <string name="mm_call_weak_internet_connection">Nettverket ditt fører til dårlig samtalekvalitet</string>
+    <string name="mm_calls_notification_channel">Anrop</string>
+    <string name="mm_cancel">Avbryt</string>
+    <string name="mm_flip_camera">Bytt kamera</string>
+    <string name="mm_hangup">Legg på</string>
+    <string name="mm_in_call">I en samtale</string>
+    <string name="mm_in_call_notification_channel">Pågående anrop</string>
+    <string name="mm_incoming_call">Innkommende anrop</string>
+    <string name="mm_microphone">Mikrofon</string>
+    <string name="mm_microphone_muted">Dempet</string>
+    <string name="mm_mute">Demp</string>
+    <string name="mm_notification_permission_required_declining_call">Tillatelse til å sende varsler mangler. Det innkommende anropet avvises.</string>
+    <string name="mm_read_phone_state_permission_required_declining_call">Tillatelse til å lese telefonstatus mangler. Det innkommende anropet avvises.</string>
+    <string name="mm_ongoing_cellular_call_declining_call">Et mobilanrop pågår. Det innkommende anropet avvises.</string>
+    <string name="mm_ongoing_cellular_call_call_finished">Et mobilanrop pågår. Anropet er avsluttet.</string>
+    <string name="mm_ok">OK</string>
+    <string name="mm_call_registration_notification_channel">Anropsregistrering</string>
+    <string name="mm_call_registration_notification_description">Anropsregistrering pågår</string>
+    <string name="mm_screen_share">Del skjerm</string>
+    <string name="mm_screen_sharing">Skjermdeling</string>
+    <string name="mm_screen_sharing_description">Skjermen din deles</string>
+    <string name="mm_speaker">Høyttaler</string>
+    <string name="mm_unknown">Ukjent</string>
+    <string name="mm_unknown_error">Ukjent feil</string>
+    <string name="mm_unmute">Slå på mikrofonen</string>
+    <string name="mm_video">Video</string>
+    <string name="mm_video_call">Videoanrop</string>
+    <string name="mm_video_permission_required">Tillatelse til å bruke kameraet kreves for videoanrop.</string>
+    <string name="mm_your_microphone_is_muted">Mikrofonen din er dempet</string>
+    <string name="mm_you_are_sharing_a_screen">Du deler skjermen.</string>
+    <string name="mm_stop_sharing_screen"><u>Slutt å dele skjermen</u></string>
+    <string name="mm_connection_problems">Anropet ble avbrutt. Prøver å koble til på nytt…</string>
+</resources>
