@@ -278,15 +278,17 @@ public abstract class InAppChat {
     /**
      * Returns the default {@link InAppChatNotificationInteractionHandler}.
      *
-     * <p>
-     * When the user taps an in-app chat message push notification, the default handler opens the callback activity
-     * defined in {@link org.infobip.mobile.messaging.NotificationSettings#getCallbackActivity()}.
-     * </p>
+     * <p>The default handler parses the notification's {@link org.infobip.mobile.messaging.OpenLivechatAction}:</p>
+     * <ul>
+     *     <li>If the action contains a valid chat thread ID or originates from the "Open chatbot in LiveChat" tap action,
+     *     it opens {@link org.infobip.mobile.messaging.chat.view.InAppChatActivity}.</li>
+     *     <li>If no action can be parsed from an in-app chat message push notification, it opens the callback activity
+     *     defined in {@link org.infobip.mobile.messaging.NotificationSettings#getCallbackActivity()}.</li>
+     * </ul>
      *
-     * <p>
-     * For any push notification or in-app message with the "Open chatbot in LiveChat" tap action,
-     * the default handler opens {@link org.infobip.mobile.messaging.chat.view.InAppChatActivity}.
-     * </p>
+     * <p>In multi-thread mode, the activity opens the specified thread and sends the optional keyword to that thread.
+     * Without a thread ID, it creates a thread with the keyword or opens the new-thread screen when the keyword is absent.
+     * In single-thread mode, the optional keyword is sent to the current chat and the thread ID is ignored.</p>
      *
      * @return the default {@link InAppChatNotificationInteractionHandler} used to handle in-app chat notification taps
      * @see org.infobip.mobile.messaging.chat.core.InAppChatNotificationInteractionHandler

@@ -191,11 +191,24 @@ class InAppChatActivity : AppCompatActivity() {
             intent?.extractLivechatAction()?.let { action ->
                 val fragment = getInAppChatFragment()
                 val message = action.keyword
-                when {
-                    message?.isNotBlank() == true && fragment.isMultiThread -> fragment.createThread(MessagePayload.Basic(message = message))
-                    message?.isNotBlank() == true && !fragment.isMultiThread -> fragment.send(MessagePayload.Basic(message = message))
-                    fragment.isMultiThread -> fragment.openNewThread()
+                val threadId = action.threadId.takeIf { fragment.isMultiThread }
+                val payload = message
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { MessagePayload.Basic(message = it) }
+
+                if (fragment.isMultiThread) {
+                    when {
+                        threadId != null -> {
+                            fragment.showThread(threadId)
+                            payload?.let { fragment.send(it, threadId) }
+                        }
+                        payload != null -> fragment.createThread(payload)
+                        else -> fragment.openNewThread()
+                    }
+                } else {
+                    payload?.let { fragment.send(it) }
                 }
+
                 intent.removeExtra(BroadcastParameter.EXTRA_MESSAGE)
             }
         }.onFailure {

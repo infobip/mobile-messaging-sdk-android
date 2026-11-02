@@ -10,6 +10,7 @@ package org.infobip.mobile.messaging.chat.core.widget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer
 import org.infobip.mobile.messaging.chat.attachments.InAppChatAttachment
 import org.infobip.mobile.messaging.chat.core.InAppChatException
 import org.infobip.mobile.messaging.chat.core.MultithreadStrategy
@@ -26,6 +27,8 @@ internal class LivechatWidgetClientImpl(
     private val instanceId: InstanceId?,
     private val coroutineScope: CoroutineScope,
 ) : LivechatWidgetClient {
+
+    private val jsonSerializer = JsonSerializer()
 
     companion object {
         private const val TAG = "LcWidgetClient"
@@ -61,10 +64,12 @@ internal class LivechatWidgetClientImpl(
         }.onFailure {
             executionListener?.onResult(LivechatWidgetResult.Error(InAppChatException.MessageSerializationError(it)))
         }.onSuccess { serializedPayload ->
-            if (threadId.isNullOrBlank())
-                executeScript(LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload + ")", executionListener)
-            else
-                executeScript(LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload +", '" + threadId + "')", executionListener)
+            val script = if (threadId.isNullOrBlank()) {
+                LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload + ")"
+            } else {
+                LivechatWidgetMethod.sendMessage.name + "(" + serializedPayload + ", " + serializeString(threadId) + ")"
+            }
+            executeScript(script, executionListener)
         }
     }
 
@@ -177,18 +182,12 @@ internal class LivechatWidgetClientImpl(
         }
     }
 
-    private fun buildWidgetMethodInvocation(methodName: String, vararg params: String?): String {
-        val builder = StringBuilder()
-        builder.append(methodName)
+    internal fun buildWidgetMethodInvocation(
+        methodName: String,
+        vararg params: String?,
+    ): String = "$methodName(${params.joinToString(", ") { serializeString(it) }})"
 
-        if (params.isNotEmpty()) {
-            builder.append(params.joinToString("','", "('", "')"))
-        } else {
-            builder.append("()")
-        }
-
-        return builder.toString()
-    }
+    private fun serializeString(value: String?): String = jsonSerializer.serialize(value ?: "null")
 
     private fun shortenScript(script: String?): String? {
         return runCatching {
