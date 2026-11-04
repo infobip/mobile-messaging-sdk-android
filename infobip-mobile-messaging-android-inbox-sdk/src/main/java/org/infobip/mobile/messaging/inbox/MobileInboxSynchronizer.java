@@ -67,13 +67,15 @@ public class MobileInboxSynchronizer {
                 MobileMessagingLogger.v("FETCHING INBOX >>>");
                 String header = token != null ? "Bearer " + token : "App " + mobileMessagingCore.getApplicationCode();
                 if (filterOptions == null) {
-                    return mobileApiInbox.fetchInbox(externalUserId, header, null, null, null, null);
+                    return mobileApiInbox.fetchInboxPage(externalUserId, header, null, null, null, null, null);
                 }
                 String from = filterOptions.getFromDateTime() == null ? null : String.valueOf(filterOptions.getFromDateTime().getTime());
                 String to = filterOptions.getToDateTime() == null ? null : String.valueOf(filterOptions.getToDateTime().getTime());
                 String topic = isBlank(filterOptions.getTopic()) ? null : filterOptions.getTopic();
-                Integer limit = filterOptions.getTopics() == null ? filterOptions.getLimit() : MULTIPLE_TOPICS_FETCH_LIMIT;
-                return mobileApiInbox.fetchInbox(externalUserId, header, from, to, topic, limit);
+                List<String> topics = filterOptions.getTopics();
+                Integer limit = topics == null || topics.isEmpty() ? filterOptions.getLimit() : MULTIPLE_TOPICS_FETCH_LIMIT;
+                String cursor = isBlank(filterOptions.getCursor()) ? null : filterOptions.getCursor();
+                return mobileApiInbox.fetchInboxPage(externalUserId, header, from, to, topic, limit, cursor);
             }
 
             @Override
@@ -112,6 +114,44 @@ public class MobileInboxSynchronizer {
                 .execute();
     }
 
+    public void deleteMessages(String token, String externalUserId, String[] messageIds,
+                               MobileMessaging.ResultListener<Void> listener) {
+        if (!mobileMessagingCore.isRegistrationAvailable()) {
+            if (listener != null) {
+                listener.onResult(new Result<>(InternalSdkError.NO_VALID_REGISTRATION.getError()));
+            }
+            return;
+        }
+
+        new MRetryableTask<Void, Void>() {
+            @Override
+            public Void run(Void[] voids) {
+                MobileMessagingLogger.v("DELETING INBOX MESSAGES >>>");
+                String header = token != null ? "Bearer " + token : "App " + mobileMessagingCore.getApplicationCode();
+                mobileApiInbox.deleteInboxMessages(externalUserId, header, messageIds);
+                return null;
+            }
+
+            @Override
+            public void after(Void ignored) {
+                MobileMessagingLogger.v("DELETING INBOX MESSAGES DONE <<<");
+                if (listener != null) {
+                    listener.onResult(new Result<>((Void) null));
+                }
+            }
+
+            @Override
+            public void error(Throwable error) {
+                MobileMessagingLogger.e("DELETING INBOX MESSAGES ERROR <<<", error);
+                MobileMessagingError mobileMessagingError = MobileMessagingError.createFrom(error);
+                coreBroadcaster.error(mobileMessagingError);
+                if (listener != null) {
+                    listener.onResult(new Result<>(mobileMessagingError));
+                }
+            }
+        }.retryWith(retryPolicy).execute();
+    }
+
     private Inbox filterMessagesByTopics(Inbox inbox, MobileInboxFilterOptions filterOptions) {
         if (filterOptions != null) {
             List<String> topics = filterOptions.getTopics();
@@ -129,6 +169,7 @@ public class MobileInboxSynchronizer {
                 }
                 inbox.setCountTotalFiltered(filteredMessages.size());
                 inbox.setCountUnreadFiltered(countUnreadFiltered);
+                inbox.setNextCursor(null);
                 filteredMessages = applyLimitToMessages(filteredMessages, filterOptions.getLimit());
                 inbox.setMessages(filteredMessages);
             }

@@ -13,6 +13,7 @@ import org.infobip.mobile.messaging.api.support.ApiException;
 import org.infobip.mobile.messaging.api.support.ApiIOException;
 import org.infobip.mobile.messaging.api.support.Tuple;
 import org.infobip.mobile.messaging.api.support.http.client.model.ApiResponse;
+import org.infobip.mobile.messaging.api.support.http.client.model.ApiServiceException;
 import org.infobip.mobile.messaging.api.support.http.serialization.JsonSerializer;
 import org.infobip.mobile.messaging.api.support.util.Base64Encoder;
 import org.infobip.mobile.messaging.api.support.util.StreamUtils;
@@ -187,21 +188,28 @@ public class DefaultApiClient implements ApiClient {
             interceptResponse(responseCode, urlConnection.getHeaderFields());
             int contentLength = urlConnection.getContentLength();
             if (responseCode >= 400) {
-                ApiResponse apiResponse = new ApiResponse(ErrorCode.UNKNOWN_ERROR.value, ErrorCode.UNKNOWN_ERROR.description);
-                if (contentLength > 0) {
-                    InputStream inputStream = urlConnection.getErrorStream();
-                    String s = StreamUtils.readToString(inputStream, "UTF-8", contentLength);
-                    apiResponse = jsonSerializer(request.httpMethod).deserialize(s, ApiResponse.class);
-                    inputStream.close();
+                ApiResponse apiResponse = null;
+                Throwable errorBodyFailure = null;
+                // Error bodies may be chunked or have no Content-Length header. Read to EOF.
+                try (InputStream inputStream = urlConnection.getErrorStream()) {
+                    if (inputStream != null) {
+                        String errorBody = StreamUtils.readToString(inputStream, "UTF-8", -1);
+                        if (StringUtils.isNotBlank(errorBody)) {
+                            apiResponse = jsonSerializer(request.httpMethod).deserialize(errorBody, ApiResponse.class);
+                        }
+                    }
+                } catch (IOException | RuntimeException error) {
+                    // A malformed gateway body or failed read must not erase a known HTTP status.
+                    errorBodyFailure = error;
                 }
 
+                ErrorCode fallback = responseCode >= 500 ? ErrorCode.UNKNOWN_API_BACKEND_ERROR : ErrorCode.UNKNOWN_API_ERROR;
+                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, fallback.value,
+                        "HTTP " + responseCode + ": " + fallback.description);
                 if (responseCode >= 500) {
-                    Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
-                    throw new ApiBackendException(tuple.getLeft(), tuple.getRight());
+                    throw new ApiBackendException(tuple.getLeft(), tuple.getRight(), errorBodyFailure, responseCode);
                 }
-
-                Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_ERROR.value, ErrorCode.UNKNOWN_API_ERROR.description);
-                throw new ApiException(tuple.getLeft(), tuple.getRight());
+                throw new ApiException(tuple.getLeft(), tuple.getRight(), errorBodyFailure, responseCode);
             }
 
             if (Void.class.equals(responseType) || void.class.equals(responseType) || responseType == null) {
@@ -221,7 +229,7 @@ public class DefaultApiClient implements ApiClient {
 
             if (apiResponse != null && apiResponse.getRequestError() != null) {
                 Tuple<String, String> tuple = safeGetErrorInfo(apiResponse, ErrorCode.UNKNOWN_API_BACKEND_ERROR.value, ErrorCode.UNKNOWN_API_BACKEND_ERROR.description);
-                throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response);
+                throw new ApiBackendExceptionWithContent(tuple.getLeft(), tuple.getRight(), response, responseCode);
             }
 
             return response;
@@ -269,7 +277,9 @@ public class DefaultApiClient implements ApiClient {
             return new Tuple<>(code, message);
         }
 
-        return new Tuple<>(apiResponse.getRequestError().getServiceException().getMessageId(), apiResponse.getRequestError().getServiceException().getText());
+        ApiServiceException serviceError = apiResponse.getRequestError().getServiceException();
+        return new Tuple<>(StringUtils.isNotBlank(serviceError.getMessageId()) ? serviceError.getMessageId() : code,
+                StringUtils.isNotBlank(serviceError.getText()) ? serviceError.getText() : message);
     }
 
     private void appendValue(StringBuilder sb, Map.Entry<String, Collection<Object>> entry) throws UnsupportedEncodingException {

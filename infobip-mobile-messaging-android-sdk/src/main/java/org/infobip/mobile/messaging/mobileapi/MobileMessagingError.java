@@ -26,6 +26,7 @@ public class MobileMessagingError implements Serializable {
     private final String message;
     private final Type type;
     private final Throwable tr;
+    private final Integer httpStatusCode;
 
     public static MobileMessagingError createFrom(Throwable e) {
         if (e instanceof BackendBaseException) {
@@ -45,7 +46,8 @@ public class MobileMessagingError implements Serializable {
     }
 
     private MobileMessagingError(ApiIOException apiException) {
-        this(apiException.getCode(), apiException.getMessage(), Type.SERVER_ERROR, new Throwable(apiException.getMessage()));
+        this(apiException.getCode(), apiException.getMessage(), Type.SERVER_ERROR,
+                new Throwable(apiException.getMessage()), apiException.getHttpStatusCode());
     }
 
     private MobileMessagingError(Throwable e) {
@@ -53,10 +55,15 @@ public class MobileMessagingError implements Serializable {
     }
 
     private MobileMessagingError(String code, String message, Type type, Throwable tr) {
+        this(code, message, type, tr, null);
+    }
+
+    private MobileMessagingError(String code, String message, Type type, Throwable tr, Integer httpStatusCode) {
         this.code = code;
         this.message = message;
         this.type = type;
         this.tr = tr;
+        this.httpStatusCode = httpStatusCode;
     }
 
     @NonNull
@@ -73,6 +80,15 @@ public class MobileMessagingError implements Serializable {
     @NonNull
     public Type getType() {
         return type;
+    }
+
+    /**
+     * HTTP response status, or null for local validation and failures without an HTTP response.
+     * The backend or SDK error code remains available through {@link #getCode()}.
+     */
+    @Nullable
+    public Integer getHttpStatusCode() {
+        return httpStatusCode;
     }
 
     @Nullable

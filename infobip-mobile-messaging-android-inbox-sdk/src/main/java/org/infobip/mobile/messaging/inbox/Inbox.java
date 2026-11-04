@@ -30,6 +30,8 @@ public class Inbox {
 
     private List<InboxMessage> messages;
 
+    private String nextCursor;
+
     /**
      * Total number of messages available in the Inbox. Maximum is limited to 100 messages.
      */
@@ -83,6 +85,19 @@ public class Inbox {
 
     void setMessages(List<InboxMessage> messages) {
         this.messages = messages;
+    }
+
+    /**
+     * Opaque cursor for fetching the next page. Pass it to
+     * {@link MobileInboxFilterOptions#setCursor(String)} while keeping the same date and topic filters.
+     * A {@code null} value means that no further page is available.
+     */
+    public String getNextCursor() {
+        return nextCursor;
+    }
+
+    public void setNextCursor(String nextCursor) {
+        this.nextCursor = nextCursor;
     }
 
     public static Inbox createFrom(Bundle bundle) {

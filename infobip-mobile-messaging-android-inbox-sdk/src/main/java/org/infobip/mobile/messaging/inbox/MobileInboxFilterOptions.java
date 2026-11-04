@@ -28,13 +28,19 @@ public class MobileInboxFilterOptions {
      */
     private String topic;
     /**
-     * topics - messages' topics to be fetched
+     * Nonempty lists are filtered client-side over up to 1,000 fetched messages,
+     * including single-element lists. Use {@link #setTopic(String)} for backend filtering
+     * and cursor pagination.
      */
     private List<String> topics;
     /**
      * limit - number of messages to be fetched
      */
     private Integer limit;
+    /**
+     * Opaque cursor returned as {@link Inbox#getNextCursor()} by the previous fetch.
+     */
+    private String cursor;
 
     public MobileInboxFilterOptions(Date fromDateTime,
                                     Date toDateTime,
@@ -52,8 +58,23 @@ public class MobileInboxFilterOptions {
                                     Integer limit) {
         this.fromDateTime = fromDateTime;
         this.toDateTime = toDateTime;
-        this.topics = topics;
+        setTopics(topics);
         this.limit = limit;
+    }
+
+    /**
+     * Creates server-side filter options for a page of inbox messages.
+     * Keep {@code fromDateTime}, {@code toDateTime}, and {@code topic} unchanged between pages.
+     *
+     * @param cursor {@link Inbox#getNextCursor()} from the previous page, or {@code null} for the first page
+     */
+    public MobileInboxFilterOptions(Date fromDateTime,
+                                    Date toDateTime,
+                                    String topic,
+                                    Integer limit,
+                                    String cursor) {
+        this(fromDateTime, toDateTime, topic, limit);
+        this.cursor = cursor;
     }
 
     public Date getFromDateTime() {
@@ -81,6 +102,11 @@ public class MobileInboxFilterOptions {
 
     public List<String> getTopics() { return topics; }
 
+    /**
+     * Sets legacy client-side topic filtering, even when the list contains only one topic.
+     * A null or nonpositive limit does not truncate the locally filtered results.
+     * Use {@link #setTopic(String)} instead to enable backend filtering and cursor pagination.
+     */
     public void setTopics(List<String> topics) {
         this.topics = topics;
         this.topic = null;
@@ -92,5 +118,19 @@ public class MobileInboxFilterOptions {
 
     public void setLimit(Integer limit) {
         this.limit = limit;
+    }
+
+    public String getCursor() {
+        return cursor;
+    }
+
+    /**
+     * Sets the cursor for backend pagination. Null, empty, or whitespace-only cursors
+     * request the first page. Nonblank cursors are sent unchanged as opaque values.
+     * A nonblank cursor cannot be combined with
+     * a nonempty {@link #getTopics()} list; use the singular {@link #setTopic(String)} option.
+     */
+    public void setCursor(String cursor) {
+        this.cursor = cursor;
     }
 }

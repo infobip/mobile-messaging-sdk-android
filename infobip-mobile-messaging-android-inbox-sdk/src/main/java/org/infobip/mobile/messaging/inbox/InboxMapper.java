@@ -29,6 +29,7 @@ public class InboxMapper {
         inbox.setCountUnread(fetchInboxResponse.getCountUnread());
         inbox.setCountTotalFiltered(fetchInboxResponse.getCountTotalFiltered());
         inbox.setCountUnreadFiltered(fetchInboxResponse.getCountUnreadFiltered());
+        inbox.setNextCursor(fetchInboxResponse.getNextCursor());
         if (fetchInboxResponse.getMessages() != null) {
             List<InboxMessage> inboxMessages = new ArrayList<>(fetchInboxResponse.getMessages().size());
             for (MessageResponse messageResponse : fetchInboxResponse.getMessages()) {
@@ -91,7 +92,8 @@ public class InboxMapper {
             JSONObject jsonObject = new JSONObject().put("countTotal", inbox.getCountTotal())
                     .put("countUnread", inbox.getCountUnread())
                     .putOpt("countTotalFiltered", inbox.getCountTotalFiltered())
-                    .putOpt("countUnreadFiltered", inbox.getCountUnreadFiltered());
+                    .putOpt("countUnreadFiltered", inbox.getCountUnreadFiltered())
+                    .putOpt("nextCursor", inbox.getNextCursor());
             JSONArray jsonArray = new JSONArray();
             for (InboxMessage message : inbox.getMessages()) {
                 jsonArray.put(toJSON(message));

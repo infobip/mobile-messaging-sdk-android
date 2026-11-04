@@ -19,4 +19,8 @@ public class ApiException extends ApiIOException {
     public ApiException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
+
+    public ApiException(String code, String message, Throwable cause, Integer httpStatusCode) {
+        super(code, message, cause, httpStatusCode);
+    }
 }

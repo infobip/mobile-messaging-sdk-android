@@ -16,7 +16,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Make a POST request.
+ * Substitutes a named placeholder in the request path.
  */
 @Documented
 @Target({PARAMETER, METHOD})
@@ -24,4 +24,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Path {
     String name() default "";
     String value() default "";
+
+    /**
+     * Percent-encodes the raw value as one UTF-8 path segment before substitution.
+     * Slashes, semicolons (matrix-parameter delimiters), query/fragment delimiters
+     * and literal percent signs are encoded;
+     * callers must not pre-encode values when this option is enabled.
+     * Defaults to false to preserve existing direct-substitution behavior.
+     */
+    boolean encode() default false;
 }

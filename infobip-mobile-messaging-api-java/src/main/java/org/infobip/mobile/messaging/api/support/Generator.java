@@ -33,6 +33,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,6 +170,26 @@ public class Generator {
             return (T) annotation;
         }
         return null;
+    }
+
+    private static String pathValue(Path path, String value) {
+        if (!path.encode()) {
+            return value;
+        }
+        // RFC 3986 pchar, excluding ';' because servers can treat it as a matrix-parameter delimiter.
+        // Also encode '/' and '%' so the raw value remains a single literal path segment.
+        String allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,=:@";
+        String hex = "0123456789ABCDEF";
+        StringBuilder encoded = new StringBuilder();
+        for (byte b : value.getBytes(StandardCharsets.UTF_8)) {
+            int c = b & 0xff;
+            if (allowed.indexOf(c) >= 0) {
+                encoded.append((char) c);
+            } else {
+                encoded.append('%').append(hex.charAt(c >>> 4)).append(hex.charAt(c & 0x0f));
+            }
+        }
+        return encoded.toString();
     }
 
     private Collection<Object> toCollection(Object arg) {
@@ -367,7 +388,7 @@ public class Generator {
 
                 Path path = parameter.getPath();
                 if (null != path) {
-                    uri = uri.replace("{" + path.name() + "}", arg.toString());
+                    uri = uri.replace("{" + path.name() + "}", pathValue(path, arg.toString()));
                     hasUriAnnotations = true;
                 }
 
@@ -508,12 +529,12 @@ public class Generator {
 
             Path path = method.getAnnotation(Path.class);
             if (null != path) {
-                uri = uri.replace("{" + path.name() + "}", injectProperty(path.value()));
+                uri = uri.replace("{" + path.name() + "}", pathValue(path, injectProperty(path.value())));
             }
             Paths paths = method.getAnnotation(Paths.class);
             if (null != paths) {
                 for (Path p : paths.value()) {
-                    uri = uri.replace("{" + p.name() + "}", injectProperty(p.value()));
+                    uri = uri.replace("{" + p.name() + "}", pathValue(p, injectProperty(p.value())));
                 }
             }
             return uri;

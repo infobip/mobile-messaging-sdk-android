@@ -21,6 +21,11 @@ public class ApiBackendExceptionWithContent extends ApiIOException {
         this.content = content;
     }
 
+    public ApiBackendExceptionWithContent(String code, String message, Object content, Integer httpStatusCode) {
+        super(code, message, null, httpStatusCode);
+        this.content = content;
+    }
+
     public Object getContent() {
         return content;
     }

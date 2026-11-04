@@ -15,7 +15,9 @@ import org.infobip.mobile.messaging.MessageHandlerModule;
 import org.infobip.mobile.messaging.MobileMessaging;
 import org.infobip.mobile.messaging.MobileMessagingCore;
 import org.infobip.mobile.messaging.logging.MobileMessagingLogger;
+import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileApiResourceProvider;
+import org.infobip.mobile.messaging.mobileapi.Result;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,8 +68,16 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
 
     @Override
     public void fetchInbox(@NonNull String token, @NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
-        if (isBlank(token) || isBlank(externalUserId)) {
-            MobileMessagingLogger.w("[Inbox] One or more required parameters is empty. Check token and externalUserId");
+        if (isBlank(token)) {
+            reportInvalidParameters(messageResultListener, "JWT token must not be blank");
+            return;
+        }
+        if (isBlank(externalUserId)) {
+            reportInvalidParameters(messageResultListener, "External user ID must not be blank");
+            return;
+        }
+        if (hasCursorWithClientSideTopics(filterOptions)) {
+            reportInvalidParameters(messageResultListener, "Cursor pagination is not supported with a nonempty topics list; use the singular topic option instead");
             return;
         }
         mobileInboxSynchronizer().fetchInbox(token, externalUserId, filterOptions, messageResultListener);
@@ -76,10 +86,61 @@ public class MobileInboxImpl extends MobileInbox implements MessageHandlerModule
     @Override
     public void fetchInbox(@NonNull String externalUserId, MobileInboxFilterOptions filterOptions, MobileMessaging.ResultListener<Inbox> messageResultListener) {
         if (isBlank(externalUserId)) {
-            MobileMessagingLogger.w("[Inbox] externalUserId was empty");
+            reportInvalidParameters(messageResultListener, "External user ID must not be blank");
+            return;
+        }
+        if (hasCursorWithClientSideTopics(filterOptions)) {
+            reportInvalidParameters(messageResultListener, "Cursor pagination is not supported with a nonempty topics list; use the singular topic option instead");
             return;
         }
         mobileInboxSynchronizer().fetchInbox(null, externalUserId, filterOptions, messageResultListener);
+    }
+
+    @Override
+    public void deleteMessages(@NonNull String token, @NonNull String externalUserId,
+                               @NonNull String[] messageIds, MobileMessaging.ResultListener<Void> listener) {
+        if (isBlank(token)) {
+            reportInvalidParameters(listener, "JWT token must not be blank");
+            return;
+        }
+        deleteMessagesInternal(token, externalUserId, messageIds, listener);
+    }
+
+    @Override
+    public void deleteMessages(@NonNull String externalUserId, @NonNull String[] messageIds,
+                               MobileMessaging.ResultListener<Void> listener) {
+        deleteMessagesInternal(null, externalUserId, messageIds, listener);
+    }
+
+    private void deleteMessagesInternal(String token, String externalUserId, String[] messageIds,
+                                        MobileMessaging.ResultListener<Void> listener) {
+        if (isBlank(externalUserId)) {
+            reportInvalidParameters(listener, "External user ID must not be blank");
+            return;
+        }
+        if (messageIds == null || messageIds.length == 0) {
+            reportInvalidParameters(listener, "At least one message ID is required");
+            return;
+        }
+        for (String messageId : messageIds) {
+            if (isBlank(messageId)) {
+                reportInvalidParameters(listener, "Message IDs must not be blank");
+                return;
+            }
+        }
+        mobileInboxSynchronizer().deleteMessages(token, externalUserId, messageIds, listener);
+    }
+
+    private static boolean hasCursorWithClientSideTopics(MobileInboxFilterOptions options) {
+        return options != null && !isBlank(options.getCursor()) &&
+                options.getTopics() != null && !options.getTopics().isEmpty();
+    }
+
+    private static <T> void reportInvalidParameters(MobileMessaging.ResultListener<T> listener, String message) {
+        MobileMessagingLogger.w("[Inbox] " + message);
+        if (listener != null) {
+            listener.onResult(new Result<>(InternalSdkError.INBOX_INVALID_PARAMETERS.getError(message)));
+        }
     }
 
     @Override

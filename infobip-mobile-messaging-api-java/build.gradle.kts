@@ -75,6 +75,12 @@ dependencies {
     testImplementation("org.mockito:mockito-core:$mmMockitoCoreVersion")
 }
 
+tasks.withType<Test>().configureEach {
+    // ApiResponse contains an exception DTO; Gson reflects its inherited Throwable fields.
+    // Android has no Java module boundary, but JVM transport tests run on JDK 17+.
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
+}
+
 sonar {
     properties {
         property("sonar.java.binaries", layout.buildDirectory.get().asFile.resolve("classes/java/main").absolutePath)

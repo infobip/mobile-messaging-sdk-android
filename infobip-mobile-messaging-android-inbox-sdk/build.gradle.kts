@@ -76,6 +76,8 @@ dependencies {
     implementation(project(":infobip-mobile-messaging-android-sdk"))
     implementation(project(":infobip-mobile-messaging-api-java"))
 
+    testImplementation("junit:junit:$mmJunitVersion")
+
     androidTestImplementation(project(":infobip-mobile-messaging-android-test"))
     androidTestImplementation("androidx.test.ext:junit:$mmAndroidJunitVersion")
     androidTestImplementation("junit:junit:$mmJunitVersion")

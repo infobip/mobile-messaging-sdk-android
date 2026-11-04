@@ -27,6 +27,7 @@ public class MobileInboxFilterOptionsJson {
             String topic = null;
             List<String> topics = null;
             Integer limit = null;
+            String cursor = null;
 
             if (json.has(MobileInboxFilterOptionsAttrs.fromDateTime) && !json.isNull(MobileInboxFilterOptionsAttrs.fromDateTime))
                 fromDateTime = DateTimeUtil.ISO8601DateFromString(json.getString(MobileInboxFilterOptionsAttrs.fromDateTime));
@@ -43,22 +44,17 @@ public class MobileInboxFilterOptionsJson {
             }
             if (json.has(MobileInboxFilterOptionsAttrs.limit) && !json.isNull(MobileInboxFilterOptionsAttrs.limit))
                 limit = json.getInt(MobileInboxFilterOptionsAttrs.limit);
+            if (json.has(MobileInboxFilterOptionsAttrs.cursor) && !json.isNull(MobileInboxFilterOptionsAttrs.cursor))
+                cursor = json.getString(MobileInboxFilterOptionsAttrs.cursor);
 
+            MobileInboxFilterOptions options;
             if (topic != null) {
-                return new MobileInboxFilterOptions(
-                        fromDateTime,
-                        toDateTime,
-                        topic,
-                        limit
-                );
+                options = new MobileInboxFilterOptions(fromDateTime, toDateTime, topic, limit, cursor);
             } else {
-                return new MobileInboxFilterOptions(
-                        fromDateTime,
-                        toDateTime,
-                        topics,
-                        limit
-                );
+                options = new MobileInboxFilterOptions(fromDateTime, toDateTime, topics, limit);
+                options.setCursor(cursor);
             }
+            return options;
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

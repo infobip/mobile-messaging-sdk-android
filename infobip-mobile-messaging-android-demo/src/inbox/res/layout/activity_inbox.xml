@@ -36,13 +36,21 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="579dp" />
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/tv_counts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="italic" />
+
+        <Button
+            android:id="@+id/btn_delete_selected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Delete selected (0)" />
 
         <Button
             android:id="@+id/button_second"

@@ -13,4 +13,5 @@ public class MobileInboxFilterOptionsAttrs {
     public static final String topic = "topic";
     public static final String topics = "topics";
     public static final String limit = "limit";
+    public static final String cursor = "cursor";
 }

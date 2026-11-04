@@ -35,7 +35,6 @@ import org.infobip.mobile.messaging.SuccessPending;
 import org.infobip.mobile.messaging.User;
 import org.infobip.mobile.messaging.UserIdentity;
 import org.infobip.mobile.messaging.inbox.Inbox;
-import org.infobip.mobile.messaging.inbox.InboxBundleMapper;
 import org.infobip.mobile.messaging.inbox.MobileInbox;
 import org.infobip.mobile.messaging.inbox.MobileInboxEvent;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
@@ -171,10 +170,9 @@ public class MainActivity extends AppCompatActivity {
 
     private View.OnClickListener onToInboxButtonPressed() {
         return view -> {
-            // Passing external user id and inbox as arguments to the second activity
+            // The inbox screen fetches a fresh first page for this user.
             Bundle arguments = new Bundle();
             arguments.putString(Constants.BUNDLE_KEY_EXTERNAL_USER_ID, externalUserId);
-            arguments.putBundle(Constants.BUNDLE_KEY_DEMO_INBOX, InboxBundleMapper.inboxToBundle(inbox));
 
             Intent intent = new Intent(MainActivity.this, InboxActivity.class);
             intent.putExtras(arguments);
@@ -235,6 +233,9 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         registerReceivers();
+        if (isUserPersonalizedWithExternalUserId()) {
+            prepareInbox();
+        }
     }
 
     private void registerReceivers() {
