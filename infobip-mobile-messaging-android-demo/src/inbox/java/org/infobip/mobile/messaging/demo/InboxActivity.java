@@ -341,7 +341,7 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
-                    deleteMessage(inboxMessages.get(position));
+                    deleteSwipedMessage(inboxMessages.get(position));
                 }
             }
         });
@@ -367,11 +367,11 @@ public class InboxActivity extends AppCompatActivity implements CustomAdapter.On
         btnDeleteSelected.setText("Delete selected (" + selectedCount + ")");
     }
 
-    private void deleteMessage(InboxMessage message) {
+    private void deleteSwipedMessage(InboxMessage message) {
         if (!canUpdateInboxUi()) {
             return;
         }
-        mobileInbox.deleteMessage(externalUserId, message.getMessageId(),
+        mobileInbox.deleteMessages(externalUserId, new String[]{message.getMessageId()},
                 new InboxDeleteResultListener(deletions, Collections.singleton(message.getMessageId()), this));
     }
 

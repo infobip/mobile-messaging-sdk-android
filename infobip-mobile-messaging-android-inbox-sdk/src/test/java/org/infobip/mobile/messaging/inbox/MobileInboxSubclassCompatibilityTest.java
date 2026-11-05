@@ -26,22 +26,22 @@ public class MobileInboxSubclassCompatibilityTest {
 
     @Test
     public void legacySubclassRejectsBatchDeletionWithToken() {
-        assertUnsupported(() -> inbox.deleteMessages("token", "user", new String[]{"id"}, listener));
+        assertUnsupported(() -> inbox.deleteMessages("token", "user", new String[]{"id1", "id2"}, listener));
     }
 
     @Test
     public void legacySubclassRejectsBatchDeletionWithApplicationCode() {
-        assertUnsupported(() -> inbox.deleteMessages("user", new String[]{"id"}, listener));
+        assertUnsupported(() -> inbox.deleteMessages("user", new String[]{"id1", "id2"}, listener));
     }
 
     @Test
     public void legacySubclassRejectsSingleDeletionWithToken() {
-        assertUnsupported(() -> inbox.deleteMessage("token", "user", "id", listener));
+        assertUnsupported(() -> inbox.deleteMessages("token", "user", new String[]{"id"}, listener));
     }
 
     @Test
     public void legacySubclassRejectsSingleDeletionWithApplicationCode() {
-        assertUnsupported(() -> inbox.deleteMessage("user", "id", listener));
+        assertUnsupported(() -> inbox.deleteMessages("user", new String[]{"id"}, listener));
     }
 
     private void assertUnsupported(Runnable deletion) {

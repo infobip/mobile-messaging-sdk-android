@@ -180,6 +180,26 @@ public class MobileInboxTest extends MobileMessagingTestCase {
     }
 
     @Test
+    public void deleteMessages_should_accept_single_id_with_provided_token() {
+        String[] messageIds = {"id1"};
+
+        mobileInboxImpl.deleteMessages(givenToken, givenExternalUserId, messageIds, deleteResultListener);
+
+        Mockito.verify(mobileInboxSynchronizer).deleteMessages(
+                givenToken, givenExternalUserId, messageIds, deleteResultListener);
+    }
+
+    @Test
+    public void deleteMessages_should_accept_single_id_with_application_code() {
+        String[] messageIds = {"id1"};
+
+        mobileInboxImpl.deleteMessages(givenExternalUserId, messageIds, deleteResultListener);
+
+        Mockito.verify(mobileInboxSynchronizer).deleteMessages(
+                null, givenExternalUserId, messageIds, deleteResultListener);
+    }
+
+    @Test
     public void deleteMessages_should_reject_blank_message_id() {
         mobileInboxImpl.deleteMessages(givenToken, givenExternalUserId,
                 new String[]{"id1", " "}, deleteResultListener);

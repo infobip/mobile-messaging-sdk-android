@@ -64,6 +64,7 @@ public abstract class MobileInbox {
     /**
      * Asynchronously deletes one or more inbox messages using the same JWT authorization as inbox fetch.
      * Deletion is idempotent: missing and already deleted messages are reported as success.
+     * To delete a single message, pass an array containing only that message ID.
      *
      * @throws UnsupportedOperationException synchronously if this implementation does not support deletion.
      *         The default implementation throws without invoking the listener, preserving compatibility
@@ -76,6 +77,7 @@ public abstract class MobileInbox {
 
     /**
      * Asynchronously deletes one or more inbox messages using Application Code authorization.
+     * To delete a single message, pass an array containing only that message ID.
      *
      * @throws UnsupportedOperationException synchronously if this implementation does not support deletion.
      *         The default implementation throws without invoking the listener, preserving compatibility
@@ -84,16 +86,6 @@ public abstract class MobileInbox {
     public void deleteMessages(@NonNull String externalUserId, @NonNull String[] messageIds,
                                MobileMessaging.ResultListener<Void> listener) {
         throw new UnsupportedOperationException("Inbox deletion is not supported by this implementation");
-    }
-
-    public void deleteMessage(@NonNull String token, @NonNull String externalUserId,
-                              @NonNull String messageId, MobileMessaging.ResultListener<Void> listener) {
-        deleteMessages(token, externalUserId, new String[]{messageId}, listener);
-    }
-
-    public void deleteMessage(@NonNull String externalUserId, @NonNull String messageId,
-                              MobileMessaging.ResultListener<Void> listener) {
-        deleteMessages(externalUserId, new String[]{messageId}, listener);
     }
 
     /**
