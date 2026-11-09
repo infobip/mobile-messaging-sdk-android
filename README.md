@@ -18,7 +18,7 @@ Mobile Messaging SDK is designed and developed to easily enable push notificatio
     ```kotlin
     dependencies {
         ...
-        implementation("com.infobip:infobip-mobile-messaging-android-sdk:16.6.1@aar") {
+        implementation("com.infobip:infobip-mobile-messaging-android-sdk:16.7.0@aar") {
             isTransitive = true
         }
     }
