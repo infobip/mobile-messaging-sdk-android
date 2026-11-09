@@ -1161,13 +1161,28 @@ public class MobileMessagingCore
         return jwtSupplier.getJwt();
     }
 
+    /**
+     * Sets trusted domains and persists them, so they are also applied when notifications are handled before the SDK is initialized,
+     * e.g. when the application process is started by a push message. Null or empty value removes the persisted domains.
+     */
     public void setTrustedDomains(HashSet<String> trustedDomains) {
-        this.trustedDomains = trustedDomains;
+        if (trustedDomains == null || trustedDomains.isEmpty()) {
+            this.trustedDomains = null;
+            PreferenceHelper.remove(context, MobileMessagingProperty.TRUSTED_DOMAINS);
+        } else {
+            // copy, so later changes of the caller's set don't make in-memory and persisted domains diverge
+            this.trustedDomains = new HashSet<>(trustedDomains);
+            PreferenceHelper.saveStringSet(context, MobileMessagingProperty.TRUSTED_DOMAINS, this.trustedDomains);
+        }
     }
 
     public HashSet<String> getTrustedDomains() {
-        if (trustedDomains == null) return null;
-        return trustedDomains;
+        if (trustedDomains == null) {
+            Set<String> persistedTrustedDomains = PreferenceHelper.findStringSet(context, MobileMessagingProperty.TRUSTED_DOMAINS);
+            if (persistedTrustedDomains == null) return null;
+            trustedDomains = new HashSet<>(persistedTrustedDomains);
+        }
+        return new HashSet<>(trustedDomains);
     }
 
     private boolean isDisplayNotificationEnabled() {

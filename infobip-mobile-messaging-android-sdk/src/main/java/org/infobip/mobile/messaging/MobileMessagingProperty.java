@@ -92,6 +92,7 @@ public enum MobileMessagingProperty {
     SAVE_INSTALLATION_ON_DISK("org.infobip.mobile.messaging.infobip.SAVE_INSTALLATION_ON_DISK", true),
     SAVE_CUSTOM_ATTRIBUTES_ON_DISK("org.infobip.mobile.messaging.infobip.SAVE_CUSTOM_ATTRIBUTES_ON_DISK", true),
     ALLOW_UNTRUSTED_SSL_ON_ERROR("org.infobip.mobile.messaging.infobip.ALLOW_UNTRUSTED_SSL_ON_ERROR", false),
+    TRUSTED_DOMAINS("org.infobip.mobile.messaging.infobip.TRUSTED_DOMAINS"),
     APP_CODE_PROVIDER_CANONICAL_CLASS_NAME("org.infobip.mobile.messaging.infobip.APP_CODE_PROVIDER_CANONICAL_CLASS_NAME"),
     // END
 

@@ -9,6 +9,7 @@ package org.infobip.mobile.messaging;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.app.Application;
@@ -20,11 +21,13 @@ import org.infobip.mobile.messaging.cloud.MobileMessagingCloudHandler;
 import org.infobip.mobile.messaging.platform.Lazy;
 import org.infobip.mobile.messaging.platform.Platform;
 import org.infobip.mobile.messaging.tools.MobileMessagingTestCase;
+import org.infobip.mobile.messaging.util.DomainHelper;
 import org.infobip.mobile.messaging.util.PreferenceHelper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MobileMessagingBuilderTest extends MobileMessagingTestCase {
@@ -78,6 +81,32 @@ public class MobileMessagingBuilderTest extends MobileMessagingTestCase {
         MobileMessagingCore core = build(givenBuilder());
 
         assertFalse(core.isAppManagedFcmTokenLifecycle());
+    }
+
+    @Test
+    public void test_trusted_domains_from_builder_are_applied_after_process_restart() {
+        HashSet<String> trustedDomains = new HashSet<>();
+        trustedDomains.add("example.com");
+        build(givenBuilder().withTrustedDomains(trustedDomains));
+
+        // core instance without in-memory trusted domains, as created when a push starts the app process before the SDK is initialized
+        MobileMessagingTestable.create(context, broadcaster, mobileApiResourceProvider, firebaseAppProvider);
+
+        DomainHelper domainHelper = new DomainHelper(context);
+        assertFalse(domainHelper.isTrustedDomain("https://www.bla.com"));
+        assertTrue(domainHelper.isTrustedDomain("https://some.example.com"));
+    }
+
+    @Test
+    public void test_trusted_domains_are_removed_when_omitted_on_subsequent_build() {
+        HashSet<String> trustedDomains = new HashSet<>();
+        trustedDomains.add("example.com");
+        build(givenBuilder().withTrustedDomains(trustedDomains));
+
+        MobileMessagingCore core = build(givenBuilder());
+
+        assertNull(core.getTrustedDomains());
+        assertFalse(PreferenceHelper.contains(context, MobileMessagingProperty.TRUSTED_DOMAINS));
     }
 
     private MobileMessaging.Builder givenBuilder() {
