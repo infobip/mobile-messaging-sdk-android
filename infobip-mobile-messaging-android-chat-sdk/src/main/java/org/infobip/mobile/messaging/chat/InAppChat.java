@@ -237,6 +237,23 @@ public abstract class InAppChat {
     public abstract String getChatPushBody();
 
     /**
+     * Enables or disables automatic navigation to in-app chat for chat message pushes with a valid thread ID.
+     * The setting is persisted and is {@code false} by default.
+     * The "Open chatbot in LiveChat" action without a thread ID still opens in-app chat.
+     *
+     * @param enabled whether automatic chat push navigation is enabled
+     */
+    public abstract void setPushNavigationEnabled(boolean enabled);
+
+    /**
+     * Returns the stored automatic navigation setting for chat message pushes with a valid thread ID.
+     * The setting is {@code false} by default.
+     *
+     * @return {@code true} if automatic chat push navigation is enabled
+     */
+    public abstract boolean isPushNavigationEnabled();
+
+    /**
      * Get instance of {@link LivechatWidgetApi} to interact with livechat widget
      * without need to show either {@code InAppChatView} or {@code InAppChatFragment} in UI.
      *
@@ -280,14 +297,16 @@ public abstract class InAppChat {
      *
      * <p>The default handler parses the notification's {@link org.infobip.mobile.messaging.OpenLivechatAction}:</p>
      * <ul>
-     *     <li>If the action contains a valid chat thread ID or originates from the "Open chatbot in LiveChat" tap action,
+     *     <li>If the action has no thread ID, as with the "Open chatbot in LiveChat" action,
      *     it opens {@link org.infobip.mobile.messaging.chat.view.InAppChatActivity}.</li>
-     *     <li>If no action can be parsed from an in-app chat message push notification, it opens the callback activity
+     *     <li>If the action contains a valid chat thread ID and push navigation is enabled,
+     *     it opens {@link org.infobip.mobile.messaging.chat.view.InAppChatActivity}.</li>
+     *     <li>Otherwise, an in-app chat message push notification opens the callback activity
      *     defined in {@link org.infobip.mobile.messaging.NotificationSettings#getCallbackActivity()}.</li>
      * </ul>
      *
-     * <p>In multi-thread mode, the activity opens the specified thread and sends the optional keyword to that thread.
-     * Without a thread ID, it creates a thread with the keyword or opens the new-thread screen when the keyword is absent.
+     * <p>In multi-thread mode, the chat activity opens the specified thread when a thread ID is present.
+     * Without a thread ID, it creates a thread with the optional keyword or opens the new-thread screen.
      * In single-thread mode, the optional keyword is sent to the current chat and the thread ID is ignored.</p>
      *
      * @return the default {@link InAppChatNotificationInteractionHandler} used to handle in-app chat notification taps

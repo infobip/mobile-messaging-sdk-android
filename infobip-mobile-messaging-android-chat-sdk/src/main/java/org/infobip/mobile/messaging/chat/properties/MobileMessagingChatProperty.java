@@ -23,6 +23,7 @@ public enum MobileMessagingChatProperty {
     IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_ATTACHMENT_MAX_SIZE", 10_485_760L),  //10 MiB
     IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_WIDGET_ATTACHMENT_ALLOWED_EXTENSIONS", null),
     IN_APP_CHAT_ACTIVATED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_ACTIVATED", false),
+    IN_APP_CHAT_PUSH_NAVIGATION_ENABLED("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_PUSH_NAVIGATION_ENABLED", false),
     IN_APP_CHAT_LANGUAGE("org.infobip.mobile.messaging.infobip.IN_APP_CHAT_LANGUAGE", null),
     UNREAD_CHAT_MESSAGES_COUNT("org.infobip.mobile.messaging.infobip.UNREAD_CHAT_MESSAGES_COUNT", 0);
 
