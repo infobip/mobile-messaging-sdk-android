@@ -1,4 +1,5 @@
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+import hudson.AbortException
 
 def canonicalJob = 'Team_Mobile_Messaging/infobip-mobile-messaging-android'
 properties([
@@ -67,6 +68,14 @@ timestamps {
                                     } catch (FlowInterruptedException interrupted) {
                                         if (interrupted.isActualInterruption() || workerRun != null) { throw interrupted }
                                         echo('Worker could not start promptly on ' + host + '; trying another available Mac.')
+                                    } catch (AbortException cancelled) {
+                                        // The build step can report a cancelled queue request as
+                                        // AbortException before timeout propagates FlowInterruptedException.
+                                        // Only a cancelled request with no started worker is eligible.
+                                        if (workerRun != null || cancelled.message?.replace(' » ', '/') != 'Build of ' + target.worker + ' was cancelled') {
+                                            throw cancelled
+                                        }
+                                        echo('Queued worker was cancelled before starting on ' + host + '; trying another available Mac.')
                                     }
                                     if (workerRun != null) {
                                         stage('Native Android build on ' + host) {
