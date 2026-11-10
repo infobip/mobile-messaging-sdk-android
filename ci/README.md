@@ -25,6 +25,8 @@ The existing Infobip `/gitlab/build_now` hook discovers Freestyle/Maven jobs rat
 
 ## Rollout and rollback
 
+`native-android-workers.groovy` is the worker/relay provisioning blueprint. Run it with sandboxed Job DSL and a configured run identity, or apply the same settings through normal Jenkins configuration. Do not disable the sandbox to bypass a provisioning failure. The template copies Jenkins-managed credentials without exporting them into Git.
+
 1. Validate a copied snapshot job on mini-03 under its device lock, with source mirroring and release actions disabled. Do not interrupt running jobs.
 2. Provision workers and a candidate dispatcher; validate scheduling, worker admission, tests and report copying. Keep the existing job available while doing this.
 3. Drain the existing Android job, preserving queued requests and build history. Move it to the release name, isolate it from push discovery and retain its Release wrapper, parameters and credentials. Add the global native Android resource to its existing device resource.
