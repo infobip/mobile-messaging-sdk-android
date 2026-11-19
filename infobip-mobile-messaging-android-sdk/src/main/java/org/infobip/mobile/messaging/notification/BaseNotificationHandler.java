@@ -369,30 +369,16 @@ public class BaseNotificationHandler {
     }
 
     /**
-     * This method will return channel with HIGH importance if heads up notification is required.
+     * Resolves the notification channel using {@link NotificationChannelManager}. Without channel config and resolver,
+     * channel with HIGH importance is returned if heads up notification is required.
      * <br>This is necessary for Android 8.0 and above.
      *
      * @param notificationSettings - notification settings to use when choosing the channel
      */
     @NonNull
     private String getChannelIdForNotification(@NonNull NotificationSettings notificationSettings, Message message) {
-        boolean hasCustomSound = message.getSound() != null && !message.getSound().equals("default");
         boolean shouldDisplayHeadsUp = shouldDisplayHeadsUpNotification(notificationSettings, message);
-        boolean isVibrate = message.isVibrate();
-        boolean soundEnabled = message.getSound() != null;
-
-        if (hasCustomSound) {
-            String baseChannelId = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID);
-            if (baseChannelId != null) {
-                if (shouldDisplayHeadsUp) {
-                    return baseChannelId + (isVibrate ? "_high_priority, vibration" : "_high_priority");
-                } else {
-                    return baseChannelId + (isVibrate ? "_vibration" : "");
-                }
-            }
-        }
-
-        return MobileMessagingCore.getNotificationChannelId(soundEnabled, isVibrate, shouldDisplayHeadsUp);
+        return NotificationChannelManager.resolveChannelId(context, message, shouldDisplayHeadsUp, message.isChatMessage());
     }
 
     /**

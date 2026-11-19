@@ -28,4 +28,13 @@
     <string name="mm_notification_channel_custom_vibration">%1$s Mtetemo</string>
     <string name="mm_notification_channel_custom_high_priority">%1$s Kipaumbele cha Juu</string>
     <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Kipaumbele cha Juu, Mtetemo</string>
+
+    <string name="mm_notification_channel_fallback">%1$s Arifa</string>
+    <string name="mm_notification_channel_fallback_vibration">%1$s Arifa, Mtetemo</string>
+    <string name="mm_notification_channel_fallback_sound">%1$s Arifa, Sauti</string>
+    <string name="mm_notification_channel_fallback_quiet">%1$s Arifa, Kimya</string>
+    <string name="mm_notification_channel_fallback_high_priority">%1$s Arifa, Kipaumbele cha Juu</string>
+    <string name="mm_notification_channel_fallback_high_priority_vibration">%1$s Arifa, Kipaumbele cha Juu, Mtetemo</string>
+    <string name="mm_notification_channel_fallback_high_priority_sound">%1$s Arifa, Kipaumbele cha Juu, Sauti</string>
+    <string name="mm_notification_channel_fallback_high_priority_quiet">%1$s Arifa, Kipaumbele cha Juu, Kimya</string>
 </resources>

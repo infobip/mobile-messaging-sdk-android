@@ -28,4 +28,13 @@
     <string name="mm_notification_channel_custom_vibration">%1$s Okukankana</string>
     <string name="mm_notification_channel_custom_high_priority">%1$s Ekikulu Ennyo</string>
     <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Ekikulu Ennyo, Okukankana</string>
+
+    <string name="mm_notification_channel_fallback">%1$s Ebimanyisibwa</string>
+    <string name="mm_notification_channel_fallback_vibration">%1$s Ebimanyisibwa, Okukankana</string>
+    <string name="mm_notification_channel_fallback_sound">%1$s Ebimanyisibwa, Eddoboozi</string>
+    <string name="mm_notification_channel_fallback_quiet">%1$s Ebimanyisibwa, Okusirika</string>
+    <string name="mm_notification_channel_fallback_high_priority">%1$s Ebimanyisibwa, Ekikulu Ennyo</string>
+    <string name="mm_notification_channel_fallback_high_priority_vibration">%1$s Ebimanyisibwa, Ekikulu Ennyo, Okukankana</string>
+    <string name="mm_notification_channel_fallback_high_priority_sound">%1$s Ebimanyisibwa, Ekikulu Ennyo, Eddoboozi</string>
+    <string name="mm_notification_channel_fallback_high_priority_quiet">%1$s Ebimanyisibwa, Ekikulu Ennyo, Okusirika</string>
 </resources>

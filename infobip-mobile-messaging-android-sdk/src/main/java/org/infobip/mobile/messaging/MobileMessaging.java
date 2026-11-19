@@ -19,6 +19,10 @@ import com.google.firebase.FirebaseOptions;
 import org.infobip.mobile.messaging.mobileapi.InternalSdkError;
 import org.infobip.mobile.messaging.mobileapi.MobileMessagingError;
 import org.infobip.mobile.messaging.mobileapi.Result;
+import org.infobip.mobile.messaging.notification.NotificationChannelConfig;
+import org.infobip.mobile.messaging.notification.NotificationChannelDefinition;
+import org.infobip.mobile.messaging.notification.NotificationChannelManager;
+import org.infobip.mobile.messaging.notification.NotificationChannelResolver;
 import org.infobip.mobile.messaging.storage.MessageStore;
 import org.infobip.mobile.messaging.util.Cryptor;
 import org.infobip.mobile.messaging.util.CryptorImpl;
@@ -531,6 +535,47 @@ public abstract class MobileMessaging {
     public abstract void setJwtSupplier(JwtSupplier jwtSupplier);
 
     /**
+     * Sets or replaces the {@link NotificationChannelResolver} which selects notification channel for each notification displayed by the SDK.
+     * <p>
+     * The resolver is kept in memory only. Set it on every application start in {@code Application.onCreate()}, so that it is available
+     * also when the application process is started by a push message. Cross-platform plugin users can set it in the native application class.
+     * If not set, the channel resolved by the SDK is used. A resolver set using
+     * {@link Builder#withNotificationChannelResolver(NotificationChannelResolver)} takes precedence over this one.
+     * <pre>
+     * {@code MobileMessaging.setNotificationChannelResolver(context ->
+     *         context.isInAppChatMessage() ? "chat" : context.getSdkSuggestedChannelId());}
+     * </pre>
+     *
+     * @param resolver resolver to use, or null to remove the current one
+     * @see NotificationChannelResolver
+     * @see Builder#withNotificationChannelResolver(NotificationChannelResolver)
+     */
+    public static void setNotificationChannelResolver(@Nullable NotificationChannelResolver resolver) {
+        NotificationChannelManager.setResolver(resolver);
+    }
+
+    /**
+     * Deletes the SDK default notification channels (mm_default_channel*) and the channels created for
+     * {@link Builder#withCustomNotificationChannel(String, String, String)} from the device.
+     * <p>
+     * The SDK never deletes notification channels automatically. Use this method after migrating to
+     * {@link Builder#withSingleNotificationChannel(String, String)}, {@link Builder#withoutDefaultNotificationChannels()}
+     * or {@link Builder#withNotificationChannelConfig(NotificationChannelConfig)}, so that unused channels are not shown in system settings.
+     * Channels are deleted only if SDK default channels are disabled in the current configuration.
+     * Channels of previously set custom channels are deleted as well, except channels used by the current configuration.
+     * <p>
+     * <b>Warning:</b> deleting a channel discards all settings the user made for it (importance, sound, vibration, do not disturb...).
+     * Only channels named in {@link NotificationChannelConfig} are kept. Don't call this method while a
+     * {@link NotificationChannelResolver} or messages with the custom payload channel key still use SDK default or custom sound channels,
+     * the SDK can't detect such use. After deletion, these channels are treated as missing.
+     * Has no effect below Android 8.0 (API 26).
+     *
+     * @return true if at least one channel was deleted, false if there was nothing to delete, SDK default channels are still in use
+     * or channels are not supported
+     */
+    public abstract boolean deleteSdkDefaultNotificationChannels();
+
+    /**
      * Default result listener interface for asynchronous operations.
      *
      * @param <T> type of successful result
@@ -618,6 +663,11 @@ public abstract class MobileMessaging {
         private boolean bannerForegroundNotifications = false;
         private HashSet<String> trustedDomains = null;
         private boolean appManagedFcmTokenLifecycle = false;
+        private NotificationChannelConfig notificationChannelConfig = null;
+        // applied on top of notificationChannelConfig in build(), so that the result doesn't depend on the order of calls
+        private NotificationChannelDefinition singleNotificationChannel = null;
+        private boolean withoutDefaultNotificationChannels = false;
+        private NotificationChannelResolver notificationChannelResolver = null;
 
         @SuppressWarnings("unchecked")
         private Class<? extends MessageStore> messageStoreClass = (Class<? extends MessageStore>) MobileMessagingProperty.MESSAGE_STORE_CLASS.getDefaultValue();
@@ -861,6 +911,137 @@ public abstract class MobileMessaging {
             this.channelId = channelId;
             this.channelName = channelName;
             this.notificationAudio = notificationAudio;
+            return this;
+        }
+
+        /**
+         * Configures notification channels used by the SDK on Android 8.0 (API 26) and above: single channel, disabling SDK default channels,
+         * mapping of notification kinds to channels, channel selected by a custom payload key and channels the SDK creates for the application.
+         * <p>
+         * Configuration is persisted. If this method is not called on the next initialization, SDK default channels are used again.
+         * The SDK never deletes notification channels automatically, see {@link MobileMessaging#deleteSdkDefaultNotificationChannels()}.
+         * Calling this method again replaces the configuration. {@link #withSingleNotificationChannel(String, String, String)} and
+         * {@link #withoutDefaultNotificationChannels()} are applied on top of it, regardless of the order of calls.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withNotificationChannelConfig(NotificationChannelConfig.builder()
+         *               .withoutDefaultChannels()
+         *               .addChannel(NotificationChannelDefinition.builder("alerts").withNameResource("channel_alerts")
+         *                       .withImportance(NotificationChannelDefinition.Importance.HIGH).build())
+         *               .addChannel(NotificationChannelDefinition.builder("general").withNameResource("channel_general").build())
+         *               .withChannelMapping(NotificationChannelMapping.builder()
+         *                       .withHighPriorityChannelId("alerts")
+         *                       .withDefaultChannelId("general")
+         *                       .build())
+         *               .withPayloadChannelIdKey("androidChannelId")
+         *               .build())
+         *       .build();}
+         * </pre>
+         *
+         * @param notificationChannelConfig notification channel configuration
+         * @return {@link Builder}
+         * @see NotificationChannelConfig
+         */
+        public Builder withNotificationChannelConfig(@NonNull NotificationChannelConfig notificationChannelConfig) {
+            this.notificationChannelConfig = notificationChannelConfig;
+            return this;
+        }
+
+        /**
+         * All notifications will be displayed in a single notification channel which the SDK creates.
+         * SDK default notification channels are not created and {@link #withCustomNotificationChannel(String, String, String)} is ignored.
+         * If the channel already exists, only its name is updated.
+         * The SDK creates the channel with default importance (an existing channel keeps its importance), so on Android 8.0 and above
+         * notifications in it aren't displayed as heads-up. To display them as heads-up, pass a single channel definition with
+         * {@link NotificationChannelDefinition.Importance#HIGH} using {@link NotificationChannelConfig.Builder#withSingleChannel(NotificationChannelDefinition)},
+         * then also notifications displayed while the application is in the foreground are heads-up. Android doesn't change the importance
+         * of an existing channel, also of a deleted one created again, so use a new channel ID to switch existing installations to heads-up.
+         * SDK logs a warning if heads-up notifications are enabled, but end up in a single channel without high importance.
+         * <pre>
+         * {@code new MobileMessaging.Builder(application)
+         *       .withSingleNotificationChannel("notifications", getString(R.string.notifications))
+         *       .build();}
+         * </pre>
+         *
+         * @param channelId   channel ID
+         * @param channelName channel name visible to the user in system settings
+         * @return {@link Builder}
+         */
+        public Builder withSingleNotificationChannel(@NonNull String channelId, @NonNull String channelName) {
+            return withSingleNotificationChannel(channelId, channelName, null);
+        }
+
+        /**
+         * All notifications will be displayed in a single notification channel which the SDK creates.
+         * SDK default notification channels are not created and {@link #withCustomNotificationChannel(String, String, String)} is ignored.
+         * If the channel already exists, only its name and description are updated.
+         * The SDK creates the channel with default importance (an existing channel keeps its importance), so on Android 8.0 and above
+         * notifications in it aren't displayed as heads-up. To display them as heads-up, pass a single channel definition with
+         * {@link NotificationChannelDefinition.Importance#HIGH} using {@link NotificationChannelConfig.Builder#withSingleChannel(NotificationChannelDefinition)},
+         * then also notifications displayed while the application is in the foreground are heads-up. Android doesn't change the importance
+         * of an existing channel, also of a deleted one created again, so use a new channel ID to switch existing installations to heads-up.
+         * SDK logs a warning if heads-up notifications are enabled, but end up in a single channel without high importance.
+         *
+         * @param channelId          channel ID
+         * @param channelName        channel name visible to the user in system settings
+         * @param channelDescription channel description visible to the user in system settings
+         * @return {@link Builder}
+         */
+        public Builder withSingleNotificationChannel(@NonNull String channelId, @NonNull String channelName, @Nullable String channelDescription) {
+            this.singleNotificationChannel = NotificationChannelDefinition.builder(channelId)
+                    .withName(channelName)
+                    .withDescription(channelDescription)
+                    .build();
+            return this;
+        }
+
+        /**
+         * SDK will not create its default notification channels. Notifications are displayed in channels selected by
+         * {@link #withNotificationChannelConfig(NotificationChannelConfig)} or {@link #withNotificationChannelResolver(NotificationChannelResolver)}.
+         * If none of them provides an existing channel, the SDK fallback channel is used: mm_fallback_channel_high_priority
+         * for heads-up notifications, otherwise mm_fallback_channel, with the _vibration, _sound or _quiet suffix for messages
+         * with vibration only, sound only or neither, same as SDK default channels.
+         * {@link #withCustomNotificationChannel(String, String, String)} is ignored.
+         *
+         * @return {@link Builder}
+         */
+        public Builder withoutDefaultNotificationChannels() {
+            this.withoutDefaultNotificationChannels = true;
+            return this;
+        }
+
+        /**
+         * Applies {@link #withSingleNotificationChannel(String, String, String)} and {@link #withoutDefaultNotificationChannels()}
+         * on top of the configuration set using {@link #withNotificationChannelConfig(NotificationChannelConfig)}.
+         */
+        @Nullable
+        static NotificationChannelConfig mergeNotificationChannelConfig(@Nullable NotificationChannelConfig config,
+                                                                        @Nullable NotificationChannelDefinition singleChannel,
+                                                                        boolean withoutDefaultChannels) {
+            if (singleChannel == null && !withoutDefaultChannels) {
+                return config;
+            }
+            NotificationChannelConfig.Builder builder = NotificationChannelConfig.builder(config);
+            if (singleChannel != null) {
+                builder.withSingleChannel(singleChannel);
+            }
+            if (withoutDefaultChannels) {
+                builder.withoutDefaultChannels();
+            }
+            return builder.build();
+        }
+
+        /**
+         * Sets {@link NotificationChannelResolver} which selects notification channel for each notification displayed by the SDK.
+         * Resolver is kept in memory only, see {@link MobileMessaging#setNotificationChannelResolver(NotificationChannelResolver)}.
+         * It takes precedence over the resolver set using {@link MobileMessaging#setNotificationChannelResolver(NotificationChannelResolver)}
+         * and is removed when the SDK is built again without it.
+         *
+         * @param notificationChannelResolver resolver to use
+         * @return {@link Builder}
+         */
+        public Builder withNotificationChannelResolver(@NonNull NotificationChannelResolver notificationChannelResolver) {
+            this.notificationChannelResolver = notificationChannelResolver;
             return this;
         }
 
@@ -1122,6 +1303,9 @@ public abstract class MobileMessaging {
             MobileMessagingCore.setCustomNotificationChannel(application, channelId, channelName, notificationAudio);
             MobileMessagingCore.setBannerForegroundNotifications(application, bannerForegroundNotifications);
             MobileMessagingCore.setAppManagedFcmTokenLifecycle(application, appManagedFcmTokenLifecycle);
+            MobileMessagingCore.setNotificationChannelConfig(application,
+                    mergeNotificationChannelConfig(notificationChannelConfig, singleNotificationChannel, withoutDefaultNotificationChannels));
+            NotificationChannelManager.setBuilderResolver(notificationChannelResolver);
 
             MobileMessagingCore.Builder mobileMessagingCoreBuilder = new MobileMessagingCore.Builder(application)
                     .withDisplayNotification(notificationSettings)

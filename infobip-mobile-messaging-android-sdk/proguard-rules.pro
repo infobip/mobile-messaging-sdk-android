@@ -113,6 +113,12 @@
 -keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
 -keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
 
+# Notification channel configuration is persisted and provided by cross-platform plugins as JSON
+-keep class org.infobip.mobile.messaging.notification.NotificationChannelConfig { *; }
+-keep class org.infobip.mobile.messaging.notification.NotificationChannelMapping { *; }
+-keep class org.infobip.mobile.messaging.notification.NotificationChannelDefinition { *; }
+-keep enum org.infobip.mobile.messaging.notification.NotificationChannelDefinition$Importance { *; }
+
 # WorkManager uses a Room-generated database implementation created through reflection.
 # Room 2.5.0 keeps the generated class but not its constructor required by R8 full mode.
 -keepclassmembers class * extends androidx.room.RoomDatabase {

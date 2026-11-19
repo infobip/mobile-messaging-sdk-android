@@ -97,6 +97,7 @@ extensions.configure<ApplicationExtension> {
         create("customInApp") { dimension = "default" }
         create("cryptorMigration") { dimension = "default" }
         create("inbox") { dimension = "default" }
+        create("notificationChannels") { dimension = "default" }
     }
 
     sourceSets {

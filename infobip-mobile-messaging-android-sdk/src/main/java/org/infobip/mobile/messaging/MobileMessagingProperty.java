@@ -80,6 +80,8 @@ public enum MobileMessagingProperty {
     NOTIFICATION_CHANNEL_ID("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_ID", null),
     NOTIFICATION_CHANNEL_NAME("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_NAME", null),
     NOTIFICATION_CHANNEL_AUDIO("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_AUDIO", null),
+    NOTIFICATION_CHANNEL_CONFIG("org.infobip.mobile.messaging.infobip.NOTIFICATION_CHANNEL_CONFIG", null),
+    CUSTOM_NOTIFICATION_CHANNEL_IDS("org.infobip.mobile.messaging.infobip.CUSTOM_NOTIFICATION_CHANNEL_IDS", new String[0]),
     BANNER_FOREGROUND_NOTIFICATIONS("org.infobip.mobile.messaging.infobip.BANNER_FOREGROUND_NOTIFICATIONS", false),
     APP_MANAGED_FCM_TOKEN_LIFECYCLE("org.infobip.mobile.messaging.infobip.APP_MANAGED_FCM_TOKEN_LIFECYCLE", false),
     // END

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  activity_main.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- region scenario -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_scenario" />
+
+            <TextView
+                android:id="@+id/tv_active_scenario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_config"
+                style="@style/NotificationChannels.Monospace" />
+
+            <RadioGroup
+                android:id="@+id/rg_scenarios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/btn_apply_scenario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/apply_scenario" />
+
+            <TextView
+                style="@style/NotificationChannels.Hint"
+                android:text="@string/scenario_hint" />
+            <!-- endregion -->
+
+            <!-- region messages -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_messages" />
+
+            <TextView
+                style="@style/NotificationChannels.Hint"
+                android:text="@string/messages_hint" />
+
+            <CheckBox
+                android:id="@+id/cb_delayed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/post_delayed" />
+
+            <LinearLayout
+                android:id="@+id/ll_messages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+            <!-- endregion -->
+
+            <!-- region log -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_log" />
+
+            <TextView
+                android:id="@+id/tv_log"
+                style="@style/NotificationChannels.Monospace" />
+
+            <Button
+                android:id="@+id/btn_clear_log"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear_log" />
+            <!-- endregion -->
+
+            <!-- region channels -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_channels" />
+
+            <TextView
+                android:id="@+id/tv_channels"
+                style="@style/NotificationChannels.Monospace" />
+
+            <Button
+                android:id="@+id/btn_refresh_channels"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/refresh_channels" />
+            <!-- endregion -->
+
+            <!-- region actions -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_actions" />
+
+            <Button
+                android:id="@+id/btn_create_orders"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/create_orders_channel" />
+
+            <Button
+                android:id="@+id/btn_delete_orders"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/delete_orders_channel" />
+
+            <Button
+                android:id="@+id/btn_delete_sdk_defaults"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/delete_sdk_default_channels" />
+
+            <Button
+                android:id="@+id/btn_delete_all_channels"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/delete_all_channels" />
+
+            <Button
+                android:id="@+id/btn_channel_settings"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/open_channel_settings" />
+
+            <Button
+                android:id="@+id/btn_cancel_notifications"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/cancel_notifications" />
+            <!-- endregion -->
+
+            <!-- region real push -->
+            <TextView
+                style="@style/NotificationChannels.Section"
+                android:text="@string/section_push" />
+
+            <TextView
+                android:id="@+id/tv_registration_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true" />
+
+            <Button
+                android:id="@+id/btn_copy_registration_id"
+                style="@style/NotificationChannels.Action"
+                android:text="@string/copy_registration_id" />
+            <!-- endregion -->
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

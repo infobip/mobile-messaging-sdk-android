@@ -28,4 +28,13 @@
     <string name="mm_notification_channel_custom_vibration">%1$s Kunyeganyega</string>
     <string name="mm_notification_channel_custom_high_priority">%1$s Icy’ingenzi Cyane</string>
     <string name="mm_notification_channel_custom_high_priority_vibration">%1$s Icy’ingenzi Cyane, Kunyeganyega</string>
+
+    <string name="mm_notification_channel_fallback">%1$s Imenyesha</string>
+    <string name="mm_notification_channel_fallback_vibration">%1$s Imenyesha, Kunyeganyega</string>
+    <string name="mm_notification_channel_fallback_sound">%1$s Imenyesha, Ijwi</string>
+    <string name="mm_notification_channel_fallback_quiet">%1$s Imenyesha, Bucece</string>
+    <string name="mm_notification_channel_fallback_high_priority">%1$s Imenyesha, Icy’ingenzi Cyane</string>
+    <string name="mm_notification_channel_fallback_high_priority_vibration">%1$s Imenyesha, Icy’ingenzi Cyane, Kunyeganyega</string>
+    <string name="mm_notification_channel_fallback_high_priority_sound">%1$s Imenyesha, Icy’ingenzi Cyane, Ijwi</string>
+    <string name="mm_notification_channel_fallback_high_priority_quiet">%1$s Imenyesha, Icy’ingenzi Cyane, Bucece</string>
 </resources>

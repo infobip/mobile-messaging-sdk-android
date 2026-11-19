@@ -30,4 +30,14 @@
     <string name="mm_notification_channel_custom_vibration">%1$s Vibration</string>
     <string name="mm_notification_channel_custom_high_priority">%1$s High Priority</string>
     <string name="mm_notification_channel_custom_high_priority_vibration">%1$s High Priority, Vibration</string>
+
+    <!-- Names of the channels used when no configured notification channel matches or exists: one for each combination of sound and vibration, high priority ones for heads-up notifications. %1$s is replaced with the application name. -->
+    <string name="mm_notification_channel_fallback">%1$s Notifications</string>
+    <string name="mm_notification_channel_fallback_vibration">%1$s Notifications, Vibration</string>
+    <string name="mm_notification_channel_fallback_sound">%1$s Notifications, Sound</string>
+    <string name="mm_notification_channel_fallback_quiet">%1$s Notifications, Quiet</string>
+    <string name="mm_notification_channel_fallback_high_priority">%1$s Notifications, High Priority</string>
+    <string name="mm_notification_channel_fallback_high_priority_vibration">%1$s Notifications, High Priority, Vibration</string>
+    <string name="mm_notification_channel_fallback_high_priority_sound">%1$s Notifications, High Priority, Sound</string>
+    <string name="mm_notification_channel_fallback_high_priority_quiet">%1$s Notifications, High Priority, Quiet</string>
 </resources>

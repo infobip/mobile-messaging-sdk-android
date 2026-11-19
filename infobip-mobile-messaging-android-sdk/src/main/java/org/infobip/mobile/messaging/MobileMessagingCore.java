@@ -16,7 +16,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
@@ -69,6 +68,9 @@ import org.infobip.mobile.messaging.mobileapi.user.DepersonalizeServerListener;
 import org.infobip.mobile.messaging.mobileapi.user.PersonalizeSynchronizer;
 import org.infobip.mobile.messaging.mobileapi.user.UserDataReporter;
 import org.infobip.mobile.messaging.mobileapi.version.VersionChecker;
+import org.infobip.mobile.messaging.notification.NotificationChannelConfig;
+import org.infobip.mobile.messaging.notification.NotificationChannelManager;
+import org.infobip.mobile.messaging.notification.NotificationChannelRouter;
 import org.infobip.mobile.messaging.notification.NotificationHandler;
 import org.infobip.mobile.messaging.permissions.PostNotificationsPermissionRequester;
 import org.infobip.mobile.messaging.platform.AndroidBroadcaster;
@@ -107,7 +109,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,18 +139,6 @@ public class MobileMessagingCore
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND = "mm_default_channel_high_priority_sound";
     public static final String MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET = "mm_default_channel_high_priority_quiet";
     public static final String IN_APP_CHAT_MESSAGE_HANDLER_MODULE_NAME = "org.infobip.mobile.messaging.chat.InAppChatImpl";
-    private static final Map<String, String> channelMap = Map.of(
-            //soundEnabled, isVibrate, shouldDisplayHeadsUp
-            createNotificationChannelKey(true, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID,
-            createNotificationChannelKey(true, false, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_SOUND,
-            createNotificationChannelKey(false, true, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_VIBRATION,
-            createNotificationChannelKey(false, false, true), MM_DEFAULT_HIGH_PRIORITY_CHANNEL_ID_QUIET,
-            createNotificationChannelKey(true, true, false), MM_DEFAULT_CHANNEL_ID,
-            createNotificationChannelKey(true, false, false), MM_DEFAULT_CHANNEL_ID_SOUND,
-            createNotificationChannelKey(false, true, false), MM_DEFAULT_CHANNEL_ID_VIBRATION,
-            createNotificationChannelKey(false, false, false), MM_DEFAULT_CHANNEL_ID_QUIET
-
-    );
 
     protected static MobileApiResourceProvider mobileApiResourceProvider;
     static String applicationCode;
@@ -223,11 +212,7 @@ public class MobileMessagingCore
         ComponentUtil.setSynchronizationReceiverStateEnabled(context, mobileMessagingSynchronizationReceiver, true);
         ComponentUtil.setConnectivityComponentsStateEnabled(context, true);
 
-        initDefaultChannels();
-
-        if (PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO) != null) {
-            initCustomChannels();
-        }
+        initNotificationChannels();
 
         migratePrefsIfNecessary(context);
         encryptUserDataIfNecessary();
@@ -297,12 +282,45 @@ public class MobileMessagingCore
         }
     }
 
-    private static String createNotificationChannelKey(boolean soundEnabled, boolean isVibrate, boolean shouldDisplayHeadsUp) {
-        return soundEnabled + "_" + isVibrate + "_" + shouldDisplayHeadsUp;
+    /**
+     * @return ID of the SDK default channel for the given sound, vibration and heads-up settings
+     * @deprecated Doesn't consider {@link NotificationChannelConfig}, {@link org.infobip.mobile.messaging.notification.NotificationChannelResolver}
+     * and custom sound channels, so it can differ from the channel the SDK uses. Will be removed in a future version.
+     */
+    @Deprecated
+    public static String getNotificationChannelId(boolean soundEnabled, boolean isVibrate, boolean shouldDisplayHeadsUp) {
+        return NotificationChannelRouter.getDefaultChannelId(soundEnabled, isVibrate, shouldDisplayHeadsUp);
     }
 
-    public static String getNotificationChannelId(boolean soundEnabled, boolean isVibrate, boolean shouldDisplayHeadsUp) {
-        return channelMap.get(createNotificationChannelKey(soundEnabled, isVibrate, shouldDisplayHeadsUp));
+    /**
+     * Creates notification channels according to the persisted {@link NotificationChannelConfig}.
+     * Without config, SDK default channels and custom sound channels are created as in previous SDK versions.
+     */
+    private void initNotificationChannels() {
+        NotificationChannelConfig config = NotificationChannelManager.loadConfig(context);
+        boolean hasCustomSoundChannel = PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO) != null;
+
+        if (config == null || config.areDefaultChannelsEnabled()) {
+            initDefaultChannels();
+            if (hasCustomSoundChannel) {
+                initCustomChannels();
+            }
+        } else if (hasCustomSoundChannel) {
+            MobileMessagingLogger.w("Custom notification channel is ignored because SDK default notification channels are disabled");
+        }
+
+        NotificationChannelManager.createConfiguredChannels(context, config);
+
+        NotificationSettings notificationSettings = getNotificationSettings();
+        boolean isHeadsUpEnabled = notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled();
+        if (NotificationChannelManager.isHeadsUpHiddenBySingleChannel(context, config, isHeadsUpEnabled)) {
+            MobileMessagingLogger.w("Heads-up notifications are enabled, but unless NotificationChannelResolver or the custom payload channel key"
+                    + " selects another channel, they are displayed in the single notification channel " + config.getSingleChannel().getId()
+                    + " which doesn't have high importance, so on Android 8.0 and above they don't pop up."
+                    + " Define the single channel with NotificationChannelDefinition.Importance.HIGH, using a new channel ID if the channel already exists"
+                    + " (Android keeps the importance of existing and re-created deleted channels, and users can lower it),"
+                    + " or disable heads-up notifications using NotificationSettings.Builder.withoutHeadsUpNotifications().");
+        }
     }
 
     private void initDefaultChannels() {
@@ -331,17 +349,8 @@ public class MobileMessagingCore
         }
     }
 
-    /**
-     * Resolves notification channel name from string resources, so that applications can override and translate it.
-     * Falls back to the application name if the resource can't be resolved or formatted (e.g. invalid format specifier in an application override).
-     */
     private String getChannelName(@StringRes int resId, String appName) {
-        try {
-            return context.getString(resId, appName);
-        } catch (Resources.NotFoundException | IllegalFormatException e) {
-            MobileMessagingLogger.e("Could not resolve notification channel name.", e);
-            return appName;
-        }
+        return NotificationChannelManager.getChannelName(context, resId, appName);
     }
 
     private void createNotificationChannel(
@@ -393,19 +402,22 @@ public class MobileMessagingCore
             return;
         }
 
+        NotificationChannelManager.rememberCustomSoundChannelId(context, channelId);
+
         String appName = SoftwareInformation.getAppName(context);
         if (channelName != null)
             appName = appName + " " + channelName;
 
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build();
-        createNotificationChannel(channelId + "_vibration", getChannelName(R.string.mm_notification_channel_custom_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
-        createNotificationChannel(channelId, getChannelName(R.string.mm_notification_channel_custom, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(NotificationChannelRouter.getCustomSoundChannelId(channelId, true, false), getChannelName(R.string.mm_notification_channel_custom_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
+        createNotificationChannel(NotificationChannelRouter.getCustomSoundChannelId(channelId, false, false), getChannelName(R.string.mm_notification_channel_custom, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_DEFAULT, notificationManager);
 
 
+        NotificationSettings notificationSettings = getNotificationSettings();
         if (notificationSettings != null && notificationSettings.areHeadsUpNotificationsEnabled()) {
-            createNotificationChannel(channelId + "_high_priority, vibration", getChannelName(R.string.mm_notification_channel_custom_high_priority_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
-            createNotificationChannel(channelId + "_high_priority", getChannelName(R.string.mm_notification_channel_custom_high_priority, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(NotificationChannelRouter.getCustomSoundChannelId(channelId, true, true), getChannelName(R.string.mm_notification_channel_custom_high_priority_vibration, appName), true, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
+            createNotificationChannel(NotificationChannelRouter.getCustomSoundChannelId(channelId, false, true), getChannelName(R.string.mm_notification_channel_custom_high_priority, appName), false, true, uri, audioAttributes, NotificationManager.IMPORTANCE_HIGH, notificationManager);
         }
     }
 
@@ -1489,6 +1501,8 @@ public class MobileMessagingCore
     }
 
     static void setCustomNotificationChannel(Context context, String channelId, String channelName, String notificationAudio) {
+        // channels of the previously set custom channel might exist on the device, including ones created by previous SDK versions
+        NotificationChannelManager.rememberCustomSoundChannelId(context, PreferenceHelper.findString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID));
         PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_ID, channelId);
         PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_NAME, channelName);
         PreferenceHelper.saveString(context, MobileMessagingProperty.NOTIFICATION_CHANNEL_AUDIO, notificationAudio);
@@ -1537,6 +1551,15 @@ public class MobileMessagingCore
 
     public boolean isAppManagedFcmTokenLifecycle() {
         return PreferenceHelper.findBoolean(context, MobileMessagingProperty.APP_MANAGED_FCM_TOKEN_LIFECYCLE.getKey(), false);
+    }
+
+    static void setNotificationChannelConfig(Context context, NotificationChannelConfig notificationChannelConfig) {
+        NotificationChannelManager.saveConfig(context, notificationChannelConfig);
+    }
+
+    @Override
+    public boolean deleteSdkDefaultNotificationChannels() {
+        return NotificationChannelManager.deleteSdkDefaultChannels(context);
     }
 
     static boolean shouldSaveApplicationCode(Context context) {

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  strings.xml
+  Mobile Messaging SDK
+
+  Copyright (c) 2016-2025 Infobip Limited
+  Licensed under the Apache License, Version 2.0
+-->
+<resources>
+
+    <string name="main_activity_title">Notification Channels</string>
+
+    <string name="section_scenario">Scenario</string>
+    <string name="active_scenario">Active: %1$s\n%2$s</string>
+    <string name="persisted_config">Persisted config: %1$s</string>
+    <string name="apply_scenario">Apply and restart app</string>
+    <string name="scenario_hint">Channels are never deleted automatically. For a clean state between scenarios, delete all channels below and apply again, or reinstall the app.</string>
+
+    <string name="section_messages">Simulated messages</string>
+    <string name="messages_hint">Posted directly through the SDK notification handler. In foreground only banner messages are heads-up; use the delay and leave the app to test background behaviour.</string>
+    <string name="post_delayed">Post after 5 seconds</string>
+
+    <string name="section_channels">Channels</string>
+    <string name="refresh_channels">Refresh</string>
+    <string name="no_channels">No channels</string>
+    <string name="no_channels_support">Notification channels require Android 8.0 or newer</string>
+
+    <string name="section_actions">Actions</string>
+    <string name="create_orders_channel">Create \"orders\" channel</string>
+    <string name="delete_orders_channel">Delete \"orders\" channel</string>
+    <string name="delete_sdk_default_channels">deleteSdkDefaultNotificationChannels()</string>
+    <string name="delete_all_channels">Delete all channels</string>
+    <string name="open_channel_settings">Open notification settings</string>
+    <string name="cancel_notifications">Cancel all notifications</string>
+
+    <string name="section_push">Real push</string>
+    <string name="registration_id">Registration ID: %1$s</string>
+    <string name="copy_registration_id">Copy registration ID</string>
+    <string name="registration_id_copied">Registration ID copied</string>
+
+    <string name="section_log">Log</string>
+    <string name="clear_log">Clear log</string>
+</resources>
